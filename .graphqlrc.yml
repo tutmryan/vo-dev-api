@@ -1,0 +1,22 @@
+schema:
+  - src/features/**/*.graphql
+  - src/schema/**/*.graphql
+extensions:
+  codegen:
+    generates:
+      ./src/generated/resolver-types.ts:
+        plugins:
+          - typescript
+          - typescript-resolvers
+        config:
+          useIndexSignature: true
+          contextType: ../context#GraphQLContext
+          resolverTypeWrapperSignature: 'Promise<T | Error> | T | Error'
+          scalars:
+            # add types for any used scalars here
+            LocalDate: string
+            EmailAddress: string
+            PositiveInt: number
+            PositiveFloat: number
+            URL: string
+

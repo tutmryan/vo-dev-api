@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": false /* Generates corresponding '.d.ts' file. */,
+    "declarationMap": false /* Generates a sourcemap for each corresponding '.d.ts' file. */,
+    "sourceMap": false /* Generates corresponding '.map' file. */
+  },
+  "include": ["src", "config"],
+  "exclude": ["src/**/testing.ts", "src/**/*.test.ts", "src/**/test.ts", "src/**/test-utils/**"]
+}

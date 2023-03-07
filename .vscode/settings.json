@@ -1,0 +1,15 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+    "source.organizeImports": false
+  },
+  "eslint.validate": ["typescript", "typescriptreact", "graphql"],
+  "eslint.options": {
+    "extensions": [".ts", ".graphql"]
+  },
+  "typescript.preferences.quoteStyle": "single",
+  "jest.autoRun": "off",
+  "jest.showTerminalOnLaunch": false
+}

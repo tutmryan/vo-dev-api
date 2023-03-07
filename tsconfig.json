@@ -1,0 +1,13 @@
+{
+  "extends": "@makerx/ts-config",
+  "compilerOptions": {
+    "target": "ES2021",
+    "outDir": "./build",
+    "rootDir": ".",
+    "esModuleInterop": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "emitDecoratorMetadata": true,
+  "experimentalDecorators": true,
+  "include": ["src", "config", "test", "scripts"]
+}

@@ -1,0 +1,7 @@
+# eslint-disable-next-line @graphql-eslint/require-description
+type Query {
+  """
+  No-op query to test if the server is up and running.
+  """
+  healthcheck: Void
+}

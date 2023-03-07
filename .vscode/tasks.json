@@ -1,0 +1,78 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start DB",
+      "type": "npm",
+      "script": "db:start",
+      "path": "${workspaceFolder}",
+      "isBackground": true,
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Migrate DB",
+      "type": "npm",
+      "script": "db:migrate",
+      "path": "${workspaceFolder}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "dependsOn": ["Start DB"]
+    },
+    {
+      "label": "Reset DB",
+      "type": "npm",
+      "script": "db:reset",
+      "path": "${workspaceFolder}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "dependsOn": ["Start DB"]
+    },
+    {
+      "label": "Generate GraphQL Types",
+      "type": "npm",
+      "script": "gql:generate",
+      "path": "${workspaceFolder}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Generate GraphQL Types (watch)",
+      "type": "npm",
+      "script": "gql:generate:watch",
+      "path": "${workspaceFolder}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Check types",
+      "type": "npm",
+      "script": "check-types",
+      "path": "${workspaceFolder}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint",
+      "type": "npm",
+      "script": "lint",
+      "path": "${workspaceFolder}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
