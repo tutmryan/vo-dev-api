@@ -23,14 +23,6 @@ const config: DeepPartial<Config> = {
       level: 'info',
     },
   },
-  databases: {
-    verifiedOrchestation: {
-      host: 'localhost',
-      port: 1433,
-      username: 'sa',
-      password: '7o}R~=XA1jmz!-aHQ^pA',
-    },
-  },
   auth: {
     bearer: {
       jwksUri: 'https://makerxb2cdev.b2clogin.com/makerxb2cdev.onmicrosoft.com/B2C_1_konvoy_localdev/discovery/v2.0/keys',

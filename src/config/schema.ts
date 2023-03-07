@@ -40,15 +40,13 @@ export type Config = {
     pollingFrequencySeconds: number
     maxProcessingAttempts: number
   }
-  databases: {
-    verifiedOrchestation: {
-      host: string
-      port: number
-      database: string
-      logging: LoggerOptions
-      username?: string
-      password?: string
-    }
+  database: {
+    host: string
+    port: number
+    database: string
+    logging: LoggerOptions
+    username?: string
+    password?: string
   }
   microsoftGraph: {
     auth: {

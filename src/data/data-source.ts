@@ -6,7 +6,7 @@ import { logger, LoggerForTypeOrm } from '../logger'
 import type { VerifiedOrchestrationEntityManager } from './entity-manager'
 import { SnakeNamingStrategy } from './utils/snake-naming-strategy'
 
-const { host, port, database, username, password, logging } = config.get('databases.verifiedOrchestation')
+const { host, port, database, username, password, logging } = config.get('database')
 
 export const dataSourceConfig: SqlServerConnectionOptions = {
   type: 'mssql',

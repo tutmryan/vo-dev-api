@@ -22,11 +22,9 @@ const config: DeepPartial<Config> = {
     secure: true,
     httpOnly: true,
   },
-  databases: {
-    verifiedOrchestation: {
-      database: 'master',
-      logging: true,
-    },
+  database: {
+    database: 'TODO',
+    logging: true,
   },
   auth: {
     pkce: {
