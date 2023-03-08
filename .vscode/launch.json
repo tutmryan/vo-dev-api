@@ -14,13 +14,6 @@
       "preLaunchTask": "Migrate DB"
     },
     {
-      "name": "Migrate Database",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "npm run start",
-      "cwd": "${workspaceFolder}/migrate-db-lambda"
-    },
-    {
       "name": "Generate GraphQL Types (watch)",
       "type": "node-terminal",
       "request": "launch",
