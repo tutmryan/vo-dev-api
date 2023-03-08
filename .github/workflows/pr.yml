@@ -14,7 +14,6 @@ jobs:
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
       node-version: '18.x'
-      npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}
 
   # ci-infrastructure:
   #   name: CI Infrastructure
