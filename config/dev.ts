@@ -10,25 +10,21 @@ const config: DeepPartial<Config> = {
   },
   auth: {
     bearer: {
-      jwksUri: 'https://makerxb2cdev.b2clogin.com/makerxb2cdev.onmicrosoft.com/B2C_1_konvoy_dev/discovery/v2.0/keys',
+      jwksUri: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/discovery/v2.0/keys',
       verifyOptions: {
-        issuer: 'https://makerxb2cdev.b2clogin.com/2c6429d4-2bed-404b-8af9-864187a9d034/v2.0/',
-        audience: ['d2ea9f84-18c7-480f-83aa-621f8f427c9a'],
+        issuer: 'https://sts.windows.net/a4577872-4a36-4a93-9846-b29a1220ca89/',
+        audience: ['api://verified-orchestration-api-dev'],
       },
     },
     pkce: {
       enabled: true,
-      scopes: [
-        'profile',
-        'https://makerxb2cdev.onmicrosoft.com/konvoy-api-dev/Konvoy.UserAccess',
-        'https://makerxb2cdev.onmicrosoft.com/konvoy-api-dev/Konvoy.AdminAccess',
-      ],
-      logoutUrl: 'https://makerxb2cdev.b2clogin.com/makerxb2cdev.onmicrosoft.com/B2C_1_konvoy_dev/oauth2/v2.0/logout',
+      scopes: ['api://verified-orchestration-api-dev/.default', 'profile'],
+      logoutUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/logout',
       msalConfig: {
         auth: {
-          clientId: 'aec29108-05d6-42e2-a124-2a60adfe4a94',
-          authority: 'https://makerxb2cdev.b2clogin.com/makerxb2cdev.onmicrosoft.com/B2C_1_konvoy_dev',
-          knownAuthorities: ['makerxb2cdev.b2clogin.com'],
+          clientId: '0a675e3c-e076-4ebf-97f2-125d3e6ce9f8',
+          authority: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89',
+          knownAuthorities: ['https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89'],
         },
         system: {
           loggerOptions: {
