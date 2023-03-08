@@ -18,7 +18,7 @@ export const dataSourceConfig: SqlServerConnectionOptions = {
   synchronize: false,
   logger: new LoggerForTypeOrm(logging, logger),
   entities: ['src/**/entities/*{.ts,.js}'],
-  migrations: ['migrate-db-lambda/migrations/**/*{.ts,.js}'],
+  migrations: ['migrations/**/*{.ts,.js}'],
   migrationsTransactionMode: 'each',
   namingStrategy: new SnakeNamingStrategy(),
   extra: {

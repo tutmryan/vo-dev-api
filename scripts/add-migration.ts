@@ -22,12 +22,5 @@ function addMigration(migrationSubCommandName: string, name: string) {
   if (migrationSubCommandName === 'generate') {
     additionalOptions = ['--dataSource', 'src/data', '--pretty']
   }
-  runChildProc('npm', [
-    'run',
-    'typeorm',
-    '--',
-    `migration:${migrationSubCommandName}`,
-    ...additionalOptions,
-    `./migrate-db-lambda/migrations/${name}`,
-  ])
+  runChildProc('npm', ['run', 'typeorm', '--', `migration:${migrationSubCommandName}`, ...additionalOptions, `./migrations/${name}`])
 }
