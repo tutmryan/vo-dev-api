@@ -4,6 +4,7 @@
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
     "GraphQL.vscode-graphql",
-    "Orta.vscode-jest"
+    "Orta.vscode-jest",
+    "ms-vscode.powershell"
   ]
 }

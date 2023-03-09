@@ -11,5 +11,9 @@
   },
   "typescript.preferences.quoteStyle": "single",
   "jest.autoRun": "off",
-  "jest.showTerminalOnLaunch": false
+  "jest.showTerminalOnLaunch": false,
+  "[powershell]": {
+    "editor.defaultFormatter": "ms-vscode.powershell"
+  },
+  "powershell.codeFormatting.preset": "OTBS"
 }

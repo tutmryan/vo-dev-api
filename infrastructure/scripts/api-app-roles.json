@@ -1,0 +1,11 @@
+[
+  {
+    "allowedMemberTypes": ["Application"],
+    "description": "Used to secure the issuance and presentation request callback endpoints.",
+    "displayName": "Request callback",
+    "id": "9137aba9-cc8a-4a17-889b-c587dd315760",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "VerifiableCredential.Request.Callback"
+  }
+]
