@@ -4,8 +4,20 @@ import type { SqlServerConnectionOptions } from 'typeorm/driver/sqlserver/SqlSer
 
 const httpTrigger: AzureFunction = async function (context: Context): Promise<void> {
   try {
-    const { DATABASE_HOST: host, DATABASE_PORT: port } = process.env
-    if (!host || !port) throw new Error('Missing environment variables DATABASE_HOST and/or DATABASE_PORT')
+    const { DATABASE_HOST: host, DATABASE_PORT: port, PRINCIPAL_NAME, PRINCIPAL_ID } = process.env
+    if (!host || !port || !PRINCIPAL_NAME || !PRINCIPAL_ID) throw new Error('Missing environment variables')
+
+    const principalId = context.req?.headers['X-MS-CLIENT-PRINCIPAL-ID']
+    const principalName = context.req?.headers['X-MS-CLIENT-PRINCIPAL-NAME']
+
+    if (!principalId || !principalName) {
+      context.res = { status: 401 }
+      return
+    }
+    if (principalId !== PRINCIPAL_ID || principalName !== PRINCIPAL_NAME) {
+      context.res = { status: 403 }
+      return
+    }
 
     const config: SqlServerConnectionOptions = {
       type: 'mssql',

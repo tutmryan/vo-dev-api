@@ -8,7 +8,7 @@
     "check-types": "tsc --noEmit",
     "build": "npm run clean && tsc && npm run build:copy-files && npm run build:install && npm run build:post-build",
     "clean": "rimraf build",
-    "build:copy-files": "copyfiles \"package*.json\" build",
+    "build:copy-files": "copyfiles \"package*.json\" function.json build",
     "build:install": "npm ci --omit=dev --prefix build",
     "build:post-build": "rimraf build/package.json build/package-lock.json"
   },
