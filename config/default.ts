@@ -23,7 +23,8 @@ const config: DeepPartial<Config> = {
     httpOnly: true,
   },
   database: {
-    database: 'TODO',
+    database: 'VerifiedOrchestration',
+    port: 1433,
     logging: true,
   },
   auth: {
