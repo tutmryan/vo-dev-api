@@ -41,7 +41,15 @@ const localdevConfig: () => SqlServerConnectionOptions = () => {
 
 const hostedConfig: () => SqlServerConnectionOptions = () => {
   const { host, port } = config.get('database')
-  return { ...baseConfig, host, port }
+  return {
+    ...baseConfig,
+    host,
+    port,
+    authentication: {
+      type: 'azure-active-directory-msi-app-service',
+      options: {},
+    },
+  }
 }
 
 export const dataSourceConfig: SqlServerConnectionOptions = isLocalDev ? localdevConfig() : hostedConfig()

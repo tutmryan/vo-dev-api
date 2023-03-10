@@ -17,6 +17,10 @@ const httpTrigger: AzureFunction = async function (context: Context): Promise<vo
       entities: [''],
       migrations: ['migrations/**/*{.ts,.js}'],
       subscribers: [],
+      authentication: {
+        type: 'azure-active-directory-msi-app-service',
+        options: {},
+      },
     }
     const dataSource = new DataSource(config)
 
