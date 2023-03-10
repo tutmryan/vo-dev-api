@@ -1,3 +1,4 @@
+import { isLocalDev } from '@makerxstudio/node-common'
 import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 import type { SqlServerConnectionOptions } from 'typeorm/driver/sqlserver/SqlServerConnectionOptions'
@@ -6,27 +7,43 @@ import { logger, LoggerForTypeOrm } from '../logger'
 import type { VerifiedOrchestrationEntityManager } from './entity-manager'
 import { SnakeNamingStrategy } from './utils/snake-naming-strategy'
 
-const { host, port, database, username, password, logging } = config.get('database')
+const { logging } = config.get('database')
 
-export const dataSourceConfig: SqlServerConnectionOptions = {
+const baseConfig: Pick<
+  SqlServerConnectionOptions,
+  'type' | 'synchronize' | 'logger' | 'entities' | 'migrations' | 'migrationsTransactionMode' | 'namingStrategy'
+> = {
   type: 'mssql',
-  host,
-  port,
-  database,
-  username,
-  password,
   synchronize: false,
   logger: new LoggerForTypeOrm(logging, logger),
   entities: ['src/**/entities/*{.ts,.js}'],
   migrations: ['migrate-db-function/migrations/**/*{.ts,.js}'],
   migrationsTransactionMode: 'each',
   namingStrategy: new SnakeNamingStrategy(),
-  extra: {
-    options: {
-      trustServerCertificate: true,
-    },
-  },
 }
 
+const localdevConfig: () => SqlServerConnectionOptions = () => {
+  const { host, port, database, username, password } = config.get('database')
+  return {
+    ...baseConfig,
+    host,
+    port,
+    database,
+    username,
+    password,
+    extra: {
+      options: {
+        trustServerCertificate: true,
+      },
+    },
+  }
+}
+
+const hostedConfig: () => SqlServerConnectionOptions = () => {
+  const { host, port } = config.get('database')
+  return { ...baseConfig, host, port }
+}
+
+export const dataSourceConfig: SqlServerConnectionOptions = isLocalDev ? localdevConfig() : hostedConfig()
 export const dataSource = new DataSource(dataSourceConfig)
 export const entityManager = dataSource.manager as VerifiedOrchestrationEntityManager
