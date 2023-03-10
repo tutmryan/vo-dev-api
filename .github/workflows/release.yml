@@ -17,17 +17,30 @@ jobs:
       node-version: '18.x'
     secrets:
       npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}
-
   ci-migrations-function:
     name: CI Migrations Function
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
       node-version: '18.x'
       working-directory: ./migrate-db-function
-      run-build: true
 
-  # ci-infrastructure:
-  #   name: CI Infrastructure
-  #   uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
-  #   with:
-  #     working-directory: ./infrastructure
+  build-api:
+    name: Build API
+    needs:
+      - ci-api
+    uses: makerxstudio/shared-config/.github/workflows/node-build-zip.yml@main
+    with:
+      node-version: '18.x'
+      artifact-name: api
+    secrets:
+      npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}
+  build-migrations-function:
+    name: Build Migrations Function
+    needs:
+      - ci-migrations-function
+    uses: makerxstudio/shared-config/.github/workflows/node-build-zip.yml@main
+    with:
+      node-version: '18.x'
+      working-directory: ./migrate-db-function
+      artifact-name: migrations-function
+
