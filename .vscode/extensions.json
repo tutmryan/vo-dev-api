@@ -5,6 +5,7 @@
     "dbaeumer.vscode-eslint",
     "GraphQL.vscode-graphql",
     "Orta.vscode-jest",
-    "ms-vscode.powershell"
+    "ms-vscode.powershell",
+    "ms-azuretools.vscode-bicep"
   ]
 }

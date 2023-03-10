@@ -1,4 +1,4 @@
-[CmdletBinding()]
+[CmdletBinding(DefaultParameterSetName = 'Environment')]
 param(
   [Parameter(Mandatory = $true)]
   [string]
@@ -12,10 +12,16 @@ param(
   [string]
   $GitHubRepositoryName,
 
-  [Parameter(Mandatory = $true)]
+  [Parameter(Mandatory = $true, ParameterSetName = 'Environment')]
   [string]
-  $GitHubEnvironmentName
+  $GitHubEnvironmentName,
+
+  [Parameter(Mandatory = $true, ParameterSetName = 'Branch')]
+  [string]
+  $BranchName
 )
+
+Set-StrictMode -Version Latest
 
 $constants = @{
   federatedCredentialIssuer = 'https://token.actions.githubusercontent.com'
@@ -51,10 +57,29 @@ if ($null -ne $servicePrincipal) {
   Write-Output ('Created a new service principal named ''{0}''' -f $Name)
 }
 
+$servicePrincipalObjectId = az ad sp list --display-name $Name --query "[].id" --output tsv
+
 #
 # Federated credential
 #
-$federatedCredentialSubject = 'repo:{0}/{1}:environment:{2}' -f $GitHubOrganisationName, $GitHubRepositoryName, $GitHubEnvironmentName
+$federatedCredentialSubject = switch ($PSCmdlet.ParameterSetName) {
+  'Environment' {
+    'repo:{0}/{1}:environment:{2}' -f $GitHubOrganisationName, $GitHubRepositoryName, $GitHubEnvironmentName
+  }
+  'Branch' {
+    'repo:{0}/{1}:ref:refs/heads/{2}' -f $GitHubOrganisationName, $GitHubRepositoryName, $BranchName
+  }
+}
+
+$federatedCredentialName = switch ($PSCmdlet.ParameterSetName) {
+  'Environment' {
+    'DeployTo{0}Environment' -f $GitHubEnvironmentName
+  }
+  'Branch' {
+    'DeployFrom{0}Branch' -f ((Get-Culture).TextInfo.ToTitleCase($BranchName))
+  }
+}
+
 $federatedCredential = az ad app federated-credential list `
   --id $appRegistrationAppId `
   --query ("[?issuer=='{0}' && subject=='{1}']" -f $constants.federatedCredentialIssuer, $federatedCredentialSubject) `
@@ -70,7 +95,7 @@ if ($null -ne $federatedCredential) {
       'api://AzureADTokenExchange'
     )
     issuer    = $constants.federatedCredentialIssuer
-    name      = 'DeployTo{0}' -f $GitHubEnvironmentName
+    name      = $federatedCredentialName
     subject   = $federatedCredentialSubject
   }
 
@@ -87,9 +112,10 @@ if ($null -ne $federatedCredential) {
 $tenantId = az account show --query 'tenantId' --output tsv
 Write-Output ''
 Write-Output 'Add the following secrets to GitHub Actions'
-Write-Output ('- AZURE_CLIENT_ID:       {0}' -f $appRegistrationAppId)
-Write-Output ('- AZURE_TENANT_ID:       {0}' -f $tenantId)
-Write-Output ('- AZURE_SUBSCRIPTION_ID: <target-subscription-id>')
+Write-Output ('- AZURE_CLIENT_ID:                   {0}' -f $appRegistrationAppId)
+Write-Output ('- AZURE_SERVICE_PRINCIPAL_OBJECT_ID: {0}' -f $servicePrincipalObjectId)
+Write-Output ('- AZURE_TENANT_ID:                   {0}' -f $tenantId)
+Write-Output ('- AZURE_SUBSCRIPTION_ID:             <target-subscription-id>')
 
 Write-Output ''
 Write-Output ('Assign the necessary roles (for example Contributor) to the ''{0}'' service principal on the desired target resource (either a subscription or a resource group)' -f $Name)

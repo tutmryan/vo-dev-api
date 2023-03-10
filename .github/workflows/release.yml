@@ -17,6 +17,7 @@ jobs:
       node-version: '18.x'
     secrets:
       npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}
+
   ci-migrations-function:
     name: CI Migrations Function
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
@@ -34,6 +35,7 @@ jobs:
       artifact-name: api
     secrets:
       npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}
+
   build-migrations-function:
     name: Build Migrations Function
     needs:
@@ -44,3 +46,44 @@ jobs:
       working-directory: ./migrate-db-function
       artifact-name: migrations-function
 
+  infrastructure-provisioning:
+    name: Provision dev infrastructure
+    runs-on: ubuntu-latest
+    environment: Development
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Set current date as environment variable
+        run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Deploy infrastructure
+        uses: azure/arm-deploy@v1
+        with:
+          deploymentName: ${{env.NOW}}-GitHubActions
+          resourceGroupName: vo-dev-verified-orchestration
+          template: ./infrastructure/template.bicep
+          parameters: >-
+            environment=dev
+            sqlInstanceAadAdministratorName="Verified Orchestration SQL Administrators (dev)"
+            sqlInstanceAadAdministratorObjectId=cb26d064-654b-49d4-a96c-f296e3667a55
+            sqlDatabaseName=VerifiedOrchestration
+            sqlDatabaseSku=S1
+            appServicePlanSku=B2
+
+  # ci-infrastructure:
+  #   name: CI Infrastructure
+  #   uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
+  #   with:
+  #     working-directory: ./infrastructure

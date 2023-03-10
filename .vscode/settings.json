@@ -15,5 +15,8 @@
   "[powershell]": {
     "editor.defaultFormatter": "ms-vscode.powershell"
   },
-  "powershell.codeFormatting.preset": "OTBS"
+  "powershell.codeFormatting.preset": "OTBS",
+  "[bicep]": {
+    "editor.defaultFormatter": "ms-azuretools.vscode-bicep"
+  }
 }
