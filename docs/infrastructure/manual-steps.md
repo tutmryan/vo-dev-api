@@ -25,12 +25,9 @@ You need to be logged in to the Azure CLI to the correct tenant with appropriate
 
 The previous script will output secrets that you need to add to the GitHub environment created in the first step.
 
-| Secret name                         | Secret value                                                                                                                                                                    |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `AZURE_CLIENT_ID`                   | App ID of the created app registration                                                                                                                                          |
-| `AZURE_SERVICE_PRINCIPAL_OBJECT_ID` | Object ID of the created service principal (also called enterprise application)                                                                                                 |
-| `AZURE_TENANT_ID`                   | ID of the [Verified Orchestration tenant](https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview/query/azure%20ad)                                |
-| `AZURE_SUBSCRIPTION_ID`             | ID of the [Microsoft Azure Sponsorship subscription](https://portal.azure.com/#@verifiedorchestration.com/resource/subscriptions/de5e410a-fa03-4be4-bcda-b068b4be7f52/overview) |
+| Secret name         | Secret value    |
+| ------------------- | --------------- |
+| `APP_COOKIE_SECRET` | A random string |
 
 To do so:
 

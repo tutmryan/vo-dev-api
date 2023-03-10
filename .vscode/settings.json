@@ -18,5 +18,9 @@
   "powershell.codeFormatting.preset": "OTBS",
   "[bicep]": {
     "editor.defaultFormatter": "ms-azuretools.vscode-bicep"
+  },
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": "/.github/workflows/*.yml",
+    "https://json.schemastore.org/github-action.json": "/.github/actions/**/*.yml"
   }
 }

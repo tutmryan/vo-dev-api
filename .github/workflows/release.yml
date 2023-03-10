@@ -46,44 +46,53 @@ jobs:
       working-directory: ./migrate-db-function
       artifact-name: migrations-function
 
-  infrastructure-provisioning:
-    name: Provision dev infrastructure
+  upload-other-artifacts:
+    name: Upload other artifacts
     runs-on: ubuntu-latest
-    environment: Development
-    permissions:
-      contents: read
-      id-token: write
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Log in to Azure
-        uses: azure/login@v1
+      - name: Upload infrastructure artifact
+        uses: actions/upload-artifact@v3
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          name: infrastructure
+          path: ./infrastructure
+          if-no-files-found: error
 
-      - name: Set current date as environment variable
-        run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Deploy infrastructure
-        uses: azure/arm-deploy@v1
+      - name: Upload github-actions artifact
+        uses: actions/upload-artifact@v3
         with:
-          deploymentName: ${{env.NOW}}-GitHubActions
-          resourceGroupName: vo-dev-verified-orchestration
-          template: ./infrastructure/template.bicep
-          parameters: >-
-            environment=dev
-            sqlInstanceAadAdministratorName="Verified Orchestration SQL Administrators (dev)"
-            sqlInstanceAadAdministratorObjectId=cb26d064-654b-49d4-a96c-f296e3667a55
-            sqlDatabaseName=VerifiedOrchestration
-            sqlDatabaseSku=S1
-            appServicePlanSku=B2
+          name: github-actions
+          path: ./.github/actions
+          if-no-files-found: error
 
-  # ci-infrastructure:
-  #   name: CI Infrastructure
-  #   uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
-  #   with:
-  #     working-directory: ./infrastructure
+  deploy-to-dev:
+    name: Deploy to development environment
+    runs-on: ubuntu-latest
+    environment: Development
+    needs:
+      - build-api
+      - build-migrations-function
+      - upload-other-artifacts
+    permissions:
+      id-token: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v3
+
+      - name: Deploy
+        uses: ./github-actions/deployment
+        with:
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-service-principal-object-id: ${{ secrets.AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          environment: dev
+          resource-group-name: vo-dev-verified-orchestration
+          sql-instance-aad-administrator-name: Verified Orchestration SQL Administrators (dev)
+          sql-instance-aad-administrator-object-id: cb26d064-654b-49d4-a96c-f296e3667a55
+          sql-database-sku: S1
+          app-service-plan-sku: B2
+          app-service-name: vo-dev-verified-orchestration-api
+          app-cookie-secret: ${{ secrets.APP_COOKIE_SECRET }}

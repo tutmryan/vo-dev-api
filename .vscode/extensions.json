@@ -6,6 +6,7 @@
     "GraphQL.vscode-graphql",
     "Orta.vscode-jest",
     "ms-vscode.powershell",
-    "ms-azuretools.vscode-bicep"
+    "ms-azuretools.vscode-bicep",
+    "redhat.vscode-yaml"
   ]
 }

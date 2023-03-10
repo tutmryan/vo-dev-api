@@ -7,13 +7,25 @@ import { logger, LoggerForTypeOrm } from '../logger'
 import type { VerifiedOrchestrationEntityManager } from './entity-manager'
 import { SnakeNamingStrategy } from './utils/snake-naming-strategy'
 
-const { logging } = config.get('database')
+const { logging, host, port, database } = config.get('database')
 
 const baseConfig: Pick<
   SqlServerConnectionOptions,
-  'type' | 'synchronize' | 'logger' | 'entities' | 'migrations' | 'migrationsTransactionMode' | 'namingStrategy'
+  | 'type'
+  | 'synchronize'
+  | 'logger'
+  | 'entities'
+  | 'migrations'
+  | 'migrationsTransactionMode'
+  | 'namingStrategy'
+  | 'host'
+  | 'port'
+  | 'database'
 > = {
   type: 'mssql',
+  host,
+  port,
+  database,
   synchronize: false,
   logger: new LoggerForTypeOrm(logging, logger),
   entities: ['src/**/entities/*{.ts,.js}'],
@@ -23,12 +35,9 @@ const baseConfig: Pick<
 }
 
 const localdevConfig: () => SqlServerConnectionOptions = () => {
-  const { host, port, database, username, password } = config.get('database')
+  const { username, password } = config.get('database')
   return {
     ...baseConfig,
-    host,
-    port,
-    database,
     username,
     password,
     extra: {
@@ -40,11 +49,8 @@ const localdevConfig: () => SqlServerConnectionOptions = () => {
 }
 
 const hostedConfig: () => SqlServerConnectionOptions = () => {
-  const { host, port } = config.get('database')
   return {
     ...baseConfig,
-    host,
-    port,
     authentication: {
       type: 'azure-active-directory-msi-app-service',
       options: {},

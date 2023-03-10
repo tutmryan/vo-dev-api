@@ -4,6 +4,9 @@
 ])
 param environment string
 
+@description('Object ID of the service principal performing the deployment')
+param servicePrincipalObjectId string
+
 var resourcePrefix = 'vo'
 var appName = 'verified-orchestration'
 
@@ -35,10 +38,13 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
+var keyVaultName = '${resourcePrefix}-${environment}-vrfd-orchstn-kv'
+
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
-  name: '${resourcePrefix}-${environment}-vrfd-orchstn-kv'
+  name: keyVaultName
   location: location
   properties: {
+    enabledForTemplateDeployment: true
     tenantId: subscription().tenantId
     accessPolicies: [
       {
@@ -50,11 +56,39 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
           ]
         }
       }
+      {
+        tenantId: subscription().tenantId
+        objectId: servicePrincipalObjectId
+        permissions: {
+          secrets: [
+            'get'
+            'set'
+            'list'
+          ]
+        }
+      }
     ]
     sku: {
       name: 'standard'
       family: 'A'
     }
+  }
+}
+
+@description('The cookie secret used by the cookie-session Express middleware')
+@secure()
+param appServiceCookieSecret string
+
+var appServiceCookieSecretSecretName = 'APP-COOKIE-SECRET'
+
+resource appServiceCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: appServiceCookieSecretSecretName
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: appServiceCookieSecret
   }
 }
 
@@ -165,32 +199,23 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
     clientAffinityEnabled: false
     siteConfig: {
       alwaysOn: true
-      appCommandLine: 'pm2 ./src/main.js --no-daemon'
-      appSettings: [
-        {
-          name: 'APPINSIGHTS_INSTRUMENTATION_KEY'
-          value: appInsights.properties.InstrumentationKey
-        }
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: appInsights.properties.ConnectionString
-        }
-        {
-          name: 'DATABASE_HOST'
-          value: '${sqlInstance.name}${az.environment().suffixes.sqlServerHostname}'
-        }
-        {
-          name: 'NODE_ENV'
-          value: environment
-        }
-        {
-          name: 'WEBSITE_RUN_FROM_PACKAGE'
-          value: '1'
-        }
-      ]
+      appCommandLine: 'pm2 start ./src/main.js --no-daemon'
       ftpsState: 'Disabled'
       linuxFxVersion: 'NODE|18-lts'
       minTlsVersion: '1.2'
     }
+  }
+}
+
+resource appServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
+  name: 'appsettings'
+  parent: appService
+  properties: {
+    APPINSIGHTS_INSTRUMENTATION_KEY: appInsights.properties.InstrumentationKey
+    APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
+    COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${appServiceCookieSecretSecret.properties.secretUri})'
+    DATABASE_HOST: '${sqlInstance.name}${az.environment().suffixes.sqlServerHostname}'
+    NODE_ENV: environment
+    WEBSITE_RUN_FROM_PACKAGE: '1'
   }
 }

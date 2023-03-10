@@ -1,0 +1,76 @@
+name: Deployment
+description: Deploys the application to an environment
+
+inputs:
+  azure-client-id:
+    description: App ID of the deployment app registration
+    required: true
+  azure-service-principal-object-id:
+    description: Object ID of the deployment service principal
+    required: true
+  azure-tenant-id:
+    description: ID of the target Azure AD tenant
+    required: true
+  azure-subscription-id:
+    description: ID of the target Azure subscription
+    required: true
+  environment:
+    description: Name of the environment
+    required: true
+  resource-group-name:
+    description: Name of the resource group to deploy resources to
+    required: true
+  sql-instance-aad-administrator-name:
+    description: Name of the Azure SQL administrators principal
+    required: true
+  sql-instance-aad-administrator-object-id:
+    description: Object ID of the Azure SQL administrators principal
+    required: true
+  sql-database-sku:
+    description: SKU of the Azure SQL database
+    required: true
+  app-service-plan-sku:
+    description: SKU of the App Service Plan
+    required: true
+  app-service-name:
+    description: Name of the App Service
+    required: true
+  app-cookie-secret:
+    description: Cookie secret used by the cookie-session Express middleware
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Set current date as environment variable
+      run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Deploy infrastructure
+      uses: azure/arm-deploy@v1
+      with:
+        deploymentName: ${{env.NOW}}-GitHubActions
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/template.bicep
+        parameters: >-
+          environment=${{ inputs.environment }}
+          servicePrincipalObjectId=${{ inputs.azure-service-principal-object-id }}
+          sqlInstanceAadAdministratorName="${{ inputs.sql-instance-aad-administrator-name }}"
+          sqlInstanceAadAdministratorObjectId=${{ inputs.sql-instance-aad-administrator-object-id }}
+          sqlDatabaseName=VerifiedOrchestration
+          sqlDatabaseSku=${{ inputs.sql-database-sku }}
+          appServicePlanSku=${{ inputs.app-service-plan-sku }}
+          appServiceCookieSecret=${{ inputs.app-cookie-secret }}
+
+    - name: Deploy API to App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ inputs.app-service-name }}
+        package: api/api.zip
