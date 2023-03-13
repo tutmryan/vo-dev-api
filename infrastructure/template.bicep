@@ -23,8 +23,8 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   }
 }
 
-resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: '${resourcePrefix}-${environment}-${appName}-ai'
+resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: '${resourcePrefix}-${environment}-${appName}-api-ai'
   location: location
   kind: 'web'
   properties: {
@@ -49,7 +49,16 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
     accessPolicies: [
       {
         tenantId: subscription().tenantId
-        objectId: appService.identity.principalId
+        objectId: apiAppService.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+          ]
+        }
+      }
+      {
+        tenantId: subscription().tenantId
+        objectId: migrationsFunctionApp.identity.principalId
         permissions: {
           secrets: [
             'get'
@@ -79,10 +88,8 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
 @secure()
 param appServiceCookieSecret string
 
-var appServiceCookieSecretSecretName = 'APP-COOKIE-SECRET'
-
 resource appServiceCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  name: appServiceCookieSecretSecretName
+  name: 'APP-COOKIE-SECRET'
   parent: keyVault
   properties: {
     attributes: {
@@ -187,9 +194,10 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   }
 }
 
-resource appService 'Microsoft.Web/sites@2022-03-01' = {
+resource apiAppService 'Microsoft.Web/sites@2022-03-01' = {
   name: '${resourcePrefix}-${environment}-${appName}-api'
   location: location
+  kind: 'app,linux'
   identity: {
     type: 'SystemAssigned'
   }
@@ -207,15 +215,95 @@ resource appService 'Microsoft.Web/sites@2022-03-01' = {
   }
 }
 
-resource appServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
+resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   name: 'appsettings'
-  parent: appService
+  parent: apiAppService
   properties: {
-    APPINSIGHTS_INSTRUMENTATION_KEY: appInsights.properties.InstrumentationKey
-    APPLICATIONINSIGHTS_CONNECTION_STRING: appInsights.properties.ConnectionString
+    APPINSIGHTS_INSTRUMENTATION_KEY: apiAppInsights.properties.InstrumentationKey
+    APPLICATIONINSIGHTS_CONNECTION_STRING: apiAppInsights.properties.ConnectionString
     COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${appServiceCookieSecretSecret.properties.secretUri})'
     DATABASE_HOST: '${sqlInstance.name}${az.environment().suffixes.sqlServerHostname}'
     NODE_ENV: environment
     WEBSITE_RUN_FROM_PACKAGE: '1'
+  }
+}
+
+resource migrationsStorage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+  name: '${resourcePrefix}${environment}vrfdorchstnst'
+  location: location
+  kind: 'StorageV2'
+  sku: {
+    name: 'Standard_LRS'
+  }
+  properties: {
+    allowBlobPublicAccess: false
+    publicNetworkAccess: 'Enabled'
+    minimumTlsVersion: 'TLS1_2'
+    networkAcls: {
+      defaultAction: 'Allow'
+    }
+    supportsHttpsTrafficOnly: true
+  }
+}
+
+resource migrationsStorageSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'MIGRATIONS-STORAGE-CONNECTION-STRING'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: 'DefaultEndpointsProtocol=https;AccountName=${migrationsStorage.name};AccountKey=${migrationsStorage.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
+  }
+}
+
+resource migrationsAppInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: '${resourcePrefix}-${environment}-${appName}-migrations-ai'
+  location: location
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    DisableIpMasking: false
+    Flow_Type: 'Bluefield'
+    Request_Source: 'rest'
+    RetentionInDays: 180
+    SamplingPercentage: 100
+    WorkspaceResourceId: logAnalytics.id
+  }
+}
+
+resource migrationsFunctionApp 'Microsoft.Web/sites@2022-03-01' = {
+  name: '${resourcePrefix}-${environment}-${appName}-migrations'
+  location: location
+  kind: 'functionapp,linux'
+  identity: {
+    type: 'SystemAssigned'
+  }
+  properties: {
+    serverFarmId: appServicePlan.id
+    httpsOnly: true
+    clientAffinityEnabled: false
+    siteConfig: {
+      alwaysOn: true
+      ftpsState: 'Disabled'
+      linuxFxVersion: 'Node|18'
+      minTlsVersion: '1.2'
+    }
+  }
+}
+
+resource migrationsFunctionAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
+  name: 'appsettings'
+  parent: migrationsFunctionApp
+  properties: {
+    APPINSIGHTS_INSTRUMENTATION_KEY: migrationsAppInsights.properties.InstrumentationKey
+    APPLICATIONINSIGHTS_CONNECTION_STRING: migrationsAppInsights.properties.ConnectionString
+    AzureWebJobsStorage: '@Microsoft.KeyVault(SecretUri=${migrationsStorageSecret.properties.secretUri})'
+    FUNCTIONS_EXTENSION_VERSION: '~4'
+    FUNCTIONS_WORKER_RUNTIME: 'node'
+    WEBSITE_RUN_FROM_PACKAGE: '1'
+    NODE_ENV: environment
+    DATABASE_HOST: '${sqlInstance.name}${az.environment().suffixes.sqlServerHostname}'
+    DATABASE_PORT: '1433'
   }
 }

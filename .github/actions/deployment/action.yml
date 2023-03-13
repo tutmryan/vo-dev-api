@@ -32,8 +32,11 @@ inputs:
   app-service-plan-sku:
     description: SKU of the App Service Plan
     required: true
-  app-service-name:
-    description: Name of the App Service
+  api-app-service-name:
+    description: Name of the API App Service
+    required: true
+  migrations-function-app-name:
+    description: Name of the migrations Functions app
     required: true
   app-cookie-secret:
     description: Cookie secret used by the cookie-session Express middleware
@@ -69,8 +72,22 @@ runs:
           appServicePlanSku=${{ inputs.app-service-plan-sku }}
           appServiceCookieSecret=${{ inputs.app-cookie-secret }}
 
+    - name: Deploy migrations Functions app
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ inputs.migrations-function-app-name }}
+        package: migrations-function/migrations-function.zip
+
+    - name: Run database migrations
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/invoke-database-migrations-function.ps1
+        -ResourceGroupName '${{ inputs.resource-group-name }}'
+        -FunctionAppName '${{ inputs.migrations-function-app-name }}'
+        -FunctionName 'RunDatabaseMigrations'
+
     - name: Deploy API to App Service
       uses: azure/webapps-deploy@v2
       with:
-        app-name: ${{ inputs.app-service-name }}
+        app-name: ${{ inputs.api-app-service-name }}
         package: api/api.zip
