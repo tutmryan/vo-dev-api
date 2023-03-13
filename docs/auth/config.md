@@ -18,3 +18,13 @@
 1. Click Register
 1. API permissions > Add a permission > My APIs > Verified Orchestration API ({environment}) > Delegated permissions > Admin > Add permissions
 1. API permissions > Grant admin consent for {tenant} > Yes
+
+## Admin website app registration (repeat for all environments e.g. localdev, dev, prod)
+
+1. Name: Verified Orchestration Admin (localdev)
+1. Add platform `Single-page application (SPA)` with one Redirect URI: `http(s)://${host}` (http://localhost for localdev)
+1. Click Register
+1. API permissions > Add a permission > My APIs > Verified Orchestration API ({environment}) > Delegated permissions > Admin > Add permissions
+1. API permissions > Grant admin consent for {tenant} > Yes
+
+Note: for localdev, configure API permissions for both localdev and dev APIs
