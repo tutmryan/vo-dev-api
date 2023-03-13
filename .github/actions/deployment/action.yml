@@ -41,6 +41,10 @@ inputs:
   app-cookie-secret:
     description: Cookie secret used by the cookie-session Express middleware
     required: true
+outputs:
+  api-url:
+    description: URL of the deployed API
+    value: ${{ steps.deploy-api.outputs.webapp-url }}
 
 runs:
   using: composite
@@ -87,6 +91,7 @@ runs:
         -FunctionName 'RunDatabaseMigrations'
 
     - name: Deploy API to App Service
+      id: deploy-api
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ inputs.api-app-service-name }}
