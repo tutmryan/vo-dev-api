@@ -6,6 +6,14 @@ param(
 
   [Parameter(Mandatory = $true)]
   [string]
+  $MigrationsAppClientId,
+
+  [Parameter(Mandatory = $true)]
+  [string]
+  $MigrationsAppRoleId,
+
+  [Parameter(Mandatory = $true)]
+  [string]
   $GitHubOrganisationName,
 
   [Parameter(Mandatory = $true)]
@@ -18,7 +26,11 @@ param(
 
   [Parameter(Mandatory = $true, ParameterSetName = 'Branch')]
   [string]
-  $BranchName
+  $BranchName,
+
+  [Parameter()]
+  [switch]
+  $SkipAdminConsent
 )
 
 Set-StrictMode -Version Latest
@@ -41,7 +53,7 @@ if ($null -ne $appRegistration) {
   Write-Output ('Created a new app registration named ''{0}''' -f $Name)
 }
 
-$appRegistrationAppId = az ad app list --query ("[?displayName=='{0}'].appId" -f $Name) --output tsv
+$appRegistrationClientId = az ad app list --query ("[?displayName=='{0}'].appId" -f $Name) --output tsv
 
 #
 # Service principal
@@ -52,12 +64,37 @@ if ($null -ne $servicePrincipal) {
 } else {
   Write-Output ('Creating a new service principal named ''{0}''...' -f $Name)
 
-  az ad sp create --id $appRegistrationAppId --output none
+  az ad sp create --id $appRegistrationClientId --output none
 
   Write-Output ('Created a new service principal named ''{0}''' -f $Name)
 }
 
 $servicePrincipalObjectId = az ad sp list --display-name $Name --query "[].id" --output tsv
+
+#
+# API permissions
+#
+Write-Output 'Setting API permissions...'
+
+$apiPermissionsPayload = @(
+  @{
+    resourceAppId  = $MigrationsAppClientId
+    resourceAccess = @(
+      @{
+        id   = $MigrationsAppRoleId
+        type = 'Role'
+      }
+    )
+  }
+)
+$apiPermissionsPayloadJson = (ConvertTo-Json -InputObject $apiPermissionsPayload -Depth 10 -Compress) -replace '"', '\"'
+
+az ad app update `
+  --id $appRegistrationClientId `
+  --required-resource-accesses $apiPermissionsPayloadJson `
+  --output none
+
+Write-Output 'Set API permissions'
 
 #
 # Federated credential
@@ -81,7 +118,7 @@ $federatedCredentialName = switch ($PSCmdlet.ParameterSetName) {
 }
 
 $federatedCredential = az ad app federated-credential list `
-  --id $appRegistrationAppId `
+  --id $appRegistrationClientId `
   --query ("[?issuer=='{0}' && subject=='{1}']" -f $constants.federatedCredentialIssuer, $federatedCredentialSubject) `
   --output tsv
 
@@ -102,17 +139,27 @@ if ($null -ne $federatedCredential) {
   $newFederatedCredentialPayloadJson = ($newFederatedCredentialPayload | ConvertTo-Json -Depth 10 -Compress) -replace '"', '\"'
 
   az ad app federated-credential create `
-    --id $appRegistrationAppId `
+    --id $appRegistrationClientId `
     --parameters $newFederatedCredentialPayloadJson `
     --output none
 
   Write-Output ('Created a new federated credential to deploy from GitHub Actions' -f $Name)
 }
 
+if (-not $SkipAdminConsent) {
+  Write-Output 'Granting admin consent...'
+
+  az ad app permission admin-consent `
+    --id $appRegistrationClientId `
+    --output none
+
+  Write-Output 'Granted admin consent'
+}
+
 $tenantId = az account show --query 'tenantId' --output tsv
 Write-Output ''
 Write-Output 'Add the following secrets to GitHub Actions'
-Write-Output ('- AZURE_CLIENT_ID:                   {0}' -f $appRegistrationAppId)
+Write-Output ('- AZURE_CLIENT_ID:                   {0}' -f $appRegistrationClientId)
 Write-Output ('- AZURE_SERVICE_PRINCIPAL_OBJECT_ID: {0}' -f $servicePrincipalObjectId)
 Write-Output ('- AZURE_TENANT_ID:                   {0}' -f $tenantId)
 Write-Output ('- AZURE_SUBSCRIPTION_ID:             <target-subscription-id>')

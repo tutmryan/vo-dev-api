@@ -40,7 +40,7 @@ if ($appRegistration) {
   Write-Output ('Created API app registration ''{0}''' -f $Name)
 }
 
-$appRegistrationId = az ad app list --query ("[?displayName=='{0}'].id" -f $Name) --output tsv
+$appRegistrationClientId = az ad app list --query ("[?displayName=='{0}'].id" -f $Name) --output tsv
 
 #
 # Set properties
@@ -48,7 +48,7 @@ $appRegistrationId = az ad app list --query ("[?displayName=='{0}'].id" -f $Name
 Write-Output 'Setting identifier URI, API permissions, and app roles...'
 
 az ad app update `
-  --id $appRegistrationId `
+  --id $appRegistrationClientId `
   --identifier-uris $IdentifierUri `
   --required-resource-accesses ('@{0}' -f $constants.requestedResourceAccessFile) `
   --app-roles ('@{0}' -f $constants.appRolesFile) `
@@ -66,7 +66,8 @@ Write-Output 'Set identifier URI, API permissions, and app roles'
 # -NoEnumerate prevents ConvertFrom-Json from transforming an array with a single element into an object
 # See https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertfrom-json?view=powershell-7.3#example-5-round-trip-a-single-element-array
 #
-$scopes = Get-Content -Path $constants.scopesFile -Raw | ConvertFrom-Json -Depth 10 -NoEnumerate
+$scopesFileContent = Get-Content -Path $constants.scopesFile -Raw
+$scopes = ConvertFrom-Json -InputObject $scopesFileContent -Depth 10 -NoEnumerate
 $setScopesPayload = @{
   api = @{
     oauth2PermissionScopes = $scopes
@@ -79,14 +80,14 @@ Write-Output 'Setting scopes...'
 
 az rest `
   --method patch `
-  --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationId) `
+  --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationClientId) `
   --body $setScopesPayloadJson `
   --output none
 
 Write-Output 'Set scopes'
 
 $credential = az ad app show `
-  --id $appRegistrationId `
+  --id $appRegistrationClientId `
   --query ("passwordCredentials[?displayName=='{0}']" -f $constants.clientSecretDescription) `
   --output tsv
 
@@ -97,7 +98,7 @@ if ($null -ne $credential) {
   Write-Output 'Generating a new client secret...'
 
   $clientSecret = az ad app credential reset `
-    --id $appRegistrationId `
+    --id $appRegistrationClientId `
     --append `
     --display-name $constants.clientSecretDescription `
     --years 1 `
@@ -112,7 +113,7 @@ if (-not $SkipAdminConsent) {
   Write-Output 'Granting admin consent...'
 
   az ad app permission admin-consent `
-    --id $appRegistrationId `
+    --id $appRegistrationClientId `
     --output none
 
   Write-Output 'Granted admin consent'

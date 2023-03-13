@@ -307,3 +307,51 @@ resource migrationsFunctionAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     DATABASE_PORT: '1433'
   }
 }
+
+@description('The client ID of the migrations app registration in Azure AD')
+param migrationsAppClientId string
+
+@description('The client ID of the deployment app registration in Azure AD')
+param deploymentAppClientId string
+
+resource migrationsFunctionAppAuthConfig 'Microsoft.Web/sites/config@2022-03-01' = {
+  name: 'authsettingsV2'
+  parent: migrationsFunctionApp
+  properties: {
+    platform: {
+      enabled: true
+    }
+    globalValidation: {
+      requireAuthentication: true
+      unauthenticatedClientAction: 'Return401'
+    }
+    httpSettings: {
+      requireHttps: true
+    }
+    identityProviders: {
+      azureActiveDirectory: {
+        enabled: true
+        registration: {
+          clientId: migrationsAppClientId
+          #disable-next-line no-hardcoded-env-urls
+          openIdIssuer: 'https://login.microsoftonline.com/${subscription().tenantId}/v2.0/'
+        }
+        validation: {
+          defaultAuthorizationPolicy: {
+            allowedApplications: [
+              deploymentAppClientId
+            ]
+          }
+        }
+      }
+
+      apple: { enabled: false }
+      azureStaticWebApps: { enabled: false }
+      facebook: { enabled: false }
+      gitHub: { enabled: false }
+      google: { enabled: false }
+      legacyMicrosoftAccount: { enabled: false }
+      twitter: { enabled: false }
+    }
+  }
+}

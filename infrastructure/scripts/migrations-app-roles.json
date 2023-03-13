@@ -1,0 +1,13 @@
+[
+  {
+    "allowedMemberTypes": [
+      "Application"
+    ],
+    "description": "Used to secure access to the migrations app.",
+    "displayName": "Access the migrations app",
+    "id": "d7d87a02-23ac-4af4-b87d-2bb70b52bea3",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "MigrationsApp.Access"
+  }
+]

@@ -100,4 +100,5 @@ jobs:
           app-service-plan-sku: B2
           api-app-service-name: vo-dev-verified-orchestration-api
           migrations-function-app-name: vo-dev-verified-orchestration-migrations
+          migrations-app-client-id: a705473f-45d1-498a-a9aa-c767c4d406b8
           app-cookie-secret: ${{ secrets.APP_COOKIE_SECRET }}

@@ -41,6 +41,9 @@ inputs:
   migrations-function-app-name:
     description: Name of the migrations Functions app
     required: true
+  migrations-app-client-id:
+    description: Client ID of the migrations app registration in Azure AD
+    required: true
   app-cookie-secret:
     description: Cookie secret used by the cookie-session Express middleware
     required: true
@@ -85,6 +88,8 @@ runs:
           sqlDatabaseSku=${{ inputs.sql-database-sku }}
           appServicePlanSku=${{ inputs.app-service-plan-sku }}
           appServiceCookieSecret=${{ inputs.app-cookie-secret }}
+          migrationsAppClientId=${{ inputs.migrations-app-client-id }}
+          deploymentAppClientId=${{ inputs.azure-client-id }}
 
     - name: Enable AAD-only auth on the Azure SQL instance
       shell: pwsh
@@ -103,9 +108,9 @@ runs:
       shell: pwsh
       run: >-
         ./infrastructure/scripts/invoke-database-migrations-function.ps1
-        -ResourceGroupName '${{ inputs.resource-group-name }}'
         -FunctionAppName '${{ inputs.migrations-function-app-name }}'
         -FunctionName 'RunDatabaseMigrations'
+        -MigrationsAppClientId '${{ inputs.migrations-app-client-id }}'
 
     - name: Deploy API to App Service
       id: deploy-api

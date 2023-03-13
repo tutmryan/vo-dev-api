@@ -32,8 +32,8 @@ $constants = @{
   }
 }
 
-$apiAppRegistrationAppId = az ad app list --query ("[?displayName=='{0}'].appId" -f $ApiAppRegistrationName) --output tsv
-if ($null -eq $apiAppRegistrationAppId) {
+$apiAppRegistrationClientId = az ad app list --query ("[?displayName=='{0}'].appId" -f $ApiAppRegistrationName) --output tsv
+if ($null -eq $apiAppRegistrationClientId) {
   throw ('Unable to find the API app registration named ''{0}''' -f $ApiAppRegistrationName)
 }
 
@@ -54,7 +54,7 @@ if ($appRegistration) {
   Write-Output ('Created UI app registration ''{0}''' -f $Name)
 }
 
-$appRegistrationId = az ad app list --query ("[?displayName=='{0}'].id" -f $Name) --output tsv
+$appRegistrationClientId = az ad app list --query ("[?displayName=='{0}'].id" -f $Name) --output tsv
 
 #
 # Set properties
@@ -62,13 +62,13 @@ $appRegistrationId = az ad app list --query ("[?displayName=='{0}'].id" -f $Name
 Write-Output 'Setting identifier URI and API permissions'
 
 $apiAdminScopeId = az ad app list `
-  --query ("[?appId=='{0}'][].api.oauth2PermissionScopes[?value=='{1}'][].id" -f $apiAppRegistrationAppId, $constants.apiAdminScopeValue) `
+  --query ("[?appId=='{0}'][].api.oauth2PermissionScopes[?value=='{1}'][].id" -f $apiAppRegistrationClientId, $constants.apiAdminScopeValue) `
   --output tsv
 
 $requiredResourceAccesses = @(
   $constants.graphUserReadScope
   @{
-    resourceAppId  = $apiAppRegistrationAppId
+    resourceAppId  = $apiAppRegistrationClientId
     resourceAccess = @(@{
         id   = $apiAdminScopeId
         type = 'Scope'
@@ -80,7 +80,7 @@ $requiredResourceAccesses = @(
 $requiredResourceAccessesJson = (ConvertTo-Json -InputObject $requiredResourceAccesses -Depth 10 -Compress) -replace '"', '\"'
 
 az ad app update `
-  --id $appRegistrationId `
+  --id $appRegistrationClientId `
   --identifier-uris $IdentifierUri `
   --required-resource-accesses $requiredResourceAccessesJson `
   --output none
@@ -91,7 +91,7 @@ if (-not $SkipAdminConsent) {
   Write-Output 'Granting admin consent...'
 
   az ad app permission admin-consent `
-    --id $appRegistrationId `
+    --id $appRegistrationClientId `
     --output none
 
   Write-Output 'Granted admin consent'

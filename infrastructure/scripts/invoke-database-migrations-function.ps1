@@ -2,25 +2,23 @@
 param (
   [Parameter(Mandatory = $true)]
   [string]
-  $ResourceGroupName,
-
-  [Parameter(Mandatory = $true)]
-  [string]
   $FunctionAppName,
 
   [Parameter(Mandatory = $true)]
   [string]
-  $FunctionName
+  $FunctionName,
+
+  [Parameter(Mandatory = $true)]
+  [string]
+  $MigrationsAppClientId
 )
 
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
-$functionKey = az functionapp function keys list `
-  --resource-group $ResourceGroupName `
-  --name $FunctionAppName `
-  --function-name $FunctionName `
-  --query "default" `
+$token = az account get-access-token `
+  --scope ('{0}/.default' -f $MigrationsAppClientId) `
+  --query "accessToken" `
   --output tsv
 
 $functionUrl = 'https://{0}.azurewebsites.net/api/{1}' -f $FunctionAppName, $FunctionName
@@ -29,7 +27,7 @@ $responseStatusCode = $null
 $response = Invoke-RestMethod `
   -Method Post `
   -Uri $functionUrl `
-  -Headers @{ 'x-functions-key' = $functionKey } `
+  -Headers @{ Authorization = ('Bearer {0}' -f $token) } `
   -SkipHttpErrorCheck `
   -StatusCodeVariable 'responseStatusCode'
 
