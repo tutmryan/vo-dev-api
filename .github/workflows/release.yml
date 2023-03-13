@@ -93,6 +93,7 @@ jobs:
           azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           environment: dev
           resource-group-name: vo-dev-verified-orchestration
+          sql-instance-name: vo-dev-verified-orchestration-sql
           sql-instance-aad-administrator-name: Verified Orchestration SQL Administrators (dev)
           sql-instance-aad-administrator-object-id: cb26d064-654b-49d4-a96c-f296e3667a55
           sql-database-sku: S1

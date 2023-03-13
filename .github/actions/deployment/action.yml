@@ -20,6 +20,9 @@ inputs:
   resource-group-name:
     description: Name of the resource group to deploy resources to
     required: true
+  sql-instance-name:
+    description: Name of the Azure SQL instance
+    required: true
   sql-instance-aad-administrator-name:
     description: Name of the Azure SQL administrators principal
     required: true
@@ -60,6 +63,13 @@ runs:
       run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
       shell: bash
 
+    - name: Disable AAD-only auth on the Azure SQL instance
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/disable-sql-aad-only-auth.ps1
+        -ResourceGroupName '${{ inputs.resource-group-name }}'
+        -AzureSqlInstanceName '${{ inputs.sql-instance-name }}'
+
     - name: Deploy infrastructure
       uses: azure/arm-deploy@v1
       with:
@@ -75,6 +85,13 @@ runs:
           sqlDatabaseSku=${{ inputs.sql-database-sku }}
           appServicePlanSku=${{ inputs.app-service-plan-sku }}
           appServiceCookieSecret=${{ inputs.app-cookie-secret }}
+
+    - name: Enable AAD-only auth on the Azure SQL instance
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/enable-sql-aad-only-auth.ps1
+        -ResourceGroupName '${{ inputs.resource-group-name }}'
+        -AzureSqlInstanceName '${{ inputs.sql-instance-name }}'
 
     - name: Deploy migrations Functions app
       uses: azure/webapps-deploy@v2
