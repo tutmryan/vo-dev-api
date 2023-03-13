@@ -207,7 +207,7 @@ resource apiAppService 'Microsoft.Web/sites@2022-03-01' = {
     clientAffinityEnabled: false
     siteConfig: {
       alwaysOn: true
-      appCommandLine: 'pm2 start ./src/main.tracing.js --no-daemon'
+      appCommandLine: 'pm2 start ./src/main.tracing.js -i max --no-daemon'
       ftpsState: 'Disabled'
       linuxFxVersion: 'NODE|18-lts'
       minTlsVersion: '1.2'
