@@ -76,7 +76,7 @@ runs:
     - name: Deploy infrastructure
       uses: azure/arm-deploy@v1
       with:
-        deploymentName: ${{env.NOW}}-GitHubActions
+        deploymentName: ${{env.NOW}}-api-github-actions
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/template.bicep
         parameters: >-
