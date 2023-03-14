@@ -110,10 +110,10 @@ $federatedCredentialSubject = switch ($PSCmdlet.ParameterSetName) {
 
 $federatedCredentialName = switch ($PSCmdlet.ParameterSetName) {
   'Environment' {
-    'DeployTo{0}Environment' -f $GitHubEnvironmentName
+    '{0}-{1}-{2}-environment' -f $GitHubOrganisationName, $GitHubRepositoryName, $GitHubEnvironmentName
   }
   'Branch' {
-    'DeployFrom{0}Branch' -f ((Get-Culture).TextInfo.ToTitleCase($BranchName))
+    '{0}-{1}-{2}-branch' -f $GitHubOrganisationName, $GitHubRepositoryName, $BranchName
   }
 }
 
