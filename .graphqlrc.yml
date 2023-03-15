@@ -1,17 +1,19 @@
 schema:
   - src/features/**/*.graphql
   - src/schema/**/*.graphql
+documents:
+  - 'src/features/**/*.{ts,tsx}'
 extensions:
   codegen:
     generates:
-      ./src/generated/resolver-types.ts:
+      ./src/generated/:
+        preset: 'client-preset'
         plugins:
-          - typescript
-          - typescript-resolvers
+          - typescript-resolvers:
+              useIndexSignature: true
+              contextType: ../context#GraphQLContext
+              resolverTypeWrapperSignature: 'Promise<T | Error> | T | Error'
         config:
-          useIndexSignature: true
-          contextType: ../context#GraphQLContext
-          resolverTypeWrapperSignature: 'Promise<T | Error> | T | Error'
           scalars:
             # add types for any used scalars here
             LocalDate: string

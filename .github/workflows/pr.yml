@@ -13,7 +13,9 @@ jobs:
     name: CI API
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
-      node-version: '18.x'
+      node-version: 18.x
+      pre-test-script: npm run test:ci:start-db
+      test-script: npm run test:ci
     secrets:
       npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}
 
@@ -21,12 +23,5 @@ jobs:
     name: CI Migrations Function
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
-      node-version: '18.x'
+      node-version: 18.x
       working-directory: ./migrate-db-function
-
-  # ci-infrastructure:
-  #   name: CI Infrastructure
-  #   uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
-  #   with:
-  #     working-directory: ./infrastructure
-  #     run-build: true

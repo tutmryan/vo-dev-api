@@ -1,4 +1,4 @@
-import { isLocalDev } from '@makerxstudio/node-common'
+import { environment, isLocalDev } from '@makerxstudio/node-common'
 import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 import type { SqlServerConnectionOptions } from 'typeorm/driver/sqlserver/SqlServerConnectionOptions'
@@ -34,7 +34,7 @@ const baseConfig: Pick<
   namingStrategy: new SnakeNamingStrategy(),
 }
 
-const localdevConfig: () => SqlServerConnectionOptions = () => {
+const usernamePasswordAuthConfig: () => SqlServerConnectionOptions = () => {
   const { username, password } = config.get('database')
   return {
     ...baseConfig,
@@ -48,7 +48,7 @@ const localdevConfig: () => SqlServerConnectionOptions = () => {
   }
 }
 
-const hostedConfig: () => SqlServerConnectionOptions = () => {
+const aadAuthConfig: () => SqlServerConnectionOptions = () => {
   return {
     ...baseConfig,
     authentication: {
@@ -58,6 +58,7 @@ const hostedConfig: () => SqlServerConnectionOptions = () => {
   }
 }
 
-export const dataSourceConfig: SqlServerConnectionOptions = isLocalDev ? localdevConfig() : hostedConfig()
+export const dataSourceConfig: SqlServerConnectionOptions =
+  isLocalDev || environment === 'test' ? usernamePasswordAuthConfig() : aadAuthConfig()
 export const dataSource = new DataSource(dataSourceConfig)
 export const entityManager = dataSource.manager as VerifiedOrchestrationEntityManager

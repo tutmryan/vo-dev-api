@@ -9,5 +9,5 @@
   },
   "emitDecoratorMetadata": true,
   "experimentalDecorators": true,
-  "include": ["src", "config", "test", "scripts", "migrate-db-function"]
+  "include": ["src", "config", "test", "scripts", "migrate-db-function", "jest.*.ts"]
 }
