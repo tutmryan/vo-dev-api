@@ -1,6 +1,6 @@
 import type { Configuration as MsalConfiguration } from '@azure/msal-node'
 import type { BearerConfig } from '@makerxstudio/express-bearer'
-import type { ClientCredentialsConfig } from '@makerxstudio/node-common'
+import type { ClientCredentialsConfig, OnBehalfOfConfig } from '@makerxstudio/node-common'
 import type { CorsOptions, CorsOptionsDelegate } from 'cors'
 import type { LoggerOptions } from 'typeorm'
 import type { ConsoleTransportOptions } from 'winston/lib/winston/transports'
@@ -55,5 +55,14 @@ export type Config = {
       clientSecret: string
     }
     b2cTenantName: string
+  }
+  integrations: {
+    verifiedIdAdmin: {
+      baseUrl: string
+      auth: Omit<OnBehalfOfConfig, 'assertionToken'>
+    }
+    verifiedIdNetwork: {
+      baseUrl: string
+    }
   }
 }

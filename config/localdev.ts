@@ -38,6 +38,8 @@ const config: DeepPartial<Config> = {
       logoutUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/logout',
       msalConfig: {
         auth: {
+          // Verified Orchestration API UI (localdev)
+          // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/20bcde12-9cbc-4a37-9e69-200a1e210530/isMSAApp~/false
           clientId: '20bcde12-9cbc-4a37-9e69-200a1e210530',
           authority: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89',
           knownAuthorities: ['https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89'],
@@ -48,6 +50,15 @@ const config: DeepPartial<Config> = {
             logLevel: LogLevel.Info,
           },
         },
+      },
+    },
+  },
+  integrations: {
+    verifiedIdAdmin: {
+      auth: {
+        // Verified Orchestration API (localdev)
+        // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/3f0968a8-aaf0-407a-b7e9-826d82f0f6a9/isMSAApp~/false
+        clientId: '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9',
       },
     },
   },

@@ -75,6 +75,7 @@ jobs:
     environment:
       name: Development
       url: ${{ steps.deploy.outputs.api-url }}
+    concurrency: deploy-to-dev
     needs:
       - build-api
       - build-migrations-function
@@ -89,10 +90,10 @@ jobs:
         id: deploy
         uses: ./github-actions/deployment
         with:
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-service-principal-object-id: ${{ secrets.AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          azure-client-id: ${{ vars.AZURE_CLIENT_ID }}
+          azure-service-principal-object-id: ${{ vars.AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
+          azure-tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
           environment: dev
           resource-group-name: vo-dev-verified-orchestration
           sql-instance-name: vo-dev-verified-orchestration-sql
@@ -103,4 +104,5 @@ jobs:
           api-app-service-name: vo-dev-verified-orchestration-api
           migrations-function-app-name: vo-dev-verified-orchestration-migrations
           migrations-app-client-id: a705473f-45d1-498a-a9aa-c767c4d406b8
-          app-cookie-secret: ${{ secrets.APP_COOKIE_SECRET }}
+          api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
+          api-client-secret: ${{ secrets.API_CLIENT_SECRET }}

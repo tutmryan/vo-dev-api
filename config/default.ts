@@ -41,6 +41,19 @@ const config: DeepPartial<Config> = {
       },
     },
   },
+  integrations: {
+    verifiedIdAdmin: {
+      baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/',
+      auth: {
+        tokenUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/token',
+        // See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#authentication
+        scope: '6a8b4b39-c021-437c-b060-5a14a3fd65f3/full_access',
+      },
+    },
+    verifiedIdNetwork: {
+      baseUrl: 'https://verifiedid.did.msidentity.com/',
+    },
+  },
 }
 
 module.exports = config

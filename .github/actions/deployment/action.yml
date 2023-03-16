@@ -44,8 +44,11 @@ inputs:
   migrations-app-client-id:
     description: Client ID of the migrations app registration in Azure AD
     required: true
-  app-cookie-secret:
+  api-cookie-secret:
     description: Cookie secret used by the cookie-session Express middleware
+    required: true
+  api-client-secret:
+    description: Client secret of the API app registration in Azure AD
     required: true
 outputs:
   api-url:
@@ -87,7 +90,8 @@ runs:
           sqlDatabaseName=VerifiedOrchestration
           sqlDatabaseSku=${{ inputs.sql-database-sku }}
           appServicePlanSku=${{ inputs.app-service-plan-sku }}
-          appServiceCookieSecret=${{ inputs.app-cookie-secret }}
+          apiCookieSecret=${{ inputs.api-cookie-secret }}
+          apiClientSecret=${{ inputs.api-client-secret }}
           migrationsAppClientId=${{ inputs.migrations-app-client-id }}
           deploymentAppClientId=${{ inputs.azure-client-id }}
 

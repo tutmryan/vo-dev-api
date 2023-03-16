@@ -5,6 +5,7 @@ import { randomUUID } from 'crypto'
 import type { GraphQLContext } from '../context'
 import { dataSource } from '../data'
 import { logger } from '../logger'
+import { createServices } from '../services'
 
 const requestInfo: RequestInfo = {
   host: 'localhost',
@@ -39,5 +40,6 @@ export const buildJwt = ({
 export const buildUser = (jwt: JwtPayload = buildJwt()) => new User(jwt, '')
 
 export const createContext = async ({ user }: { user?: User }): Promise<GraphQLContext> => {
-  return { user, logger, requestInfo, started: Date.now(), dataSource }
+  const context = { user, logger, requestInfo, started: Date.now(), dataSource }
+  return { ...context, services: createServices(context) }
 }

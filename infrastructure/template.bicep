@@ -86,16 +86,31 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
 
 @description('The cookie secret used by the cookie-session Express middleware')
 @secure()
-param appServiceCookieSecret string
+param apiCookieSecret string
 
-resource appServiceCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  name: 'APP-COOKIE-SECRET'
+resource apiCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'API-COOKIE-SECRET'
   parent: keyVault
   properties: {
     attributes: {
       enabled: true
     }
-    value: appServiceCookieSecret
+    value: apiCookieSecret
+  }
+}
+
+@description('The client secret of the API app registration in Azure AD')
+@secure()
+param apiClientSecret string
+
+resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'API-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: apiClientSecret
   }
 }
 
@@ -221,10 +236,11 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   properties: {
     APPINSIGHTS_INSTRUMENTATION_KEY: apiAppInsights.properties.InstrumentationKey
     APPLICATIONINSIGHTS_CONNECTION_STRING: apiAppInsights.properties.ConnectionString
-    COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${appServiceCookieSecretSecret.properties.secretUri})'
+    COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${apiCookieSecretSecret.properties.secretUri})'
     DATABASE_HOST: '${sqlInstance.name}${az.environment().suffixes.sqlServerHostname}'
     NODE_ENV: environment
     WEBSITE_RUN_FROM_PACKAGE: '1'
+    API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
   }
 }
 

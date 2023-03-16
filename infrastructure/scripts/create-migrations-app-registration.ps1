@@ -76,5 +76,4 @@ $appRoleId = $appRoles |
 
 Write-Output ''
 Write-Output ('App registration client ID : {0}' -f $appRegistrationClientId)
-Write-Output ('Service principal object ID: {0}' -f $servicePrincipalObjectId)
 Write-Output ('App role ID:                 {0}' -f $appRoleId)

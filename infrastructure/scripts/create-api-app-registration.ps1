@@ -17,7 +17,6 @@ $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
 $constants = @{
-  clientSecretDescription     = 'Generated with create-api-app-registration.ps1'
   appRolesFile                = Join-Path -Path $PSScriptRoot -ChildPath 'api-app-roles.json'
   requestedResourceAccessFile = Join-Path -Path $PSScriptRoot -ChildPath 'api-requested-resource-accesses.json'
   scopesFile                  = Join-Path -Path $PSScriptRoot -ChildPath 'api-scopes.json'
@@ -43,14 +42,53 @@ if ($appRegistration) {
 $appRegistrationClientId = az ad app list --query ("[?displayName=='{0}'].id" -f $Name) --output tsv
 
 #
+# Service principal
+#
+$servicePrincipal = az ad sp list --display-name $Name --output tsv
+if ($null -ne $servicePrincipal) {
+  Write-Output ('Found an existing service principal named ''{0}''' -f $Name)
+} else {
+  Write-Output ('Creating a new service principal named ''{0}''...' -f $Name)
+
+  az ad sp create --id $appRegistrationClientId --output none
+
+  Write-Output ('Created a new service principal named ''{0}''' -f $Name)
+}
+
+#
 # Set properties
 #
 Write-Output 'Setting identifier URI, API permissions, and app roles...'
 
+$apiPermissionsPayload = @(
+  @{
+    # VerifiableCredentials.Create.All role for Verifiable Credentials Service Request app
+    # See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/verifiable-credentials-configure-tenant#grant-permissions-to-get-access-tokens
+    resourceAppId  = '3db474b9-6a0c-4840-96ac-1fceb342124f'
+    resourceAccess = @(
+      @{
+        id   = '949ebb93-18f8-41b4-b677-c2bfea940027'
+        type = 'Role'
+      }
+    )
+  }
+  @{
+    # full_access scope for Verifiable Credentials Service Admin app
+    # See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#authentication
+    resourceAppId  = '6a8b4b39-c021-437c-b060-5a14a3fd65f3'
+    resourceAccess = @(
+      @{
+        id   = 'f4922361-5b56-4b3b-808f-a25115425e16'
+        type = 'Scope'
+      }
+    )
+  }
+)
+
 az ad app update `
   --id $appRegistrationClientId `
   --identifier-uris $IdentifierUri `
-  --required-resource-accesses ('@{0}' -f $constants.requestedResourceAccessFile) `
+  --required-resource-accesses ((ConvertTo-Json -InputObject $apiPermissionsPayload -Compress -Depth 10) -replace '"', '\"') `
   --app-roles ('@{0}' -f $constants.appRolesFile) `
   --output none
 
@@ -86,29 +124,6 @@ az rest `
 
 Write-Output 'Set scopes'
 
-$credential = az ad app show `
-  --id $appRegistrationClientId `
-  --query ("passwordCredentials[?displayName=='{0}']" -f $constants.clientSecretDescription) `
-  --output tsv
-
-if ($null -ne $credential) {
-  Write-Output ('Found an existing client secret named ''{0}''' -f $constants.clientSecretDescription)
-} else {
-
-  Write-Output 'Generating a new client secret...'
-
-  $clientSecret = az ad app credential reset `
-    --id $appRegistrationClientId `
-    --append `
-    --display-name $constants.clientSecretDescription `
-    --years 1 `
-    --only-show-errors `
-    --query "password" `
-    --output tsv
-
-  Write-Output ('New client secret generated with a lifetime of 1 year: {0}' -f $clientSecret)
-}
-
 if (-not $SkipAdminConsent) {
   Write-Output 'Granting admin consent...'
 
@@ -118,3 +133,5 @@ if (-not $SkipAdminConsent) {
 
   Write-Output 'Granted admin consent'
 }
+
+Write-Output ('Link to app registration in Azure Portal: https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/{0}/isMSAApp~/false' -f $appRegistrationClientId)
