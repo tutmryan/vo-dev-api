@@ -2,41 +2,13 @@
   "configurations": [
     {
       "name": "API",
-      "type": "node-terminal",
+      "type": "node",
       "request": "launch",
-      "command": "npm run debug"
-    },
-    {
-      "name": "API (migrate)",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "npm run debug",
-      "preLaunchTask": "Migrate DB"
-    },
-    {
-      "name": "Generate GraphQL Types (watch)",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "npm run gql:generate:watch"
-    },
-    {
-      "name": "Build API",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "npm run build"
-    },
-    {
-      "name": "Run built API",
-      "type": "node-terminal",
-      "request": "launch",
-      "command": "npm run start:built"
-    }
-  ],
-  "compounds": [
-    {
-      "name": "API + Codegen",
-      "configurations": ["API", "Generate GraphQL Types (watch)"],
-      "stopAll": true
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "debug"],
+      "cwd": "${workspaceRoot}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"]
     }
   ]
 }
