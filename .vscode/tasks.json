@@ -73,6 +73,26 @@
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Build",
+      "type": "npm",
+      "script": "build",
+      "path": "${workspaceFolder}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Start built",
+      "type": "npm",
+      "script": "start:built",
+      "path": "${workspaceFolder}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
     }
   ]
 }
