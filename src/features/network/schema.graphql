@@ -53,10 +53,9 @@ input NetworkIssuersWhere {
   isTrusted: Boolean
 }
 
-# eslint-disable @graphql-eslint/strict-id-in-types
 """
 A published contract via the Entra Verified ID network
-"""
+""" # eslint-disable @graphql-eslint/strict-id-in-types
 type NetworkContract {
   """
   The friendly name of this contract

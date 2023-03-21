@@ -1,11 +1,11 @@
 import http from 'http'
 import prompt from 'prompt-sync'
 
-import https from 'https'
-import fs from 'fs'
-import path from 'path'
-import { spawnSync } from 'child_process'
 import colors from 'colors'
+import { sync as spawnSync } from 'cross-spawn'
+import fs from 'fs'
+import https from 'https'
+import path from 'path'
 
 export function downloadFile(apiPath: string, localPath: string) {
   return new Promise((resolve) => {

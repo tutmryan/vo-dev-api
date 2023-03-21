@@ -12,8 +12,10 @@ extensions:
           - typescript-resolvers:
               useIndexSignature: true
               contextType: ../context#GraphQLContext
-              resolverTypeWrapperSignature: 'Promise<T | Error> | T | Error'
+              mappers:
+                Template: ../features/templates/entities/template-entity#TemplateEntity
         config:
+          defaultScalarType: unknown
           scalars:
             # add types for any used scalars here
             LocalDate: string
@@ -21,4 +23,6 @@ extensions:
             PositiveInt: number
             PositiveFloat: number
             URL: string
-
+            DateTime: Date
+            Locale: string
+            HexColorCode: string

@@ -1,11 +1,13 @@
 import { graphql } from '../../generated'
 import { beforeAfterAll, executeOperationAnonymous } from '../../test'
 
-const healthcheckQuery = graphql(`
+const healthcheckQuery = graphql(
+  `
   query Healthcheck {
     healthcheck
   }
-`)
+` as const,
+)
 
 describe('healthcheck query', () => {
   beforeAfterAll()

@@ -1,5 +1,6 @@
 /* eslint-disable */
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
+import { TemplateEntity } from '../features/templates/entities/template-entity';
 import { GraphQLContext } from '../context';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
@@ -16,23 +17,23 @@ export type Scalars = {
   Int: number;
   Float: number;
   /** Banking account number is a string of 5 to 17 alphanumeric values for representing an generic account number */
-  AccountNumber: any;
+  AccountNumber: unknown;
   /** The `BigInt` scalar type represents non-fractional signed whole numeric values. */
-  BigInt: any;
+  BigInt: unknown;
   /** The `Byte` scalar type represents byte value as a Buffer */
-  Byte: any;
+  Byte: unknown;
   /** A country code as defined by ISO 3166-1 alpha-2 */
-  CountryCode: any;
+  CountryCode: unknown;
   /** A field whose value conforms to the standard cuid format as specified in https://github.com/ericelliott/cuid#broken-down */
-  Cuid: any;
+  Cuid: unknown;
   /** A field whose value is a Currency: https://en.wikipedia.org/wiki/ISO_4217. */
-  Currency: any;
+  Currency: unknown;
   /** A field whose value conforms to the standard DID format as specified in did-core: https://www.w3.org/TR/did-core/. */
-  DID: any;
+  DID: unknown;
   /** A date string, such as 2007-12-03, compliant with the `full-date` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-  Date: any;
+  Date: unknown;
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-  DateTime: any;
+  DateTime: Date;
   /**
    * A string representing a duration conforming to the ISO8601 standard,
    * such as: P1W1DT13H23M34S
@@ -51,29 +52,29 @@ export type Scalars = {
    * Matches moment.js, Luxon and DateFns implementations
    * ,/. is valid for decimal places and +/- is a valid prefix
    */
-  Duration: any;
+  Duration: unknown;
   /** A field whose value conforms to the standard internet email address format as specified in RFC822: https://www.w3.org/Protocols/rfc822/. */
   EmailAddress: string;
   /** A field whose value is a generic Universally Unique Identifier: https://en.wikipedia.org/wiki/Universally_unique_identifier. */
-  GUID: any;
+  GUID: unknown;
   /** A field whose value is a CSS HSL color: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#hsl()_and_hsla(). */
-  HSL: any;
+  HSL: unknown;
   /** A field whose value is a CSS HSLA color: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#hsl()_and_hsla(). */
-  HSLA: any;
+  HSLA: unknown;
   /** A field whose value is a hex color code: https://en.wikipedia.org/wiki/Web_colors. */
-  HexColorCode: any;
+  HexColorCode: string;
   /** A field whose value is a hexadecimal: https://en.wikipedia.org/wiki/Hexadecimal. */
-  Hexadecimal: any;
+  Hexadecimal: unknown;
   /** A field whose value is an International Bank Account Number (IBAN): https://en.wikipedia.org/wiki/International_Bank_Account_Number. */
-  IBAN: any;
+  IBAN: unknown;
   /** A field whose value is either an IPv4 or IPv6 address: https://en.wikipedia.org/wiki/IP_address. */
-  IP: any;
+  IP: unknown;
   /** A field whose value is a IPv4 address: https://en.wikipedia.org/wiki/IPv4. */
-  IPv4: any;
+  IPv4: unknown;
   /** A field whose value is a IPv6 address: https://en.wikipedia.org/wiki/IPv6. */
-  IPv6: any;
+  IPv6: unknown;
   /** A field whose value is a ISBN-10 or ISBN-13 number: https://en.wikipedia.org/wiki/International_Standard_Book_Number. */
-  ISBN: any;
+  ISBN: unknown;
   /**
    * A string representing a duration conforming to the ISO8601 standard,
    * such as: P1W1DT13H23M34S
@@ -92,93 +93,181 @@ export type Scalars = {
    * Matches moment.js, Luxon and DateFns implementations
    * ,/. is valid for decimal places and +/- is a valid prefix
    */
-  ISO8601Duration: any;
+  ISO8601Duration: unknown;
   /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-  JSON: any;
+  JSON: unknown;
   /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
-  JSONObject: any;
+  JSONObject: unknown;
   /** A field whose value is a JSON Web Token (JWT): https://jwt.io/introduction. */
-  JWT: any;
+  JWT: unknown;
   /** A field whose value is a valid decimal degrees latitude number (53.471): https://en.wikipedia.org/wiki/Latitude */
-  Latitude: any;
+  Latitude: unknown;
   /** A local date string (i.e., with no associated timezone) in `YYYY-MM-DD` format, e.g. `2020-01-01`. */
   LocalDate: string;
   /** A local time string (i.e., with no associated timezone) in 24-hr `HH:mm[:ss[.SSS]]` format, e.g. `14:25` or `14:25:06` or `14:25:06.123`.  This scalar is very similar to the `LocalTime`, with the only difference being that `LocalEndTime` also allows `24:00` as a valid value to indicate midnight of the following day.  This is useful when using the scalar to represent the exclusive upper bound of a time block. */
-  LocalEndTime: any;
+  LocalEndTime: unknown;
   /** A local time string (i.e., with no associated timezone) in 24-hr `HH:mm[:ss[.SSS]]` format, e.g. `14:25` or `14:25:06` or `14:25:06.123`. */
-  LocalTime: any;
+  LocalTime: unknown;
   /** The locale in the format of a BCP 47 (RFC 5646) standard string */
-  Locale: any;
+  Locale: string;
   /** The `BigInt` scalar type represents non-fractional signed whole numeric values. */
-  Long: any;
+  Long: unknown;
   /** A field whose value is a valid decimal degrees longitude number (53.471): https://en.wikipedia.org/wiki/Longitude */
-  Longitude: any;
+  Longitude: unknown;
   /** A field whose value is a IEEE 802 48-bit MAC address: https://en.wikipedia.org/wiki/MAC_address. */
-  MAC: any;
+  MAC: unknown;
   /** Floats that will have a value less than 0. */
-  NegativeFloat: any;
+  NegativeFloat: unknown;
   /** Integers that will have a value less than 0. */
-  NegativeInt: any;
+  NegativeInt: unknown;
   /** A string that cannot be passed as an empty value */
-  NonEmptyString: any;
+  NonEmptyString: unknown;
   /** Floats that will have a value of 0 or more. */
-  NonNegativeFloat: any;
+  NonNegativeFloat: unknown;
   /** Integers that will have a value of 0 or more. */
-  NonNegativeInt: any;
+  NonNegativeInt: unknown;
   /** Floats that will have a value of 0 or less. */
-  NonPositiveFloat: any;
+  NonPositiveFloat: unknown;
   /** Integers that will have a value of 0 or less. */
-  NonPositiveInt: any;
+  NonPositiveInt: unknown;
   /** A field whose value conforms with the standard mongodb object ID as described here: https://docs.mongodb.com/manual/reference/method/ObjectId/#ObjectId. Example: 5e5677d71bdc2ae76344968c */
-  ObjectID: any;
+  ObjectID: unknown;
   /** A field whose value conforms to the standard E.164 format as specified in: https://en.wikipedia.org/wiki/E.164. Basically this is +17895551234. */
-  PhoneNumber: any;
+  PhoneNumber: unknown;
   /** A field whose value is a valid TCP port within the range of 0 to 65535: https://en.wikipedia.org/wiki/Transmission_Control_Protocol#TCP_ports */
-  Port: any;
+  Port: unknown;
   /** Floats that will have a value greater than 0. */
   PositiveFloat: number;
   /** Integers that will have a value greater than 0. */
   PositiveInt: number;
   /** A field whose value conforms to the standard postal code formats for United States, United Kingdom, Germany, Canada, France, Italy, Australia, Netherlands, Spain, Denmark, Sweden, Belgium, India, Austria, Portugal, Switzerland or Luxembourg. */
-  PostalCode: any;
+  PostalCode: unknown;
   /** A field whose value is a CSS RGB color: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#rgb()_and_rgba(). */
-  RGB: any;
+  RGB: unknown;
   /** A field whose value is a CSS RGBA color: https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#rgb()_and_rgba(). */
-  RGBA: any;
+  RGBA: unknown;
   /** In the US, an ABA routing transit number (`ABA RTN`) is a nine-digit code to identify the financial institution. */
-  RoutingNumber: any;
+  RoutingNumber: unknown;
   /** The `SafeInt` scalar type represents non-fractional signed whole numeric values that are considered safe as defined by the ECMAScript specification. */
-  SafeInt: any;
+  SafeInt: unknown;
   /** A field whose value is a Semantic Version: https://semver.org */
-  SemVer: any;
+  SemVer: unknown;
   /** A time string at UTC, such as 10:15:30Z, compliant with the `full-time` format outlined in section 5.6 of the RFC 3339profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
-  Time: any;
+  Time: unknown;
   /** A field whose value exists in the standard IANA Time Zone Database: https://www.iana.org/time-zones */
-  TimeZone: any;
+  TimeZone: unknown;
   /** The javascript `Date` as integer. Type represents date and time as number of milliseconds from start of UNIX epoch. */
-  Timestamp: any;
+  Timestamp: unknown;
   /** A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt. */
   URL: string;
   /** A currency string, such as $21.25 */
-  USCurrency: any;
+  USCurrency: unknown;
   /** A field whose value is a generic Universally Unique Identifier: https://en.wikipedia.org/wiki/Universally_unique_identifier. */
-  UUID: any;
+  UUID: unknown;
   /** Floats that will have a value of 0 or more. */
-  UnsignedFloat: any;
+  UnsignedFloat: unknown;
   /** Integers that will have a value of 0 or more. */
-  UnsignedInt: any;
+  UnsignedInt: unknown;
   /** A field whose value is a UTC Offset: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones */
-  UtcOffset: any;
+  UtcOffset: unknown;
   /** Represents NULL values */
-  Void: any;
+  Void: unknown;
   /** A field whose value matches /^\d{4}$/. */
-  Year: any;
+  Year: unknown;
 };
 
 export enum CacheControlScope {
   Private = 'PRIVATE',
   Public = 'PUBLIC'
 }
+
+/** Defines a claim included in a verifiable credential */
+export type CreateUpdateTemplateDisplayClaimInput = {
+  /** The name of the claim to which the label applies */
+  claim: Scalars['String'];
+  /** The description of the claim */
+  description?: InputMaybe<Scalars['String']>;
+  /** The label of the claim */
+  label: Scalars['String'];
+  /**
+   * The type of the claim
+   * Valid values encountered so far are:
+   *   - String
+   *   - image/jpg;base64url (in the Verified Employee contract)
+   */
+  type: Scalars['String'];
+  /**
+   * The value for the claim
+   * If provided, the value is fixed for all credentials referencing this claim
+   * If not provided, the value will need to be dynamically provided before the credential is issued
+   */
+  value?: InputMaybe<Scalars['String']>;
+};
+
+/** Supplemental data when the verifiable credential is issued */
+export type CreateUpdateTemplateDisplayConsentInput = {
+  /** Supplemental text to use when displaying consent */
+  instructions?: InputMaybe<Scalars['String']>;
+  /** Title of the consent */
+  title?: InputMaybe<Scalars['String']>;
+};
+
+/**
+ * The display properties of the verifiable credential at the template level
+ * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design#display-definition-wallet-credential-visuals
+ */
+export type CreateUpdateTemplateDisplayCredentialInput = {
+  /** Background color of the credential */
+  backgroundColor?: InputMaybe<Scalars['HexColorCode']>;
+  /** Supplemental text displayed alongside each credential */
+  description?: InputMaybe<Scalars['String']>;
+  /** The name of the issuer of the credential */
+  issuedBy?: InputMaybe<Scalars['String']>;
+  /** Logo information of the credential */
+  logo: CreateUpdateTemplateDisplayCredentialLogoInput;
+  /** Text color of the credential */
+  textColor?: InputMaybe<Scalars['HexColorCode']>;
+  /** Title of the credential */
+  title?: InputMaybe<Scalars['String']>;
+};
+
+/**
+ * Defines the logo displayed on the credential
+ * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/rules-and-display-definitions-model#displaycredentiallogo-type
+ */
+export type CreateUpdateTemplateDisplayCredentialLogoInput = {
+  /** The description of the logo */
+  description?: InputMaybe<Scalars['String']>;
+  /** The base-64 encoded image (optional if url is specified) */
+  image?: InputMaybe<Scalars['String']>;
+  /** URI of the logo (optional if image is specified) */
+  uri?: InputMaybe<Scalars['URL']>;
+};
+
+/** Credential display definitions at the template level */
+export type CreateUpdateTemplateDisplayModelInput = {
+  card: CreateUpdateTemplateDisplayCredentialInput;
+  claims: Array<CreateUpdateTemplateDisplayClaimInput>;
+  consent: CreateUpdateTemplateDisplayConsentInput;
+  locale?: InputMaybe<Scalars['Locale']>;
+};
+
+export type Mutation = {
+  __typename?: 'Mutation';
+  createTemplate: Template;
+  updateTemplate: Template;
+};
+
+
+export type MutationCreateTemplateArgs = {
+  input: TemplateInput;
+};
+
+
+export type MutationUpdateTemplateArgs = {
+  id: Scalars['ID'];
+  input: TemplateInput;
+};
 
 /** A published contract via the Entra Verified ID network */
 export type NetworkContract = {
@@ -222,6 +311,8 @@ export type Query = {
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-issuers
    */
   findNetworkIssuers: Array<NetworkIssuer>;
+  /** Returns templates, optionally matching the specified criteria */
+  findTemplates: Array<Template>;
   /** No-op query to test if the server is up and running. */
   healthcheck?: Maybe<Scalars['Void']>;
   /**
@@ -229,6 +320,8 @@ export type Query = {
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
    */
   networkContracts: Array<NetworkContract>;
+  /** Returns a template by ID */
+  template: Template;
 };
 
 
@@ -237,22 +330,211 @@ export type QueryFindNetworkIssuersArgs = {
 };
 
 
+export type QueryFindTemplatesArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']>;
+  offset?: InputMaybe<Scalars['PositiveInt']>;
+  where?: InputMaybe<TemplateWhere>;
+};
+
+
 export type QueryNetworkContractsArgs = {
   issuerId: Scalars['ID'];
   tenantId: Scalars['ID'];
 };
 
+
+export type QueryTemplateArgs = {
+  id: Scalars['ID'];
+};
+
+/** Defines a template that can be used as a base for a contract */
+export type Template = {
+  __typename?: 'Template';
+  /** This templates children, if any. */
+  children: Array<Template>;
+  /** The description of the template */
+  description: Scalars['String'];
+  /**
+   * The credential display definition defined by this template.
+   * May be a partial or full definition.
+   * This definition is merged on top of the definition from the parent template.
+   */
+  display: TemplateDisplayModel;
+  /** The unique identifier for the template */
+  id: Scalars['ID'];
+  /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
+  isPublic?: Maybe<Scalars['Boolean']>;
+  /** The name of the template */
+  name: Scalars['String'];
+  /**
+   * The parent template, if any.
+   * The root template has no parent.
+   */
+  parent?: Maybe<Template>;
+  /**
+   * The combined representation of this template's parent chain.
+   * The root template has no parent.
+   */
+  parentData?: Maybe<TemplateParentData>;
+  /** The lifespan of the credential expressed in seconds */
+  validityIntervalInSeconds?: Maybe<Scalars['PositiveInt']>;
+};
+
+/** Defines a claim included in a verifiable credential */
+export type TemplateDisplayClaim = {
+  __typename?: 'TemplateDisplayClaim';
+  /** The name of the claim to which the label applies */
+  claim: Scalars['String'];
+  /** The description of the claim */
+  description?: Maybe<Scalars['String']>;
+  /** The label of the claim */
+  label: Scalars['String'];
+  /**
+   * The type of the claim
+   * Valid values encountered so far are:
+   *   - String
+   *   - image/jpg;base64url (in the Verified Employee contract)
+   */
+  type: Scalars['String'];
+  /**
+   * The value for the claim
+   * If provided, the value is fixed for all credentials referencing this claim
+   * If not provided, the value will need to be dynamically provided before the credential is issued
+   */
+  value?: Maybe<Scalars['String']>;
+};
+
+/** Supplemental data when the verifiable credential is issued */
+export type TemplateDisplayConsent = {
+  __typename?: 'TemplateDisplayConsent';
+  /** Supplemental text to use when displaying consent */
+  instructions?: Maybe<Scalars['String']>;
+  /** Title of the consent */
+  title?: Maybe<Scalars['String']>;
+};
+
+/**
+ * The display properties of the verifiable credential at the template level
+ * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design#display-definition-wallet-credential-visuals
+ */
+export type TemplateDisplayCredential = {
+  __typename?: 'TemplateDisplayCredential';
+  /** Background color of the credential */
+  backgroundColor?: Maybe<Scalars['HexColorCode']>;
+  /** Supplemental text displayed alongside each credential */
+  description?: Maybe<Scalars['String']>;
+  /** The name of the issuer of the credential */
+  issuedBy?: Maybe<Scalars['String']>;
+  /** Logo information of the credential */
+  logo: TemplateDisplayCredentialLogo;
+  /** Text color of the credential */
+  textColor?: Maybe<Scalars['HexColorCode']>;
+  /** Title of the credential */
+  title?: Maybe<Scalars['String']>;
+};
+
+/**
+ * Defines the logo displayed on the credential
+ * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/rules-and-display-definitions-model#displaycredentiallogo-type
+ */
+export type TemplateDisplayCredentialLogo = {
+  __typename?: 'TemplateDisplayCredentialLogo';
+  /** The description of the logo */
+  description?: Maybe<Scalars['String']>;
+  /** The base-64 encoded image (optional if url is specified) */
+  image?: Maybe<Scalars['String']>;
+  /** URI of the logo (optional if image is specified) */
+  uri?: Maybe<Scalars['URL']>;
+};
+
+/** Credential display definitions at the template level */
+export type TemplateDisplayModel = {
+  __typename?: 'TemplateDisplayModel';
+  card: TemplateDisplayCredential;
+  claims: Array<TemplateDisplayClaim>;
+  consent: TemplateDisplayConsent;
+  locale?: Maybe<Scalars['Locale']>;
+};
+
+/** Defines the input to create or update a template */
+export type TemplateInput = {
+  /** The description of the template */
+  description: Scalars['String'];
+  /**
+   * The credential display definition defined by this template.
+   * May be a partial or full definition.
+   * This definition is merged on top of the definition from the parent template.
+   */
+  display: CreateUpdateTemplateDisplayModelInput;
+  /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
+  isPublic?: InputMaybe<Scalars['Boolean']>;
+  /** The name of the template */
+  name: Scalars['String'];
+  /** The ID of the parent template, if any */
+  parentTemplateID?: InputMaybe<Scalars['ID']>;
+  /** The lifespan of the credential expressed in seconds */
+  validityIntervalInSeconds?: InputMaybe<Scalars['PositiveInt']>;
+};
+
+/** Represents the combined data of parent templates */
+export type TemplateParentData = {
+  __typename?: 'TemplateParentData';
+  /**
+   * The credential display definition defined by this template.
+   * May be a partial or full definition.
+   * This definition is merged on top of the definition from the parent template.
+   */
+  display: TemplateDisplayModel;
+  /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
+  isPublic?: Maybe<Scalars['Boolean']>;
+  /** The lifespan of the credential expressed in seconds */
+  validityIntervalInSeconds?: Maybe<Scalars['PositiveInt']>;
+};
+
+/** Defines the searchable fields usable to find templates */
+export type TemplateWhere = {
+  /** The name of the template to match */
+  name: Scalars['String'];
+};
+
 export type HealthcheckQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HealthcheckQuery = { __typename?: 'Query', healthcheck?: any | null };
+export type HealthcheckQuery = { __typename?: 'Query', healthcheck?: unknown | null };
+
+export type TemplateParentDataFragmentFragment = { __typename?: 'Template', parentData?: { __typename?: 'TemplateParentData', isPublic?: boolean | null, validityIntervalInSeconds?: number | null, display: { __typename?: 'TemplateDisplayModel', locale?: string | null, card: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } }, consent: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> } } | null } & { ' $fragmentName'?: 'TemplateParentDataFragmentFragment' };
+
+export type GetTemplateParentDataQueryQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
 
 
+export type GetTemplateParentDataQueryQuery = { __typename?: 'Query', template: (
+    { __typename?: 'Template' }
+    & { ' $fragmentRefs'?: { 'TemplateParentDataFragmentFragment': TemplateParentDataFragmentFragment } }
+  ) };
+
+export type TemplateFragmentFragment = { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null, parent?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'TemplateDisplayModel', locale?: string | null, card: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } }, consent: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> } } & { ' $fragmentName'?: 'TemplateFragmentFragment' };
+
+export type CreateTemplateMutationVariables = Exact<{
+  input: TemplateInput;
+}>;
+
+
+export type CreateTemplateMutation = { __typename?: 'Mutation', createTemplate: (
+    { __typename?: 'Template' }
+    & { ' $fragmentRefs'?: { 'TemplateFragmentFragment': TemplateFragmentFragment } }
+  ) };
+
+export const TemplateParentDataFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateParentDataFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"parentData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]}}]} as unknown as DocumentNode<TemplateParentDataFragmentFragment, unknown>;
+export const TemplateFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<TemplateFragmentFragment, unknown>;
 export const HealthcheckDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Healthcheck"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"healthcheck"}}]}}]} as unknown as DocumentNode<HealthcheckQuery, HealthcheckQueryVariables>;
+export const GetTemplateParentDataQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTemplateParentDataQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"template"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateParentDataFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateParentDataFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"parentData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]}}]} as unknown as DocumentNode<GetTemplateParentDataQueryQuery, GetTemplateParentDataQueryQueryVariables>;
+export const CreateTemplateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateTemplate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TemplateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<CreateTemplateMutation, CreateTemplateMutationVariables>;
 export type WithIndex<TObject> = TObject & Record<string, any>;
 export type ResolversObject<TObject> = WithIndex<TObject>;
 
-export type ResolverTypeWrapper<T> = Promise<T | Error> | T | Error;
+export type ResolverTypeWrapper<T> = Promise<T> | T;
 
 
 export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
@@ -317,6 +599,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
   info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
 
+
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{
   AccountNumber: ResolverTypeWrapper<Scalars['AccountNumber']>;
@@ -324,6 +607,12 @@ export type ResolversTypes = ResolversObject<{
   Byte: ResolverTypeWrapper<Scalars['Byte']>;
   CacheControlScope: CacheControlScope;
   CountryCode: ResolverTypeWrapper<Scalars['CountryCode']>;
+  CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
+  String: ResolverTypeWrapper<Scalars['String']>;
+  CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
+  CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
+  CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
+  CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
   Cuid: ResolverTypeWrapper<Scalars['Cuid']>;
   Currency: ResolverTypeWrapper<Scalars['Currency']>;
   DID: ResolverTypeWrapper<Scalars['DID']>;
@@ -353,12 +642,12 @@ export type ResolversTypes = ResolversObject<{
   Long: ResolverTypeWrapper<Scalars['Long']>;
   Longitude: ResolverTypeWrapper<Scalars['Longitude']>;
   MAC: ResolverTypeWrapper<Scalars['MAC']>;
+  Mutation: ResolverTypeWrapper<{}>;
+  ID: ResolverTypeWrapper<Scalars['ID']>;
   NegativeFloat: ResolverTypeWrapper<Scalars['NegativeFloat']>;
   NegativeInt: ResolverTypeWrapper<Scalars['NegativeInt']>;
   NetworkContract: ResolverTypeWrapper<NetworkContract>;
-  String: ResolverTypeWrapper<Scalars['String']>;
   NetworkIssuer: ResolverTypeWrapper<NetworkIssuer>;
-  ID: ResolverTypeWrapper<Scalars['ID']>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   NetworkIssuersWhere: NetworkIssuersWhere;
   NonEmptyString: ResolverTypeWrapper<Scalars['NonEmptyString']>;
@@ -378,6 +667,15 @@ export type ResolversTypes = ResolversObject<{
   RoutingNumber: ResolverTypeWrapper<Scalars['RoutingNumber']>;
   SafeInt: ResolverTypeWrapper<Scalars['SafeInt']>;
   SemVer: ResolverTypeWrapper<Scalars['SemVer']>;
+  Template: ResolverTypeWrapper<TemplateEntity>;
+  TemplateDisplayClaim: ResolverTypeWrapper<TemplateDisplayClaim>;
+  TemplateDisplayConsent: ResolverTypeWrapper<TemplateDisplayConsent>;
+  TemplateDisplayCredential: ResolverTypeWrapper<TemplateDisplayCredential>;
+  TemplateDisplayCredentialLogo: ResolverTypeWrapper<TemplateDisplayCredentialLogo>;
+  TemplateDisplayModel: ResolverTypeWrapper<TemplateDisplayModel>;
+  TemplateInput: TemplateInput;
+  TemplateParentData: ResolverTypeWrapper<TemplateParentData>;
+  TemplateWhere: TemplateWhere;
   Time: ResolverTypeWrapper<Scalars['Time']>;
   TimeZone: ResolverTypeWrapper<Scalars['TimeZone']>;
   Timestamp: ResolverTypeWrapper<Scalars['Timestamp']>;
@@ -399,6 +697,12 @@ export type ResolversParentTypes = ResolversObject<{
   BigInt: Scalars['BigInt'];
   Byte: Scalars['Byte'];
   CountryCode: Scalars['CountryCode'];
+  CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
+  String: Scalars['String'];
+  CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
+  CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
+  CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
+  CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
   Cuid: Scalars['Cuid'];
   Currency: Scalars['Currency'];
   DID: Scalars['DID'];
@@ -428,12 +732,12 @@ export type ResolversParentTypes = ResolversObject<{
   Long: Scalars['Long'];
   Longitude: Scalars['Longitude'];
   MAC: Scalars['MAC'];
+  Mutation: {};
+  ID: Scalars['ID'];
   NegativeFloat: Scalars['NegativeFloat'];
   NegativeInt: Scalars['NegativeInt'];
   NetworkContract: NetworkContract;
-  String: Scalars['String'];
   NetworkIssuer: NetworkIssuer;
-  ID: Scalars['ID'];
   Boolean: Scalars['Boolean'];
   NetworkIssuersWhere: NetworkIssuersWhere;
   NonEmptyString: Scalars['NonEmptyString'];
@@ -453,6 +757,15 @@ export type ResolversParentTypes = ResolversObject<{
   RoutingNumber: Scalars['RoutingNumber'];
   SafeInt: Scalars['SafeInt'];
   SemVer: Scalars['SemVer'];
+  Template: TemplateEntity;
+  TemplateDisplayClaim: TemplateDisplayClaim;
+  TemplateDisplayConsent: TemplateDisplayConsent;
+  TemplateDisplayCredential: TemplateDisplayCredential;
+  TemplateDisplayCredentialLogo: TemplateDisplayCredentialLogo;
+  TemplateDisplayModel: TemplateDisplayModel;
+  TemplateInput: TemplateInput;
+  TemplateParentData: TemplateParentData;
+  TemplateWhere: TemplateWhere;
   Time: Scalars['Time'];
   TimeZone: Scalars['TimeZone'];
   Timestamp: Scalars['Timestamp'];
@@ -627,6 +940,11 @@ export interface MacScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes[
   name: 'MAC';
 }
 
+export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = ResolversObject<{
+  createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
+  updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;
+}>;
+
 export interface NegativeFloatScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['NegativeFloat'], any> {
   name: 'NegativeFloat';
 }
@@ -698,8 +1016,10 @@ export interface PostalCodeScalarConfig extends GraphQLScalarTypeConfig<Resolver
 
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = ResolversObject<{
   findNetworkIssuers?: Resolver<Array<ResolversTypes['NetworkIssuer']>, ParentType, ContextType, RequireFields<QueryFindNetworkIssuersArgs, 'where'>>;
+  findTemplates?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType, Partial<QueryFindTemplatesArgs>>;
   healthcheck?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
+  template?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<QueryTemplateArgs, 'id'>>;
 }>;
 
 export interface RgbScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['RGB'], any> {
@@ -721,6 +1041,66 @@ export interface SafeIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTy
 export interface SemVerScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['SemVer'], any> {
   name: 'SemVer';
 }
+
+export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Template'] = ResolversParentTypes['Template']> = ResolversObject<{
+  children?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  display?: Resolver<ResolversTypes['TemplateDisplayModel'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isPublic?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  parent?: Resolver<Maybe<ResolversTypes['Template']>, ParentType, ContextType>;
+  parentData?: Resolver<Maybe<ResolversTypes['TemplateParentData']>, ParentType, ContextType>;
+  validityIntervalInSeconds?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type TemplateDisplayClaimResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayClaim'] = ResolversParentTypes['TemplateDisplayClaim']> = ResolversObject<{
+  claim?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type TemplateDisplayConsentResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayConsent'] = ResolversParentTypes['TemplateDisplayConsent']> = ResolversObject<{
+  instructions?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type TemplateDisplayCredentialResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayCredential'] = ResolversParentTypes['TemplateDisplayCredential']> = ResolversObject<{
+  backgroundColor?: Resolver<Maybe<ResolversTypes['HexColorCode']>, ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  issuedBy?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  logo?: Resolver<ResolversTypes['TemplateDisplayCredentialLogo'], ParentType, ContextType>;
+  textColor?: Resolver<Maybe<ResolversTypes['HexColorCode']>, ParentType, ContextType>;
+  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type TemplateDisplayCredentialLogoResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayCredentialLogo'] = ResolversParentTypes['TemplateDisplayCredentialLogo']> = ResolversObject<{
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  image?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  uri?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type TemplateDisplayModelResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayModel'] = ResolversParentTypes['TemplateDisplayModel']> = ResolversObject<{
+  card?: Resolver<ResolversTypes['TemplateDisplayCredential'], ParentType, ContextType>;
+  claims?: Resolver<Array<ResolversTypes['TemplateDisplayClaim']>, ParentType, ContextType>;
+  consent?: Resolver<ResolversTypes['TemplateDisplayConsent'], ParentType, ContextType>;
+  locale?: Resolver<Maybe<ResolversTypes['Locale']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
+
+export type TemplateParentDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateParentData'] = ResolversParentTypes['TemplateParentData']> = ResolversObject<{
+  display?: Resolver<ResolversTypes['TemplateDisplayModel'], ParentType, ContextType>;
+  isPublic?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  validityIntervalInSeconds?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+}>;
 
 export interface TimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Time'], any> {
   name: 'Time';
@@ -800,6 +1180,7 @@ export type Resolvers<ContextType = GraphQLContext> = ResolversObject<{
   Long?: GraphQLScalarType;
   Longitude?: GraphQLScalarType;
   MAC?: GraphQLScalarType;
+  Mutation?: MutationResolvers<ContextType>;
   NegativeFloat?: GraphQLScalarType;
   NegativeInt?: GraphQLScalarType;
   NetworkContract?: NetworkContractResolvers<ContextType>;
@@ -821,6 +1202,13 @@ export type Resolvers<ContextType = GraphQLContext> = ResolversObject<{
   RoutingNumber?: GraphQLScalarType;
   SafeInt?: GraphQLScalarType;
   SemVer?: GraphQLScalarType;
+  Template?: TemplateResolvers<ContextType>;
+  TemplateDisplayClaim?: TemplateDisplayClaimResolvers<ContextType>;
+  TemplateDisplayConsent?: TemplateDisplayConsentResolvers<ContextType>;
+  TemplateDisplayCredential?: TemplateDisplayCredentialResolvers<ContextType>;
+  TemplateDisplayCredentialLogo?: TemplateDisplayCredentialLogoResolvers<ContextType>;
+  TemplateDisplayModel?: TemplateDisplayModelResolvers<ContextType>;
+  TemplateParentData?: TemplateParentDataResolvers<ContextType>;
   Time?: GraphQLScalarType;
   TimeZone?: GraphQLScalarType;
   Timestamp?: GraphQLScalarType;

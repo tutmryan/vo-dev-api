@@ -5,6 +5,7 @@ import config from './config'
 import { logger } from './logger'
 import type { Services } from './services'
 import { createServices } from './services'
+import { dataSource } from './data'
 
 export type BaseContext = GraphQLContextBase<typeof logger, RequestInfo>
 export type GraphQLContext = BaseContext & {
@@ -18,6 +19,6 @@ export const createContext = createContextFactory<GraphQLContext>({
   requestLogger: (requestMetadata) => logger.child(requestMetadata),
   augmentContext: (context) => {
     const services = createServices(context)
-    return { services }
+    return { services, dataSource }
   },
 })
