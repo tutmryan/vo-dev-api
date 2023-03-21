@@ -1,5 +1,5 @@
 import type { Configuration } from '@azure/msal-node'
-import { PublicClientApplication } from '@azure/msal-node'
+import { ConfidentialClientApplication } from '@azure/msal-node'
 import { bearerTokenMiddleware } from '@makerxstudio/express-bearer'
 import type { AuthConfig } from '@makerxstudio/express-msal'
 import {
@@ -51,7 +51,7 @@ export const getExpressApp = (): Express => {
       },
     }
     const msalConfig = merge(msalLoggerConfig, config.get('auth.pkce.msalConfig'))
-    const msalClient = new PublicClientApplication(msalConfig)
+    const msalClient = new ConfidentialClientApplication(msalConfig)
     const authConfig: AuthConfig = {
       app,
       msalClient,

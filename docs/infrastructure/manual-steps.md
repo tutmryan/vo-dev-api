@@ -2,14 +2,14 @@
 
 Most of the provisioning is automated, but there are still some steps that need to be performed manually on a per-environment basis.
 
-## 1. Create an environment in the GitHub repository
+## Create an environment in the GitHub repository
 
 See <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>.
 
-## 2. Create an app registration for the API
+## Create an app registration for the API
 
 ```powershell
-./infrastructure/script/create-api-app-registration `
+./infrastructure/script/create-api-app-registration.ps1 `
   -Name '<name-of-application>' `
   -IdentifierUri '<identifier-uri>'
 ```
@@ -26,7 +26,28 @@ We need to add the new client secret to the GitHub secrets:
 1. Click on the relevant environment.
 1. Add the secret as `API_CLIENT_SECRET`.
 
-## 2. Create an app registration for the migrations application
+## Create an app registration for the UI (admin app)
+
+```powershell
+./infrastructure/script/create-ui-app-registration.ps1 `
+  -Name '<name-of-application>' `
+  -RedirectUrl '<redirect-url' `
+  -ApiAppRegistrationName '<api-app-registration-name>'
+```
+
+We also need to create a client secret for this application:
+
+1. Navigate to the link in the script output.
+1. Click on "Certificates & secrets", then "+ New client secret".
+1. Give a description, select the appropriate expiry date, then "Add".
+
+We need to add the new client secret to the GitHub secrets:
+
+1. Navigate to the environment for the repository at <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>.
+1. Click on the relevant environment.
+1. Add the secret as `UI_CLIENT_SECRET`.
+
+## Create an app registration for the migrations application
 
 ```powershell
 ./infrastructure/scripts/create-migrations-app-registration.ps1 -Name '<name-of-application>'
@@ -34,7 +55,7 @@ We need to add the new client secret to the GitHub secrets:
 
 This script will output the client ID of the app registration and the ID of the role, which we need in the next step.
 
-## 3. Create a deployment service principal
+## Create a deployment service principal
 
 We need a service principal so that GitHub Actions can:
 
@@ -69,7 +90,7 @@ To do so:
 1. Click on the relevant environment.
 1. Add the environment variables.
 
-## 4. Add secrets to the GitHub environment
+## Add secrets to the GitHub environment
 
 The applications need secure configuration settings that we store as secrets in the GitHub environment.
 
@@ -83,7 +104,7 @@ To do so:
 1. Click on the relevant environment.
 1. Add the secrets.
 
-## 5. Create a resource group to hold Azure resources
+## Create a resource group to hold Azure resources
 
 1. Navigate to the Azure Portal subscriptions blade: <https://portal.azure.com/#view/Microsoft_Azure_Billing/SubscriptionsBlade>.
 1. Select the relevant subscription.
@@ -91,7 +112,7 @@ To do so:
 1. Click on "+ Create"
 1. Pick a name, select the appropriate region, and finalise the creation.
 
-## 6. Give the deployment service principal permissions to deploy Azure resources
+## Give the deployment service principal permissions to deploy Azure resources
 
 1. Navigate to the previously created resource group.
 1. Click on "Access control (IAM)".
@@ -100,14 +121,14 @@ To do so:
 1. Click on "+ Select members", then find the deployment service principal by its name.
 1. Click on "Review + assign", then finalise the role assignment.
 
-## 7. Create an Azure AD group for Azure SQL administrators
+## Create an Azure AD group for Azure SQL administrators
 
 1. Navigate to the Azure Active Directory blade in the Azure Portal: <https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview>.
 1. In the "Manage" section, click on "Groups", then on "New group".
 1. Enter a group name, select relevant members, and finalise the group creation.
 1. Refresh the page until the new group appears, and note down its object ID.
 
-## 8. Add the new job in the GitHub Actions workflow
+## Add the new job in the GitHub Actions workflow
 
 A job for an existing environment probably already exists, so it's a matter of duplicating it.
 Make sure that the job for the new environment depends on the job for the previous environment, via the `needs` property.
@@ -118,7 +139,7 @@ Adjust the parameters as required:
 - SQL Azure administrators group name and object ID.
 - App Service Plan and Azure SQL database SKUs.
 
-## 9. Create SQL users for the applications' managed identities
+## Create SQL users for the applications' managed identities
 
 Once the infrastructure has been provisioned via GitHub Actions, we need to create users in the database for the applications to connect to it.
 At the time of writing, we have two applications connecting to the database:

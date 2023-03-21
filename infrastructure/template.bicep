@@ -114,6 +114,21 @@ resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
   }
 }
 
+@description('The client secret of the UI app registration in Azure AD')
+@secure()
+param uiClientSecret string
+
+resource uiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'UI-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: uiClientSecret
+  }
+}
+
 @description('Name of the Azure SQL AAD administrator')
 param sqlInstanceAadAdministratorName string
 
@@ -241,6 +256,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     NODE_ENV: environment
     WEBSITE_RUN_FROM_PACKAGE: '1'
     API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
+    UI_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${uiClientSecretSecret.properties.secretUri})'
   }
 }
 

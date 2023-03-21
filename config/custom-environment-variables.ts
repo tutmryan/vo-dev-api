@@ -39,6 +39,15 @@ const config: EnvVarSubstitution<Config> = {
       clientSecret: 'MICROSOFT_GRAPH_CLIENT_SECRET',
     },
   },
+  auth: {
+    pkce: {
+      msalConfig: {
+        auth: {
+          clientSecret: 'UI_CLIENT_SECRET',
+        },
+      },
+    },
+  },
   integrations: {
     verifiedIdAdmin: {
       auth: {

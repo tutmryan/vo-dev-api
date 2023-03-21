@@ -50,6 +50,9 @@ inputs:
   api-client-secret:
     description: Client secret of the API app registration in Azure AD
     required: true
+  ui-client-secret:
+    description: Client secret of the UI app registration in Azure AD
+    required: true
 outputs:
   api-url:
     description: URL of the deployed API
@@ -92,6 +95,7 @@ runs:
           appServicePlanSku=${{ inputs.app-service-plan-sku }}
           apiCookieSecret=${{ inputs.api-cookie-secret }}
           apiClientSecret=${{ inputs.api-client-secret }}
+          uiClientSecret=${{ inputs.ui-client-secret }}
           migrationsAppClientId=${{ inputs.migrations-app-client-id }}
           deploymentAppClientId=${{ inputs.azure-client-id }}
 

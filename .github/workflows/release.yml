@@ -106,3 +106,4 @@ jobs:
           migrations-app-client-id: a705473f-45d1-498a-a9aa-c767c4d406b8
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
           api-client-secret: ${{ secrets.API_CLIENT_SECRET }}
+          ui-client-secret: ${{ secrets.UI_CLIENT_SECRET }}

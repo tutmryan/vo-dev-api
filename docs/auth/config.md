@@ -14,7 +14,7 @@
 ## Admin API UI app registration (repeat for all environments where an API UI will be hosted e.g. localdev, dev)
 
 1. Name: Verified Orchestration API UI (localdev)
-1. Add platform `Public client/native (mobile and desktop)` (for server-side PKCE) with one Redirect URI: `http(s)://${host}` (http://localhost for localdev)
+1. Add platform `Web` (for server-side PKCE) with one Redirect URI: `http(s)://${host}` (http://localhost for localdev)
 1. Click Register
 1. API permissions > Add a permission > My APIs > Verified Orchestration API ({environment}) > Delegated permissions > Admin > Add permissions
 1. API permissions > Grant admin consent for {tenant} > Yes

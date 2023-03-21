@@ -98,7 +98,7 @@ $requiredResourceAccessesJson = (ConvertTo-Json -InputObject $requiredResourceAc
 az ad app update `
   --id $appRegistrationClientId `
   --required-resource-accesses $requiredResourceAccessesJson `
-  --public-client-redirect-uris $RedirectUrl `
+  --web-redirect-uris $RedirectUrl `
   --output none
 
 Write-Output 'Set API permissions and redirect URLs'
@@ -112,3 +112,5 @@ if (-not $SkipAdminConsent) {
 
   Write-Output 'Granted admin consent'
 }
+
+Write-Output ('Link to app registration in Azure Portal: https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/{0}/isMSAApp~/false' -f $appRegistrationClientId)
