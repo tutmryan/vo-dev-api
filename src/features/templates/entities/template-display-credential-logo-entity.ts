@@ -1,5 +1,7 @@
 import { Column, Entity } from 'typeorm'
 import { VerifiedOrchestrationEntity } from '../../../data'
+import { copyUnsetProps } from '../../../util/copy-props'
+import { intersectingProps } from '../../../util/intersecting-props'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 
 @Entity('template_display_credential_logo')
@@ -19,8 +21,10 @@ export class TemplateDisplayCredentialLogoEntity extends VerifiedOrchestrationEn
   description!: string | null
 
   merge(child: TemplateDisplayCredentialLogoEntity) {
-    if (!this.uri) this.uri = child.uri
-    if (!this.image) this.image = child.image
-    if (!this.description) this.description = child.description
+    copyUnsetProps(this, child, ['uri', 'image', 'description'])
+  }
+
+  checkOverrides(child: TemplateDisplayCredentialLogoEntity): string[] {
+    return intersectingProps(this, child, ['uri', 'image', 'description'])
   }
 }

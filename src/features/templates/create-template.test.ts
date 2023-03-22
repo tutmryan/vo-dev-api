@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { useFragment } from '../../generated'
 import type { TemplateInput } from '../../generated/graphql'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
-import { createTemplateMutation, getEmptyTemplateInput, TemplateFragment } from './test/create-template'
+import { createTemplate, createTemplateMutation, getEmptyTemplateInput, TemplateFragment } from './test/create-template'
 
 describe('createTemplate mutation', () => {
   beforeAfterAll()
@@ -38,6 +38,64 @@ describe('createTemplate mutation', () => {
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toContain(`Could not find any entity of type "TemplateEntity"`)
     expect(errors?.[0]?.message).toContain(`"id": "${bogusParentId}"`)
+  })
+
+  it('returns an error when the new template overrides a property set on the parent template', async () => {
+    // Arrange
+    const parentTemplateInput = getEmptyTemplateInput()
+    const parentTemplate = await createTemplate({
+      ...parentTemplateInput,
+      validityIntervalInSeconds: 1_000,
+      display: {
+        ...parentTemplateInput.display,
+        locale: 'en-AU',
+        consent: { instructions: 'Parent consent instructions' },
+        claims: [{ claim: 'parent_claim', label: 'Parent claim', type: 'String' }],
+        card: {
+          ...parentTemplateInput.display.card,
+          issuedBy: 'Parent template',
+          logo: {
+            uri: 'https://parent-template.com/image.png',
+          },
+        },
+      },
+    })
+
+    // Act
+    const emptyTemplateInput = getEmptyTemplateInput()
+    const { errors } = await executeOperationAsAdmin({
+      query: createTemplateMutation,
+      variables: {
+        input: {
+          ...getEmptyTemplateInput(),
+          parentTemplateID: parentTemplate.id,
+          validityIntervalInSeconds: 1_500,
+          display: {
+            ...emptyTemplateInput.display,
+            consent: {
+              ...emptyTemplateInput.display.consent,
+              instructions: 'Overridden instructions that will cause an error',
+              title: 'Fresh title that will not cause an error',
+            },
+            card: {
+              ...emptyTemplateInput.display.card,
+              backgroundColor: '#222333',
+              issuedBy: 'Overridden issuedBy which will cause an error',
+              logo: {
+                uri: 'https://overridden-image.which/will-cause-an-error.png',
+                description: 'Fresh logo description, no worries',
+              },
+            },
+          },
+        },
+      },
+    })
+
+    // Assert
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toBe(
+      'The template overrides the following properties from its parent: validityIntervalInSeconds, display.consent.instructions, display.card.issuedBy, display.card.logo.uri',
+    )
   })
 
   it('returns correct data when there are no errors', async () => {

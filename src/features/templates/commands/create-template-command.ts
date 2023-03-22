@@ -49,5 +49,10 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
     }),
   })
 
+  const checkParentOverridesResult = await template.checkParentOverrides()
+  if (checkParentOverridesResult.result === 'failure') {
+    throw new Error(`The template overrides the following properties from its parent: ${checkParentOverridesResult.errors.join(', ')}`)
+  }
+
   return await repository.save(template)
 }

@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne } from 'typeorm'
 import { VerifiedOrchestrationEntity } from '../../../data'
-import { invariant } from '../../../util/invariant'
+import { copyUnsetProps } from '../../../util/copy-props'
+import { intersectingProps } from '../../../util/intersecting-props'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { TemplateDisplayCredentialLogoEntity } from './template-display-credential-logo-entity'
 
@@ -35,18 +36,16 @@ export class TemplateDisplayCredentialEntity extends VerifiedOrchestrationEntity
 
   @OneToOne(() => TemplateDisplayCredentialLogoEntity, { nullable: false, cascade: true, eager: true })
   @JoinColumn()
-  logo?: TemplateDisplayCredentialLogoEntity
+  logo!: TemplateDisplayCredentialLogoEntity
 
   merge(child: TemplateDisplayCredentialEntity) {
-    invariant(this.logo, 'this.logo must be loaded')
-    invariant(child.logo, 'child.logo must be loaded')
-
-    if (!this.title) this.title = child.title
-    if (!this.issuedBy) this.issuedBy = child.issuedBy
-    if (!this.backgroundColor) this.backgroundColor = child.backgroundColor
-    if (!this.textColor) this.textColor = child.textColor
-    if (!this.description) this.description = child.description
-
+    copyUnsetProps(this, child, ['title', 'issuedBy', 'backgroundColor', 'textColor', 'description'])
     this.logo.merge(child.logo)
+  }
+
+  checkOverrides(child: TemplateDisplayCredentialEntity): string[] {
+    const errors = intersectingProps(this, child, ['title', 'issuedBy', 'backgroundColor', 'textColor', 'description']) as string[]
+    errors.push(...this.logo.checkOverrides(child.logo).map((x) => `logo.${x}`))
+    return errors
   }
 }

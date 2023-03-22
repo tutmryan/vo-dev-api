@@ -1,5 +1,7 @@
 import { Column, Entity } from 'typeorm'
 import { VerifiedOrchestrationEntity } from '../../../data'
+import { copyUnsetProps } from '../../../util/copy-props'
+import { intersectingProps } from '../../../util/intersecting-props'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 
 @Entity('template_display_consent')
@@ -16,7 +18,10 @@ export class TemplateDisplayConsentEntity extends VerifiedOrchestrationEntity {
   instructions!: string | null
 
   merge(child: TemplateDisplayConsentEntity) {
-    if (!this.title) this.title = child.title
-    if (!this.instructions) this.instructions = child.instructions
+    copyUnsetProps(this, child, ['title', 'instructions'])
+  }
+
+  checkOverrides(child: TemplateDisplayConsentEntity): string[] {
+    return intersectingProps(this, child, ['title', 'instructions'])
   }
 }
