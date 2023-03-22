@@ -17,3 +17,14 @@ az provider register --namespace Microsoft.AzureActiveDirectory
 - Resource group: vo-verified-orchestration-demo-b2c
 - Resource group location: Australia East
 
+## B2C flow: Sign in
+
+Name: B2C_1_SignIn
+
+### User attributes and token claims
+
+- Given Name
+- Surname
+- Display Name
+- Email Addresses
+- User's Object ID
