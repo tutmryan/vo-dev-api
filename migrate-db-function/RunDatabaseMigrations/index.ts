@@ -41,9 +41,12 @@ const httpTrigger: AzureFunction = async function (context: Context): Promise<vo
 
     context.res = { status: 200, body: JSON.stringify({ result: 'complete', migrations }, null, 4) }
   } catch ({ message, stack }) {
+    context.log.error(`Error while running migrations`, message, stack)
     context.res = { status: 500, body: JSON.stringify({ result: 'failed', message, stack }, null, 4) }
   } finally {
-    await dataSource?.destroy()
+    if (dataSource?.isInitialized) {
+      await dataSource.destroy()
+    }
   }
 }
 
