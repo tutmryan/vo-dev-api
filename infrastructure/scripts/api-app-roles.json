@@ -7,5 +7,23 @@
     "isEnabled": true,
     "origin": "Application",
     "value": "VerifiableCredential.Request.Callback"
+  },
+  {
+    "allowedMemberTypes": ["Application"],
+    "description": "Used to secure the credential issuance endpoints.",
+    "displayName": "Credential issuance",
+    "id": "92c3bee4-22bf-4929-89f2-053974df3a24",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "VerifiableCredential.Issue"
+  },
+  {
+    "allowedMemberTypes": ["Application"],
+    "description": "Used to secure the credential presentation endpoints.",
+    "displayName": "Credential presentation",
+    "id": "cc555251-1030-4b4f-84b9-6c102dd9445d",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "VerifiableCredential.Present"
   }
 ]
