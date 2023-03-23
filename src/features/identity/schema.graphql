@@ -1,0 +1,19 @@
+"""
+Represents an identity that gets issued credentials.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types, @graphql-eslint/no-unreachable-types
+type Identity {
+  """
+  The issuer of the identity
+  """
+  issuer: String!
+
+  """
+  The unique identifier of the identity in the issuer
+  """
+  identifier: String!
+
+  """
+  The name of the identity
+  """
+  name: String!
+}
