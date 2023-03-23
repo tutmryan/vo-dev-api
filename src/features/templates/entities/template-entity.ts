@@ -1,11 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm'
+import { merge } from 'lodash'
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
 import { VerifiedOrchestrationEntity } from '../../../data'
-import { copyUnsetProps } from '../../../util/copy-props'
-import { intersectingProps } from '../../../util/intersecting-props'
+import type { TemplateDisplayModel, TemplateParentData } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
-import { TemplateDisplayEntity } from './template-display-entity'
-
-export type CheckParentTemplateOverridesResult = { result: 'success' } | { result: 'failure'; errors: string[] }
+import { ensureNoIntersectingTemplateData, toTemplateParentData } from '../mapping'
 
 @Entity('template')
 export class TemplateEntity extends VerifiedOrchestrationEntity {
@@ -15,12 +13,12 @@ export class TemplateEntity extends VerifiedOrchestrationEntity {
     parent: TemplateEntity | null
     isPublic: boolean | null
     validityIntervalInSeconds: number | null
-    display: TemplateDisplayEntity
+    display: TemplateDisplayModel | null
   }) {
     super()
     if (!args) return
-    const { parent, display, ...rest } = args
-    typeSafeAssign(this, { ...rest, parent: Promise.resolve(parent), display: Promise.resolve(display) })
+    const { parent, ...rest } = args
+    typeSafeAssign(this, { ...rest, parent: Promise.resolve(parent) })
   }
 
   @Column({ type: 'nvarchar' })
@@ -41,53 +39,40 @@ export class TemplateEntity extends VerifiedOrchestrationEntity {
   @Column({ type: 'int', nullable: true })
   validityIntervalInSeconds!: number | null
 
-  @OneToOne(() => TemplateDisplayEntity, { nullable: false, cascade: true })
-  @JoinColumn()
-  display!: Promise<TemplateDisplayEntity>
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
+  private displayJson?: string | null
 
-  merge(child: TemplateEntity) {
-    copyUnsetProps(this, child, ['isPublic', 'validityIntervalInSeconds'])
+  get display(): TemplateDisplayModel | null {
+    return this.displayJson ? JSON.parse(this.displayJson) : null
+  }
+  set display(display: TemplateDisplayModel | null) {
+    this.displayJson = display ? JSON.stringify(display) : null
   }
 
-  async getParentData(): Promise<{ parent: TemplateEntity; parentDisplay: TemplateDisplayEntity } | null> {
+  private async getAncestors(): Promise<TemplateEntity[]> {
     let parent = await this.parent
-    if (!parent) return null
+    if (!parent) return []
 
-    // build list of parents from leaf to root
-    const parents = []
+    const ancestors = [parent]
     while (parent) {
-      parents.push(parent)
       parent = await parent.parent
+      if (parent) ancestors.push(parent)
     }
 
-    const root = parents.pop()!
-    const rootDisplay = await root.display
-
-    const ancestors = parents.reverse()
-    for (const next of ancestors) {
-      root.merge(next)
-      rootDisplay.merge(await next.display)
-    }
-
-    return {
-      parent: root,
-      parentDisplay: rootDisplay,
-    }
+    return ancestors
   }
 
-  async checkParentOverrides(): Promise<CheckParentTemplateOverridesResult> {
-    const parentData = await this.getParentData()
-    if (!parentData) return { result: 'success' }
-
-    const { parent, parentDisplay } = parentData
-    const parentErrors = parent.checkOverrides(this)
-    const parentDisplayErrors = parentDisplay.checkOverrides(await this.display).map((x) => `display.${x}`)
-
-    const allErrors = [...parentErrors, ...parentDisplayErrors]
-    return allErrors.length > 0 ? { result: 'failure', errors: allErrors } : { result: 'success' }
+  async parentData(): Promise<TemplateParentData | undefined> {
+    const ancestors = await this.getAncestors()
+    if (ancestors.length == 0) return undefined
+    return merge({}, ...ancestors.map(toTemplateParentData))
   }
 
-  private checkOverrides(child: TemplateEntity): string[] {
-    return intersectingProps(this, child, ['isPublic', 'validityIntervalInSeconds'])
+  async update(input: Pick<TemplateEntity, 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'display'>) {
+    const parentTemplateData = await this.parentData()
+    if (parentTemplateData) {
+      ensureNoIntersectingTemplateData(toTemplateParentData(input), parentTemplateData)
+    }
+    typeSafeAssign(this, input)
   }
 }

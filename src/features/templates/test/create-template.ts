@@ -1,6 +1,6 @@
-import type { TemplateInput } from '../../../generated/graphql'
 import { randomUUID } from 'crypto'
 import { graphql, useFragment } from '../../../generated'
+import type { TemplateInput } from '../../../generated/graphql'
 import { executeOperationAsAdmin } from '../../../test'
 
 export const TemplateFragment = graphql(`
@@ -58,13 +58,6 @@ export function getEmptyTemplateInput(): TemplateInput {
   return {
     name: randomUUID(),
     description: randomUUID(),
-    display: {
-      card: {
-        logo: {},
-      },
-      consent: {},
-      claims: [],
-    },
   }
 }
 

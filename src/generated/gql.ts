@@ -18,6 +18,8 @@ const documents = {
     "\n  query GetTemplateParentDataQuery($id: ID!) {\n    template(id: $id) {\n      ...TemplateParentDataFragment\n    }\n  }": types.GetTemplateParentDataQueryDocument,
     "\n  fragment TemplateFragment on Template {\n    id\n    name\n    description\n    parent {\n      id\n      name\n      description\n      isPublic\n      validityIntervalInSeconds\n    }\n    display {\n      locale\n      card {\n        title\n        issuedBy\n        backgroundColor\n        textColor\n        description\n        logo {\n          uri\n          image\n          description\n        }\n      }\n      consent {\n        title\n        instructions\n      }\n      claims {\n        label\n        claim\n        type\n        description\n        value\n      }\n    }\n    isPublic\n    validityIntervalInSeconds\n  }\n": types.TemplateFragmentFragmentDoc,
     "\n  mutation CreateTemplate($input: TemplateInput!) {\n    createTemplate(input: $input) {\n      ...TemplateFragment\n    }\n  }\n": types.CreateTemplateDocument,
+    "\n  query GetTemplate($id: ID!) {\n    template(id: $id) {\n      ...TemplateFragment\n    }\n  }": types.GetTemplateDocument,
+    "\n  mutation UpdateTemplate($id: ID!, $input: TemplateInput!) {\n    updateTemplate(id: $id, input: $input) {\n      ...TemplateFragment\n    }\n  }\n": types.UpdateTemplateDocument,
 };
 
 /**
@@ -54,6 +56,14 @@ export function graphql(source: "\n  fragment TemplateFragment on Template {\n  
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation CreateTemplate($input: TemplateInput!) {\n    createTemplate(input: $input) {\n      ...TemplateFragment\n    }\n  }\n"): (typeof documents)["\n  mutation CreateTemplate($input: TemplateInput!) {\n    createTemplate(input: $input) {\n      ...TemplateFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query GetTemplate($id: ID!) {\n    template(id: $id) {\n      ...TemplateFragment\n    }\n  }"): (typeof documents)["\n  query GetTemplate($id: ID!) {\n    template(id: $id) {\n      ...TemplateFragment\n    }\n  }"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateTemplate($id: ID!, $input: TemplateInput!) {\n    updateTemplate(id: $id, input: $input) {\n      ...TemplateFragment\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateTemplate($id: ID!, $input: TemplateInput!) {\n    updateTemplate(id: $id, input: $input) {\n      ...TemplateFragment\n    }\n  }\n"];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

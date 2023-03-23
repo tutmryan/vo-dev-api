@@ -41,6 +41,6 @@ const adminOboAuthFactory: HttpAuthFactory<BaseContext> = async ({ user }) => {
 
   const oboConfig = config.get('integrations.verifiedIdAdmin.auth')
   const { access_token, expires_in } = await getOnBehalfOfToken({ ...oboConfig, assertionToken })
-  adminOboAuthCache.set(oid, access_token, { ttl: expires_in - 10 })
+  await adminOboAuthCache.set(oid, access_token, { ttl: expires_in - 10 })
   return { authorization: `Bearer ${access_token}` }
 }

@@ -1,7 +1,7 @@
 import type { ObjectLiteral } from 'typeorm/common/ObjectLiteral'
 import type { EntityTarget } from 'typeorm/common/EntityTarget'
 import type { Repository } from 'typeorm/repository/Repository'
-import type { VerifiedOrchestrationEntity } from './entity'
+import type { VerifiedOrchestrationEntity } from './verified-orchestration-entity'
 
 export type VerifiedOrchestrationEntityManager = {
   getRepository<Entity extends VerifiedOrchestrationEntity>(target: EntityTarget<Entity>): VerifiedOrchestrationRepository<Entity>

@@ -1,6 +1,6 @@
-import { createTemplate, getEmptyTemplateInput } from './test/create-template'
 import { graphql, useFragment } from '../../generated'
 import { beforeAfterAll, executeOperationAsAdmin } from '../../test'
+import { createTemplate, getEmptyTemplateInput } from './test/create-template'
 
 const TemplateParentDataFragment = graphql(
   `
@@ -80,7 +80,6 @@ describe('template.parentData field', () => {
         consent: { instructions: 'Parent consent instructions' },
         claims: [{ claim: 'parent_claim', label: 'Parent claim', type: 'String' }],
         card: {
-          ...parentTemplateInput.display.card,
           issuedBy: 'Parent template',
           logo: {
             uri: 'https://parent-template.com/image.png',
@@ -130,7 +129,6 @@ describe('template.parentData field', () => {
         consent: { instructions: 'Root template consent instructions' },
         claims: [{ claim: 'standard_claim', label: 'Standard claim', type: 'String' }],
         card: {
-          ...rootTemplateInput.display.card,
           textColor: '#112233',
           issuedBy: 'Root template Pty Ltd',
         },
@@ -150,7 +148,6 @@ describe('template.parentData field', () => {
           { claim: 'parent_template_claim', label: 'Parent template claim', type: 'String' },
         ],
         card: {
-          ...parentTemplateInput.display.card,
           backgroundColor: '#321321',
           title: 'Parent template card title',
           logo: { image: 'https://parent-template.com/image.png' },

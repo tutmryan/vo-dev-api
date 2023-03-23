@@ -53,11 +53,9 @@ type Template {
   children: [Template!]!
 
   """
-  The credential display definition defined by this template.
-  May be a partial or full definition.
-  This definition is merged on top of the definition from the parent template.
+  The full or partial credential display definition defined by this template, if any.
   """
-  display: TemplateDisplayModel!
+  display: TemplateDisplayModel
 
   """
   Defines whether the contracts created from this template will be published in the Verified Credentials Network
@@ -74,11 +72,9 @@ Represents the combined data of parent templates
 """ # eslint-disable-next-line @graphql-eslint/strict-id-in-types
 type TemplateParentData {
   """
-  The credential display definition defined by this template.
-  May be a partial or full definition.
-  This definition is merged on top of the definition from the parent template.
+  The full or partial credential display definition defined by this template, if any.
   """
-  display: TemplateDisplayModel!
+  display: TemplateDisplayModel
 
   """
   Defines whether the contracts created from this template will be published in the Verified Credentials Network
@@ -109,11 +105,9 @@ input TemplateInput {
   parentTemplateID: ID
 
   """
-  The credential display definition defined by this template.
-  May be a partial or full definition.
-  This definition is merged on top of the definition from the parent template.
+  The full or partial credential display definition defined by this template, if any.
   """
-  display: CreateUpdateTemplateDisplayModelInput!
+  display: CreateUpdateTemplateDisplayModelInput
 
   """
   Defines whether the contracts created from this template will be published in the Verified Credentials Network
@@ -130,9 +124,9 @@ Credential display definitions at the template level
 """ # eslint-disable @graphql-eslint/strict-id-in-types
 type TemplateDisplayModel {
   locale: Locale
-  card: TemplateDisplayCredential!
-  consent: TemplateDisplayConsent!
-  claims: [TemplateDisplayClaim!]!
+  card: TemplateDisplayCredential
+  consent: TemplateDisplayConsent
+  claims: [TemplateDisplayClaim!]
 }
 
 """
@@ -140,9 +134,9 @@ Credential display definitions at the template level
 """
 input CreateUpdateTemplateDisplayModelInput {
   locale: Locale
-  card: CreateUpdateTemplateDisplayCredentialInput!
-  consent: CreateUpdateTemplateDisplayConsentInput!
-  claims: [CreateUpdateTemplateDisplayClaimInput!]!
+  card: CreateUpdateTemplateDisplayCredentialInput
+  consent: CreateUpdateTemplateDisplayConsentInput
+  claims: [CreateUpdateTemplateDisplayClaimInput!]
 }
 
 """
@@ -173,7 +167,7 @@ type TemplateDisplayCredential {
   """
   Logo information of the credential
   """
-  logo: TemplateDisplayCredentialLogo!
+  logo: TemplateDisplayCredentialLogo
 }
 
 """
@@ -204,7 +198,7 @@ input CreateUpdateTemplateDisplayCredentialInput {
   """
   Logo information of the credential
   """
-  logo: CreateUpdateTemplateDisplayCredentialLogoInput!
+  logo: CreateUpdateTemplateDisplayCredentialLogoInput
 }
 
 """

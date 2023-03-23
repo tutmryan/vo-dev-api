@@ -50,9 +50,11 @@ describe('createTemplate mutation', () => {
         ...parentTemplateInput.display,
         locale: 'en-AU',
         consent: { instructions: 'Parent consent instructions' },
-        claims: [{ claim: 'parent_claim', label: 'Parent claim', type: 'String' }],
+        claims: [
+          { claim: 'parent_claim', label: 'Parent claim', type: 'String' },
+          { claim: 'other_parent_claim', label: 'Other parent claim', type: 'String', value: 'Fixed', description: 'Description' },
+        ],
         card: {
-          ...parentTemplateInput.display.card,
           issuedBy: 'Parent template',
           logo: {
             uri: 'https://parent-template.com/image.png',
@@ -73,12 +75,11 @@ describe('createTemplate mutation', () => {
           display: {
             ...emptyTemplateInput.display,
             consent: {
-              ...emptyTemplateInput.display.consent,
               instructions: 'Overridden instructions that will cause an error',
               title: 'Fresh title that will not cause an error',
             },
+            claims: [{ claim: 'other_parent_claim', label: 'Other parent claim', type: 'String', value: 'Overridden, will cause error' }],
             card: {
-              ...emptyTemplateInput.display.card,
               backgroundColor: '#222333',
               issuedBy: 'Overridden issuedBy which will cause an error',
               logo: {
@@ -93,8 +94,8 @@ describe('createTemplate mutation', () => {
 
     // Assert
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toBe(
-      'The template overrides the following properties from its parent: validityIntervalInSeconds, display.consent.instructions, display.card.issuedBy, display.card.logo.uri',
+    expect(errors?.[0]?.message).toMatchInlineSnapshot(
+      `"The template overrides the following properties from its parent: validityIntervalInSeconds, display.card.issuedBy, display.card.logo.uri, display.consent.instructions, display.claims[other_parent_claim]"`,
     )
   })
 

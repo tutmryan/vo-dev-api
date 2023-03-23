@@ -20,31 +20,31 @@ export class LoggerForTypeOrm implements TypeOrmLoggerInterface {
 
   log(level: 'log' | 'info' | 'warn', message: any, _queryRunner?: QueryRunner): any {
     if (!this.shouldLog(level)) return
-    logger.log(level, message)
+    this.logger[level === 'log' ? 'info' : level](message)
   }
 
   logMigration(message: string, _queryRunner?: QueryRunner): any {
     if (!this.shouldLog('migration')) return
-    logger.info('db migration', { message })
+    this.logger.info('db migration', { message })
   }
 
   logQuery(query: string, parameters?: any[], _queryRunner?: QueryRunner): any {
     if (!this.shouldLog('query')) return
-    logger.verbose('db query', { query, parameters })
+    this.logger.verbose('db query', { query, parameters })
   }
 
   logQueryError(error: string | Error, query: string, parameters?: any[], _queryRunner?: QueryRunner): any {
     if (!this.shouldLog('error')) return
-    logger.error('db query error', { query, parameters, error })
+    this.logger.error('db query error', { query, parameters, error })
   }
 
   logQuerySlow(time: number, query: string, parameters?: any[], _queryRunner?: QueryRunner): any {
     if (!this.shouldLog('query')) return
-    logger.warn('db query slow', { query, parameters, time })
+    this.logger.warn('db query slow', { query, parameters, time })
   }
 
   logSchemaBuild(message: string, _queryRunner?: QueryRunner): any {
     if (!this.shouldLog('schema')) return
-    logger.info('db schema build', { message })
+    this.logger.info('db schema build', { message })
   }
 }
