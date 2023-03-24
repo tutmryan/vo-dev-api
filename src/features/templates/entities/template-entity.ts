@@ -30,6 +30,9 @@ export class TemplateEntity extends VerifiedOrchestrationEntity {
   @ManyToOne(() => TemplateEntity, { nullable: true })
   parent!: Promise<TemplateEntity | null>
 
+  @Column()
+  parentId?: string | null
+
   @OneToMany(() => TemplateEntity, (template) => template.parent)
   children!: Promise<TemplateEntity[]>
 
@@ -53,10 +56,10 @@ export class TemplateEntity extends VerifiedOrchestrationEntity {
     let parent = await this.parent
     if (!parent) return []
 
-    const ancestors = [parent]
+    const ancestors = []
     while (parent) {
+      ancestors.push(parent)
       parent = await parent.parent
-      if (parent) ancestors.push(parent)
     }
 
     return ancestors

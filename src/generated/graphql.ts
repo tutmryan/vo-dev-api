@@ -481,8 +481,10 @@ export type TemplateParentData = {
 
 /** Defines the searchable fields usable to find templates */
 export type TemplateWhere = {
+  /** List only root templates (without a parent) */
+  isRoot?: InputMaybe<Scalars['Boolean']>;
   /** The name of the template to match */
-  name: Scalars['String'];
+  name?: InputMaybe<Scalars['String']>;
 };
 
 export type HealthcheckQueryVariables = Exact<{ [key: string]: never; }>;
@@ -609,7 +611,6 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
   context: TContext,
   info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
-
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = ResolversObject<{

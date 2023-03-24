@@ -336,5 +336,9 @@ input TemplateWhere {
   """
   The name of the template to match
   """
-  name: String!
+  name: String
+  """
+  List only root templates (without a parent)
+  """
+  isRoot: Boolean
 }

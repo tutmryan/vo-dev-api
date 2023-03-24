@@ -1,5 +1,5 @@
 import type { FindOptionsWhere } from 'typeorm'
-import { ILike } from 'typeorm'
+import { ILike, IsNull } from 'typeorm'
 import type { QueryContext } from '../../../cqrs/query-context'
 import type { Maybe, TemplateWhere } from '../../../generated/graphql'
 import { TemplateEntity } from '../entities/template-entity'
@@ -13,6 +13,7 @@ export async function FindTemplatesQuery(
   const where: FindOptionsWhere<TemplateEntity> = {}
 
   if (criteria?.name) where.name = ILike(`%${criteria.name}%`)
+  if (criteria?.isRoot) where.parentId = IsNull()
 
   const templates = await this.entityManager.getRepository(TemplateEntity).find({
     where,
