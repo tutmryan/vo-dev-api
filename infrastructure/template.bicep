@@ -129,6 +129,21 @@ resource uiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   }
 }
 
+@description('The client secret of the API integration app registration in the B2C tenant')
+@secure()
+param b2cGraphClientSecret string
+
+resource b2cGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'B2C-GRAPH-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: b2cGraphClientSecret
+  }
+}
+
 @description('Name of the Azure SQL AAD administrator')
 param sqlInstanceAadAdministratorName string
 
@@ -257,6 +272,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     WEBSITE_RUN_FROM_PACKAGE: '1'
     API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
     UI_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${uiClientSecretSecret.properties.secretUri})'
+    B2C_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${b2cGraphClientSecretSecret.properties.secretUri})'
   }
 }
 

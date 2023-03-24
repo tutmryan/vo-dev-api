@@ -53,6 +53,12 @@ const config: DeepPartial<Config> = {
     verifiedIdNetwork: {
       baseUrl: 'https://verifiedid.did.msidentity.com/',
     },
+    b2cGraph: {
+      auth: {
+        tenantId: '10b631d3-9e47-49e1-a938-cbd933f0488d',
+      },
+      b2cTenantName: 'voonboardingdemo',
+    },
   },
 }
 

@@ -45,6 +45,13 @@ const config: DeepPartial<Config> = {
         clientId: 'e53f942c-c727-4db9-a857-988bae3e07b6',
       },
     },
+    b2cGraph: {
+      auth: {
+        // Verified Orchestration API B2C Integration (dev)
+        // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/40bd620e-c3f8-4493-a7bc-18d7de65953e/isMSAApp~/false
+        clientId: '40bd620e-c3f8-4493-a7bc-18d7de65953e',
+      },
+    },
   },
 }
 

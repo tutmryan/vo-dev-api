@@ -54,6 +54,11 @@ const config: EnvVarSubstitution<Config> = {
         clientSecret: 'API_CLIENT_SECRET',
       },
     },
+    b2cGraph: {
+      auth: {
+        clientSecret: 'B2C_GRAPH_CLIENT_SECRET',
+      },
+    },
   },
 }
 

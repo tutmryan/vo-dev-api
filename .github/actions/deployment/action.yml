@@ -53,6 +53,9 @@ inputs:
   ui-client-secret:
     description: Client secret of the UI app registration in Azure AD
     required: true
+  b2c-graph-client-secret:
+    description: Client secret of the API integration app registration in the B2C tenant
+    required: true
 outputs:
   api-url:
     description: URL of the deployed API
@@ -98,6 +101,7 @@ runs:
           uiClientSecret=${{ inputs.ui-client-secret }}
           migrationsAppClientId=${{ inputs.migrations-app-client-id }}
           deploymentAppClientId=${{ inputs.azure-client-id }}
+          b2cGraphClientSecret=${{ inputs.b2c-graph-client-secret }}
 
     - name: Enable AAD-only auth on the Azure SQL instance
       shell: pwsh

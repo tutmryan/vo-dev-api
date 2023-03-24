@@ -64,5 +64,13 @@ export type Config = {
     verifiedIdNetwork: {
       baseUrl: string
     }
+    b2cGraph: {
+      auth: {
+        tenantId: string
+        clientId: string
+        clientSecret: string
+      }
+      b2cTenantName: string
+    }
   }
 }
