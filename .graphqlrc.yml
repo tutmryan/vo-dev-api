@@ -10,11 +10,12 @@ extensions:
         preset: 'client-preset'
         plugins:
           - typescript-resolvers:
-              useIndexSignature: true
+              useIndexSignature: false
               contextType: ../context#GraphQLContext
               mappers:
                 Template: ../features/templates/entities/template-entity#TemplateEntity
         config:
+          strictScalars: true
           defaultScalarType: unknown
           scalars:
             # add types for any used scalars here
@@ -26,3 +27,4 @@ extensions:
             DateTime: Date
             Locale: string
             HexColorCode: string
+            Void: null | undefined | void
