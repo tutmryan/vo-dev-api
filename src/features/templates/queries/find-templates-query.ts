@@ -13,7 +13,7 @@ export async function FindTemplatesQuery(
   const where: FindOptionsWhere<TemplateEntity> = {}
 
   if (criteria?.name) where.name = ILike(`%${criteria.name}%`)
-  if (criteria?.isRoot) where.parentId = IsNull()
+  if (criteria?.isRoot) where.parent = IsNull()
 
   const templates = await this.entityManager.getRepository(TemplateEntity).find({
     where,
