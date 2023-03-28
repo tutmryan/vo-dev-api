@@ -1,4 +1,4 @@
-import { intersection } from 'lodash'
+import { intersection, isEqual, isNil } from 'lodash'
 
 const flatten = (
   data: Record<string, any>,
@@ -31,4 +31,25 @@ export function findKeysIntersection(
   const [flatA, flatB] = [flatten(a, flattenOpts), flatten(b, flattenOpts)]
   const [keysA, keysB] = [Object.keys(flatA), Object.keys(flatB)]
   return intersection(keysA, keysB)
+}
+
+export function findKeysOverriding(
+  a: Record<string, any>,
+  b: Record<string, any>,
+  { ignoreNulls, ignorePrivate }: { ignoreNulls?: boolean; ignorePrivate?: boolean } = {},
+) {
+  const flattenOpts = { removeNull: !!ignoreNulls, removePrivate: !!ignorePrivate }
+  const [flatA, flatB] = [flatten(a, flattenOpts), flatten(b, flattenOpts)]
+
+  const overriddenKeys: string[] = []
+  for (const property in flatA) {
+    const aValue = flatA[property]
+    const bValue = flatB[property]
+
+    if (!isNil(bValue) && !isEqual(aValue, bValue)) {
+      overriddenKeys.push(property)
+    }
+  }
+
+  return overriddenKeys
 }

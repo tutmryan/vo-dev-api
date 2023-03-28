@@ -1,0 +1,189 @@
+import { randomUUID } from 'crypto'
+import { useFragment } from '../../generated'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
+import { ContractFragment, createContractMutation, getDefaultContractInput } from './test/create-contract'
+import { createTemplate, getEmptyTemplateInput } from '../templates/test/create-template'
+import type { ContractInput } from '../../generated/graphql'
+import { omit } from 'lodash'
+
+describe('createContract mutation', () => {
+  beforeAfterAll()
+
+  async function givenTemplate() {
+    const template = await createTemplate({
+      ...getEmptyTemplateInput(),
+      isPublic: true,
+      display: {
+        locale: 'en-AU',
+        card: {
+          title: 'Card title',
+          logo: { image: 'https://image.com/image.png' },
+        },
+        consent: { title: 'Consent title' },
+        claims: [
+          { claim: 'claim_one', label: 'Claim 1', type: 'String' },
+          { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
+        ],
+      },
+    })
+
+    return { template }
+  }
+
+  it('returns an errors when in an anonymous context', async () => {
+    // Act
+    const { errors } = await executeOperationAnonymous({
+      query: createContractMutation,
+      variables: {
+        input: getDefaultContractInput(),
+      },
+    })
+
+    // Assert
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toBe('Not Authorised!')
+  })
+
+  it(`returns an error if the template ID doesn't exist`, async () => {
+    // Act
+    const bogusTemplateId = randomUUID()
+
+    const contractInput = getDefaultContractInput()
+    contractInput.templateID = bogusTemplateId
+
+    const { errors } = await executeOperationAsAdmin({
+      query: createContractMutation,
+      variables: {
+        input: contractInput,
+      },
+    })
+
+    // Assert
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain(`Could not find any entity of type "TemplateEntity"`)
+    expect(errors?.[0]?.message).toContain(`"id": "${bogusTemplateId}"`)
+  })
+
+  it('returns an error if the contract overrides properties from its template', async () => {
+    // Arrange
+    const { template } = await givenTemplate()
+
+    // Act
+    const { errors } = await executeOperationAsAdmin({
+      query: createContractMutation,
+      variables: {
+        input: {
+          name: 'Contract',
+          description: 'Contract description',
+          templateID: template.id,
+          isPublic: false,
+          validityIntervalInSeconds: 1000,
+          credentialTypes: ['DefaultCredential'],
+          display: {
+            locale: 'fr-FR',
+            card: {
+              title: 'Updated card title',
+              description: 'Card description',
+              backgroundColor: '#123123',
+              textColor: '#321321',
+              issuedBy: 'Card issuer',
+              logo: { image: 'https://updated-image.com/updated-image.png' },
+            },
+            consent: { title: 'Updated Consent title' },
+            claims: [
+              { claim: 'claim_one', label: 'Claim 1', type: 'String', value: 'Claim 1' },
+              { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Updated claim 2' },
+            ],
+          },
+        },
+      },
+    })
+
+    // Arrange
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toMatchInlineSnapshot(
+      `"The contract overrides the following properties from its template: display.locale, display.card.title, display.card.logo.image, display.consent.title, isPublic, display.claims[claim_two]"`,
+    )
+  })
+
+  it('returns correct data when there are no errors (no template)', async () => {
+    // Arrange
+    const input = getDefaultContractInput()
+    input.display.claims.push({
+      claim: 'claim_name',
+      type: 'String',
+      value: 'Fixed value',
+      label: 'Default claim',
+    })
+
+    // Act
+    const { data, errors } = await executeOperationAsAdmin({
+      query: createContractMutation,
+      variables: {
+        input,
+      },
+    })
+
+    // Assert
+    expect(errors).toBeUndefined()
+    expect(data).toBeDefined()
+
+    const contract = useFragment(ContractFragment, data!.createContract)
+
+    expect(contract.id).toBeDefined()
+    expect(contract).toMatchObject(input)
+  })
+
+  it('returns correct data when there are no errors (with template)', async () => {
+    // Arrange
+    const { template } = await givenTemplate()
+
+    const input: ContractInput = {
+      name: randomUUID(),
+      description: randomUUID(),
+      templateID: template.id,
+      isPublic: true,
+      validityIntervalInSeconds: 1000,
+      credentialTypes: ['DefaultCredential'],
+      display: {
+        locale: 'en-AU',
+        card: {
+          title: 'Card title',
+          issuedBy: 'Card issuer',
+          description: 'Card description',
+          textColor: '#321321',
+          backgroundColor: '#213123',
+          logo: {
+            image: 'https://image.com/image.png',
+            description: 'Logo description',
+          },
+        },
+        consent: {
+          title: 'Consent title',
+          instructions: 'Consent instructions',
+        },
+        claims: [
+          { claim: 'claim_one', label: 'Claim 1', type: 'String', value: 'Claim 1' },
+          { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
+        ],
+      },
+    }
+
+    // Act
+    const { data, errors } = await executeOperationAsAdmin({
+      query: createContractMutation,
+      variables: {
+        input,
+      },
+    })
+
+    // Assert
+    expect(errors).toBeUndefined()
+    expect(data).toBeDefined()
+
+    const contract = useFragment(ContractFragment, data!.createContract)
+
+    expect(contract.id).toBeDefined()
+    expect(contract).toMatchObject(omit(input, 'templateID'))
+  })
+})

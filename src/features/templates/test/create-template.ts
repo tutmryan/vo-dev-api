@@ -3,7 +3,8 @@ import { graphql, useFragment } from '../../../generated'
 import type { TemplateInput } from '../../../generated/graphql'
 import { executeOperationAsAdmin } from '../../../test'
 
-export const TemplateFragment = graphql(`
+export const TemplateFragment = graphql(
+  `
   fragment TemplateFragment on Template {
     id
     name
@@ -44,15 +45,18 @@ export const TemplateFragment = graphql(`
     isPublic
     validityIntervalInSeconds
   }
-`)
+` as const,
+)
 
-export const createTemplateMutation = graphql(`
+export const createTemplateMutation = graphql(
+  `
   mutation CreateTemplate($input: TemplateInput!) {
     createTemplate(input: $input) {
       ...TemplateFragment
     }
   }
-`)
+` as const,
+)
 
 export function getEmptyTemplateInput(): TemplateInput {
   return {

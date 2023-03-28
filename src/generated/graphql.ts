@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { TemplateEntity } from '../features/templates/entities/template-entity';
+import { ContractEntity } from '../features/contracts/entities/contract-entity';
 import { GraphQLContext } from '../context';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
@@ -32,6 +33,200 @@ export enum CacheControlScope {
   Private = 'PRIVATE',
   Public = 'PUBLIC'
 }
+
+/** Defines a contract that can be used to issue credentials */
+export type Contract = {
+  __typename?: 'Contract';
+  /**
+   * The types of credentials that can be issued and presented from the contract.
+   * Requires at least one type, and cannot have duplicate types.
+   */
+  credentialTypes: Array<Scalars['String']>;
+  /** The description of the contract */
+  description: Scalars['String'];
+  /** The full or partial credential display definition defined by this contract */
+  display: ContractDisplayModel;
+  /** The unique identifier for the contract */
+  id: Scalars['ID'];
+  /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
+  isPublic: Scalars['Boolean'];
+  /** The name of the contract */
+  name: Scalars['String'];
+  /** The template that this contract is based on */
+  template?: Maybe<Template>;
+  /** The combined representation of the template's parent chain. */
+  templateData?: Maybe<TemplateParentData>;
+  /** The lifespan of the credential expressed in seconds */
+  validityIntervalInSeconds: Scalars['PositiveInt'];
+};
+
+/** Defines a claim included in a verifiable credential */
+export type ContractDisplayClaim = {
+  __typename?: 'ContractDisplayClaim';
+  /** The name of the claim to which the label applies */
+  claim: Scalars['String'];
+  /** The description of the claim */
+  description?: Maybe<Scalars['String']>;
+  /** The label of the claim */
+  label: Scalars['String'];
+  /**
+   * The type of the claim
+   * Valid values encountered so far are:
+   * - String
+   * - image/jpg;base64url (in the Verified Employee contract)
+   */
+  type: Scalars['String'];
+  /** The value for the claim */
+  value: Scalars['String'];
+};
+
+/** Defines a claim included in a verifiable credential */
+export type ContractDisplayClaimInput = {
+  /** The name of the claim to which the label applies */
+  claim: Scalars['String'];
+  /** The description of the claim */
+  description?: InputMaybe<Scalars['String']>;
+  /** The label of the claim */
+  label: Scalars['String'];
+  /**
+   * The type of the claim
+   * Valid values encountered so far are:
+   * - String
+   * - image/jpg;base64url (in the Verified Employee contract)
+   */
+  type: Scalars['String'];
+  /** The value for the claim */
+  value: Scalars['String'];
+};
+
+/** Supplemental data when the verifiable credential is issued */
+export type ContractDisplayConsent = {
+  __typename?: 'ContractDisplayConsent';
+  /** Supplemental text to use when displaying consent */
+  instructions?: Maybe<Scalars['String']>;
+  /** Title of the consent */
+  title?: Maybe<Scalars['String']>;
+};
+
+/** Supplemental data when the verifiable credential is issued */
+export type ContractDisplayConsentInput = {
+  /** Supplemental text to use when displaying consent */
+  instructions?: InputMaybe<Scalars['String']>;
+  /** Title of the consent */
+  title?: InputMaybe<Scalars['String']>;
+};
+
+/**
+ * The display properties of the verifiable credential at the template level
+ * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design#display-definition-wallet-credential-visuals
+ */
+export type ContractDisplayCredential = {
+  __typename?: 'ContractDisplayCredential';
+  /** Background color of the credential */
+  backgroundColor: Scalars['HexColorCode'];
+  /** Supplemental text displayed alongside each credential */
+  description: Scalars['String'];
+  /** The name of the issuer of the credential */
+  issuedBy: Scalars['String'];
+  /** Logo information of the credential */
+  logo: ContractDisplayCredentialLogo;
+  /** Text color of the credential */
+  textColor: Scalars['HexColorCode'];
+  /** Title of the credential */
+  title: Scalars['String'];
+};
+
+/**
+ * The display properties of the verifiable credential at the template level
+ * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design#display-definition-wallet-credential-visuals
+ */
+export type ContractDisplayCredentialInput = {
+  /** Background color of the credential */
+  backgroundColor: Scalars['HexColorCode'];
+  /** Supplemental text displayed alongside each credential */
+  description: Scalars['String'];
+  /** The name of the issuer of the credential */
+  issuedBy: Scalars['String'];
+  /** Logo information of the credential */
+  logo: ContractDisplayCredentialLogoInput;
+  /** Text color of the credential */
+  textColor: Scalars['HexColorCode'];
+  /** Title of the credential */
+  title: Scalars['String'];
+};
+
+/**
+ * Defines the logo displayed on the credential
+ * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/rules-and-display-definitions-model#displaycredentiallogo-type
+ */
+export type ContractDisplayCredentialLogo = {
+  __typename?: 'ContractDisplayCredentialLogo';
+  /** The description of the logo */
+  description?: Maybe<Scalars['String']>;
+  /** The base-64 encoded image (optional if url is specified) */
+  image?: Maybe<Scalars['String']>;
+  /** URI of the logo (optional if image is specified) */
+  uri?: Maybe<Scalars['URL']>;
+};
+
+/**
+ * Defines the logo displayed on the credential
+ * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/rules-and-display-definitions-model#displaycredentiallogo-type
+ */
+export type ContractDisplayCredentialLogoInput = {
+  /** The description of the logo */
+  description?: InputMaybe<Scalars['String']>;
+  /** The base-64 encoded image (optional if url is specified) */
+  image?: InputMaybe<Scalars['String']>;
+  /** URI of the logo (optional if image is specified) */
+  uri?: InputMaybe<Scalars['URL']>;
+};
+
+/** Credential display definitions at the template level */
+export type ContractDisplayModel = {
+  __typename?: 'ContractDisplayModel';
+  card: ContractDisplayCredential;
+  claims: Array<ContractDisplayClaim>;
+  consent: ContractDisplayConsent;
+  locale: Scalars['Locale'];
+};
+
+/** Credential display definitions at the template level */
+export type ContractDisplayModelInput = {
+  card: ContractDisplayCredentialInput;
+  claims: Array<ContractDisplayClaimInput>;
+  consent: ContractDisplayConsentInput;
+  locale: Scalars['Locale'];
+};
+
+/** Defines the input to create or update a template */
+export type ContractInput = {
+  /**
+   * The types of credentials that can be issued and presented from the contract.
+   * Requires at least one type, and cannot have duplicate types.
+   */
+  credentialTypes: Array<Scalars['String']>;
+  /** The description of the template */
+  description: Scalars['String'];
+  /** The credential display definition defined by this contract. */
+  display: ContractDisplayModelInput;
+  /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
+  isPublic: Scalars['Boolean'];
+  /** The name of the template */
+  name: Scalars['String'];
+  /** The ID of the template used as a base for the contract */
+  templateID?: InputMaybe<Scalars['ID']>;
+  /** The lifespan of the credential expressed in seconds */
+  validityIntervalInSeconds: Scalars['PositiveInt'];
+};
+
+/** Defines the searchable fields usable to find contracts */
+export type ContractWhere = {
+  /** The name of the contract to match */
+  name?: InputMaybe<Scalars['String']>;
+  /** List only contracts from this template */
+  templateID?: InputMaybe<Scalars['ID']>;
+};
 
 /** Defines a claim included in a verifiable credential */
 export type CreateUpdateTemplateDisplayClaimInput = {
@@ -117,13 +312,26 @@ export type Identity = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  createContract: Contract;
   createTemplate: Template;
+  updateContract: Contract;
   updateTemplate: Template;
+};
+
+
+export type MutationCreateContractArgs = {
+  input: ContractInput;
 };
 
 
 export type MutationCreateTemplateArgs = {
   input: TemplateInput;
+};
+
+
+export type MutationUpdateContractArgs = {
+  id: Scalars['ID'];
+  input: ContractInput;
 };
 
 
@@ -169,6 +377,10 @@ export type NetworkIssuersWhere = {
 
 export type Query = {
   __typename?: 'Query';
+  /** Returns a contract by ID */
+  contract: Contract;
+  /** Returns contracts, optionally matching the specified criteria */
+  findContracts: Array<Contract>;
   /**
    * Finds issuers from the Entra Verified ID network
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-issuers
@@ -185,6 +397,18 @@ export type Query = {
   networkContracts: Array<NetworkContract>;
   /** Returns a template by ID */
   template: Template;
+};
+
+
+export type QueryContractArgs = {
+  id: Scalars['ID'];
+};
+
+
+export type QueryFindContractsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']>;
+  offset?: InputMaybe<Scalars['PositiveInt']>;
+  where?: InputMaybe<ContractWhere>;
 };
 
 
@@ -215,6 +439,8 @@ export type Template = {
   __typename?: 'Template';
   /** This templates children, if any. */
   children: Array<Template>;
+  /** The template contracts, if any */
+  contracts: Array<Contract>;
   /** The description of the template */
   description: Scalars['String'];
   /** The full or partial credential display definition defined by this template, if any. */
@@ -258,7 +484,7 @@ export type TemplateDisplayClaim = {
   /**
    * The value for the claim
    * If provided, the value is fixed for all credentials referencing this claim
-   * If not provided, the value will need to be dynamically provided before the credential is issued
+   * If not provided, the value will need to be provided by one of the child template or contract
    */
   value?: Maybe<Scalars['String']>;
 };
@@ -350,6 +576,39 @@ export type TemplateWhere = {
   name?: InputMaybe<Scalars['String']>;
 };
 
+export type ContractFragmentFragment = { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value: string }> } } & { ' $fragmentName'?: 'ContractFragmentFragment' };
+
+export type CreateContractMutationVariables = Exact<{
+  input: ContractInput;
+}>;
+
+
+export type CreateContractMutation = { __typename?: 'Mutation', createContract: (
+    { __typename?: 'Contract' }
+    & { ' $fragmentRefs'?: { 'ContractFragmentFragment': ContractFragmentFragment } }
+  ) };
+
+export type GetContractQueryVariables = Exact<{
+  id: Scalars['ID'];
+}>;
+
+
+export type GetContractQuery = { __typename?: 'Query', contract: (
+    { __typename?: 'Contract' }
+    & { ' $fragmentRefs'?: { 'ContractFragmentFragment': ContractFragmentFragment } }
+  ) };
+
+export type UpdateContractMutationVariables = Exact<{
+  id: Scalars['ID'];
+  input: ContractInput;
+}>;
+
+
+export type UpdateContractMutation = { __typename?: 'Mutation', updateContract: (
+    { __typename?: 'Contract' }
+    & { ' $fragmentRefs'?: { 'ContractFragmentFragment': ContractFragmentFragment } }
+  ) };
+
 export type HealthcheckQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -400,8 +659,12 @@ export type UpdateTemplateMutation = { __typename?: 'Mutation', updateTemplate: 
     & { ' $fragmentRefs'?: { 'TemplateFragmentFragment': TemplateFragmentFragment } }
   ) };
 
+export const ContractFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ContractFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Contract"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"template"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<ContractFragmentFragment, unknown>;
 export const TemplateParentDataFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateParentDataFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"parentData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]}}]} as unknown as DocumentNode<TemplateParentDataFragmentFragment, unknown>;
 export const TemplateFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<TemplateFragmentFragment, unknown>;
+export const CreateContractDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateContract"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ContractInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createContract"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ContractFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ContractFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Contract"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"template"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<CreateContractMutation, CreateContractMutationVariables>;
+export const GetContractDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContract"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"contract"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ContractFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ContractFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Contract"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"template"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<GetContractQuery, GetContractQueryVariables>;
+export const UpdateContractDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateContract"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ContractInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateContract"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ContractFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ContractFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Contract"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"template"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<UpdateContractMutation, UpdateContractMutationVariables>;
 export const HealthcheckDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Healthcheck"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"healthcheck"}}]}}]} as unknown as DocumentNode<HealthcheckQuery, HealthcheckQueryVariables>;
 export const GetTemplateParentDataQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTemplateParentDataQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"template"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateParentDataFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateParentDataFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"parentData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]}}]} as unknown as DocumentNode<GetTemplateParentDataQueryQuery, GetTemplateParentDataQueryQueryVariables>;
 export const CreateTemplateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateTemplate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TemplateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<CreateTemplateMutation, CreateTemplateMutationVariables>;
@@ -477,8 +740,23 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   CacheControlScope: CacheControlScope;
-  CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
+  Contract: ResolverTypeWrapper<ContractEntity>;
   String: ResolverTypeWrapper<Scalars['String']>;
+  ID: ResolverTypeWrapper<Scalars['ID']>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
+  ContractDisplayClaim: ResolverTypeWrapper<ContractDisplayClaim>;
+  ContractDisplayClaimInput: ContractDisplayClaimInput;
+  ContractDisplayConsent: ResolverTypeWrapper<ContractDisplayConsent>;
+  ContractDisplayConsentInput: ContractDisplayConsentInput;
+  ContractDisplayCredential: ResolverTypeWrapper<ContractDisplayCredential>;
+  ContractDisplayCredentialInput: ContractDisplayCredentialInput;
+  ContractDisplayCredentialLogo: ResolverTypeWrapper<ContractDisplayCredentialLogo>;
+  ContractDisplayCredentialLogoInput: ContractDisplayCredentialLogoInput;
+  ContractDisplayModel: ResolverTypeWrapper<ContractDisplayModel>;
+  ContractDisplayModelInput: ContractDisplayModelInput;
+  ContractInput: ContractInput;
+  ContractWhere: ContractWhere;
+  CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
   CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
   CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
@@ -487,10 +765,8 @@ export type ResolversTypes = {
   Identity: ResolverTypeWrapper<Identity>;
   Locale: ResolverTypeWrapper<Scalars['Locale']>;
   Mutation: ResolverTypeWrapper<{}>;
-  ID: ResolverTypeWrapper<Scalars['ID']>;
   NetworkContract: ResolverTypeWrapper<NetworkContract>;
   NetworkIssuer: ResolverTypeWrapper<NetworkIssuer>;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   NetworkIssuersWhere: NetworkIssuersWhere;
   PositiveInt: ResolverTypeWrapper<Scalars['PositiveInt']>;
   Query: ResolverTypeWrapper<{}>;
@@ -511,8 +787,23 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
-  CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
+  Contract: ContractEntity;
   String: Scalars['String'];
+  ID: Scalars['ID'];
+  Boolean: Scalars['Boolean'];
+  ContractDisplayClaim: ContractDisplayClaim;
+  ContractDisplayClaimInput: ContractDisplayClaimInput;
+  ContractDisplayConsent: ContractDisplayConsent;
+  ContractDisplayConsentInput: ContractDisplayConsentInput;
+  ContractDisplayCredential: ContractDisplayCredential;
+  ContractDisplayCredentialInput: ContractDisplayCredentialInput;
+  ContractDisplayCredentialLogo: ContractDisplayCredentialLogo;
+  ContractDisplayCredentialLogoInput: ContractDisplayCredentialLogoInput;
+  ContractDisplayModel: ContractDisplayModel;
+  ContractDisplayModelInput: ContractDisplayModelInput;
+  ContractInput: ContractInput;
+  ContractWhere: ContractWhere;
+  CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
   CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
   CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
@@ -521,10 +812,8 @@ export type ResolversParentTypes = {
   Identity: Identity;
   Locale: Scalars['Locale'];
   Mutation: {};
-  ID: Scalars['ID'];
   NetworkContract: NetworkContract;
   NetworkIssuer: NetworkIssuer;
-  Boolean: Scalars['Boolean'];
   NetworkIssuersWhere: NetworkIssuersWhere;
   PositiveInt: Scalars['PositiveInt'];
   Query: {};
@@ -570,6 +859,59 @@ export type ConstraintDirectiveArgs = {
 
 export type ConstraintDirectiveResolver<Result, Parent, ContextType = GraphQLContext, Args = ConstraintDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
+export type ContractResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Contract'] = ResolversParentTypes['Contract']> = {
+  credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  display?: Resolver<ResolversTypes['ContractDisplayModel'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  template?: Resolver<Maybe<ResolversTypes['Template']>, ParentType, ContextType>;
+  templateData?: Resolver<Maybe<ResolversTypes['TemplateParentData']>, ParentType, ContextType>;
+  validityIntervalInSeconds?: Resolver<ResolversTypes['PositiveInt'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ContractDisplayClaimResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayClaim'] = ResolversParentTypes['ContractDisplayClaim']> = {
+  claim?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  value?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ContractDisplayConsentResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayConsent'] = ResolversParentTypes['ContractDisplayConsent']> = {
+  instructions?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ContractDisplayCredentialResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayCredential'] = ResolversParentTypes['ContractDisplayCredential']> = {
+  backgroundColor?: Resolver<ResolversTypes['HexColorCode'], ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  issuedBy?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  logo?: Resolver<ResolversTypes['ContractDisplayCredentialLogo'], ParentType, ContextType>;
+  textColor?: Resolver<ResolversTypes['HexColorCode'], ParentType, ContextType>;
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ContractDisplayCredentialLogoResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayCredentialLogo'] = ResolversParentTypes['ContractDisplayCredentialLogo']> = {
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  image?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  uri?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ContractDisplayModelResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayModel'] = ResolversParentTypes['ContractDisplayModel']> = {
+  card?: Resolver<ResolversTypes['ContractDisplayCredential'], ParentType, ContextType>;
+  claims?: Resolver<Array<ResolversTypes['ContractDisplayClaim']>, ParentType, ContextType>;
+  consent?: Resolver<ResolversTypes['ContractDisplayConsent'], ParentType, ContextType>;
+  locale?: Resolver<ResolversTypes['Locale'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['HexColorCode'], any> {
   name: 'HexColorCode';
 }
@@ -586,7 +928,9 @@ export interface LocaleScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
 }
 
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  createContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationCreateContractArgs, 'input'>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
+  updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;
 };
 
@@ -612,6 +956,8 @@ export interface PositiveIntScalarConfig extends GraphQLScalarTypeConfig<Resolve
 }
 
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
+  findContracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType, Partial<QueryFindContractsArgs>>;
   findNetworkIssuers?: Resolver<Array<ResolversTypes['NetworkIssuer']>, ParentType, ContextType, RequireFields<QueryFindNetworkIssuersArgs, 'where'>>;
   findTemplates?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType, Partial<QueryFindTemplatesArgs>>;
   healthcheck?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
@@ -621,6 +967,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
 
 export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Template'] = ResolversParentTypes['Template']> = {
   children?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType>;
+  contracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   display?: Resolver<Maybe<ResolversTypes['TemplateDisplayModel']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -688,6 +1035,12 @@ export interface VoidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
 }
 
 export type Resolvers<ContextType = GraphQLContext> = {
+  Contract?: ContractResolvers<ContextType>;
+  ContractDisplayClaim?: ContractDisplayClaimResolvers<ContextType>;
+  ContractDisplayConsent?: ContractDisplayConsentResolvers<ContextType>;
+  ContractDisplayCredential?: ContractDisplayCredentialResolvers<ContextType>;
+  ContractDisplayCredentialLogo?: ContractDisplayCredentialLogoResolvers<ContextType>;
+  ContractDisplayModel?: ContractDisplayModelResolvers<ContextType>;
   HexColorCode?: GraphQLScalarType;
   Identity?: IdentityResolvers<ContextType>;
   Locale?: GraphQLScalarType;

@@ -13,6 +13,10 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
+    "\n  fragment ContractFragment on Contract {\n    id\n    name\n    description\n    template {\n      id\n      name\n      description\n      isPublic\n      validityIntervalInSeconds\n    }\n    credentialTypes\n    display {\n      locale\n      card {\n        title\n        issuedBy\n        backgroundColor\n        textColor\n        description\n        logo {\n          uri\n          image\n          description\n        }\n      }\n      consent {\n        title\n        instructions\n      }\n      claims {\n        label\n        claim\n        type\n        description\n        value\n      }\n    }\n    isPublic\n    validityIntervalInSeconds\n  }\n": types.ContractFragmentFragmentDoc,
+    "\n  mutation CreateContract($input: ContractInput!) {\n    createContract(input: $input) {\n      ...ContractFragment\n    }\n  }\n": types.CreateContractDocument,
+    "\n  query GetContract($id: ID!) {\n    contract(id: $id) {\n      ...ContractFragment\n    }\n  }": types.GetContractDocument,
+    "\n  mutation UpdateContract($id: ID!, $input: ContractInput!) {\n    updateContract(id: $id, input: $input) {\n      ...ContractFragment\n    }\n  }\n": types.UpdateContractDocument,
     "\n  query Healthcheck {\n    healthcheck\n  }\n": types.HealthcheckDocument,
     "\n  fragment TemplateParentDataFragment on Template {\n    parentData {\n      display {\n        locale\n        card {\n          title\n          issuedBy\n          backgroundColor\n          textColor\n          description\n          logo {\n            uri\n            image\n            description\n          }\n        }\n        consent {\n          title\n          instructions\n        }\n        claims {\n          label\n          claim\n          type\n          description\n          value\n        }\n      }\n      isPublic\n      validityIntervalInSeconds\n    }\n  }\n  ": types.TemplateParentDataFragmentFragmentDoc,
     "\n  query GetTemplateParentDataQuery($id: ID!) {\n    template(id: $id) {\n      ...TemplateParentDataFragment\n    }\n  }": types.GetTemplateParentDataQueryDocument,
@@ -36,6 +40,22 @@ const documents = {
  */
 export function graphql(source: string): unknown;
 
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment ContractFragment on Contract {\n    id\n    name\n    description\n    template {\n      id\n      name\n      description\n      isPublic\n      validityIntervalInSeconds\n    }\n    credentialTypes\n    display {\n      locale\n      card {\n        title\n        issuedBy\n        backgroundColor\n        textColor\n        description\n        logo {\n          uri\n          image\n          description\n        }\n      }\n      consent {\n        title\n        instructions\n      }\n      claims {\n        label\n        claim\n        type\n        description\n        value\n      }\n    }\n    isPublic\n    validityIntervalInSeconds\n  }\n"): (typeof documents)["\n  fragment ContractFragment on Contract {\n    id\n    name\n    description\n    template {\n      id\n      name\n      description\n      isPublic\n      validityIntervalInSeconds\n    }\n    credentialTypes\n    display {\n      locale\n      card {\n        title\n        issuedBy\n        backgroundColor\n        textColor\n        description\n        logo {\n          uri\n          image\n          description\n        }\n      }\n      consent {\n        title\n        instructions\n      }\n      claims {\n        label\n        claim\n        type\n        description\n        value\n      }\n    }\n    isPublic\n    validityIntervalInSeconds\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateContract($input: ContractInput!) {\n    createContract(input: $input) {\n      ...ContractFragment\n    }\n  }\n"): (typeof documents)["\n  mutation CreateContract($input: ContractInput!) {\n    createContract(input: $input) {\n      ...ContractFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query GetContract($id: ID!) {\n    contract(id: $id) {\n      ...ContractFragment\n    }\n  }"): (typeof documents)["\n  query GetContract($id: ID!) {\n    contract(id: $id) {\n      ...ContractFragment\n    }\n  }"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateContract($id: ID!, $input: ContractInput!) {\n    updateContract(id: $id, input: $input) {\n      ...ContractFragment\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateContract($id: ID!, $input: ContractInput!) {\n    updateContract(id: $id, input: $input) {\n      ...ContractFragment\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

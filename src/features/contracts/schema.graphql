@@ -1,100 +1,74 @@
 # eslint-disable-next-line @graphql-eslint/require-description
 type Query {
   """
-  Returns templates, optionally matching the specified criteria
+  Returns contracts, optionally matching the specified criteria
   """
-  findTemplates(where: TemplateWhere, offset: PositiveInt, limit: PositiveInt): [Template!]!
+  findContracts(where: ContractWhere, offset: PositiveInt, limit: PositiveInt): [Contract!]!
 
   """
-  Returns a template by ID
+  Returns a contract by ID
   """
-  template(id: ID!): Template!
+  contract(id: ID!): Contract!
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description
 type Mutation {
-  createTemplate(input: TemplateInput!): Template!
-  updateTemplate(id: ID!, input: TemplateInput!): Template!
+  createContract(input: ContractInput!): Contract!
+  updateContract(id: ID!, input: ContractInput!): Contract!
 }
 
 """
-Defines a template that can be used as a base for a contract
+Defines a contract that can be used to issue credentials
 """
-type Template {
+type Contract {
   """
-  The unique identifier for the template
+  The unique identifier for the contract
   """
   id: ID!
 
   """
-  The name of the template
+  The name of the contract
   """
   name: String!
   """
-  The description of the template
+  The description of the contract
   """
   description: String!
 
   """
-  The parent template, if any.
-  The root template has no parent.
+  The template that this contract is based on
   """
-  parent: Template
+  template: Template
 
   """
-  The combined representation of this template's parent chain.
-  The root template has no parent.
+  The combined representation of the template's parent chain.
   """
-  parentData: TemplateParentData
+  templateData: TemplateParentData
 
   """
-  This templates children, if any.
+  The full or partial credential display definition defined by this contract
   """
-  children: [Template!]!
-
-  """
-  The full or partial credential display definition defined by this template, if any.
-  """
-  display: TemplateDisplayModel
+  display: ContractDisplayModel!
 
   """
   Defines whether the contracts created from this template will be published in the Verified Credentials Network
   """
-  isPublic: Boolean
+  isPublic: Boolean!
   """
   The lifespan of the credential expressed in seconds
   """
-  validityIntervalInSeconds: PositiveInt
-
+  validityIntervalInSeconds: PositiveInt!
   """
-  The template contracts, if any
+  The types of credentials that can be issued and presented from the contract.
+  Requires at least one type, and cannot have duplicate types.
   """
-  contracts: [Contract!]!
-}
-
-"""
-Represents the combined data of parent templates
-""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
-type TemplateParentData {
-  """
-  The full or partial credential display definition defined by this template, if any.
-  """
-  display: TemplateDisplayModel
-
-  """
-  Defines whether the contracts created from this template will be published in the Verified Credentials Network
-  """
-  isPublic: Boolean
-  """
-  The lifespan of the credential expressed in seconds
-  """
-  validityIntervalInSeconds: PositiveInt
+  credentialTypes: [String!]!
 }
 
 """
 Defines the input to create or update a template
 """
-input TemplateInput {
+input ContractInput {
   """
   The name of the template
   """
@@ -105,112 +79,117 @@ input TemplateInput {
   description: String!
 
   """
-  The ID of the parent template, if any
+  The ID of the template used as a base for the contract
   """
-  parentTemplateID: ID
+  templateID: ID
 
   """
-  The full or partial credential display definition defined by this template, if any.
+  The credential display definition defined by this contract.
   """
-  display: CreateUpdateTemplateDisplayModelInput
+  display: ContractDisplayModelInput!
 
   """
   Defines whether the contracts created from this template will be published in the Verified Credentials Network
   """
-  isPublic: Boolean
+  isPublic: Boolean!
   """
   The lifespan of the credential expressed in seconds
   """
-  validityIntervalInSeconds: PositiveInt
+  validityIntervalInSeconds: PositiveInt!
+  """
+  The types of credentials that can be issued and presented from the contract.
+  Requires at least one type, and cannot have duplicate types.
+  """
+  credentialTypes: [String!]!
 }
 
 """
 Credential display definitions at the template level
 """ # eslint-disable @graphql-eslint/strict-id-in-types
-type TemplateDisplayModel {
-  locale: Locale
-  card: TemplateDisplayCredential
-  consent: TemplateDisplayConsent
-  claims: [TemplateDisplayClaim!]
+type ContractDisplayModel {
+  locale: Locale!
+  card: ContractDisplayCredential!
+  consent: ContractDisplayConsent!
+  claims: [ContractDisplayClaim!]!
 }
 
 """
 Credential display definitions at the template level
 """
-input CreateUpdateTemplateDisplayModelInput {
-  locale: Locale
-  card: CreateUpdateTemplateDisplayCredentialInput
-  consent: CreateUpdateTemplateDisplayConsentInput
-  claims: [CreateUpdateTemplateDisplayClaimInput!]
+input ContractDisplayModelInput {
+  locale: Locale!
+  card: ContractDisplayCredentialInput!
+  consent: ContractDisplayConsentInput!
+  claims: [ContractDisplayClaimInput!]!
 }
 
 """
 The display properties of the verifiable credential at the template level
 See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design#display-definition-wallet-credential-visuals
 """ # eslint-disable @graphql-eslint/strict-id-in-types
-type TemplateDisplayCredential {
+type ContractDisplayCredential {
   """
   Title of the credential
   """
-  title: String
+  title: String!
   """
   The name of the issuer of the credential
   """
-  issuedBy: String
+  issuedBy: String!
   """
   Background color of the credential
   """
-  backgroundColor: HexColorCode
+  backgroundColor: HexColorCode!
   """
   Text color of the credential
   """
-  textColor: HexColorCode
+  textColor: HexColorCode!
   """
   Supplemental text displayed alongside each credential
   """
-  description: String
+  description: String!
   """
   Logo information of the credential
   """
-  logo: TemplateDisplayCredentialLogo
+  logo: ContractDisplayCredentialLogo!
 }
 
 """
 The display properties of the verifiable credential at the template level
 See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design#display-definition-wallet-credential-visuals
 """
-input CreateUpdateTemplateDisplayCredentialInput {
+input ContractDisplayCredentialInput {
   """
   Title of the credential
   """
-  title: String
+  title: String!
   """
   The name of the issuer of the credential
   """
-  issuedBy: String
+  issuedBy: String!
   """
   Background color of the credential
   """
-  backgroundColor: HexColorCode
+  backgroundColor: HexColorCode!
   """
   Text color of the credential
   """
-  textColor: HexColorCode
+  textColor: HexColorCode!
   """
   Supplemental text displayed alongside each credential
   """
-  description: String
+  description: String!
   """
   Logo information of the credential
   """
-  logo: CreateUpdateTemplateDisplayCredentialLogoInput
+  logo: ContractDisplayCredentialLogoInput!
 }
 
 """
 Defines the logo displayed on the credential
 See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/rules-and-display-definitions-model#displaycredentiallogo-type
 """ # eslint-disable @graphql-eslint/strict-id-in-types
-type TemplateDisplayCredentialLogo {
+type ContractDisplayCredentialLogo {
   """
   URI of the logo (optional if image is specified)
   """
@@ -229,7 +208,7 @@ type TemplateDisplayCredentialLogo {
 Defines the logo displayed on the credential
 See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/rules-and-display-definitions-model#displaycredentiallogo-type
 """
-input CreateUpdateTemplateDisplayCredentialLogoInput {
+input ContractDisplayCredentialLogoInput {
   """
   URI of the logo (optional if image is specified)
   """
@@ -247,7 +226,7 @@ input CreateUpdateTemplateDisplayCredentialLogoInput {
 """
 Supplemental data when the verifiable credential is issued
 """ # eslint-disable @graphql-eslint/strict-id-in-types
-type TemplateDisplayConsent {
+type ContractDisplayConsent {
   """
   Title of the consent
   """
@@ -261,7 +240,7 @@ type TemplateDisplayConsent {
 """
 Supplemental data when the verifiable credential is issued
 """ # eslint-disable @graphql-eslint/strict-id-in-types
-input CreateUpdateTemplateDisplayConsentInput {
+input ContractDisplayConsentInput {
   """
   Title of the consent
   """
@@ -275,7 +254,7 @@ input CreateUpdateTemplateDisplayConsentInput {
 """
 Defines a claim included in a verifiable credential
 """ # eslint-disable @graphql-eslint/strict-id-in-types
-type TemplateDisplayClaim {
+type ContractDisplayClaim {
   """
   The label of the claim
   """
@@ -287,8 +266,8 @@ type TemplateDisplayClaim {
   """
   The type of the claim
   Valid values encountered so far are:
-    - String
-    - image/jpg;base64url (in the Verified Employee contract)
+  - String
+  - image/jpg;base64url (in the Verified Employee contract)
   """
   type: String!
   """
@@ -297,16 +276,14 @@ type TemplateDisplayClaim {
   description: String
   """
   The value for the claim
-  If provided, the value is fixed for all credentials referencing this claim
-  If not provided, the value will need to be provided by one of the child template or contract
   """
-  value: String
+  value: String!
 }
 
 """
 Defines a claim included in a verifiable credential
 """ # eslint-disable @graphql-eslint/strict-id-in-types
-input CreateUpdateTemplateDisplayClaimInput {
+input ContractDisplayClaimInput {
   """
   The label of the claim
   """
@@ -318,8 +295,8 @@ input CreateUpdateTemplateDisplayClaimInput {
   """
   The type of the claim
   Valid values encountered so far are:
-    - String
-    - image/jpg;base64url (in the Verified Employee contract)
+  - String
+  - image/jpg;base64url (in the Verified Employee contract)
   """
   type: String!
   """
@@ -328,22 +305,20 @@ input CreateUpdateTemplateDisplayClaimInput {
   description: String
   """
   The value for the claim
-  If provided, the value is fixed for all credentials referencing this claim
-  If not provided, the value will need to be dynamically provided before the credential is issued
   """
-  value: String
+  value: String!
 }
 
 """
-Defines the searchable fields usable to find templates
+Defines the searchable fields usable to find contracts
 """
-input TemplateWhere {
+input ContractWhere {
   """
-  The name of the template to match
+  The name of the contract to match
   """
   name: String
   """
-  List only root templates (without a parent)
+  List only contracts from this template
   """
-  isRoot: Boolean
+  templateID: ID
 }

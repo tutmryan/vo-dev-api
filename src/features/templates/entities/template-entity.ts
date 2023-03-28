@@ -4,6 +4,7 @@ import { VerifiedOrchestrationEntity } from '../../../data'
 import type { TemplateDisplayModel, TemplateParentData } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { ensureNoIntersectingTemplateData, toTemplateParentData } from '../mapping'
+import { ContractEntity } from '../../contracts/entities/contract-entity'
 
 @Entity('template')
 export class TemplateEntity extends VerifiedOrchestrationEntity {
@@ -32,6 +33,9 @@ export class TemplateEntity extends VerifiedOrchestrationEntity {
 
   @OneToMany(() => TemplateEntity, (template) => template.parent)
   children!: Promise<TemplateEntity[]>
+
+  @OneToMany(() => ContractEntity, (contract) => contract.template)
+  contracts!: Promise<ContractEntity[]>
 
   @Column({ type: 'bit', nullable: true })
   isPublic!: boolean | null
@@ -66,6 +70,13 @@ export class TemplateEntity extends VerifiedOrchestrationEntity {
     const ancestors = await this.getAncestors()
     if (ancestors.length == 0) return undefined
     return merge({}, ...ancestors.map(toTemplateParentData))
+  }
+
+  async combinedData(): Promise<TemplateParentData> {
+    const parentData = await this.parentData()
+    if (!parentData) return toTemplateParentData(this)
+
+    return merge(parentData, toTemplateParentData(this))
   }
 
   async update(input: Pick<TemplateEntity, 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'display'>) {
