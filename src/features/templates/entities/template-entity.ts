@@ -30,9 +30,6 @@ export class TemplateEntity extends VerifiedOrchestrationEntity {
   @ManyToOne(() => TemplateEntity, { nullable: true })
   parent!: Promise<TemplateEntity | null>
 
-  @Column()
-  parentId?: string | null
-
   @OneToMany(() => TemplateEntity, (template) => template.parent)
   children!: Promise<TemplateEntity[]>
 
