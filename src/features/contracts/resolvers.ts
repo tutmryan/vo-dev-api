@@ -1,6 +1,6 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
-import { resolveUpdatedAt } from '../tracking/updated-at-resolver'
+import { resolveUpdatedAt } from '../auditing/updated-at-resolver'
 import { CreateContractCommand } from './commands/create-contract-command'
 import { UpdateContractCommand } from './commands/update-contract-command'
 import { FindContractsQuery } from './queries/find-contracts-query'

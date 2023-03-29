@@ -4,7 +4,7 @@ import type { TemplateDisplayModel, TemplateParentData } from '../../../generate
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { ensureNoIntersectingTemplateData, toTemplateParentData } from '../mapping'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
-import { TrackedEntity } from '../../tracking/entities/tracked-entity'
+import { TrackedEntity } from '../../auditing/entities/tracked-entity'
 
 @Entity('template')
 export class TemplateEntity extends TrackedEntity {

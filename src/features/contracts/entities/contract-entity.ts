@@ -4,7 +4,7 @@ import type { ContractDisplayModel } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { isEqual, uniq } from 'lodash'
 import { domainInvariant } from '../../../util/domain-invariant'
-import { TrackedEntity } from '../../tracking/entities/tracked-entity'
+import { TrackedEntity } from '../../auditing/entities/tracked-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('contract')

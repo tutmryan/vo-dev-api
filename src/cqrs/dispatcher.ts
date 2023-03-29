@@ -2,7 +2,7 @@ import type { GraphQLContext } from '../context'
 import { entityManager, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../data'
 import type { CommandContext } from './command-context'
 import type { QueryContext } from './query-context'
-import { addUserToManager } from '../features/tracking/user-context-helper'
+import { addUserToManager } from '../features/auditing/user-context-helper'
 
 export type CommandLike = (this: CommandContext, ...args: any) => any
 export type QueryLike = (this: QueryContext, ...args: any) => any

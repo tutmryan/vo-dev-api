@@ -6,7 +6,7 @@ import config from '../config'
 import { logger, LoggerForTypeOrm } from '../logger'
 import type { VerifiedOrchestrationEntityManager } from './entity-manager'
 import { SnakeNamingStrategy } from './utils/snake-naming-strategy'
-import { TrackingEventSubscriber } from '../features/tracking/tracking-event-subscriber'
+import { TrackingEventSubscriber } from '../features/auditing/tracking-event-subscriber'
 
 const { logging, host, port, database } = config.get('database')
 
