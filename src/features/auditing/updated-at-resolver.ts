@@ -1,7 +1,7 @@
-import type { TrackedEntity } from './entities/tracked-entity'
+import type { AuditedAndTrackedEntity } from './entities/audited-and-tracked-entity'
 
 /**
  * returns null for updatedAt when updatedById is not set
  */
-export const resolveUpdatedAt = (source: Pick<TrackedEntity, 'updatedById' | 'updatedAt'>): Date | null =>
+export const resolveUpdatedAt = (source: Pick<AuditedAndTrackedEntity, 'updatedById' | 'updatedAt'>): Date | null =>
   source.updatedById ? source.updatedAt : null

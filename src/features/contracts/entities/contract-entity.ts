@@ -4,11 +4,11 @@ import type { ContractDisplayModel } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { isEqual, uniq } from 'lodash'
 import { domainInvariant } from '../../../util/domain-invariant'
-import { TrackedEntity } from '../../auditing/entities/tracked-entity'
+import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('contract')
-export class ContractEntity extends TrackedEntity {
+export class ContractEntity extends AuditedAndTrackedEntity {
   constructor(args?: {
     name: string
     description: string
