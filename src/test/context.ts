@@ -1,9 +1,10 @@
 import type { JwtPayload, RequestInfo } from '@makerxstudio/graphql-core'
-import { User } from '@makerxstudio/graphql-core'
 import casual from 'casual'
 import { randomUUID } from 'crypto'
 import type { GraphQLContext } from '../context'
+import { findUpdateOrCreateUser } from '../context'
 import { dataSource } from '../data'
+import type { Request } from 'express'
 import { logger } from '../logger'
 import { createServices } from '../services'
 
@@ -17,7 +18,8 @@ const requestInfo: RequestInfo = {
 
 interface BuildJwtInput {
   oid: string
-  iss: string
+  tid: string
+  sub: string
   email: string
   scopes: string[]
   roles: string[]
@@ -25,21 +27,22 @@ interface BuildJwtInput {
 
 export const buildJwt = ({
   oid = randomUUID(),
-  iss = 'test',
+  tid = randomUUID(),
+  sub = randomUUID(),
   email = casual.email,
   scopes = ['Admin'],
   roles = [],
 }: Partial<BuildJwtInput> = {}): JwtPayload => ({
   oid,
-  iss,
+  tid,
+  sub,
   email,
   scp: scopes.join(' '),
   roles,
 })
 
-export const buildUser = (jwt: JwtPayload = buildJwt()) => new User(jwt, '')
-
-export const createContext = async ({ user }: { user?: User }): Promise<GraphQLContext> => {
+export const createContext = async (jwtPayload?: JwtPayload): Promise<GraphQLContext> => {
+  const user = await findUpdateOrCreateUser({ claims: jwtPayload, req: <Request>{ headers: { authorization: 'Bearer test' } } })
   const context = { user, logger, requestInfo, started: Date.now(), dataSource }
   return { ...context, services: createServices(context) }
 }

@@ -17,7 +17,7 @@ export default function () {
     path.join(__dirname, './schema/**/*.graphql'),
   ])
 
-  const usedScalars = pick(scalarResolvers, 'String', 'PositiveInt', 'URL', 'HexColorCode', 'Void', 'Locale')
+  const usedScalars = pick(scalarResolvers, 'String', 'PositiveInt', 'URL', 'HexColorCode', 'Void', 'Locale', 'DateTime')
 
   let schema = makeExecutableSchema({
     typeDefs,

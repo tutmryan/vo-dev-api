@@ -7,7 +7,5 @@
     "esModuleInterop": true,
     "noUncheckedIndexedAccess": true
   },
-  "emitDecoratorMetadata": true,
-  "experimentalDecorators": true,
   "include": ["src", "config", "test", "scripts", "migrate-db-function", "jest.*.ts"]
 }

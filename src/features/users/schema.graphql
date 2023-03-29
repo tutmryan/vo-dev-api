@@ -1,0 +1,26 @@
+"""
+Represents a user of the platform, whether a human (interactive user) or a third-party application
+"""
+type User {
+  """
+  The ID of the user
+  """
+  id: ID!
+
+  """
+  The name of the user.
+  For applications, this is a unique identifier.
+  """
+  name: String!
+
+  """
+  The email of the user.
+  Only specified for interactive users; null for applications
+  """
+  email: String
+
+  """
+  Determines whether the user is an application
+  """
+  isApp: Boolean!
+}

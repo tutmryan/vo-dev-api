@@ -1,9 +1,10 @@
-import type { Resolvers } from '../../generated/graphql'
 import { dispatch, query } from '../../cqrs/dispatcher'
-import { FindContractsQuery } from './queries/find-contracts-query'
-import { GetContractQuery } from './queries/get-contract-query'
+import type { Resolvers } from '../../generated/graphql'
+import { resolveUpdatedAt } from '../tracking/updated-at-resolver'
 import { CreateContractCommand } from './commands/create-contract-command'
 import { UpdateContractCommand } from './commands/update-contract-command'
+import { FindContractsQuery } from './queries/find-contracts-query'
+import { GetContractQuery } from './queries/get-contract-query'
 
 export const resolvers: Resolvers = {
   Query: {
@@ -13,5 +14,8 @@ export const resolvers: Resolvers = {
   Mutation: {
     createContract: (_, { input }, context) => dispatch(context, CreateContractCommand, input),
     updateContract: (_, { id, input }, context) => dispatch(context, UpdateContractCommand, id, input),
+  },
+  Contract: {
+    updatedAt: resolveUpdatedAt,
   },
 }

@@ -2,6 +2,7 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { TemplateEntity } from '../features/templates/entities/template-entity';
 import { ContractEntity } from '../features/contracts/entities/contract-entity';
+import { UserEntity } from '../features/users/entities/user-entity';
 import { GraphQLContext } from '../context';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
@@ -17,6 +18,8 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+  DateTime: Date;
   /** A field whose value is a hex color code: https://en.wikipedia.org/wiki/Web_colors. */
   HexColorCode: string;
   /** The locale in the format of a BCP 47 (RFC 5646) standard string */
@@ -37,6 +40,10 @@ export enum CacheControlScope {
 /** Defines a contract that can be used to issue credentials */
 export type Contract = {
   __typename?: 'Contract';
+  /** When the contract was created. */
+  createdAt: Scalars['DateTime'];
+  /** The user who created the contract. */
+  createdBy: User;
   /**
    * The types of credentials that can be issued and presented from the contract.
    * Requires at least one type, and cannot have duplicate types.
@@ -56,6 +63,10 @@ export type Contract = {
   template?: Maybe<Template>;
   /** The combined representation of the template's parent chain. */
   templateData?: Maybe<TemplateParentData>;
+  /** When the contract was last updated. */
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  /** The user who last updated the contract. */
+  updatedBy?: Maybe<User>;
   /** The lifespan of the credential expressed in seconds */
   validityIntervalInSeconds: Scalars['PositiveInt'];
 };
@@ -441,6 +452,10 @@ export type Template = {
   children: Array<Template>;
   /** The template contracts, if any */
   contracts: Array<Contract>;
+  /** When the template was created. */
+  createdAt: Scalars['DateTime'];
+  /** The user who created the template. */
+  createdBy: User;
   /** The description of the template */
   description: Scalars['String'];
   /** The full or partial credential display definition defined by this template, if any. */
@@ -461,6 +476,10 @@ export type Template = {
    * The root template has no parent.
    */
   parentData?: Maybe<TemplateParentData>;
+  /** When the template was last updated. */
+  updatedAt?: Maybe<Scalars['DateTime']>;
+  /** The user who last updated the template. */
+  updatedBy?: Maybe<User>;
   /** The lifespan of the credential expressed in seconds */
   validityIntervalInSeconds?: Maybe<Scalars['PositiveInt']>;
 };
@@ -574,6 +593,25 @@ export type TemplateWhere = {
   isRoot?: InputMaybe<Scalars['Boolean']>;
   /** The name of the template to match */
   name?: InputMaybe<Scalars['String']>;
+};
+
+/** Represents a user of the platform, whether a human (interactive user) or a third-party application */
+export type User = {
+  __typename?: 'User';
+  /**
+   * The email of the user.
+   * Only specified for interactive users; null for applications
+   */
+  email?: Maybe<Scalars['String']>;
+  /** The ID of the user */
+  id: Scalars['ID'];
+  /** Determines whether the user is an application */
+  isApp: Scalars['Boolean'];
+  /**
+   * The name of the user.
+   * For applications, this is a unique identifier.
+   */
+  name: Scalars['String'];
 };
 
 export type ContractFragmentFragment = { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value: string }> } } & { ' $fragmentName'?: 'ContractFragmentFragment' };
@@ -761,6 +799,7 @@ export type ResolversTypes = {
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
   CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
   CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
+  DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
   HexColorCode: ResolverTypeWrapper<Scalars['HexColorCode']>;
   Identity: ResolverTypeWrapper<Identity>;
   Locale: ResolverTypeWrapper<Scalars['Locale']>;
@@ -780,6 +819,7 @@ export type ResolversTypes = {
   TemplateParentData: ResolverTypeWrapper<TemplateParentData>;
   TemplateWhere: TemplateWhere;
   URL: ResolverTypeWrapper<Scalars['URL']>;
+  User: ResolverTypeWrapper<UserEntity>;
   Void: ResolverTypeWrapper<Scalars['Void']>;
   Int: ResolverTypeWrapper<Scalars['Int']>;
   Float: ResolverTypeWrapper<Scalars['Float']>;
@@ -808,6 +848,7 @@ export type ResolversParentTypes = {
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
   CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
   CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
+  DateTime: Scalars['DateTime'];
   HexColorCode: Scalars['HexColorCode'];
   Identity: Identity;
   Locale: Scalars['Locale'];
@@ -827,6 +868,7 @@ export type ResolversParentTypes = {
   TemplateParentData: TemplateParentData;
   TemplateWhere: TemplateWhere;
   URL: Scalars['URL'];
+  User: UserEntity;
   Void: Scalars['Void'];
   Int: Scalars['Int'];
   Float: Scalars['Float'];
@@ -860,6 +902,8 @@ export type ConstraintDirectiveArgs = {
 export type ConstraintDirectiveResolver<Result, Parent, ContextType = GraphQLContext, Args = ConstraintDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type ContractResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Contract'] = ResolversParentTypes['Contract']> = {
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   display?: Resolver<ResolversTypes['ContractDisplayModel'], ParentType, ContextType>;
@@ -868,6 +912,8 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   template?: Resolver<Maybe<ResolversTypes['Template']>, ParentType, ContextType>;
   templateData?: Resolver<Maybe<ResolversTypes['TemplateParentData']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   validityIntervalInSeconds?: Resolver<ResolversTypes['PositiveInt'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -911,6 +957,10 @@ export type ContractDisplayModelResolvers<ContextType = GraphQLContext, ParentTy
   locale?: Resolver<ResolversTypes['Locale'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
+
+export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
+  name: 'DateTime';
+}
 
 export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['HexColorCode'], any> {
   name: 'HexColorCode';
@@ -968,6 +1018,8 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
 export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Template'] = ResolversParentTypes['Template']> = {
   children?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType>;
   contracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   display?: Resolver<Maybe<ResolversTypes['TemplateDisplayModel']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -975,6 +1027,8 @@ export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends R
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   parent?: Resolver<Maybe<ResolversTypes['Template']>, ParentType, ContextType>;
   parentData?: Resolver<Maybe<ResolversTypes['TemplateParentData']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   validityIntervalInSeconds?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -1030,6 +1084,14 @@ export interface UrlScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes[
   name: 'URL';
 }
 
+export type UserResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
+  email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isApp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface VoidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Void'], any> {
   name: 'Void';
 }
@@ -1041,6 +1103,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   ContractDisplayCredential?: ContractDisplayCredentialResolvers<ContextType>;
   ContractDisplayCredentialLogo?: ContractDisplayCredentialLogoResolvers<ContextType>;
   ContractDisplayModel?: ContractDisplayModelResolvers<ContextType>;
+  DateTime?: GraphQLScalarType;
   HexColorCode?: GraphQLScalarType;
   Identity?: IdentityResolvers<ContextType>;
   Locale?: GraphQLScalarType;
@@ -1057,6 +1120,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   TemplateDisplayModel?: TemplateDisplayModelResolvers<ContextType>;
   TemplateParentData?: TemplateParentDataResolvers<ContextType>;
   URL?: GraphQLScalarType;
+  User?: UserResolvers<ContextType>;
   Void?: GraphQLScalarType;
 };
 

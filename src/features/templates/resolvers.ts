@@ -1,5 +1,6 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
+import { resolveUpdatedAt } from '../tracking/updated-at-resolver'
 import { CreateTemplateCommand } from './commands/create-template-command'
 import { UpdateTemplateCommand } from './commands/update-template-command'
 import { FindTemplatesQuery } from './queries/find-templates-query'
@@ -13,5 +14,8 @@ export const resolvers: Resolvers = {
   Query: {
     template: (_, { id }, context) => query(context, GetTemplateQuery, id),
     findTemplates: (_, { where, offset, limit }, context) => query(context, FindTemplatesQuery, where, offset, limit),
+  },
+  Template: {
+    updatedAt: resolveUpdatedAt,
   },
 }

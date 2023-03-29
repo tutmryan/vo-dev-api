@@ -63,6 +63,24 @@ type Contract {
   Requires at least one type, and cannot have duplicate types.
   """
   credentialTypes: [String!]!
+
+  """
+  The user who created the contract.
+  """
+  createdBy: User!
+  """
+  When the contract was created.
+  """
+  createdAt: DateTime!
+
+  """
+  The user who last updated the contract.
+  """
+  updatedBy: User
+  """
+  When the contract was last updated.
+  """
+  updatedAt: DateTime
 }
 
 """

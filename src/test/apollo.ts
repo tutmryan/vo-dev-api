@@ -1,11 +1,11 @@
 import type { GraphQLRequest } from '@apollo/server'
 import { ApolloServer } from '@apollo/server'
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
-import type { User } from '@makerxstudio/graphql-core'
+import type { JwtPayload } from '@makerxstudio/graphql-core'
 import type { DocumentNode, FormattedExecutionResult } from 'graphql'
 import type { GraphQLContext } from '../context'
 import schema from '../schema'
-import { buildUser, createContext } from './context'
+import { buildJwt, createContext } from './context'
 
 export const server = new ApolloServer<GraphQLContext>({
   schema: schema(),
@@ -17,10 +17,10 @@ const executeOperation = async <TData = Record<string, unknown>, TVariables exte
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
-  user?: User,
+  jwtPayload?: JwtPayload,
 ): Promise<FormattedExecutionResult<TData>> => {
   const response = await server.executeOperation(request, {
-    contextValue: await createContext({ user }),
+    contextValue: await createContext(jwtPayload),
   })
   if (response.body.kind !== 'single') throw new Error('Invalid response body kind')
   return response.body.singleResult as FormattedExecutionResult<TData>
@@ -30,8 +30,8 @@ export const executeOperationAs = async <TData = Record<string, unknown>, TVaria
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
-  user: User,
-): Promise<FormattedExecutionResult<TData>> => executeOperation(request, user)
+  jwtPayload: JwtPayload,
+): Promise<FormattedExecutionResult<TData>> => executeOperation(request, jwtPayload)
 
 export const executeOperationAnonymous = async <TData = Record<string, unknown>, TVariables extends VariableValues = VariableValues>(
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
@@ -43,4 +43,4 @@ export const executeOperationAsAdmin = async <TData = Record<string, unknown>, T
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
-): Promise<FormattedExecutionResult<TData>> => executeOperation(request, buildUser())
+): Promise<FormattedExecutionResult<TData>> => executeOperation(request, buildJwt())

@@ -20,6 +20,7 @@ $constants = @{
   appRolesFile                = Join-Path -Path $PSScriptRoot -ChildPath 'api-app-roles.json'
   requestedResourceAccessFile = Join-Path -Path $PSScriptRoot -ChildPath 'api-requested-resource-accesses.json'
   scopesFile                  = Join-Path -Path $PSScriptRoot -ChildPath 'api-scopes.json'
+  optionalClaimsFile          = Join-Path -Path $PSScriptRoot -ChildPath 'api-optional-claims.json'
 }
 
 #
@@ -58,7 +59,7 @@ if ($null -ne $servicePrincipal) {
 #
 # Set properties
 #
-Write-Output 'Setting identifier URI, API permissions, and app roles...'
+Write-Output 'Setting identifier URI, API permissions, app roles, and optional claims...'
 
 $apiPermissionsPayload = @(
   @{
@@ -90,9 +91,10 @@ az ad app update `
   --identifier-uris $IdentifierUri `
   --required-resource-accesses ((ConvertTo-Json -InputObject $apiPermissionsPayload -Compress -Depth 10) -replace '"', '\"') `
   --app-roles ('@{0}' -f $constants.appRolesFile) `
+  --optional-claims ('@{0}' -f $constants.optionalClaimsFile) `
   --output none
 
-Write-Output 'Set identifier URI, API permissions, and app roles'
+Write-Output 'Set identifier URI, API permissions, app roles, and optional claims'
 
 #
 # Nothing built in for scopes, and az ad app update doesn't work

@@ -1,13 +1,13 @@
 import { merge } from 'lodash'
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
-import { VerifiedOrchestrationEntity } from '../../../data'
 import type { TemplateDisplayModel, TemplateParentData } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { ensureNoIntersectingTemplateData, toTemplateParentData } from '../mapping'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
+import { TrackedEntity } from '../../tracking/entities/tracked-entity'
 
 @Entity('template')
-export class TemplateEntity extends VerifiedOrchestrationEntity {
+export class TemplateEntity extends TrackedEntity {
   constructor(args?: {
     name: string
     description: string

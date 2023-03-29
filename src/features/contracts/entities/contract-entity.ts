@@ -1,4 +1,3 @@
-import { VerifiedOrchestrationEntity } from '../../../data'
 import { Column, Entity, ManyToOne } from 'typeorm'
 import { TemplateEntity } from '../../templates/entities/template-entity'
 import type { ContractDisplayModel, TemplateParentData } from '../../../generated/graphql'
@@ -6,9 +5,10 @@ import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { toTemplateParentData } from '../../templates/mapping'
 import { isEqual, merge, uniq } from 'lodash'
 import { domainInvariant } from '../../../util/domain-invariant'
+import { TrackedEntity } from '../../tracking/entities/tracked-entity'
 
 @Entity('contract')
-export class ContractEntity extends VerifiedOrchestrationEntity {
+export class ContractEntity extends TrackedEntity {
   constructor(args?: {
     name: string
     description: string

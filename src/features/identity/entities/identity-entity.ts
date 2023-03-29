@@ -1,6 +1,6 @@
-import { VerifiedOrchestrationEntity } from '../../../data'
 import { Column, Entity, Index } from 'typeorm'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
+import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 
 @Entity('identity')
 @Index(['issuer', 'identifier'], { unique: true })

@@ -15,6 +15,7 @@ extensions:
               mappers:
                 Template: ../features/templates/entities/template-entity#TemplateEntity
                 Contract: ../features/contracts/entities/contract-entity#ContractEntity
+                User: ../features/users/entities/user-entity#UserEntity
         config:
           strictScalars: true
           defaultScalarType: unknown
