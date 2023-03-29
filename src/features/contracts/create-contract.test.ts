@@ -87,7 +87,10 @@ describe('createContract mutation', () => {
               backgroundColor: '#123123',
               textColor: '#321321',
               issuedBy: 'Card issuer',
-              logo: { image: 'https://updated-image.com/updated-image.png' },
+              logo: {
+                image: 'https://updated-image.com/updated-image.png',
+                description: 'Logo description',
+              },
             },
             consent: { title: 'Updated Consent title' },
             claims: [

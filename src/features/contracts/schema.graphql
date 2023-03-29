@@ -15,6 +15,7 @@ type Query {
 type Mutation {
   createContract(input: ContractInput!): Contract!
   updateContract(id: ID!, input: ContractInput!): Contract!
+  provisionContract(id: ID!): Contract!
 }
 
 """
@@ -81,6 +82,28 @@ type Contract {
   When the contract was last updated.
   """
   updatedAt: DateTime
+
+  """
+  The ID of the contract in the Verified ID service.
+  This only has a value when the contract has been provisioned.
+  """
+  externalId: String
+  """
+  Who initially provisioned the contract in the Verified ID service.
+  """
+  provisionedBy: User
+  """
+  When the contract was initially provisioned in the Verified ID service.
+  """
+  provisionedAt: DateTime
+  """
+  Who last provisioned the contract in the Verified ID service.
+  """
+  lastProvisionedBy: User
+  """
+  When the contract was last provisioned in the Verified ID service.
+  """
+  lastProvisionedAt: DateTime
 }
 
 """
@@ -219,7 +242,7 @@ type ContractDisplayCredentialLogo {
   """
   The description of the logo
   """
-  description: String
+  description: String!
 }
 
 """
@@ -238,7 +261,7 @@ input ContractDisplayCredentialLogoInput {
   """
   The description of the logo
   """
-  description: String
+  description: String!
 }
 
 """

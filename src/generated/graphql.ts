@@ -53,12 +53,25 @@ export type Contract = {
   description: Scalars['String'];
   /** The full or partial credential display definition defined by this contract */
   display: ContractDisplayModel;
+  /**
+   * The ID of the contract in the Verified ID service.
+   * This only has a value when the contract has been provisioned.
+   */
+  externalId?: Maybe<Scalars['String']>;
   /** The unique identifier for the contract */
   id: Scalars['ID'];
   /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
   isPublic: Scalars['Boolean'];
+  /** When the contract was last provisioned in the Verified ID service. */
+  lastProvisionedAt?: Maybe<Scalars['DateTime']>;
+  /** Who last provisioned the contract in the Verified ID service. */
+  lastProvisionedBy?: Maybe<User>;
   /** The name of the contract */
   name: Scalars['String'];
+  /** When the contract was initially provisioned in the Verified ID service. */
+  provisionedAt?: Maybe<Scalars['DateTime']>;
+  /** Who initially provisioned the contract in the Verified ID service. */
+  provisionedBy?: Maybe<User>;
   /** The template that this contract is based on */
   template?: Maybe<Template>;
   /** The combined representation of the template's parent chain. */
@@ -173,7 +186,7 @@ export type ContractDisplayCredentialInput = {
 export type ContractDisplayCredentialLogo = {
   __typename?: 'ContractDisplayCredentialLogo';
   /** The description of the logo */
-  description?: Maybe<Scalars['String']>;
+  description: Scalars['String'];
   /** The base-64 encoded image (optional if url is specified) */
   image?: Maybe<Scalars['String']>;
   /** URI of the logo (optional if image is specified) */
@@ -186,7 +199,7 @@ export type ContractDisplayCredentialLogo = {
  */
 export type ContractDisplayCredentialLogoInput = {
   /** The description of the logo */
-  description?: InputMaybe<Scalars['String']>;
+  description: Scalars['String'];
   /** The base-64 encoded image (optional if url is specified) */
   image?: InputMaybe<Scalars['String']>;
   /** URI of the logo (optional if image is specified) */
@@ -325,6 +338,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   createContract: Contract;
   createTemplate: Template;
+  provisionContract: Contract;
   updateContract: Contract;
   updateTemplate: Template;
 };
@@ -337,6 +351,11 @@ export type MutationCreateContractArgs = {
 
 export type MutationCreateTemplateArgs = {
   input: TemplateInput;
+};
+
+
+export type MutationProvisionContractArgs = {
+  id: Scalars['ID'];
 };
 
 
@@ -614,7 +633,7 @@ export type User = {
   name: Scalars['String'];
 };
 
-export type ContractFragmentFragment = { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value: string }> } } & { ' $fragmentName'?: 'ContractFragmentFragment' };
+export type ContractFragmentFragment = { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri?: string | null, image?: string | null, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value: string }> } } & { ' $fragmentName'?: 'ContractFragmentFragment' };
 
 export type CreateContractMutationVariables = Exact<{
   input: ContractInput;
@@ -907,9 +926,14 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   display?: Resolver<ResolversTypes['ContractDisplayModel'], ParentType, ContextType>;
+  externalId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  lastProvisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  lastProvisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  provisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  provisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   template?: Resolver<Maybe<ResolversTypes['Template']>, ParentType, ContextType>;
   templateData?: Resolver<Maybe<ResolversTypes['TemplateParentData']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
@@ -944,7 +968,7 @@ export type ContractDisplayCredentialResolvers<ContextType = GraphQLContext, Par
 };
 
 export type ContractDisplayCredentialLogoResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayCredentialLogo'] = ResolversParentTypes['ContractDisplayCredentialLogo']> = {
-  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   image?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   uri?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -980,6 +1004,7 @@ export interface LocaleScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationCreateContractArgs, 'input'>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
+  provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;
 };

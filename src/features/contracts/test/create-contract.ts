@@ -72,7 +72,7 @@ export function getDefaultContractInput(): ContractInput {
         title: 'Credential title',
         description: 'Credential description',
         issuedBy: 'Credential issuer',
-        logo: {},
+        logo: { description: 'Logo description' },
         textColor: '#ffffff',
         backgroundColor: '#000000',
       },

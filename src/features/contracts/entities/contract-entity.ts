@@ -1,11 +1,11 @@
 import { Column, Entity, ManyToOne } from 'typeorm'
 import { TemplateEntity } from '../../templates/entities/template-entity'
-import type { ContractDisplayModel, TemplateParentData } from '../../../generated/graphql'
+import type { ContractDisplayModel } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
-import { toTemplateParentData } from '../../templates/mapping'
-import { isEqual, merge, uniq } from 'lodash'
+import { isEqual, uniq } from 'lodash'
 import { domainInvariant } from '../../../util/domain-invariant'
 import { TrackedEntity } from '../../tracking/entities/tracked-entity'
+import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('contract')
 export class ContractEntity extends TrackedEntity {
@@ -42,6 +42,21 @@ export class ContractEntity extends TrackedEntity {
   @Column({ type: 'int', nullable: false })
   validityIntervalInSeconds!: number
 
+  @Column({ type: 'uniqueidentifier', nullable: true })
+  externalId!: string | null
+
+  @ManyToOne(() => UserEntity, { nullable: true })
+  provisionedBy!: Promise<UserEntity | null>
+
+  @Column({ type: 'datetimeoffset', nullable: true })
+  provisionedAt!: Date | null
+
+  @ManyToOne(() => UserEntity, { nullable: true })
+  lastProvisionedBy!: Promise<UserEntity | null>
+
+  @Column({ type: 'datetimeoffset', nullable: true })
+  lastProvisionedAt!: Date | null
+
   @Column({ type: 'nvarchar', length: 'MAX' })
   private displayJson!: string
 
@@ -67,17 +82,18 @@ export class ContractEntity extends TrackedEntity {
     this.credentialTypesJson = JSON.stringify(credentialTypes)
   }
 
-  async templateData(): Promise<TemplateParentData | undefined> {
-    const template = await this.template
-    if (!template) return undefined
-
-    const templateParentData = await template.parentData()
-    if (!templateParentData) return toTemplateParentData(template)
-
-    return merge(templateParentData, toTemplateParentData(template))
-  }
-
   async update(input: Pick<ContractEntity, 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'display'>) {
     typeSafeAssign(this, input)
+  }
+
+  markAsProvisioned({ externalId, user }: { externalId: string; user: UserEntity }) {
+    this.externalId = externalId
+    this.provisionedBy = Promise.resolve(user)
+    this.provisionedAt = new Date()
+  }
+
+  markAsReprovisioned(user: UserEntity) {
+    this.lastProvisionedBy = Promise.resolve(user)
+    this.lastProvisionedAt = new Date()
   }
 }

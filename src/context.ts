@@ -4,13 +4,14 @@ import type { DataSource } from 'typeorm'
 import config from './config'
 import { logger } from './logger'
 import type { Services } from './services'
-import { createServices } from './services'
+import { B2cUserService, createServices, NetworkService } from './services'
 import { dataSource } from './data'
 import { User } from './user'
 import { invariant } from './util/invariant'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
 import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or-create-user'
 import { dispatch } from './cqrs/dispatcher'
+import { AdminService } from './services/admin'
 
 export type BaseContext = GraphQLContextBase<typeof logger, RequestInfo, User | undefined>
 export type GraphQLContext = BaseContext & {
@@ -42,7 +43,17 @@ export const findUpdateOrCreateUser: CreateUser<User | undefined> = async ({ cla
     isApp,
   }
 
-  const userEntity = await dispatch({ dataSource, user: undefined }, FindUpdateOrCreateUser, input)
+  const context: Pick<GraphQLContext, 'dataSource' | 'user' | 'services'> = {
+    dataSource,
+    user: undefined,
+    services: {
+      b2cUser: new B2cUserService(),
+      admin: new AdminService({}),
+      network: new NetworkService({}),
+    },
+  }
+
+  const userEntity = await dispatch(context, FindUpdateOrCreateUser, input)
 
   return new User(claims, req.headers.authorization?.substring(7) ?? '', userEntity)
 }
