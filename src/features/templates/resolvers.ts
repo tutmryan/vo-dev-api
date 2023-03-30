@@ -1,6 +1,6 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
-import { resolveUpdatedAt } from '../tracking/updated-at-resolver'
+import { resolveUpdatedAt } from '../auditing/updated-at-resolver'
 import { CreateTemplateCommand } from './commands/create-template-command'
 import { UpdateTemplateCommand } from './commands/update-template-command'
 import { FindTemplatesQuery } from './queries/find-templates-query'

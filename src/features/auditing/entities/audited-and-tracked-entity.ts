@@ -1,8 +1,8 @@
 import { Column, CreateDateColumn, ManyToOne, UpdateDateColumn } from 'typeorm'
-import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import type { UserEntity } from '../../users/entities/user-entity'
+import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 
-export class TrackedEntity extends VerifiedOrchestrationEntity {
+export abstract class AuditedAndTrackedEntity extends VerifiedOrchestrationEntity {
   @CreateDateColumn({ type: 'datetimeoffset' })
   createdAt!: Date
 
