@@ -56,6 +56,9 @@ inputs:
   b2c-graph-client-secret:
     description: Client secret of the API integration app registration in the B2C tenant
     required: true
+  migrations-app-version:
+    description: Version returned by the GetVersion function of the migrations Function app
+    required: true
 outputs:
   api-url:
     description: URL of the deployed API
@@ -102,6 +105,7 @@ runs:
           migrationsAppClientId=${{ inputs.migrations-app-client-id }}
           deploymentAppClientId=${{ inputs.azure-client-id }}
           b2cGraphClientSecret=${{ inputs.b2c-graph-client-secret }}
+          migrationsAppVersion=${{ inputs.migrations-app-version }}
 
     - name: Enable AAD-only auth on the Azure SQL instance
       shell: pwsh
@@ -121,8 +125,8 @@ runs:
       run: >-
         ./infrastructure/scripts/invoke-database-migrations-function.ps1
         -FunctionAppName '${{ inputs.migrations-function-app-name }}'
-        -FunctionName 'RunDatabaseMigrations'
         -MigrationsAppClientId '${{ inputs.migrations-app-client-id }}'
+        -ExpectedVersion '${{ inputs.migrations-app-version }}'
 
     - name: Deploy API to App Service
       id: deploy-api
