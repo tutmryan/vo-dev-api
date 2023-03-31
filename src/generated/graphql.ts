@@ -338,7 +338,9 @@ export type Mutation = {
   __typename?: 'Mutation';
   createContract: Contract;
   createTemplate: Template;
+  deleteTemplate: Scalars['Void'];
   provisionContract: Contract;
+  setTemplateParent: Template;
   updateContract: Contract;
   updateTemplate: Template;
 };
@@ -354,8 +356,19 @@ export type MutationCreateTemplateArgs = {
 };
 
 
+export type MutationDeleteTemplateArgs = {
+  id: Scalars['ID'];
+};
+
+
 export type MutationProvisionContractArgs = {
   id: Scalars['ID'];
+};
+
+
+export type MutationSetTemplateParentArgs = {
+  id: Scalars['ID'];
+  parentTemplateID?: InputMaybe<Scalars['ID']>;
 };
 
 
@@ -1004,7 +1017,9 @@ export interface LocaleScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationCreateContractArgs, 'input'>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
+  deleteTemplate?: Resolver<ResolversTypes['Void'], ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;
   provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
+  setTemplateParent?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationSetTemplateParentArgs, 'id'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;
 };

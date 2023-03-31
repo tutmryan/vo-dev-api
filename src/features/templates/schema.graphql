@@ -15,6 +15,7 @@ type Query {
 type Mutation {
   createTemplate(input: TemplateInput!): Template!
   updateTemplate(id: ID!, input: TemplateInput!): Template!
+  deleteTemplate(id: ID!): Void
 }
 
 """
