@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, ManyToOne, UpdateDateColumn } from 'typeorm'
-import type { UserEntity } from '../../users/entities/user-entity'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
+import type { UserEntity } from '../../users/entities/user-entity'
 
 export abstract class AuditedAndTrackedEntity extends VerifiedOrchestrationEntity {
   @CreateDateColumn({ type: 'datetimeoffset' })
@@ -16,7 +16,7 @@ export abstract class AuditedAndTrackedEntity extends VerifiedOrchestrationEntit
   createdById!: string
 
   @ManyToOne('UserEntity', { nullable: true })
-  updatedBy!: Promise<UserEntity> | null
+  updatedBy!: Promise<UserEntity | null>
 
   @Column({ type: 'uniqueidentifier', nullable: true })
   updatedById!: string | null
