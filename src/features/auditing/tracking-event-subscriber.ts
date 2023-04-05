@@ -14,6 +14,7 @@ export class TrackingEventSubscriber implements EntitySubscriberInterface {
   beforeUpdate(event: UpdateEvent<unknown>) {
     if (event.entity && event.entity instanceof AuditedAndTrackedEntity) {
       event.entity.updatedById = getUserFromManager(event.manager)
+      event.entity.updatedAt = new Date()
     }
   }
 }
