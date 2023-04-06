@@ -10,3 +10,4 @@ The verified orchestration platform GraphQL API backend repository.
 - `npm i`
 - `cp .env.template .env`
 - fill in `.env` secrets from 1password vault
+- run tasks: Start DB & Migrate DB
