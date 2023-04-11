@@ -14,6 +14,7 @@
   "devDependencies": {
     "@azure/functions": "^3.5.1",
     "@tsconfig/node18": "^1.0.1",
+    "@types/node": "^18.15.11",
     "copyfiles": "^2.4.1",
     "rimraf": "^5.0.0",
     "typescript": "^5.0.4"
