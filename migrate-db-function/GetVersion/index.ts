@@ -6,7 +6,7 @@ const httpTrigger: AzureFunction = async function (context: Context): Promise<vo
     if (!version) throw new Error('Missing environment variable APP_VERSION')
 
     context.res = { status: 200, body: JSON.stringify({ version }) }
-  } catch ({ message, stack }) {
+  } catch ({ message, stack }: any) {
     context.log.error(`Error while getting version`, message, stack)
     context.res = { status: 500, body: JSON.stringify({ message, stack }) }
   }
