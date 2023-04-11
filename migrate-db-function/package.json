@@ -12,17 +12,18 @@
     "build:post-build": "rimraf build/package.json build/package-lock.json"
   },
   "devDependencies": {
-    "@azure/functions": "^3.5.0",
+    "@azure/functions": "^3.5.1",
     "@tsconfig/node18": "^1.0.1",
+    "@types/node": "^18.15.11",
     "copyfiles": "^2.4.1",
-    "rimraf": "^4.4.0",
-    "typescript": "^4.9.5"
+    "rimraf": "^5.0.0",
+    "typescript": "^5.0.4"
   },
   "dependencies": {
-    "mssql": "^7.3.5",
-    "typeorm": "^0.3.12"
+    "mssql": "^9.1.1",
+    "typeorm": "^0.3.14"
   },
   "overrides": {
-    "jsonwebtoken": "9.0.0"
+    "xml2js": "0.5.0"
   }
 }
