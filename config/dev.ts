@@ -1,5 +1,5 @@
 import { LogLevel } from '@azure/msal-node'
-import type { Config } from '../src/config/schema'
+import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 
 const config: DeepPartial<Config> = {
@@ -36,6 +36,9 @@ const config: DeepPartial<Config> = {
         },
       },
     },
+  },
+  redis: {
+    host: 'vo-dev-verified-orchestration-redis.redis.cache.windows.net',
   },
   integrations: {
     verifiedIdAdmin: {

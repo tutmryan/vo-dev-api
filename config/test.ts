@@ -1,5 +1,5 @@
 import type { DeepPartial } from 'typeorm'
-import type { Config } from '../src/config/schema'
+import type { Config } from '../src/config'
 
 const config: DeepPartial<Config> = {
   database: {

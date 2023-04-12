@@ -1,4 +1,4 @@
-import type { Config } from '../src/config/schema'
+import type { Config } from '../src/config'
 
 type EnvVarParsingRule = { __name: string; __format: string }
 
@@ -33,6 +33,10 @@ const config: EnvVarSubstitution<Config> = {
     username: 'DATABASE_USERNAME',
     password: 'DATABASE_PASSWORD',
     logging: json('DATABASE_LOGGING'),
+  },
+  redis: {
+    host: 'REDIS_HOST',
+    key: 'REDIS_KEY',
   },
   microsoftGraph: {
     auth: {

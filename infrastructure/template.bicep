@@ -144,6 +144,21 @@ resource b2cGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-0
   }
 }
 
+@description('Access key for the Azure Redis Cache')
+@secure()
+param redisKey string
+
+resource redisKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'REDIS-KEY'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: redisKey
+  }
+}
+
 @description('Name of the Azure SQL AAD administrator')
 param sqlInstanceAadAdministratorName string
 
@@ -186,6 +201,50 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
   parent: sqlInstance
   sku: {
     name: sqlDatabaseSku
+  }
+}
+
+@description('Specify the name of the Azure Redis Cache to create.')
+param redisCacheName string
+
+@description('Specify the pricing tier of the new Azure Redis Cache.')
+@allowed([
+  'Basic'
+  'Standard'
+  'Premium'
+])
+param redisCacheSKU string
+
+@description('Specify the family for the sku. C = Basic/Standard, P = Premium.')
+@allowed([
+  'C'
+  'P'
+])
+param redisCacheFamily string
+
+@description('Specify the size of the new Azure Redis Cache instance. Valid values: for C (Basic/Standard) family (0, 1, 2, 3, 4, 5, 6), for P (Premium) family (1, 2, 3, 4)')
+@allowed([
+  0
+  1
+  2
+  3
+  4
+  5
+  6
+])
+param redisCacheCapacity int
+
+resource redisCache 'Microsoft.Cache/Redis@2020-06-01' = {
+  name: redisCacheName
+  location: location
+  properties: {
+    enableNonSslPort: false
+    minimumTlsVersion: '1.2'
+    sku: {
+      capacity: redisCacheCapacity
+      family: redisCacheFamily
+      name: redisCacheSKU
+    }
   }
 }
 
@@ -273,6 +332,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
     UI_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${uiClientSecretSecret.properties.secretUri})'
     B2C_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${b2cGraphClientSecretSecret.properties.secretUri})'
+    REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
   }
 }
 

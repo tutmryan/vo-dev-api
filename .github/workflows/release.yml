@@ -100,6 +100,10 @@ jobs:
           sql-instance-aad-administrator-name: Verified Orchestration SQL Administrators (dev)
           sql-instance-aad-administrator-object-id: cb26d064-654b-49d4-a96c-f296e3667a55
           sql-database-sku: S1
+          redis-cache-name: vo-dev-verified-orchestration-redis
+          redis-cache-sku: Basic
+          redis-cache-family: C
+          redis-cache-capacity: 1
           app-service-plan-sku: B2
           api-app-service-name: vo-dev-verified-orchestration-api
           migrations-function-app-name: vo-dev-verified-orchestration-migrations
@@ -108,5 +112,6 @@ jobs:
           api-client-secret: ${{ secrets.API_CLIENT_SECRET }}
           ui-client-secret: ${{ secrets.UI_CLIENT_SECRET }}
           b2c-graph-client-secret: ${{ secrets.B2C_GRAPH_CLIENT_SECRET }}
+          redis-key: ${{ secrets.REDIS_KEY }}
           # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context:~:text=artifacts%20are%20kept.-,github.run_id,-string
           migrations-app-version: ${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}
