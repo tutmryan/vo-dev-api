@@ -1,12 +1,13 @@
 import { isDev, isLocalDev } from '@makerxstudio/node-common'
-import { allow, rule, shield } from 'graphql-shield'
+import { allow, race, rule, shield } from 'graphql-shield'
 import type { IRules, ShieldRule } from 'graphql-shield/typings/types'
 import type { GraphQLContext } from './context'
 import type { Resolvers } from './generated/graphql'
 
-const isUser = rule({ cache: 'contextual' })(async (_parent, _args, { user }: GraphQLContext) => user?.scopes.includes('Admin') === true)
+const isAdmin = rule({ cache: 'contextual' })(async (_parent, _args, { user }: GraphQLContext) => user?.scopes.includes('Admin') === true)
 const canRequestIssuance = rule({ cache: 'contextual' })((_, __, { user }) => user?.roles.includes('VerifiableCredential.Issue'))
 const canRequestPresentation = rule({ cache: 'contextual' })((_, __, { user }) => user?.roles.includes('VerifiableCredential.Present'))
+const isUser = race(isAdmin, canRequestIssuance, canRequestPresentation)
 
 export const permissions = wrappedShield({
   Query: {
