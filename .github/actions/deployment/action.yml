@@ -128,6 +128,13 @@ runs:
           redisCacheCapacity=${{ inputs.redis-cache-capacity }}
           redisKey=${{ inputs.redis-key }}
 
+    - name: Log in to Azure again after potential long deployment
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
     - name: Enable AAD-only auth on the Azure SQL instance
       shell: pwsh
       run: >-
