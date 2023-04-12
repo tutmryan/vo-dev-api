@@ -1,8 +1,8 @@
-import { graphql, useFragment } from '../../generated'
+import { graphql } from '../../generated'
 import { beforeAfterAll, executeOperationAsAdmin } from '../../test'
 import { createTemplate, getEmptyTemplateInput } from './test/create-template'
 
-const TemplateParentDataFragment = graphql(
+graphql(
   `
   fragment TemplateParentDataFragment on Template {
     parentData {
@@ -64,8 +64,7 @@ describe('template.parentData field', () => {
     })
 
     // Assert
-    const template = useFragment(TemplateParentDataFragment, data!.template)
-    expect(template.parentData).toBeNull()
+    expect(data!.template.parentData).toBeNull()
   })
 
   it(`returns the parent template's data when there's only 1 level of hierarchy`, async () => {
@@ -102,8 +101,7 @@ describe('template.parentData field', () => {
     })
 
     // Assert
-    const template = useFragment(TemplateParentDataFragment, data!.template)
-    expect(template.parentData).toMatchObject({
+    expect(data!.template.parentData).toMatchObject({
       validityIntervalInSeconds: 1_000,
       display: {
         locale: 'en-AU',
@@ -169,8 +167,7 @@ describe('template.parentData field', () => {
     })
 
     // Assert
-    const template = useFragment(TemplateParentDataFragment, data!.template)
-    expect(template.parentData).toMatchObject({
+    expect(data!.template.parentData).toMatchObject({
       validityIntervalInSeconds: 1_440,
       isPublic: false,
       display: {

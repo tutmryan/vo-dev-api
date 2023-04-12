@@ -1,6 +1,5 @@
-import { graphql, useFragment } from '../../../generated'
+import { graphql } from '../../../generated'
 import { executeOperationAsAdmin } from '../../../test'
-import { TemplateFragment } from './create-template'
 
 const getTemplateQuery = graphql(
   `
@@ -21,5 +20,5 @@ export async function getTemplate(id: string) {
     throw new Error(`Error while getting the template: ${JSON.stringify(errors)}`)
   }
 
-  return useFragment(TemplateFragment, data!.template)
+  return data!.template
 }

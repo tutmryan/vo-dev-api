@@ -8,6 +8,8 @@ extensions:
     generates:
       ./src/generated/:
         preset: 'client-preset'
+        presetConfig:
+          fragmentMasking: false
         plugins:
           - typescript-resolvers:
               useIndexSignature: false
@@ -18,13 +20,9 @@ extensions:
                 User: ../features/users/entities/user-entity#UserEntity
         config:
           strictScalars: true
-          defaultScalarType: unknown
           scalars:
-            # add types for any used scalars here
-            LocalDate: string
-            EmailAddress: string
+            # add types for any used scalars here and in schema.ts
             PositiveInt: number
-            PositiveFloat: number
             URL: string
             DateTime: Date
             Locale: string

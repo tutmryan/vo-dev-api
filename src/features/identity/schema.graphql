@@ -1,7 +1,31 @@
 """
-Represents an identity that gets issued credentials.
-""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types, @graphql-eslint/no-unreachable-types
+Represents an identity that is issued credentials
+"""
 type Identity {
+  """
+  The local id of this identity
+  """
+  id: ID!
+  """
+  The issuer of the identity
+  """
+  issuer: String!
+
+  """
+  The unique identifier of the identity in the issuing tenant
+  """
+  identifier: String!
+
+  """
+  The name of the identity
+  """
+  name: String!
+}
+
+"""
+Input type representing an identity that is issued credentials
+"""
+input IdentityInput {
   """
   The issuer of the identity
   """
@@ -16,4 +40,20 @@ type Identity {
   The name of the identity
   """
   name: String!
+}
+
+# eslint-disable-next-line @graphql-eslint/require-description
+type Mutation {
+  """
+  Creates or updates an identity based on its issuer and identifier
+  """
+  saveIdentity(input: IdentityInput!): Identity!
+}
+
+# eslint-disable-next-line @graphql-eslint/require-description
+type Query {
+  """
+  Returns an identity by ID
+  """
+  identity(id: ID!): Identity!
 }

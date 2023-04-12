@@ -1,7 +1,7 @@
-import { graphql, useFragment } from '../../../generated'
+import { randomUUID } from 'crypto'
+import { graphql } from '../../../generated'
 import type { ContractInput } from '../../../generated/graphql'
 import { executeOperationAsAdmin } from '../../../test'
-import { randomUUID } from 'crypto'
 
 export const ContractFragment = graphql(
   `
@@ -94,5 +94,5 @@ export async function createContract(input: ContractInput) {
     throw new Error(`Error while creating a contract: ${JSON.stringify(errors)}`)
   }
 
-  return useFragment(ContractFragment, data!.createContract)
+  return data!.createContract
 }

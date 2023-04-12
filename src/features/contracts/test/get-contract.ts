@@ -1,6 +1,5 @@
-import { graphql, useFragment } from '../../../generated'
+import { graphql } from '../../../generated'
 import { executeOperationAsAdmin } from '../../../test'
-import { ContractFragment } from './create-contract'
 
 const getContractQuery = graphql(
   `
@@ -21,5 +20,5 @@ export async function getContract(id: string) {
     throw new Error(`Error while getting the contract: ${JSON.stringify(errors)}`)
   }
 
-  return useFragment(ContractFragment, data!.contract)
+  return data!.contract
 }

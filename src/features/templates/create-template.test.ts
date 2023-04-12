@@ -1,8 +1,7 @@
 import { randomUUID } from 'crypto'
-import { useFragment } from '../../generated'
 import type { TemplateInput } from '../../generated/graphql'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
-import { createTemplate, createTemplateMutation, getEmptyTemplateInput, TemplateFragment } from './test/create-template'
+import { createTemplate, createTemplateMutation, getEmptyTemplateInput } from './test/create-template'
 
 describe('createTemplate mutation', () => {
   beforeAfterAll()
@@ -144,9 +143,7 @@ describe('createTemplate mutation', () => {
     expect(errors).toBeUndefined()
     expect(data).toBeDefined()
 
-    const template = useFragment(TemplateFragment, data!.createTemplate)
-
-    expect(template.id).toBeDefined()
-    expect(template).toMatchObject(input)
+    expect(data!.createTemplate.id).toBeDefined()
+    expect(data!.createTemplate).toMatchObject(input)
   })
 })

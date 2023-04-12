@@ -1,10 +1,9 @@
 import { randomUUID } from 'crypto'
-import { useFragment } from '../../generated'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
-import { ContractFragment, createContractMutation, getDefaultContractInput } from './test/create-contract'
-import { createTemplate, getEmptyTemplateInput } from '../templates/test/create-template'
-import type { ContractInput } from '../../generated/graphql'
 import { omit } from 'lodash'
+import type { ContractInput } from '../../generated/graphql'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
+import { createTemplate, getEmptyTemplateInput } from '../templates/test/create-template'
+import { createContractMutation, getDefaultContractInput } from './test/create-contract'
 
 describe('createContract mutation', () => {
   beforeAfterAll()
@@ -131,10 +130,8 @@ describe('createContract mutation', () => {
     expect(errors).toBeUndefined()
     expect(data).toBeDefined()
 
-    const contract = useFragment(ContractFragment, data!.createContract)
-
-    expect(contract.id).toBeDefined()
-    expect(contract).toMatchObject(input)
+    expect(data!.createContract.id).toBeDefined()
+    expect(data!.createContract).toMatchObject(input)
   })
 
   it('returns correct data when there are no errors (with template)', async () => {
@@ -184,9 +181,7 @@ describe('createContract mutation', () => {
     expect(errors).toBeUndefined()
     expect(data).toBeDefined()
 
-    const contract = useFragment(ContractFragment, data!.createContract)
-
-    expect(contract.id).toBeDefined()
-    expect(contract).toMatchObject(omit(input, 'templateID'))
+    expect(data!.createContract.id).toBeDefined()
+    expect(data!.createContract).toMatchObject(omit(input, 'templateID'))
   })
 })

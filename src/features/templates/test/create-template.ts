@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto'
-import { graphql, useFragment } from '../../../generated'
+import { graphql } from '../../../generated'
 import type { TemplateInput } from '../../../generated/graphql'
 import { executeOperationAsAdmin } from '../../../test'
 
@@ -77,5 +77,5 @@ export async function createTemplate(input: TemplateInput) {
     throw new Error(`Error while creating a template: ${JSON.stringify(errors)}`)
   }
 
-  return useFragment(TemplateFragment, data!.createTemplate)
+  return data!.createTemplate
 }
