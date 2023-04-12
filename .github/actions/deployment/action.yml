@@ -69,9 +69,6 @@ inputs:
   b2c-graph-client-secret:
     description: Client secret of the API integration app registration in the B2C tenant
     required: true
-  redis-key:
-    description: Access key for the Azure Redis Cache
-    required: true
   migrations-app-version:
     description: Version returned by the GetVersion function of the migrations Function app
     required: true
@@ -126,7 +123,6 @@ runs:
           redisCacheSKU=${{ inputs.redis-cache-sku }}
           redisCacheFamily=${{ inputs.redis-cache-family }}
           redisCacheCapacity=${{ inputs.redis-cache-capacity }}
-          redisKey=${{ inputs.redis-key }}
 
     - name: Log in to Azure again after potential long deployment
       uses: azure/login@v1

@@ -144,21 +144,6 @@ resource b2cGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-0
   }
 }
 
-@description('Access key for the Azure Redis Cache')
-@secure()
-param redisKey string
-
-resource redisKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  name: 'REDIS-KEY'
-  parent: keyVault
-  properties: {
-    attributes: {
-      enabled: true
-    }
-    value: redisKey
-  }
-}
-
 @description('Name of the Azure SQL AAD administrator')
 param sqlInstanceAadAdministratorName string
 
@@ -245,6 +230,17 @@ resource redisCache 'Microsoft.Cache/Redis@2020-06-01' = {
       family: redisCacheFamily
       name: redisCacheSKU
     }
+  }
+}
+
+resource redisKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'REDIS-KEY'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: redisCache.listKeys().primaryKey
   }
 }
 

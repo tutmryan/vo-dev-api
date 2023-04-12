@@ -112,6 +112,5 @@ jobs:
           api-client-secret: ${{ secrets.API_CLIENT_SECRET }}
           ui-client-secret: ${{ secrets.UI_CLIENT_SECRET }}
           b2c-graph-client-secret: ${{ secrets.B2C_GRAPH_CLIENT_SECRET }}
-          redis-key: ${{ secrets.REDIS_KEY }}
           # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context:~:text=artifacts%20are%20kept.-,github.run_id,-string
           migrations-app-version: ${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}
