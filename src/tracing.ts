@@ -1,5 +1,6 @@
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express'
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
+import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis'
 import { TediousInstrumentation } from '@opentelemetry/instrumentation-tedious'
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston'
 import { Resource } from '@opentelemetry/resources'
@@ -23,5 +24,6 @@ client.getTraceHandler().addInstrumentation(new ExpressInstrumentation())
 client.getTraceHandler().addInstrumentation(new WinstonInstrumentation())
 client.getTraceHandler().addInstrumentation(new GraphQLInstrumentation())
 client.getTraceHandler().addInstrumentation(new TediousInstrumentation())
+client.getTraceHandler().addInstrumentation(new IORedisInstrumentation())
 
 client.start()
