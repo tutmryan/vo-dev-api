@@ -1,11 +1,14 @@
-import type { AuthHeaders, HttpAuthFactory } from '@makerxstudio/node-common'
-import { getOnBehalfOfToken } from '@makerxstudio/node-common'
-import { newCacheSection } from '../cache'
+import type { HttpAuthFactory } from '@makerxstudio/node-common'
+import {
+  createClientCredentialsAuthFactory as clientCredentialsAuth,
+  createOnBehalfOfAuthFactory as oboAuth,
+} from '@makerxstudio/node-common'
 import config from '../config'
 import type { BaseContext } from '../context'
+import { AdminService } from './admin'
 import { B2cUserService } from './b2c-user'
 import { NetworkService } from './network'
-import { AdminService } from './admin'
+import { RequestService } from './request'
 
 export * from './b2c-user'
 export * from './network'
@@ -14,6 +17,7 @@ export interface Services {
   network: NetworkService
   b2cUser: B2cUserService
   admin: AdminService
+  request: RequestService
 }
 
 export const createServices = (context: BaseContext): Services => {
@@ -21,26 +25,13 @@ export const createServices = (context: BaseContext): Services => {
     network: createNetworkService(context),
     admin: createAdminService(context),
     b2cUser: new B2cUserService(),
+    request: createRequestService(context),
   }
 }
 
-const verifiedIdAdminOboAuthCache = newCacheSection('verifiedIdAdmin:oboAuth')
-
-const verifiedIdAdminOboAuthFactory: HttpAuthFactory<BaseContext> = async ({ user }) => {
-  if (!user?.claims.oid) return <AuthHeaders>{}
-  const {
-    claims: { oid },
-    token: assertionToken,
-  } = user
-
-  const cachedToken = await verifiedIdAdminOboAuthCache.get(oid)
-  if (cachedToken) return { authorization: `Bearer ${cachedToken}` }
-
-  const oboConfig = config.get('integrations.verifiedIdAdmin.auth')
-  const { access_token, expires_in } = await getOnBehalfOfToken({ ...oboConfig, assertionToken })
-  await verifiedIdAdminOboAuthCache.set(oid, access_token, { ttl: expires_in - 10 })
-  return { authorization: `Bearer ${access_token}` }
-}
+// TODO: remove OBO and replace with the new application auth model
+const adminOboAuth: HttpAuthFactory<BaseContext> = ({ user }) =>
+  user?.token ? oboAuth(config.get('integrations.verifiedIdAdmin.auth'))({ assertionToken: user.token }) : Promise.resolve({})
 
 function createNetworkService(context: BaseContext) {
   const httpClientOptions = {
@@ -52,7 +43,7 @@ function createNetworkService(context: BaseContext) {
   return new NetworkService({
     ...httpClientOptions,
     baseUrl: config.get('integrations.verifiedIdNetwork.baseUrl'),
-    authFactory: verifiedIdAdminOboAuthFactory,
+    authFactory: adminOboAuth,
   })
 }
 
@@ -66,6 +57,24 @@ function createAdminService(context: BaseContext) {
   return new AdminService({
     ...httpClientOptions,
     baseUrl: config.get('integrations.verifiedIdNetwork.baseUrl'),
-    authFactory: verifiedIdAdminOboAuthFactory,
+    authFactory: adminOboAuth,
+  })
+}
+
+function createRequestService(context: BaseContext) {
+  const httpClientOptions = {
+    requestContext: context,
+    logger: context.logger,
+    correlationId: context.requestInfo.correlationId,
+  }
+
+  return new RequestService({
+    ...httpClientOptions,
+    baseUrl: config.get('integrations.verifiedIdRequest.baseUrl'),
+    authFactory: <HttpAuthFactory<BaseContext>>clientCredentialsAuth(config.get('integrations.verifiedIdRequest.auth')),
+    issuanceCallbackUrl: `https://${context.requestInfo.host}${config.get('issuanceCallback.route')}`,
+    issuanceCallbackAuthConfig: config.get('issuanceCallback.auth'),
+    presentationCallbackUrl: `https://${context.requestInfo.host}${config.get('presentationCallback.route')}`,
+    presentationCallbackAuthConfig: config.get('presentationCallback.auth'),
   })
 }

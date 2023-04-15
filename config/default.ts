@@ -53,12 +53,34 @@ const config: DeepPartial<Config> = {
     verifiedIdNetwork: {
       baseUrl: 'https://verifiedid.did.msidentity.com/',
     },
+    verifiedIdRequest: {
+      baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/',
+      auth: {
+        tokenUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/token',
+        scope: '3db474b9-6a0c-4840-96ac-1fceb342124f/.default',
+      },
+    },
     b2cGraph: {
       auth: {
         tenantId: '10b631d3-9e47-49e1-a938-cbd933f0488d',
       },
       b2cTenantName: 'voonboardingdemo',
     },
+  },
+  issuanceCallback: {
+    route: '/issuance/callback',
+    auth: {
+      tokenUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/token',
+    },
+  },
+  presentationCallback: {
+    route: '/presentation/callback',
+    auth: {
+      tokenUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/token',
+    },
+  },
+  issuanceRequestRegistration: {
+    clientName: 'Verified Orchestration Platform',
   },
 }
 

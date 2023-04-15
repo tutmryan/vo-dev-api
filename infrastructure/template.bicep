@@ -144,6 +144,21 @@ resource b2cGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-0
   }
 }
 
+@description('The client secret of the VID callback app registration in Azure AD')
+@secure()
+param vidCallbackClientSecret string
+
+resource vidCallbackClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'VID-CALLBACK-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: vidCallbackClientSecret
+  }
+}
+
 @description('Name of the Azure SQL AAD administrator')
 param sqlInstanceAadAdministratorName string
 
@@ -328,6 +343,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
     UI_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${uiClientSecretSecret.properties.secretUri})'
     B2C_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${b2cGraphClientSecretSecret.properties.secretUri})'
+    VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
     REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
   }
 }

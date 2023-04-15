@@ -9,12 +9,16 @@ import {
   pkceAuthenticationMiddleware,
   toNpmLogLevel,
 } from '@makerxstudio/express-msal'
+import bodyParser from 'body-parser'
 import cookieSession from 'cookie-session'
 import cors from 'cors'
 import type { Express } from 'express'
 import express from 'express'
 import { clone, merge } from 'lodash'
 import config from './config'
+import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
+import { issuanceCallbackHandler } from './features/issuance/callback/issuance-callback-handler'
+import { presentationCallbackHandler } from './features/presentation/callback/presentation-callback-handler'
 import { logger } from './logger'
 
 export const getExpressApp = (): Express => {
@@ -87,14 +91,14 @@ export const getExpressApp = (): Express => {
     }),
   )
 
-  // disable CSRF protection on the healthcheck query for GETs
-  // so that the container healthcheck can run
-  app.get('/graphql', async (req, res, next) => {
-    if (req.url === '/graphql?query=%7Bhealthcheck%7D') {
-      req.headers['apollo-require-preflight'] = 'true'
-    }
-    next()
-  })
+  // add issuance and presentation callback routes
+  const jsonParser = bodyParser.json()
+
+  app.post(config.get('issuanceCallback.route'), jsonParser, issuanceCallbackMiddleware(issuanceCallbackHandler))
+  logger.info(`Added POST ${config.get('issuanceCallback.route')}`)
+
+  app.post(config.get('presentationCallback.route'), jsonParser, presentationCallbackMiddleware(presentationCallbackHandler))
+  logger.info(`Added POST ${config.get('presentationCallback.route')}`)
 
   return app
 }

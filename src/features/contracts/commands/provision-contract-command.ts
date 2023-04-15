@@ -1,7 +1,7 @@
+import { omit } from 'lodash'
 import type { CommandContext } from '../../../cqrs/command-context'
-import { ContractEntity } from '../entities/contract-entity'
 import type { Contract, CreateContractInput, UpdateContractInput } from '../../../services/admin.types'
-import { omit, pick } from 'lodash'
+import { ContractEntity } from '../entities/contract-entity'
 
 export async function ProvisionContractCommand(this: CommandContext, id: string) {
   const repository = this.entityManager.getRepository(ContractEntity)
@@ -42,7 +42,7 @@ function toCreateContractInput(contract: ContractEntity): CreateContractInput {
               type: x.type,
               required: true,
               outputClaim: x.claim,
-              inputClaim: `$.${x.claim}`,
+              inputClaim: x.claim,
               indexed: false,
             })),
           },
@@ -54,7 +54,12 @@ function toCreateContractInput(contract: ContractEntity): CreateContractInput {
         locale: contract.display.locale,
         consent: contract.display.consent,
         card: contract.display.card,
-        claims: contract.display.claims.map((x) => pick(x, 'claim', 'type', 'label', 'description')),
+        claims: contract.display.claims.map(({ claim, type, label, description }) => ({
+          label,
+          claim: `vc.credentialSubject.${claim}`,
+          type,
+          description,
+        })),
       },
     ],
   }

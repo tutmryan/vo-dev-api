@@ -61,12 +61,35 @@ const config: DeepPartial<Config> = {
         clientId: '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9',
       },
     },
+    verifiedIdRequest: {
+      auth: {
+        // Verified Orchestration API (localdev)
+        // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/3f0968a8-aaf0-407a-b7e9-826d82f0f6a9/isMSAApp~/false
+        clientId: '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9',
+      },
+    },
     b2cGraph: {
       auth: {
         // Verified Orchestration API B2C Integration (localdev)
         // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/0593ae4c-c277-43fd-ae67-082645e28373/isMSAApp~/false
         clientId: '0593ae4c-c277-43fd-ae67-082645e28373',
       },
+    },
+  },
+  issuanceCallback: {
+    auth: {
+      // Verified Orchestration VID callback (localdev)
+      // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/bafdce32-e946-4b0a-a630-f7a2fe4229e4/isMSAApp~/false
+      clientId: 'bafdce32-e946-4b0a-a630-f7a2fe4229e4',
+      scope: 'api://verified-orchestration-api-localdev/.default',
+    },
+  },
+  presentationCallback: {
+    auth: {
+      // Verified Orchestration VID callback (localdev)
+      // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/bafdce32-e946-4b0a-a630-f7a2fe4229e4/isMSAApp~/false
+      clientId: 'bafdce32-e946-4b0a-a630-f7a2fe4229e4',
+      scope: 'api://verified-orchestration-api-localdev/.default',
     },
   },
 }

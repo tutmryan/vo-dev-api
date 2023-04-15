@@ -58,10 +58,25 @@ const config: EnvVarSubstitution<Config> = {
         clientSecret: 'API_CLIENT_SECRET',
       },
     },
+    verifiedIdRequest: {
+      auth: {
+        clientSecret: 'API_CLIENT_SECRET',
+      },
+    },
     b2cGraph: {
       auth: {
         clientSecret: 'B2C_GRAPH_CLIENT_SECRET',
       },
+    },
+  },
+  issuanceCallback: {
+    auth: {
+      clientSecret: 'VID_CALLBACK_CLIENT_SECRET',
+    },
+  },
+  presentationCallback: {
+    auth: {
+      clientSecret: 'VID_CALLBACK_CLIENT_SECRET',
     },
   },
 }

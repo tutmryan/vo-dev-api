@@ -1,6 +1,7 @@
 import type { HttpClientOptions } from '@makerxstudio/node-common'
 import { HttpClient } from '@makerxstudio/node-common'
 import type { BaseContext } from '../context'
+import type { Authority } from '../generated/graphql'
 import { invariant } from '../util/invariant'
 import type { Contract, CreateContractInput, UpdateContractInput } from './admin.types'
 
@@ -8,46 +9,69 @@ interface Value<T> {
   value: T
 }
 
-type Authority = {
-  id: string
-}
-
-// This is a hacky way of not having to hit the /authorities
-// endpoint every time to get the ID of the first one.
-let authorityId: string | undefined = undefined
+// keep an authority reference at the module level
+// to avoid having to repeatedly load it
+let authority: Authority | undefined = undefined
 
 export class AdminService extends HttpClient<BaseContext> {
   constructor(options: HttpClientOptions<BaseContext>) {
     super(options)
   }
 
-  async createContract(input: CreateContractInput): Promise<Contract> {
-    const authorityId = await this.getAuthorityId()
+  async authorities(): Promise<Authority[]> {
+    const { value: authorities } = await this.get<Value<Authority[]>>('v1.0/verifiableCredentials/authorities')
+    return authorities
+  }
 
-    return await this.post<Contract>(`v1.0/verifiableCredentials/authorities/${authorityId}/contracts`, { data: input })
+  async authorityById(id: string): Promise<Authority> {
+    return this.get<Authority>(`v1.0/verifiableCredentials/authorities/${id}`)
+  }
+
+  async createContract(input: CreateContractInput): Promise<Contract> {
+    try {
+      return await this.post<Contract>(`v1.0/verifiableCredentials/authorities/${await this.authorityId()}/contracts`, { data: input })
+    } catch (error: any) {
+      const { message, ...rest } = error
+      this.options.logger?.error('Error creating contract', { message, ...rest })
+      throw error
+    }
   }
 
   async updateContract(contractId: string, input: UpdateContractInput): Promise<Contract> {
-    const authorityId = await this.getAuthorityId()
-
     // The service is case-sensitive on GUIDs, and we get the contract ID from SQL Server / mssql as uppercase, so
     // we need to lowercase it ourselves #prettylame
-    return await this.patch<Contract>(`v1.0/verifiableCredentials/authorities/${authorityId}/contracts/${contractId.toLowerCase()}`, {
-      data: input,
-    })
+    return await this.patch<Contract>(
+      `v1.0/verifiableCredentials/authorities/${await this.authorityId()}/contracts/${contractId.toLowerCase()}`,
+      {
+        data: input,
+      },
+    )
   }
 
-  private async getAuthorityId(): Promise<string> {
-    if (authorityId) {
-      return authorityId
-    }
+  async contracts(authorityId?: string): Promise<Contract[]> {
+    const { value: contracts } = await this.get<Value<Contract[]>>(
+      `v1.0/verifiableCredentials/authorities/${authorityId ?? (await this.authorityId())}/contracts`,
+    )
+    return contracts
+  }
+
+  async contract(id: string): Promise<Contract | null> {
+    return this.get<Contract>(`v1.0/verifiableCredentials/authorities/${await this.authorityId()}/contracts/${id.toLowerCase()}`)
+  }
+
+  async authority(): Promise<Authority> {
+    if (authority) return authority
 
     const { value: authorities } = await this.get<Value<Authority[]>>('v1.0/verifiableCredentials/authorities')
 
-    const [firstAuthority] = authorities
-    invariant(firstAuthority, 'Unable to find an authority when querying the Verified ID service')
+    const [first] = authorities
+    invariant(first, 'Unable to find an authority when querying the Verified ID service')
 
-    authorityId = firstAuthority.id
-    return authorityId
+    authority = first
+    return authority
+  }
+
+  async authorityId(): Promise<string> {
+    return (await this.authority()).id
   }
 }

@@ -31,7 +31,7 @@ We need to add the new client secret to the GitHub secrets:
 ```powershell
 ./infrastructure/script/create-ui-app-registration.ps1 `
   -Name '<name-of-application>' `
-  -RedirectUrl '<redirect-url' `
+  -RedirectUrl '<redirect-url>' `
   -ApiAppRegistrationName '<api-app-registration-name>'
 ```
 
@@ -157,3 +157,23 @@ To create the users:
 1. In the left menu, click on "Query editor", then click on the "Continue as..." button in the "Azure Active Directory" section.
 1. Copy the contents of the [`create-aad-user.sql` script](../../infrastructure/scripts/create-aad-user.sql) and replace the `<aad-user>` token with the name of the application.
 1. The Functions app needs the `db_ddladmin` role, the GraphQL API doesn't.
+
+## Create an app registration for the authenticated callbacks from the Verified ID service
+
+```powershell
+./infrastructure/scripts/create-callback-app-registration.ps1 `
+  -Name '<name-of-application>' `
+  -ApiAppRegistrationName '<api-app-registration-name>'
+```
+
+We need to create a client secret for this application:
+
+1. Navigate to the link in the script output.
+1. Click on "Certificates & secrets", then "+ New client secret".
+1. Give a description, select the appropriate expiry date, then "Add".
+
+We need to add the new client secret to the GitHub secrets:
+
+1. Navigate to the environment for the repository at <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>.
+1. Click on the relevant environment.
+1. Add the secret as `VID_CALLBACK_CLIENT_SECRET`.

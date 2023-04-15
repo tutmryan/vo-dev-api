@@ -28,3 +28,4 @@ extensions:
             Locale: string
             HexColorCode: string
             Void: null | undefined | void
+            JSONObject: Record<string, unknown>

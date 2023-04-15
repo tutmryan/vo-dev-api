@@ -2,16 +2,15 @@ import type { CreateUser, GraphQLContext as GraphQLContextBase, RequestInfo } fr
 import { createContextFactory } from '@makerxstudio/graphql-core'
 import type { DataSource } from 'typeorm'
 import config from './config'
-import { logger } from './logger'
-import type { Services } from './services'
-import { B2cUserService, createServices, NetworkService } from './services'
+import { dispatch } from './cqrs/dispatcher'
 import { dataSource } from './data'
-import { User } from './user'
-import { invariant } from './util/invariant'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
 import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or-create-user'
-import { dispatch } from './cqrs/dispatcher'
-import { AdminService } from './services/admin'
+import { logger } from './logger'
+import type { Services } from './services'
+import { createServices } from './services'
+import { User } from './user'
+import { invariant } from './util/invariant'
 
 export type BaseContext = GraphQLContextBase<typeof logger, RequestInfo, User | undefined>
 export type GraphQLContext = BaseContext & {
@@ -43,14 +42,11 @@ export const findUpdateOrCreateUser: CreateUser<User | undefined> = async ({ cla
     isApp,
   }
 
+  // we don't have a real graphql context yet, so create just enough to dispatch FindUpdateOrCreateUser command
   const context: Pick<GraphQLContext, 'dataSource' | 'user' | 'services'> = {
     dataSource,
     user: undefined,
-    services: {
-      b2cUser: new B2cUserService(),
-      admin: new AdminService({}),
-      network: new NetworkService({}),
-    },
+    services: {} as any as Services,
   }
 
   const userEntity = await dispatch(context, FindUpdateOrCreateUser, input)

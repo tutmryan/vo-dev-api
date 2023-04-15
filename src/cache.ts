@@ -4,6 +4,7 @@ import { InMemoryLRUCache, PrefixingKeyValueCache } from '@apollo/utils.keyvalue
 import { isLocalDev } from '@makerxstudio/node-common'
 import Keyv from 'keyv'
 import config from './config'
+import type { RequestCredential } from './generated/graphql'
 import { logger } from './logger'
 
 const redis = config.has('redis') ? config.get('redis') : undefined
@@ -20,4 +21,18 @@ export const newCacheSection = (prefix: string): KeyValueCache => {
   return new PrefixingKeyValueCache(cache, prefix)
 }
 
-export const requestCallbackCache = newCacheSection('verifiedIdRequestCallback')
+export const REQUEST_CACHE_TTL = 60 * 60 // 1 hour
+export const requestCallbackCache = newCacheSection('requestCallback')
+
+export interface IssuanceRequestDetails {
+  userId: string
+  identityId: string
+  contractId: string
+}
+export interface PresentationRequestDetails {
+  userId: string
+  identityId: string
+  contractIds: string[]
+  requestedCredentials: RequestCredential[]
+}
+export const requestDetailsCache = newCacheSection('requestDetails')

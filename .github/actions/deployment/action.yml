@@ -20,6 +20,7 @@ inputs:
   resource-group-name:
     description: Name of the resource group to deploy resources to
     required: true
+
   sql-instance-name:
     description: Name of the Azure SQL instance
     required: true
@@ -32,6 +33,7 @@ inputs:
   sql-database-sku:
     description: SKU of the Azure SQL database
     required: true
+
   redis-cache-name:
     description: Name of the Azure Redis Cache
     required: true
@@ -57,6 +59,7 @@ inputs:
   migrations-app-client-id:
     description: Client ID of the migrations app registration in Azure AD
     required: true
+
   api-cookie-secret:
     description: Cookie secret used by the cookie-session Express middleware
     required: true
@@ -69,9 +72,14 @@ inputs:
   b2c-graph-client-secret:
     description: Client secret of the API integration app registration in the B2C tenant
     required: true
+  vid-callback-client-secret:
+    description: Client secret of the VID callback app registration in Azure AD
+    required: true
+
   migrations-app-version:
     description: Version returned by the GetVersion function of the migrations Function app
     required: true
+
 outputs:
   api-url:
     description: URL of the deployed API
@@ -118,6 +126,7 @@ runs:
           migrationsAppClientId=${{ inputs.migrations-app-client-id }}
           deploymentAppClientId=${{ inputs.azure-client-id }}
           b2cGraphClientSecret=${{ inputs.b2c-graph-client-secret }}
+          vidCallbackClientSecret=${{ inputs.vid-callback-client-secret }}
           migrationsAppVersion=${{ inputs.migrations-app-version }}
           redisCacheName=${{ inputs.redis-cache-name }}
           redisCacheSKU=${{ inputs.redis-cache-sku }}

@@ -7,6 +7,7 @@ import config from 'config'
 import type { CorsOptions, CorsOptionsDelegate } from 'cors'
 import type { LoggerOptions } from 'typeorm'
 import type { ConsoleTransportOptions } from 'winston/lib/winston/transports'
+import type { IssuanceRequestRegistration } from './services/request'
 
 export type Config = {
   cors: CorsOptions | CorsOptionsDelegate
@@ -71,6 +72,10 @@ export type Config = {
     verifiedIdNetwork: {
       baseUrl: string
     }
+    verifiedIdRequest: {
+      baseUrl: string
+      auth: ClientCredentialsConfig
+    }
     b2cGraph: {
       auth: {
         tenantId: string
@@ -80,6 +85,15 @@ export type Config = {
       b2cTenantName: string
     }
   }
+  issuanceCallback: {
+    route: string
+    auth: ClientCredentialsConfig
+  }
+  presentationCallback: {
+    route: string
+    auth: ClientCredentialsConfig
+  }
+  issuanceRequestRegistration: IssuanceRequestRegistration
 }
 
 export default createTypedConfig<Config>(config)

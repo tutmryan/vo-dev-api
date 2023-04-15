@@ -13,9 +13,22 @@ type Query {
 
 # eslint-disable-next-line @graphql-eslint/require-description
 type Mutation {
+  """
+  Creates a new contract
+  """
   createContract(input: ContractInput!): Contract!
+  """
+  Updates an existing contract
+  """
   updateContract(id: ID!, input: ContractInput!): Contract!
+  """
+  Provisions or re-provisions a contract into the Verified ID service
+  """
   provisionContract(id: ID!): Contract!
+  """
+  Deletes an existing contract. Only possible when the contract has not yet been provisioned.
+  """
+  deleteContract(id: ID!): Void
 }
 
 """
@@ -316,9 +329,9 @@ type ContractDisplayClaim {
   """
   description: String
   """
-  The value for the claim
+  The value for the claim (optional, only set if the value is fixed)
   """
-  value: String!
+  value: String
 }
 
 """
@@ -345,9 +358,9 @@ input ContractDisplayClaimInput {
   """
   description: String
   """
-  The value for the claim
+  The value for the claim (optional, only set if the value is fixed)
   """
-  value: String!
+  value: String
 }
 
 """

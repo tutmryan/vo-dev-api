@@ -13,8 +13,17 @@ type Query {
 
 # eslint-disable-next-line @graphql-eslint/require-description
 type Mutation {
+  """
+  Creates a new template
+  """
   createTemplate(input: TemplateInput!): Template!
+  """
+  Updates an existing template
+  """
   updateTemplate(id: ID!, input: TemplateInput!): Template!
+  """
+  Deletes an existing template
+  """
   deleteTemplate(id: ID!): Void
 }
 
