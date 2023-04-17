@@ -6,6 +6,8 @@ import { dispatch } from './cqrs/dispatcher'
 import { dataSource } from './data'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
 import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or-create-user'
+import type { DataLoaders } from './loaders'
+import { createDataLoaders } from './loaders'
 import { logger } from './logger'
 import type { Services } from './services'
 import { createServices } from './services'
@@ -16,6 +18,7 @@ export type BaseContext = GraphQLContextBase<typeof logger, RequestInfo, User | 
 export type GraphQLContext = BaseContext & {
   dataSource: DataSource
   services: Services
+  dataLoaders: DataLoaders
 }
 
 export const findUpdateOrCreateUser: CreateUser<User | undefined> = async ({ claims, req }) => {
@@ -61,6 +64,7 @@ export const createContext = createContextFactory<GraphQLContext>({
   createUser: findUpdateOrCreateUser,
   augmentContext: (context) => {
     const services = createServices(context)
-    return { services, dataSource }
+    const dataLoaders = createDataLoaders()
+    return { services, dataSource, dataLoaders }
   },
 })

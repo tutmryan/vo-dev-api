@@ -189,6 +189,47 @@ type Mutation {
   createIssuanceRequest(request: IssuanceRequestInput!): IssuanceRequestResponse!
 }
 
+"""
+An instance of a successfull contract-to-credential issuance.
+"""
+type Issuance {
+  id: ID!
+  issuedAt: DateTime!
+  """
+  The identity of the person who was issued the credential.
+  """
+  identity: Identity!
+  """
+  The platform user (application or person) that issued the credential.
+  """
+  user: User!
+  """
+  The contract defining the issued credential.
+  """
+  contract: Contract!
+  """
+  When the issued credential expires according to the validity period of the contract.
+  """
+  credentialExpiresAt: DateTime!
+}
+
+"""
+Criteria for filtering issuances.
+"""
+input IssuanceWhere {
+  """
+  The ID of the identity that was issued the credential.
+  """
+  identityId: ID
+}
+
+extend type Contract {
+  """
+  Returns the successfull credential issuances for this contract.
+  """
+  issuances(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
+}
+
 # The rest of this schema is for the callbacks, not GraphQL API
 # eslint-disable @graphql-eslint/no-unreachable-types
 

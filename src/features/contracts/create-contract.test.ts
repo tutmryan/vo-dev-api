@@ -48,7 +48,7 @@ describe('createContract mutation', () => {
     const bogusTemplateId = randomUUID()
 
     const contractInput = getDefaultContractInput()
-    contractInput.templateID = bogusTemplateId
+    contractInput.templateId = bogusTemplateId
 
     const { errors } = await executeOperationAsAdmin({
       query: createContractMutation,
@@ -74,7 +74,7 @@ describe('createContract mutation', () => {
         input: {
           name: 'Contract',
           description: 'Contract description',
-          templateID: template.id,
+          templateId: template.id,
           isPublic: false,
           validityIntervalInSeconds: 1000,
           credentialTypes: ['DefaultCredential'],
@@ -141,7 +141,7 @@ describe('createContract mutation', () => {
     const input: ContractInput = {
       name: randomUUID(),
       description: randomUUID(),
-      templateID: template.id,
+      templateId: template.id,
       isPublic: true,
       validityIntervalInSeconds: 1000,
       credentialTypes: ['DefaultCredential'],
@@ -182,6 +182,6 @@ describe('createContract mutation', () => {
     expect(data).toBeDefined()
 
     expect(data!.createContract.id).toBeDefined()
-    expect(data!.createContract).toMatchObject(omit(input, 'templateID'))
+    expect(data!.createContract).toMatchObject(omit(input, 'templateId'))
   })
 })

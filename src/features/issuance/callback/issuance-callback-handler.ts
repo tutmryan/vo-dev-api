@@ -4,7 +4,7 @@ import { requestDetailsCache } from '../../../cache'
 import { dataSource } from '../../../data'
 import { IssuanceRequestStatus } from '../../../generated/graphql'
 import type { IssuanceCallbackHandler } from '../../callback'
-import { IssuanceEntity } from '../entities/IssuanceEntity'
+import { IssuanceEntity } from '../entities/issuance-entity'
 
 export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) => {
   if (event.requestStatus === IssuanceRequestStatus.RequestRetrieved) {

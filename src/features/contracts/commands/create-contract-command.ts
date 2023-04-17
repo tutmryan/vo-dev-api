@@ -1,13 +1,13 @@
-import type { ContractInput } from '../../../generated/graphql'
+import { omit } from 'lodash'
 import type { CommandContext } from '../../../cqrs/command-context'
+import type { ContractInput } from '../../../generated/graphql'
 import { TemplateEntity } from '../../templates/entities/template-entity'
 import { ContractEntity } from '../entities/contract-entity'
 import { ensureNoOverridingTemplateData } from '../mapping'
-import { omit } from 'lodash'
 
 export async function CreateContractCommand(this: CommandContext, input: ContractInput) {
-  const template = input.templateID
-    ? await this.entityManager.getRepository(TemplateEntity).findOneByOrFail({ id: input.templateID })
+  const template = input.templateId
+    ? await this.entityManager.getRepository(TemplateEntity).findOneByOrFail({ id: input.templateId })
     : null
 
   if (template) {

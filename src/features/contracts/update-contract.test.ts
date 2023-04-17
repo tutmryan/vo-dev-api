@@ -1,10 +1,10 @@
+import { randomUUID } from 'crypto'
+import type { TemplateFragmentFragment } from '../../generated/graphql'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
-import { getUpdateContractInput, updateContractMutation } from './test/update-contract'
+import { createTemplate, getEmptyTemplateInput } from '../templates/test/create-template'
 import { createContract } from './test/create-contract'
 import { getContract } from './test/get-contract'
-import type { TemplateFragmentFragment } from '../../generated/graphql'
-import { createTemplate, getEmptyTemplateInput } from '../templates/test/create-template'
-import { randomUUID } from 'crypto'
+import { getUpdateContractInput, updateContractMutation } from './test/update-contract'
 
 describe('updateContract mutation', () => {
   beforeAfterAll()
@@ -33,7 +33,7 @@ describe('updateContract mutation', () => {
     const contract = await createContract({
       name: randomUUID(),
       description: randomUUID(),
-      templateID: withTemplate ? template!.id : null,
+      templateId: withTemplate ? template!.id : null,
       isPublic: true,
       validityIntervalInSeconds: 1000,
       credentialTypes: ['DefaultCredential'],

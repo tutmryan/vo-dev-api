@@ -5,8 +5,8 @@ import { requestDetailsCache } from '../../../cache'
 import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import type { PresentationCallbackHandler } from '../../callback'
-import type { PresentedData } from '../entities/PresentationEntity'
-import { PresentationEntity } from '../entities/PresentationEntity'
+import type { PresentedData } from '../entities/presentation-entity'
+import { PresentationEntity } from '../entities/presentation-entity'
 
 export const presentationCallbackHandler: PresentationCallbackHandler = async (event) => {
   if (event.requestStatus === PresentationRequestStatus.RequestRetrieved) {

@@ -135,7 +135,7 @@ input TemplateInput {
   """
   The ID of the parent template, if any
   """
-  parentTemplateID: ID
+  parentTemplateId: ID
 
   """
   The full or partial credential display definition defined by this template, if any.

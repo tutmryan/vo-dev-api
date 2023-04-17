@@ -89,7 +89,7 @@ describe('template.parentData field', () => {
 
     const childTemplate = await createTemplate({
       ...getEmptyTemplateInput(),
-      parentTemplateID: parentTemplate.id,
+      parentTemplateId: parentTemplate.id,
     })
 
     // Act
@@ -136,7 +136,7 @@ describe('template.parentData field', () => {
     const parentTemplateInput = getEmptyTemplateInput()
     const parentTemplate = await createTemplate({
       ...parentTemplateInput,
-      parentTemplateID: rootTemplate.id,
+      parentTemplateId: rootTemplate.id,
       isPublic: false,
       display: {
         ...parentTemplateInput.display,
@@ -155,7 +155,7 @@ describe('template.parentData field', () => {
 
     const childTemplate = await createTemplate({
       ...getEmptyTemplateInput(),
-      parentTemplateID: parentTemplate.id,
+      parentTemplateId: parentTemplate.id,
     })
 
     // Act

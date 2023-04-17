@@ -68,9 +68,30 @@ input RequestConfiguration {
 }
 
 """
+The configuration information used on the presentation request
+"""
+type RequestedConfiguration {
+  validation: RequestConfigurationValidation
+}
+
+"""
 Provides information about the presented credentials should be validated
 """
 input ConfigurationValidation {
+  """
+  Determines if a revoked credential should be accepted. Default is false (it shouldn't be accepted).
+  """
+  allowRevoked: Boolean
+  """
+  Determines if the linked domain should be validated. Default is false. Setting this flag to false means you as a Relying Party application accept credentials from unverified linked domain. Setting this flag to true means the linked domain will be validated and only verified domains will be accepted.
+  """
+  validateLinkedDomain: Boolean
+}
+
+"""
+Validation information on the presentation request
+"""
+type RequestConfigurationValidation {
   """
   Determines if a revoked credential should be accepted. Default is false (it shouldn't be accepted).
   """
@@ -126,6 +147,28 @@ input RequestCredential {
 }
 
 """
+Provides information about the requested credential for an presentation.
+"""
+type RequestedCredential {
+  """
+  The verifiable credential type that was requested
+  """
+  type: String!
+  """
+  The purpose of requesting presentation of the credential.
+  """
+  purpose: String
+  """
+  A collection of issuers' DIDs that could issue the type of verifiable credential requsted for issuance.
+  """
+  acceptedIssuers: [String!]
+  """
+  Optional settings for presentation validation.
+  """
+  configuration: RequestedConfiguration
+}
+
+"""
 Represents a successful presentation request response
 """
 type PresentationResponse {
@@ -167,7 +210,7 @@ type PresentedCredential {
   type: [String!]!
   claims: JSONObject!
   credentialState: JSONObject!
-  domainValidation: JSONObject!
+  domainValidation: JSONObject
 }
 
 """
@@ -234,4 +277,49 @@ type PresentationEvent {
   The claims presented
   """
   claims: JSONObject!
+}
+
+"""
+An instance of a successfull credential presentation.
+"""
+type Presentation {
+  id: ID!
+  presentedAt: DateTime!
+  """
+  The identity of the person who presented the credential (if known).
+  """
+  identity: Identity
+  """
+  The platform user (application or person) that requested the credential presentation.
+  """
+  user: User!
+  """
+  The contracts used as presentation request input (if any).
+  """
+  contracts: [Contract!]!
+  """
+  The credentials that were requested
+  """
+  requestedCredentials: [RequestedCredential!]!
+  """
+  The credentials that were presented (excluding claims data)
+  """
+  presentedCredentials: [PresentedCredential!]!
+}
+
+"""
+Criteria for filtering presentations.
+"""
+input PresentationWhere {
+  """
+  The ID of the identity who presented the credential (if known).
+  """
+  identityId: ID
+}
+
+extend type Contract {
+  """
+  Returns the successfull credential presentations for this contract.
+  """
+  presentations(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
 }

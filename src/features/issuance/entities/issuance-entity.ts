@@ -5,7 +5,7 @@ import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
-@Entity('issuance')
+@Entity('issuance', { orderBy: { issuedAt: 'DESC' } })
 export class IssuanceEntity extends VerifiedOrchestrationEntity {
   constructor(args?: { contractId: string; identityId: string; userId: string }) {
     super()

@@ -135,7 +135,7 @@ input ContractInput {
   """
   The ID of the template used as a base for the contract
   """
-  templateID: ID
+  templateId: ID
 
   """
   The credential display definition defined by this contract.
@@ -374,5 +374,5 @@ input ContractWhere {
   """
   List only contracts from this template
   """
-  templateID: ID
+  templateId: ID
 }

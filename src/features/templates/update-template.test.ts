@@ -2,8 +2,8 @@ import { randomUUID } from 'crypto'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
 import { createTemplate, getEmptyTemplateInput } from './test/create-template'
-import { getUpdateTemplateInput, updateTemplateMutation } from './test/update-template'
 import { getTemplate } from './test/get-template'
+import { getUpdateTemplateInput, updateTemplateMutation } from './test/update-template'
 
 describe('updateTemplate mutation', () => {
   beforeAfterAll()
@@ -28,14 +28,14 @@ describe('updateTemplate mutation', () => {
     const template = await createTemplate({
       name: 'SUT template',
       description: 'This is the SUT template',
-      parentTemplateID: parentTemplate?.id,
+      parentTemplateId: parentTemplate?.id,
     })
 
     if (hasChildren) {
       await createTemplate({
         name: 'Child template',
         description: 'This is the child template',
-        parentTemplateID: template.id,
+        parentTemplateId: template.id,
       })
     }
 

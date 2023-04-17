@@ -28,7 +28,7 @@ describe('createTemplate mutation', () => {
       variables: {
         input: {
           ...getEmptyTemplateInput(),
-          parentTemplateID: bogusParentId,
+          parentTemplateId: bogusParentId,
         },
       },
     })
@@ -69,7 +69,7 @@ describe('createTemplate mutation', () => {
       variables: {
         input: {
           ...getEmptyTemplateInput(),
-          parentTemplateID: parentTemplate.id,
+          parentTemplateId: parentTemplate.id,
           validityIntervalInSeconds: 1_500,
           display: {
             ...emptyTemplateInput.display,

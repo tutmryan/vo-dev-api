@@ -1,10 +1,10 @@
-import { Column, Entity, ManyToOne } from 'typeorm'
-import { TemplateEntity } from '../../templates/entities/template-entity'
-import type { ContractDisplayModel } from '../../../generated/graphql'
-import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { isEqual, uniq } from 'lodash'
+import { Column, Entity, ManyToOne } from 'typeorm'
+import type { ContractDisplayModel } from '../../../generated/graphql'
 import { domainInvariant } from '../../../util/domain-invariant'
+import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
+import { TemplateEntity } from '../../templates/entities/template-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('contract')
@@ -48,11 +48,17 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => UserEntity, { nullable: true })
   provisionedBy!: Promise<UserEntity | null>
 
+  @Column()
+  provisionedById!: string | null
+
   @Column({ type: 'datetimeoffset', nullable: true })
   provisionedAt!: Date | null
 
   @ManyToOne(() => UserEntity, { nullable: true })
   lastProvisionedBy!: Promise<UserEntity | null>
+
+  @Column()
+  lastProvisionedById!: string | null
 
   @Column({ type: 'datetimeoffset', nullable: true })
   lastProvisionedAt!: Date | null

@@ -1,7 +1,7 @@
-import type { QueryContext } from '../../../cqrs/query-context'
-import type { ContractWhere, Maybe } from '../../../generated/graphql'
 import type { FindOptionsWhere } from 'typeorm'
 import { ILike } from 'typeorm'
+import type { QueryContext } from '../../../cqrs/query-context'
+import type { ContractWhere, Maybe } from '../../../generated/graphql'
 import { ContractEntity } from '../entities/contract-entity'
 
 export async function FindContractsQuery(
@@ -13,7 +13,7 @@ export async function FindContractsQuery(
   const where: FindOptionsWhere<ContractEntity> = {}
 
   if (criteria?.name) where.name = ILike(`%${criteria.name}%`)
-  if (criteria?.templateID) where.templateId = criteria.templateID
+  if (criteria?.templateId) where.templateId = criteria.templateId
 
   const contracts = await this.entityManager.getRepository(ContractEntity).find({
     where,

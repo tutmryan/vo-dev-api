@@ -7,7 +7,7 @@ import { ensureNoIntersectingTemplateData, toDisplayModel, toTemplateParentData 
 export async function CreateTemplateCommand(this: CommandContext, input: TemplateInput) {
   const repository = this.entityManager.getRepository(TemplateEntity)
 
-  const parent = input.parentTemplateID ? await repository.findOneByOrFail({ id: input.parentTemplateID }) : null
+  const parent = input.parentTemplateId ? await repository.findOneByOrFail({ id: input.parentTemplateId }) : null
 
   if (parent) {
     const parentData = merge({}, toTemplateParentData(parent), await parent.parentData())

@@ -22,9 +22,6 @@ export const newCacheSection = (prefix: string): KeyValueCache => {
   return new PrefixingKeyValueCache(cache, prefix)
 }
 
-export const REQUEST_CACHE_TTL = 60 * 60 // 1 hour
-export const requestCallbackCache = newCacheSection('requestCallback')
-
 export interface IssuanceRequestDetails {
   userId: string
   identityId: string
@@ -36,4 +33,7 @@ export interface PresentationRequestDetails {
   contractIds: string[]
   requestedCredentials: RequestCredential[]
 }
+
+export const REQUEST_CACHE_TTL = 60 * 60 // 1 hour
+export const requestCallbackCache = newCacheSection('requestCallback')
 export const requestDetailsCache = newCacheSection('requestDetails')

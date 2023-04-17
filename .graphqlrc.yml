@@ -18,6 +18,8 @@ extensions:
                 Template: ../features/templates/entities/template-entity#TemplateEntity
                 Contract: ../features/contracts/entities/contract-entity#ContractEntity
                 User: ../features/users/entities/user-entity#UserEntity
+                Issuance: ../features/issuance/entities/issuance-entity#IssuanceEntity
+                Presentation: ../features/presentation/entities/presentation-entity#PresentationEntity
         config:
           strictScalars: true
           scalars:

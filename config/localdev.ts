@@ -20,9 +20,10 @@ const config: DeepPartial<Config> = {
     requestInfoToLog: [],
     omitPaths: ['service', 'trace_id', 'span_id', 'trace_flags'],
     loggerOptions: {
-      level: 'info',
+      level: 'verbose',
     },
   },
+  database: { logging: true },
   auth: {
     bearer: {
       jwksUri: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/discovery/v2.0/keys',

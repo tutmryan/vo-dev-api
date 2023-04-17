@@ -8,7 +8,7 @@ import { UserEntity } from '../../users/entities/user-entity'
 
 export type PresentedData = Omit<PresentedCredential, 'claims'>
 
-@Entity('presentation')
+@Entity('presentation', { orderBy: { presentedAt: 'DESC' } })
 export class PresentationEntity extends VerifiedOrchestrationEntity {
   constructor(args?: {
     identityId: string
