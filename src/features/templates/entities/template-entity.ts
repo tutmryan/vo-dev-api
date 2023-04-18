@@ -2,11 +2,11 @@ import { merge } from 'lodash'
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
 import type { TemplateDisplayModel, TemplateParentData } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
-import { ensureNoIntersectingTemplateData, toTemplateParentData } from '../mapping'
-import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
+import { ContractEntity } from '../../contracts/entities/contract-entity'
+import { ensureNoIntersectingTemplateData, toTemplateParentData } from '../mapping'
 
-@Entity('template')
+@Entity('template', { orderBy: { createdAt: 'ASC' } })
 export class TemplateEntity extends AuditedAndTrackedEntity {
   constructor(args?: {
     name: string

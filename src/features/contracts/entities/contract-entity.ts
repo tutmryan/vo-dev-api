@@ -7,7 +7,7 @@ import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tra
 import { TemplateEntity } from '../../templates/entities/template-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
-@Entity('contract')
+@Entity('contract', { orderBy: { createdAt: 'ASC' } })
 export class ContractEntity extends AuditedAndTrackedEntity {
   constructor(args?: {
     name: string
