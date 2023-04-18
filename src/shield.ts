@@ -15,6 +15,10 @@ export const permissions = wrappedShield({
     contract: isAuthorised,
     findContracts: isAuthorised,
   },
+  Mutation: {
+    createIssuanceRequest: or(isAdmin, canRequestIssuance),
+    createPresentationRequest: or(isAdmin, canRequestPresentation),
+  },
 })
 
 function wrappedShield(x: ShieldSchema<Resolvers>) {
