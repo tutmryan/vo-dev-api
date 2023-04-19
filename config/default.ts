@@ -43,7 +43,7 @@ const config: DeepPartial<Config> = {
   },
   integrations: {
     verifiedIdAdmin: {
-      baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/',
+      baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/',
       auth: {
         tokenUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/token',
         // See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#authentication
