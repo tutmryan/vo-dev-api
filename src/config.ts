@@ -1,6 +1,6 @@
 import type { Configuration as MsalConfiguration } from '@azure/msal-node'
 import type { BearerConfig } from '@makerxstudio/express-bearer'
-import type { ClientCredentialsConfig, OnBehalfOfConfig } from '@makerxstudio/node-common'
+import type { ClientCredentialsConfig } from '@makerxstudio/node-common'
 import { createTypedConfig } from '@makerxstudio/node-common/typed-config-factory'
 // eslint-disable-next-line no-restricted-imports
 import config from 'config'
@@ -67,10 +67,7 @@ export type Config = {
   integrations: {
     verifiedIdAdmin: {
       baseUrl: string
-      auth: Omit<OnBehalfOfConfig, 'assertionToken'>
-    }
-    verifiedIdNetwork: {
-      baseUrl: string
+      auth: ClientCredentialsConfig
     }
     verifiedIdRequest: {
       baseUrl: string

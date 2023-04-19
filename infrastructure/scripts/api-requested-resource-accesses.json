@@ -2,7 +2,23 @@
   {
     "resourceAccess": [
       {
-        "id": "949ebb93-18f8-41b4-b677-c2bfea940027",
+        "id": "4ceb7a90-1485-40b1-accf-83a647694c0f",
+        "type": "Role"
+      },
+      {
+        "id": "077813bc-e516-4576-bafd-07bead19c0dc",
+        "type": "Role"
+      },
+      {
+        "id": "c7656015-9c77-47f7-ae83-110ad70f1edc",
+        "type": "Role"
+      },
+      {
+        "id": "933a4159-27ca-4486-b1be-dce09da38475",
+        "type": "Role"
+      },
+      {
+        "id": "63f52f43-0b98-429c-b291-b2dba4a64504",
         "type": "Role"
       }
     ],
