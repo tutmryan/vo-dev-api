@@ -40,6 +40,13 @@ const config: DeepPartial<Config> = {
   redis: {
     host: 'vo-dev-verified-orchestration-redis.redis.cache.windows.net',
   },
+  sendgrid: {
+    templates: {
+      onboarding: {
+        dynamicTemplateData: { onboarding_url: 'https://green-forest-0f87c3200.2.azurestaticapps.net/' },
+      },
+    },
+  },
   integrations: {
     verifiedIdAdmin: {
       auth: {

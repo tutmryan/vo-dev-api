@@ -2,6 +2,7 @@ import type { Configuration as MsalConfiguration } from '@azure/msal-node'
 import type { BearerConfig } from '@makerxstudio/express-bearer'
 import type { ClientCredentialsConfig } from '@makerxstudio/node-common'
 import { createTypedConfig } from '@makerxstudio/node-common/typed-config-factory'
+import type { MailDataRequired } from '@sendgrid/mail'
 // eslint-disable-next-line no-restricted-imports
 import config from 'config'
 import type { CorsOptions, CorsOptionsDelegate } from 'cors'
@@ -63,6 +64,12 @@ export type Config = {
       clientSecret: string
     }
     b2cTenantName: string
+  }
+  sendgrid: {
+    key: string
+    templates: {
+      onboarding: { mailData: Pick<MailDataRequired, 'templateId' | 'from'>; dynamicTemplateData: { onboarding_url: string } }
+    }
   }
   integrations: {
     verifiedIdAdmin: {

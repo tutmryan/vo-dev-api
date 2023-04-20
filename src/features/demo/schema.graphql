@@ -1,0 +1,12 @@
+"""
+Input to start the onboarding process.
+"""
+input OnboardingInput {
+  email: EmailAddress!
+  givenName: String!
+  familyName: String!
+}
+
+extend type Mutation {
+  beginOnboarding(input: OnboardingInput!): Void
+}

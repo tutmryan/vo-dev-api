@@ -159,6 +159,21 @@ resource vidCallbackClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-0
   }
 }
 
+@description('API key for SendGrid')
+@secure()
+param sendgridApiKey string
+
+resource sendgridApiKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'SENDGRID-API-KEY'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: sendgridApiKey
+  }
+}
+
 @description('Name of the Azure SQL AAD administrator')
 param sqlInstanceAadAdministratorName string
 
@@ -345,6 +360,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     B2C_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${b2cGraphClientSecretSecret.properties.secretUri})'
     VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
     REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
+    SENDGRID_API_KEY: '@Microsoft.KeyVault(SecretUri=${sendgridApiKeySecret.properties.secretUri})'
   }
 }
 

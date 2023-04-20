@@ -75,6 +75,9 @@ inputs:
   vid-callback-client-secret:
     description: Client secret of the VID callback app registration in Azure AD
     required: true
+  sendgrid-api-key:
+    description: API key for SendGrid
+    required: true
 
   migrations-app-version:
     description: Version returned by the GetVersion function of the migrations Function app
@@ -127,6 +130,7 @@ runs:
           deploymentAppClientId=${{ inputs.azure-client-id }}
           b2cGraphClientSecret=${{ inputs.b2c-graph-client-secret }}
           vidCallbackClientSecret=${{ inputs.vid-callback-client-secret }}
+          sendgridApiKey=${{ inputs.sendgrid-api-key }}
           migrationsAppVersion=${{ inputs.migrations-app-version }}
           redisCacheName=${{ inputs.redis-cache-name }}
           redisCacheSKU=${{ inputs.redis-cache-sku }}

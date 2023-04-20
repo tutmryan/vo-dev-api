@@ -14,7 +14,6 @@ const GraphClient = Lazy(() => {
   const authProvider = new TokenCredentialAuthenticationProvider(credential, { scopes: ['https://graph.microsoft.com/.default'] })
 
   return Client.initWithMiddleware({
-    debugLogging: true,
     authProvider: authProvider,
   })
 })
@@ -31,7 +30,17 @@ export class B2cUserService {
     return `https://${b2cTenantName}.b2clogin.com/${b2cTenantId}/v2.0/`
   }
 
-  async createB2cUser({ givenName, email, familyName }: { givenName: string; familyName: string; email: string }): Promise<GraphUser> {
+  async createB2cUser({
+    givenName,
+    email,
+    familyName,
+    forceChangePasswordNextSignInWithMfa = true,
+  }: {
+    givenName: string
+    familyName: string
+    email: string
+    forceChangePasswordNextSignInWithMfa?: boolean
+  }): Promise<GraphUser> {
     const graphClient = GraphClient()
 
     return await graphClient.api('/users').post({
@@ -45,7 +54,7 @@ export class B2cUserService {
         },
       ],
       passwordProfile: {
-        forceChangePasswordNextSignInWithMfa: true,
+        forceChangePasswordNextSignInWithMfa,
         password: randomUUID(),
       },
       givenName: givenName,

@@ -31,3 +31,4 @@ extensions:
             HexColorCode: string
             Void: null | undefined | void
             JSONObject: Record<string, unknown>
+            EmailAddress: string

@@ -22,6 +22,8 @@ export type Scalars = {
   Float: number;
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
   DateTime: Date;
+  /** A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address. */
+  EmailAddress: string;
   /** A field whose value is a hex color code: https://en.wikipedia.org/wiki/Web_colors. */
   HexColorCode: string;
   /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
@@ -549,6 +551,7 @@ export type KeyVaultMetadata = {
 
 export type Mutation = {
   __typename?: 'Mutation';
+  beginOnboarding?: Maybe<Scalars['Void']>;
   /** Creates a new contract */
   createContract: Contract;
   /** The result of this request returns a QR code with a link to start the issuance process, or an error */
@@ -569,6 +572,11 @@ export type Mutation = {
   updateContract: Contract;
   /** Updates an existing template */
   updateTemplate: Template;
+};
+
+
+export type MutationBeginOnboardingArgs = {
+  input: OnboardingInput;
 };
 
 
@@ -656,6 +664,13 @@ export type NetworkIssuersWhere = {
   /** Only include issuers that are trusted (by this organisation) */
   isTrusted?: InputMaybe<Scalars['Boolean']>;
   linkedDomainUrlsLike?: InputMaybe<Scalars['String']>;
+};
+
+/** Input to start the onboarding process. */
+export type OnboardingInput = {
+  email: Scalars['EmailAddress'];
+  familyName: Scalars['String'];
+  givenName: Scalars['String'];
 };
 
 /**
@@ -1372,6 +1387,7 @@ export type ResolversTypes = {
   DateTime: ResolverTypeWrapper<Scalars['DateTime']>;
   DidDocumentStatus: DidDocumentStatus;
   DidModel: ResolversTypes['IonDidModel'] | ResolversTypes['WebDidModel'];
+  EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']>;
   HexColorCode: ResolverTypeWrapper<Scalars['HexColorCode']>;
   Identity: ResolverTypeWrapper<Identity>;
   IdentityInput: IdentityInput;
@@ -1390,6 +1406,7 @@ export type ResolversTypes = {
   NetworkContract: ResolverTypeWrapper<NetworkContract>;
   NetworkIssuer: ResolverTypeWrapper<NetworkIssuer>;
   NetworkIssuersWhere: NetworkIssuersWhere;
+  OnboardingInput: OnboardingInput;
   Pin: Pin;
   PositiveInt: ResolverTypeWrapper<Scalars['PositiveInt']>;
   Presentation: ResolverTypeWrapper<PresentationEntity>;
@@ -1456,6 +1473,7 @@ export type ResolversParentTypes = {
   CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
   DateTime: Scalars['DateTime'];
   DidModel: ResolversParentTypes['IonDidModel'] | ResolversParentTypes['WebDidModel'];
+  EmailAddress: Scalars['EmailAddress'];
   HexColorCode: Scalars['HexColorCode'];
   Identity: Identity;
   IdentityInput: IdentityInput;
@@ -1473,6 +1491,7 @@ export type ResolversParentTypes = {
   NetworkContract: NetworkContract;
   NetworkIssuer: NetworkIssuer;
   NetworkIssuersWhere: NetworkIssuersWhere;
+  OnboardingInput: OnboardingInput;
   Pin: Pin;
   PositiveInt: Scalars['PositiveInt'];
   Presentation: PresentationEntity;
@@ -1595,6 +1614,10 @@ export type DidModelResolvers<ContextType = GraphQLContext, ParentType extends R
   signingKeys?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
+export interface EmailAddressScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['EmailAddress'], any> {
+  name: 'EmailAddress';
+}
+
 export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['HexColorCode'], any> {
   name: 'HexColorCode';
 }
@@ -1665,6 +1688,7 @@ export interface LocaleScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
 }
 
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  beginOnboarding?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationBeginOnboardingArgs, 'input'>>;
   createContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationCreateContractArgs, 'input'>>;
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
   createPresentationRequest?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestArgs, 'request'>>;
@@ -1908,6 +1932,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   ContractDisplayModel?: ContractDisplayModelResolvers<ContextType>;
   DateTime?: GraphQLScalarType;
   DidModel?: DidModelResolvers<ContextType>;
+  EmailAddress?: GraphQLScalarType;
   HexColorCode?: GraphQLScalarType;
   Identity?: IdentityResolvers<ContextType>;
   IonDidModel?: IonDidModelResolvers<ContextType>;

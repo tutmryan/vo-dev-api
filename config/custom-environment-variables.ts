@@ -52,6 +52,9 @@ const config: EnvVarSubstitution<Config> = {
       },
     },
   },
+  sendgrid: {
+    key: 'SENDGRID_API_KEY',
+  },
   integrations: {
     verifiedIdAdmin: {
       auth: {

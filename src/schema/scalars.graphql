@@ -83,10 +83,10 @@ scalar DateTime
 # """
 # scalar LocalEndTime
 
-# """
-# A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
-# """
-# scalar EmailAddress
+"""
+A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
+"""
+scalar EmailAddress
 
 # """
 # Floats that will have a value less than 0.

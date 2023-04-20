@@ -41,6 +41,13 @@ const config: DeepPartial<Config> = {
       },
     },
   },
+  sendgrid: {
+    templates: {
+      onboarding: {
+        mailData: { templateId: 'd-8c0c050b6a94416f9c6936b305ccb3ee', from: { email: 'sam.curry@makerx.com.au', name: 'Sam Curry' } },
+      },
+    },
+  },
   integrations: {
     verifiedIdAdmin: {
       baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/',
