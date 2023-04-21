@@ -309,6 +309,8 @@ export type ContractInput = {
 
 /** Defines the searchable fields usable to find contracts */
 export type ContractWhere = {
+  /** List only contracts that are or are not published in the Verified Credentials Network */
+  isProvisioned?: InputMaybe<Scalars['Boolean']>;
   /** The name of the contract to match */
   name?: InputMaybe<Scalars['String']>;
   /** List only contracts from this template */

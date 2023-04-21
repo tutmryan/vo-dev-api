@@ -375,4 +375,8 @@ input ContractWhere {
   List only contracts from this template
   """
   templateId: ID
+  """
+  List only contracts that are or are not published in the Verified Credentials Network
+  """
+  isProvisioned: Boolean
 }
