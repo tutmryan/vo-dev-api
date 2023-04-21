@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<TrustFrameworkPolicy
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06"
+  PolicySchemaVersion="0.3.0.0"
+  TenantId="voonboardingdemo.onmicrosoft.com"
+  PolicyId="B2C_1A_TrustFrameworkExtensions"
+  PublicPolicyUri="http://voonboardingdemo.onmicrosoft.com/B2C_1A_TrustFrameworkExtensions">
+
+  <BasePolicy>
+    <TenantId>voonboardingdemo.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkLocalization</PolicyId>
+  </BasePolicy>
+ <BuildingBlocks>
+
+  </BuildingBlocks>
+
+  <ClaimsProviders>
+
+    <ClaimsProvider>
+      <DisplayName>Local Account SignIn</DisplayName>
+      <TechnicalProfiles>
+         <TechnicalProfile Id="login-NonInteractive">
+          <Metadata>
+            <Item Key="client_id">2f54d20e-1c36-4e94-938c-acca22bae101</Item>
+            <Item Key="IdTokenAudience">096cbe2d-3745-406c-9224-7fbc720876e8</Item>
+          </Metadata>
+          <InputClaims>
+            <InputClaim ClaimTypeReferenceId="client_id" DefaultValue="2f54d20e-1c36-4e94-938c-acca22bae101" />
+            <InputClaim ClaimTypeReferenceId="resource_id" PartnerClaimType="resource" DefaultValue="096cbe2d-3745-406c-9224-7fbc720876e8" />
+          </InputClaims>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+
+  </ClaimsProviders>
+
+    <!--UserJourneys>
+
+	</UserJourneys-->
+
+</TrustFrameworkPolicy>
