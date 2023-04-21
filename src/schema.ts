@@ -10,24 +10,14 @@ import { pick } from 'lodash'
 import path from 'path'
 import { permissions } from './shield'
 
+const usedScalars = pick(scalarResolvers, 'PositiveInt', 'URL', 'DateTime', 'Locale', 'HexColorCode', 'Void', 'JSONObject', 'EmailAddress')
+
 export default function () {
   const resolvers = loadFilesSync(path.join(__dirname, './features/**/resolvers.*'), { extensions: ['ts', 'js'] })
   const typeDefs = loadFilesSync<string>([
     path.join(__dirname, './features/**/schema.graphql'),
     path.join(__dirname, './schema/**/*.graphql'),
   ])
-
-  const usedScalars = pick(
-    scalarResolvers,
-    'PositiveInt',
-    'URL',
-    'DateTime',
-    'Locale',
-    'HexColorCode',
-    'Void',
-    'JSONObject',
-    'EmailAddress',
-  )
 
   let schema = makeExecutableSchema({
     typeDefs,
