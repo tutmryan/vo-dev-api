@@ -16,6 +16,7 @@ export async function UpdateTemplateCommand(this: CommandContext, id: string, in
     description: input.description,
     isPublic: input.isPublic ?? null,
     validityIntervalInSeconds: input.validityIntervalInSeconds ?? null,
+    credentialTypes: input.credentialTypes ?? null,
     display: toDisplayModel(input.display),
   })
 

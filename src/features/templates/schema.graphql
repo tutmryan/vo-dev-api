@@ -75,6 +75,10 @@ type Template {
   The lifespan of the credential expressed in seconds
   """
   validityIntervalInSeconds: PositiveInt
+  """
+  The type(s) of the contract / credential
+  """
+  credentialTypes: [String!]
 
   """
   The template contracts, if any
@@ -117,6 +121,10 @@ type TemplateParentData {
   The lifespan of the credential expressed in seconds
   """
   validityIntervalInSeconds: PositiveInt
+  """
+  The type(s) of the contract / credential
+  """
+  credentialTypes: [String!]
 }
 
 """
@@ -150,6 +158,10 @@ input TemplateInput {
   The lifespan of the credential expressed in seconds
   """
   validityIntervalInSeconds: PositiveInt
+  """
+  The type(s) of the contract / credential
+  """
+  credentialTypes: [String!]
 }
 
 """

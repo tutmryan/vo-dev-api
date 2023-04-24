@@ -44,6 +44,7 @@ export const TemplateFragment = graphql(
     }
     isPublic
     validityIntervalInSeconds
+    credentialTypes
   }
 ` as const,
 )

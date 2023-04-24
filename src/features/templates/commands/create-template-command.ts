@@ -19,6 +19,7 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
     description: input.description,
     isPublic: input.isPublic ?? null,
     validityIntervalInSeconds: input.validityIntervalInSeconds ?? null,
+    credentialTypes: input.credentialTypes ?? null,
     parent,
     display: toDisplayModel(input.display),
   })

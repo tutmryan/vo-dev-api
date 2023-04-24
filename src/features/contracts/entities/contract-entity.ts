@@ -1,5 +1,5 @@
 import { isEqual, uniq } from 'lodash'
-import { Column, Entity, ManyToOne } from 'typeorm'
+import { Column, Entity, ManyToOne, RelationId } from 'typeorm'
 import type { ContractDisplayModel } from '../../../generated/graphql'
 import { domainInvariant } from '../../../util/domain-invariant'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
@@ -48,7 +48,7 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => UserEntity, { nullable: true })
   provisionedBy!: Promise<UserEntity | null>
 
-  @Column()
+  @RelationId((contract: ContractEntity) => contract.provisionedBy)
   provisionedById!: string | null
 
   @Column({ type: 'datetimeoffset', nullable: true })
@@ -57,7 +57,7 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => UserEntity, { nullable: true })
   lastProvisionedBy!: Promise<UserEntity | null>
 
-  @Column()
+  @RelationId((contract: ContractEntity) => contract.lastProvisionedBy)
   lastProvisionedById!: string | null
 
   @Column({ type: 'datetimeoffset', nullable: true })

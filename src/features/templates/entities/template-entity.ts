@@ -1,6 +1,7 @@
-import { merge } from 'lodash'
+import { compact, flatten, isEqual, merge, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
 import type { TemplateDisplayModel, TemplateParentData } from '../../../generated/graphql'
+import { domainInvariant } from '../../../util/domain-invariant'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
@@ -14,6 +15,7 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
     parent: TemplateEntity | null
     isPublic: boolean | null
     validityIntervalInSeconds: number | null
+    credentialTypes: string[] | null
     display: TemplateDisplayModel | null
   }) {
     super()
@@ -53,6 +55,20 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
     this.displayJson = display ? JSON.stringify(display) : null
   }
 
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
+  private credentialTypesJson!: string | null
+
+  get credentialTypes(): string[] | null {
+    return this.credentialTypesJson ? JSON.parse(this.credentialTypesJson) : null
+  }
+
+  set credentialTypes(credentialTypes: string[] | null) {
+    if (credentialTypes) {
+      domainInvariant(isEqual(credentialTypes, uniq(credentialTypes)), 'Credential types need to be unique')
+      this.credentialTypesJson = JSON.stringify(credentialTypes)
+    } else this.credentialTypesJson = null
+  }
+
   private async getAncestors(): Promise<TemplateEntity[]> {
     let parent = await this.parent
     if (!parent) return []
@@ -69,7 +85,11 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
   async parentData(): Promise<TemplateParentData | undefined> {
     const ancestors = await this.getAncestors()
     if (ancestors.length == 0) return undefined
-    return merge({}, ...ancestors.map(toTemplateParentData))
+    const credentialTypes = uniq(compact(flatten(ancestors.map((a) => a.credentialTypes)))).sort()
+    const data = merge({}, ...ancestors.map(toTemplateParentData), {
+      credentialTypes: credentialTypes.length ? credentialTypes : undefined,
+    })
+    return data
   }
 
   async combinedData(): Promise<TemplateParentData> {
@@ -79,7 +99,9 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
     return merge(parentData, toTemplateParentData(this))
   }
 
-  async update(input: Pick<TemplateEntity, 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'display'>) {
+  async update(
+    input: Pick<TemplateEntity, 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes'>,
+  ) {
     const parentTemplateData = await this.parentData()
     if (parentTemplateData) {
       ensureNoIntersectingTemplateData(toTemplateParentData(input), parentTemplateData)

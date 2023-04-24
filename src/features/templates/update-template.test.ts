@@ -14,6 +14,7 @@ describe('updateTemplate mutation', () => {
       parentTemplate = await createTemplate({
         name: 'Parent template',
         description: 'This is the parent template',
+        credentialTypes: ['ParentType'],
         display: {
           card: {
             backgroundColor: '#222222',
@@ -91,6 +92,8 @@ describe('updateTemplate mutation', () => {
           // No errors here as they're not set on the parent template
           isPublic: true,
           validityIntervalInSeconds: 1_500,
+          // This will cause an error as it's set on the parent template
+          credentialTypes: ['ParentType'],
           display: {
             // No error here either
             locale: 'en-AU',
@@ -118,7 +121,7 @@ describe('updateTemplate mutation', () => {
     // Assert
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toMatchInlineSnapshot(
-      `"The template overrides the following properties from its parent: display.card.backgroundColor, display.consent.title, display.claims[parent_claim]"`,
+      `"The template overrides the following properties from its parent: display.card.backgroundColor, display.consent.title, display.claims[parent_claim], credentialTypes[ParentType]"`,
     )
   })
 

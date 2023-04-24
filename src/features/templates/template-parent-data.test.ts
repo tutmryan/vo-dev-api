@@ -34,6 +34,7 @@ graphql(
       }
       isPublic
       validityIntervalInSeconds
+      credentialTypes
     }
   }
   ` as const,
@@ -73,6 +74,7 @@ describe('template.parentData field', () => {
     const parentTemplate = await createTemplate({
       ...parentTemplateInput,
       validityIntervalInSeconds: 1_000,
+      credentialTypes: ['CredentialType', 'AnotherType'],
       display: {
         ...parentTemplateInput.display,
         locale: 'en-AU',
@@ -103,6 +105,7 @@ describe('template.parentData field', () => {
     // Assert
     expect(data!.template.parentData).toMatchObject({
       validityIntervalInSeconds: 1_000,
+      credentialTypes: ['AnotherType', 'CredentialType'],
       display: {
         locale: 'en-AU',
         consent: { instructions: 'Parent consent instructions' },
@@ -122,6 +125,7 @@ describe('template.parentData field', () => {
     const rootTemplate = await createTemplate({
       ...rootTemplateInput,
       validityIntervalInSeconds: 1_440,
+      credentialTypes: ['RootType'],
       display: {
         ...rootTemplateInput.display,
         consent: { instructions: 'Root template consent instructions' },
@@ -138,6 +142,7 @@ describe('template.parentData field', () => {
       ...parentTemplateInput,
       parentTemplateId: rootTemplate.id,
       isPublic: false,
+      credentialTypes: ['ParentType'],
       display: {
         ...parentTemplateInput.display,
         consent: { title: 'Parent template consent title' },
@@ -169,6 +174,7 @@ describe('template.parentData field', () => {
     // Assert
     expect(data!.template.parentData).toMatchObject({
       validityIntervalInSeconds: 1_440,
+      credentialTypes: ['ParentType', 'RootType'],
       isPublic: false,
       display: {
         consent: {

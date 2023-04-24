@@ -73,8 +73,8 @@ type Contract {
   """
   validityIntervalInSeconds: PositiveInt!
   """
-  The types of credentials that can be issued and presented from the contract.
-  Requires at least one type, and cannot have duplicate types.
+  The type(s) of the contract / credential
+  Requires at least one type, and cannot have duplicate types
   """
   credentialTypes: [String!]!
 
@@ -151,8 +151,8 @@ input ContractInput {
   """
   validityIntervalInSeconds: PositiveInt!
   """
-  The types of credentials that can be issued and presented from the contract.
-  Requires at least one type, and cannot have duplicate types.
+  The type(s) of the contract / credential
+  Requires at least one type, and cannot have duplicate types
   """
   credentialTypes: [String!]!
 }
