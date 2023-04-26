@@ -88,7 +88,9 @@ export class ContractEntity extends AuditedAndTrackedEntity {
     this.credentialTypesJson = JSON.stringify(credentialTypes)
   }
 
-  async update(input: Pick<ContractEntity, 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'display'>) {
+  async update(
+    input: Pick<ContractEntity, 'name' | 'description' | 'credentialTypes' | 'isPublic' | 'validityIntervalInSeconds' | 'display'>,
+  ) {
     typeSafeAssign(this, input)
   }
 
