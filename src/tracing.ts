@@ -14,6 +14,12 @@ resource.attributes[SemanticResourceAttributes.SERVICE_NAMESPACE] = 'verifiable-
 const config = new ApplicationInsightsConfig()
 config.resource = resource
 
+/**
+ * Disabling this for now as it shows 1000s of failed requests on the App Insights dashboard.
+ * See https://github.com/microsoft/ApplicationInsights-node.js/issues/1123
+ */
+config.enableAutoCollectStandardMetrics = false
+
 config.instrumentations.http = { enabled: true }
 config.instrumentations.azureSdk = { enabled: true }
 config.logInstrumentations.winston = { enabled: true }
