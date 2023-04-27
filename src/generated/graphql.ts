@@ -859,6 +859,8 @@ export type Query = {
   networkContracts: Array<NetworkContract>;
   /** Returns a template by ID */
   template: Template;
+  /** Returns the combined data of a template and its ancestors */
+  templateCombinedData: TemplateParentData;
 };
 
 
@@ -904,6 +906,11 @@ export type QueryNetworkContractsArgs = {
 
 export type QueryTemplateArgs = {
   id: Scalars['ID'];
+};
+
+
+export type QueryTemplateCombinedDataArgs = {
+  templateId: Scalars['ID'];
 };
 
 /** Provides configuration information about the presentation request */
@@ -1794,6 +1801,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityArgs, 'id'>>;
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
   template?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<QueryTemplateArgs, 'id'>>;
+  templateCombinedData?: Resolver<ResolversTypes['TemplateParentData'], ParentType, ContextType, RequireFields<QueryTemplateCombinedDataArgs, 'templateId'>>;
 };
 
 export type RequestConfigurationValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestConfigurationValidation'] = ResolversParentTypes['RequestConfigurationValidation']> = {

@@ -9,6 +9,11 @@ type Query {
   Returns a template by ID
   """
   template(id: ID!): Template!
+
+  """
+  Returns the combined data of a template and its ancestors
+  """
+  templateCombinedData(templateId: ID!): TemplateParentData!
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description
