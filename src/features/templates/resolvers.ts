@@ -5,7 +5,6 @@ import { CreateTemplateCommand } from './commands/create-template-command'
 import { DeleteTemplateCommand } from './commands/delete-template-command'
 import { UpdateTemplateCommand } from './commands/update-template-command'
 import { FindTemplatesQuery } from './queries/find-templates-query'
-import { GetTemplateQuery } from './queries/get-template-query'
 
 export const resolvers: Resolvers = {
   Mutation: {
@@ -14,7 +13,7 @@ export const resolvers: Resolvers = {
     deleteTemplate: (_, { id }, context) => dispatch(context, DeleteTemplateCommand, id),
   },
   Query: {
-    template: (_, { id }, context) => query(context, GetTemplateQuery, id),
+    template: (_, { id }, { dataLoaders: { templates } }) => templates.load(id),
     findTemplates: (_, { where, offset, limit }, context) => query(context, FindTemplatesQuery, where, offset, limit),
   },
   Template: {
