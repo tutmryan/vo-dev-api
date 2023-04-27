@@ -95,7 +95,6 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
   async combinedData(): Promise<TemplateParentData> {
     const parentData = await this.parentData()
     if (!parentData) return toTemplateParentData(this)
-
     return merge(parentData, toTemplateParentData(this))
   }
 

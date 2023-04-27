@@ -15,6 +15,10 @@ export const resolvers: Resolvers = {
   Query: {
     template: (_, { id }, { dataLoaders: { templates } }) => templates.load(id),
     findTemplates: (_, { where, offset, limit }, context) => query(context, FindTemplatesQuery, where, offset, limit),
+    templateCombinedData: async (_, { templateId }, { dataLoaders: { templates } }) => {
+      const template = await templates.load(templateId)
+      return template.combinedData()
+    },
   },
   Template: {
     updatedAt: resolveUpdatedAt,
