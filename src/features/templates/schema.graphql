@@ -52,13 +52,11 @@ type Template {
 
   """
   The parent template, if any.
-  The root template has no parent.
   """
   parent: Template
 
   """
-  The combined representation of this template's parent chain.
-  The root template has no parent.
+  The combined representation of this template's parent + ancestors, if any.
   """
   parentData: TemplateParentData
 

@@ -1045,15 +1045,9 @@ export type Template = {
   isPublic?: Maybe<Scalars['Boolean']>;
   /** The name of the template */
   name: Scalars['String'];
-  /**
-   * The parent template, if any.
-   * The root template has no parent.
-   */
+  /** The parent template, if any. */
   parent?: Maybe<Template>;
-  /**
-   * The combined representation of this template's parent chain.
-   * The root template has no parent.
-   */
+  /** The combined representation of this template's parent + ancestors, if any. */
   parentData?: Maybe<TemplateParentData>;
   /** When the template was last updated. */
   updatedAt?: Maybe<Scalars['DateTime']>;
