@@ -9,6 +9,8 @@
 CREATE USER [Verified Orchestration Report Data Viewers] FROM EXTERNAL PROVIDER
 GO
 
+-- run the migration to create role report_data_viewer before running the next
+
 ALTER ROLE [report_data_viewer] ADD MEMBER [Verified Orchestration Report Data Viewers]
 GO
 ```

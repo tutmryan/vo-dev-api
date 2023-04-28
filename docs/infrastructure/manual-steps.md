@@ -156,7 +156,7 @@ To create the users:
 1. In the "Settings" section of the left menu, click on "SQL databases", then on the relevant database.
 1. In the left menu, click on "Query editor", then click on the "Continue as..." button in the "Azure Active Directory" section.
 1. Copy the contents of the [`create-aad-user.sql` script](../../infrastructure/scripts/create-aad-user.sql) and replace the `<aad-user>` token with the name of the application.
-1. The Functions app needs the `db_ddladmin` role, the GraphQL API doesn't.
+1. The Functions app needs the `db_ddladmin` and `db_securityadmin` roles (db_securityadmin to create roles and grant permissions to role), the GraphQL API doesn't.
 
 ## Create an app registration for the authenticated callbacks from the Verified ID service
 
