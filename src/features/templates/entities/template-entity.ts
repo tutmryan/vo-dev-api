@@ -1,4 +1,4 @@
-import { flatten, isEqual, merge, uniq } from 'lodash'
+import { compact, flatten, isEqual, merge, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
 import type { TemplateDisplayClaim, TemplateDisplayModel, TemplateParentData } from '../../../generated/graphql'
 import { domainInvariant } from '../../../util/domain-invariant'
@@ -109,7 +109,7 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
    *   - `display.claims` is a union of claims from all ancestors (earliest to latest), with the latest taking precedence (by claim name)
    */
   private mergeAncestors(ancestors: TemplateParentData[]): TemplateParentData {
-    const credentialTypes = flatten(ancestors.map((a) => a.credentialTypes).reverse())
+    const credentialTypes = flatten(compact(ancestors.map((a) => a.credentialTypes)).reverse())
     const data = merge({}, ...ancestors.map(toTemplateParentData), {
       credentialTypes: credentialTypes.length ? credentialTypes : undefined,
     })
