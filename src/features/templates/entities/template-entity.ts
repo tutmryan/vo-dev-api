@@ -1,6 +1,6 @@
-import { compact, flatten, isEqual, merge, uniq } from 'lodash'
+import { flatten, isEqual, merge, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
-import type { TemplateDisplayModel, TemplateParentData } from '../../../generated/graphql'
+import type { TemplateDisplayClaim, TemplateDisplayModel, TemplateParentData } from '../../../generated/graphql'
 import { domainInvariant } from '../../../util/domain-invariant'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
@@ -82,20 +82,46 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
     return ancestors
   }
 
+  /**
+   *
+   * @returns A merged representation of this template's ancestors. See #mergeAncestors for details.
+   */
   async parentData(): Promise<TemplateParentData | undefined> {
     const ancestors = await this.getAncestors()
     if (ancestors.length == 0) return undefined
-    const credentialTypes = uniq(compact(flatten(ancestors.map((a) => a.credentialTypes)))).sort()
+    return this.mergeAncestors(ancestors)
+  }
+
+  /**
+   *
+   * @returns A merged representation of this template and it's ancestors. See #mergeAncestors for details.
+   */
+  async combinedData(): Promise<TemplateParentData> {
+    const ancestors = await this.getAncestors()
+    const thisData = toTemplateParentData(this)
+    return this.mergeAncestors([thisData, ...ancestors])
+  }
+
+  /**
+   *
+   * @returns A merged representation of the ancestors:
+   *   - `credentialTypes` is a union of credential types from all ancestors (earliest to latest)
+   *   - `display.claims` is a union of claims from all ancestors (earliest to latest), with the latest taking precedence (by claim name)
+   */
+  private mergeAncestors(ancestors: TemplateParentData[]): TemplateParentData {
+    const credentialTypes = flatten(ancestors.map((a) => a.credentialTypes).reverse())
     const data = merge({}, ...ancestors.map(toTemplateParentData), {
       credentialTypes: credentialTypes.length ? credentialTypes : undefined,
     })
+    data.display.claims = ancestors
+      .reduce<TemplateDisplayClaim[]>((acc, { display }) => {
+        if (!display?.claims) return acc
+        const toAdd = display.claims.filter((claim) => !acc.some((c) => c.claim === claim.claim))
+        acc.push(...toAdd.reverse())
+        return acc
+      }, [])
+      .reverse()
     return data
-  }
-
-  async combinedData(): Promise<TemplateParentData> {
-    const parentData = await this.parentData()
-    if (!parentData) return toTemplateParentData(this)
-    return merge(parentData, toTemplateParentData(this))
   }
 
   async update(

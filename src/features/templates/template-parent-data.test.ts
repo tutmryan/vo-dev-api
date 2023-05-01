@@ -105,7 +105,7 @@ describe('template.parentData field', () => {
     // Assert
     expect(data!.template.parentData).toMatchObject({
       validityIntervalInSeconds: 1_000,
-      credentialTypes: ['AnotherType', 'CredentialType'],
+      credentialTypes: ['CredentialType', 'AnotherType'],
       display: {
         locale: 'en-AU',
         consent: { instructions: 'Parent consent instructions' },
@@ -147,8 +147,8 @@ describe('template.parentData field', () => {
         ...parentTemplateInput.display,
         consent: { title: 'Parent template consent title' },
         claims: [
-          { claim: 'standard_claim', label: 'Standard claim', type: 'String', value: 'Standard claim value' },
           { claim: 'parent_template_claim', label: 'Parent template claim', type: 'String' },
+          { claim: 'standard_claim', label: 'Standard claim', type: 'String', value: 'Standard claim value' },
         ],
         card: {
           backgroundColor: '#321321',
@@ -174,7 +174,7 @@ describe('template.parentData field', () => {
     // Assert
     expect(data!.template.parentData).toMatchObject({
       validityIntervalInSeconds: 1_440,
-      credentialTypes: ['ParentType', 'RootType'],
+      credentialTypes: ['RootType', 'ParentType'],
       isPublic: false,
       display: {
         consent: {
@@ -182,8 +182,8 @@ describe('template.parentData field', () => {
           title: 'Parent template consent title',
         },
         claims: [
-          { claim: 'standard_claim', label: 'Standard claim', type: 'String', value: 'Standard claim value' },
           { claim: 'parent_template_claim', label: 'Parent template claim', type: 'String' },
+          { claim: 'standard_claim', label: 'Standard claim', type: 'String', value: 'Standard claim value' },
         ],
         card: {
           issuedBy: 'Root template Pty Ltd',
