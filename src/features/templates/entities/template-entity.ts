@@ -113,7 +113,7 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
     const data = merge({}, ...ancestors.map(toTemplateParentData), {
       credentialTypes: credentialTypes.length ? credentialTypes : undefined,
     })
-    data.display.claims = ancestors
+    const claims = ancestors
       .reduce<TemplateDisplayClaim[]>((acc, { display }) => {
         if (!display?.claims) return acc
         const toAdd = display.claims.filter((claim) => !acc.some((c) => c.claim === claim.claim))
@@ -121,6 +121,10 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
         return acc
       }, [])
       .reverse()
+    if (claims.length) {
+      if (!data.display) data.display = {}
+      data.display.claims = claims
+    }
     return data
   }
 
