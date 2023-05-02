@@ -20,6 +20,12 @@ export const resolvers: Resolvers = {
   },
   Contract: {
     updatedAt: resolveUpdatedAt,
+    template: ({ templateId }, _, { dataLoaders: { templates } }) => (templateId ? templates.load(templateId) : null),
+    templateData: async ({ templateId }, _, { dataLoaders: { templates } }) => {
+      if (!templateId) return null
+      const template = await templates.load(templateId)
+      return template.combinedData()
+    },
   },
   Issuance: {
     contract: ({ contractId }, _, { dataLoaders: { contracts } }) => contracts.load(contractId),
