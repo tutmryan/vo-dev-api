@@ -1027,6 +1027,8 @@ export type Template = {
   __typename?: 'Template';
   /** This templates children, if any. */
   children: Array<Template>;
+  /** The combined representation of this template, it's parent + ancestors, if any. */
+  combinedData?: Maybe<TemplateParentData>;
   /** The template contracts, if any */
   contracts: Array<Contract>;
   /** When the template was created. */
@@ -1847,6 +1849,7 @@ export type RequestedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
 
 export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Template'] = ResolversParentTypes['Template']> = {
   children?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType>;
+  combinedData?: Resolver<Maybe<ResolversTypes['TemplateParentData']>, ParentType, ContextType>;
   contracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;

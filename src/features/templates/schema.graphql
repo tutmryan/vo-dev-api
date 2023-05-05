@@ -61,6 +61,11 @@ type Template {
   parentData: TemplateParentData
 
   """
+  The combined representation of this template, it's parent + ancestors, if any.
+  """
+  combinedData: TemplateParentData
+
+  """
   This templates children, if any.
   """
   children: [Template!]!

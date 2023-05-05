@@ -2,6 +2,7 @@ import { compact, flatten, isEqual, merge, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
 import type { TemplateDisplayClaim, TemplateDisplayModel, TemplateParentData } from '../../../generated/graphql'
 import { domainInvariant } from '../../../util/domain-invariant'
+import { Lazy } from '../../../util/lazy'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
@@ -69,7 +70,7 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
     } else this.credentialTypesJson = null
   }
 
-  private async getAncestors(): Promise<TemplateEntity[]> {
+  private getAncestors: () => Promise<TemplateEntity[]> = Lazy(async () => {
     let parent = await this.parent
     if (!parent) return []
 
@@ -80,27 +81,27 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
     }
 
     return ancestors
-  }
+  })
 
   /**
    *
    * @returns A merged representation of this template's ancestors. See #mergeAncestors for details.
    */
-  async parentData(): Promise<TemplateParentData | undefined> {
+  parentData: () => Promise<TemplateParentData | undefined> = Lazy(async () => {
     const ancestors = await this.getAncestors()
     if (ancestors.length == 0) return undefined
     return this.mergeAncestors(ancestors)
-  }
+  })
 
   /**
    *
    * @returns A merged representation of this template and it's ancestors. See #mergeAncestors for details.
    */
-  async combinedData(): Promise<TemplateParentData> {
+  combinedData: () => Promise<TemplateParentData> = Lazy(async () => {
     const ancestors = await this.getAncestors()
     const thisData = toTemplateParentData(this)
     return this.mergeAncestors([thisData, ...ancestors])
-  }
+  })
 
   /**
    *
