@@ -46,10 +46,12 @@ export const findUpdateOrCreateUser: CreateUser<User | undefined> = async ({ cla
   }
 
   // we don't have a real graphql context yet, so create just enough to dispatch FindUpdateOrCreateUser command
-  const context: Pick<GraphQLContext, 'dataSource' | 'user' | 'services'> = {
+  const context: Pick<GraphQLContext, 'dataSource' | 'user' | 'logger' | 'services' | 'dataLoaders'> = {
     dataSource,
     user: undefined,
+    logger,
     services: {} as any as Services,
+    dataLoaders: {} as any as DataLoaders,
   }
 
   const userEntity = await dispatch(context, FindUpdateOrCreateUser, input)

@@ -1,14 +1,14 @@
 import type { GraphQLContext } from '../context'
 import { entityManager, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../data'
+import { addUserToManager } from '../features/auditing/user-context-helper'
 import type { CommandContext } from './command-context'
 import type { QueryContext } from './query-context'
-import { addUserToManager } from '../features/auditing/user-context-helper'
 
 export type CommandLike = (this: CommandContext, ...args: any) => any
 export type QueryLike = (this: QueryContext, ...args: any) => any
 
 export const dispatch = async <T extends CommandLike>(
-  context: Pick<GraphQLContext, 'dataSource' | 'user' | 'services'>,
+  context: Pick<GraphQLContext, 'dataSource' | 'user' | 'services' | 'dataLoaders' | 'logger'>,
   command: T,
   ...args: Parameters<T>
 ): Promise<Awaited<ReturnType<T>>> => {
@@ -22,7 +22,9 @@ export const dispatch = async <T extends CommandLike>(
       {
         user,
         entityManager,
+        logger: context.logger,
         services: context.services,
+        dataLoaders: context.dataLoaders,
         contextType: 'command',
       },
       args,
@@ -31,7 +33,7 @@ export const dispatch = async <T extends CommandLike>(
 }
 
 export const query = async <T extends QueryLike>(
-  context: Omit<GraphQLContext, 'loaders'>,
+  context: Omit<GraphQLContext, 'dataLoaders'>,
   query: T,
   ...args: Parameters<T>
 ): Promise<Awaited<ReturnType<T>>> => {
@@ -40,6 +42,7 @@ export const query = async <T extends QueryLike>(
     {
       user,
       entityManager,
+      logger: context.logger,
       contextType: 'query',
     },
     args,

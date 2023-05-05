@@ -8,7 +8,7 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
 
   const contract = await repository.findOneByOrFail({ id })
 
-  const template = await contract.template
+  const template = input.templateId ? await this.dataLoaders.templates.load(input.templateId) : await contract.template
   if (template) {
     ensureNoOverridingTemplateData(input, await template.combinedData())
   }
@@ -20,6 +20,7 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
     isPublic: input.isPublic,
     validityIntervalInSeconds: input.validityIntervalInSeconds,
     display: input.display,
+    templateId: template?.id ?? null,
   })
 
   return await repository.save(contract)

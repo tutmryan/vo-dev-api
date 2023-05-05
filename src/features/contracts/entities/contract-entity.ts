@@ -89,7 +89,10 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   }
 
   async update(
-    input: Pick<ContractEntity, 'name' | 'description' | 'credentialTypes' | 'isPublic' | 'validityIntervalInSeconds' | 'display'>,
+    input: Pick<
+      ContractEntity,
+      'name' | 'description' | 'credentialTypes' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'templateId'
+    >,
   ) {
     typeSafeAssign(this, input)
   }

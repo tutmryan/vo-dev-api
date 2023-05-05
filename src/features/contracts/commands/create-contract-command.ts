@@ -15,7 +15,7 @@ export async function CreateContractCommand(this: CommandContext, input: Contrac
   }
 
   const contract = new ContractEntity({
-    ...omit(input, 'templateID'),
+    ...omit(input, 'templateId'),
     template,
   })
 
