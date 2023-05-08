@@ -27,18 +27,24 @@ export async function ProvisionContractCommand(this: CommandContext, id: string)
   return await repository.save(contract)
 }
 
-function toCreateContractInput(contract: ContractEntity): CreateContractInput {
+function toCreateContractInput({
+  name,
+  isPublic,
+  validityIntervalInSeconds: validityInterval,
+  credentialTypes,
+  display: { card, claims, consent, locale },
+}: ContractEntity): CreateContractInput {
   return {
-    name: contract.name,
-    availableInVcDirectory: contract.isPublic,
+    name: name,
+    availableInVcDirectory: isPublic,
     rules: {
-      validityInterval: contract.validityIntervalInSeconds,
-      vc: { type: contract.credentialTypes },
+      validityInterval,
+      vc: { type: credentialTypes },
       attestations: {
         idTokenHints: [
           {
             required: true,
-            mapping: contract.display.claims.map((x) => ({
+            mapping: claims.map((x) => ({
               type: x.type,
               required: true,
               outputClaim: x.claim,
@@ -51,10 +57,10 @@ function toCreateContractInput(contract: ContractEntity): CreateContractInput {
     },
     displays: [
       {
-        locale: contract.display.locale,
-        consent: contract.display.consent,
-        card: contract.display.card,
-        claims: contract.display.claims.map(({ claim, type, label, description }) => ({
+        locale,
+        consent,
+        card,
+        claims: claims.map(({ claim, type, label, description }) => ({
           label,
           claim: `vc.credentialSubject.${claim}`,
           type,
