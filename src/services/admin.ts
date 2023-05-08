@@ -1,5 +1,5 @@
 import type { HttpClientOptions } from '@makerxstudio/node-common'
-import { HttpClient } from '@makerxstudio/node-common'
+import { HttpClient, HttpResponseError } from '@makerxstudio/node-common'
 import type { BaseContext } from '../context'
 import type { Authority, NetworkContract, NetworkIssuer, NetworkIssuersWhere } from '../generated/graphql'
 import { invariant } from '../util/invariant'
@@ -33,19 +33,25 @@ export class AdminService extends HttpClient<BaseContext> {
     } catch (error: any) {
       const { message, ...rest } = error
       this.options.logger?.error('Error creating contract', { message, ...rest })
-      throw error
+      this.throwBestResponseErrorInfo(error)
     }
   }
 
   async updateContract(contractId: string, input: UpdateContractInput): Promise<Contract> {
     // The service is case-sensitive on GUIDs, and we get the contract ID from SQL Server / mssql as uppercase, so
     // we need to lowercase it ourselves #prettylame
-    return await this.patch<Contract>(
-      `verifiableCredentials/authorities/${await this.authorityId()}/contracts/${contractId.toLowerCase()}`,
-      {
-        data: input,
-      },
-    )
+    try {
+      return await this.patch<Contract>(
+        `verifiableCredentials/authorities/${await this.authorityId()}/contracts/${contractId.toLowerCase()}`,
+        {
+          data: input,
+        },
+      )
+    } catch (error: any) {
+      const { message, ...rest } = error
+      this.options.logger?.error('Error updating contract', { message, ...rest })
+      this.throwBestResponseErrorInfo(error)
+    }
   }
 
   async contracts(authorityId?: string): Promise<Contract[]> {
@@ -87,5 +93,11 @@ export class AdminService extends HttpClient<BaseContext> {
       `tenants/${tenantId}/verifiableCredentialsNetwork/authorities/${issuerId}/contracts`,
     )
     return contracts
+  }
+
+  private throwBestResponseErrorInfo(error: HttpResponseError): never {
+    if (error instanceof HttpResponseError && error.responseInfo.responseJson)
+      throw (error.responseInfo.responseJson as any).error ?? error.responseInfo.responseJson
+    throw error
   }
 }
