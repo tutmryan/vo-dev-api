@@ -5,7 +5,7 @@ import { IssuanceEntity } from '../entities/issuance-entity'
 
 export async function FindIssuancesQuery(
   this: QueryContext,
-  criteria?: Maybe<IssuanceWhere & { contractId?: string }>,
+  criteria?: Maybe<IssuanceWhere>,
   offset?: Maybe<number>,
   limit?: Maybe<number>,
 ) {
@@ -13,6 +13,7 @@ export async function FindIssuancesQuery(
 
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.contractId) where.contractId = criteria.contractId.toUpperCase()
+  if (criteria?.userId) where.userId = criteria.userId.toUpperCase()
 
   const issuances = await this.entityManager.getRepository(IssuanceEntity).find({
     where,

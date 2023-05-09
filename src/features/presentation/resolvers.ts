@@ -4,15 +4,16 @@ import { CreatePresentationRequestCommand } from './commands/create-presentation
 import { FindPresentationsQuery } from './queries/find-presentations-query'
 
 export const resolvers: Resolvers = {
+  Query: {
+    findPresentations: (_parent, { where, offset, limit }, context) => query(context, FindPresentationsQuery, where, offset, limit),
+  },
   Mutation: {
     createPresentationRequest: (_parent, { request }, context) => dispatch(context, CreatePresentationRequestCommand, request),
   },
-
   Contract: {
     presentations: (contract, { where, offset, limit }, context) =>
       query(context, FindPresentationsQuery, { contractId: contract.id, ...where }, offset, limit),
   },
-
   PresentationRequestResponse: {
     __resolveType: (response) => ('error' in response ? 'RequestErrorResponse' : 'PresentationResponse'),
   },

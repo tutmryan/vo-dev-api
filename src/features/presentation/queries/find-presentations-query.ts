@@ -5,7 +5,7 @@ import { PresentationEntity } from '../entities/presentation-entity'
 
 export async function FindPresentationsQuery(
   this: QueryContext,
-  criteria?: Maybe<IssuanceWhere & { contractId?: string }>,
+  criteria?: Maybe<IssuanceWhere>,
   offset?: Maybe<number>,
   limit?: Maybe<number>,
 ) {
@@ -13,6 +13,7 @@ export async function FindPresentationsQuery(
   const relations: FindOptionsRelations<PresentationEntity> = {}
 
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
+  if (criteria?.userId) where.userId = criteria.userId.toUpperCase()
   if (criteria?.contractId) {
     relations.contracts = true
     where.contracts = { id: criteria.contractId.toUpperCase() }

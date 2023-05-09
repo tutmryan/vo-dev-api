@@ -308,6 +308,20 @@ type Presentation {
 }
 
 """
+Criteria for filtering contract presentations.
+"""
+input ContractPresentationWhere {
+  """
+  The ID of the identity who presented the credential (if known).
+  """
+  identityId: ID
+  """
+  The ID of the user (Person or Application) that requested & received the presentation.
+  """
+  userId: ID
+}
+
+"""
 Criteria for filtering presentations.
 """
 input PresentationWhere {
@@ -315,11 +329,26 @@ input PresentationWhere {
   The ID of the identity who presented the credential (if known).
   """
   identityId: ID
+  """
+  The ID of a contract used to make the presentation request.
+  """
+  contractId: ID
+  """
+  The ID of the user (Person or Application) that requested & received the presentation.
+  """
+  userId: ID
 }
 
 extend type Contract {
   """
   Returns the successfull credential presentations for this contract.
   """
-  presentations(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+  presentations(where: ContractPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+}
+
+extend type Query {
+  """
+  Returns successfull credential presentations, optionally matching the specified criteria.
+  """
+  findPresentations(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
 }

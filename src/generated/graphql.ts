@@ -136,7 +136,7 @@ export type Contract = {
 export type ContractIssuancesArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']>;
   offset?: InputMaybe<Scalars['PositiveInt']>;
-  where?: InputMaybe<IssuanceWhere>;
+  where?: InputMaybe<ContractIssuanceWhere>;
 };
 
 
@@ -144,7 +144,7 @@ export type ContractIssuancesArgs = {
 export type ContractPresentationsArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']>;
   offset?: InputMaybe<Scalars['PositiveInt']>;
-  where?: InputMaybe<PresentationWhere>;
+  where?: InputMaybe<ContractPresentationWhere>;
 };
 
 /** Defines a claim included in a verifiable credential */
@@ -305,6 +305,22 @@ export type ContractInput = {
   templateId?: InputMaybe<Scalars['ID']>;
   /** The lifespan of the credential expressed in seconds */
   validityIntervalInSeconds: Scalars['PositiveInt'];
+};
+
+/** Criteria for filtering contract issuances. */
+export type ContractIssuanceWhere = {
+  /** The ID of the identity that was issued the credential. */
+  identityId?: InputMaybe<Scalars['ID']>;
+  /** The ID of the user (Person or Application) that issued the credential. */
+  userId?: InputMaybe<Scalars['ID']>;
+};
+
+/** Criteria for filtering contract presentations. */
+export type ContractPresentationWhere = {
+  /** The ID of the identity who presented the credential (if known). */
+  identityId?: InputMaybe<Scalars['ID']>;
+  /** The ID of the user (Person or Application) that requested & received the presentation. */
+  userId?: InputMaybe<Scalars['ID']>;
 };
 
 /** Defines the searchable fields usable to find contracts */
@@ -534,8 +550,12 @@ export type IssuanceResponse = {
 
 /** Criteria for filtering issuances. */
 export type IssuanceWhere = {
+  /** The ID of the contract that was issued. */
+  contractId?: InputMaybe<Scalars['ID']>;
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']>;
+  /** The ID of the user (Person or Application) that issued the credential. */
+  userId?: InputMaybe<Scalars['ID']>;
 };
 
 /** Information about the used Key Vault */
@@ -816,8 +836,12 @@ export type PresentationResponse = {
 
 /** Criteria for filtering presentations. */
 export type PresentationWhere = {
+  /** The ID of a contract used to make the presentation request. */
+  contractId?: InputMaybe<Scalars['ID']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']>;
+  /** The ID of the user (Person or Application) that requested & received the presentation. */
+  userId?: InputMaybe<Scalars['ID']>;
 };
 
 /** Loosely typed representation based on documentation / example event here: https://docs.microsoft.com/en-us/azure/active-directory/verifiable-credentials/presentation-request-api#callback-events */
@@ -841,11 +865,15 @@ export type Query = {
   credentialTypes: Array<Scalars['String']>;
   /** Returns contracts, optionally matching the specified criteria */
   findContracts: Array<Contract>;
+  /** Returns successfull credential issuances, optionally matching the specified criteria. */
+  findIssuances: Array<Issuance>;
   /**
    * Finds issuers from the Entra Verified ID network
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-issuers
    */
   findNetworkIssuers: Array<NetworkIssuer>;
+  /** Returns successfull credential presentations, optionally matching the specified criteria. */
+  findPresentations: Array<Presentation>;
   /** Returns templates, optionally matching the specified criteria */
   findTemplates: Array<Template>;
   /** No-op query to test if the server is up and running. */
@@ -881,8 +909,22 @@ export type QueryFindContractsArgs = {
 };
 
 
+export type QueryFindIssuancesArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']>;
+  offset?: InputMaybe<Scalars['PositiveInt']>;
+  where?: InputMaybe<IssuanceWhere>;
+};
+
+
 export type QueryFindNetworkIssuersArgs = {
   where: NetworkIssuersWhere;
+};
+
+
+export type QueryFindPresentationsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']>;
+  offset?: InputMaybe<Scalars['PositiveInt']>;
+  where?: InputMaybe<PresentationWhere>;
 };
 
 
@@ -1390,6 +1432,8 @@ export type ResolversTypes = {
   ContractDisplayModel: ResolverTypeWrapper<ContractDisplayModel>;
   ContractDisplayModelInput: ContractDisplayModelInput;
   ContractInput: ContractInput;
+  ContractIssuanceWhere: ContractIssuanceWhere;
+  ContractPresentationWhere: ContractPresentationWhere;
   ContractWhere: ContractWhere;
   CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
   CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
@@ -1477,6 +1521,8 @@ export type ResolversParentTypes = {
   ContractDisplayModel: ContractDisplayModel;
   ContractDisplayModelInput: ContractDisplayModelInput;
   ContractInput: ContractInput;
+  ContractIssuanceWhere: ContractIssuanceWhere;
+  ContractPresentationWhere: ContractPresentationWhere;
   ContractWhere: ContractWhere;
   CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
   CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
@@ -1791,7 +1837,9 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   findContracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType, Partial<QueryFindContractsArgs>>;
+  findIssuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<QueryFindIssuancesArgs>>;
   findNetworkIssuers?: Resolver<Array<ResolversTypes['NetworkIssuer']>, ParentType, ContextType, RequireFields<QueryFindNetworkIssuersArgs, 'where'>>;
+  findPresentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<QueryFindPresentationsArgs>>;
   findTemplates?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType, Partial<QueryFindTemplatesArgs>>;
   healthcheck?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityArgs, 'id'>>;
