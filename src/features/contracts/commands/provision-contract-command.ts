@@ -34,6 +34,8 @@ function toCreateContractInput({
   credentialTypes,
   display: { card, claims, consent, locale },
 }: ContractEntity): CreateContractInput {
+  const { logo, ...cardRest } = card
+  const { image, ...logoRest } = logo
   return {
     name: name,
     availableInVcDirectory: isPublic,
@@ -59,7 +61,7 @@ function toCreateContractInput({
       {
         locale,
         consent,
-        card,
+        card: { ...cardRest, logo: { ...logoRest, image: image ? image.split(',')[1] : undefined } },
         claims: claims.map(({ claim, type, label, description }) => ({
           label,
           claim: `vc.credentialSubject.${claim}`,
