@@ -19,6 +19,7 @@ export async function FindIssuancesQuery(
     where,
     skip: offset ?? undefined,
     take: limit ?? undefined,
+    order: { issuedAt: 'DESC' },
   })
 
   return issuances

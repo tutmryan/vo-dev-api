@@ -24,6 +24,7 @@ export async function FindPresentationsQuery(
     relations,
     skip: offset ?? undefined,
     take: limit ?? undefined,
+    order: { presentedAt: 'DESC' },
   })
 
   return presentations
