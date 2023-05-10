@@ -108,10 +108,10 @@ scalar EmailAddress
 # """
 # scalar NonNegativeFloat
 
-# """
-# Integers that will have a value of 0 or more.
-# """
-# scalar NonNegativeInt
+"""
+Integers that will have a value of 0 or more.
+"""
+scalar NonNegativeInt
 
 # """
 # Floats that will have a value of 0 or less.

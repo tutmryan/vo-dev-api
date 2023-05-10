@@ -10,7 +10,18 @@ import { pick } from 'lodash'
 import path from 'path'
 import { permissions } from './shield'
 
-const usedScalars = pick(scalarResolvers, 'PositiveInt', 'URL', 'DateTime', 'Locale', 'HexColorCode', 'Void', 'JSONObject', 'EmailAddress')
+const usedScalars = pick(
+  scalarResolvers,
+  'PositiveInt',
+  'NonNegativeInt',
+  'URL',
+  'DateTime',
+  'Locale',
+  'HexColorCode',
+  'Void',
+  'JSONObject',
+  'EmailAddress',
+)
 
 export default function () {
   const resolvers = loadFilesSync(path.join(__dirname, './features/**/resolvers.*'), { extensions: ['ts', 'js'] })

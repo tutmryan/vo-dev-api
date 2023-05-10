@@ -30,6 +30,8 @@ export type Scalars = {
   JSONObject: Record<string, unknown>;
   /** The locale in the format of a BCP 47 (RFC 5646) standard string */
   Locale: string;
+  /** Integers that will have a value of 0 or more. */
+  NonNegativeInt: number;
   /** Integers that will have a value greater than 0. */
   PositiveInt: number;
   /** A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt. */
@@ -50,6 +52,11 @@ export type Authority = {
   /** The friendly name of this instance of the verifiable credential service */
   name: Scalars['String'];
 };
+
+export enum CacheControlScope {
+  Private = 'PRIVATE',
+  Public = 'PUBLIC'
+}
 
 /**
  * Allows the developer to asynchronously get information on the flow during the verifiable credential issuance process.
@@ -485,6 +492,20 @@ export type IssuanceCallbackEvent = {
   state: Scalars['String'];
 };
 
+/** Criteria for counting issuances. */
+export type IssuanceCountWhere = {
+  /** The ID of the contract that was issued. */
+  contractId?: InputMaybe<Scalars['ID']>;
+  /** The start of the period to count. */
+  from?: InputMaybe<Scalars['DateTime']>;
+  /** The ID of the identity that was issued the credential. */
+  identityId?: InputMaybe<Scalars['ID']>;
+  /** The end of the period to count. */
+  to?: InputMaybe<Scalars['DateTime']>;
+  /** The ID of the user (Person or Application) that issued the credential. */
+  userId?: InputMaybe<Scalars['ID']>;
+};
+
 /**
  * The issuance request payload contains information about your verifiable credentials issuance request.
  * The following example demonstrates an issuance request by using a PIN code flow with user claims, such as first name and last name.
@@ -751,6 +772,20 @@ export type PresentationCallbackEvent = {
   verifiedCredentialsData: Array<PresentedCredential>;
 };
 
+/** Criteria for counting presentations. */
+export type PresentationCountWhere = {
+  /** The ID of a contract used to make the presentation request. */
+  contractId?: InputMaybe<Scalars['ID']>;
+  /** The start of the period to count. */
+  from?: InputMaybe<Scalars['DateTime']>;
+  /** The ID of the identity who presented the credential (if known). */
+  identityId?: InputMaybe<Scalars['ID']>;
+  /** The end of the period to count. */
+  to?: InputMaybe<Scalars['DateTime']>;
+  /** The ID of the user (Person or Application) that requested & received the presentation. */
+  userId?: InputMaybe<Scalars['ID']>;
+};
+
 /** Represents a credential presentation between a client application and a user (presenter of the credential and associated claims) */
 export type PresentationEvent = {
   __typename?: 'PresentationEvent';
@@ -880,11 +915,15 @@ export type Query = {
   healthcheck?: Maybe<Scalars['Void']>;
   /** Returns an identity by ID */
   identity: Identity;
+  /** Returns the issuance count, optionally matching the specified criteria. */
+  issuanceCount: Scalars['NonNegativeInt'];
   /**
    * Lists the credential contract types for the specified network issuer
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
    */
   networkContracts: Array<NetworkContract>;
+  /** Returns the successfull presentation count, optionally matching the specified criteria. */
+  presentationCount: Scalars['NonNegativeInt'];
   /** Returns a template by ID */
   template: Template;
   /** Returns the combined data of a template and its ancestors */
@@ -940,9 +979,19 @@ export type QueryIdentityArgs = {
 };
 
 
+export type QueryIssuanceCountArgs = {
+  where?: InputMaybe<IssuanceCountWhere>;
+};
+
+
 export type QueryNetworkContractsArgs = {
   issuerId: Scalars['ID'];
   tenantId: Scalars['ID'];
+};
+
+
+export type QueryPresentationCountArgs = {
+  where?: InputMaybe<PresentationCountWhere>;
 };
 
 
@@ -1418,6 +1467,7 @@ export type ResolversTypes = {
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   String: ResolverTypeWrapper<Scalars['String']>;
+  CacheControlScope: CacheControlScope;
   Callback: Callback;
   ConfigurationValidation: ConfigurationValidation;
   Contract: ResolverTypeWrapper<ContractEntity>;
@@ -1450,6 +1500,7 @@ export type ResolversTypes = {
   IonDidModel: ResolverTypeWrapper<IonDidModel>;
   Issuance: ResolverTypeWrapper<IssuanceEntity>;
   IssuanceCallbackEvent: ResolverTypeWrapper<IssuanceCallbackEvent>;
+  IssuanceCountWhere: IssuanceCountWhere;
   IssuanceRequestInput: IssuanceRequestInput;
   IssuanceRequestResponse: ResolverTypeWrapper<ResolversUnionTypes['IssuanceRequestResponse']>;
   IssuanceRequestStatus: IssuanceRequestStatus;
@@ -1462,11 +1513,13 @@ export type ResolversTypes = {
   NetworkContract: ResolverTypeWrapper<NetworkContract>;
   NetworkIssuer: ResolverTypeWrapper<NetworkIssuer>;
   NetworkIssuersWhere: NetworkIssuersWhere;
+  NonNegativeInt: ResolverTypeWrapper<Scalars['NonNegativeInt']>;
   OnboardingInput: OnboardingInput;
   Pin: Pin;
   PositiveInt: ResolverTypeWrapper<Scalars['PositiveInt']>;
   Presentation: ResolverTypeWrapper<PresentationEntity>;
   PresentationCallbackEvent: ResolverTypeWrapper<PresentationCallbackEvent>;
+  PresentationCountWhere: PresentationCountWhere;
   PresentationEvent: ResolverTypeWrapper<PresentationEvent>;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
@@ -1499,6 +1552,7 @@ export type ResolversTypes = {
   User: ResolverTypeWrapper<UserEntity>;
   Void: ResolverTypeWrapper<Scalars['Void']>;
   WebDidModel: ResolverTypeWrapper<WebDidModel>;
+  Int: ResolverTypeWrapper<Scalars['Int']>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -1538,6 +1592,7 @@ export type ResolversParentTypes = {
   IonDidModel: IonDidModel;
   Issuance: IssuanceEntity;
   IssuanceCallbackEvent: IssuanceCallbackEvent;
+  IssuanceCountWhere: IssuanceCountWhere;
   IssuanceRequestInput: IssuanceRequestInput;
   IssuanceRequestResponse: ResolversUnionParentTypes['IssuanceRequestResponse'];
   IssuanceResponse: IssuanceResponse;
@@ -1549,11 +1604,13 @@ export type ResolversParentTypes = {
   NetworkContract: NetworkContract;
   NetworkIssuer: NetworkIssuer;
   NetworkIssuersWhere: NetworkIssuersWhere;
+  NonNegativeInt: Scalars['NonNegativeInt'];
   OnboardingInput: OnboardingInput;
   Pin: Pin;
   PositiveInt: Scalars['PositiveInt'];
   Presentation: PresentationEntity;
   PresentationCallbackEvent: PresentationCallbackEvent;
+  PresentationCountWhere: PresentationCountWhere;
   PresentationEvent: PresentationEvent;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
@@ -1585,7 +1642,16 @@ export type ResolversParentTypes = {
   User: UserEntity;
   Void: Scalars['Void'];
   WebDidModel: WebDidModel;
+  Int: Scalars['Int'];
 };
+
+export type CacheControlDirectiveArgs = {
+  inheritMaxAge?: Maybe<Scalars['Boolean']>;
+  maxAge?: Maybe<Scalars['Int']>;
+  scope?: Maybe<CacheControlScope>;
+};
+
+export type CacheControlDirectiveResolver<Result, Parent, ContextType = GraphQLContext, Args = CacheControlDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
 export type AuthorityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Authority'] = ResolversParentTypes['Authority']> = {
   didModel?: Resolver<ResolversTypes['DidModel'], ParentType, ContextType>;
@@ -1776,6 +1842,10 @@ export type NetworkIssuerResolvers<ContextType = GraphQLContext, ParentType exte
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export interface NonNegativeIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['NonNegativeInt'], any> {
+  name: 'NonNegativeInt';
+}
+
 export interface PositiveIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['PositiveInt'], any> {
   name: 'PositiveInt';
 }
@@ -1843,7 +1913,9 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findTemplates?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType, Partial<QueryFindTemplatesArgs>>;
   healthcheck?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityArgs, 'id'>>;
+  issuanceCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryIssuanceCountArgs>>;
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
+  presentationCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryPresentationCountArgs>>;
   template?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<QueryTemplateArgs, 'id'>>;
   templateCombinedData?: Resolver<ResolversTypes['TemplateParentData'], ParentType, ContextType, RequireFields<QueryTemplateCombinedDataArgs, 'templateId'>>;
 };
@@ -2011,6 +2083,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   Mutation?: MutationResolvers<ContextType>;
   NetworkContract?: NetworkContractResolvers<ContextType>;
   NetworkIssuer?: NetworkIssuerResolvers<ContextType>;
+  NonNegativeInt?: GraphQLScalarType;
   PositiveInt?: GraphQLScalarType;
   Presentation?: PresentationResolvers<ContextType>;
   PresentationCallbackEvent?: PresentationCallbackEventResolvers<ContextType>;
@@ -2039,3 +2112,6 @@ export type Resolvers<ContextType = GraphQLContext> = {
   WebDidModel?: WebDidModelResolvers<ContextType>;
 };
 
+export type DirectiveResolvers<ContextType = GraphQLContext> = {
+  cacheControl?: CacheControlDirectiveResolver<any, any, ContextType>;
+};

@@ -25,6 +25,7 @@ extensions:
           scalars:
             # add types for any used scalars here and in schema.ts
             PositiveInt: number
+            NonNegativeInt: number
             URL: string
             DateTime: Date
             Locale: string

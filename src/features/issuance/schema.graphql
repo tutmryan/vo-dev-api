@@ -245,6 +245,32 @@ input IssuanceWhere {
   userId: ID
 }
 
+"""
+Criteria for counting issuances.
+"""
+input IssuanceCountWhere {
+  """
+  The ID of the identity that was issued the credential.
+  """
+  identityId: ID
+  """
+  The ID of the contract that was issued.
+  """
+  contractId: ID
+  """
+  The ID of the user (Person or Application) that issued the credential.
+  """
+  userId: ID
+  """
+  The start of the period to count.
+  """
+  from: DateTime
+  """
+  The end of the period to count.
+  """
+  to: DateTime
+}
+
 extend type Contract {
   """
   Returns the successfull credential issuances for this contract.
@@ -257,6 +283,10 @@ extend type Query {
   Returns successfull credential issuances, optionally matching the specified criteria.
   """
   findIssuances(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
+  """
+  Returns the issuance count, optionally matching the specified criteria.
+  """
+  issuanceCount(where: IssuanceCountWhere): NonNegativeInt! @cacheControl(maxAge: 60)
 }
 
 # The rest of this schema is for the callbacks, not GraphQL API
