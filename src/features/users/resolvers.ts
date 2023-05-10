@@ -22,7 +22,7 @@ export const resolvers: Resolvers = {
   User: {
     name: ({ name, isApp, oid }) => {
       if (!isApp) return name
-      return config.get('platformConsumerApps')[oid]?.name ?? name
+      return config.get('platformConsumerApps')[oid.toLowerCase()]?.name ?? name
     },
   },
 }
