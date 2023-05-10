@@ -98,6 +98,7 @@ export type Config = {
     auth: ClientCredentialsConfig
   }
   issuanceRequestRegistration: IssuanceRequestRegistration
+  platformConsumerApps: Record<string, { name: string }>
 }
 
 export default createTypedConfig<Config>(config)

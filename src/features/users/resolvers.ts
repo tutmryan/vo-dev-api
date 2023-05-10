@@ -1,3 +1,4 @@
+import config from '../../config'
 import type { Resolvers } from '../../generated/graphql'
 
 export const resolvers: Resolvers = {
@@ -17,5 +18,11 @@ export const resolvers: Resolvers = {
   },
   Presentation: {
     user: ({ userId }, _, { dataLoaders: { users } }) => users.load(userId),
+  },
+  User: {
+    name: ({ name, isApp, oid }) => {
+      if (!isApp) return name
+      return config.get('platformConsumerApps')[oid]?.name ?? name
+    },
   },
 }

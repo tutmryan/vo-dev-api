@@ -86,6 +86,10 @@ const config: DeepPartial<Config> = {
   issuanceRequestRegistration: {
     clientName: 'Verified Orchestration Platform',
   },
+  platformConsumerApps: {
+    '04b30d59-839f-4fde-ab0a-3233f5af325c': { name: 'Onboarding Demo API (localdev)' },
+    '97a58c14-a657-4f27-ad98-b2e44ebf4b24': { name: 'Onboarding Demo API' },
+  },
 }
 
 module.exports = config
