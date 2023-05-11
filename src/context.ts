@@ -40,7 +40,7 @@ export const findUpdateOrCreateUser: CreateUser<User | undefined> = async ({ cla
   const input: FindUpdateOrCreateUserInput = {
     tenantId,
     oid: claims.oid,
-    name: claims.name ?? claims.sub,
+    name: (isApp ? config.get('platformConsumerApps')[claims.oid]?.name : undefined) ?? claims.name ?? claims.sub,
     email: claims.email ?? null,
     isApp,
   }

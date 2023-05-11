@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm'
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, RelationId } from 'typeorm'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import type { PresentedCredential, RequestCredential } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
@@ -38,6 +38,9 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   @ManyToMany(() => ContractEntity)
   @JoinTable({ name: 'presentation_contracts' })
   contracts!: Promise<ContractEntity[]>
+
+  @RelationId((presentation: PresentationEntity) => presentation.contracts)
+  contractIds!: string[]
 
   @CreateDateColumn({ type: 'datetimeoffset' })
   presentedAt!: Date

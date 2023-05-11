@@ -1,5 +1,6 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
+import { compactErrors } from '../../util/compact-errors'
 import { resolveUpdatedAt } from '../auditing/updated-at-resolver'
 import { CreateContractCommand } from './commands/create-contract-command'
 import { DeleteContractCommand } from './commands/delete-contract-command'
@@ -29,5 +30,8 @@ export const resolvers: Resolvers = {
   },
   Issuance: {
     contract: ({ contractId }, _, { dataLoaders: { contracts } }) => contracts.load(contractId),
+  },
+  Presentation: {
+    contracts: (presentation, _, { dataLoaders: { contracts } }) => contracts.loadMany(presentation.contractIds).then(compactErrors),
   },
 }

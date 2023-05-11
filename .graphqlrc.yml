@@ -12,7 +12,6 @@ extensions:
           fragmentMasking: false
         plugins:
           - typescript-resolvers:
-              useIndexSignature: false
               contextType: ../context#GraphQLContext
               mappers:
                 Template: ../features/templates/entities/template-entity#TemplateEntity
