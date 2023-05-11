@@ -380,3 +380,17 @@ input ContractWhere {
   """
   isProvisioned: Boolean
 }
+
+"""
+Represents a count of occurrences of a contract.
+"""
+type ContractCount {
+  """
+  The contract.
+  """
+  contract: Contract!
+  """
+  The number of occurrences of this contract.
+  """
+  count: NonNegativeInt!
+}

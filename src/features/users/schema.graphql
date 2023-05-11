@@ -24,3 +24,17 @@ type User {
   """
   isApp: Boolean!
 }
+
+"""
+Represents a count of occurrences of a user.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type UserCount {
+  """
+  The user (Person or Application).
+  """
+  user: User!
+  """
+  The number of occurrences of this user.
+  """
+  count: NonNegativeInt!
+}

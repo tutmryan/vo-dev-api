@@ -337,24 +337,6 @@ input PresentationWhere {
   The ID of the user (Person or Application) that requested & received the presentation.
   """
   userId: ID
-}
-
-"""
-Criteria for counting presentations.
-"""
-input PresentationCountWhere {
-  """
-  The ID of the identity who presented the credential (if known).
-  """
-  identityId: ID
-  """
-  The ID of a contract used to make the presentation request.
-  """
-  contractId: ID
-  """
-  The ID of the user (Person or Application) that requested & received the presentation.
-  """
-  userId: ID
   """
   The start of the period to count.
   """
@@ -376,9 +358,9 @@ extend type Query {
   """
   Returns successfull credential presentations, optionally matching the specified criteria.
   """
-  findPresentations(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+  findPresentations(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]! @cacheControl(maxAge: 60)
   """
   Returns the successfull presentation count, optionally matching the specified criteria.
   """
-  presentationCount(where: PresentationCountWhere): NonNegativeInt! @cacheControl(maxAge: 60)
+  presentationCount(where: PresentationWhere): NonNegativeInt! @cacheControl(maxAge: 60)
 }

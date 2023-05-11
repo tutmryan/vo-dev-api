@@ -33,7 +33,7 @@ export const dispatch = async <T extends CommandLike>(
 }
 
 export const query = async <T extends QueryLike>(
-  context: Omit<GraphQLContext, 'dataLoaders'>,
+  context: GraphQLContext,
   query: T,
   ...args: Parameters<T>
 ): Promise<Awaited<ReturnType<T>>> => {
@@ -43,6 +43,7 @@ export const query = async <T extends QueryLike>(
       user,
       entityManager,
       logger: context.logger,
+      dataLoaders: context.dataLoaders,
       contextType: 'query',
     },
     args,

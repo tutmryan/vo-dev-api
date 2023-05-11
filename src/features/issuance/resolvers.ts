@@ -1,6 +1,8 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { CreateIssuanceRequestCommand } from './commands/create-issuance-request-command'
+import { CountIssuancesByContractQuery } from './queries/count-issuances-by-contract'
+import { CountIssuancesByUserQuery } from './queries/count-issuances-by-user-query'
 import { CountIssuancesQuery } from './queries/count-issuances-query'
 import { FindIssuancesQuery } from './queries/find-issuances-query'
 
@@ -8,6 +10,8 @@ export const resolvers: Resolvers = {
   Query: {
     findIssuances: (_, { where, offset, limit }, context) => query(context, FindIssuancesQuery, where, offset, limit),
     issuanceCount: (_, { where }, context) => query(context, CountIssuancesQuery, where),
+    issuanceCountByUser: (_, { where, offset, limit }, context) => query(context, CountIssuancesByUserQuery, where, offset, limit),
+    issuanceCountByContract: (_, { where, offset, limit }, context) => query(context, CountIssuancesByContractQuery, where, offset, limit),
   },
   Mutation: {
     createIssuanceRequest: (_, { request }, context) => dispatch(context, CreateIssuanceRequestCommand, request),

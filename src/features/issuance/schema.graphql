@@ -243,30 +243,12 @@ input IssuanceWhere {
   The ID of the user (Person or Application) that issued the credential.
   """
   userId: ID
-}
-
-"""
-Criteria for counting issuances.
-"""
-input IssuanceCountWhere {
   """
-  The ID of the identity that was issued the credential.
-  """
-  identityId: ID
-  """
-  The ID of the contract that was issued.
-  """
-  contractId: ID
-  """
-  The ID of the user (Person or Application) that issued the credential.
-  """
-  userId: ID
-  """
-  The start of the period to count.
+  The start of the period to include.
   """
   from: DateTime
   """
-  The end of the period to count.
+  The end of the period to include.
   """
   to: DateTime
 }
@@ -282,11 +264,19 @@ extend type Query {
   """
   Returns successfull credential issuances, optionally matching the specified criteria.
   """
-  findIssuances(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
+  findIssuances(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]! @cacheControl(maxAge: 60)
   """
   Returns the issuance count, optionally matching the specified criteria.
   """
-  issuanceCount(where: IssuanceCountWhere): NonNegativeInt! @cacheControl(maxAge: 60)
+  issuanceCount(where: IssuanceWhere): NonNegativeInt! @cacheControl(maxAge: 60)
+  """
+  Returns the issuance count, grouped by Contract, optionally matching the specified criteria.
+  """
+  issuanceCountByContract(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [ContractCount!]! @cacheControl(maxAge: 60)
+  """
+  Returns the issuance count, grouped by User, optionally matching the specified criteria.
+  """
+  issuanceCountByUser(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]! @cacheControl(maxAge: 60)
 }
 
 # The rest of this schema is for the callbacks, not GraphQL API
