@@ -1,6 +1,6 @@
+import { omit } from 'lodash'
 import { graphql } from '../../../generated'
 import type { TemplateFragmentFragment, TemplateInput } from '../../../generated/graphql'
-import { omit } from 'lodash'
 
 export const updateTemplateMutation = graphql(
   `
@@ -13,5 +13,7 @@ export const updateTemplateMutation = graphql(
 )
 
 export function getUpdateTemplateInput(template: TemplateFragmentFragment): TemplateInput {
-  return omit(template, 'id', 'parent')
+  const input: TemplateInput = omit(template, 'id', 'parent')
+  if (template.parent?.id) input.parentTemplateId = template.parent.id
+  return input
 }

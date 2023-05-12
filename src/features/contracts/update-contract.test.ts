@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto'
+import { omit } from 'lodash'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
 import { createTemplate, getEmptyTemplateInput } from '../templates/test/create-template'
@@ -165,6 +166,6 @@ describe('updateContract mutation', () => {
     expect(errors).toBeUndefined()
 
     const updatedTemplate = await getContract(contract.id)
-    expect(updatedTemplate).toMatchObject(input)
+    expect(updatedTemplate).toMatchObject(omit(input, 'templateId'))
   })
 })

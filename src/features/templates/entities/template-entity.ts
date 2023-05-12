@@ -6,7 +6,7 @@ import { Lazy } from '../../../util/lazy'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
-import { ensureNoIntersectingTemplateData, toTemplateParentData } from '../mapping'
+import { toTemplateParentData } from '../mapping'
 
 @Entity('template', { orderBy: { createdAt: 'ASC' } })
 export class TemplateEntity extends AuditedAndTrackedEntity {
@@ -130,12 +130,11 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
   }
 
   async update(
-    input: Pick<TemplateEntity, 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes'>,
+    input: Pick<TemplateEntity, 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes'> & {
+      parent: TemplateEntity | null
+    },
   ) {
-    const parentTemplateData = await this.parentData()
-    if (parentTemplateData) {
-      ensureNoIntersectingTemplateData(toTemplateParentData(input), parentTemplateData)
-    }
-    typeSafeAssign(this, input)
+    const { parent, ...rest } = input
+    typeSafeAssign(this, { ...rest, parent: Promise.resolve(parent) })
   }
 }

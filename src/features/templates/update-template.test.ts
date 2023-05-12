@@ -125,24 +125,6 @@ describe('updateTemplate mutation', () => {
     )
   })
 
-  it('returns an error when the template has children', async () => {
-    // Arrange
-    const { template } = await givenTemplate({ hasChildren: true })
-
-    // Act
-    const { errors } = await executeOperationAsAdmin({
-      query: updateTemplateMutation,
-      variables: {
-        id: template.id,
-        input: getUpdateTemplateInput(template),
-      },
-    })
-
-    // Assert
-    expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toMatchInlineSnapshot(`"This template cannot be updated because it has children"`)
-  })
-
   it('updates the template when there are no errors', async () => {
     // Arrange
     const { template } = await givenTemplate({})

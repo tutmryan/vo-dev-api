@@ -1,14 +1,15 @@
 import type { CommandContext } from '../../../cqrs/command-context'
 import type { TemplateInput } from '../../../generated/graphql'
 import { TemplateEntity } from '../entities/template-entity'
-import { toDisplayModel } from '../mapping'
+import { ensureNoIntersectingTemplateData, toDisplayModel, toTemplateParentData } from '../mapping'
 
 export async function UpdateTemplateCommand(this: CommandContext, id: string, input: TemplateInput) {
   const repository = this.entityManager.getRepository(TemplateEntity)
-
   const template = await repository.findOneByOrFail({ id })
-  if ((await template.children).length !== 0) {
-    throw new Error('This template cannot be updated because it has children')
+
+  const parent = input.parentTemplateId ? await repository.findOneByOrFail({ id: input.parentTemplateId }) : null
+  if (parent) {
+    ensureNoIntersectingTemplateData(toTemplateParentData(input), await parent.combinedData())
   }
 
   await template.update({
@@ -18,6 +19,7 @@ export async function UpdateTemplateCommand(this: CommandContext, id: string, in
     validityIntervalInSeconds: input.validityIntervalInSeconds ?? null,
     credentialTypes: input.credentialTypes ?? null,
     display: toDisplayModel(input.display),
+    parent,
   })
 
   return await repository.save(template)

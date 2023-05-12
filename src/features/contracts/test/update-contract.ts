@@ -1,5 +1,5 @@
-import { graphql } from '../../../generated'
 import { omit } from 'lodash'
+import { graphql } from '../../../generated'
 import type { ContractFragmentFragment, ContractInput } from '../../../generated/graphql'
 
 export const updateContractMutation = graphql(
@@ -13,5 +13,8 @@ export const updateContractMutation = graphql(
 )
 
 export function getUpdateContractInput(contract: ContractFragmentFragment): ContractInput {
-  return omit(contract, 'id', 'template')
+  const input: ContractInput = omit(contract, 'id', 'template')
+  if (contract.template) input.templateId = contract.template.id
+
+  return input
 }
