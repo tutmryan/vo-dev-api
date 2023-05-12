@@ -363,4 +363,13 @@ extend type Query {
   Returns the successfull presentation count, optionally matching the specified criteria.
   """
   presentationCount(where: PresentationWhere): NonNegativeInt! @cacheControl(maxAge: 60)
+  """
+  Returns the successfull presentation count, grouped by Contract, optionally matching the specified criteria.
+  """
+  presentationCountByContract(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [ContractCount!]!
+    @cacheControl(maxAge: 60)
+  """
+  Returns the successfull presentation count, grouped by User, optionally matching the specified criteria.
+  """
+  presentationCountByUser(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]! @cacheControl(maxAge: 60)
 }

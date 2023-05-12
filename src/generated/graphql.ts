@@ -918,6 +918,10 @@ export type Query = {
   networkContracts: Array<NetworkContract>;
   /** Returns the successfull presentation count, optionally matching the specified criteria. */
   presentationCount: Scalars['NonNegativeInt'];
+  /** Returns the successfull presentation count, grouped by Contract, optionally matching the specified criteria. */
+  presentationCountByContract: Array<ContractCount>;
+  /** Returns the successfull presentation count, grouped by User, optionally matching the specified criteria. */
+  presentationCountByUser: Array<UserCount>;
   /** Returns a template by ID */
   template: Template;
   /** Returns the combined data of a template and its ancestors */
@@ -999,6 +1003,20 @@ export type QueryNetworkContractsArgs = {
 
 
 export type QueryPresentationCountArgs = {
+  where?: InputMaybe<PresentationWhere>;
+};
+
+
+export type QueryPresentationCountByContractArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']>;
+  offset?: InputMaybe<Scalars['PositiveInt']>;
+  where?: InputMaybe<PresentationWhere>;
+};
+
+
+export type QueryPresentationCountByUserArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']>;
+  offset?: InputMaybe<Scalars['PositiveInt']>;
   where?: InputMaybe<PresentationWhere>;
 };
 
@@ -1941,6 +1959,8 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   issuanceCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByUserArgs>>;
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
   presentationCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryPresentationCountArgs>>;
+  presentationCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryPresentationCountByContractArgs>>;
+  presentationCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryPresentationCountByUserArgs>>;
   template?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<QueryTemplateArgs, 'id'>>;
   templateCombinedData?: Resolver<ResolversTypes['TemplateParentData'], ParentType, ContextType, RequireFields<QueryTemplateCombinedDataArgs, 'templateId'>>;
 };

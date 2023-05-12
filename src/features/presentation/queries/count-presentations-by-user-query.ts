@@ -1,0 +1,37 @@
+import type { QueryContext } from '../../../cqrs/query-context'
+import type { Maybe, PresentationWhere } from '../../../generated/graphql'
+import { PresentationEntity } from '../entities/presentation-entity'
+
+export async function CountPresentationsByUserQuery(
+  this: QueryContext,
+  criteria?: Maybe<PresentationWhere>,
+  offset?: Maybe<number>,
+  limit?: Maybe<number>,
+) {
+  const {
+    entityManager,
+    dataLoaders: { users },
+  } = this
+  const query = entityManager
+    .getRepository(PresentationEntity)
+    .createQueryBuilder('issuance')
+    .select('COUNT(*)', 'count')
+    .addSelect('user_id')
+    .groupBy('user_id')
+    .orderBy('count', 'DESC')
+    .where('1=1')
+
+  if (offset) query.skip(offset)
+  if (limit) query.take(limit)
+
+  if (criteria?.identityId) query.andWhere('identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
+  if (criteria?.contractId) query.andWhere('contract_id = :contractId', { contractId: criteria.contractId.toUpperCase() })
+  if (criteria?.userId) throw new Error("Sorry, can't filter by userId when grouping by user.")
+
+  if (criteria?.from && criteria.to)
+    query.andWhere('presented_at BETWEEN :from AND :to', { from: criteria.from.toISOString(), to: criteria.to.toISOString() })
+  else if (criteria?.from) query.andWhere('presented_at >= :from', { from: criteria.from.toISOString() })
+  else if (criteria?.to) query.andWhere('presented_at <= :to', { to: criteria.to.toISOString() })
+
+  return query.getRawMany().then((rows) => rows.map((row) => ({ user: users.load(row.user_id), count: row.count })))
+}

@@ -1,6 +1,8 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { CreatePresentationRequestCommand } from './commands/create-presentation-request-command'
+import { CountPresentationsByContractQuery } from './queries/count-presentations-by-contract-query'
+import { CountPresentationsByUserQuery } from './queries/count-presentations-by-user-query'
 import { CountPresentationsQuery } from './queries/count-presentations-query'
 import { FindPresentationsQuery } from './queries/find-presentations-query'
 
@@ -8,6 +10,10 @@ export const resolvers: Resolvers = {
   Query: {
     findPresentations: (_parent, { where, offset, limit }, context) => query(context, FindPresentationsQuery, where, offset, limit),
     presentationCount: (_parent, { where }, context) => query(context, CountPresentationsQuery, where),
+    presentationCountByUser: (_parent, { where, offset, limit }, context) =>
+      query(context, CountPresentationsByUserQuery, where, offset, limit),
+    presentationCountByContract: (_parent, { where, offset, limit }, context) =>
+      query(context, CountPresentationsByContractQuery, where, offset, limit),
   },
   Mutation: {
     createPresentationRequest: (_parent, { request }, context) => dispatch(context, CreatePresentationRequestCommand, request),
