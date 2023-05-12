@@ -8,7 +8,7 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
 
   const contract = await repository.findOneByOrFail({ id })
 
-  const template = input.templateId ? await this.dataLoaders.templates.load(input.templateId) : await contract.template
+  const template = input.templateId ? await this.dataLoaders.templates.load(input.templateId) : undefined
   if (template) {
     ensureNoOverridingTemplateData(input, await template.combinedData())
   }
