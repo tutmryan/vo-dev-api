@@ -25,6 +25,7 @@ export async function FindPresentationsQuery(
   else if (criteria?.to) where.presentedAt = LessThanOrEqualTimestamp(criteria.to)
 
   const presentations = await this.entityManager.getRepository(PresentationEntity).find({
+    comment: 'FindPresentationsQuery',
     where,
     relations,
     skip: offset ?? undefined,

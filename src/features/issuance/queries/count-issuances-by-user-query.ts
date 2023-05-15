@@ -20,6 +20,7 @@ export async function CountIssuancesByUserQuery(
     .groupBy('user_id')
     .orderBy('count', 'DESC')
     .where('1=1')
+    .comment('CountIssuancesByUserQuery')
 
   if (offset) query.skip(offset)
   if (limit) query.take(limit)

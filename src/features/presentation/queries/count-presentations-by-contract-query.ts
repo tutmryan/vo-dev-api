@@ -22,6 +22,7 @@ export async function CountPresentationsByContractQuery(
     .groupBy('contract_id')
     .orderBy('count', 'DESC')
     .where('1=1')
+    .comment('CountPresentationsByContractQuery')
 
   if (offset) query.skip(offset)
   if (limit) query.take(limit)

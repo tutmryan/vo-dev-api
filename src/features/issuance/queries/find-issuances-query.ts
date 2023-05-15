@@ -21,6 +21,7 @@ export async function FindIssuancesQuery(
   else if (criteria?.to) where.issuedAt = LessThanOrEqualTimestamp(criteria.to)
 
   const issuances = await this.entityManager.getRepository(IssuanceEntity).find({
+    comment: 'FindIssuancesQuery',
     where,
     skip: offset ?? undefined,
     take: limit ?? undefined,

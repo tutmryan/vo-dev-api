@@ -5,6 +5,6 @@ import { ContractEntity } from './entities/contract-entity'
 
 export const contractLoader = () =>
   new DataLoader<string, ContractEntity>(async (ids) => {
-    const results = await dataSource.getRepository(ContractEntity).findBy({ id: In(ids) })
+    const results = await dataSource.getRepository(ContractEntity).find({ comment: 'FindContractsById', where: { id: In(ids) } })
     return ids.map((id) => results.find((result) => result.id.toUpperCase() === id.toUpperCase()) ?? new Error(`Contract not found: ${id}`))
   })

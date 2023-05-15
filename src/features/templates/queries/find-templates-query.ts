@@ -16,6 +16,7 @@ export async function FindTemplatesQuery(
   if (criteria?.isRoot) where.parent = IsNull()
 
   const templates = await this.entityManager.getRepository(TemplateEntity).find({
+    comment: 'FindTemplatesQuery',
     where,
     skip: offset ?? undefined,
     take: limit ?? undefined,
