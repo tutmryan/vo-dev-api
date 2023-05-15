@@ -20,6 +20,7 @@ export async function CountPresentationsByUserQuery(
     .groupBy('user_id')
     .orderBy('count', 'DESC')
     .where('1=1')
+    .comment('CountPresentationsByUserQuery')
 
   if (offset) query.skip(offset)
   if (limit) query.take(limit)

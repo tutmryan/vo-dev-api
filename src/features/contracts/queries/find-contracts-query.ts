@@ -18,6 +18,7 @@ export async function FindContractsQuery(
     where.provisionedAt = criteria.isProvisioned ? Not(IsNull()) : IsNull()
 
   const contracts = await this.entityManager.getRepository(ContractEntity).find({
+    comment: 'FindContractsQuery',
     where,
     skip: offset ?? undefined,
     take: limit ?? undefined,

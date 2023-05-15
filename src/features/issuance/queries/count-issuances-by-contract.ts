@@ -20,6 +20,7 @@ export async function CountIssuancesByContractQuery(
     .groupBy('contract_id')
     .orderBy('count', 'DESC')
     .where('1=1')
+    .comment('CountIssuancesByContractQuery')
 
   if (offset) query.skip(offset)
   if (limit) query.take(limit)

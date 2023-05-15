@@ -16,6 +16,7 @@ export async function CountIssuancesQuery(this: QueryContext, criteria?: Maybe<I
   else if (criteria?.to) where.issuedAt = LessThanOrEqualTimestamp(criteria.to)
 
   const count = await this.entityManager.getRepository(IssuanceEntity).count({
+    comment: 'CountIssuancesQuery',
     where,
   })
 

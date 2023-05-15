@@ -20,6 +20,7 @@ export async function CountPresentationsQuery(this: QueryContext, criteria?: May
   else if (criteria?.to) where.presentedAt = LessThanOrEqualTimestamp(criteria.to)
 
   const count = await this.entityManager.getRepository(PresentationEntity).count({
+    comment: 'CountPresentationsQuery',
     relations,
     where,
   })
