@@ -20,6 +20,7 @@ import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './fe
 import { issuanceCallbackHandler } from './features/issuance/callback/issuance-callback-handler'
 import { presentationCallbackHandler } from './features/presentation/callback/presentation-callback-handler'
 import { logger } from './logger'
+import { addVoyager } from './voyager'
 
 export const getExpressApp = (): Express => {
   const app = express()
@@ -80,6 +81,10 @@ export const getExpressApp = (): Express => {
         ? interactiveAuthMiddleware(req, res, next)
         : next(),
     )
+
+    // add voyager
+    addVoyager(app)
+    logger.info(`Added /voyager`)
   }
 
   // add bearer auth to all requests
