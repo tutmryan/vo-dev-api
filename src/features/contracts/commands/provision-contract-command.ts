@@ -74,5 +74,6 @@ function toCreateContractInput({
 }
 
 function toUpdateContractInput(contract: ContractEntity): UpdateContractInput {
+  // VID API seems to have a bug? in that you can't update the name of a contract
   return omit(toCreateContractInput(contract), 'name')
 }

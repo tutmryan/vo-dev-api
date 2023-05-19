@@ -68,7 +68,7 @@ export type Config = {
   sendgrid: {
     key: string
     templates: {
-      onboarding: { mailData: Pick<MailDataRequired, 'templateId' | 'from'>; dynamicTemplateData: { onboarding_url: string } }
+      onboarding: { mailData: Pick<MailDataRequired, 'templateId' | 'from'>; baseUrl: string; kycPath: string; issuancePath: string }
     }
   }
   integrations: {

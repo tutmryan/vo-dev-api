@@ -44,6 +44,8 @@ const config: DeepPartial<Config> = {
   sendgrid: {
     templates: {
       onboarding: {
+        kycPath: '/',
+        issuancePath: '/credentials/issue',
         mailData: { templateId: 'd-8c0c050b6a94416f9c6936b305ccb3ee', from: { email: 'sam.curry@makerx.com.au', name: 'Sam Curry' } },
       },
     },

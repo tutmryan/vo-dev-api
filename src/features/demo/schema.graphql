@@ -5,6 +5,7 @@ input OnboardingInput {
   email: EmailAddress!
   givenName: String!
   familyName: String!
+  kyc: Boolean
 }
 
 extend type Mutation {

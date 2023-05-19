@@ -59,7 +59,7 @@ export function useSubscriptionsServer(schema: GraphQLSchema, httpServer: Server
         // extract auth token from connection params
         const token = extractTokenFromConnectionParams(ctx.connectionParams)
         if (!token) return false
-        // verify token, set claims on context.extra subsequent callbacks to use
+        // verify token, set claims on context.extra for subsequent callbacks to use
         const claims = await verifyForHost(getHost(ctx.extra.request), token, config.get('auth.bearer'))
         ctx.extra.claims = claims as unknown as undefined
         // log and return true to establish connection

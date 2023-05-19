@@ -737,6 +737,7 @@ export type OnboardingInput = {
   email: Scalars['EmailAddress'];
   familyName: Scalars['String'];
   givenName: Scalars['String'];
+  kyc?: InputMaybe<Scalars['Boolean']>;
 };
 
 /**

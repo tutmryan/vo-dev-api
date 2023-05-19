@@ -8,13 +8,17 @@ const mailClient = Lazy(() => {
   return client
 })
 
-export const sendOnboardingEmail = async (to: MailDataRequired['to'], input: { first_name: string; last_name: string }) => {
+export const sendOnboardingEmail = async (to: MailDataRequired['to'], input: { first_name: string; last_name: string }, kyc = false) => {
+  const onboardingPath = kyc
+    ? config.get('sendgrid.templates.onboarding.kycPath')
+    : config.get('sendgrid.templates.onboarding.issuancePath')
+  const onboarding_url = new URL(onboardingPath, config.get('sendgrid.templates.onboarding.baseUrl')).href
   const data = {
     ...config.get('sendgrid.templates.onboarding.mailData'),
     personalizations: [
       {
         to,
-        dynamicTemplateData: { ...config.get('sendgrid.templates.onboarding.dynamicTemplateData'), ...input },
+        dynamicTemplateData: { onboarding_url, ...input },
       },
     ],
   } as MailDataRequired
