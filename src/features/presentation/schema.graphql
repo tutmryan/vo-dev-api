@@ -229,14 +229,14 @@ type PresentationCallbackEvent {
   """
   The verifiable credential user DID.
   """
-  subject: String!
-  verifiedCredentialsData: [PresentedCredential!]!
+  subject: String
+  verifiedCredentialsData: [PresentedCredential!]
   """
   The receipt contains the original payload sent from the wallet to the Verifiable Credentials service.
   The receipt should be used for troubleshooting/debugging only.
   The format in the receipt isn't fix and can change based on the wallet and version used.
   """
-  receipt: JSONObject!
+  receipt: JSONObject
 }
 
 """
@@ -372,4 +372,53 @@ extend type Query {
   Returns the successfull presentation count, grouped by User, optionally matching the specified criteria.
   """
   presentationCountByUser(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]! @cacheControl(maxAge: 60)
+}
+
+"""
+Criteria for filtering presentation events.
+"""
+input PresentationEventWhere {
+  """
+  The requestId of the presentation request, returned from the createPresentationRequest mutation.
+  """
+  requestId: ID
+  """
+  The ID of the identity that the presentation is for.
+  """
+  identityId: ID
+  """
+  The ID of the user (Person or Application) that requested presentation.
+  """
+  userId: ID
+  """
+  The type of credential presented.
+  Note: type data is only available on complete presentation events; if specified, only complete presentations containing this type will be returned.
+  """
+  type: String
+  """
+  Only return events with the specified status.
+  """
+  status: PresentationRequestStatus
+}
+
+"""
+Data representing an presentation event (see PresentationRequestStatus, could be received, successful, failed).
+"""
+type PresentationEventData {
+  """
+  The callback event data
+  """
+  event: PresentationCallbackEvent!
+  """
+  The presentation data, if the presentation was successful
+  """
+  presentation: Presentation
+}
+
+# eslint-disable-next-line @graphql-eslint/require-description, @graphql-eslint/no-unreachable-types
+type Subscription {
+  """
+  Returns event data when an presentation callback is received
+  """
+  presentationEvent(where: PresentationEventWhere): PresentationEventData!
 }

@@ -279,6 +279,54 @@ extend type Query {
   issuanceCountByUser(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]! @cacheControl(maxAge: 60)
 }
 
+"""
+Criteria for filtering issuance events.
+"""
+input IssuanceEventWhere {
+  """
+  The requestId of the issuance request, returned from the createIssuanceRequest mutation.
+  """
+  requestId: ID
+  """
+  The ID of the identity that the issuance is for.
+  """
+  identityId: ID
+  """
+  The ID of the contract to be issued.
+  """
+  contractId: ID
+  """
+  The ID of the user (Person or Application) that requested issuance.
+  """
+  userId: ID
+  """
+  Only return events with the specified status.
+  """
+  status: IssuanceRequestStatus
+}
+
+"""
+Data representing an issuance event (see IssuanceRequestStatus, could be received, successful, failed).
+"""
+type IssuanceEventData {
+  """
+  The callback event data
+  """
+  event: IssuanceCallbackEvent!
+  """
+  The issuance data, if the issuance was successful
+  """
+  issuance: Issuance
+}
+
+# eslint-disable-next-line @graphql-eslint/require-description, @graphql-eslint/no-unreachable-types
+type Subscription {
+  """
+  Returns event data when an issuance callback is received
+  """
+  issuanceEvent(where: IssuanceEventWhere): IssuanceEventData!
+}
+
 # The rest of this schema is for the callbacks, not GraphQL API
 # eslint-disable @graphql-eslint/no-unreachable-types
 

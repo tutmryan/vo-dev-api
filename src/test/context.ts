@@ -1,7 +1,6 @@
 import type { JwtPayload, RequestInfo } from '@makerxstudio/graphql-core'
 import casual from 'casual'
 import { randomUUID } from 'crypto'
-import type { Request } from 'express'
 import type { GraphQLContext } from '../context'
 import { findUpdateOrCreateUser } from '../context'
 import { dataSource } from '../data'
@@ -13,7 +12,7 @@ const requestInfo: RequestInfo = {
   host: 'localhost',
   url: 'http://localhost/graphql',
   method: 'TEST',
-  referer: 'jest',
+  origin: 'jest',
   requestId: 'test',
 }
 
@@ -43,7 +42,7 @@ export const buildJwt = ({
 })
 
 export const createContext = async (jwtPayload?: JwtPayload): Promise<GraphQLContext> => {
-  const user = await findUpdateOrCreateUser({ claims: jwtPayload, req: <Request>{ headers: { authorization: 'Bearer test' } } })
+  const user = await findUpdateOrCreateUser(jwtPayload, 'test-token')
   const context = { user, logger, requestInfo, started: Date.now(), dataSource }
   return { ...context, services: createServices(context), dataLoaders: createDataLoaders() }
 }

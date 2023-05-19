@@ -4,7 +4,7 @@ import type { DeepPartial } from '../src/util/type-helpers'
 const config: DeepPartial<Config> = {
   logging: {
     userClaimsToLog: ['oid', 'aud', 'tid', 'azp', 'iss', 'scp', 'roles'],
-    requestInfoToLog: ['referer', 'requestId', 'correlationId'],
+    requestInfoToLog: ['origin', 'requestId', 'correlationId'],
     omitPaths: [],
     loggerOptions: {
       defaultMeta: {

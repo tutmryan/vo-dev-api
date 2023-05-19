@@ -1,5 +1,6 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
+import { resolveIssuanceEventData, subscribeToIssuanceEventsWithFilter } from './callback/pubsub'
 import { CreateIssuanceRequestCommand } from './commands/create-issuance-request-command'
 import { CountIssuancesByContractQuery } from './queries/count-issuances-by-contract'
 import { CountIssuancesByUserQuery } from './queries/count-issuances-by-user-query'
@@ -31,5 +32,11 @@ export const resolvers: Resolvers = {
   },
   RequestErrorResponse: {
     date: ({ date }) => new Date(date),
+  },
+  Subscription: {
+    issuanceEvent: {
+      subscribe: subscribeToIssuanceEventsWithFilter,
+      resolve: resolveIssuanceEventData,
+    },
   },
 }

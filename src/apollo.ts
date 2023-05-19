@@ -13,18 +13,29 @@ import { createLoggingPlugin, introspectionControlPlugin } from '@makerxstudio/g
 import { isProduction } from '@makerxstudio/node-common'
 import type { Express } from 'express'
 import { json } from 'express'
+import type { Disposable } from 'graphql-ws'
 import type http from 'http'
 import { newCacheSection } from './cache'
 import type { GraphQLContext } from './context'
 import { createContext } from './context'
 import { logger } from './logger'
-import schema from './schema'
+import createSchema from './schema'
+import { useSubscriptionsServer } from './subscriptions'
 
-const plugins = (httpServer: http.Server): ApolloServerPlugin<GraphQLContext>[] => {
+const plugins = (httpServer: http.Server, serverCleanup: Disposable): ApolloServerPlugin<GraphQLContext>[] => {
   const plugins: ApolloServerPlugin<GraphQLContext>[] = [
     createLoggingPlugin({}),
     introspectionControlPlugin as ApolloServerPlugin<GraphQLContext>,
     ApolloServerPluginDrainHttpServer({ httpServer }),
+    {
+      async serverWillStart() {
+        return {
+          async drainServer() {
+            await serverCleanup.dispose()
+          },
+        }
+      },
+    },
     ApolloServerPluginCacheControl({ defaultMaxAge: 0 }),
     responseCachePlugin({
       cache: newCacheSection('apollo'),
@@ -43,11 +54,16 @@ const plugins = (httpServer: http.Server): ApolloServerPlugin<GraphQLContext>[] 
 }
 
 export const startApolloServer = async (app: Express, httpServer: http.Server) => {
-  logger.info('Starting apollo server')
+  logger.info('Building schema')
+  const schema = createSchema()
 
+  logger.info('Initialising subscriptions websocket server')
+  const wsServerCleanup = useSubscriptionsServer(schema, httpServer)
+
+  logger.info('Starting apollo server')
   const server = new ApolloServer<GraphQLContext>({
-    schema: schema(),
-    plugins: plugins(httpServer),
+    schema,
+    plugins: plugins(httpServer, wsServerCleanup),
     introspection: true,
     csrfPrevention: true,
   })

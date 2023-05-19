@@ -1,16 +1,19 @@
-import type { CreateUser, GraphQLContext as GraphQLContextBase, RequestInfo } from '@makerxstudio/graphql-core'
+import type { GraphQLContext as GraphQLContextBase, RequestInfo } from '@makerxstudio/graphql-core'
 import { createContextFactory } from '@makerxstudio/graphql-core'
+import type { JwtPayload } from 'jsonwebtoken'
 import type { DataSource } from 'typeorm'
 import config from './config'
 import { dispatch } from './cqrs/dispatcher'
 import { dataSource } from './data'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
 import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or-create-user'
+import { createSubscriptionContextFactory } from './lib/graphql-core/subscription-context'
 import type { DataLoaders } from './loaders'
 import { createDataLoaders } from './loaders'
 import { logger } from './logger'
 import type { Services } from './services'
 import { createServices } from './services'
+import { extractTokenFromConnectionParams } from './subscriptions'
 import { User } from './user'
 import { invariant } from './util/invariant'
 
@@ -21,7 +24,7 @@ export type GraphQLContext = BaseContext & {
   dataLoaders: DataLoaders
 }
 
-export const findUpdateOrCreateUser: CreateUser<User | undefined> = async ({ claims, req }) => {
+export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string) => {
   if (!claims) return undefined
 
   const tenantId = claims['tid'] as string
@@ -56,17 +59,27 @@ export const findUpdateOrCreateUser: CreateUser<User | undefined> = async ({ cla
 
   const userEntity = await dispatch(context, FindUpdateOrCreateUser, input)
 
-  return new User(claims, req.headers.authorization?.substring(7) ?? '', userEntity)
+  return new User(claims, token ?? '', userEntity)
+}
+
+const augmentContext = (context: GraphQLContext) => {
+  const services = createServices(context)
+  const dataLoaders = createDataLoaders()
+  return { services, dataSource, dataLoaders }
 }
 
 export const createContext = createContextFactory<GraphQLContext>({
   claimsToLog: config.get('logging.userClaimsToLog'),
   requestInfoToLog: config.get('logging.requestInfoToLog'),
   requestLogger: (requestMetadata) => logger.child(requestMetadata),
-  createUser: findUpdateOrCreateUser,
-  augmentContext: (context) => {
-    const services = createServices(context)
-    const dataLoaders = createDataLoaders()
-    return { services, dataSource, dataLoaders }
-  },
+  createUser: ({ claims, req }) => findUpdateOrCreateUser(claims, req.headers.authorization?.substring(7)),
+  augmentContext,
+})
+
+export const createSubscriptionContext = createSubscriptionContextFactory<GraphQLContext>({
+  claimsToLog: config.get('logging.userClaimsToLog'),
+  requestInfoToLog: config.get('logging.requestInfoToLog'),
+  requestLogger: (requestMetadata) => logger.child(requestMetadata),
+  createUser: ({ claims, connectionParams }) => findUpdateOrCreateUser(claims, extractTokenFromConnectionParams(connectionParams)),
+  augmentContext,
 })

@@ -502,6 +502,29 @@ export type IssuanceCallbackEvent = {
   state: Scalars['String'];
 };
 
+/** Data representing an issuance event (see IssuanceRequestStatus, could be received, successful, failed). */
+export type IssuanceEventData = {
+  __typename?: 'IssuanceEventData';
+  /** The callback event data */
+  event: IssuanceCallbackEvent;
+  /** The issuance data, if the issuance was successful */
+  issuance?: Maybe<Issuance>;
+};
+
+/** Criteria for filtering issuance events. */
+export type IssuanceEventWhere = {
+  /** The ID of the contract to be issued. */
+  contractId?: InputMaybe<Scalars['ID']>;
+  /** The ID of the identity that the issuance is for. */
+  identityId?: InputMaybe<Scalars['ID']>;
+  /** The requestId of the issuance request, returned from the createIssuanceRequest mutation. */
+  requestId?: InputMaybe<Scalars['ID']>;
+  /** Only return events with the specified status. */
+  status?: InputMaybe<IssuanceRequestStatus>;
+  /** The ID of the user (Person or Application) that requested issuance. */
+  userId?: InputMaybe<Scalars['ID']>;
+};
+
 /**
  * The issuance request payload contains information about your verifiable credentials issuance request.
  * The following example demonstrates an issuance request by using a PIN code flow with user claims, such as first name and last name.
@@ -761,15 +784,15 @@ export type PresentationCallbackEvent = {
    * The receipt should be used for troubleshooting/debugging only.
    * The format in the receipt isn't fix and can change based on the wallet and version used.
    */
-  receipt: Scalars['JSONObject'];
+  receipt?: Maybe<Scalars['JSONObject']>;
   /** Mapped to the original request when the payload was posted to the Verifiable Credentials service. */
   requestId: Scalars['ID'];
   requestStatus: PresentationRequestStatus;
   /** Returns the state value that you passed in the original payload. */
   state: Scalars['String'];
   /** The verifiable credential user DID. */
-  subject: Scalars['String'];
-  verifiedCredentialsData: Array<PresentedCredential>;
+  subject?: Maybe<Scalars['String']>;
+  verifiedCredentialsData?: Maybe<Array<PresentedCredential>>;
 };
 
 /** Represents a credential presentation between a client application and a user (presenter of the credential and associated claims) */
@@ -785,6 +808,32 @@ export type PresentationEvent = {
   issuers: Scalars['String'];
   /** When the presentation was made */
   time: Scalars['DateTime'];
+};
+
+/** Data representing an presentation event (see PresentationRequestStatus, could be received, successful, failed). */
+export type PresentationEventData = {
+  __typename?: 'PresentationEventData';
+  /** The callback event data */
+  event: PresentationCallbackEvent;
+  /** The presentation data, if the presentation was successful */
+  presentation?: Maybe<Presentation>;
+};
+
+/** Criteria for filtering presentation events. */
+export type PresentationEventWhere = {
+  /** The ID of the identity that the presentation is for. */
+  identityId?: InputMaybe<Scalars['ID']>;
+  /** The requestId of the presentation request, returned from the createPresentationRequest mutation. */
+  requestId?: InputMaybe<Scalars['ID']>;
+  /** Only return events with the specified status. */
+  status?: InputMaybe<PresentationRequestStatus>;
+  /**
+   * The type of credential presented.
+   * Note: type data is only available on complete presentation events; if specified, only complete presentations containing this type will be returned.
+   */
+  type?: InputMaybe<Scalars['String']>;
+  /** The ID of the user (Person or Application) that requested presentation. */
+  userId?: InputMaybe<Scalars['ID']>;
 };
 
 /** The presentation request payload contains information about your verifiable credentials presentation request. */
@@ -1137,6 +1186,24 @@ export type RequestedCredential = {
   purpose?: Maybe<Scalars['String']>;
   /** The verifiable credential type that was requested */
   type: Scalars['String'];
+};
+
+export type Subscription = {
+  __typename?: 'Subscription';
+  /** Returns event data when an issuance callback is received */
+  issuanceEvent: IssuanceEventData;
+  /** Returns event data when an presentation callback is received */
+  presentationEvent: PresentationEventData;
+};
+
+
+export type SubscriptionIssuanceEventArgs = {
+  where?: InputMaybe<IssuanceEventWhere>;
+};
+
+
+export type SubscriptionPresentationEventArgs = {
+  where?: InputMaybe<PresentationEventWhere>;
 };
 
 /** Defines a template that can be used as a base for a contract */
@@ -1536,6 +1603,8 @@ export type ResolversTypes = {
   IonDidModel: ResolverTypeWrapper<IonDidModel>;
   Issuance: ResolverTypeWrapper<IssuanceEntity>;
   IssuanceCallbackEvent: ResolverTypeWrapper<IssuanceCallbackEvent>;
+  IssuanceEventData: ResolverTypeWrapper<Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversTypes['Issuance']> }>;
+  IssuanceEventWhere: IssuanceEventWhere;
   IssuanceRequestInput: IssuanceRequestInput;
   IssuanceRequestResponse: ResolverTypeWrapper<ResolversUnionTypes['IssuanceRequestResponse']>;
   IssuanceRequestStatus: IssuanceRequestStatus;
@@ -1555,6 +1624,8 @@ export type ResolversTypes = {
   Presentation: ResolverTypeWrapper<PresentationEntity>;
   PresentationCallbackEvent: ResolverTypeWrapper<PresentationCallbackEvent>;
   PresentationEvent: ResolverTypeWrapper<PresentationEvent>;
+  PresentationEventData: ResolverTypeWrapper<Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversTypes['Presentation']> }>;
+  PresentationEventWhere: PresentationEventWhere;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
   PresentationRequestResponse: ResolverTypeWrapper<ResolversUnionTypes['PresentationRequestResponse']>;
@@ -1573,6 +1644,7 @@ export type ResolversTypes = {
   RequestInnerError: ResolverTypeWrapper<RequestInnerError>;
   RequestedConfiguration: ResolverTypeWrapper<RequestedConfiguration>;
   RequestedCredential: ResolverTypeWrapper<RequestedCredential>;
+  Subscription: ResolverTypeWrapper<{}>;
   Template: ResolverTypeWrapper<TemplateEntity>;
   TemplateDisplayClaim: ResolverTypeWrapper<TemplateDisplayClaim>;
   TemplateDisplayConsent: ResolverTypeWrapper<TemplateDisplayConsent>;
@@ -1628,6 +1700,8 @@ export type ResolversParentTypes = {
   IonDidModel: IonDidModel;
   Issuance: IssuanceEntity;
   IssuanceCallbackEvent: IssuanceCallbackEvent;
+  IssuanceEventData: Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversParentTypes['Issuance']> };
+  IssuanceEventWhere: IssuanceEventWhere;
   IssuanceRequestInput: IssuanceRequestInput;
   IssuanceRequestResponse: ResolversUnionParentTypes['IssuanceRequestResponse'];
   IssuanceResponse: IssuanceResponse;
@@ -1646,6 +1720,8 @@ export type ResolversParentTypes = {
   Presentation: PresentationEntity;
   PresentationCallbackEvent: PresentationCallbackEvent;
   PresentationEvent: PresentationEvent;
+  PresentationEventData: Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversParentTypes['Presentation']> };
+  PresentationEventWhere: PresentationEventWhere;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
   PresentationRequestResponse: ResolversUnionParentTypes['PresentationRequestResponse'];
@@ -1663,6 +1739,7 @@ export type ResolversParentTypes = {
   RequestInnerError: RequestInnerError;
   RequestedConfiguration: RequestedConfiguration;
   RequestedCredential: RequestedCredential;
+  Subscription: {};
   Template: TemplateEntity;
   TemplateDisplayClaim: TemplateDisplayClaim;
   TemplateDisplayConsent: TemplateDisplayConsent;
@@ -1824,6 +1901,12 @@ export type IssuanceCallbackEventResolvers<ContextType = GraphQLContext, ParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type IssuanceEventDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IssuanceEventData'] = ResolversParentTypes['IssuanceEventData']> = {
+  event?: Resolver<ResolversTypes['IssuanceCallbackEvent'], ParentType, ContextType>;
+  issuance?: Resolver<Maybe<ResolversTypes['Issuance']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type IssuanceRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IssuanceRequestResponse'] = ResolversParentTypes['IssuanceRequestResponse']> = {
   __resolveType: TypeResolveFn<'IssuanceResponse' | 'RequestErrorResponse', ParentType, ContextType>;
 };
@@ -1903,12 +1986,12 @@ export type PresentationResolvers<ContextType = GraphQLContext, ParentType exten
 };
 
 export type PresentationCallbackEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationCallbackEvent'] = ResolversParentTypes['PresentationCallbackEvent']> = {
-  receipt?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
+  receipt?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   requestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   requestStatus?: Resolver<ResolversTypes['PresentationRequestStatus'], ParentType, ContextType>;
   state?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  subject?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  verifiedCredentialsData?: Resolver<Array<ResolversTypes['PresentedCredential']>, ParentType, ContextType>;
+  subject?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  verifiedCredentialsData?: Resolver<Maybe<Array<ResolversTypes['PresentedCredential']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1918,6 +2001,12 @@ export type PresentationEventResolvers<ContextType = GraphQLContext, ParentType 
   credentialTypes?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   issuers?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   time?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type PresentationEventDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationEventData'] = ResolversParentTypes['PresentationEventData']> = {
+  event?: Resolver<ResolversTypes['PresentationCallbackEvent'], ParentType, ContextType>;
+  presentation?: Resolver<Maybe<ResolversTypes['Presentation']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2010,6 +2099,11 @@ export type RequestedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
   purpose?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type SubscriptionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
+  issuanceEvent?: SubscriptionResolver<ResolversTypes['IssuanceEventData'], "issuanceEvent", ParentType, ContextType, Partial<SubscriptionIssuanceEventArgs>>;
+  presentationEvent?: SubscriptionResolver<ResolversTypes['PresentationEventData'], "presentationEvent", ParentType, ContextType, Partial<SubscriptionPresentationEventArgs>>;
 };
 
 export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Template'] = ResolversParentTypes['Template']> = {
@@ -2127,6 +2221,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   IonDidModel?: IonDidModelResolvers<ContextType>;
   Issuance?: IssuanceResolvers<ContextType>;
   IssuanceCallbackEvent?: IssuanceCallbackEventResolvers<ContextType>;
+  IssuanceEventData?: IssuanceEventDataResolvers<ContextType>;
   IssuanceRequestResponse?: IssuanceRequestResponseResolvers<ContextType>;
   IssuanceResponse?: IssuanceResponseResolvers<ContextType>;
   JSONObject?: GraphQLScalarType;
@@ -2140,6 +2235,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   Presentation?: PresentationResolvers<ContextType>;
   PresentationCallbackEvent?: PresentationCallbackEventResolvers<ContextType>;
   PresentationEvent?: PresentationEventResolvers<ContextType>;
+  PresentationEventData?: PresentationEventDataResolvers<ContextType>;
   PresentationRequestResponse?: PresentationRequestResponseResolvers<ContextType>;
   PresentationResponse?: PresentationResponseResolvers<ContextType>;
   PresentedCredential?: PresentedCredentialResolvers<ContextType>;
@@ -2151,6 +2247,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   RequestInnerError?: RequestInnerErrorResolvers<ContextType>;
   RequestedConfiguration?: RequestedConfigurationResolvers<ContextType>;
   RequestedCredential?: RequestedCredentialResolvers<ContextType>;
+  Subscription?: SubscriptionResolvers<ContextType>;
   Template?: TemplateResolvers<ContextType>;
   TemplateDisplayClaim?: TemplateDisplayClaimResolvers<ContextType>;
   TemplateDisplayConsent?: TemplateDisplayConsentResolvers<ContextType>;
