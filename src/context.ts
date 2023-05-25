@@ -1,5 +1,5 @@
 import type { GraphQLContext as GraphQLContextBase, RequestInfo } from '@makerxstudio/graphql-core'
-import { createContextFactory } from '@makerxstudio/graphql-core'
+import { createContextFactory, createSubscriptionContextFactory, extractTokenFromConnectionParams } from '@makerxstudio/graphql-core'
 import type { JwtPayload } from 'jsonwebtoken'
 import type { DataSource } from 'typeorm'
 import config from './config'
@@ -7,13 +7,11 @@ import { dispatch } from './cqrs/dispatcher'
 import { dataSource } from './data'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
 import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or-create-user'
-import { createSubscriptionContextFactory } from './lib/graphql-core/subscription-context'
 import type { DataLoaders } from './loaders'
 import { createDataLoaders } from './loaders'
 import { logger } from './logger'
 import type { Services } from './services'
 import { createServices } from './services'
-import { extractTokenFromConnectionParams } from './subscriptions'
 import { User } from './user'
 import { invariant } from './util/invariant'
 
@@ -62,7 +60,7 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
   return new User(claims, token ?? '', userEntity)
 }
 
-const augmentContext = (context: GraphQLContext) => {
+const augmentContext = (context: BaseContext) => {
   const services = createServices(context)
   const dataLoaders = createDataLoaders()
   return { services, dataSource, dataLoaders }

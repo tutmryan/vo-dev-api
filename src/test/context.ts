@@ -9,6 +9,7 @@ import { logger } from '../logger'
 import { createServices } from '../services'
 
 const requestInfo: RequestInfo = {
+  protocol: 'http',
   host: 'localhost',
   url: 'http://localhost/graphql',
   method: 'TEST',

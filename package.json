@@ -95,7 +95,7 @@
     "@makerxstudio/express-bearer": "^0.3.0",
     "@makerxstudio/express-msal": "^1.1.0",
     "@makerxstudio/graphql-apollo-server": "^1.2.0",
-    "@makerxstudio/graphql-core": "^0.6.1",
+    "@makerxstudio/graphql-core": "^0.7.1",
     "@makerxstudio/node-common": "^0.4.0",
     "@makerxstudio/node-winston": "^0.2.0",
     "@microsoft/microsoft-graph-client": "^3.0.5",

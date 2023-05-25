@@ -9,18 +9,20 @@ import {
   ApolloServerPluginLandingPageLocalDefault,
   ApolloServerPluginLandingPageProductionDefault,
 } from '@apollo/server/plugin/landingPage/default'
+import { verifyForHost } from '@makerxstudio/express-bearer'
 import { createLoggingPlugin, introspectionControlPlugin } from '@makerxstudio/graphql-apollo-server'
+import { useSubscriptionsServer } from '@makerxstudio/graphql-core'
 import { isProduction } from '@makerxstudio/node-common'
 import type { Express } from 'express'
 import { json } from 'express'
 import type { Disposable } from 'graphql-ws'
 import type http from 'http'
 import { newCacheSection } from './cache'
+import config from './config'
 import type { GraphQLContext } from './context'
-import { createContext } from './context'
+import { createContext, createSubscriptionContext } from './context'
 import { logger } from './logger'
 import createSchema from './schema'
-import { useSubscriptionsServer } from './subscriptions'
 
 const plugins = (httpServer: http.Server, serverCleanup: Disposable): ApolloServerPlugin<GraphQLContext>[] => {
   const plugins: ApolloServerPlugin<GraphQLContext>[] = [
@@ -58,7 +60,15 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
   const schema = createSchema()
 
   logger.info('Initialising subscriptions websocket server')
-  const wsServerCleanup = useSubscriptionsServer(schema, httpServer)
+  const wsServerCleanup = useSubscriptionsServer({
+    schema,
+    httpServer,
+    logger,
+    createSubscriptionContext,
+    jwtClaimsToLog: config.get('logging.userClaimsToLog'),
+    requireAuth: true,
+    verifyToken: (host, token) => verifyForHost(host, token, config.get('auth.bearer')),
+  })
 
   logger.info('Starting apollo server')
   const server = new ApolloServer<GraphQLContext>({
