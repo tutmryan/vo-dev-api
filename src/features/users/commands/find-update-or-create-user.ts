@@ -8,7 +8,7 @@ export type FindUpdateOrCreateUserInput = Pick<UserEntity, 'oid' | 'tenantId' | 
 
 const userCache = new InMemoryLRUCache<UserEntity>({
   // 1 hour
-  ttl: 60 * 60,
+  ttl: 1000 * 60 * 60,
   // 100 items, we don't expect many users to be logged in at the same time
   max: 100,
   // as per doc, unecessary
