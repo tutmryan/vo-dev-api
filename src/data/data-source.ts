@@ -1,13 +1,13 @@
-import { environment, isLocalDev } from '@makerxstudio/node-common'
+import { environment, isLocalDev } from '@makerx/node-common'
 import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 import type { SqlServerConnectionOptions } from 'typeorm/driver/sqlserver/SqlServerConnectionOptions'
 import config from '../config'
-import { logger, LoggerForTypeOrm } from '../logger'
+import { AuditingEventSubscriber } from '../features/auditing/auditing-event-subscribers'
+import { TrackingEventSubscriber } from '../features/auditing/tracking-event-subscriber'
+import { LoggerForTypeOrm, logger } from '../logger'
 import type { VerifiedOrchestrationEntityManager } from './entity-manager'
 import { SnakeNamingStrategy } from './utils/snake-naming-strategy'
-import { TrackingEventSubscriber } from '../features/auditing/tracking-event-subscriber'
-import { AuditingEventSubscriber } from '../features/auditing/auditing-event-subscribers'
 
 const { logging, host, port, database } = config.get('database')
 

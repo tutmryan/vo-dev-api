@@ -1,5 +1,5 @@
-import type { User } from '@makerxstudio/graphql-core'
-import type { Logger } from '@makerxstudio/node-winston'
+import type { User } from '@makerx/graphql-core'
+import type { Logger } from '@makerx/node-winston'
 import type { VerifiedOrchestrationEntityManager } from '../data/entity-manager'
 import type { DataLoaders } from '../loaders'
 

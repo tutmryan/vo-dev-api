@@ -1,5 +1,5 @@
-import type { HttpAuthFactory } from '@makerxstudio/node-common'
-import { createClientCredentialsAuthFactory as clientCredentialsAuth } from '@makerxstudio/node-common'
+import type { HttpAuthFactory } from '@makerx/node-common'
+import { createClientCredentialsAuthFactory as clientCredentialsAuth } from '@makerx/node-common'
 import config from '../config'
 import type { BaseContext } from '../context'
 import { AdminService } from './admin'

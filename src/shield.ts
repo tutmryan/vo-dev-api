@@ -1,4 +1,4 @@
-import { isDev, isLocalDev } from '@makerxstudio/node-common'
+import { isDev, isLocalDev } from '@makerx/node-common'
 import { allow, or, rule, shield } from 'graphql-shield'
 import type { IRules, ShieldRule } from 'graphql-shield/typings/types'
 import type { GraphQLContext } from './context'

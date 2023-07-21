@@ -4,12 +4,12 @@ type Query {
   Finds issuers from the Entra Verified ID network
   See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-issuers
   """
-  findNetworkIssuers(where: NetworkIssuersWhere!): [NetworkIssuer!]!
+  findNetworkIssuers(where: NetworkIssuersWhere!): [NetworkIssuer!]! @cacheControl(maxAge: 60) # 1 minute since publishing takes some time to replicate anyway
   """
   Lists the credential contract types for the specified network issuer
   See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
   """
-  networkContracts(tenantId: ID!, issuerId: ID!): [NetworkContract!]!
+  networkContracts(tenantId: ID!, issuerId: ID!): [NetworkContract!]! @cacheControl(maxAge: 60) # 1 minute since publishing takes some time to replicate anyway
 }
 
 """

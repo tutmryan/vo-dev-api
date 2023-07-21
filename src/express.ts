@@ -1,14 +1,14 @@
 import type { Configuration } from '@azure/msal-node'
 import { ConfidentialClientApplication } from '@azure/msal-node'
-import { bearerTokenMiddleware } from '@makerxstudio/express-bearer'
-import type { AuthConfig } from '@makerxstudio/express-msal'
+import { bearerTokenMiddleware } from '@makerx/express-bearer'
+import type { AuthConfig } from '@makerx/express-msal'
 import {
   copySessionJwtToBearerHeader,
   isAuthenticatedSession,
   logout,
   pkceAuthenticationMiddleware,
   toNpmLogLevel,
-} from '@makerxstudio/express-msal'
+} from '@makerx/express-msal'
 import bodyParser from 'body-parser'
 import cookieSession from 'cookie-session'
 import cors from 'cors'

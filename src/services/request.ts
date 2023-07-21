@@ -1,5 +1,5 @@
-import type { ClientCredentialsConfig, HttpClientOptions } from '@makerxstudio/node-common'
-import { HttpClient, HttpResponseError, getClientCredentialsToken } from '@makerxstudio/node-common'
+import type { ClientCredentialsConfig, HttpClientOptions } from '@makerx/node-common'
+import { HttpClient, HttpResponseError, getClientCredentialsToken } from '@makerx/node-common'
 import { randomUUID } from 'crypto'
 import { REQUEST_CACHE_TTL, requestCallbackCache } from '../cache'
 import type { BaseContext } from '../context'

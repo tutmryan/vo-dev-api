@@ -1,5 +1,5 @@
-import type { JwtPayload } from '@makerxstudio/graphql-core'
-import { User as BaseUser } from '@makerxstudio/graphql-core'
+import type { JwtPayload } from '@makerx/graphql-core'
+import { User as BaseUser } from '@makerx/graphql-core'
 import type { UserEntity } from './features/users/entities/user-entity'
 
 /**

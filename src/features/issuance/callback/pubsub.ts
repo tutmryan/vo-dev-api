@@ -1,4 +1,4 @@
-import type { GraphQLContext } from '@makerxstudio/graphql-core'
+import type { GraphQLContext } from '@makerx/graphql-core'
 import { withFilter } from 'graphql-subscriptions'
 import type { IssuanceRequestDetails } from '../../../cache'
 import { pubsub } from '../../../cache'

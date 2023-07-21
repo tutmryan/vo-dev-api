@@ -16,8 +16,6 @@ jobs:
       node-version: 18.x
       pre-test-script: npm run test:ci:start-db
       test-script: npm run test:ci
-    secrets:
-      npm-auth-token: ${{ secrets.NPM_AUTH_TOKEN }}
 
   ci-migrations-function:
     name: CI Migrations Function

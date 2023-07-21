@@ -1,4 +1,4 @@
-import { extractErrorResponseInfo } from '@makerxstudio/node-common'
+import { extractErrorResponseInfo } from '@makerx/node-common'
 import type { RequestHandler } from 'express'
 import { capitalize } from 'lodash'
 import type { RequestInit } from 'node-fetch'

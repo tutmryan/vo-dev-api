@@ -1,4 +1,4 @@
-import type { Logger } from '@makerxstudio/node-winston'
+import type { Logger } from '@makerx/node-winston'
 import type { VerifiedOrchestrationEntityManager } from '../data/entity-manager'
 import type { DataLoaders } from '../loaders'
 import type { Services } from '../services'

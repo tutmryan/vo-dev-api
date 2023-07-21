@@ -1,4 +1,4 @@
-import { isLocalDev } from '@makerxstudio/node-common'
+import { isLocalDev } from '@makerx/node-common'
 import { createDatabase, tryConnect } from '../src/util/local-database-init'
 
 if (!isLocalDev) {

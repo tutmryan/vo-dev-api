@@ -1,7 +1,7 @@
 import type { GraphQLRequest } from '@apollo/server'
 import { ApolloServer } from '@apollo/server'
 import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
-import type { JwtPayload } from '@makerxstudio/graphql-core'
+import type { JwtPayload } from '@makerx/graphql-core'
 import type { DocumentNode, FormattedExecutionResult } from 'graphql'
 import type { GraphQLContext } from '../context'
 import schema from '../schema'

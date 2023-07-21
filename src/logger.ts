@@ -1,7 +1,7 @@
-import type { Logger } from '@makerxstudio/node-common'
-import { isLocalDev } from '@makerxstudio/node-common'
-import { createLogger } from '@makerxstudio/node-winston'
-import type { Logger as TypeOrmLoggerInterface, LoggerOptions, QueryRunner } from 'typeorm'
+import type { Logger } from '@makerx/node-common'
+import { isLocalDev } from '@makerx/node-common'
+import { createLogger } from '@makerx/node-winston'
+import type { LoggerOptions, QueryRunner, Logger as TypeOrmLoggerInterface } from 'typeorm'
 import config from './config'
 
 export const logger = createLogger({

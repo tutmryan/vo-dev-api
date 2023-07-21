@@ -1,7 +1,7 @@
 import { KeyvAdapter } from '@apollo/utils.keyvadapter'
 import type { KeyValueCache } from '@apollo/utils.keyvaluecache'
 import { InMemoryLRUCache, PrefixingKeyValueCache } from '@apollo/utils.keyvaluecache'
-import { environment, isLocalDev } from '@makerxstudio/node-common'
+import { environment, isLocalDev } from '@makerx/node-common'
 import { RedisPubSub } from 'graphql-redis-subscriptions'
 import { PubSub } from 'graphql-subscriptions'
 import Keyv from 'keyv'

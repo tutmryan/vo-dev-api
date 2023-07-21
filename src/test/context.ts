@@ -1,4 +1,4 @@
-import type { JwtPayload, RequestInfo } from '@makerxstudio/graphql-core'
+import type { JwtPayload, RequestInfo } from '@makerx/graphql-core'
 import casual from 'casual'
 import { randomUUID } from 'crypto'
 import type { GraphQLContext } from '../context'

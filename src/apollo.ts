@@ -9,10 +9,10 @@ import {
   ApolloServerPluginLandingPageLocalDefault,
   ApolloServerPluginLandingPageProductionDefault,
 } from '@apollo/server/plugin/landingPage/default'
-import { verifyForHost } from '@makerxstudio/express-bearer'
-import { createLoggingPlugin, introspectionControlPlugin } from '@makerxstudio/graphql-apollo-server'
-import { useSubscriptionsServer } from '@makerxstudio/graphql-core'
-import { isProduction } from '@makerxstudio/node-common'
+import { verifyForHost } from '@makerx/express-bearer'
+import { createLoggingPlugin, introspectionControlPlugin } from '@makerx/graphql-apollo-server'
+import { useSubscriptionsServer } from '@makerx/graphql-core'
+import { isProduction } from '@makerx/node-common'
 import type { Express } from 'express'
 import { json } from 'express'
 import type { Disposable } from 'graphql-ws'

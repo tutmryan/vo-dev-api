@@ -1,5 +1,5 @@
-import type { HttpClientOptions } from '@makerxstudio/node-common'
-import { HttpClient, HttpResponseError } from '@makerxstudio/node-common'
+import type { HttpClientOptions } from '@makerx/node-common'
+import { HttpClient, HttpResponseError } from '@makerx/node-common'
 import type { BaseContext } from '../context'
 import type { Authority, NetworkContract, NetworkIssuer, NetworkIssuersWhere } from '../generated/graphql'
 import { invariant } from '../util/invariant'
