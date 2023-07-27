@@ -75,6 +75,16 @@
       "problemMatcher": []
     },
     {
+      "label": "Test",
+      "type": "npm",
+      "script": "test",
+      "path": "${workspaceFolder}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Build",
       "type": "npm",
       "script": "build",

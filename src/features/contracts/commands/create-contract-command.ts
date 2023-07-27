@@ -2,6 +2,7 @@ import { omit } from 'lodash'
 import type { CommandContext } from '../../../cqrs/command-context'
 import type { ContractInput } from '../../../generated/graphql'
 import { TemplateEntity } from '../../templates/entities/template-entity'
+import { validateContractClaims } from '../claims'
 import { ContractEntity } from '../entities/contract-entity'
 import { ensureNoOverridingTemplateData } from '../mapping'
 
@@ -9,6 +10,8 @@ export async function CreateContractCommand(this: CommandContext, input: Contrac
   const template = input.templateId
     ? await this.entityManager.getRepository(TemplateEntity).findOneByOrFail({ id: input.templateId })
     : null
+
+  validateContractClaims(input.display.claims)
 
   if (template) {
     ensureNoOverridingTemplateData(input, await template.combinedData())

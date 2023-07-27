@@ -34,7 +34,7 @@ export interface IssuanceRequestDetails {
 }
 export interface PresentationRequestDetails {
   userId: string
-  identityId: string
+  identityId?: string
   contractIds: string[]
   requestedCredentials: RequestCredential[]
 }

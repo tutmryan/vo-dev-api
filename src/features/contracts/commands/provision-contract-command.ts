@@ -1,6 +1,7 @@
 import { omit } from 'lodash'
 import type { CommandContext } from '../../../cqrs/command-context'
 import type { Contract, CreateContractInput, UpdateContractInput } from '../../../services/admin.types'
+import { displayClaimPrefix, standardClaimAttestations, standardContractDislayClaims } from '../claims'
 import { ContractEntity } from '../entities/contract-entity'
 
 export async function ProvisionContractCommand(this: CommandContext, id: string) {
@@ -46,13 +47,16 @@ function toCreateContractInput({
         idTokenHints: [
           {
             required: true,
-            mapping: claims.map((x) => ({
-              type: x.type,
-              required: true,
-              outputClaim: x.claim,
-              inputClaim: x.claim,
-              indexed: false,
-            })),
+            mapping: [
+              ...standardClaimAttestations,
+              ...claims.map(({ type, claim }) => ({
+                type: type,
+                required: true,
+                outputClaim: claim,
+                inputClaim: claim,
+                indexed: false,
+              })),
+            ],
           },
         ],
       },
@@ -62,12 +66,15 @@ function toCreateContractInput({
         locale,
         consent,
         card: { ...cardRest, logo: { ...logoRest, image: image ? image.split(',')[1] : undefined } },
-        claims: claims.map(({ claim, type, label, description }) => ({
-          label,
-          claim: `vc.credentialSubject.${claim}`,
-          type,
-          description,
-        })),
+        claims: [
+          ...claims.map(({ claim, type, label, description }) => ({
+            label,
+            claim: `${displayClaimPrefix}.${claim}`,
+            type,
+            description,
+          })),
+          ...standardContractDislayClaims,
+        ],
       },
     ],
   }

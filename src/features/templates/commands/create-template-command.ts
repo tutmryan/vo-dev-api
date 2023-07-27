@@ -1,11 +1,14 @@
 import { merge } from 'lodash'
 import type { CommandContext } from '../../../cqrs/command-context'
 import type { TemplateInput } from '../../../generated/graphql'
+import { validateContractClaims } from '../../contracts/claims'
 import { TemplateEntity } from '../entities/template-entity'
 import { ensureNoIntersectingTemplateData, toDisplayModel, toTemplateParentData } from '../mapping'
 
 export async function CreateTemplateCommand(this: CommandContext, input: TemplateInput) {
   const repository = this.entityManager.getRepository(TemplateEntity)
+
+  validateContractClaims(input.display?.claims)
 
   const parent = input.parentTemplateId ? await repository.findOneByOrFail({ id: input.parentTemplateId }) : null
 

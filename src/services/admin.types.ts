@@ -29,7 +29,7 @@ type IdTokenHintAttestation = {
   trustedIssuers?: string[]
 }
 
-type AttestationClaimMapping = {
+export type AttestationClaimMapping = {
   inputClaim: string
   outputClaim: string
   indexed: boolean
@@ -64,7 +64,7 @@ type DisplayConsent = {
   instructions?: string | null
 }
 
-type DisplayClaim = {
+export type DisplayClaim = {
   label: string
   claim: string
   type: string

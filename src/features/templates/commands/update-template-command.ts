@@ -1,10 +1,14 @@
 import type { CommandContext } from '../../../cqrs/command-context'
 import type { TemplateInput } from '../../../generated/graphql'
+import { validateContractClaims } from '../../contracts/claims'
 import { TemplateEntity } from '../entities/template-entity'
 import { ensureNoIntersectingTemplateData, toDisplayModel, toTemplateParentData } from '../mapping'
 
 export async function UpdateTemplateCommand(this: CommandContext, id: string, input: TemplateInput) {
   const repository = this.entityManager.getRepository(TemplateEntity)
+
+  validateContractClaims(input.display?.claims)
+
   const template = await repository.findOneByOrFail({ id })
 
   const parent = input.parentTemplateId ? await repository.findOneByOrFail({ id: input.parentTemplateId }) : null

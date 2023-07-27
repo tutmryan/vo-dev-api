@@ -3,6 +3,7 @@ import { omit } from 'lodash'
 import type { ContractInput } from '../../generated/graphql'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
 import { createTemplate, getEmptyTemplateInput } from '../templates/test/create-template'
+import { StandardClaims } from './claims'
 import { createContractMutation, getDefaultContractInput } from './test/create-contract'
 
 describe('createContract mutation', () => {
@@ -183,5 +184,44 @@ describe('createContract mutation', () => {
 
     expect(data!.createContract.id).toBeDefined()
     expect(data!.createContract).toMatchObject(omit(input, 'templateId'))
+  })
+
+  it('validates against including standard claims', async () => {
+    // Arrange
+    const input = getDefaultContractInput()
+    input.display.claims.push({
+      claim: StandardClaims.name,
+      type: 'String',
+      label: 'Standard name claim',
+    })
+
+    // Act
+    const { errors } = await executeOperationAsAdmin({
+      query: createContractMutation,
+      variables: {
+        input,
+      },
+    })
+
+    // Assert
+    expect(errors).toMatchInlineSnapshot(`
+      [
+        {
+          "extensions": {
+            "code": "INTERNAL_SERVER_ERROR",
+          },
+          "locations": [
+            {
+              "column": 3,
+              "line": 2,
+            },
+          ],
+          "message": "Claims must not include any of: identityId, name",
+          "path": [
+            "createContract",
+          ],
+        },
+      ]
+    `)
   })
 })

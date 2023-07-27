@@ -6,13 +6,17 @@ import type { IssuanceRequestInput } from '../../../generated/graphql'
 import type { IssuanceRequest } from '../../../services/request'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
+import type { StandardClaims } from '../../contracts/claims'
+import { validateIssuanceClaims } from '../../contracts/claims'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 
+type StandardClaimsData = Record<StandardClaims, string>
+
 export async function CreateIssuanceRequestCommand(
   this: CommandContext,
-  { contractId, identityId, identity: identityInput, ...rest }: IssuanceRequestInput,
+  { contractId, identityId, identity: identityInput, claims: claimsInput, ...rest }: IssuanceRequestInput,
 ) {
   const {
     user,
@@ -21,6 +25,8 @@ export async function CreateIssuanceRequestCommand(
   } = this
 
   userInvariant(user)
+
+  validateIssuanceClaims(claimsInput)
 
   // find the contract
   const contract = await entityManager.getRepository(ContractEntity).findOneByOrFail({ id: contractId })
@@ -36,8 +42,20 @@ export async function CreateIssuanceRequestCommand(
   else if (!identityInput) throw new Error('Either identityId or identity must be provided')
   else identity = await createOrUpdateIdentity(entityManager, identityInput)
 
+  // build claims data, starting with any claims defined on the contract with (default) values
+  let claims: Record<string, any> = contract.display.claims.filter(({ value }) => !!value).map(({ claim, value }) => ({ [claim]: value }))
+  // add issuance request claims input, overriding any contract-defined claim values
+  if (claimsInput) Object.entries(claimsInput).forEach(([claim, value]) => (claims[claim] = value))
+  // add standard claims
+  const standardClaims: StandardClaimsData = {
+    identityId: identity.id,
+    name: identity.name,
+  }
+  claims = { ...claims, ...standardClaims }
+
   // create the issuance request
   const issuanceRequest: IssuanceRequest = {
+    claims,
     ...rest,
     authority: (await admin.authority()).didModel.did,
     manifest: provisionedContract.manifestUrl,
