@@ -38,9 +38,9 @@ const config: EnvVarSubstitution<Config> = {
     host: 'REDIS_HOST',
     key: 'REDIS_KEY',
   },
-  microsoftGraph: {
+  homeTenantGraph: {
     auth: {
-      clientSecret: 'MICROSOFT_GRAPH_CLIENT_SECRET',
+      clientSecret: 'API_CLIENT_SECRET',
     },
   },
   auth: {

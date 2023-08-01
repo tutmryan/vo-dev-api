@@ -54,6 +54,11 @@ const config: DeepPartial<Config> = {
       },
     },
   },
+  homeTenantGraph: {
+    auth: {
+      clientId: '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9',
+    },
+  },
   sendgrid: {
     templates: {
       onboarding: {

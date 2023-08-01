@@ -8,6 +8,7 @@ import config from 'config'
 import type { CorsOptions, CorsOptionsDelegate } from 'cors'
 import type { LoggerOptions } from 'typeorm'
 import type { ConsoleTransportOptions } from 'winston/lib/winston/transports'
+import type { GraphServiceConfig } from './services'
 import type { IssuanceRequestRegistration } from './services/request'
 
 export type Config = {
@@ -57,14 +58,7 @@ export type Config = {
     host: string
     key: string
   }
-  microsoftGraph: {
-    auth: {
-      tenantId: string
-      clientId: string
-      clientSecret: string
-    }
-    b2cTenantName: string
-  }
+  homeTenantGraph: GraphServiceConfig
   sendgrid: {
     key: string
     templates: {
@@ -80,14 +74,7 @@ export type Config = {
       baseUrl: string
       auth: ClientCredentialsConfig
     }
-    b2cGraph: {
-      auth: {
-        tenantId: string
-        clientId: string
-        clientSecret: string
-      }
-      b2cTenantName: string
-    }
+    b2cGraph: GraphServiceConfig
   }
   issuanceCallback: {
     route: string

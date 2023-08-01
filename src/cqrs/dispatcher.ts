@@ -43,6 +43,7 @@ export const query = async <T extends QueryLike>(
       user,
       entityManager,
       logger: context.logger,
+      services: context.services,
       dataLoaders: context.dataLoaders,
       contextType: 'query',
     },

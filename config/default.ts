@@ -41,6 +41,12 @@ const config: DeepPartial<Config> = {
       },
     },
   },
+  homeTenantGraph: {
+    auth: {
+      tenantId: 'a4577872-4a36-4a93-9846-b29a1220ca89',
+    },
+    tenantName: 'verifiedorchestration.com',
+  },
   sendgrid: {
     templates: {
       onboarding: {
@@ -70,7 +76,7 @@ const config: DeepPartial<Config> = {
       auth: {
         tenantId: '10b631d3-9e47-49e1-a938-cbd933f0488d',
       },
-      b2cTenantName: 'voonboardingdemo',
+      tenantName: 'voonboardingdemo.onmicrosoft.com',
     },
   },
   issuanceCallback: {

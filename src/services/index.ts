@@ -3,21 +3,23 @@ import { createClientCredentialsAuthFactory as clientCredentialsAuth } from '@ma
 import config from '../config'
 import type { BaseContext } from '../context'
 import { AdminService } from './admin'
-import { B2cUserService } from './b2c-user'
+import { GraphService } from './graph-service'
 import { RequestService } from './request'
 
-export * from './b2c-user'
+export * from './graph-service'
 
 export interface Services {
-  b2cUser: B2cUserService
+  homeTenantGraph: GraphService
+  b2cGraph: GraphService
   admin: AdminService
   request: RequestService
 }
 
 export const createServices = (context: BaseContext): Services => {
   return {
+    b2cGraph: new GraphService(config.get('integrations.b2cGraph')),
+    homeTenantGraph: new GraphService(config.get('homeTenantGraph')),
     admin: createAdminService(context),
-    b2cUser: new B2cUserService(),
     request: createRequestService(context),
   }
 }

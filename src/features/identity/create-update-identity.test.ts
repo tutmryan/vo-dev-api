@@ -5,7 +5,7 @@ import type { IdentityInput } from '../../generated/graphql'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
 import { invariant } from '../../util/invariant'
 
-const identityQuery = graphql(`
+export const identityQuery = graphql(`
   query Identity($id: ID!) {
     identity(id: $id) {
       id
@@ -16,7 +16,7 @@ const identityQuery = graphql(`
   }
 `)
 
-const saveIdentityMutation = graphql(`
+export const saveIdentityMutation = graphql(`
   mutation SaveIdentity($input: IdentityInput!) {
     saveIdentity(input: $input) {
       id
@@ -27,7 +27,7 @@ const saveIdentityMutation = graphql(`
   }
 `)
 
-function createIdentityInput(): IdentityInput {
+export function createIdentityInput(): IdentityInput {
   return {
     issuer: 'issuer',
     identifier: randomUUID(),
@@ -35,7 +35,7 @@ function createIdentityInput(): IdentityInput {
   }
 }
 
-describe('identity', () => {
+describe('create-update-identity', () => {
   beforeAfterAll()
 
   it('should save an identity', async () => {

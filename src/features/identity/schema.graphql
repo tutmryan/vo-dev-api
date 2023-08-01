@@ -42,6 +42,48 @@ input IdentityInput {
   name: String!
 }
 
+"""
+Defines the searchable fields usable to find identities
+"""
+input IdentityWhere {
+  """
+  The name of the identity to match
+  """
+  name: String
+}
+
+"""
+Represents a home tenant identity
+"""
+type TenantIdentity {
+  """
+  The OID of this user identity within the home tenant
+  """
+  id: ID!
+  """
+  The issuer (tenant ID) of this user identity
+  """
+  issuer: String!
+  """
+  The displayName of the user identity
+  """
+  name: String!
+  """
+  The userType, usually 'Member' or 'Guest'
+  """
+  userType: String!
+}
+
+"""
+Defines criteria used to find home tenant identities
+"""
+input TenantIdentityWhere {
+  """
+  The partial name of the user to match
+  """
+  nameStartsWith: String!
+}
+
 # eslint-disable-next-line @graphql-eslint/require-description
 type Mutation {
   """
@@ -56,4 +98,12 @@ type Query {
   Returns an identity by ID
   """
   identity(id: ID!): Identity!
+  """
+  Returns identites, optionally matching the specified criteria
+  """
+  findIdentities(where: IdentityWhere, offset: PositiveInt, limit: PositiveInt = 100): [Identity!]! @cacheControl(maxAge: 60)
+  """
+  Returns home tenant user identies matching the specified criteria
+  """
+  findTenantIdentities(where: TenantIdentityWhere!, limit: PositiveInt = 100): [TenantIdentity!]! @cacheControl(maxAge: 60)
 }

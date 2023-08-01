@@ -37,6 +37,11 @@ const config: DeepPartial<Config> = {
       },
     },
   },
+  homeTenantGraph: {
+    auth: {
+      clientId: 'e53f942c-c727-4db9-a857-988bae3e07b6',
+    },
+  },
   redis: {
     host: 'vo-dev-verified-orchestration-redis.redis.cache.windows.net',
   },
