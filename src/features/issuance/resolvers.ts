@@ -21,6 +21,10 @@ export const resolvers: Resolvers = {
     issuances: (contract, { where, offset, limit }, context) =>
       query(context, FindIssuancesQuery, { contractId: contract.id, ...where }, offset, limit),
   },
+  Identity: {
+    issuances: (identity, { where, offset, limit }, context) =>
+      query(context, FindIssuancesQuery, { identityId: identity.id, ...where }, offset, limit),
+  },
   Issuance: {
     credentialExpiresAt: async ({ issuedAt, contractId }, _, { dataLoaders: { contracts } }) => {
       const contract = await contracts.load(contractId)

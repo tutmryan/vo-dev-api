@@ -5,6 +5,7 @@ import { ContractEntity } from '../features/contracts/entities/contract-entity';
 import { UserEntity } from '../features/users/entities/user-entity';
 import { IssuanceEntity } from '../features/issuance/entities/issuance-entity';
 import { PresentationEntity } from '../features/presentation/entities/presentation-entity';
+import { IdentityEntity } from '../features/identity/entities/identity-entity';
 import { GraphQLContext } from '../context';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
@@ -115,7 +116,7 @@ export type Contract = {
   id: Scalars['ID']['output'];
   /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
   isPublic: Scalars['Boolean']['output'];
-  /** Returns the successfull credential issuances for this contract. */
+  /** Returns the successful credential issuances for this contract. */
   issuances: Array<Issuance>;
   /** When the contract was last provisioned in the Verified ID service. */
   lastProvisionedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -123,7 +124,7 @@ export type Contract = {
   lastProvisionedBy?: Maybe<User>;
   /** The name of the contract */
   name: Scalars['String']['output'];
-  /** Returns the successfull credential presentations for this contract. */
+  /** Returns the successful credential presentations for this contract. */
   presentations: Array<Presentation>;
   /** When the contract was initially provisioned in the Verified ID service. */
   provisionedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -447,10 +448,30 @@ export type Identity = {
   id: Scalars['ID']['output'];
   /** The unique identifier of the identity in the issuing tenant */
   identifier: Scalars['String']['output'];
+  /** Returns the successful credential issuances for this identity. */
+  issuances: Array<Issuance>;
   /** The issuer of the identity */
   issuer: Scalars['String']['output'];
   /** The name of the identity */
   name: Scalars['String']['output'];
+  /** Returns the successful credential presentations for this identity. */
+  presentations: Array<Presentation>;
+};
+
+
+/** Represents an identity that is issued credentials */
+export type IdentityIssuancesArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<IdentityIssuanceWhere>;
+};
+
+
+/** Represents an identity that is issued credentials */
+export type IdentityPresentationsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<IdentityPresentationWhere>;
 };
 
 /** Input type representing an identity that is issued credentials */
@@ -461,6 +482,22 @@ export type IdentityInput = {
   issuer: Scalars['String']['input'];
   /** The name of the identity */
   name: Scalars['String']['input'];
+};
+
+/** Criteria for filtering issuances for identity. */
+export type IdentityIssuanceWhere = {
+  /** The ID of the contract that was issued. */
+  contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that issued the credential. */
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** Criteria for filtering identity presentations. */
+export type IdentityPresentationWhere = {
+  /** The ID of a contract used to make the presentation request. */
+  contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that requested & received the presentation. */
+  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Defines the searchable fields usable to find identities */
@@ -483,7 +520,7 @@ export type IonDidModel = DidModel & {
   updateKeys: Array<Scalars['String']['output']>;
 };
 
-/** An instance of a successfull contract-to-credential issuance. */
+/** An instance of a successful contract-to-credential issuance. */
 export type Issuance = {
   __typename?: 'Issuance';
   /** The contract defining the issued credential. */
@@ -768,7 +805,7 @@ export type Pin = {
   value: Scalars['String']['input'];
 };
 
-/** An instance of a successfull credential presentation. */
+/** An instance of a successful credential presentation. */
 export type Presentation = {
   __typename?: 'Presentation';
   /** The contracts used as presentation request input (if any). */
@@ -950,14 +987,14 @@ export type Query = {
   findContracts: Array<Contract>;
   /** Returns identites, optionally matching the specified criteria */
   findIdentities: Array<Identity>;
-  /** Returns successfull credential issuances, optionally matching the specified criteria. */
+  /** Returns successful credential issuances, optionally matching the specified criteria. */
   findIssuances: Array<Issuance>;
   /**
    * Finds issuers from the Entra Verified ID network
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-issuers
    */
   findNetworkIssuers: Array<NetworkIssuer>;
-  /** Returns successfull credential presentations, optionally matching the specified criteria. */
+  /** Returns successful credential presentations, optionally matching the specified criteria. */
   findPresentations: Array<Presentation>;
   /** Returns templates, optionally matching the specified criteria */
   findTemplates: Array<Template>;
@@ -978,11 +1015,11 @@ export type Query = {
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
    */
   networkContracts: Array<NetworkContract>;
-  /** Returns the successfull presentation count, optionally matching the specified criteria. */
+  /** Returns the successful presentation count, optionally matching the specified criteria. */
   presentationCount: Scalars['NonNegativeInt']['output'];
-  /** Returns the successfull presentation count, grouped by Contract, optionally matching the specified criteria. */
+  /** Returns the successful presentation count, grouped by Contract, optionally matching the specified criteria. */
   presentationCountByContract: Array<ContractCount>;
-  /** Returns the successfull presentation count, grouped by User, optionally matching the specified criteria. */
+  /** Returns the successful presentation count, grouped by User, optionally matching the specified criteria. */
   presentationCountByUser: Array<UserCount>;
   /** Returns a template by ID */
   template: Template;
@@ -1652,8 +1689,10 @@ export type ResolversTypes = {
   DidModel: ResolverTypeWrapper<ResolversInterfaceTypes<ResolversTypes>['DidModel']>;
   EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']['output']>;
   HexColorCode: ResolverTypeWrapper<Scalars['HexColorCode']['output']>;
-  Identity: ResolverTypeWrapper<Identity>;
+  Identity: ResolverTypeWrapper<IdentityEntity>;
   IdentityInput: IdentityInput;
+  IdentityIssuanceWhere: IdentityIssuanceWhere;
+  IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
   IonDidModel: ResolverTypeWrapper<IonDidModel>;
   Issuance: ResolverTypeWrapper<IssuanceEntity>;
@@ -1752,8 +1791,10 @@ export type ResolversParentTypes = {
   DidModel: ResolversInterfaceTypes<ResolversParentTypes>['DidModel'];
   EmailAddress: Scalars['EmailAddress']['output'];
   HexColorCode: Scalars['HexColorCode']['output'];
-  Identity: Identity;
+  Identity: IdentityEntity;
   IdentityInput: IdentityInput;
+  IdentityIssuanceWhere: IdentityIssuanceWhere;
+  IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
   IonDidModel: IonDidModel;
   Issuance: IssuanceEntity;
@@ -1927,8 +1968,10 @@ export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<Resolv
 export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Identity'] = ResolversParentTypes['Identity']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<IdentityIssuancesArgs>>;
   issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<IdentityPresentationsArgs>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

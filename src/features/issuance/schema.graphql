@@ -190,7 +190,7 @@ type Mutation {
 }
 
 """
-An instance of a successfull contract-to-credential issuance.
+An instance of a successful contract-to-credential issuance.
 """
 type Issuance {
   id: ID!
@@ -228,6 +228,20 @@ input ContractIssuanceWhere {
 }
 
 """
+Criteria for filtering issuances for identity.
+"""
+input IdentityIssuanceWhere {
+  """
+  The ID of the contract that was issued.
+  """
+  contractId: ID
+  """
+  The ID of the user (Person or Application) that issued the credential.
+  """
+  userId: ID
+}
+
+"""
 Criteria for filtering issuances.
 """
 input IssuanceWhere {
@@ -255,14 +269,21 @@ input IssuanceWhere {
 
 extend type Contract {
   """
-  Returns the successfull credential issuances for this contract.
+  Returns the successful credential issuances for this contract.
   """
   issuances(where: ContractIssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
 }
 
+extend type Identity {
+  """
+  Returns the successful credential issuances for this identity.
+  """
+  issuances(where: IdentityIssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
+}
+
 extend type Query {
   """
-  Returns successfull credential issuances, optionally matching the specified criteria.
+  Returns successful credential issuances, optionally matching the specified criteria.
   """
   findIssuances(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]! @cacheControl(maxAge: 60)
   """

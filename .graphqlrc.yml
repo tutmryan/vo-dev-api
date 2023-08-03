@@ -19,6 +19,7 @@ extensions:
                 User: ../features/users/entities/user-entity#UserEntity
                 Issuance: ../features/issuance/entities/issuance-entity#IssuanceEntity
                 Presentation: ../features/presentation/entities/presentation-entity#PresentationEntity
+                Identity: ../features/identity/entities/identity-entity#IdentityEntity
         config:
           strictScalars: true
           scalars:

@@ -1,12 +1,12 @@
 import type { FindOptionsRelations, FindOptionsWhere } from 'typeorm'
 import type { QueryContext } from '../../../cqrs/query-context'
-import type { IssuanceWhere, Maybe } from '../../../generated/graphql'
+import type { Maybe, PresentationWhere } from '../../../generated/graphql'
 import { BetweenTimestamp, LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp } from '../../../util/typeorm'
 import { PresentationEntity } from '../entities/presentation-entity'
 
 export async function FindPresentationsQuery(
   this: QueryContext,
-  criteria?: Maybe<IssuanceWhere>,
+  criteria?: Maybe<PresentationWhere>,
   offset?: Maybe<number>,
   limit?: Maybe<number>,
 ) {
