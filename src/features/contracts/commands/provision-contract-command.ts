@@ -69,7 +69,7 @@ function toCreateContractInput({
         claims: [
           ...claims.map(({ claim, type, label, description }) => ({
             label,
-            claim: `${displayClaimPrefix}.${claim}`,
+            claim: `${displayClaimPrefix}${claim}`,
             type,
             description,
           })),
