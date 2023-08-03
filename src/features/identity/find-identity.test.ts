@@ -20,7 +20,7 @@ describe('find-identity', () => {
     // Arrange
     const input = createIdentityInput()
 
-    const { data: saveData } = await executeOperationAsAdmin({
+    await executeOperationAsAdmin({
       query: saveIdentityMutation,
       variables: {
         input,

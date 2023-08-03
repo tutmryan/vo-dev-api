@@ -280,7 +280,7 @@ type PresentationEvent {
 }
 
 """
-An instance of a successfull credential presentation.
+An instance of a successful credential presentation.
 """
 type Presentation {
   id: ID!
@@ -322,6 +322,20 @@ input ContractPresentationWhere {
 }
 
 """
+Criteria for filtering identity presentations.
+"""
+input IdentityPresentationWhere {
+  """
+  The ID of a contract used to make the presentation request.
+  """
+  contractId: ID
+  """
+  The ID of the user (Person or Application) that requested & received the presentation.
+  """
+  userId: ID
+}
+
+"""
 Criteria for filtering presentations.
 """
 input PresentationWhere {
@@ -349,27 +363,34 @@ input PresentationWhere {
 
 extend type Contract {
   """
-  Returns the successfull credential presentations for this contract.
+  Returns the successful credential presentations for this contract.
   """
   presentations(where: ContractPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
 }
 
+extend type Identity {
+  """
+  Returns the successful credential presentations for this identity.
+  """
+  presentations(where: IdentityPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+}
+
 extend type Query {
   """
-  Returns successfull credential presentations, optionally matching the specified criteria.
+  Returns successful credential presentations, optionally matching the specified criteria.
   """
   findPresentations(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]! @cacheControl(maxAge: 60)
   """
-  Returns the successfull presentation count, optionally matching the specified criteria.
+  Returns the successful presentation count, optionally matching the specified criteria.
   """
   presentationCount(where: PresentationWhere): NonNegativeInt! @cacheControl(maxAge: 60)
   """
-  Returns the successfull presentation count, grouped by Contract, optionally matching the specified criteria.
+  Returns the successful presentation count, grouped by Contract, optionally matching the specified criteria.
   """
   presentationCountByContract(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [ContractCount!]!
     @cacheControl(maxAge: 60)
   """
-  Returns the successfull presentation count, grouped by User, optionally matching the specified criteria.
+  Returns the successful presentation count, grouped by User, optionally matching the specified criteria.
   """
   presentationCountByUser(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]! @cacheControl(maxAge: 60)
 }
