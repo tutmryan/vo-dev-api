@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, ManyToOne } from 'typeorm'
+import { Column, CreateDateColumn, Entity, ManyToOne, RelationId } from 'typeorm'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
@@ -33,4 +33,16 @@ export class IssuanceEntity extends VerifiedOrchestrationEntity {
 
   @CreateDateColumn({ type: 'datetimeoffset' })
   issuedAt!: Date
+
+  @Column({ type: 'bit', nullable: true })
+  isRevoked!: boolean | null
+
+  @ManyToOne(() => UserEntity, { nullable: true })
+  revokedBy!: Promise<UserEntity | null>
+
+  @RelationId((issuance: IssuanceEntity) => issuance.revokedBy)
+  revokedById!: string | null
+
+  @Column({ type: 'datetimeoffset', nullable: true })
+  revokedAt!: Date | null
 }

@@ -211,6 +211,18 @@ type Issuance {
   When the issued credential expires according to the validity period of the contract.
   """
   credentialExpiresAt: DateTime!
+  """
+  Defines whether the issued credential has been revoked
+  """
+  isRevoked: Boolean
+  """
+  The platform user (application or person) that revoked the credential.
+  """
+  revokedBy: User
+  """
+  When the credential was revoked.
+  """
+  revokedAt: DateTime
 }
 
 """

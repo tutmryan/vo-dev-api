@@ -530,7 +530,13 @@ export type Issuance = {
   id: Scalars['ID']['output'];
   /** The identity of the person who was issued the credential. */
   identity: Identity;
+  /** Defines whether the issued credential has been revoked */
+  isRevoked?: Maybe<Scalars['Boolean']['output']>;
   issuedAt: Scalars['DateTime']['output'];
+  /** When the credential was revoked. */
+  revokedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The platform user (application or person) that revoked the credential. */
+  revokedBy?: Maybe<User>;
   /** The platform user (application or person) that issued the credential. */
   user: User;
 };
@@ -1991,7 +1997,10 @@ export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends R
   credentialExpiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
+  isRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   issuedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  revokedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  revokedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

@@ -14,6 +14,7 @@ export const resolvers: Resolvers = {
   },
   Issuance: {
     user: ({ userId }, _, { dataLoaders: { users } }) => users.load(userId),
+    revokedBy: ({ revokedById }, _, { dataLoaders: { users } }) => (revokedById ? users.load(revokedById) : null),
   },
   Presentation: {
     user: ({ userId }, _, { dataLoaders: { users } }) => users.load(userId),
