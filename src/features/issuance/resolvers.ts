@@ -2,6 +2,7 @@ import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { resolveIssuanceEventData, subscribeToIssuanceEventsWithFilter } from './callback/pubsub'
 import { CreateIssuanceRequestCommand } from './commands/create-issuance-request-command'
+import { RevokeIssuanceCommand } from './commands/revoke-issuance-command'
 import { CountIssuancesByContractQuery } from './queries/count-issuances-by-contract'
 import { CountIssuancesByUserQuery } from './queries/count-issuances-by-user-query'
 import { CountIssuancesQuery } from './queries/count-issuances-query'
@@ -16,6 +17,7 @@ export const resolvers: Resolvers = {
   },
   Mutation: {
     createIssuanceRequest: (_, { request }, context) => dispatch(context, CreateIssuanceRequestCommand, request),
+    revokeIssuance: (_, { id }, context) => dispatch(context, RevokeIssuanceCommand, id),
   },
   Contract: {
     issuances: (contract, { where, offset, limit }, context) =>

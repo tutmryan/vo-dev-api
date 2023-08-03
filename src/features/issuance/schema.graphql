@@ -187,6 +187,11 @@ type Mutation {
   The result of this request returns a QR code with a link to start the issuance process, or an error
   """
   createIssuanceRequest(request: IssuanceRequestInput!): IssuanceRequestResponse!
+
+  """
+  Revokes an existing credential.
+  """
+  revokeIssuance(id: ID!): Issuance!
 }
 
 """

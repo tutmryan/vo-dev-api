@@ -683,6 +683,8 @@ export type Mutation = {
   deleteTemplate?: Maybe<Scalars['Void']['output']>;
   /** Provisions or re-provisions a contract into the Verified ID service */
   provisionContract: Contract;
+  /** Revokes an existing credential. */
+  revokeIssuance: Issuance;
   /** Creates or updates an identity based on its issuer and identifier */
   saveIdentity: Identity;
   /** Updates an existing contract */
@@ -728,6 +730,11 @@ export type MutationDeleteTemplateArgs = {
 
 
 export type MutationProvisionContractArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationRevokeIssuanceArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -2056,6 +2063,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;
   provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
+  revokeIssuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<MutationRevokeIssuanceArgs, 'id'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;
