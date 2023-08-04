@@ -70,3 +70,9 @@ export type DisplayClaim = {
   type: string
   description?: string | null
 }
+
+export type Credential = {
+  id: string
+  status: string
+  issuedAt: number
+}

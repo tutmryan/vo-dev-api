@@ -1,9 +1,10 @@
 import type { HttpClientOptions } from '@makerx/node-common'
 import { HttpClient, HttpResponseError } from '@makerx/node-common'
+import { createHash } from 'crypto'
 import type { BaseContext } from '../context'
 import type { Authority, NetworkContract, NetworkIssuer, NetworkIssuersWhere } from '../generated/graphql'
 import { invariant } from '../util/invariant'
-import type { Contract, CreateContractInput, UpdateContractInput } from './admin.types'
+import type { Contract, CreateContractInput, Credential, UpdateContractInput } from './admin.types'
 
 interface Value<T> {
   value: T
@@ -93,6 +94,37 @@ export class AdminService extends HttpClient<BaseContext> {
       `tenants/${tenantId}/verifiableCredentialsNetwork/authorities/${issuerId}/contracts`,
     )
     return contracts
+  }
+
+  async findCredential(contractId: string, claimValue: string): Promise<Credential | null> {
+    // reference article on how to generate sha256 hash
+    // https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/admin-api#search-credentials
+    const contractIdLowerCase = contractId.toLowerCase()
+    const indexClaimHash = createHash('sha256').update(`${contractIdLowerCase}${claimValue.toLowerCase()}`).digest('base64')
+
+    const { value: credentials } = await this.get<Value<Credential[]>>(
+      `verifiableCredentials/authorities/${await this.authorityId()}/contracts/${contractIdLowerCase}/credentials?filter=${encodeURIComponent(
+        `indexclaimhash eq ${indexClaimHash}`,
+      )}`,
+    )
+    const [first] = credentials
+    invariant(first, 'Unable to find a credential when querying the Verified ID service')
+    return first
+  }
+
+  async revokeCredential(contractId: string, credentialId: string): Promise<void> {
+    try {
+      // cannot use `this.post` here as it throws `invalid json response body` error
+      // the response is 204 with no response body and `this.post` call `.json()` function on response object
+      await this.requestRaw(
+        `verifiableCredentials/authorities/${await this.authorityId()}/contracts/${contractId.toLowerCase()}/credentials/${credentialId}/revoke`,
+        { data: {}, init: { method: 'POST' } },
+      )
+    } catch (error: any) {
+      const { message, ...rest } = error
+      this.options.logger?.error('Error revoking credential', { message, ...rest })
+      this.throwBestResponseErrorInfo(error)
+    }
   }
 
   private throwBestResponseErrorInfo(error: HttpResponseError): never {

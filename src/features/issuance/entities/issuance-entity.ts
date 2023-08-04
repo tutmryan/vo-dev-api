@@ -45,4 +45,10 @@ export class IssuanceEntity extends VerifiedOrchestrationEntity {
 
   @Column({ type: 'datetimeoffset', nullable: true })
   revokedAt!: Date | null
+
+  markAsRevoked(user: UserEntity) {
+    this.isRevoked = true
+    this.revokedBy = Promise.resolve(user)
+    this.revokedAt = new Date()
+  }
 }
