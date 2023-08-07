@@ -96,3 +96,42 @@ export async function createContract(input: ContractInput) {
 
   return data!.createContract
 }
+
+export function buildContractInput(args: Partial<ContractInput>): ContractInput {
+  return {
+    name: randomUUID(),
+    description: randomUUID(),
+    templateId: null,
+    isPublic: true,
+    validityIntervalInSeconds: 1000,
+    credentialTypes: ['DefaultCredential'],
+    ...args,
+    display: {
+      locale: 'en-AU',
+      ...args.display,
+      card: {
+        title: 'Card title',
+        description: 'Card description',
+        backgroundColor: '#123123',
+        textColor: '#321321',
+        issuedBy: 'Card issuer',
+        ...args.display?.card,
+        logo: {
+          image: 'https://image.com/image.png',
+          description: 'Logo description',
+          ...args.display?.card.logo,
+        },
+      },
+      consent: {
+        title: 'Consent title',
+        instructions: 'Consent instructions',
+        ...args.display?.consent,
+      },
+      claims: args.display?.claims || [
+        { claim: 'claim_one', label: 'Claim 1', type: 'String', value: 'Claim 1' },
+        { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
+      ],
+    },
+    ...args,
+  }
+}

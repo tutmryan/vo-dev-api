@@ -1,66 +1,32 @@
 import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
+import { mock as AdminService, mockCreateContract } from '../../services/__mocks__/admin'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
-import { createTemplate, getEmptyTemplateInput } from '../templates/test/create-template'
-import { createContract } from './test/create-contract'
+import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
+import { buildContractInput, createContract } from './test/create-contract'
+import { deprecateContractMutation } from './test/deprecate-contract'
 import { getContract } from './test/get-contract'
+import { provisionContractMutation } from './test/provision-contract'
 import { getUpdateContractInput, updateContractMutation } from './test/update-contract'
+
+jest.mock('../../services/admin')
 
 describe('updateContract mutation', () => {
   beforeAfterAll()
+  beforeEach(() => AdminService.clearAllMocks())
 
   async function givenContract({ withTemplate = false }: { withTemplate?: boolean }) {
     let template: TemplateFragmentFragment | undefined = undefined
     if (withTemplate) {
-      template = await createTemplate({
-        ...getEmptyTemplateInput(),
-        isPublic: true,
-        display: {
-          locale: 'en-AU',
-          card: {
-            title: 'Card title',
-            logo: { image: 'https://image.com/image.png' },
-          },
-          consent: { title: 'Consent title' },
-          claims: [
-            { claim: 'claim_one', label: 'Claim 1', type: 'String' },
-            { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
-          ],
-        },
-      })
+      template = await createTemplate(buildTemplateInput({}))
     }
 
-    const contract = await createContract({
-      name: randomUUID(),
-      description: randomUUID(),
-      templateId: withTemplate ? template!.id : null,
-      isPublic: true,
-      validityIntervalInSeconds: 1000,
-      credentialTypes: ['DefaultCredential'],
-      display: {
-        locale: 'en-AU',
-        card: {
-          title: 'Card title',
-          description: 'Card description',
-          backgroundColor: '#123123',
-          textColor: '#321321',
-          issuedBy: 'Card issuer',
-          logo: {
-            image: 'https://image.com/image.png',
-            description: 'Logo description',
-          },
-        },
-        consent: {
-          title: 'Consent title',
-          instructions: 'Consent instructions',
-        },
-        claims: [
-          { claim: 'claim_one', label: 'Claim 1', type: 'String', value: 'Claim 1' },
-          { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
-        ],
-      },
-    })
+    const contract = await createContract(
+      buildContractInput({
+        templateId: withTemplate ? template!.id : null,
+      }),
+    )
 
     return { contract }
   }
@@ -167,5 +133,42 @@ describe('updateContract mutation', () => {
 
     const updatedTemplate = await getContract(contract.id)
     expect(updatedTemplate).toMatchObject(omit(input, 'templateId'))
+  })
+
+  it('throws error when updating the deprecated contract', async () => {
+    // Arrange
+    const { contract } = await givenContract({ withTemplate: true })
+    const externalContractId = randomUUID()
+    mockCreateContract.mockResolvedValue({ id: externalContractId })
+    //publishing for the first time
+    await executeOperationAsAdmin({
+      query: provisionContractMutation,
+      variables: {
+        id: contract.id,
+      },
+    })
+    //deprecating the contract
+    await executeOperationAsAdmin({
+      query: deprecateContractMutation,
+      variables: {
+        id: contract.id,
+      },
+    })
+
+    // Act
+    const input = getUpdateContractInput(contract)
+    input.display.card.description = 'Updated card description'
+
+    const { errors } = await executeOperationAsAdmin({
+      query: updateContractMutation,
+      variables: {
+        id: contract.id,
+        input,
+      },
+    })
+
+    // Assert
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toMatchInlineSnapshot(`"Contract has been deprecated, it cannot be updated"`)
   })
 })

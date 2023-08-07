@@ -119,4 +119,10 @@ export class ContractEntity extends AuditedAndTrackedEntity {
     this.lastProvisionedBy = Promise.resolve(user)
     this.lastProvisionedAt = new Date()
   }
+
+  markAsDeprecated(user: UserEntity) {
+    this.isDeprecated = true
+    this.deprecatedBy = Promise.resolve(user)
+    this.deprecatedAt = new Date()
+  }
 }

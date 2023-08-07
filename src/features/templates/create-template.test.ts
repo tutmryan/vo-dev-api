@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import type { TemplateInput } from '../../generated/graphql'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
-import { createTemplate, createTemplateMutation, getEmptyTemplateInput } from './test/create-template'
+import { buildTemplateInput, createTemplate, createTemplateMutation, getEmptyTemplateInput } from './test/create-template'
 
 describe('createTemplate mutation', () => {
   beforeAfterAll()
@@ -11,7 +11,7 @@ describe('createTemplate mutation', () => {
     const { errors } = await executeOperationAnonymous({
       query: createTemplateMutation,
       variables: {
-        input: getEmptyTemplateInput(),
+        input: buildTemplateInput({}),
       },
     })
 
@@ -26,10 +26,7 @@ describe('createTemplate mutation', () => {
     const { errors } = await executeOperationAsAdmin({
       query: createTemplateMutation,
       variables: {
-        input: {
-          ...getEmptyTemplateInput(),
-          parentTemplateId: bogusParentId,
-        },
+        input: buildTemplateInput({ parentTemplateId: bogusParentId }),
       },
     })
 
@@ -100,12 +97,9 @@ describe('createTemplate mutation', () => {
 
   it('returns correct data when there are no errors', async () => {
     // Arrange
-    const input: TemplateInput = {
-      ...getEmptyTemplateInput(),
-      isPublic: true,
+    const input: TemplateInput = buildTemplateInput({
       validityIntervalInSeconds: 3_600,
       display: {
-        locale: 'en-AU',
         consent: {
           title: 'Consent title',
           instructions: 'Consent instructions',
@@ -129,7 +123,7 @@ describe('createTemplate mutation', () => {
           },
         ],
       },
-    }
+    })
 
     // Act
     const { data, errors } = await executeOperationAsAdmin({

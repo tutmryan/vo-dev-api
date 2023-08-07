@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
 import type { ContractInput } from '../../generated/graphql'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
-import { createTemplate, getEmptyTemplateInput } from '../templates/test/create-template'
+import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { StandardClaims } from './claims'
 import { createContractMutation, getDefaultContractInput } from './test/create-contract'
 
@@ -10,22 +10,7 @@ describe('createContract mutation', () => {
   beforeAfterAll()
 
   async function givenTemplate() {
-    const template = await createTemplate({
-      ...getEmptyTemplateInput(),
-      isPublic: true,
-      display: {
-        locale: 'en-AU',
-        card: {
-          title: 'Card title',
-          logo: { image: 'https://image.com/image.png' },
-        },
-        consent: { title: 'Consent title' },
-        claims: [
-          { claim: 'claim_one', label: 'Claim 1', type: 'String' },
-          { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
-        ],
-      },
-    })
+    const template = await createTemplate(buildTemplateInput({}))
 
     return { template }
   }
