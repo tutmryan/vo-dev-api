@@ -96,7 +96,7 @@
     "@makerx/express-msal": "^1.0.0",
     "@makerx/graphql-apollo-server": "^1.0.1",
     "@makerx/graphql-core": "^1.2.1",
-    "@makerx/node-common": "^1.0.3",
+    "@makerx/node-common": "^1.1.0",
     "@makerx/node-winston": "^1.0.0",
     "@microsoft/microsoft-graph-client": "^3.0.5",
     "@opentelemetry/api": "^1.4.1",

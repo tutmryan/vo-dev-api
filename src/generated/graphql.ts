@@ -530,7 +530,13 @@ export type Issuance = {
   id: Scalars['ID']['output'];
   /** The identity of the person who was issued the credential. */
   identity: Identity;
+  /** Defines whether the issued credential has been revoked */
+  isRevoked?: Maybe<Scalars['Boolean']['output']>;
   issuedAt: Scalars['DateTime']['output'];
+  /** When the credential was revoked. */
+  revokedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The platform user (application or person) that revoked the credential. */
+  revokedBy?: Maybe<User>;
   /** The platform user (application or person) that issued the credential. */
   user: User;
 };
@@ -677,6 +683,8 @@ export type Mutation = {
   deleteTemplate?: Maybe<Scalars['Void']['output']>;
   /** Provisions or re-provisions a contract into the Verified ID service */
   provisionContract: Contract;
+  /** Revokes an existing credential. */
+  revokeIssuance: Issuance;
   /** Creates or updates an identity based on its issuer and identifier */
   saveIdentity: Identity;
   /** Updates an existing contract */
@@ -722,6 +730,11 @@ export type MutationDeleteTemplateArgs = {
 
 
 export type MutationProvisionContractArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationRevokeIssuanceArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1991,7 +2004,10 @@ export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends R
   credentialExpiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
+  isRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   issuedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  revokedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  revokedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -2047,6 +2063,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;
   provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
+  revokeIssuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<MutationRevokeIssuanceArgs, 'id'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;

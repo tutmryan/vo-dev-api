@@ -187,6 +187,11 @@ type Mutation {
   The result of this request returns a QR code with a link to start the issuance process, or an error
   """
   createIssuanceRequest(request: IssuanceRequestInput!): IssuanceRequestResponse!
+
+  """
+  Revokes an existing credential.
+  """
+  revokeIssuance(id: ID!): Issuance!
 }
 
 """
@@ -211,6 +216,18 @@ type Issuance {
   When the issued credential expires according to the validity period of the contract.
   """
   credentialExpiresAt: DateTime!
+  """
+  Defines whether the issued credential has been revoked
+  """
+  isRevoked: Boolean
+  """
+  The platform user (application or person) that revoked the credential.
+  """
+  revokedBy: User
+  """
+  When the credential was revoked.
+  """
+  revokedAt: DateTime
 }
 
 """
