@@ -103,6 +103,10 @@ export type Contract = {
    * Requires at least one type, and cannot have duplicate types
    */
   credentialTypes: Array<Scalars['String']['output']>;
+  /** When the contract was deprecated. */
+  deprecatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Who deprecated the contract. */
+  deprecatedBy?: Maybe<User>;
   /** The description of the contract */
   description: Scalars['String']['output'];
   /** The full or partial credential display definition defined by this contract */
@@ -114,6 +118,8 @@ export type Contract = {
   externalId?: Maybe<Scalars['String']['output']>;
   /** The unique identifier for the contract */
   id: Scalars['ID']['output'];
+  /** Defines whether the contract is deprecated, if so no new issuance can be requested for it */
+  isDeprecated?: Maybe<Scalars['Boolean']['output']>;
   /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
   isPublic: Scalars['Boolean']['output'];
   /** Returns the successful credential issuances for this contract. */
@@ -681,6 +687,8 @@ export type Mutation = {
   deleteContract?: Maybe<Scalars['Void']['output']>;
   /** Deletes an existing template */
   deleteTemplate?: Maybe<Scalars['Void']['output']>;
+  /** Deprecates an existing contract. */
+  deprecateContract: Contract;
   /** Provisions or re-provisions a contract into the Verified ID service */
   provisionContract: Contract;
   /** Revokes an existing credential. */
@@ -725,6 +733,11 @@ export type MutationDeleteContractArgs = {
 
 
 export type MutationDeleteTemplateArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeprecateContractArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1873,10 +1886,13 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  deprecatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  deprecatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   display?: Resolver<ResolversTypes['ContractDisplayModel'], ParentType, ContextType>;
   externalId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isDeprecated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<ContractIssuancesArgs>>;
   lastProvisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
@@ -2043,6 +2059,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;
+  deprecateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationDeprecateContractArgs, 'id'>>;
   provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
   revokeIssuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<MutationRevokeIssuanceArgs, 'id'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;

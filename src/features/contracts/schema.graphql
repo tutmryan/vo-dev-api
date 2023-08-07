@@ -29,6 +29,10 @@ type Mutation {
   Deletes an existing contract. Only possible when the contract has not yet been provisioned.
   """
   deleteContract(id: ID!): Void
+  """
+  Deprecates an existing contract.
+  """
+  deprecateContract(id: ID!): Contract!
 }
 
 """
@@ -117,6 +121,18 @@ type Contract {
   When the contract was last provisioned in the Verified ID service.
   """
   lastProvisionedAt: DateTime
+  """
+  Defines whether the contract is deprecated, if so no new issuance can be requested for it
+  """
+  isDeprecated: Boolean
+  """
+  Who deprecated the contract.
+  """
+  deprecatedBy: User
+  """
+  When the contract was deprecated.
+  """
+  deprecatedAt: DateTime
 }
 
 """
