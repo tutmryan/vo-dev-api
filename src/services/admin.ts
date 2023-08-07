@@ -114,11 +114,9 @@ export class AdminService extends HttpClient<BaseContext> {
 
   async revokeCredential(contractId: string, credentialId: string): Promise<void> {
     try {
-      // cannot use `this.post` here as it throws `invalid json response body` error
-      // the response is 204 with no response body and `this.post` call `.json()` function on response object
-      await this.requestRaw(
+      await this.post<undefined>(
         `verifiableCredentials/authorities/${await this.authorityId()}/contracts/${contractId.toLowerCase()}/credentials/${credentialId}/revoke`,
-        { data: {}, init: { method: 'POST' } },
+        {},
       )
     } catch (error: any) {
       const { message, ...rest } = error
