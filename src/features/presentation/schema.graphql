@@ -7,11 +7,13 @@ The presentation request payload contains information about your verifiable cred
 """
 input PresentationRequestInput {
   """
-  The ID of the identity you wish to present (alternatively use the identity property)
+  The ID of the identity you wish to present (alternatively use the identity property).
+  Presentation identity information is only required for presentations of externally issued credentials.
   """
   identityId: ID
   """
-  The identity you wish to present (alternatively use the identityId property, if known)
+  The identity you wish to present (alternatively use the identityId property, if known).
+  Presentation identity information is only required for presentations of externally issued credentials.
   """
   identity: IdentityInput
   """
@@ -35,15 +37,8 @@ input PresentationRequestInput {
   callback: Callback
   """
   A collection of RequestCredential objects representing the credentials the user needs to provide.
-  Use this property to request credentials from other issuers; otherwise, use requestedContracts.
   """
-  requestedCredentials: [RequestCredential!]
-
-  """
-  A collection of RequestContract objects representing the credentials the user needs to provide.
-  Use this property to request credentials based on Verified Orchestration platform contract IDs; otherwise, use requestedCredentials.
-  """
-  requestedContracts: [RequestContract!]
+  requestedCredentials: [RequestCredential!]!
 }
 
 """
@@ -104,26 +99,6 @@ type RequestConfigurationValidation {
 
 """
 Provides information about the requested credentials the user needs to provide.
-Use this when requesting credentials based on Verified Orchestration platform contract IDs; otherwise use RequestCredential.
-"""
-input RequestContract {
-  """
-  The ID of the Verified Orchestration platform contract that you wish to be presented.
-  """
-  contractId: String!
-  """
-  Provide information about the purpose of requesting this verifiable credential.
-  """
-  purpose: String
-  """
-  Optional settings for presentation validation.
-  """
-  configuration: RequestConfiguration
-}
-
-"""
-Provides information about the requested credentials the user needs to provide.
-Use this when requesting credentials from external issuers; otherwise use RequestContract.
 """
 input RequestCredential {
   """
@@ -137,7 +112,8 @@ input RequestCredential {
   purpose: String
   """
   A collection of issuers' DIDs that could issue the type of verifiable credential that subjects can present.
-  If the acceptedIssuers collection is empty, then the Verified Orchestration platform home tenant will be used.
+  If not specified, the Verified Orchestration platform issuer DID will be used.
+  This field should only be used when requesting credentials from external issuers.
   """
   acceptedIssuers: [String!]
   """
@@ -159,7 +135,7 @@ type RequestedCredential {
   """
   purpose: String
   """
-  A collection of issuers' DIDs that could issue the type of verifiable credential requsted for issuance.
+  A collection of issuers' DIDs that could issue the type of verifiable credential requested for issuance.
   """
   acceptedIssuers: [String!]
   """
@@ -344,11 +320,11 @@ input PresentationWhere {
   """
   identityId: ID
   """
-  The ID of a contract used to make the presentation request.
+  The ID of a contract that was presented.
   """
   contractId: ID
   """
-  The ID of the user (Person or Application) that requested & received the presentation.
+  The ID of the user (Person or Application) that requested & received the presentation data.
   """
   userId: ID
   """

@@ -1,8 +1,8 @@
 import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
 import type { CommandContext } from '../../../cqrs/command-context'
 import type { PresentationRequestInput } from '../../../generated/graphql'
+import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
-import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import type { PresentationEntity } from '../entities/presentation-entity'
@@ -11,7 +11,7 @@ export type PresentationRequestDetails = Pick<PresentationEntity, 'userId' | 'id
 
 export async function CreatePresentationRequestCommand(
   this: CommandContext,
-  { identityId, identity: identityInput, requestedContracts, ...presentationRequest }: PresentationRequestInput,
+  { identityId, identity: identityInput, ...presentationRequest }: PresentationRequestInput,
 ) {
   const {
     user,
@@ -21,37 +21,28 @@ export async function CreatePresentationRequestCommand(
 
   userInvariant(user)
 
-  // find or create the identity
-  let identity: IdentityEntity
-  if (identityId) identity = await entityManager.getRepository(IdentityEntity).findOneByOrFail({ id: identityId })
-  else if (!identityInput) throw new Error('Either identityId or identity must be provided')
-  else identity = await createOrUpdateIdentity(entityManager, identityInput)
+  invariant(presentationRequest.requestedCredentials.length > 0, 'Requested credentials must be provided')
 
+  // validate identity info is provided IF requested credentials are from external issuers
   const issuerDid = (await admin.authority()).didModel.did
+  const isExternalIssuer = presentationRequest.requestedCredentials.some(
+    ({ acceptedIssuers }) => acceptedIssuers && acceptedIssuers.some((acceptedIssuer) => acceptedIssuer !== issuerDid),
+  )
+  if (isExternalIssuer && !identityId && !identityInput)
+    throw new Error('Either identityId or identity info must be provided for presentations from external issuers')
 
-  // assign requested credential issuers if not provided
-  if (presentationRequest.requestedCredentials)
-    presentationRequest.requestedCredentials.forEach((requestedCredential) => {
-      if (!requestedCredential.acceptedIssuers || requestedCredential.acceptedIssuers.length === 0)
-        requestedCredential.acceptedIssuers = [issuerDid]
-    })
+  // find or create the identity, if provided
+  const identity = identityId
+    ? await entityManager.getRepository(IdentityEntity).findOneByOrFail({ id: identityId })
+    : identityInput
+    ? await createOrUpdateIdentity(entityManager, identityInput)
+    : undefined
 
-  // turn requestedContracts into extra requestedCredentials
-  if (requestedContracts) {
-    const requestedCredentials = presentationRequest.requestedCredentials ?? []
-    const contractRepo = entityManager.getRepository(ContractEntity)
-    for (const { contractId, ...rest } of requestedContracts) {
-      const contract = await contractRepo.findOneByOrFail({ id: contractId })
-      contract.credentialTypes.forEach((credentialType) => {
-        requestedCredentials.push({
-          ...rest,
-          type: credentialType,
-          acceptedIssuers: [issuerDid],
-        })
-      })
-    }
-    presentationRequest.requestedCredentials = requestedCredentials
-  }
+  // assign requested credential acceptedIssuers, if not provided
+  presentationRequest.requestedCredentials.forEach((requestedCredential) => {
+    if (!requestedCredential.acceptedIssuers || requestedCredential.acceptedIssuers.length === 0)
+      requestedCredential.acceptedIssuers = [issuerDid]
+  })
 
   // send it
   const response = await request.createPresentationRequest({ ...presentationRequest, authority: issuerDid })
@@ -59,8 +50,8 @@ export async function CreatePresentationRequestCommand(
   // cache presentation details for use in the callback
   const requestDetails: PresentationRequestDetails = {
     userId: user.userEntity.id.toUpperCase(),
-    identityId: identity.id.toUpperCase(),
-    requestedCredentials: presentationRequest.requestedCredentials ?? [],
+    identityId: identity?.id.toUpperCase() ?? null,
+    requestedCredentials: presentationRequest.requestedCredentials,
   }
   await requestDetailsCache.set(response.requestId, JSON.stringify(requestDetails), {
     ttl: REQUEST_CACHE_TTL,

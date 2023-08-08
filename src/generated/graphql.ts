@@ -824,7 +824,7 @@ export type Presentation = {
   id: Scalars['ID']['output'];
   /** The identity of the person who presented the credential (if known). */
   identity?: Maybe<Identity>;
-  /** The issuances that were presented */
+  /** The issuances that were presented (which may be none, if the presented credentials were from an external issuer) */
   issuances: Array<Issuance>;
   presentedAt: Scalars['DateTime']['output'];
   /** The credentials that were presented (excluding claims data) */
@@ -898,9 +898,15 @@ export type PresentationEventWhere = {
 /** The presentation request payload contains information about your verifiable credentials presentation request. */
 export type PresentationRequestInput = {
   callback?: InputMaybe<Callback>;
-  /** The identity you wish to present (alternatively use the identityId property, if known) */
+  /**
+   * The identity you wish to present (alternatively use the identityId property, if known).
+   * Presentation identity information is only required for presentations of externally issued credentials.
+   */
   identity?: InputMaybe<IdentityInput>;
-  /** The ID of the identity you wish to present (alternatively use the identity property) */
+  /**
+   * The ID of the identity you wish to present (alternatively use the identity property).
+   * Presentation identity information is only required for presentations of externally issued credentials.
+   */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /**
    * Determines whether a QR code is included in the response of this request.
@@ -920,16 +926,8 @@ export type PresentationRequestInput = {
    */
   includeReceipt?: InputMaybe<Scalars['Boolean']['input']>;
   registration: PresentationRequestRegistration;
-  /**
-   * A collection of RequestContract objects representing the credentials the user needs to provide.
-   * Use this property to request credentials based on Verified Orchestration platform contract IDs; otherwise, use requestedCredentials.
-   */
-  requestedContracts?: InputMaybe<Array<RequestContract>>;
-  /**
-   * A collection of RequestCredential objects representing the credentials the user needs to provide.
-   * Use this property to request credentials from other issuers; otherwise, use requestedContracts.
-   */
-  requestedCredentials?: InputMaybe<Array<RequestCredential>>;
+  /** A collection of RequestCredential objects representing the credentials the user needs to provide. */
+  requestedCredentials: Array<RequestCredential>;
 };
 
 /** Provides information about the verifier. */
@@ -965,7 +963,7 @@ export type PresentationResponse = {
 
 /** Criteria for filtering presentations. */
 export type PresentationWhere = {
-  /** The ID of a contract used to make the presentation request. */
+  /** The ID of a contract that was presented. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
   /** The start of the period to count. */
   from?: InputMaybe<Scalars['DateTime']['input']>;
@@ -973,7 +971,7 @@ export type PresentationWhere = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The end of the period to count. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
-  /** The ID of the user (Person or Application) that requested & received the presentation. */
+  /** The ID of the user (Person or Application) that requested & received the presentation data. */
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -1169,27 +1167,12 @@ export type RequestConfigurationValidation = {
   validateLinkedDomain?: Maybe<Scalars['Boolean']['output']>;
 };
 
-/**
- * Provides information about the requested credentials the user needs to provide.
- * Use this when requesting credentials based on Verified Orchestration platform contract IDs; otherwise use RequestCredential.
- */
-export type RequestContract = {
-  /** Optional settings for presentation validation. */
-  configuration?: InputMaybe<RequestConfiguration>;
-  /** The ID of the Verified Orchestration platform contract that you wish to be presented. */
-  contractId: Scalars['String']['input'];
-  /** Provide information about the purpose of requesting this verifiable credential. */
-  purpose?: InputMaybe<Scalars['String']['input']>;
-};
-
-/**
- * Provides information about the requested credentials the user needs to provide.
- * Use this when requesting credentials from external issuers; otherwise use RequestContract.
- */
+/** Provides information about the requested credentials the user needs to provide. */
 export type RequestCredential = {
   /**
    * A collection of issuers' DIDs that could issue the type of verifiable credential that subjects can present.
-   * If the acceptedIssuers collection is empty, then the Verified Orchestration platform home tenant will be used.
+   * If not specified, the Verified Orchestration platform issuer DID will be used.
+   * This field should only be used when requesting credentials from external issuers.
    */
   acceptedIssuers?: InputMaybe<Array<Scalars['String']['input']>>;
   /** Optional settings for presentation validation. */
@@ -1254,7 +1237,7 @@ export type RequestedConfiguration = {
 /** Provides information about the requested credential for an presentation. */
 export type RequestedCredential = {
   __typename?: 'RequestedCredential';
-  /** A collection of issuers' DIDs that could issue the type of verifiable credential requsted for issuance. */
+  /** A collection of issuers' DIDs that could issue the type of verifiable credential requested for issuance. */
   acceptedIssuers?: Maybe<Array<Scalars['String']['output']>>;
   /** Optional settings for presentation validation. */
   configuration?: Maybe<RequestedConfiguration>;
@@ -1743,7 +1726,6 @@ export type ResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
   RequestConfiguration: RequestConfiguration;
   RequestConfigurationValidation: ResolverTypeWrapper<RequestConfigurationValidation>;
-  RequestContract: RequestContract;
   RequestCredential: RequestCredential;
   RequestError: ResolverTypeWrapper<RequestError>;
   RequestErrorResponse: ResolverTypeWrapper<RequestErrorResponse>;
@@ -1843,7 +1825,6 @@ export type ResolversParentTypes = {
   Query: {};
   RequestConfiguration: RequestConfiguration;
   RequestConfigurationValidation: RequestConfigurationValidation;
-  RequestContract: RequestContract;
   RequestCredential: RequestCredential;
   RequestError: RequestError;
   RequestErrorResponse: RequestErrorResponse;
