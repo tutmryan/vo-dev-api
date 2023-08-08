@@ -10,8 +10,8 @@ export async function CountPresentationsQuery(this: QueryContext, criteria?: May
 
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.contractId) {
-    relations.contracts = true
-    where.contracts = { id: criteria.contractId.toUpperCase() }
+    relations.issuances = true
+    where.issuances = { contractId: criteria.contractId.toUpperCase() }
   }
   if (criteria?.userId) where.userId = criteria.userId.toUpperCase()
 

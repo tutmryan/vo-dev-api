@@ -216,7 +216,7 @@ describe('createContract mutation', () => {
               "line": 2,
             },
           ],
-          "message": "Claims must not include any of: identityId, name",
+          "message": "Claims must not include any of: issuanceId, name",
           "path": [
             "createContract",
           ],

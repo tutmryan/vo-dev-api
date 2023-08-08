@@ -6,7 +6,6 @@ import { RedisPubSub } from 'graphql-redis-subscriptions'
 import { PubSub } from 'graphql-subscriptions'
 import Keyv from 'keyv'
 import config from './config'
-import type { RequestCredential } from './generated/graphql'
 import { logger } from './logger'
 
 const redisConfig = config.has('redis') ? config.get('redis') : undefined
@@ -26,18 +25,6 @@ export const newCacheSection = (prefix: string): KeyValueCache => {
 }
 
 export const pubsub = isRedisEnabled ? new RedisPubSub({ connection: redisConnectionString }) : new PubSub()
-
-export interface IssuanceRequestDetails {
-  userId: string
-  identityId: string
-  contractId: string
-}
-export interface PresentationRequestDetails {
-  userId: string
-  identityId?: string
-  contractIds: string[]
-  requestedCredentials: RequestCredential[]
-}
 
 export const REQUEST_CACHE_TTL = 60 * 60 // 1 hour
 export const requestCallbackCache = newCacheSection('requestCallback')

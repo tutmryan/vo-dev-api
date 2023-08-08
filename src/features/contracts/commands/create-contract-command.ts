@@ -4,7 +4,7 @@ import type { ContractInput } from '../../../generated/graphql'
 import { TemplateEntity } from '../../templates/entities/template-entity'
 import { validateContractClaims } from '../claims'
 import { ContractEntity } from '../entities/contract-entity'
-import { ensureNoOverridingTemplateData } from '../mapping'
+import { applyLogoImageUrlDefault, ensureNoOverridingTemplateData } from '../mapping'
 
 export async function CreateContractCommand(this: CommandContext, input: ContractInput) {
   const template = input.templateId
@@ -16,6 +16,8 @@ export async function CreateContractCommand(this: CommandContext, input: Contrac
   if (template) {
     ensureNoOverridingTemplateData(input, await template.combinedData())
   }
+
+  applyLogoImageUrlDefault(input.display.card.logo)
 
   const contract = new ContractEntity({
     ...omit(input, 'templateId'),

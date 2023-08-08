@@ -294,9 +294,9 @@ type Presentation {
   """
   user: User!
   """
-  The contracts used as presentation request input (if any).
+  The issuances that were presented (which may be none, if the presented credentials were from an external issuer)
   """
-  contracts: [Contract!]!
+  issuances: [Issuance!]!
   """
   The credentials that were requested
   """

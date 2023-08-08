@@ -14,10 +14,10 @@ export async function CountPresentationsByUserQuery(
   } = this
   const query = entityManager
     .getRepository(PresentationEntity)
-    .createQueryBuilder('issuance')
+    .createQueryBuilder('p')
     .select('COUNT(*)', 'count')
-    .addSelect('user_id')
-    .groupBy('user_id')
+    .addSelect('p.user_id')
+    .groupBy('p.user_id')
     .orderBy('count', 'DESC')
     .where('1=1')
     .comment('CountPresentationsByUserQuery')
@@ -25,8 +25,12 @@ export async function CountPresentationsByUserQuery(
   if (offset) query.skip(offset)
   if (limit) query.take(limit)
 
-  if (criteria?.identityId) query.andWhere('identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
-  if (criteria?.contractId) query.andWhere('contract_id = :contractId', { contractId: criteria.contractId.toUpperCase() })
+  if (criteria?.identityId) query.andWhere('p.identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
+  if (criteria?.contractId) {
+    query.innerJoin('presentation_issuances', 'pi', 'p.id = pi.presentation_id')
+    query.innerJoin('issuance', 'i', 'pi.issuance_id = i.id')
+    query.andWhere('contract_id = :contractId', { contractId: criteria.contractId.toUpperCase() })
+  }
   if (criteria?.userId) throw new Error("Sorry, can't filter by userId when grouping by user.")
 
   if (criteria?.from && criteria.to)

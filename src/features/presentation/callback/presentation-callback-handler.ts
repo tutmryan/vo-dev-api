@@ -1,12 +1,13 @@
 import { logger } from '@azure/identity'
 import { omit } from 'lodash'
-import type { PresentationRequestDetails } from '../../../cache'
 import { requestDetailsCache } from '../../../cache'
 import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import type { PresentationCallbackHandler } from '../../callback'
 import { StandardClaims } from '../../contracts/claims'
+import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
+import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import type { PresentedData } from '../entities/presentation-entity'
 import { PresentationEntity } from '../entities/presentation-entity'
 import type { PresentationTopicData } from './pubsub'
@@ -25,34 +26,39 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
   const topicData: PresentationTopicData = { ...presentationRequestDetails, event }
 
   if (event.requestStatus === PresentationRequestStatus.PresentationVerified) {
-    // identityId should either be in the request details (for authenticated presentations)
-    // or the presented credential claims (for anonymous presentations, via StandardClaims.identityId)
-    const identityId =
-      presentationRequestDetails.identityId ??
-      (event.verifiedCredentialsData?.find((credential) => !!credential.claims[StandardClaims.identityId])?.claims[
-        StandardClaims.identityId
-      ] as string)
+    const entityManager = dataSource.createEntityManager()
 
-    invariant(identityId, 'identityId must be present in either the request details or the presented credential claims')
+    // grab all the issuance IDs from the presented credential claims
+    const issuanceIds =
+      event.verifiedCredentialsData?.reduce<string[]>((acc, credential) => {
+        if (credential.claims[StandardClaims.issuanceId]) acc.push(credential.claims[StandardClaims.issuanceId] as string)
+        return acc
+      }, []) ?? []
 
-    // ensure identityId on the presentation event data reflects the claim value (for anonymous presentations)
-    topicData.identityId = identityId
+    // grab the identityId from the presentation request details or the issuance request deets
+    let identityId = presentationRequestDetails.identityId
+    if (!identityId) {
+      if (issuanceIds.length === 0) throw new Error('No identityId or issuanceIds found in presentation request or event data')
+      const issuance = await entityManager.getRepository(IssuanceEntity).findOneByOrFail({ id: issuanceIds[0] })
+      identityId = issuance.identityId
+    }
+    invariant(identityId, 'identityId could not be determined')
 
     // save presented credential data minus the claims, which is probably PII
     const presentedCredentials: PresentedData[] = event.verifiedCredentialsData
       ? event.verifiedCredentialsData.map((credential) => omit(credential, 'claims'))
       : []
 
-    const { userId, contractIds, requestedCredentials } = presentationRequestDetails
+    const { userId, requestedCredentials } = presentationRequestDetails
     const presentationEntity = new PresentationEntity({
       userId,
       identityId,
-      contractIds,
+      issuanceIds,
       requestedCredentials,
       presentedCredentials,
     })
 
-    const { id } = await dataSource.createEntityManager().getRepository(PresentationEntity).save(presentationEntity)
+    const { id } = await entityManager.getRepository(PresentationEntity).save(presentationEntity)
     topicData.presentationId = id
   }
 

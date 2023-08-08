@@ -1,4 +1,3 @@
-import type { PresentationRequestDetails } from '../../../cache'
 import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
 import type { CommandContext } from '../../../cqrs/command-context'
 import type { PresentationRequestInput } from '../../../generated/graphql'
@@ -6,6 +5,9 @@ import { userInvariant } from '../../../util/user-invariant'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
+import type { PresentationEntity } from '../entities/presentation-entity'
+
+export type PresentationRequestDetails = Pick<PresentationEntity, 'userId' | 'identityId' | 'requestedCredentials'>
 
 export async function CreatePresentationRequestCommand(
   this: CommandContext,
@@ -58,7 +60,6 @@ export async function CreatePresentationRequestCommand(
   const requestDetails: PresentationRequestDetails = {
     userId: user.userEntity.id.toUpperCase(),
     identityId: identity.id.toUpperCase(),
-    contractIds: requestedContracts?.map((c) => c.contractId.toUpperCase()) ?? [],
     requestedCredentials: presentationRequest.requestedCredentials ?? [],
   }
   await requestDetailsCache.set(response.requestId, JSON.stringify(requestDetails), {

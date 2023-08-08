@@ -2,8 +2,8 @@ import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, Rel
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import type { PresentedCredential, RequestCredential } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
-import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
+import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
 export type PresentedData = Omit<PresentedCredential, 'claims'>
@@ -13,14 +13,14 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   constructor(args?: {
     identityId: string
     userId: string
-    contractIds: string[]
+    issuanceIds: string[]
     requestedCredentials: RequestCredential[]
     presentedCredentials: PresentedData[]
   }) {
     super()
     if (!args) return
-    const { contractIds, ...rest } = args
-    typeSafeAssign(this, { ...rest, contracts: Promise.resolve(args.contractIds.map((id) => ({ id } as ContractEntity))) })
+    const { issuanceIds, ...rest } = args
+    typeSafeAssign(this, { ...rest, issuances: Promise.resolve(args.issuanceIds.map((id) => ({ id } as IssuanceEntity))) })
   }
 
   @ManyToOne(() => IdentityEntity)
@@ -35,12 +35,12 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   @Column()
   userId!: string
 
-  @ManyToMany(() => ContractEntity)
-  @JoinTable({ name: 'presentation_contracts' })
-  contracts!: Promise<ContractEntity[]>
+  @ManyToMany(() => IssuanceEntity)
+  @JoinTable({ name: 'presentation_issuances' })
+  issuances!: Promise<IssuanceEntity[]>
 
-  @RelationId((presentation: PresentationEntity) => presentation.contracts)
-  contractIds!: string[]
+  @RelationId((presentation: PresentationEntity) => presentation.issuances)
+  issuanceIds!: string[]
 
   @CreateDateColumn({ type: 'datetimeoffset' })
   presentedAt!: Date

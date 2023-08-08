@@ -98,6 +98,7 @@ const config: DeepPartial<Config> = {
     '5d988fea-e182-4527-bd3a-a4f743121b33': { name: 'Onboarding Demo API (localdev)' },
     'dc8366b4-ba83-48e5-8ab2-9a852a4500c6': { name: 'Onboarding Demo API' },
   },
+  cardLogoImageUrlDefault: 'https://green-sky-0f070b000.2.azurestaticapps.net/icons/favicon-310x310.png',
 }
 
 module.exports = config

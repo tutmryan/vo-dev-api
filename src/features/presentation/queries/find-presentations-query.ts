@@ -1,4 +1,4 @@
-import type { FindOptionsRelations, FindOptionsWhere } from 'typeorm'
+import { type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
 import type { QueryContext } from '../../../cqrs/query-context'
 import type { Maybe, PresentationWhere } from '../../../generated/graphql'
 import { BetweenTimestamp, LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp } from '../../../util/typeorm'
@@ -16,8 +16,8 @@ export async function FindPresentationsQuery(
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.userId) where.userId = criteria.userId.toUpperCase()
   if (criteria?.contractId) {
-    relations.contracts = true
-    where.contracts = { id: criteria.contractId.toUpperCase() }
+    relations.issuances = true
+    where.issuances = { contractId: criteria.contractId.toUpperCase() }
   }
 
   if (criteria?.from && criteria.to) where.presentedAt = BetweenTimestamp(criteria.from, criteria.to)

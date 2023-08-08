@@ -5,12 +5,12 @@ export const displayClaimPrefix = 'vc.credentialSubject.'
 export const claimTypeString = 'String'
 
 export enum StandardClaims {
-  identityId = 'identityId',
+  issuanceId = 'issuanceId',
   name = 'name',
 }
 
 export const standardClaimLabels: Record<StandardClaims, string> = {
-  [StandardClaims.identityId]: 'Identity ID',
+  [StandardClaims.issuanceId]: 'Credential ID',
   [StandardClaims.name]: 'Name',
 }
 
@@ -21,7 +21,7 @@ export const standardClaimAttestations: AttestationClaimMapping[] = standardClai
   required: true,
   outputClaim: claim,
   inputClaim: claim,
-  indexed: claim === StandardClaims.identityId,
+  indexed: claim === StandardClaims.issuanceId,
 }))
 
 export const standardContractDislayClaims: DisplayClaim[] = standardClaims.map((claim) => ({

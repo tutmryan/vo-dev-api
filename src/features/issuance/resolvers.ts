@@ -1,5 +1,6 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
+import { compactErrors } from '../../util/compact-errors'
 import { resolveIssuanceEventData, subscribeToIssuanceEventsWithFilter } from './callback/pubsub'
 import { CreateIssuanceRequestCommand } from './commands/create-issuance-request-command'
 import { RevokeIssuanceCommand } from './commands/revoke-issuance-command'
@@ -44,5 +45,8 @@ export const resolvers: Resolvers = {
       subscribe: subscribeToIssuanceEventsWithFilter,
       resolve: resolveIssuanceEventData,
     },
+  },
+  Presentation: {
+    issuances: (presentation, _, { dataLoaders: { issuances } }) => issuances.loadMany(presentation.issuanceIds).then(compactErrors),
   },
 }

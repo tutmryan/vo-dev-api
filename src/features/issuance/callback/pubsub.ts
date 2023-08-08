@@ -1,6 +1,5 @@
 import type { GraphQLContext } from '@makerx/graphql-core'
 import { withFilter } from 'graphql-subscriptions'
-import type { IssuanceRequestDetails } from '../../../cache'
 import { pubsub } from '../../../cache'
 import { entityManager } from '../../../data'
 import type {
@@ -9,6 +8,7 @@ import type {
   SubscriptionIssuanceEventArgs,
   SubscriptionSubscribeFn,
 } from '../../../generated/graphql'
+import type { IssuanceRequestDetails } from '../commands/create-issuance-request-command'
 import { IssuanceEntity } from '../entities/issuance-entity'
 
 const ISSUANCE_TOPIC = 'issuance'

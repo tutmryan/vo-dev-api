@@ -7,7 +7,7 @@ import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('issuance')
 export class IssuanceEntity extends VerifiedOrchestrationEntity {
-  constructor(args?: { contractId: string; identityId: string; userId: string }) {
+  constructor(args?: { id: string; contractId: string; identityId: string; userId: string }) {
     super()
     if (!args) return
     typeSafeAssign(this, args)

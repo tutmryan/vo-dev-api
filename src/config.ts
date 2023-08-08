@@ -86,6 +86,7 @@ export type Config = {
   }
   issuanceRequestRegistration: IssuanceRequestRegistration
   platformConsumerApps: Record<string, { name: string }>
+  cardLogoImageUrlDefault: string
 }
 
 export default createTypedConfig<Config>(config)

@@ -821,11 +821,11 @@ export type Pin = {
 /** An instance of a successful credential presentation. */
 export type Presentation = {
   __typename?: 'Presentation';
-  /** The contracts used as presentation request input (if any). */
-  contracts: Array<Contract>;
   id: Scalars['ID']['output'];
   /** The identity of the person who presented the credential (if known). */
   identity?: Maybe<Identity>;
+  /** The issuances that were presented */
+  issuances: Array<Issuance>;
   presentedAt: Scalars['DateTime']['output'];
   /** The credentials that were presented (excluding claims data) */
   presentedCredentials: Array<PresentedCredential>;
@@ -2095,9 +2095,9 @@ export interface PositiveIntScalarConfig extends GraphQLScalarTypeConfig<Resolve
 }
 
 export type PresentationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Presentation'] = ResolversParentTypes['Presentation']> = {
-  contracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<Maybe<ResolversTypes['Identity']>, ParentType, ContextType>;
+  issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType>;
   presentedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   presentedCredentials?: Resolver<Array<ResolversTypes['PresentedCredential']>, ParentType, ContextType>;
   requestedCredentials?: Resolver<Array<ResolversTypes['RequestedCredential']>, ParentType, ContextType>;

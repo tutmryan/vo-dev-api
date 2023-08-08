@@ -1,6 +1,13 @@
 import { get, intersection, omit } from 'lodash'
+import config from '../../config'
+import type {
+  ContractDisplayClaimInput,
+  ContractDisplayCredentialLogoInput,
+  ContractInput,
+  TemplateDisplayClaim,
+  TemplateParentData,
+} from '../../generated/graphql'
 import { findKeysOverriding } from '../../util/intersection'
-import type { ContractDisplayClaimInput, ContractInput, TemplateDisplayClaim, TemplateParentData } from '../../generated/graphql'
 
 /**
  * Recursively finds properties from ContractInput overriding its TemplateParentData counterpart
@@ -37,4 +44,8 @@ export function ensureNoOverridingTemplateData(a: ContractInput, b: TemplatePare
   if (overriddenProps.length > 0) {
     throw new Error(`The contract overrides the following properties from its template: ${overriddenProps.join(', ')}`)
   }
+}
+
+export function applyLogoImageUrlDefault(logo: ContractDisplayCredentialLogoInput) {
+  if (!logo.uri) logo.uri = config.get('cardLogoImageUrlDefault')
 }

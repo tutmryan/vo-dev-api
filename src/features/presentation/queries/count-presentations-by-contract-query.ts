@@ -15,8 +15,9 @@ export async function CountPresentationsByContractQuery(
   const query = (entityManager as any)
     .createQueryBuilder()
     .select()
-    .from('presentation_contracts', null)
-    .innerJoin('presentation', 'p', 'presentation_contracts.presentation_id = p.id')
+    .from('presentation_issuances', null)
+    .innerJoin('presentation', 'p', 'presentation_issuances.presentation_id = p.id')
+    .innerJoin('issuance', 'i', 'presentation_issuances.issuance_id = i.id')
     .select('COUNT(*)', 'count')
     .addSelect('contract_id')
     .groupBy('contract_id')
@@ -28,8 +29,8 @@ export async function CountPresentationsByContractQuery(
   if (limit) query.take(limit)
 
   if (criteria?.identityId) query.andWhere('p.identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
-  if (criteria?.contractId) query.andWhere('contract_id = :contractId', { contractId: criteria.contractId.toUpperCase() })
-  if (criteria?.userId) throw new Error("Sorry, can't filter by userId when grouping by user.")
+  if (criteria?.userId) query.andWhere('p.user_id = :userId', { userId: criteria.userId.toUpperCase() })
+  if (criteria?.contractId) throw new Error("Sorry, can't filter by contractId when grouping by contract.")
 
   if (criteria?.from && criteria.to)
     query.andWhere('p.presented_at BETWEEN :from AND :to', { from: criteria.from.toISOString(), to: criteria.to.toISOString() })
