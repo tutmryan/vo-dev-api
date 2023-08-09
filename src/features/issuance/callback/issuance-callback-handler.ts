@@ -19,7 +19,7 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
   const topicData: IssuanceTopicData = { ...issuanceRequestDetails, event }
 
   if (event.requestStatus === IssuanceRequestStatus.IssuanceSuccessful) {
-    const issuanceEntity = new IssuanceEntity(issuanceRequestDetails)
+    const issuanceEntity = new IssuanceEntity({ ...issuanceRequestDetails, requestId: event.requestId })
     const { id } = await dataSource.createEntityManager().getRepository(IssuanceEntity).save(issuanceEntity)
     topicData.issuanceId = id
   }

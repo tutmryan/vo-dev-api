@@ -10,18 +10,20 @@ export type PresentedData = Omit<PresentedCredential, 'claims'>
 
 @Entity('presentation')
 export class PresentationEntity extends VerifiedOrchestrationEntity {
-  constructor(args?: {
-    identityId: string
-    userId: string
-    issuanceIds: string[]
-    requestedCredentials: RequestCredential[]
-    presentedCredentials: PresentedData[]
-  }) {
+  constructor(
+    args?: Pick<
+      PresentationEntity,
+      'requestId' | 'identityId' | 'userId' | 'issuanceIds' | 'requestedCredentials' | 'presentedCredentials'
+    >,
+  ) {
     super()
     if (!args) return
     const { issuanceIds, ...rest } = args
     typeSafeAssign(this, { ...rest, issuances: Promise.resolve(args.issuanceIds.map((id) => ({ id } as IssuanceEntity))) })
   }
+
+  @Column({ type: 'nvarchar', nullable: true })
+  requestId!: string | null
 
   @ManyToOne(() => IdentityEntity)
   identity!: Promise<IdentityEntity | null>

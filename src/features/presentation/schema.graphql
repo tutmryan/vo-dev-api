@@ -288,6 +288,10 @@ Criteria for filtering contract presentations.
 """
 input ContractPresentationWhere {
   """
+  The requestId of the presentation request.
+  """
+  requestId: ID
+  """
   The ID of the identity who presented the credential (if known).
   """
   identityId: ID
@@ -302,6 +306,10 @@ Criteria for filtering identity presentations.
 """
 input IdentityPresentationWhere {
   """
+  The requestId of the presentation request.
+  """
+  requestId: ID
+  """
   The ID of a contract used to make the presentation request.
   """
   contractId: ID
@@ -315,6 +323,10 @@ input IdentityPresentationWhere {
 Criteria for filtering presentations.
 """
 input PresentationWhere {
+  """
+  The requestId of the presentation request.
+  """
+  requestId: ID
   """
   The ID of the identity who presented the credential (if known).
   """

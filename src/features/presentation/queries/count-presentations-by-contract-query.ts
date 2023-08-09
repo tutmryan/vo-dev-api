@@ -28,6 +28,7 @@ export async function CountPresentationsByContractQuery(
   if (offset) query.skip(offset)
   if (limit) query.take(limit)
 
+  if (criteria?.requestId) query.andWhere('p.request_id = :requestId', { requestId: criteria.requestId.toUpperCase() })
   if (criteria?.identityId) query.andWhere('p.identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
   if (criteria?.userId) query.andWhere('p.user_id = :userId', { userId: criteria.userId.toUpperCase() })
   if (criteria?.contractId) throw new Error("Sorry, can't filter by contractId when grouping by contract.")

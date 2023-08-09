@@ -51,6 +51,7 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
 
     const { userId, requestedCredentials } = presentationRequestDetails
     const presentationEntity = new PresentationEntity({
+      requestId: event.requestId,
       userId,
       identityId,
       issuanceIds,

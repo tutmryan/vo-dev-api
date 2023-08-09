@@ -13,6 +13,7 @@ export async function FindPresentationsQuery(
   const where: FindOptionsWhere<PresentationEntity> = {}
   const relations: FindOptionsRelations<PresentationEntity> = {}
 
+  if (criteria?.requestId) where.requestId = criteria.requestId.toUpperCase()
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.userId) where.userId = criteria.userId.toUpperCase()
   if (criteria?.contractId) {

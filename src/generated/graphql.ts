@@ -337,6 +337,8 @@ export type ContractInput = {
 export type ContractIssuanceWhere = {
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The requestId of the issuance request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -345,6 +347,8 @@ export type ContractIssuanceWhere = {
 export type ContractPresentationWhere = {
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The requestId of the presentation request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that requested & received the presentation. */
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -494,6 +498,8 @@ export type IdentityInput = {
 export type IdentityIssuanceWhere = {
   /** The ID of the contract that was issued. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The requestId of the issuance request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -502,6 +508,8 @@ export type IdentityIssuanceWhere = {
 export type IdentityPresentationWhere = {
   /** The ID of a contract used to make the presentation request. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The requestId of the presentation request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that requested & received the presentation. */
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -653,6 +661,8 @@ export type IssuanceWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The requestId of the issuance request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The end of the period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
@@ -982,6 +992,8 @@ export type PresentationWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The requestId of the presentation request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The end of the period to count. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the user (Person or Application) that requested & received the presentation data. */

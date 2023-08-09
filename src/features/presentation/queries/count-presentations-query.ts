@@ -8,6 +8,7 @@ export async function CountPresentationsQuery(this: QueryContext, criteria?: May
   const where: FindOptionsWhere<PresentationEntity> = {}
   const relations: FindOptionsRelations<PresentationEntity> = {}
 
+  if (criteria?.requestId) where.requestId = criteria.requestId.toUpperCase()
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.contractId) {
     relations.issuances = true

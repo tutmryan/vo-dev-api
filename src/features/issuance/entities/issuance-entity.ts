@@ -7,11 +7,14 @@ import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('issuance')
 export class IssuanceEntity extends VerifiedOrchestrationEntity {
-  constructor(args?: { id: string; contractId: string; identityId: string; userId: string }) {
+  constructor(args?: Pick<IssuanceEntity, 'id' | 'requestId' | 'contractId' | 'identityId' | 'userId'>) {
     super()
     if (!args) return
     typeSafeAssign(this, args)
   }
+
+  @Column({ type: 'nvarchar', nullable: true })
+  requestId!: string | null
 
   @ManyToOne(() => ContractEntity)
   contract!: Promise<ContractEntity>

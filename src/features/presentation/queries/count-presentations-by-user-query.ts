@@ -25,6 +25,7 @@ export async function CountPresentationsByUserQuery(
   if (offset) query.skip(offset)
   if (limit) query.take(limit)
 
+  if (criteria?.requestId) query.andWhere('p.request_id = :requestId', { requestId: criteria.requestId.toUpperCase() })
   if (criteria?.identityId) query.andWhere('p.identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
   if (criteria?.contractId) {
     query.innerJoin('presentation_issuances', 'pi', 'p.id = pi.presentation_id')

@@ -25,6 +25,7 @@ export async function CountIssuancesByContractQuery(
   if (offset) query.skip(offset)
   if (limit) query.take(limit)
 
+  if (criteria?.requestId) query.andWhere('request_id = :requestId', { identityId: criteria.requestId.toUpperCase() })
   if (criteria?.identityId) query.andWhere('identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
   if (criteria?.userId) query.andWhere('user_id = :userId', { userId: criteria.userId.toUpperCase() })
   if (criteria?.contractId) throw new Error("Sorry, can't filter by contractId when grouping by contract.")

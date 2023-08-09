@@ -7,6 +7,7 @@ import { IssuanceEntity } from '../entities/issuance-entity'
 export async function CountIssuancesQuery(this: QueryContext, criteria?: Maybe<IssuanceWhere>) {
   const where: FindOptionsWhere<IssuanceEntity> = {}
 
+  if (criteria?.requestId) where.requestId = criteria.requestId.toUpperCase()
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.contractId) where.contractId = criteria.contractId.toUpperCase()
   if (criteria?.userId) where.userId = criteria.userId.toUpperCase()

@@ -235,6 +235,10 @@ Criteria for filtering contract issuances.
 """
 input ContractIssuanceWhere {
   """
+  The requestId of the issuance request.
+  """
+  requestId: ID
+  """
   The ID of the identity that was issued the credential.
   """
   identityId: ID
@@ -249,6 +253,10 @@ Criteria for filtering issuances for identity.
 """
 input IdentityIssuanceWhere {
   """
+  The requestId of the issuance request.
+  """
+  requestId: ID
+  """
   The ID of the contract that was issued.
   """
   contractId: ID
@@ -262,6 +270,10 @@ input IdentityIssuanceWhere {
 Criteria for filtering issuances.
 """
 input IssuanceWhere {
+  """
+  The requestId of the issuance request.
+  """
+  requestId: ID
   """
   The ID of the identity that was issued the credential.
   """
