@@ -157,6 +157,16 @@ runs:
         app-name: ${{ inputs.migrations-function-app-name }}
         package: migrations-function/migrations-function.zip
 
+    - name: Restart migrations Functions app
+      uses: azure/powershell@v1
+      id: migrationFunctionsRestart
+      with:
+        azPSVersion: "latest"
+        inlineScript: |
+          $value = '${{ inputs.migrations-function-app-name }}'
+          $functionApp = Get-AzFunctionApp | Where-Object {$_.Name -eq $value}
+          $functionApp | Restart-AzFunctionApp -Force
+
     - name: Run database migrations
       shell: pwsh
       run: >-
