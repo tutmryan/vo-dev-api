@@ -34,6 +34,7 @@ export async function CreateIssuanceRequestCommand(
   // find the contract
   const contract = await entityManager.getRepository(ContractEntity).findOneByOrFail({ id: contractId })
   invariant(contract.externalId, 'Contract must be provisioned before issuance')
+  invariant(!contract.isDeprecated, 'Contract must not be deprecated')
 
   // find the provisioned contract
   const provisionedContract = await admin.contract(contract.externalId)

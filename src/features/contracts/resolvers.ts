@@ -3,6 +3,7 @@ import type { Resolvers } from '../../generated/graphql'
 import { resolveUpdatedAt } from '../auditing/updated-at-resolver'
 import { CreateContractCommand } from './commands/create-contract-command'
 import { DeleteContractCommand } from './commands/delete-contract-command'
+import { DeprecateContractCommand } from './commands/deprecate-contract-command'
 import { ProvisionContractCommand } from './commands/provision-contract-command'
 import { UpdateContractCommand } from './commands/update-contract-command'
 import { FindContractsQuery } from './queries/find-contracts-query'
@@ -17,6 +18,7 @@ export const resolvers: Resolvers = {
     updateContract: (_, { id, input }, context) => dispatch(context, UpdateContractCommand, id, input),
     deleteContract: (_, { id }, context) => dispatch(context, DeleteContractCommand, id),
     provisionContract: (_, { id }, context) => dispatch(context, ProvisionContractCommand, id),
+    deprecateContract: (_, { id }, context) => dispatch(context, DeprecateContractCommand, id),
   },
   Contract: {
     updatedAt: resolveUpdatedAt,

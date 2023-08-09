@@ -10,6 +10,7 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
   validateContractClaims(input.display.claims)
 
   const contract = await repository.findOneByOrFail({ id })
+  if (contract.isDeprecated) throw new Error('Contract has been deprecated, it cannot be updated')
 
   const template = input.templateId ? await this.dataLoaders.templates.load(input.templateId) : undefined
   if (template) {

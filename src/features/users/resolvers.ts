@@ -11,6 +11,7 @@ export const resolvers: Resolvers = {
     provisionedBy: ({ provisionedById }, _, { dataLoaders: { users } }) => (provisionedById ? users.load(provisionedById) : null),
     lastProvisionedBy: ({ lastProvisionedById }, _, { dataLoaders: { users } }) =>
       lastProvisionedById ? users.load(lastProvisionedById) : null,
+    deprecatedBy: ({ deprecatedById }, _, { dataLoaders: { users } }) => (deprecatedById ? users.load(deprecatedById) : null),
   },
   Issuance: {
     user: ({ userId }, _, { dataLoaders: { users } }) => users.load(userId),

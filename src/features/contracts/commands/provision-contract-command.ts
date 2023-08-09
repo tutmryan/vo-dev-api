@@ -19,6 +19,8 @@ export async function ProvisionContractCommand(this: CommandContext, id: string)
       user: this.user!.userEntity,
     })
   } else {
+    if (contract.isDeprecated) throw new Error('Contract has been deprecated, it cannot be published again')
+
     const updateContractInput = toUpdateContractInput(contract)
     await this.services.admin.updateContract(contract.externalId, updateContractInput)
 

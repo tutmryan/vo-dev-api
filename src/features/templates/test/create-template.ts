@@ -80,3 +80,32 @@ export async function createTemplate(input: TemplateInput) {
 
   return data!.createTemplate
 }
+
+export function buildTemplateInput(args: Partial<TemplateInput>): TemplateInput {
+  return {
+    name: randomUUID(),
+    description: randomUUID(),
+    isPublic: true,
+    ...args,
+    display: {
+      locale: 'en-AU',
+      ...args.display,
+      card: {
+        title: 'Card title',
+        logo: {
+          image: 'https://image.com/image.png',
+          ...args.display?.card?.logo,
+        },
+        ...args.display?.card,
+      },
+      consent: {
+        title: 'Consent title',
+        ...args.display?.consent,
+      },
+      claims: args.display?.claims || [
+        { claim: 'claim_one', label: 'Claim 1', type: 'String' },
+        { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
+      ],
+    },
+  }
+}

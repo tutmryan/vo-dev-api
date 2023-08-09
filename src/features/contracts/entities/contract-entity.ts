@@ -63,6 +63,18 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'datetimeoffset', nullable: true })
   lastProvisionedAt!: Date | null
 
+  @Column({ type: 'bit', nullable: true })
+  isDeprecated!: boolean | null
+
+  @ManyToOne(() => UserEntity, { nullable: true })
+  deprecatedBy!: Promise<UserEntity | null>
+
+  @RelationId((contract: ContractEntity) => contract.deprecatedBy)
+  deprecatedById!: string | null
+
+  @Column({ type: 'datetimeoffset', nullable: true })
+  deprecatedAt!: Date | null
+
   @Column({ type: 'nvarchar', length: 'MAX' })
   private displayJson!: string
 
@@ -106,5 +118,11 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   markAsReprovisioned(user: UserEntity) {
     this.lastProvisionedBy = Promise.resolve(user)
     this.lastProvisionedAt = new Date()
+  }
+
+  markAsDeprecated(user: UserEntity) {
+    this.isDeprecated = true
+    this.deprecatedBy = Promise.resolve(user)
+    this.deprecatedAt = new Date()
   }
 }

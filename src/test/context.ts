@@ -6,6 +6,7 @@ import { findUpdateOrCreateUser } from '../context'
 import { dataSource } from '../data'
 import { createDataLoaders } from '../loaders'
 import { logger } from '../logger'
+import type { Services } from '../services'
 import { createServices } from '../services'
 
 const requestInfo: RequestInfo = {
@@ -42,8 +43,8 @@ export const buildJwt = ({
   roles,
 })
 
-export const createContext = async (jwtPayload?: JwtPayload): Promise<GraphQLContext> => {
+export const createContext = async (jwtPayload?: JwtPayload, services?: Partial<Services>): Promise<GraphQLContext> => {
   const user = await findUpdateOrCreateUser(jwtPayload, 'test-token')
   const context = { user, logger, requestInfo, started: Date.now(), dataSource }
-  return { ...context, services: createServices(context), dataLoaders: createDataLoaders() }
+  return { ...context, services: { ...createServices(context), ...services }, dataLoaders: createDataLoaders() }
 }
