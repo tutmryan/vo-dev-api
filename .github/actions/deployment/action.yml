@@ -164,7 +164,8 @@ runs:
         azPSVersion: "latest"
         inlineScript: |
           $value = '${{ inputs.migrations-function-app-name }}'
-          $functionApp = Get-AzFunctionApp | Where-Object {$_.Name -eq $value}
+          $subscriptionId = '${{ inputs.azure-subscription-id }}'
+          $functionApp = Get-AzFunctionApp -SubscriptionId $subscriptionId | Where-Object {$_.Name -eq $value}
           $functionApp | Restart-AzFunctionApp -Force
 
     - name: Run database migrations
