@@ -158,15 +158,12 @@ runs:
         package: migrations-function/migrations-function.zip
 
     - name: Restart migrations Functions app
-      uses: azure/powershell@v1
+      shell: pwsh
       id: migrationFunctionsRestart
-      with:
-        azPSVersion: "latest"
-        inlineScript: |
-          $value = '${{ inputs.migrations-function-app-name }}'
-          $subscriptionId = '${{ inputs.azure-subscription-id }}'
-          $functionApp = Get-AzFunctionApp -SubscriptionId $subscriptionId | Where-Object {$_.Name -eq $value}
-          $functionApp | Restart-AzFunctionApp -Force
+      run: |
+        $value = '${{ inputs.migrations-function-app-name }}'
+        $resourceGroup = '${{ inputs.resource-group-name }}'
+        az functionapp restart --name $value --resource-group $resourceGroup
 
     - name: Run database migrations
       shell: pwsh
