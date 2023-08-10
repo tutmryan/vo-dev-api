@@ -27,9 +27,9 @@ export const subscribeToIssuanceEvents = (_args?: SubscriptionIssuanceEventArgs)
 export const subscribeToIssuanceEventsWithFilter = withFilter(
   (_, args: SubscriptionIssuanceEventArgs) => subscribeToIssuanceEvents(args),
   (data: IssuanceTopicData, args: SubscriptionIssuanceEventArgs) => {
-    const { userId, identityId, contractId, requestId, status } = args.where ?? {}
+    const { issuedById, identityId, contractId, requestId, status } = args.where ?? {}
 
-    if (userId && data.userId !== userId) return false
+    if (issuedById && data.issuedById !== issuedById) return false
     if (identityId && data.identityId !== identityId) return false
     if (contractId && data.contractId !== contractId) return false
     if (requestId && data.event.requestId !== requestId) return false

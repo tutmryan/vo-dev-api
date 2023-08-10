@@ -337,10 +337,10 @@ export type ContractInput = {
 export type ContractIssuanceWhere = {
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that issued the credential. */
+  issuedById?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
-  /** The ID of the user (Person or Application) that issued the credential. */
-  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Criteria for filtering contract presentations. */
@@ -498,10 +498,10 @@ export type IdentityInput = {
 export type IdentityIssuanceWhere = {
   /** The ID of the contract that was issued. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that issued the credential. */
+  issuedById?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
-  /** The ID of the user (Person or Application) that issued the credential. */
-  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Criteria for filtering identity presentations. */
@@ -547,12 +547,12 @@ export type Issuance = {
   /** Defines whether the issued credential has been revoked */
   isRevoked?: Maybe<Scalars['Boolean']['output']>;
   issuedAt: Scalars['DateTime']['output'];
+  /** The platform user (application or person) that issued the credential. */
+  issuedBy: User;
   /** When the credential was revoked. */
   revokedAt?: Maybe<Scalars['DateTime']['output']>;
   /** The platform user (application or person) that revoked the credential. */
   revokedBy?: Maybe<User>;
-  /** The platform user (application or person) that issued the credential. */
-  user: User;
 };
 
 /** The callback endpoint is called when a user scans the QR code, uses the deep link the authenticator app, or finishes the issuance process. */
@@ -582,12 +582,12 @@ export type IssuanceEventWhere = {
   contractId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the identity that the issuance is for. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that requested issuance. */
+  issuedById?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request, returned from the createIssuanceRequest mutation. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** Only return events with the specified status. */
   status?: InputMaybe<IssuanceRequestStatus>;
-  /** The ID of the user (Person or Application) that requested issuance. */
-  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /**
@@ -661,12 +661,12 @@ export type IssuanceWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that issued the credential. */
+  issuedById?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The end of the period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
-  /** The ID of the user (Person or Application) that issued the credential. */
-  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Information about the used Key Vault */
@@ -2031,9 +2031,9 @@ export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends R
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
   isRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   issuedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  issuedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   revokedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   revokedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

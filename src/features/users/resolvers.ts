@@ -14,7 +14,7 @@ export const resolvers: Resolvers = {
     deprecatedBy: ({ deprecatedById }, _, { dataLoaders: { users } }) => (deprecatedById ? users.load(deprecatedById) : null),
   },
   Issuance: {
-    user: ({ userId }, _, { dataLoaders: { users } }) => users.load(userId),
+    issuedBy: ({ issuedById }, _, { dataLoaders: { users } }) => users.load(issuedById),
     revokedBy: ({ revokedById }, _, { dataLoaders: { users } }) => (revokedById ? users.load(revokedById) : null),
   },
   Presentation: {

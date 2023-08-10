@@ -7,7 +7,7 @@ import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('issuance')
 export class IssuanceEntity extends VerifiedOrchestrationEntity {
-  constructor(args?: Pick<IssuanceEntity, 'id' | 'requestId' | 'contractId' | 'identityId' | 'userId'>) {
+  constructor(args?: Pick<IssuanceEntity, 'id' | 'requestId' | 'contractId' | 'identityId' | 'issuedById'>) {
     super()
     if (!args) return
     typeSafeAssign(this, args)
@@ -29,10 +29,10 @@ export class IssuanceEntity extends VerifiedOrchestrationEntity {
   identityId!: string
 
   @ManyToOne(() => UserEntity)
-  user!: Promise<UserEntity>
+  issuedBy!: Promise<UserEntity>
 
-  @Column()
-  userId!: string
+  @RelationId((issuance: IssuanceEntity) => issuance.issuedBy)
+  issuedById!: string
 
   @CreateDateColumn({ type: 'datetimeoffset' })
   issuedAt!: Date
