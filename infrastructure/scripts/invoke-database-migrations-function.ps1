@@ -6,11 +6,7 @@ param (
 
   [Parameter(Mandatory = $true)]
   [string]
-  $MigrationsAppClientId,
-
-  [Parameter(Mandatory = $true)]
-  [string]
-  $ExpectedVersion
+  $MigrationsAppClientId
 )
 
 $ErrorActionPreference = 'Stop'
@@ -20,49 +16,6 @@ $token = az account get-access-token `
   --scope ('{0}/.default' -f $MigrationsAppClientId) `
   --query "accessToken" `
   --output tsv
-
-$numberOfAttempts = 10
-$waitInSecondsBetweenAttempts = 5
-
-$getVersionFunctionUrl = 'https://{0}.azurewebsites.net/api/GetVersion' -f $FunctionAppName
-$getVersionResponseStatusCode = $null
-$foundExpectedVersion = $false
-
-#
-# Make sure we run the right version
-#
-foreach ($index in @(1..$numberOfAttempts)) {
-  $getVersionResponse = Invoke-RestMethod `
-    -Method Get `
-    -Uri $getVersionFunctionUrl `
-    -Headers @{ Authorization = ('Bearer {0}' -f $token) } `
-    -SkipHttpErrorCheck `
-    -StatusCodeVariable 'getVersionResponseStatusCode'
-
-  if ($getVersionResponseStatusCode -eq 200) {
-    if ($getVersionResponse.version -ne $ExpectedVersion) {
-      Write-Output ('❌ [{0}/{1}] Version mismatch (Expected: {2}, Actual: {3})' -f $index, $numberOfAttempts, $ExpectedVersion, $getVersionResponse.version)
-      Write-Output ''
-
-      Start-Sleep -Seconds $waitInSecondsBetweenAttempts
-      continue
-    }
-
-    $foundExpectedVersion = $true
-    break
-  } else {
-    Write-Output ('❌ [{0}/{1}] Error while getting version (HTTP response status code {2})' -f $index, $numberOfAttempts, $getVersionResponseStatusCode)
-    Write-Output ('HTTP response body: {0}' -f ($getVersionResponse | ConvertTo-Json -Depth 10 -Compress))
-    Write-Output ''
-
-    Start-Sleep -Seconds $waitInSecondsBetweenAttempts
-  }
-}
-
-if (-not $foundExpectedVersion) {
-  Write-Output ('❌ Unable to get the expected version after {0} attempts' -f $numberOfAttempts)
-  exit 1
-}
 
 #
 # Run migrations
