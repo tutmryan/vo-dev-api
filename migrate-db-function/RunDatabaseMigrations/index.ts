@@ -6,7 +6,7 @@ const httpTrigger: AzureFunction = async function (context: Context): Promise<vo
   let dataSource: DataSource | undefined = undefined
 
   try {
-    const { DATABASE_HOST: host, DATABASE_PORT: port } = process.env
+    const { DATABASE_HOST: host, DATABASE_PORT: port, APP_VERSION: version } = process.env
     if (!host || !port) throw new Error('Missing environment variables DATABASE_HOST and/or DATABASE_PORT')
 
     const config: SqlServerConnectionOptions = {
@@ -39,7 +39,7 @@ const httpTrigger: AzureFunction = async function (context: Context): Promise<vo
       context.log(`Executed migration: ${JSON.stringify(m, null, 4)}`)
     }
 
-    context.res = { status: 200, body: JSON.stringify({ result: 'complete', migrations }, null, 4) }
+    context.res = { status: 200, body: JSON.stringify({ result: 'complete', migrations, version }, null, 4) }
   } catch ({ message, stack }: any) {
     context.log.error(`Error while running migrations`, message, stack)
     context.res = { status: 500, body: JSON.stringify({ result: 'failed', message, stack }, null, 4) }
