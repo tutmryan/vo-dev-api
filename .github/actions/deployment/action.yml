@@ -79,10 +79,6 @@ inputs:
     description: API key for SendGrid
     required: true
 
-  migrations-app-version:
-    description: Version returned by the GetVersion function of the migrations Function app
-    required: true
-
 outputs:
   api-url:
     description: URL of the deployed API
@@ -131,7 +127,6 @@ runs:
           b2cGraphClientSecret=${{ inputs.b2c-graph-client-secret }}
           vidCallbackClientSecret=${{ inputs.vid-callback-client-secret }}
           sendgridApiKey=${{ inputs.sendgrid-api-key }}
-          migrationsAppVersion=${{ inputs.migrations-app-version }}
           redisCacheName=${{ inputs.redis-cache-name }}
           redisCacheSKU=${{ inputs.redis-cache-sku }}
           redisCacheFamily=${{ inputs.redis-cache-family }}
@@ -171,7 +166,6 @@ runs:
         ./infrastructure/scripts/invoke-database-migrations-function.ps1
         -FunctionAppName '${{ inputs.migrations-function-app-name }}'
         -MigrationsAppClientId '${{ inputs.migrations-app-client-id }}'
-        -ExpectedVersion '${{ inputs.migrations-app-version }}'
 
     - name: Deploy API to App Service
       id: deploy-api
