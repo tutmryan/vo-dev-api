@@ -13,7 +13,7 @@ import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import type { IssuanceEntity } from '../entities/issuance-entity'
 
-export type IssuanceRequestDetails = Pick<IssuanceEntity, 'id' | 'userId' | 'identityId' | 'contractId'>
+export type IssuanceRequestDetails = Pick<IssuanceEntity, 'id' | 'issuedById' | 'identityId' | 'contractId'>
 
 type StandardClaimsData = Record<StandardClaims, string>
 
@@ -72,7 +72,7 @@ export async function CreateIssuanceRequestCommand(
   // cache issuance details for use in the callback
   const requestDetails: IssuanceRequestDetails = {
     id: standardClaims.issuanceId.toUpperCase(),
-    userId: user.userEntity.id.toUpperCase(),
+    issuedById: user.userEntity.id.toUpperCase(),
     identityId: identity.id.toUpperCase(),
     contractId: contract.id.toUpperCase(),
   }

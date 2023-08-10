@@ -15,7 +15,7 @@ export async function FindIssuancesQuery(
   if (criteria?.requestId) where.requestId = criteria.requestId.toUpperCase()
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.contractId) where.contractId = criteria.contractId.toUpperCase()
-  if (criteria?.userId) where.userId = criteria.userId.toUpperCase()
+  if (criteria?.issuedById) where.issuedById = criteria.issuedById.toUpperCase()
 
   if (criteria?.from && criteria.to) where.issuedAt = BetweenTimestamp(criteria.from, criteria.to)
   else if (criteria?.from) where.issuedAt = MoreThanOrEqualTimestamp(criteria.from)

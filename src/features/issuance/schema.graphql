@@ -207,7 +207,7 @@ type Issuance {
   """
   The platform user (application or person) that issued the credential.
   """
-  user: User!
+  issuedBy: User!
   """
   The contract defining the issued credential.
   """
@@ -245,7 +245,7 @@ input ContractIssuanceWhere {
   """
   The ID of the user (Person or Application) that issued the credential.
   """
-  userId: ID
+  issuedById: ID
 }
 
 """
@@ -263,7 +263,7 @@ input IdentityIssuanceWhere {
   """
   The ID of the user (Person or Application) that issued the credential.
   """
-  userId: ID
+  issuedById: ID
 }
 
 """
@@ -285,7 +285,7 @@ input IssuanceWhere {
   """
   The ID of the user (Person or Application) that issued the credential.
   """
-  userId: ID
+  issuedById: ID
   """
   The start of the period to include.
   """
@@ -348,7 +348,7 @@ input IssuanceEventWhere {
   """
   The ID of the user (Person or Application) that requested issuance.
   """
-  userId: ID
+  issuedById: ID
   """
   Only return events with the specified status.
   """
