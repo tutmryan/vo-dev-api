@@ -17,6 +17,9 @@ $token = az account get-access-token `
   --query "accessToken" `
   --output tsv
 
+$numberOfAttempts = 10
+$waitInSecondsBetweenAttempts = 5
+
 #
 # Run migrations
 #
