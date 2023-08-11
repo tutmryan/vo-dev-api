@@ -6,7 +6,11 @@ param (
 
   [Parameter(Mandatory = $true)]
   [string]
-  $MigrationsAppClientId
+  $MigrationsAppClientId,
+
+  [Parameter(Mandatory = $true)]
+  [string]
+  $ExpectedVersion
 )
 
 $ErrorActionPreference = 'Stop'
@@ -36,6 +40,13 @@ foreach ($index in @(1..$numberOfAttempts)) {
 
   if ($runMigrationsResponseStatusCode -eq 200) {
     Write-Output '✅ Migrations were run successfully'
+
+    if ($runMigrationsResponse.version -ne $ExpectedVersion) {
+      Write-Output ('❌ [{0}/{1}] Version mismatch (Expected: {2}, Actual: {3})' -f $index, $numberOfAttempts, $ExpectedVersion, $runMigrationsResponse.version)
+      Write-Output ''
+    } else {
+      Write-Output ('✅ [{0}/{1}] Version match: {2}' -f $index, $numberOfAttempts, $runMigrationsResponse.version)
+    }
 
     $numberOfMigrations = ($runMigrationsResponse.migrations | Measure-Object).Count
     Write-Output ('Number of migrations run: {0}' -f $numberOfMigrations)

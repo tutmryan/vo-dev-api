@@ -110,3 +110,5 @@ jobs:
           b2c-graph-client-secret: ${{ secrets.B2C_GRAPH_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.VID_CALLBACK_CLIENT_SECRET }}
           sendgrid-api-key: ${{ secrets.SENDGRID_API_KEY }}
+          # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context:~:text=artifacts%20are%20kept.-,github.run_id,-string
+          migrations-app-version: ${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}

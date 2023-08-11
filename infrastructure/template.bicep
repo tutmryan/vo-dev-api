@@ -428,6 +428,9 @@ resource migrationsFunctionApp 'Microsoft.Web/sites@2022-03-01' = {
   }
 }
 
+@description('A unique version number that is returned by the GetVersion function of the migrations Function app')
+param migrationsAppVersion string
+
 resource migrationsFunctionAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   name: 'appsettings'
   parent: migrationsFunctionApp
@@ -441,6 +444,7 @@ resource migrationsFunctionAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     NODE_ENV: environment
     DATABASE_HOST: '${sqlInstance.name}${az.environment().suffixes.sqlServerHostname}'
     DATABASE_PORT: '1433'
+    APP_VERSION: migrationsAppVersion
   }
 }
 
