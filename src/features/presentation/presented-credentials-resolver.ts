@@ -24,4 +24,4 @@ const hasPresentedCredentialsTTLExpired = (presentationEntity: PresentationEntit
   presentationEntity.presentedAt.getTime() + PRESENTED_CREDENTIALS_TTL * 1000 <= Date.now()
 
 const didCurrentUserRequestPresentation = (presentationEntity: PresentationEntity, user: User | undefined) =>
-  user && user.userEntity.id === presentationEntity.userId
+  user && user.userEntity.id === presentationEntity.requestedById

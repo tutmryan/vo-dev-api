@@ -14,7 +14,7 @@ export async function CountPresentationsQuery(this: QueryContext, criteria?: May
     relations.issuances = true
     where.issuances = { contractId: criteria.contractId.toUpperCase() }
   }
-  if (criteria?.userId) where.userId = criteria.userId.toUpperCase()
+  if (criteria?.requestedById) where.requestedById = criteria.requestedById.toUpperCase()
 
   if (criteria?.from && criteria.to) where.presentedAt = BetweenTimestamp(criteria.from, criteria.to)
   else if (criteria?.from) where.presentedAt = MoreThanOrEqualTimestamp(criteria.from)

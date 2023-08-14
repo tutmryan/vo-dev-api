@@ -31,7 +31,7 @@ export class IssuanceEntity extends VerifiedOrchestrationEntity {
   @ManyToOne(() => UserEntity)
   issuedBy!: Promise<UserEntity>
 
-  @RelationId((issuance: IssuanceEntity) => issuance.issuedBy)
+  @Column()
   issuedById!: string
 
   @CreateDateColumn({ type: 'datetimeoffset' })

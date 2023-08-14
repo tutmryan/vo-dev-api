@@ -49,10 +49,10 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
       ? event.verifiedCredentialsData.map((credential) => omit(credential, 'claims'))
       : []
 
-    const { userId, requestedCredentials } = presentationRequestDetails
+    const { requestedById, requestedCredentials } = presentationRequestDetails
     const presentationEntity = new PresentationEntity({
       requestId: event.requestId,
-      userId,
+      requestedById,
       identityId,
       issuanceIds,
       requestedCredentials,

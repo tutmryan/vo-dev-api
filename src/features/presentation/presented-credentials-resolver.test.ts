@@ -21,7 +21,7 @@ describe('presentedCredentialsResolver', () => {
   it('does not load from cache if TTL has expired', () => {
     // Arrange
     const presentedAt = new Date(Date.now() - (PRESENTED_CREDENTIALS_TTL + 10) * 1000)
-    const entity = givenAPresentationEntity({ presentedAt: presentedAt, userId: currentUserId })
+    const entity = givenAPresentationEntity({ presentedAt: presentedAt, requestedById: currentUserId })
     const currentUser = givenAUser(currentUserId)
 
     // Act
@@ -34,7 +34,7 @@ describe('presentedCredentialsResolver', () => {
   it('does not load from cache if TTL has just reached', () => {
     // Arrange
     const presentedAt = new Date(Date.now() - PRESENTED_CREDENTIALS_TTL * 1000)
-    const entity = givenAPresentationEntity({ presentedAt: presentedAt, userId: currentUserId })
+    const entity = givenAPresentationEntity({ presentedAt: presentedAt, requestedById: currentUserId })
     const currentUser = givenAUser(currentUserId)
 
     // Act
@@ -47,7 +47,7 @@ describe('presentedCredentialsResolver', () => {
   it('does not load from cache if current user did not make the presentation request', () => {
     // Arrange
     const presentedAt = new Date(Date.now() - (PRESENTED_CREDENTIALS_TTL - 10) * 1000)
-    const entity = givenAPresentationEntity({ presentedAt: presentedAt, userId: 'user-2' })
+    const entity = givenAPresentationEntity({ presentedAt: presentedAt, requestedById: 'user-2' })
     const currentUser = givenAUser(currentUserId)
 
     // Act
@@ -60,7 +60,7 @@ describe('presentedCredentialsResolver', () => {
   it('load from cache if TTL has not yet expired', () => {
     // Arrange
     const presentedAt = new Date(Date.now() - (PRESENTED_CREDENTIALS_TTL - 10) * 1000)
-    const entity = givenAPresentationEntity({ presentedAt: presentedAt, userId: currentUserId })
+    const entity = givenAPresentationEntity({ presentedAt: presentedAt, requestedById: currentUserId })
     const currentUser = givenAUser(currentUserId)
 
     // Act
@@ -75,7 +75,7 @@ const givenAPresentationEntity = (args: Partial<PresentationEntity>) => {
   return {
     requestId: 'request-1',
     identityId: 'identity-1',
-    userId: 'user-1',
+    requestedById: 'user-1',
     ...args,
     issuanceIds: args.issuanceIds || ['issuance-1', 'issuance-2'],
     requestedCredentials: args.requestedCredentials || [],

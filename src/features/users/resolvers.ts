@@ -18,6 +18,6 @@ export const resolvers: Resolvers = {
     revokedBy: ({ revokedById }, _, { dataLoaders: { users } }) => (revokedById ? users.load(revokedById) : null),
   },
   Presentation: {
-    user: ({ userId }, _, { dataLoaders: { users } }) => users.load(userId),
+    requestedBy: ({ requestedById }, _, { dataLoaders: { users } }) => users.load(requestedById),
   },
 }
