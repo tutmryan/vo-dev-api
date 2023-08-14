@@ -2,6 +2,7 @@ import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { resolvePresentationEventData, subscribeToPresentationEventsWithFilter } from './callback/pubsub'
 import { CreatePresentationRequestCommand } from './commands/create-presentation-request-command'
+import { resolvePresentedCredentials } from './presented-credentials-resolver'
 import { CountPresentationsByContractQuery } from './queries/count-presentations-by-contract-query'
 import { CountPresentationsByUserQuery } from './queries/count-presentations-by-user-query'
 import { CountPresentationsQuery } from './queries/count-presentations-query'
@@ -18,6 +19,9 @@ export const resolvers: Resolvers = {
   },
   Mutation: {
     createPresentationRequest: (_parent, { request }, context) => dispatch(context, CreatePresentationRequestCommand, request),
+  },
+  Presentation: {
+    presentedCredentials: (presentation, _, { user }) => resolvePresentedCredentials(presentation, user),
   },
   Contract: {
     presentations: (contract, { where, offset, limit }, context) =>

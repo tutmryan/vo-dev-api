@@ -1,6 +1,6 @@
 import { logger } from '@azure/identity'
 import { omit } from 'lodash'
-import { requestDetailsCache } from '../../../cache'
+import { PRESENTED_CREDENTIALS_TTL, presentedCredentialsCache, requestDetailsCache } from '../../../cache'
 import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
@@ -61,6 +61,10 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
 
     const { id } = await entityManager.getRepository(PresentationEntity).save(presentationEntity)
     topicData.presentationId = id
+
+    presentedCredentialsCache.set(event.requestId, JSON.stringify(event.verifiedCredentialsData || []), {
+      ttl: PRESENTED_CREDENTIALS_TTL,
+    })
   }
 
   await publishPresentationEvent(topicData)

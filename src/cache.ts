@@ -27,5 +27,7 @@ export const newCacheSection = (prefix: string): KeyValueCache => {
 export const pubsub = isRedisEnabled ? new RedisPubSub({ connection: redisConnectionString }) : new PubSub()
 
 export const REQUEST_CACHE_TTL = 60 * 60 // 1 hour
+export const PRESENTED_CREDENTIALS_TTL = 30 * 60 // 30 minutes
 export const requestCallbackCache = newCacheSection('requestCallback')
 export const requestDetailsCache = newCacheSection('requestDetails')
+export const presentedCredentialsCache = newCacheSection('presentedCredentials')

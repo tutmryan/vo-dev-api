@@ -100,7 +100,7 @@ jobs:
           redis-cache-sku: Basic
           redis-cache-family: C
           redis-cache-capacity: 1
-          app-service-plan-sku: B2
+          app-service-plan-sku: P1V3
           api-app-service-name: vo-dev-verified-orchestration-api
           migrations-function-app-name: vo-dev-verified-orchestration-migrations
           migrations-app-client-id: a705473f-45d1-498a-a9aa-c767c4d406b8
