@@ -16,8 +16,8 @@ export async function CountIssuancesByUserQuery(
     .getRepository(IssuanceEntity)
     .createQueryBuilder('issuance')
     .select('COUNT(*)', 'count')
-    .addSelect('user_id')
-    .groupBy('user_id')
+    .addSelect('issued_by_id')
+    .groupBy('issued_by_id')
     .orderBy('count', 'DESC')
     .where('1=1')
     .comment('CountIssuancesByUserQuery')
@@ -35,5 +35,5 @@ export async function CountIssuancesByUserQuery(
   else if (criteria?.from) query.andWhere('issued_at >= :from', { from: criteria.from.toISOString() })
   else if (criteria?.to) query.andWhere('issued_at <= :to', { to: criteria.to.toISOString() })
 
-  return query.getRawMany().then((rows) => rows.map((row) => ({ user: users.load(row.user_id), count: row.count })))
+  return query.getRawMany().then((rows) => rows.map((row) => ({ user: users.load(row.issued_by_id), count: row.count })))
 }
