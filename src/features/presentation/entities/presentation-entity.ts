@@ -34,7 +34,7 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   @ManyToOne(() => UserEntity)
   requestedBy!: Promise<UserEntity>
 
-  @RelationId((presentation: PresentationEntity) => presentation.requestedBy)
+  @Column()
   requestedById!: string
 
   @ManyToMany(() => IssuanceEntity)
