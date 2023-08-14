@@ -13,7 +13,7 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   constructor(
     args?: Pick<
       PresentationEntity,
-      'requestId' | 'identityId' | 'userId' | 'issuanceIds' | 'requestedCredentials' | 'presentedCredentials'
+      'requestId' | 'identityId' | 'requestedById' | 'issuanceIds' | 'requestedCredentials' | 'presentedCredentials'
     >,
   ) {
     super()
@@ -32,10 +32,10 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   identityId!: string | null
 
   @ManyToOne(() => UserEntity)
-  user!: Promise<UserEntity>
+  requestedBy!: Promise<UserEntity>
 
-  @Column()
-  userId!: string
+  @RelationId((presentation: PresentationEntity) => presentation.requestedBy)
+  requestedById!: string
 
   @ManyToMany(() => IssuanceEntity)
   @JoinTable({ name: 'presentation_issuances' })

@@ -15,7 +15,7 @@ export async function FindPresentationsQuery(
 
   if (criteria?.requestId) where.requestId = criteria.requestId.toUpperCase()
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
-  if (criteria?.userId) where.userId = criteria.userId.toUpperCase()
+  if (criteria?.requestedById) where.requestedById = criteria.requestedById.toUpperCase()
   if (criteria?.contractId) {
     relations.issuances = true
     where.issuances = { contractId: criteria.contractId.toUpperCase() }

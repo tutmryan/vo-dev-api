@@ -29,9 +29,9 @@ export const subscribeToPresentationEvents = (_args?: SubscriptionPresentationEv
 export const subscribeToPresentationEventsWithFilter = withFilter(
   (_, args: SubscriptionPresentationEventArgs) => subscribeToPresentationEvents(args),
   (data: PresentationTopicData, args: SubscriptionPresentationEventArgs) => {
-    const { userId, identityId, requestId, type, status } = args.where ?? {}
+    const { requestedById, identityId, requestId, type, status } = args.where ?? {}
 
-    if (userId && data.userId !== userId) return false
+    if (requestedById && data.requestedById !== requestedById) return false
     if (identityId && data.identityId !== identityId) return false
     if (requestId && data.event.requestId !== requestId) return false
     if (type && (isNil(data.event.verifiedCredentialsData) || !data.event.verifiedCredentialsData.some((data) => data.type.includes(type))))

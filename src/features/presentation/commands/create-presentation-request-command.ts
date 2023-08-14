@@ -7,7 +7,7 @@ import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import type { PresentationEntity } from '../entities/presentation-entity'
 
-export type PresentationRequestDetails = Pick<PresentationEntity, 'userId' | 'identityId' | 'requestedCredentials'>
+export type PresentationRequestDetails = Pick<PresentationEntity, 'requestedById' | 'identityId' | 'requestedCredentials'>
 
 export async function CreatePresentationRequestCommand(
   this: CommandContext,
@@ -49,7 +49,7 @@ export async function CreatePresentationRequestCommand(
 
   // cache presentation details for use in the callback
   const requestDetails: PresentationRequestDetails = {
-    userId: user.userEntity.id.toUpperCase(),
+    requestedById: user.userEntity.id.toUpperCase(),
     identityId: identity?.id.toUpperCase() ?? null,
     requestedCredentials: presentationRequest.requestedCredentials,
   }

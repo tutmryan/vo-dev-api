@@ -350,7 +350,7 @@ export type ContractPresentationWhere = {
   /** The requestId of the presentation request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that requested & received the presentation. */
-  userId?: InputMaybe<Scalars['ID']['input']>;
+  requestedById?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Defines the searchable fields usable to find contracts */
@@ -511,7 +511,7 @@ export type IdentityPresentationWhere = {
   /** The requestId of the presentation request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that requested & received the presentation. */
-  userId?: InputMaybe<Scalars['ID']['input']>;
+  requestedById?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Defines the searchable fields usable to find identities */
@@ -852,10 +852,10 @@ export type Presentation = {
   presentedAt: Scalars['DateTime']['output'];
   /** The credentials that were presented (excluding claims data) */
   presentedCredentials: Array<PresentedCredential>;
+  /** The platform user (application or person) that requested the credential presentation. */
+  requestedBy: User;
   /** The credentials that were requested */
   requestedCredentials: Array<RequestedCredential>;
-  /** The platform user (application or person) that requested the credential presentation. */
-  user: User;
 };
 
 /** The callback endpoint is called when a user scans the QR code, uses the deep link the authenticator app, or finishes the issuance process. */
@@ -907,6 +907,8 @@ export type PresentationEventWhere = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the presentation request, returned from the createPresentationRequest mutation. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that requested presentation. */
+  requestedById?: InputMaybe<Scalars['ID']['input']>;
   /** Only return events with the specified status. */
   status?: InputMaybe<PresentationRequestStatus>;
   /**
@@ -914,8 +916,6 @@ export type PresentationEventWhere = {
    * Note: type data is only available on complete presentation events; if specified, only complete presentations containing this type will be returned.
    */
   type?: InputMaybe<Scalars['String']['input']>;
-  /** The ID of the user (Person or Application) that requested presentation. */
-  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** The presentation request payload contains information about your verifiable credentials presentation request. */
@@ -994,10 +994,10 @@ export type PresentationWhere = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the presentation request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that requested & received the presentation data. */
+  requestedById?: InputMaybe<Scalars['ID']['input']>;
   /** The end of the period to count. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
-  /** The ID of the user (Person or Application) that requested & received the presentation data. */
-  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Loosely typed representation based on documentation / example event here: https://docs.microsoft.com/en-us/azure/active-directory/verifiable-credentials/presentation-request-api#callback-events */
@@ -1055,7 +1055,7 @@ export type Query = {
   presentationCount: Scalars['NonNegativeInt']['output'];
   /** Returns the successful presentation count, grouped by Contract, optionally matching the specified criteria. */
   presentationCountByContract: Array<ContractCount>;
-  /** Returns the successful presentation count, grouped by User, optionally matching the specified criteria. */
+  /** Returns the successful presentation count, grouped by requesting User, optionally matching the specified criteria. */
   presentationCountByUser: Array<UserCount>;
   /** Returns a template by ID */
   template: Template;
@@ -2126,8 +2126,8 @@ export type PresentationResolvers<ContextType = GraphQLContext, ParentType exten
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType>;
   presentedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   presentedCredentials?: Resolver<Array<ResolversTypes['PresentedCredential']>, ParentType, ContextType>;
+  requestedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   requestedCredentials?: Resolver<Array<ResolversTypes['RequestedCredential']>, ParentType, ContextType>;
-  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

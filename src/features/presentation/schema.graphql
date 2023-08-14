@@ -268,7 +268,7 @@ type Presentation {
   """
   The platform user (application or person) that requested the credential presentation.
   """
-  user: User!
+  requestedBy: User!
   """
   The issuances that were presented (which may be none, if the presented credentials were from an external issuer)
   """
@@ -298,7 +298,7 @@ input ContractPresentationWhere {
   """
   The ID of the user (Person or Application) that requested & received the presentation.
   """
-  userId: ID
+  requestedById: ID
 }
 
 """
@@ -316,7 +316,7 @@ input IdentityPresentationWhere {
   """
   The ID of the user (Person or Application) that requested & received the presentation.
   """
-  userId: ID
+  requestedById: ID
 }
 
 """
@@ -338,7 +338,7 @@ input PresentationWhere {
   """
   The ID of the user (Person or Application) that requested & received the presentation data.
   """
-  userId: ID
+  requestedById: ID
   """
   The start of the period to count.
   """
@@ -378,7 +378,7 @@ extend type Query {
   presentationCountByContract(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [ContractCount!]!
     @cacheControl(maxAge: 60)
   """
-  Returns the successful presentation count, grouped by User, optionally matching the specified criteria.
+  Returns the successful presentation count, grouped by requesting User, optionally matching the specified criteria.
   """
   presentationCountByUser(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]! @cacheControl(maxAge: 60)
 }
@@ -398,7 +398,7 @@ input PresentationEventWhere {
   """
   The ID of the user (Person or Application) that requested presentation.
   """
-  userId: ID
+  requestedById: ID
   """
   The type of credential presented.
   Note: type data is only available on complete presentation events; if specified, only complete presentations containing this type will be returned.
