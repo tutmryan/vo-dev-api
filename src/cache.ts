@@ -10,7 +10,11 @@ import { logger } from './logger'
 
 const redisConfig = config.has('redis') ? config.get('redis') : undefined
 const isRedisEnabled = !!redisConfig?.host
-const redisConnectionString = isRedisEnabled ? `rediss://:${redisConfig.key}@${redisConfig.host}:6380` : undefined
+const redisConnectionString = isRedisEnabled
+  ? redisConfig.key
+    ? `rediss://:${redisConfig.key}@${redisConfig.host}:6380`
+    : `redis://${redisConfig.host}:6380`
+  : undefined
 
 if (!isLocalDev && !isRedisEnabled) {
   if (environment !== 'test') logger.warn('Redis caching is not configured, falling back to in-memory cache')

@@ -19,5 +19,6 @@ export async function FindIdentitiesQuery(
     where,
     skip: offset ?? undefined,
     take: limit ?? undefined,
+    order: { name: { direction: 'ASC' } },
   })
 }
