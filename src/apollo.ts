@@ -21,10 +21,15 @@ import { newCacheSection } from './cache'
 import config from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
+import { useJobRunner } from './jobRunner'
 import { logger } from './logger'
 import createSchema from './schema'
 
-const plugins = (httpServer: http.Server, serverCleanup: Disposable): ApolloServerPlugin<GraphQLContext>[] => {
+const plugins = (
+  httpServer: http.Server,
+  serverCleanup: Disposable,
+  jobRunnerCleanup: Disposable,
+): ApolloServerPlugin<GraphQLContext>[] => {
   const plugins: ApolloServerPlugin<GraphQLContext>[] = [
     createLoggingPlugin({ contextCreationFailureLogger: logger }),
     introspectionControlPlugin as ApolloServerPlugin<GraphQLContext>,
@@ -34,6 +39,7 @@ const plugins = (httpServer: http.Server, serverCleanup: Disposable): ApolloServ
         return {
           async drainServer() {
             await serverCleanup.dispose()
+            await jobRunnerCleanup.dispose()
           },
         }
       },
@@ -70,11 +76,13 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
     verifyToken: (host, token) => verifyForHost(host, token, config.get('auth.bearer')),
   })
 
+  const jobRunnerCleanup = useJobRunner()
+
   logger.info('Starting apollo server')
   const server = new ApolloServer<GraphQLContext>({
     logger,
     schema,
-    plugins: plugins(httpServer, wsServerCleanup),
+    plugins: plugins(httpServer, wsServerCleanup, jobRunnerCleanup),
     introspection: true,
     csrfPrevention: true,
   })
