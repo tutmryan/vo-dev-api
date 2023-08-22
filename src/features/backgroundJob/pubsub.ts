@@ -1,0 +1,44 @@
+import type { GraphQLContext } from '@makerx/graphql-core'
+import { withFilter } from 'graphql-subscriptions'
+import { pubsub } from '../../cache'
+import { entityManager } from '../../data'
+import type {
+  BackgroundJobEvent,
+  BackgroundJobEventData,
+  SubscriptionBackgroundJobEventArgs,
+  SubscriptionSubscribeFn,
+} from '../../generated/graphql'
+import { UserEntity } from '../users/entities/user-entity'
+
+const BACKGROUND_JOB_TOPIC = 'backgroundJob'
+
+export type BackgroundJobTopicData = {
+  jobId: string
+  event: BackgroundJobEvent
+  userId: string
+}
+
+export const publishBackgroundJobEvent = async (data: BackgroundJobTopicData): Promise<void> => {
+  pubsub.publish(BACKGROUND_JOB_TOPIC, data)
+}
+
+export const subscribeToBackgroundJobEvents = (_args?: SubscriptionBackgroundJobEventArgs) =>
+  pubsub.asyncIterator<BackgroundJobTopicData>(BACKGROUND_JOB_TOPIC)
+
+export const subscribeToBackgroundJobEventsWithFilter = withFilter(
+  (_, args: SubscriptionBackgroundJobEventArgs) => subscribeToBackgroundJobEvents(args),
+  (data: BackgroundJobTopicData, args: SubscriptionBackgroundJobEventArgs) => {
+    const { jobId, status, userId } = args.where ?? {}
+
+    if (jobId && data.jobId !== jobId) return false
+    if (status && data.event.status !== status) return false
+    if (userId && data.userId !== userId) return false
+    return true
+  },
+) as any as SubscriptionSubscribeFn<BackgroundJobEventData, any, GraphQLContext, SubscriptionBackgroundJobEventArgs>
+
+export const resolveBackgroundJobEventData = ({ event, jobId, userId }: BackgroundJobTopicData) => ({
+  event,
+  jobId,
+  user: entityManager.getRepository(UserEntity).findOneOrFail({ comment: 'FindUserById', where: { id: userId } }),
+})

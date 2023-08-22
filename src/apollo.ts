@@ -21,7 +21,7 @@ import { newCacheSection } from './cache'
 import config from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
-import { useJobRunner } from './jobRunner'
+import { useBackgroundJob } from './features/backgroundJob'
 import { logger } from './logger'
 import createSchema from './schema'
 
@@ -76,7 +76,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
     verifyToken: (host, token) => verifyForHost(host, token, config.get('auth.bearer')),
   })
 
-  const jobRunnerCleanup = useJobRunner()
+  const jobRunnerCleanup = useBackgroundJob()
 
   logger.info('Starting apollo server')
   const server = new ApolloServer<GraphQLContext>({
