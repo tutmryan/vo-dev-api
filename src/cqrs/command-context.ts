@@ -10,5 +10,6 @@ export type CommandContext = {
   readonly logger: Logger
   readonly services: Services
   readonly dataLoaders: DataLoaders
+  readonly correlationId?: string
   readonly contextType: 'command'
 }

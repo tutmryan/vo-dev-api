@@ -5,6 +5,7 @@ import { redisOptions } from '../../redis'
 export const JobQueueName = 'jobQueue'
 export const MAX_RETRY = 3
 type JobType<TName extends string, TPayload extends { userId: string }> = {
+  correlationId?: string
   name: TName
   payload: TPayload
 }

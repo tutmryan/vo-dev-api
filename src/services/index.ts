@@ -2,6 +2,7 @@ import type { HttpAuthFactory } from '@makerx/node-common'
 import { createClientCredentialsAuthFactory as clientCredentialsAuth } from '@makerx/node-common'
 import config from '../config'
 import type { BaseContext } from '../context'
+import type { logger } from '../logger'
 import { AdminService } from './admin'
 import { GraphService } from './graph-service'
 import { RequestService } from './request'
@@ -19,22 +20,21 @@ export const createServices = (context: BaseContext): Services => {
   return {
     b2cGraph: new GraphService(config.get('integrations.b2cGraph')),
     homeTenantGraph: new GraphService(config.get('homeTenantGraph')),
-    admin: createAdminService(context),
+    admin: createAdminService(context.logger, context.requestInfo.correlationId),
     request: createRequestService(context),
   }
 }
 
-function createAdminService(context: BaseContext) {
+export function createAdminService(loggerParam: typeof logger, correlationId?: string) {
   const httpClientOptions = {
-    requestContext: context,
-    logger: context.logger,
-    correlationId: context.requestInfo.correlationId,
+    logger: loggerParam,
+    correlationId,
   }
 
   return new AdminService({
     ...httpClientOptions,
     baseUrl: config.get('integrations.verifiedIdAdmin.baseUrl'),
-    authFactory: <HttpAuthFactory<BaseContext>>clientCredentialsAuth(config.get('integrations.verifiedIdAdmin.auth')),
+    authFactory: <HttpAuthFactory>clientCredentialsAuth(config.get('integrations.verifiedIdAdmin.auth')),
   })
 }
 

@@ -1,7 +1,6 @@
 import type { HttpClientOptions } from '@makerx/node-common'
 import { HttpClient, HttpResponseError } from '@makerx/node-common'
 import { createHash } from 'crypto'
-import type { BaseContext } from '../context'
 import type { Authority, NetworkContract, NetworkIssuer, NetworkIssuersWhere } from '../generated/graphql'
 import { invariant } from '../util/invariant'
 import type { Contract, CreateContractInput, Credential, UpdateContractInput } from './admin.types'
@@ -14,8 +13,8 @@ interface Value<T> {
 // to avoid having to repeatedly load it
 let authority: Authority | undefined = undefined
 
-export class AdminService extends HttpClient<BaseContext> {
-  constructor(options: HttpClientOptions<BaseContext>) {
+export class AdminService extends HttpClient {
+  constructor(options: HttpClientOptions) {
     super(options)
   }
 

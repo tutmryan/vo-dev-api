@@ -8,7 +8,7 @@ export type CommandLike = (this: CommandContext, ...args: any) => any
 export type QueryLike = (this: QueryContext, ...args: any) => any
 
 export const dispatch = async <T extends CommandLike>(
-  context: Pick<GraphQLContext, 'dataSource' | 'user' | 'services' | 'dataLoaders' | 'logger'>,
+  context: Pick<GraphQLContext, 'dataSource' | 'user' | 'services' | 'dataLoaders' | 'logger' | 'requestInfo'>,
   command: T,
   ...args: Parameters<T>
 ): Promise<Awaited<ReturnType<T>>> => {
@@ -25,6 +25,7 @@ export const dispatch = async <T extends CommandLike>(
         logger: context.logger,
         services: context.services,
         dataLoaders: context.dataLoaders,
+        correlationId: context.requestInfo.correlationId,
         contextType: 'command',
       },
       args,

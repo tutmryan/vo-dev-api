@@ -3,10 +3,14 @@ import { userInvariant } from '../../../util/user-invariant'
 import { addToJobQueue } from '../../backgroundJob/queue'
 
 export async function RevokeContractIssuancesCommand(this: CommandContext, id: string): Promise<string> {
-  const { user } = this
+  const { user, correlationId } = this
 
   userInvariant(user)
 
-  const jobId = await addToJobQueue({ name: 'revokeContractIssuances', payload: { userId: user.userEntity.id, contractId: id } })
+  const jobId = await addToJobQueue({
+    correlationId,
+    name: 'revokeContractIssuances',
+    payload: { userId: user.userEntity.id, contractId: id },
+  })
   return jobId
 }

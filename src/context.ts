@@ -48,10 +48,11 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
   }
 
   // we don't have a graphql context yet, so create just enough to dispatch FindUpdateOrCreateUser command
-  const context: Pick<GraphQLContext, 'dataSource' | 'user' | 'logger' | 'services' | 'dataLoaders'> = {
+  const context: Pick<GraphQLContext, 'dataSource' | 'user' | 'logger' | 'services' | 'dataLoaders' | 'requestInfo'> = {
     dataSource,
     user: undefined,
     logger,
+    requestInfo: {} as any as RequestInfo,
     services: {} as any as Services,
     dataLoaders: {} as any as DataLoaders,
   }

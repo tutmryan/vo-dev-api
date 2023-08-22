@@ -1,17 +1,19 @@
 import type { Job } from 'bullmq'
-import { logger } from '../../logger'
+import { IssuanceEntity } from '../issuance/entities/issuance-entity'
 import type { RevokeIssuancesJobPayload } from './queue'
+import type { WorkerContext } from './worker'
 
-export const revokeIssuancesJobHandler = async (job: Omit<Job, 'data'> & { data: RevokeIssuancesJobPayload }) => {
+export const revokeIssuancesJobHandler = async (context: WorkerContext, job: Omit<Job, 'data'> & { data: RevokeIssuancesJobPayload }) => {
   // attempts to revoke all issuance ids in the payload even if any one of those fails
   // job is marked as failed if any issuance id fails to be revoked and the job is retried
+  const { logger, entityManager } = context
   return new Promise<void>((resolve, reject) => {
     Promise.allSettled(
-      job.data.issuanceIds.map((id, index) => {
+      job.data.issuanceIds.map(async (id, index) => {
         try {
-          if (index === 5 || index === 7) throw new Error(`Index ${index} is going to fail`)
           logger.info(`revoking issuance ${id}`)
-          return Promise.resolve()
+          const issuance = await entityManager.getRepository(IssuanceEntity).findOneOrFail({ where: { id: id } })
+          logger.info(`${issuance.id} found`)
         } catch (err) {
           logger.error(`Error occurred when revoking the issuance ${id}`, err)
           return Promise.reject(err)
@@ -28,16 +30,4 @@ export const revokeIssuancesJobHandler = async (job: Omit<Job, 'data'> & { data:
       resolve()
     })
   })
-
-  // for (let i = 0; i < job.data.issuanceIds.length; i++) {
-  //   try {
-  //     if (i === 7) throw new Error('this is going to fail')
-  //     logger.info(`revoking issuance ${job.data.issuanceIds[i]}`)
-  //     job.updateProgress(Math.floor(((i + 1) / job.data.issuanceIds.length) * 100))
-  //     logger.info(job.progress)
-  //     await new Promise((r) => setTimeout(r, 1000))
-  //   } catch (err) {
-  //     logger.error(err)
-  //   }
-  // }
 }
