@@ -10,6 +10,7 @@ import { UserEntity } from '../users/entities/user-entity'
 import { publishBackgroundJobEvent } from './pubsub'
 import type { JobNames, JobTypes } from './queue'
 import { JobQueueName, MAX_RETRY } from './queue'
+import { revokeContractIssuancesJobHandler } from './revoke-contract-issuances-job-handler'
 import { revokeIssuancesJobHandler } from './revoke-issuances-job-handler'
 
 type BackgroundJob = Omit<Job, 'data'> & { data: { correlationId?: string; userId: string } }
@@ -24,6 +25,7 @@ type HandlerMap<T extends { name: JobNames }> = {
 
 const handlers: HandlerMap<JobTypes> = {
   revokeIssuances: revokeIssuancesJobHandler,
+  revokeContractIssuances: revokeContractIssuancesJobHandler,
 }
 
 const createWorkerContext = async (userId: string, correlationId?: string): Promise<WorkerContext> => ({
@@ -71,10 +73,12 @@ getWorker().on('completed', (job: BackgroundJob, result) => {
 })
 
 getWorker().on('failed', (job: BackgroundJob | undefined, error) => {
+  const hasEncounteredUnrecoverableError = (j: BackgroundJob) => !!j.finishedOn
+  const hasNoAttemptsLeft = (j: BackgroundJob) => j.attemptsMade >= MAX_RETRY
   if (job) {
     publishBackgroundJobEvent({
       event: {
-        status: job.attemptsMade < MAX_RETRY ? BackgroundJobStatus.Retrying : BackgroundJobStatus.Failed,
+        status: hasNoAttemptsLeft(job) || hasEncounteredUnrecoverableError(job) ? BackgroundJobStatus.Failed : BackgroundJobStatus.Retrying,
         error: error.message,
       },
       jobId: job.id!,
