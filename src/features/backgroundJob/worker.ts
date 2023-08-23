@@ -1,7 +1,6 @@
 import type { Job } from 'bullmq'
 import { Worker } from 'bullmq'
-import { ISOLATION_LEVEL as TXN_ISOLATION_LEVEL, dataSource } from '../../data'
-import type { VerifiedOrchestrationEntityManager } from '../../data/entity-manager'
+import { dataSource } from '../../data'
 import { BackgroundJobStatus } from '../../generated/graphql'
 import { logger } from '../../logger'
 import { redisOptions } from '../../redis'
@@ -15,7 +14,6 @@ import { revokeIssuancesJobHandler } from './revoke-issuances-job-handler'
 
 type BackgroundJob = Omit<Job, 'data'> & { data: { correlationId?: string; userId: string } }
 export type WorkerContext = {
-  entityManager: VerifiedOrchestrationEntityManager
   logger: typeof logger
   adminService: AdminService
   user: UserEntity
@@ -28,15 +26,10 @@ const handlers: HandlerMap<JobTypes> = {
   revokeIssuances: revokeIssuancesJobHandler,
 }
 
-const createWorkerContext = async (
-  entityManager: VerifiedOrchestrationEntityManager,
-  userId: string,
-  correlationId?: string,
-): Promise<WorkerContext> => ({
-  entityManager,
+const createWorkerContext = async (userId: string, correlationId?: string): Promise<WorkerContext> => ({
   logger,
   adminService: createAdminService(logger, correlationId),
-  user: await entityManager.getRepository(UserEntity).findOneByOrFail({ id: userId }),
+  user: await dataSource.getRepository(UserEntity).findOneByOrFail({ id: userId }),
 })
 
 let worker: Worker | null = null
@@ -47,10 +40,8 @@ export const getWorker = () =>
     async (job) => {
       const handler = handlers[job.name as JobNames]
       if (handler) {
-        await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
-          const context = await createWorkerContext(entityManager, job.data.userId, job.data.correlationId)
-          await handler(context, job)
-        })
+        const context = await createWorkerContext(job.data.userId, job.data.correlationId)
+        await handler(context, job)
       }
     },
     { concurrency: 10, connection: redisOptions },

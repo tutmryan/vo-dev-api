@@ -1,9 +1,6 @@
 import type { CommandContext } from '../../../cqrs/command-context'
-import type { VerifiedOrchestrationEntityManager } from '../../../data/entity-manager'
-import type { AdminService } from '../../../services/admin'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
-import type { UserEntity } from '../../users/entities/user-entity'
 import { IssuanceEntity } from '../entities/issuance-entity'
 
 export async function RevokeIssuanceCommand(this: CommandContext, id: string) {
@@ -14,15 +11,7 @@ export async function RevokeIssuanceCommand(this: CommandContext, id: string) {
   } = this
 
   userInvariant(user)
-  return revokeIssuance(entityManager, admin, user.userEntity, id)
-}
 
-export async function revokeIssuance(
-  entityManager: VerifiedOrchestrationEntityManager,
-  admin: AdminService,
-  userEntity: UserEntity,
-  id: string,
-): Promise<IssuanceEntity> {
   const issuanceRepository = entityManager.getRepository(IssuanceEntity)
   const issuance = await issuanceRepository.findOneByOrFail({ id })
 
@@ -37,6 +26,6 @@ export async function revokeIssuance(
 
   await admin.revokeCredential(contractExternalId, credential.id)
 
-  issuance.markAsRevoked(userEntity)
+  issuance.markAsRevoked(user.userEntity)
   return await issuanceRepository.save(issuance)
 }
