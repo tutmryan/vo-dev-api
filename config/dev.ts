@@ -48,6 +48,7 @@ const config: DeepPartial<Config> = {
     host: 'vo-dev-verified-orchestration-redis.redis.cache.windows.net',
   },
   limitedAccessClient: {
+    clientId: '53022c73-6efc-406b-873a-8916c3451006',
     scope: apiDefaultScope,
   },
   sendgrid: {
