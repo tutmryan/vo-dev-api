@@ -117,7 +117,7 @@ export function buildContractInput(args: Partial<ContractInput>): ContractInput 
         issuedBy: 'Card issuer',
         ...args.display?.card,
         logo: {
-          image: 'https://image.com/image.png',
+          uri: 'https://image.com/image.png',
           description: 'Logo description',
           ...args.display?.card.logo,
         },
