@@ -2,6 +2,8 @@ import { LogLevel } from '@azure/msal-node'
 import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 
+const apiDefaultScope = 'api://verified-orchestration-api-dev/.default'
+
 const config: DeepPartial<Config> = {
   cors: {
     origin: true,
@@ -18,7 +20,7 @@ const config: DeepPartial<Config> = {
     },
     pkce: {
       enabled: true,
-      scopes: ['api://verified-orchestration-api-dev/.default', 'profile'],
+      scopes: [apiDefaultScope, 'profile'],
       logoutUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/logout',
       msalConfig: {
         auth: {
@@ -44,6 +46,9 @@ const config: DeepPartial<Config> = {
   },
   redis: {
     host: 'vo-dev-verified-orchestration-redis.redis.cache.windows.net',
+  },
+  limitedAccessClient: {
+    scope: apiDefaultScope,
   },
   sendgrid: {
     templates: {
@@ -80,7 +85,7 @@ const config: DeepPartial<Config> = {
       // Verified Orchestration VID callback (dev)
       // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/836da20a-6fab-483a-9153-08f8673b9eb2/isMSAApp~/false
       clientId: '836da20a-6fab-483a-9153-08f8673b9eb2',
-      scope: 'api://verified-orchestration-api-dev/.default',
+      scope: apiDefaultScope,
     },
   },
   presentationCallback: {
@@ -88,7 +93,7 @@ const config: DeepPartial<Config> = {
       // Verified Orchestration VID callback (dev)
       // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/836da20a-6fab-483a-9153-08f8673b9eb2/isMSAApp~/false
       clientId: '836da20a-6fab-483a-9153-08f8673b9eb2',
-      scope: 'api://verified-orchestration-api-dev/.default',
+      scope: apiDefaultScope,
     },
   },
 }

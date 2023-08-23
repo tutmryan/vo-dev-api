@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { graphql } from '../../generated'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
 import { createIdentityInput, saveIdentityMutation } from './create-update-identity.test'
@@ -18,7 +19,7 @@ describe('find-identity', () => {
 
   it('should find an identity by partial name', async () => {
     // Arrange
-    const input = createIdentityInput()
+    const input = createIdentityInput({ name: randomUUID() })
 
     await executeOperationAsAdmin({
       query: saveIdentityMutation,
@@ -32,7 +33,7 @@ describe('find-identity', () => {
       query: findIdentitiesQuery,
       variables: {
         where: {
-          name: input.name.slice(-3),
+          name: input.name.slice(-10),
         },
       },
     })

@@ -1,7 +1,7 @@
 import { graphql } from '../../../generated'
 import { executeOperationAsAdmin } from '../../../test'
 
-const getContractQuery = graphql(
+export const getContractQuery = graphql(
   `
   query GetContract($id: ID!) {
     contract(id: $id) {

@@ -94,7 +94,7 @@
     "@keyv/redis": "^2.7.0",
     "@makerx/express-bearer": "^1.1.0",
     "@makerx/express-msal": "^1.0.0",
-    "@makerx/graphql-apollo-server": "^1.0.1",
+    "@makerx/graphql-apollo-server": "^1.0.2",
     "@makerx/graphql-core": "^1.2.1",
     "@makerx/node-common": "^1.1.0",
     "@makerx/node-winston": "^1.0.0",

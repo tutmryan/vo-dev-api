@@ -2,6 +2,8 @@ import { LogLevel } from '@azure/msal-node'
 import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 
+const apiDefaultScope = 'api://verified-orchestration-api-localdev/.default'
+
 const config: DeepPartial<Config> = {
   server: {
     port: 4000,
@@ -35,7 +37,7 @@ const config: DeepPartial<Config> = {
     },
     pkce: {
       enabled: true,
-      scopes: ['api://verified-orchestration-api-localdev/.default', 'profile'],
+      scopes: [apiDefaultScope, 'profile'],
       logoutUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/logout',
       msalConfig: {
         auth: {
@@ -58,6 +60,10 @@ const config: DeepPartial<Config> = {
     auth: {
       clientId: '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9',
     },
+  },
+  limitedAccessClient: {
+    clientId: 'c712fd5e-3317-47b8-bb22-c26296661a51',
+    scope: apiDefaultScope,
   },
   sendgrid: {
     templates: {
@@ -94,7 +100,7 @@ const config: DeepPartial<Config> = {
       // Verified Orchestration VID callback (localdev)
       // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/bafdce32-e946-4b0a-a630-f7a2fe4229e4/isMSAApp~/false
       clientId: 'bafdce32-e946-4b0a-a630-f7a2fe4229e4',
-      scope: 'api://verified-orchestration-api-localdev/.default',
+      scope: apiDefaultScope,
     },
   },
   presentationCallback: {
@@ -102,7 +108,7 @@ const config: DeepPartial<Config> = {
       // Verified Orchestration VID callback (localdev)
       // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/bafdce32-e946-4b0a-a630-f7a2fe4229e4/isMSAApp~/false
       clientId: 'bafdce32-e946-4b0a-a630-f7a2fe4229e4',
-      scope: 'api://verified-orchestration-api-localdev/.default',
+      scope: apiDefaultScope,
     },
   },
 }

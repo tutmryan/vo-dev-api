@@ -1,6 +1,8 @@
 import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 
+const tokenUrl = 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/token'
+
 const config: DeepPartial<Config> = {
   logging: {
     userClaimsToLog: ['oid', 'aud', 'tid', 'azp', 'iss', 'scp', 'roles'],
@@ -47,6 +49,9 @@ const config: DeepPartial<Config> = {
     },
     tenantName: 'verifiedorchestration.com',
   },
+  limitedAccessClient: {
+    tokenUrl,
+  },
   sendgrid: {
     templates: {
       onboarding: {
@@ -60,7 +65,7 @@ const config: DeepPartial<Config> = {
     verifiedIdAdmin: {
       baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/',
       auth: {
-        tokenUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/token',
+        tokenUrl,
         // See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#authentication
         scope: '6a8b4b39-c021-437c-b060-5a14a3fd65f3/.default',
       },
@@ -68,7 +73,7 @@ const config: DeepPartial<Config> = {
     verifiedIdRequest: {
       baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/',
       auth: {
-        tokenUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/token',
+        tokenUrl,
         scope: '3db474b9-6a0c-4840-96ac-1fceb342124f/.default',
       },
     },
@@ -82,13 +87,13 @@ const config: DeepPartial<Config> = {
   issuanceCallback: {
     route: '/issuance/callback',
     auth: {
-      tokenUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/token',
+      tokenUrl,
     },
   },
   presentationCallback: {
     route: '/presentation/callback',
     auth: {
-      tokenUrl: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/token',
+      tokenUrl,
     },
   },
   issuanceRequestRegistration: {

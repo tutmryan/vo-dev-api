@@ -4,9 +4,10 @@ import { randomUUID } from 'crypto'
 import type { GraphQLContext } from '../context'
 import { findUpdateOrCreateUser } from '../context'
 import { dataSource } from '../data'
+import { setLimitedAccessData } from '../features/limited-access-tokens'
+import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
 import { createDataLoaders } from '../loaders'
 import { logger } from '../logger'
-import type { Services } from '../services'
 import { createServices } from '../services'
 
 const requestInfo: RequestInfo = {
@@ -43,8 +44,13 @@ export const buildJwt = ({
   roles,
 })
 
-export const createContext = async (jwtPayload?: JwtPayload, services?: Partial<Services>): Promise<GraphQLContext> => {
-  const user = await findUpdateOrCreateUser(jwtPayload, 'test-token')
+export const createContext = async (
+  jwtPayload?: JwtPayload,
+  limitedAccessData?: AcquireLimitedAccessTokenInput,
+): Promise<GraphQLContext> => {
+  const token = randomUUID()
+  if (limitedAccessData) await setLimitedAccessData(token, limitedAccessData)
+  const user = await findUpdateOrCreateUser(jwtPayload, token)
   const context = { user, logger, requestInfo, started: Date.now(), dataSource }
-  return { ...context, services: { ...createServices(context), ...services }, dataLoaders: createDataLoaders() }
+  return { ...context, services: createServices(context), dataLoaders: createDataLoaders() }
 }

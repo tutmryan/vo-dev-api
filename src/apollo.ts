@@ -26,7 +26,7 @@ import createSchema from './schema'
 
 const plugins = (httpServer: http.Server, serverCleanup: Disposable): ApolloServerPlugin<GraphQLContext>[] => {
   const plugins: ApolloServerPlugin<GraphQLContext>[] = [
-    createLoggingPlugin({}),
+    createLoggingPlugin({ contextCreationFailureLogger: logger }),
     introspectionControlPlugin as ApolloServerPlugin<GraphQLContext>,
     ApolloServerPluginDrainHttpServer({ httpServer }),
     {
@@ -61,9 +61,9 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
 
   logger.info('Initialising subscriptions websocket server')
   const wsServerCleanup = useSubscriptionsServer({
+    logger,
     schema,
     httpServer,
-    logger,
     createSubscriptionContext,
     jwtClaimsToLog: config.get('logging.userClaimsToLog'),
     requireAuth: true,
@@ -72,6 +72,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
 
   logger.info('Starting apollo server')
   const server = new ApolloServer<GraphQLContext>({
+    logger,
     schema,
     plugins: plugins(httpServer, wsServerCleanup),
     introspection: true,

@@ -159,6 +159,36 @@ resource vidCallbackClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-0
   }
 }
 
+@description('The client secret of the limited access client: anonymous presentations app registration in Azure AD')
+@secure()
+param limitedAccessClientSecret string
+
+resource limitedAccessClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-ACCESS-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedAccessClientSecret
+  }
+}
+
+@description('The secret for limited access client data keys')
+@secure()
+param limitedAccessSecret string
+
+resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-ACCESS-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedAccessSecret
+  }
+}
+
 @description('API key for SendGrid')
 @secure()
 param sendgridApiKey string
@@ -359,6 +389,8 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     UI_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${uiClientSecretSecret.properties.secretUri})'
     B2C_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${b2cGraphClientSecretSecret.properties.secretUri})'
     VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
+    LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
+    LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessSecretSecret.properties.secretUri})'
     REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
     SENDGRID_API_KEY: '@Microsoft.KeyVault(SecretUri=${sendgridApiKeySecret.properties.secretUri})'
   }

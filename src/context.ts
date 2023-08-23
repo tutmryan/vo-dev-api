@@ -5,6 +5,7 @@ import type { DataSource } from 'typeorm'
 import config from './config'
 import { dispatch } from './cqrs/dispatcher'
 import { dataSource } from './data'
+import { getLimitedAccessData, limitedAccessRole } from './features/limited-access-tokens'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
 import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or-create-user'
 import type { DataLoaders } from './loaders'
@@ -23,7 +24,7 @@ export type GraphQLContext = BaseContext & {
 }
 
 export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string) => {
-  if (!claims) return undefined
+  if (!claims || !token) return undefined
 
   const tenantId = claims['tid'] as string
   invariant(tenantId, '`tid` claim is required')
@@ -57,7 +58,11 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
 
   const userEntity = await dispatch(context, FindUpdateOrCreateUser, input)
 
-  return new User(claims, token ?? '', userEntity)
+  // if the user has a limited access role, then also look up limited access data
+  const hasLimitedAccess = Array.isArray(claims.roles) && claims.roles.includes(limitedAccessRole)
+  const limitedAccessData = hasLimitedAccess ? await getLimitedAccessData(token) : undefined
+
+  return new User(claims, token, userEntity, limitedAccessData)
 }
 
 const augmentContext = (context: BaseContext) => {

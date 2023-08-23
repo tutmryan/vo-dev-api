@@ -59,6 +59,8 @@ export type Config = {
     key: string
   }
   homeTenantGraph: GraphServiceConfig
+  limitedAccessClient: ClientCredentialsConfig
+  limitedAccessSecret: string
   sendgrid: {
     key: string
     templates: {

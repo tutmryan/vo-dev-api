@@ -27,12 +27,24 @@ export const saveIdentityMutation = graphql(`
   }
 `)
 
-export function createIdentityInput(): IdentityInput {
+export function createIdentityInput(input?: Partial<IdentityInput>): IdentityInput {
   return {
     issuer: 'issuer',
     identifier: randomUUID(),
     name: casual.name,
+    ...input,
   }
+}
+
+export async function createIdentity(input: IdentityInput = createIdentityInput()) {
+  const { data } = await executeOperationAsAdmin({
+    query: saveIdentityMutation,
+    variables: {
+      input,
+    },
+  })
+  invariant(data?.saveIdentity, 'data?.saveIdentity is undefined')
+  return data.saveIdentity
 }
 
 describe('create-update-identity', () => {

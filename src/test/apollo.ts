@@ -4,6 +4,8 @@ import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
 import type { JwtPayload } from '@makerx/graphql-core'
 import type { DocumentNode, FormattedExecutionResult } from 'graphql'
 import type { GraphQLContext } from '../context'
+import { limitedAccessRole } from '../features/limited-access-tokens'
+import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
 import schema from '../schema'
 import { buildJwt, createContext } from './context'
 
@@ -18,9 +20,10 @@ const executeOperation = async <TData = Record<string, unknown>, TVariables exte
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
   jwtPayload?: JwtPayload,
+  limitedAccessData?: AcquireLimitedAccessTokenInput,
 ): Promise<FormattedExecutionResult<TData>> => {
   const response = await server.executeOperation(request, {
-    contextValue: await createContext(jwtPayload),
+    contextValue: await createContext(jwtPayload, limitedAccessData),
   })
   if (response.body.kind !== 'single') throw new Error('Invalid response body kind')
   return response.body.singleResult as FormattedExecutionResult<TData>
@@ -31,7 +34,8 @@ export const executeOperationAs = async <TData = Record<string, unknown>, TVaria
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
   jwtPayload: JwtPayload,
-): Promise<FormattedExecutionResult<TData>> => executeOperation(request, jwtPayload)
+  limitedAccessData?: AcquireLimitedAccessTokenInput,
+): Promise<FormattedExecutionResult<TData>> => executeOperation(request, jwtPayload, limitedAccessData)
 
 export const executeOperationAnonymous = async <TData = Record<string, unknown>, TVariables extends VariableValues = VariableValues>(
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
@@ -44,3 +48,14 @@ export const executeOperationAsAdmin = async <TData = Record<string, unknown>, T
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
 ): Promise<FormattedExecutionResult<TData>> => executeOperation(request, buildJwt())
+
+export const executeOperationAsLimitedAccessClient = async <
+  TData = Record<string, unknown>,
+  TVariables extends VariableValues = VariableValues,
+>(
+  request: Omit<GraphQLRequest<TVariables>, 'query'> & {
+    query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
+  },
+  limitedAccessData?: AcquireLimitedAccessTokenInput,
+): Promise<FormattedExecutionResult<TData>> =>
+  executeOperation(request, buildJwt({ scopes: [], roles: [limitedAccessRole] }), limitedAccessData)

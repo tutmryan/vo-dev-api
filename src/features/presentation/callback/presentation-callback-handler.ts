@@ -1,5 +1,6 @@
 import { logger } from '@azure/identity'
 import { omit } from 'lodash'
+import { In } from 'typeorm'
 import { PRESENTED_CREDENTIALS_TTL, presentedCredentialsCache, requestDetailsCache } from '../../../cache'
 import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
@@ -31,16 +32,32 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     // grab all the issuance IDs from the presented credential claims
     const issuanceIds =
       event.verifiedCredentialsData?.reduce<string[]>((acc, credential) => {
-        if (credential.claims[StandardClaims.issuanceId]) acc.push(credential.claims[StandardClaims.issuanceId] as string)
+        if (credential.claims[StandardClaims.issuanceId]) acc.push((credential.claims[StandardClaims.issuanceId] as string).toUpperCase())
         return acc
       }, []) ?? []
 
+    // look up all the issuances
+    const issuances = await entityManager.getRepository(IssuanceEntity).findBy({ id: In(issuanceIds) })
+
+    // validate every issuance ID is found
+    const invalidIssuanceIds = issuanceIds.filter((issuanceId) => !issuances.some((issuance) => issuance.id === issuanceId))
+    if (invalidIssuanceIds.length > 0) throw new Error(`Invalid issuance IDs received: ${invalidIssuanceIds.join(', ')}`)
+
     // grab the identityId from the presentation request details or the issuance request deets
     let identityId = presentationRequestDetails.identityId
-    if (!identityId) {
-      if (issuanceIds.length === 0) throw new Error('No identityId or issuanceIds found in presentation request or event data')
-      const issuance = await entityManager.getRepository(IssuanceEntity).findOneByOrFail({ id: issuanceIds[0] })
-      identityId = issuance.identityId
+
+    if (identityId) {
+      // validate every presentation issuance is for the identity specified in the request
+      const invalidIdentityIssuanceIds = issuances.filter((issuance) => issuance.identityId !== identityId).map((issuance) => issuance.id)
+      if (invalidIdentityIssuanceIds.length > 0)
+        throw new Error(
+          `Some presentation issuances have a different identity ID from that specified in the request (${identityId}): ${invalidIdentityIssuanceIds.join(
+            ', ',
+          )}`,
+        )
+    } else {
+      if (issuances.length === 0) throw new Error('No identityId or issuanceIds found in presentation request or event data')
+      identityId = issuances[0]!.identityId
     }
     invariant(identityId, 'identityId could not be determined')
 

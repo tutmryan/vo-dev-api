@@ -52,6 +52,10 @@ const config: EnvVarSubstitution<Config> = {
       },
     },
   },
+  limitedAccessClient: {
+    clientSecret: 'LIMITED_ACCESS_CLIENT_SECRET',
+  },
+  limitedAccessSecret: 'LIMITED_ACCESS_SECRET',
   sendgrid: {
     key: 'SENDGRID_API_KEY',
   },
