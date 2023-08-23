@@ -3,6 +3,8 @@ import { isDev, isLocalDev } from '@makerx/node-common'
 import { allow, and, or, shield } from 'graphql-shield'
 import type { IRules } from 'graphql-shield/typings/types'
 import {
+  hasTokenAcquisitionRole,
+  hasTokenAcquisitionRoleRequiringIdentityAccess,
   isLimitedAccessApp,
   isLimitedAnonymousPresentationApp,
   isLimitedIssuanceApp,
@@ -28,6 +30,7 @@ const isIssuanceApp = hasRoleRule('VerifiableCredential.Issue')
 const isPresentationApp = hasRoleRule('VerifiableCredential.Present')
 
 const isAuthorisedUnlimited = or(isAdmin, isIssuanceApp, isPresentationApp)
+const fallbackRule = or(isAuthorisedUnlimited, isLimitedAccessApp)
 
 // issuance and presentation access rules
 const isValidIssuanceFilter = or(isAdmin, isIssuanceApp, isValidLimitedAccessIssuanceFilter)
@@ -47,7 +50,7 @@ export const permissions = wrappedShield({
     '*': isAdmin,
     createIssuanceRequest: or(isAdmin, isIssuanceApp, isValidLimitedIssuanceRequest),
     createPresentationRequest: or(isAdmin, isPresentationApp, isValidLimitedPresentationRequest),
-    saveIdentity: isAuthorisedUnlimited,
+    saveIdentity: or(isAuthorisedUnlimited, hasTokenAcquisitionRoleRequiringIdentityAccess),
     acquireLimitedAccessToken: isValidAcquireLimitedAccessTokenRequest,
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
@@ -64,11 +67,17 @@ export const permissions = wrappedShield({
     issuances: isValidIssuanceFilter,
     presentations: isValidPresentationFilter,
   },
+  Identity: {
+    '*': or(fallbackRule, hasTokenAcquisitionRoleRequiringIdentityAccess),
+  },
+  AccessTokenResponse: {
+    '*': or(fallbackRule, hasTokenAcquisitionRole),
+  },
 })
 
 function wrappedShield(x: ShieldSchema<Resolvers>) {
   return shield(x as IRules, {
-    fallbackRule: or(isAuthorisedUnlimited, isLimitedAccessApp),
+    fallbackRule,
     debug: isLocalDev || isDev, // [doc](https://the-guild.dev/graphql/shield/docs/shield) says: _Toggle debug mode._ (???)
     allowExternalErrors: true, // we don't want shield to catch and convert all errors to: Not Authorised!
   })

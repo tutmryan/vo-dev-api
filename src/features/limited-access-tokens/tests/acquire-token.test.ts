@@ -1,7 +1,8 @@
 import { randomUUID } from 'crypto'
 import { graphql } from '../../../generated'
 import type { AccessTokenResponse, AcquireLimitedAccessTokenInput } from '../../../generated/graphql'
-import { beforeAfterAll, buildJwt, executeOperationAs, expectUnauthorizedError } from '../../../test'
+import { beforeAfterAll, buildJwt, executeOperationAs, expectToBeDefined, expectUnauthorizedError } from '../../../test'
+import { createIdentityInput, saveIdentityMutation } from '../../identity/create-update-identity.test'
 import { LimitedAccessTokenAcquisitionRoles } from '../shield-rules'
 
 const getClientCredentialsTokenMock = jest.fn(() => ({ access_token: randomUUID(), expires: 1000 * 60 * 50 }))
@@ -32,6 +33,23 @@ const validIssuanceInput = () => <AcquireLimitedAccessTokenInput>{ identityId: r
 
 describe('limited access token acquisition for issuance', () => {
   beforeAfterAll()
+
+  it('can save and read identity info', async () => {
+    const { data, errors } = await executeOperationAs(
+      { query: saveIdentityMutation, variables: { input: createIdentityInput() } },
+      buildJwt({ roles: [LimitedAccessTokenAcquisitionRoles.issuance] }),
+    )
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.saveIdentity?.id)
+  })
+
+  it('cannot save and read identity info with anonymous acquisition role', async () => {
+    const { errors } = await executeOperationAs(
+      { query: saveIdentityMutation, variables: { input: createIdentityInput() } },
+      buildJwt({ roles: [LimitedAccessTokenAcquisitionRoles.anonymousPresentations] }),
+    )
+    expectUnauthorizedError(errors)
+  })
 
   it('can acquire an issuance token', async () => {
     const { data, errors } = await executeOperationAs(

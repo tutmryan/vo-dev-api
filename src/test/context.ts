@@ -33,7 +33,7 @@ export const buildJwt = ({
   tid = randomUUID(),
   sub = randomUUID(),
   email = casual.email,
-  scopes = ['Admin'],
+  scopes = [],
   roles = [],
 }: Partial<BuildJwtInput> = {}): JwtPayload => ({
   oid,

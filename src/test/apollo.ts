@@ -47,7 +47,7 @@ export const executeOperationAsAdmin = async <TData = Record<string, unknown>, T
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
-): Promise<FormattedExecutionResult<TData>> => executeOperation(request, buildJwt())
+): Promise<FormattedExecutionResult<TData>> => executeOperation(request, buildJwt({ scopes: ['Admin'] }))
 
 export const executeOperationAsLimitedAccessClient = async <
   TData = Record<string, unknown>,
@@ -57,5 +57,4 @@ export const executeOperationAsLimitedAccessClient = async <
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
   limitedAccessData?: AcquireLimitedAccessTokenInput,
-): Promise<FormattedExecutionResult<TData>> =>
-  executeOperation(request, buildJwt({ scopes: [], roles: [limitedAccessRole] }), limitedAccessData)
+): Promise<FormattedExecutionResult<TData>> => executeOperation(request, buildJwt({ roles: [limitedAccessRole] }), limitedAccessData)

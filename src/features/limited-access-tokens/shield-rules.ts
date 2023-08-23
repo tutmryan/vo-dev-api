@@ -9,7 +9,7 @@ import type {
   QueryIdentityArgs,
 } from '../../generated/graphql'
 import { invariant } from '../../util/invariant'
-import { hasRoleRule } from '../../util/shield-utils'
+import { hasAnyRoleRule, hasRoleRule } from '../../util/shield-utils'
 
 export const limitedAccessRole = 'VerifiableCredential.LimitedAccess'
 
@@ -19,6 +19,14 @@ export enum LimitedAccessTokenAcquisitionRoles {
   listContracts = 'VerifiableCredential.AcquireLimitedAccessToken.ListContracts',
   anonymousPresentations = 'VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations',
 }
+
+export const hasTokenAcquisitionRole = hasAnyRoleRule(...Object.values(LimitedAccessTokenAcquisitionRoles))
+
+export const hasTokenAcquisitionRoleRequiringIdentityAccess = hasAnyRoleRule(
+  LimitedAccessTokenAcquisitionRoles.issuance,
+  LimitedAccessTokenAcquisitionRoles.presentation,
+  LimitedAccessTokenAcquisitionRoles.listContracts,
+)
 
 // validate input to acquire limited access token
 export const isValidAcquireLimitedAccessTokenRequest = rule({ cache: 'strict' })(
