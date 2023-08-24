@@ -25,7 +25,7 @@ export const dispatch = async <T extends CommandLike>(
         logger: context.logger,
         services: context.services,
         dataLoaders: context.dataLoaders,
-        correlationId: context.requestInfo.correlationId,
+        requestInfo: context.requestInfo,
         contextType: 'command',
       },
       args,
