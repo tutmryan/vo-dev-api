@@ -26,6 +26,7 @@ const config: DeepPartial<Config> = {
     },
   },
   database: { logging: true },
+  redis: { host: 'localhost' },
   auth: {
     bearer: {
       jwksUri: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/discovery/v2.0/keys',

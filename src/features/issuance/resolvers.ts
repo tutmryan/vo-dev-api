@@ -3,7 +3,9 @@ import type { Resolvers } from '../../generated/graphql'
 import { compactErrors } from '../../util/compact-errors'
 import { resolveIssuanceEventData, subscribeToIssuanceEventsWithFilter } from './callback/pubsub'
 import { CreateIssuanceRequestCommand } from './commands/create-issuance-request-command'
+import { RevokeContractIssuancesCommand } from './commands/revoke-contract-issuances-command'
 import { RevokeIssuanceCommand } from './commands/revoke-issuance-command'
+import { RevokeIssuancesCommand } from './commands/revoke-issuances-command'
 import { CountIssuancesByContractQuery } from './queries/count-issuances-by-contract'
 import { CountIssuancesByUserQuery } from './queries/count-issuances-by-user-query'
 import { CountIssuancesQuery } from './queries/count-issuances-query'
@@ -19,6 +21,8 @@ export const resolvers: Resolvers = {
   Mutation: {
     createIssuanceRequest: (_, { request }, context) => dispatch(context, CreateIssuanceRequestCommand, request),
     revokeIssuance: (_, { id }, context) => dispatch(context, RevokeIssuanceCommand, id),
+    revokeIssuances: (_, { ids }, context) => dispatch(context, RevokeIssuancesCommand, ids),
+    revokeContractIssuances: (_, { contractId }, context) => dispatch(context, RevokeContractIssuancesCommand, contractId),
   },
   Contract: {
     issuances: (contract, { where, offset, limit }, context) =>
