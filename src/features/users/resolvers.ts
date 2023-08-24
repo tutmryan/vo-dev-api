@@ -4,6 +4,7 @@ import { FindUsersQuery } from './queries/find-users-query'
 
 export const resolvers: Resolvers = {
   Query: {
+    user: (_, { id }, { dataLoaders: { users } }) => users.load(id),
     findUsers: (_parent, { where, offset, limit }, context) => query(context, FindUsersQuery, where, offset, limit),
   },
   Template: {
