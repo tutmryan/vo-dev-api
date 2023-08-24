@@ -123,14 +123,18 @@ export type BackgroundJobEventData = {
   event: BackgroundJobEvent;
   /** The background job id */
   jobId: Scalars['ID']['output'];
+  /** The background job name */
+  jobName: Scalars['String']['output'];
   /** The ID of the user that requested the background job. */
-  user: User;
+  user?: Maybe<User>;
 };
 
 /** Criteria for filtering background job events. */
 export type BackgroundJobEventWhere = {
   /** The id of the background job, returned from the mutations which trigger a background job. */
   jobId?: InputMaybe<Scalars['ID']['input']>;
+  /** The name of the background job */
+  jobName?: InputMaybe<Scalars['String']['input']>;
   /** Only return events with the specified status. */
   status?: InputMaybe<BackgroundJobStatus>;
   /** The ID of the user that requested the background job. */
@@ -1976,7 +1980,7 @@ export type ResolversTypes = {
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Authority: ResolverTypeWrapper<Authority>;
   BackgroundJobEvent: ResolverTypeWrapper<BackgroundJobEvent>;
-  BackgroundJobEventData: ResolverTypeWrapper<Omit<BackgroundJobEventData, 'user'> & { user: ResolversTypes['User'] }>;
+  BackgroundJobEventData: ResolverTypeWrapper<Omit<BackgroundJobEventData, 'user'> & { user?: Maybe<ResolversTypes['User']> }>;
   BackgroundJobEventWhere: BackgroundJobEventWhere;
   BackgroundJobStatus: BackgroundJobStatus;
   CacheControlScope: CacheControlScope;
@@ -2089,7 +2093,7 @@ export type ResolversParentTypes = {
   ID: Scalars['ID']['output'];
   Authority: Authority;
   BackgroundJobEvent: BackgroundJobEvent;
-  BackgroundJobEventData: Omit<BackgroundJobEventData, 'user'> & { user: ResolversParentTypes['User'] };
+  BackgroundJobEventData: Omit<BackgroundJobEventData, 'user'> & { user?: Maybe<ResolversParentTypes['User']> };
   BackgroundJobEventWhere: BackgroundJobEventWhere;
   Callback: Callback;
   ConfigurationValidation: ConfigurationValidation;
@@ -2222,7 +2226,8 @@ export type BackgroundJobEventResolvers<ContextType = GraphQLContext, ParentType
 export type BackgroundJobEventDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobEventData'] = ResolversParentTypes['BackgroundJobEventData']> = {
   event?: Resolver<ResolversTypes['BackgroundJobEvent'], ParentType, ContextType>;
   jobId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  jobName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

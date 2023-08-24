@@ -10,6 +10,10 @@ input BackgroundJobEventWhere {
   """
   jobId: ID
   """
+  The name of the background job
+  """
+  jobName: String
+  """
   The ID of the user that requested the background job.
   """
   userId: ID
@@ -75,9 +79,13 @@ type BackgroundJobEventData {
   """
   jobId: ID!
   """
+  The background job name
+  """
+  jobName: String!
+  """
   The ID of the user that requested the background job.
   """
-  user: User!
+  user: User
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description, @graphql-eslint/no-unreachable-types

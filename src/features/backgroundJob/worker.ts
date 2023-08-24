@@ -14,7 +14,7 @@ import { JobQueueName, MAX_RETRY } from './queue'
 import { revokeContractIssuancesJobHandler } from './revoke-contract-issuances-job-handler'
 import { revokeIssuancesJobHandler } from './revoke-issuances-job-handler'
 
-type BackgroundJob = Omit<Job, 'data'> & { data: { correlationId?: string; userId: string } }
+type BackgroundJob = Omit<Job, 'data'> & { data: { correlationId?: string; userId?: string } }
 export type WorkerContext = {
   logger: typeof logger
   adminService: AdminService
@@ -51,7 +51,7 @@ export const worker = Lazy(
 )
 
 worker().on('active', (job: BackgroundJob) => {
-  publishBackgroundJobEvent({ event: { status: BackgroundJobStatus.Active }, jobId: job.id!, userId: job.data.userId })
+  publishBackgroundJobEvent({ event: { status: BackgroundJobStatus.Active }, jobId: job.id!, jobName: job.name, userId: job.data.userId })
   logger.info(`Job (id: ${job.id}) is active.`)
 })
 
@@ -59,6 +59,7 @@ worker().on('progress', (job: BackgroundJob, progress) => {
   publishBackgroundJobEvent({
     event: { status: BackgroundJobStatus.Progress, progress: progress as number },
     jobId: job.id!,
+    jobName: job.name,
     userId: job.data.userId,
   })
   logger.info(`Job (id: ${job.id}) is in progress: ${progress}`, progress)
@@ -68,6 +69,7 @@ worker().on('completed', (job: BackgroundJob, result) => {
   publishBackgroundJobEvent({
     event: { status: BackgroundJobStatus.Completed, result: result },
     jobId: job.id!,
+    jobName: job.name,
     userId: job.data.userId,
   })
   logger.info(`Job (id: ${job.id}) is completed.`, result)
@@ -83,6 +85,7 @@ worker().on('failed', (job: BackgroundJob | undefined, error) => {
         error: error.message,
       },
       jobId: job.id!,
+      jobName: job.name,
       userId: job.data.userId,
     })
   }

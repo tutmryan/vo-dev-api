@@ -14,8 +14,9 @@ const BACKGROUND_JOB_TOPIC = 'backgroundJob'
 
 export type BackgroundJobTopicData = {
   jobId: string
+  jobName: string
   event: BackgroundJobEvent
-  userId: string
+  userId?: string
 }
 
 export const publishBackgroundJobEvent = async (data: BackgroundJobTopicData): Promise<void> => {
@@ -28,17 +29,17 @@ export const subscribeToBackgroundJobEvents = (_args?: SubscriptionBackgroundJob
 export const subscribeToBackgroundJobEventsWithFilter = withFilter(
   (_, args: SubscriptionBackgroundJobEventArgs) => subscribeToBackgroundJobEvents(args),
   (data: BackgroundJobTopicData, args: SubscriptionBackgroundJobEventArgs) => {
-    const { jobId, status, userId } = args.where ?? {}
+    const { jobId, jobName, status, userId } = args.where ?? {}
 
     if (jobId && data.jobId !== jobId) return false
     if (status && data.event.status !== status) return false
     if (userId && data.userId !== userId) return false
+    if (jobName && data.jobName !== jobName) return false
     return true
   },
 ) as any as SubscriptionSubscribeFn<BackgroundJobEventData, any, GraphQLContext, SubscriptionBackgroundJobEventArgs>
 
-export const resolveBackgroundJobEventData = ({ event, jobId, userId }: BackgroundJobTopicData) => ({
-  event,
-  jobId,
-  user: entityManager.getRepository(UserEntity).findOneOrFail({ comment: 'FindUserById', where: { id: userId } }),
+export const resolveBackgroundJobEventData = ({ userId, ...rest }: BackgroundJobTopicData) => ({
+  ...rest,
+  user: userId ? entityManager.getRepository(UserEntity).findOneOrFail({ comment: 'FindUserById', where: { id: userId } }) : null,
 })
