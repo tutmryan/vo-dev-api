@@ -103,6 +103,11 @@ const config: DeepPartial<Config> = {
     '5d988fea-e182-4527-bd3a-a4f743121b33': { name: 'Onboarding Demo API (localdev)' },
     'dc8366b4-ba83-48e5-8ab2-9a852a4500c6': { name: 'Onboarding Demo API' },
   },
+  identityIssuers: {
+    manual: { name: 'Manually Issued' },
+    'a4577872-4a36-4a93-9846-b29a1220ca89': { name: 'verifiedorchestration.com' },
+    '10b631d3-9e47-49e1-a938-cbd933f0488d': { name: 'voonboardingdemo.onmicrosoft.com' },
+  },
   cardLogoImageUrlDefault: 'https://green-sky-0f070b000.2.azurestaticapps.net/icons/favicon-310x310.png',
 }
 

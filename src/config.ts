@@ -88,6 +88,7 @@ export type Config = {
   }
   issuanceRequestRegistration: IssuanceRequestRegistration
   platformConsumerApps: Record<string, { name: string }>
+  identityIssuers: Record<string, { name: string }>
   cardLogoImageUrlDefault: string
 }
 
