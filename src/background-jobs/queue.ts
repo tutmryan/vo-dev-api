@@ -1,7 +1,7 @@
 import { Queue } from 'bullmq'
 import { randomUUID } from 'crypto'
-import { redisOptions } from '../../redis'
-import { Lazy } from '../../util/lazy'
+import { redisOptions } from '../redis'
+import { Lazy } from '../util/lazy'
 
 export const JobQueueName = 'jobQueue'
 export const MAX_RETRY = 3

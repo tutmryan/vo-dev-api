@@ -1,4 +1,5 @@
 schema:
+  - src/background-jobs/**/*.graphql
   - src/features/**/*.graphql
   - src/schema/**/*.graphql
 documents:

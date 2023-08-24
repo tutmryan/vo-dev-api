@@ -1,4 +1,4 @@
-import type { Resolvers } from '../../generated/graphql'
+import type { Resolvers } from '../generated/graphql'
 import { resolveBackgroundJobEventData, subscribeToBackgroundJobEventsWithFilter } from './pubsub'
 
 export const resolvers: Resolvers = {

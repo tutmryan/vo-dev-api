@@ -1,14 +1,14 @@
 import type { GraphQLContext } from '@makerx/graphql-core'
 import { withFilter } from 'graphql-subscriptions'
-import { pubsub } from '../../cache'
-import { entityManager } from '../../data'
+import { pubsub } from '../cache'
+import { entityManager } from '../data'
+import { UserEntity } from '../features/users/entities/user-entity'
 import type {
   BackgroundJobEvent,
   BackgroundJobEventData,
   SubscriptionBackgroundJobEventArgs,
   SubscriptionSubscribeFn,
-} from '../../generated/graphql'
-import { UserEntity } from '../users/entities/user-entity'
+} from '../generated/graphql'
 
 const BACKGROUND_JOB_TOPIC = 'backgroundJob'
 

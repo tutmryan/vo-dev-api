@@ -24,8 +24,12 @@ const usedScalars = pick(
 )
 
 export default function () {
-  const resolvers = loadFilesSync(path.join(__dirname, './features/**/resolvers.*'), { extensions: ['ts', 'js'] })
+  const resolvers = loadFilesSync(
+    [path.join(__dirname, './features/**/resolvers.*'), path.join(__dirname, './background-jobs/**/resolvers.*')],
+    { extensions: ['ts', 'js'] },
+  )
   const typeDefs = loadFilesSync<string>([
+    path.join(__dirname, './background-jobs/**/schema.graphql'),
     path.join(__dirname, './features/**/schema.graphql'),
     path.join(__dirname, './schema/**/*.graphql'),
   ])

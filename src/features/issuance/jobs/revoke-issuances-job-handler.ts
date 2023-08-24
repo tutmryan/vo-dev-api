@@ -1,12 +1,12 @@
 import type { Job } from 'bullmq'
 import { In } from 'typeorm'
-import { ISOLATION_LEVEL as TXN_ISOLATION_LEVEL, dataSource } from '../../data'
-import type { AdminService } from '../../services/admin'
-import { invariant } from '../../util/invariant'
-import { IssuanceEntity } from '../issuance/entities/issuance-entity'
-import type { UserEntity } from '../users/entities/user-entity'
-import type { RevokeIssuancesJobPayload } from './queue'
-import type { WorkerContext } from './worker'
+import type { RevokeIssuancesJobPayload } from '../../../background-jobs/queue'
+import type { WorkerContext } from '../../../background-jobs/worker'
+import { ISOLATION_LEVEL as TXN_ISOLATION_LEVEL, dataSource } from '../../../data'
+import type { AdminService } from '../../../services/admin'
+import { invariant } from '../../../util/invariant'
+import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
+import type { UserEntity } from '../../users/entities/user-entity'
 
 export const revokeIssuancesJobHandler = async (context: WorkerContext, job: Omit<Job, 'data'> & { data: RevokeIssuancesJobPayload }) => {
   const errorMessages = []

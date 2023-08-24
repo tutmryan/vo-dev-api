@@ -1,12 +1,12 @@
 import { UnrecoverableError, type Job } from 'bullmq'
-import { ISOLATION_LEVEL as TXN_ISOLATION_LEVEL, dataSource } from '../../data'
-import type { AdminService } from '../../services/admin'
-import { invariant } from '../../util/invariant'
-import { ContractEntity } from '../contracts/entities/contract-entity'
-import { IssuanceEntity } from '../issuance/entities/issuance-entity'
-import type { UserEntity } from '../users/entities/user-entity'
-import type { RevokeContractIssuancesJobPayload } from './queue'
-import type { WorkerContext } from './worker'
+import type { RevokeContractIssuancesJobPayload } from '../../../background-jobs/queue'
+import type { WorkerContext } from '../../../background-jobs/worker'
+import { ISOLATION_LEVEL as TXN_ISOLATION_LEVEL, dataSource } from '../../../data'
+import type { AdminService } from '../../../services/admin'
+import { invariant } from '../../../util/invariant'
+import { ContractEntity } from '../../contracts/entities/contract-entity'
+import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
+import type { UserEntity } from '../../users/entities/user-entity'
 
 export const revokeContractIssuancesJobHandler = async (
   context: WorkerContext,
