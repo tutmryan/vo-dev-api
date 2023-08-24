@@ -1,6 +1,11 @@
+import { query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
+import { FindUsersQuery } from './queries/find-users-query'
 
 export const resolvers: Resolvers = {
+  Query: {
+    findUsers: (_parent, { where, offset, limit }, context) => query(context, FindUsersQuery, where, offset, limit),
+  },
   Template: {
     createdBy: ({ createdById }, _, { dataLoaders: { users } }) => users.load(createdById),
     updatedBy: ({ createdById }, _, { dataLoaders: { users } }) => users.load(createdById),

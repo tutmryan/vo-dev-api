@@ -1,5 +1,6 @@
 """
-Represents a user of the platform, whether a human (interactive user) or a third-party application
+Represents a user of the platform, whether a person (interactive user) or a third-party application.
+Users are members of the platform home tenant, people are AAD tenant users, applications are app registrations.
 """
 type User {
   """
@@ -8,19 +9,19 @@ type User {
   id: ID!
 
   """
-  The name of the user.
-  For applications, this is a unique identifier.
+  The name of the user
+  For applications, this is a unique identifier
   """
   name: String!
 
   """
-  The email of the user.
+  The email of the user
   Only specified for interactive users; null for applications
   """
   email: String
 
   """
-  Determines whether the user is an application
+  Indicates whether the user is an application
   """
   isApp: Boolean!
 }
@@ -37,4 +38,35 @@ type UserCount {
   The number of occurrences of this user.
   """
   count: NonNegativeInt!
+}
+
+"""
+Defines the searchable fields usable to find users
+"""
+input UserWhere {
+  """
+  The name of the user to match
+  """
+  name: String
+  """
+  The email of the user to match
+  Note: only relevent for users who are people, applications don't have an email
+  """
+  email: String
+  """
+  Matches users that are applications (or not - people)
+  """
+  isApp: Boolean
+}
+
+# eslint-disable-next-line @graphql-eslint/require-description
+type Query {
+  """
+  Returns a user by ID
+  """
+  user(id: ID!): User!
+  """
+  Returns users, optionally matching the specified criteria
+  """
+  findUsers(where: UserWhere, offset: PositiveInt, limit: PositiveInt = 100): [User!]! @cacheControl(maxAge: 60)
 }

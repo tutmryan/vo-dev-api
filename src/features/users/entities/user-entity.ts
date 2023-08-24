@@ -1,10 +1,10 @@
 import { Column, Entity, Index } from 'typeorm'
-import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
+import { typeSafeAssign } from '../../../util/type-safe-assign'
 
 export type UpdateIdentityInput = Pick<UserEntity, 'email' | 'name'>
 
-@Entity('user')
+@Entity('user', { orderBy: { name: 'ASC', email: 'ASC' } })
 @Index(['tenantId', 'oid'], { unique: true })
 export class UserEntity extends VerifiedOrchestrationEntity {
   constructor(args?: { oid: string; tenantId: string; email: string | null; name: string; isApp: boolean }) {

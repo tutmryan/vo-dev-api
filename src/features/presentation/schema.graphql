@@ -320,6 +320,24 @@ input IdentityPresentationWhere {
 }
 
 """
+Criteria for filtering user presentations.
+"""
+input UserPresentationWhere {
+  """
+  The requestId of the presentation request.
+  """
+  requestId: ID
+  """
+  The ID of the identity who presented the credential (if known).
+  """
+  identityId: ID
+  """
+  The ID of a contract used to make the presentation request.
+  """
+  contractId: ID
+}
+
+"""
 Criteria for filtering presentations.
 """
 input PresentationWhere {
@@ -361,6 +379,13 @@ extend type Identity {
   Returns the successful credential presentations for this identity.
   """
   presentations(where: IdentityPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+}
+
+extend type User {
+  """
+  Returns the successful credential presentations this user has requested (presentation.requestedBy => user).
+  """
+  presentations(where: UserPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
 }
 
 extend type Query {

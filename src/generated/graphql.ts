@@ -541,7 +541,7 @@ export type IdentityInput = {
   name: Scalars['String']['input'];
 };
 
-/** Criteria for filtering issuances for identity. */
+/** Criteria for filtering issuances for an identity. */
 export type IdentityIssuanceWhere = {
   /** The ID of the contract that was issued. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
@@ -1099,6 +1099,8 @@ export type Query = {
   findTemplates: Array<Template>;
   /** Returns home tenant user identies matching the specified criteria */
   findTenantIdentities: Array<TenantIdentity>;
+  /** Returns users, optionally matching the specified criteria */
+  findUsers: Array<User>;
   /** No-op query to test if the server is up and running. */
   healthcheck?: Maybe<Scalars['Void']['output']>;
   /** Returns an identity by ID */
@@ -1124,6 +1126,8 @@ export type Query = {
   template: Template;
   /** Returns the combined data of a template and its ancestors */
   templateCombinedData: TemplateParentData;
+  /** Returns a user by ID */
+  user: User;
 };
 
 
@@ -1183,6 +1187,13 @@ export type QueryFindTenantIdentitiesArgs = {
 };
 
 
+export type QueryFindUsersArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<UserWhere>;
+};
+
+
 export type QueryIdentityArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1239,6 +1250,11 @@ export type QueryTemplateArgs = {
 
 export type QueryTemplateCombinedDataArgs = {
   templateId: Scalars['ID']['input'];
+};
+
+
+export type QueryUserArgs = {
+  id: Scalars['ID']['input'];
 };
 
 /** Provides configuration information about the presentation request */
@@ -1536,23 +1552,52 @@ export type TenantIdentityWhere = {
   nameStartsWith: Scalars['String']['input'];
 };
 
-/** Represents a user of the platform, whether a human (interactive user) or a third-party application */
+/**
+ * Represents a user of the platform, whether a person (interactive user) or a third-party application.
+ * Users are members of the platform home tenant, people are AAD tenant users, applications are app registrations.
+ */
 export type User = {
   __typename?: 'User';
   /**
-   * The email of the user.
+   * The email of the user
    * Only specified for interactive users; null for applications
    */
   email?: Maybe<Scalars['String']['output']>;
   /** The ID of the user */
   id: Scalars['ID']['output'];
-  /** Determines whether the user is an application */
+  /** Indicates whether the user is an application */
   isApp: Scalars['Boolean']['output'];
+  /** Returns the successful credential issuances this user has made (issuance.issuedBy => user). */
+  issuances: Array<Issuance>;
   /**
-   * The name of the user.
-   * For applications, this is a unique identifier.
+   * The name of the user
+   * For applications, this is a unique identifier
    */
   name: Scalars['String']['output'];
+  /** Returns the successful credential presentations this user has requested (presentation.requestedBy => user). */
+  presentations: Array<Presentation>;
+};
+
+
+/**
+ * Represents a user of the platform, whether a person (interactive user) or a third-party application.
+ * Users are members of the platform home tenant, people are AAD tenant users, applications are app registrations.
+ */
+export type UserIssuancesArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<UserIssuanceWhere>;
+};
+
+
+/**
+ * Represents a user of the platform, whether a person (interactive user) or a third-party application.
+ * Users are members of the platform home tenant, people are AAD tenant users, applications are app registrations.
+ */
+export type UserPresentationsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<UserPresentationWhere>;
 };
 
 /** Represents a count of occurrences of a user. */
@@ -1562,6 +1607,39 @@ export type UserCount = {
   count: Scalars['NonNegativeInt']['output'];
   /** The user (Person or Application). */
   user: User;
+};
+
+/** Criteria for filtering issuances for a user. */
+export type UserIssuanceWhere = {
+  /** The ID of the contract that was issued. */
+  contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the identity that was issued the credential. */
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The requestId of the issuance request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** Criteria for filtering user presentations. */
+export type UserPresentationWhere = {
+  /** The ID of a contract used to make the presentation request. */
+  contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the identity who presented the credential (if known). */
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The requestId of the presentation request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** Defines the searchable fields usable to find users */
+export type UserWhere = {
+  /**
+   * The email of the user to match
+   * Note: only relevent for users who are people, applications don't have an email
+   */
+  email?: InputMaybe<Scalars['String']['input']>;
+  /** Matches users that are applications (or not - people) */
+  isApp?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The name of the user to match */
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** DID information for the Web model */
@@ -1923,6 +2001,9 @@ export type ResolversTypes = {
   URL: ResolverTypeWrapper<Scalars['URL']['output']>;
   User: ResolverTypeWrapper<UserEntity>;
   UserCount: ResolverTypeWrapper<Omit<UserCount, 'user'> & { user: ResolversTypes['User'] }>;
+  UserIssuanceWhere: UserIssuanceWhere;
+  UserPresentationWhere: UserPresentationWhere;
+  UserWhere: UserWhere;
   Void: ResolverTypeWrapper<Scalars['Void']['output']>;
   WebDidModel: ResolverTypeWrapper<WebDidModel>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
@@ -2025,6 +2106,9 @@ export type ResolversParentTypes = {
   URL: Scalars['URL']['output'];
   User: UserEntity;
   UserCount: Omit<UserCount, 'user'> & { user: ResolversParentTypes['User'] };
+  UserIssuanceWhere: UserIssuanceWhere;
+  UserPresentationWhere: UserPresentationWhere;
+  UserWhere: UserWhere;
   Void: Scalars['Void']['output'];
   WebDidModel: WebDidModel;
   Int: Scalars['Int']['output'];
@@ -2333,6 +2417,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findPresentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<QueryFindPresentationsArgs>>;
   findTemplates?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType, Partial<QueryFindTemplatesArgs>>;
   findTenantIdentities?: Resolver<Array<ResolversTypes['TenantIdentity']>, ParentType, ContextType, RequireFields<QueryFindTenantIdentitiesArgs, 'limit' | 'where'>>;
+  findUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryFindUsersArgs, 'limit'>>;
   healthcheck?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityArgs, 'id'>>;
   issuanceCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryIssuanceCountArgs>>;
@@ -2344,6 +2429,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   presentationCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryPresentationCountByUserArgs>>;
   template?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<QueryTemplateArgs, 'id'>>;
   templateCombinedData?: Resolver<ResolversTypes['TemplateParentData'], ParentType, ContextType, RequireFields<QueryTemplateCombinedDataArgs, 'templateId'>>;
+  user?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
 };
 
 export type RequestConfigurationValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestConfigurationValidation'] = ResolversParentTypes['RequestConfigurationValidation']> = {
@@ -2482,7 +2568,9 @@ export type UserResolvers<ContextType = GraphQLContext, ParentType extends Resol
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isApp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<UserIssuancesArgs>>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<UserPresentationsArgs>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
