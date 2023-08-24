@@ -1,4 +1,4 @@
-import { Queue } from 'bullmq'
+import { Queue, QueueEvents } from 'bullmq'
 import { randomUUID } from 'crypto'
 import { logger } from '../logger'
 import { redisOptions } from '../redis'
@@ -36,20 +36,26 @@ export const jobQueue = Lazy(
       },
     }),
 )
+
+export const jobQueueEvents = Lazy(() => {
+  const events = new QueueEvents(JobQueueName, { connection: redisOptions })
+  events.on('paused', () => {
+    logger.info(`${JobQueueName} has been paused`)
+  })
+
+  events.on('resumed', () => {
+    logger.info(`${JobQueueName} has been resumed`)
+  })
+
+  events.on('error', (error) => {
+    logger.error(`${JobQueueName} encountered an error`, error)
+  })
+
+  return events
+})
+
 export const addToJobQueue = async (jobType: JobTypes): Promise<string> => {
   const jobId = randomUUID()
   await jobQueue().add(jobType.name, jobType.payload, { jobId })
   return jobId
 }
-
-jobQueue().on('paused', () => {
-  logger.info(`${JobQueueName} has been paused`)
-})
-
-jobQueue().on('resumed', () => {
-  logger.info(`${JobQueueName} has been resumed`)
-})
-
-jobQueue().on('error', (error) => {
-  logger.error(`${JobQueueName} encountered an error`, error)
-})
