@@ -339,7 +339,7 @@ extend type Query {
   """
   Returns successful credential issuances, optionally matching the specified criteria.
   """
-  findIssuances(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]! @cacheControl(maxAge: 60)
+  findIssuances(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt = 100): [Issuance!]!
   """
   Returns the issuance count, optionally matching the specified criteria.
   """
