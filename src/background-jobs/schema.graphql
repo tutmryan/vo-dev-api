@@ -48,23 +48,47 @@ enum BackgroundJobStatus {
 }
 
 """
-The background job events are published as it progress from being queued to completed or failed.
+The background job active events are published as the jobs are waiting to be processed.
 """
-type BackgroundJobEvent {
+type BackgroundJobActiveEvent {
+  status: BackgroundJobStatus!
+}
+
+"""
+The background job progress events are published as it progress from being queued to completed or failed.
+"""
+type BackgroundJobProgressEvent {
   status: BackgroundJobStatus!
   """
   When the status property value is PROGRESS, this property contains the progress number.
   """
-  progress: PositiveInt
-  """
-  When the status property value is COMPLETED, this property contains the result of the background job.
-  """
-  result: JSONObject
+  progress: PositiveInt!
+}
+
+"""
+The background job error events are published as they encounter errors in retrying or failed status
+"""
+type BackgroundJobErrorEvent {
+  status: BackgroundJobStatus!
   """
   When the status property value is FAILED or RETRYING, this property contains the error message.
   """
-  error: String
+  error: String!
 }
+
+"""
+The background job completed events are published as they are processed successfully
+"""
+type BackgroundJobCompletedEvent {
+  status: BackgroundJobStatus!
+  """
+  When the status property value is COMPLETED, this property contains the result of the background job.
+  """
+  result: JSONObject!
+}
+
+# eslint-disable-next-line @graphql-eslint/require-description
+union BackgroundJobEvent = BackgroundJobActiveEvent | BackgroundJobProgressEvent | BackgroundJobErrorEvent | BackgroundJobCompletedEvent
 
 """
 Data representing an background job event (see BackgroundJobStatus, could be received, successful, failed).

@@ -104,17 +104,29 @@ export type Authority = {
   name: Scalars['String']['output'];
 };
 
-/** The background job events are published as it progress from being queued to completed or failed. */
-export type BackgroundJobEvent = {
-  __typename?: 'BackgroundJobEvent';
-  /** When the status property value is FAILED or RETRYING, this property contains the error message. */
-  error?: Maybe<Scalars['String']['output']>;
-  /** When the status property value is PROGRESS, this property contains the progress number. */
-  progress?: Maybe<Scalars['PositiveInt']['output']>;
-  /** When the status property value is COMPLETED, this property contains the result of the background job. */
-  result?: Maybe<Scalars['JSONObject']['output']>;
+/** The background job active events are published as the jobs are waiting to be processed. */
+export type BackgroundJobActiveEvent = {
+  __typename?: 'BackgroundJobActiveEvent';
   status: BackgroundJobStatus;
 };
+
+/** The background job completed events are published as they are processed successfully */
+export type BackgroundJobCompletedEvent = {
+  __typename?: 'BackgroundJobCompletedEvent';
+  /** When the status property value is COMPLETED, this property contains the result of the background job. */
+  result: Scalars['JSONObject']['output'];
+  status: BackgroundJobStatus;
+};
+
+/** The background job error events are published as they encounter errors in retrying or failed status */
+export type BackgroundJobErrorEvent = {
+  __typename?: 'BackgroundJobErrorEvent';
+  /** When the status property value is FAILED or RETRYING, this property contains the error message. */
+  error: Scalars['String']['output'];
+  status: BackgroundJobStatus;
+};
+
+export type BackgroundJobEvent = BackgroundJobActiveEvent | BackgroundJobCompletedEvent | BackgroundJobErrorEvent | BackgroundJobProgressEvent;
 
 /** Data representing an background job event (see BackgroundJobStatus, could be received, successful, failed). */
 export type BackgroundJobEventData = {
@@ -139,6 +151,14 @@ export type BackgroundJobEventWhere = {
   status?: InputMaybe<BackgroundJobStatus>;
   /** The ID of the user that requested the background job. */
   userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** The background job progress events are published as it progress from being queued to completed or failed. */
+export type BackgroundJobProgressEvent = {
+  __typename?: 'BackgroundJobProgressEvent';
+  /** When the status property value is PROGRESS, this property contains the progress number. */
+  progress: Scalars['PositiveInt']['output'];
+  status: BackgroundJobStatus;
 };
 
 export enum BackgroundJobStatus {
@@ -1962,6 +1982,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of union types */
 export type ResolversUnionTypes<RefType extends Record<string, unknown>> = {
+  BackgroundJobEvent: ( BackgroundJobActiveEvent ) | ( BackgroundJobCompletedEvent ) | ( BackgroundJobErrorEvent ) | ( BackgroundJobProgressEvent );
   IssuanceRequestResponse: ( IssuanceResponse ) | ( RequestErrorResponse );
   PresentationRequestResponse: ( PresentationResponse ) | ( RequestErrorResponse );
 };
@@ -1979,9 +2000,13 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Authority: ResolverTypeWrapper<Authority>;
-  BackgroundJobEvent: ResolverTypeWrapper<BackgroundJobEvent>;
-  BackgroundJobEventData: ResolverTypeWrapper<Omit<BackgroundJobEventData, 'user'> & { user?: Maybe<ResolversTypes['User']> }>;
+  BackgroundJobActiveEvent: ResolverTypeWrapper<BackgroundJobActiveEvent>;
+  BackgroundJobCompletedEvent: ResolverTypeWrapper<BackgroundJobCompletedEvent>;
+  BackgroundJobErrorEvent: ResolverTypeWrapper<BackgroundJobErrorEvent>;
+  BackgroundJobEvent: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['BackgroundJobEvent']>;
+  BackgroundJobEventData: ResolverTypeWrapper<Omit<BackgroundJobEventData, 'event' | 'user'> & { event: ResolversTypes['BackgroundJobEvent'], user?: Maybe<ResolversTypes['User']> }>;
   BackgroundJobEventWhere: BackgroundJobEventWhere;
+  BackgroundJobProgressEvent: ResolverTypeWrapper<BackgroundJobProgressEvent>;
   BackgroundJobStatus: BackgroundJobStatus;
   CacheControlScope: CacheControlScope;
   Callback: Callback;
@@ -2092,9 +2117,13 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   ID: Scalars['ID']['output'];
   Authority: Authority;
-  BackgroundJobEvent: BackgroundJobEvent;
-  BackgroundJobEventData: Omit<BackgroundJobEventData, 'user'> & { user?: Maybe<ResolversParentTypes['User']> };
+  BackgroundJobActiveEvent: BackgroundJobActiveEvent;
+  BackgroundJobCompletedEvent: BackgroundJobCompletedEvent;
+  BackgroundJobErrorEvent: BackgroundJobErrorEvent;
+  BackgroundJobEvent: ResolversUnionTypes<ResolversParentTypes>['BackgroundJobEvent'];
+  BackgroundJobEventData: Omit<BackgroundJobEventData, 'event' | 'user'> & { event: ResolversParentTypes['BackgroundJobEvent'], user?: Maybe<ResolversParentTypes['User']> };
   BackgroundJobEventWhere: BackgroundJobEventWhere;
+  BackgroundJobProgressEvent: BackgroundJobProgressEvent;
   Callback: Callback;
   ConfigurationValidation: ConfigurationValidation;
   Contract: ContractEntity;
@@ -2215,12 +2244,25 @@ export type AuthorityResolvers<ContextType = GraphQLContext, ParentType extends 
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type BackgroundJobEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobEvent'] = ResolversParentTypes['BackgroundJobEvent']> = {
-  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  progress?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
-  result?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+export type BackgroundJobActiveEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobActiveEvent'] = ResolversParentTypes['BackgroundJobActiveEvent']> = {
   status?: Resolver<ResolversTypes['BackgroundJobStatus'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type BackgroundJobCompletedEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobCompletedEvent'] = ResolversParentTypes['BackgroundJobCompletedEvent']> = {
+  result?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['BackgroundJobStatus'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type BackgroundJobErrorEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobErrorEvent'] = ResolversParentTypes['BackgroundJobErrorEvent']> = {
+  error?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['BackgroundJobStatus'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type BackgroundJobEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobEvent'] = ResolversParentTypes['BackgroundJobEvent']> = {
+  __resolveType: TypeResolveFn<'BackgroundJobActiveEvent' | 'BackgroundJobCompletedEvent' | 'BackgroundJobErrorEvent' | 'BackgroundJobProgressEvent', ParentType, ContextType>;
 };
 
 export type BackgroundJobEventDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobEventData'] = ResolversParentTypes['BackgroundJobEventData']> = {
@@ -2228,6 +2270,12 @@ export type BackgroundJobEventDataResolvers<ContextType = GraphQLContext, Parent
   jobId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   jobName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type BackgroundJobProgressEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobProgressEvent'] = ResolversParentTypes['BackgroundJobProgressEvent']> = {
+  progress?: Resolver<ResolversTypes['PositiveInt'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['BackgroundJobStatus'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2692,8 +2740,12 @@ export type WebDidModelResolvers<ContextType = GraphQLContext, ParentType extend
 export type Resolvers<ContextType = GraphQLContext> = {
   AccessTokenResponse?: AccessTokenResponseResolvers<ContextType>;
   Authority?: AuthorityResolvers<ContextType>;
+  BackgroundJobActiveEvent?: BackgroundJobActiveEventResolvers<ContextType>;
+  BackgroundJobCompletedEvent?: BackgroundJobCompletedEventResolvers<ContextType>;
+  BackgroundJobErrorEvent?: BackgroundJobErrorEventResolvers<ContextType>;
   BackgroundJobEvent?: BackgroundJobEventResolvers<ContextType>;
   BackgroundJobEventData?: BackgroundJobEventDataResolvers<ContextType>;
+  BackgroundJobProgressEvent?: BackgroundJobProgressEventResolvers<ContextType>;
   Contract?: ContractResolvers<ContextType>;
   ContractCount?: ContractCountResolvers<ContextType>;
   ContractDisplayClaim?: ContractDisplayClaimResolvers<ContextType>;
