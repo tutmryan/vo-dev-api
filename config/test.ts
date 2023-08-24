@@ -9,7 +9,6 @@ const config: DeepPartial<Config> = {
     password: '7o}R~=XA1jmz!-aHQ^pA',
     logging: false,
   },
-  redis: {},
 }
 
 module.exports = config
