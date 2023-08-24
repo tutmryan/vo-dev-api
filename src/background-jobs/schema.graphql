@@ -1,0 +1,121 @@
+# eslint-disable @graphql-eslint/strict-id-in-types
+# eslint-disable @graphql-eslint/naming-convention
+
+"""
+Criteria for filtering background job events.
+"""
+input BackgroundJobEventWhere {
+  """
+  The id of the background job, returned from the mutations which trigger a background job.
+  """
+  jobId: ID
+  """
+  The name of the background job
+  """
+  jobName: String
+  """
+  The ID of the user that requested the background job.
+  """
+  userId: ID
+  """
+  Only return events with the specified status.
+  """
+  status: BackgroundJobStatus
+}
+
+# eslint-disable-next-line @graphql-eslint/require-description
+enum BackgroundJobStatus {
+  """
+  The background job has been added to the queue.
+  """
+  active
+  """
+  The background job is in progress.
+  """
+  progress
+  """
+  The background job has been completed.
+  """
+  completed
+  """
+  The background job has encountered an error and is going to be retried
+  """
+  retrying
+  """
+  The background job has failed.
+  """
+  failed
+}
+
+"""
+The background job active events are published as the jobs are waiting to be processed.
+"""
+type BackgroundJobActiveEvent {
+  status: BackgroundJobStatus!
+}
+
+"""
+The background job progress events are published as it progress from being queued to completed or failed.
+"""
+type BackgroundJobProgressEvent {
+  status: BackgroundJobStatus!
+  """
+  When the status property value is PROGRESS, this property contains the progress number.
+  """
+  progress: PositiveInt!
+}
+
+"""
+The background job error events are published as they encounter errors in retrying or failed status
+"""
+type BackgroundJobErrorEvent {
+  status: BackgroundJobStatus!
+  """
+  When the status property value is FAILED or RETRYING, this property contains the error message.
+  """
+  error: String!
+}
+
+"""
+The background job completed events are published as they are processed successfully
+"""
+type BackgroundJobCompletedEvent {
+  status: BackgroundJobStatus!
+  """
+  When the status property value is COMPLETED, this property contains the result of the background job.
+  """
+  result: JSONObject!
+}
+
+# eslint-disable-next-line @graphql-eslint/require-description
+union BackgroundJobEvent = BackgroundJobActiveEvent | BackgroundJobProgressEvent | BackgroundJobErrorEvent | BackgroundJobCompletedEvent
+
+"""
+Data representing an background job event (see BackgroundJobStatus, could be received, successful, failed).
+"""
+type BackgroundJobEventData {
+  """
+  The callback event data
+  """
+  event: BackgroundJobEvent!
+  """
+  The background job id
+  """
+  jobId: ID!
+  """
+  The background job name
+  """
+  jobName: String!
+  """
+  The ID of the user that requested the background job.
+  """
+  user: User
+}
+
+# eslint-disable-next-line @graphql-eslint/require-description, @graphql-eslint/no-unreachable-types
+type Subscription {
+  """
+  Returns event data when the background job progresses from being queued to completed or failed
+  """
+  backgroundJobEvent(where: BackgroundJobEventWhere): BackgroundJobEventData!
+}

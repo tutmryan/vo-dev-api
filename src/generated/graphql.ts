@@ -104,6 +104,76 @@ export type Authority = {
   name: Scalars['String']['output'];
 };
 
+/** The background job active events are published as the jobs are waiting to be processed. */
+export type BackgroundJobActiveEvent = {
+  __typename?: 'BackgroundJobActiveEvent';
+  status: BackgroundJobStatus;
+};
+
+/** The background job completed events are published as they are processed successfully */
+export type BackgroundJobCompletedEvent = {
+  __typename?: 'BackgroundJobCompletedEvent';
+  /** When the status property value is COMPLETED, this property contains the result of the background job. */
+  result: Scalars['JSONObject']['output'];
+  status: BackgroundJobStatus;
+};
+
+/** The background job error events are published as they encounter errors in retrying or failed status */
+export type BackgroundJobErrorEvent = {
+  __typename?: 'BackgroundJobErrorEvent';
+  /** When the status property value is FAILED or RETRYING, this property contains the error message. */
+  error: Scalars['String']['output'];
+  status: BackgroundJobStatus;
+};
+
+export type BackgroundJobEvent = BackgroundJobActiveEvent | BackgroundJobCompletedEvent | BackgroundJobErrorEvent | BackgroundJobProgressEvent;
+
+/** Data representing an background job event (see BackgroundJobStatus, could be received, successful, failed). */
+export type BackgroundJobEventData = {
+  __typename?: 'BackgroundJobEventData';
+  /** The callback event data */
+  event: BackgroundJobEvent;
+  /** The background job id */
+  jobId: Scalars['ID']['output'];
+  /** The background job name */
+  jobName: Scalars['String']['output'];
+  /** The ID of the user that requested the background job. */
+  user?: Maybe<User>;
+};
+
+/** Criteria for filtering background job events. */
+export type BackgroundJobEventWhere = {
+  /** The id of the background job, returned from the mutations which trigger a background job. */
+  jobId?: InputMaybe<Scalars['ID']['input']>;
+  /** The name of the background job */
+  jobName?: InputMaybe<Scalars['String']['input']>;
+  /** Only return events with the specified status. */
+  status?: InputMaybe<BackgroundJobStatus>;
+  /** The ID of the user that requested the background job. */
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** The background job progress events are published as it progress from being queued to completed or failed. */
+export type BackgroundJobProgressEvent = {
+  __typename?: 'BackgroundJobProgressEvent';
+  /** When the status property value is PROGRESS, this property contains the progress number. */
+  progress: Scalars['PositiveInt']['output'];
+  status: BackgroundJobStatus;
+};
+
+export enum BackgroundJobStatus {
+  /** The background job has been added to the queue. */
+  Active = 'active',
+  /** The background job has been completed. */
+  Completed = 'completed',
+  /** The background job has failed. */
+  Failed = 'failed',
+  /** The background job is in progress. */
+  Progress = 'progress',
+  /** The background job has encountered an error and is going to be retried */
+  Retrying = 'retrying'
+}
+
 export enum CacheControlScope {
   Private = 'PRIVATE',
   Public = 'PUBLIC'
@@ -759,8 +829,12 @@ export type Mutation = {
   deprecateContract: Contract;
   /** Provisions or re-provisions a contract into the Verified ID service */
   provisionContract: Contract;
+  /** Revokes existing credentials for a contract. */
+  revokeContractIssuances: Scalars['ID']['output'];
   /** Revokes an existing credential. */
   revokeIssuance: Issuance;
+  /** Revokes existing credentials. */
+  revokeIssuances: Scalars['ID']['output'];
   /** Creates or updates an identity based on its issuer and identifier */
   saveIdentity: Identity;
   /** Updates an existing contract */
@@ -820,8 +894,18 @@ export type MutationProvisionContractArgs = {
 };
 
 
+export type MutationRevokeContractIssuancesArgs = {
+  contractId: Scalars['ID']['input'];
+};
+
+
 export type MutationRevokeIssuanceArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationRevokeIssuancesArgs = {
+  ids: Array<Scalars['ID']['input']>;
 };
 
 
@@ -1365,10 +1449,17 @@ export type RequestedCredentialSpecificationInput = {
 
 export type Subscription = {
   __typename?: 'Subscription';
+  /** Returns event data when the background job progresses from being queued to completed or failed */
+  backgroundJobEvent: BackgroundJobEventData;
   /** Returns event data when an issuance callback is received */
   issuanceEvent: IssuanceEventData;
   /** Returns event data when an presentation callback is received */
   presentationEvent: PresentationEventData;
+};
+
+
+export type SubscriptionBackgroundJobEventArgs = {
+  where?: InputMaybe<BackgroundJobEventWhere>;
 };
 
 
@@ -1891,6 +1982,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of union types */
 export type ResolversUnionTypes<RefType extends Record<string, unknown>> = {
+  BackgroundJobEvent: ( BackgroundJobActiveEvent ) | ( BackgroundJobCompletedEvent ) | ( BackgroundJobErrorEvent ) | ( BackgroundJobProgressEvent );
   IssuanceRequestResponse: ( IssuanceResponse ) | ( RequestErrorResponse );
   PresentationRequestResponse: ( PresentationResponse ) | ( RequestErrorResponse );
 };
@@ -1908,6 +2000,14 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Authority: ResolverTypeWrapper<Authority>;
+  BackgroundJobActiveEvent: ResolverTypeWrapper<BackgroundJobActiveEvent>;
+  BackgroundJobCompletedEvent: ResolverTypeWrapper<BackgroundJobCompletedEvent>;
+  BackgroundJobErrorEvent: ResolverTypeWrapper<BackgroundJobErrorEvent>;
+  BackgroundJobEvent: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['BackgroundJobEvent']>;
+  BackgroundJobEventData: ResolverTypeWrapper<Omit<BackgroundJobEventData, 'event' | 'user'> & { event: ResolversTypes['BackgroundJobEvent'], user?: Maybe<ResolversTypes['User']> }>;
+  BackgroundJobEventWhere: BackgroundJobEventWhere;
+  BackgroundJobProgressEvent: ResolverTypeWrapper<BackgroundJobProgressEvent>;
+  BackgroundJobStatus: BackgroundJobStatus;
   CacheControlScope: CacheControlScope;
   Callback: Callback;
   ConfigurationValidation: ConfigurationValidation;
@@ -2017,6 +2117,13 @@ export type ResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   ID: Scalars['ID']['output'];
   Authority: Authority;
+  BackgroundJobActiveEvent: BackgroundJobActiveEvent;
+  BackgroundJobCompletedEvent: BackgroundJobCompletedEvent;
+  BackgroundJobErrorEvent: BackgroundJobErrorEvent;
+  BackgroundJobEvent: ResolversUnionTypes<ResolversParentTypes>['BackgroundJobEvent'];
+  BackgroundJobEventData: Omit<BackgroundJobEventData, 'event' | 'user'> & { event: ResolversParentTypes['BackgroundJobEvent'], user?: Maybe<ResolversParentTypes['User']> };
+  BackgroundJobEventWhere: BackgroundJobEventWhere;
+  BackgroundJobProgressEvent: BackgroundJobProgressEvent;
   Callback: Callback;
   ConfigurationValidation: ConfigurationValidation;
   Contract: ContractEntity;
@@ -2134,6 +2241,41 @@ export type AuthorityResolvers<ContextType = GraphQLContext, ParentType extends 
   keyVaultMetadata?: Resolver<ResolversTypes['KeyVaultMetadata'], ParentType, ContextType>;
   linkedDomainsVerified?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type BackgroundJobActiveEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobActiveEvent'] = ResolversParentTypes['BackgroundJobActiveEvent']> = {
+  status?: Resolver<ResolversTypes['BackgroundJobStatus'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type BackgroundJobCompletedEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobCompletedEvent'] = ResolversParentTypes['BackgroundJobCompletedEvent']> = {
+  result?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['BackgroundJobStatus'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type BackgroundJobErrorEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobErrorEvent'] = ResolversParentTypes['BackgroundJobErrorEvent']> = {
+  error?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['BackgroundJobStatus'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type BackgroundJobEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobEvent'] = ResolversParentTypes['BackgroundJobEvent']> = {
+  __resolveType: TypeResolveFn<'BackgroundJobActiveEvent' | 'BackgroundJobCompletedEvent' | 'BackgroundJobErrorEvent' | 'BackgroundJobProgressEvent', ParentType, ContextType>;
+};
+
+export type BackgroundJobEventDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobEventData'] = ResolversParentTypes['BackgroundJobEventData']> = {
+  event?: Resolver<ResolversTypes['BackgroundJobEvent'], ParentType, ContextType>;
+  jobId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  jobName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type BackgroundJobProgressEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobProgressEvent'] = ResolversParentTypes['BackgroundJobProgressEvent']> = {
+  progress?: Resolver<ResolversTypes['PositiveInt'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['BackgroundJobStatus'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2317,7 +2459,9 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;
   deprecateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationDeprecateContractArgs, 'id'>>;
   provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
+  revokeContractIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeContractIssuancesArgs, 'contractId'>>;
   revokeIssuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<MutationRevokeIssuanceArgs, 'id'>>;
+  revokeIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeIssuancesArgs, 'ids'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;
@@ -2480,6 +2624,7 @@ export type RequestedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
 };
 
 export type SubscriptionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
+  backgroundJobEvent?: SubscriptionResolver<ResolversTypes['BackgroundJobEventData'], "backgroundJobEvent", ParentType, ContextType, Partial<SubscriptionBackgroundJobEventArgs>>;
   issuanceEvent?: SubscriptionResolver<ResolversTypes['IssuanceEventData'], "issuanceEvent", ParentType, ContextType, Partial<SubscriptionIssuanceEventArgs>>;
   presentationEvent?: SubscriptionResolver<ResolversTypes['PresentationEventData'], "presentationEvent", ParentType, ContextType, Partial<SubscriptionPresentationEventArgs>>;
 };
@@ -2595,6 +2740,12 @@ export type WebDidModelResolvers<ContextType = GraphQLContext, ParentType extend
 export type Resolvers<ContextType = GraphQLContext> = {
   AccessTokenResponse?: AccessTokenResponseResolvers<ContextType>;
   Authority?: AuthorityResolvers<ContextType>;
+  BackgroundJobActiveEvent?: BackgroundJobActiveEventResolvers<ContextType>;
+  BackgroundJobCompletedEvent?: BackgroundJobCompletedEventResolvers<ContextType>;
+  BackgroundJobErrorEvent?: BackgroundJobErrorEventResolvers<ContextType>;
+  BackgroundJobEvent?: BackgroundJobEventResolvers<ContextType>;
+  BackgroundJobEventData?: BackgroundJobEventDataResolvers<ContextType>;
+  BackgroundJobProgressEvent?: BackgroundJobProgressEventResolvers<ContextType>;
   Contract?: ContractResolvers<ContextType>;
   ContractCount?: ContractCountResolvers<ContextType>;
   ContractDisplayClaim?: ContractDisplayClaimResolvers<ContextType>;

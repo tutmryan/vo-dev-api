@@ -9,3 +9,8 @@ services:
     environment:
       ACCEPT_EULA: Y
       MSSQL_SA_PASSWORD: 7o}R~=XA1jmz!-aHQ^pA
+  redis:
+    image: redis:7-alpine
+    container_name: cache
+    ports:
+      - 6380:6379
