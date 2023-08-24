@@ -76,6 +76,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
     verifyToken: (host, token) => verifyForHost(host, token, config.get('auth.bearer')),
   })
 
+  logger.info('Starting background job processing')
   const jobRunnerCleanup = useBackgroundJob()
 
   logger.info('Starting apollo server')

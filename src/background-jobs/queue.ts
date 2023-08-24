@@ -1,5 +1,6 @@
 import { Queue } from 'bullmq'
 import { randomUUID } from 'crypto'
+import { logger } from '../logger'
 import { redisOptions } from '../redis'
 import { Lazy } from '../util/lazy'
 
@@ -40,3 +41,15 @@ export const addToJobQueue = async (jobType: JobTypes): Promise<string> => {
   await jobQueue().add(jobType.name, jobType.payload, { jobId })
   return jobId
 }
+
+jobQueue().on('paused', () => {
+  logger.info(`${JobQueueName} has been paused`)
+})
+
+jobQueue().on('resumed', () => {
+  logger.info(`${JobQueueName} has been resumed`)
+})
+
+jobQueue().on('error', (error) => {
+  logger.error(`${JobQueueName} encountered an error`, error)
+})
