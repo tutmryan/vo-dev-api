@@ -6,6 +6,7 @@ import { logger } from '../../logger'
 import { redisOptions } from '../../redis'
 import { createAdminService } from '../../services'
 import type { AdminService } from '../../services/admin'
+import { Lazy } from '../../util/lazy'
 import { UserEntity } from '../users/entities/user-entity'
 import { publishBackgroundJobEvent } from './pubsub'
 import type { JobNames, JobTypes } from './queue'
@@ -34,27 +35,27 @@ const createWorkerContext = async (userId: string, correlationId?: string): Prom
   user: await dataSource.getRepository(UserEntity).findOneByOrFail({ id: userId }),
 })
 
-let worker: Worker | null = null
-export const getWorker = () =>
-  worker ||
-  (worker = new Worker(
-    JobQueueName,
-    async (job) => {
-      const handler = handlers[job.name as JobNames]
-      if (handler) {
-        const context = await createWorkerContext(job.data.userId, job.data.correlationId)
-        await handler(context, job)
-      }
-    },
-    { concurrency: 10, connection: redisOptions },
-  ))
+export const worker = Lazy(
+  () =>
+    new Worker(
+      JobQueueName,
+      async (job) => {
+        const handler = handlers[job.name as JobNames]
+        if (handler) {
+          const context = await createWorkerContext(job.data.userId, job.data.correlationId)
+          await handler(context, job)
+        }
+      },
+      { concurrency: 10, connection: redisOptions },
+    ),
+)
 
-getWorker().on('active', (job: BackgroundJob) => {
+worker().on('active', (job: BackgroundJob) => {
   publishBackgroundJobEvent({ event: { status: BackgroundJobStatus.Active }, jobId: job.id!, userId: job.data.userId })
   logger.info(`Job (id: ${job.id}) is active.`)
 })
 
-getWorker().on('progress', (job: BackgroundJob, progress) => {
+worker().on('progress', (job: BackgroundJob, progress) => {
   publishBackgroundJobEvent({
     event: { status: BackgroundJobStatus.Progress, progress: progress as number },
     jobId: job.id!,
@@ -63,7 +64,7 @@ getWorker().on('progress', (job: BackgroundJob, progress) => {
   logger.info(`Job (id: ${job.id}) is in progress: ${progress}`, progress)
 })
 
-getWorker().on('completed', (job: BackgroundJob, result) => {
+worker().on('completed', (job: BackgroundJob, result) => {
   publishBackgroundJobEvent({
     event: { status: BackgroundJobStatus.Completed, result: result },
     jobId: job.id!,
@@ -72,7 +73,7 @@ getWorker().on('completed', (job: BackgroundJob, result) => {
   logger.info(`Job (id: ${job.id}) is completed.`, result)
 })
 
-getWorker().on('failed', (job: BackgroundJob | undefined, error) => {
+worker().on('failed', (job: BackgroundJob | undefined, error) => {
   const hasEncounteredUnrecoverableError = (j: BackgroundJob) => !!j.finishedOn
   const hasNoAttemptsLeft = (j: BackgroundJob) => j.attemptsMade >= MAX_RETRY
   if (job) {
@@ -88,6 +89,6 @@ getWorker().on('failed', (job: BackgroundJob | undefined, error) => {
   logger.error(`Job (id: ${job?.id}) failed after attempt ${job?.attemptsMade}.`, error)
 })
 
-getWorker().on('error', (err) => {
+worker().on('error', (err) => {
   logger.error('Background worker failed', { err })
 })

@@ -1,6 +1,7 @@
 import { Queue } from 'bullmq'
 import { randomUUID } from 'crypto'
 import { redisOptions } from '../../redis'
+import { Lazy } from '../../util/lazy'
 
 export const JobQueueName = 'jobQueue'
 export const MAX_RETRY = 3
@@ -21,21 +22,21 @@ export type RevokeContractIssuancesJobType = JobType<RevokeContractIssuancesJobN
 export type JobNames = RevokeIssuancesJobName | RevokeContractIssuancesJobName
 export type JobTypes = RevokeIssuancesJobType | RevokeContractIssuancesJobType
 
-let jobQueue: Queue | null = null
-export const getJobQueue = () =>
-  jobQueue ||
-  (jobQueue = new Queue(JobQueueName, {
-    connection: redisOptions,
-    defaultJobOptions: {
-      attempts: MAX_RETRY,
-      backoff: {
-        type: 'exponential',
-        delay: 1000,
+export const jobQueue = Lazy(
+  () =>
+    new Queue(JobQueueName, {
+      connection: redisOptions,
+      defaultJobOptions: {
+        attempts: MAX_RETRY,
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
       },
-    },
-  }))
+    }),
+)
 export const addToJobQueue = async (jobType: JobTypes): Promise<string> => {
   const jobId = randomUUID()
-  await getJobQueue().add(jobType.name, jobType.payload, { jobId })
+  await jobQueue().add(jobType.name, jobType.payload, { jobId })
   return jobId
 }

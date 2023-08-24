@@ -3,6 +3,7 @@ import type { RedisOptions } from 'bullmq'
 import { RedisPubSub } from 'graphql-redis-subscriptions'
 import Keyv from 'keyv'
 import config from './config'
+import { Lazy } from './util/lazy'
 
 const redisConfig = config.has('redis') ? config.get('redis') : undefined
 const isRedisEnabled = !!redisConfig?.host
@@ -20,8 +21,7 @@ export const redisOptions: RedisOptions = {
   tls: redisConfig?.key ? {} : undefined,
 }
 
-let keyv: Keyv | null = null
-export const redisKeyVAdapter = (): KeyvAdapter => new KeyvAdapter(keyv || (keyv = new Keyv(redisConnectionString, { namespace: 'cache' })))
+const keyv = Lazy(() => new Keyv(redisConnectionString, { namespace: 'cache' }))
+export const redisKeyVAdapter = (): KeyvAdapter => new KeyvAdapter(keyv())
 
-let pubsub: RedisPubSub | null = null
-export const redisPubsub = () => pubsub || (pubsub = new RedisPubSub({ connection: redisConnectionString }))
+export const redisPubsub = Lazy(() => new RedisPubSub({ connection: redisConnectionString }))
