@@ -392,7 +392,7 @@ extend type Query {
   """
   Returns successful credential presentations, optionally matching the specified criteria.
   """
-  findPresentations(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]! @cacheControl(maxAge: 60)
+  findPresentations(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
   """
   Returns the successful presentation count, optionally matching the specified criteria.
   """
