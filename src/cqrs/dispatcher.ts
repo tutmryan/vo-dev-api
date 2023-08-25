@@ -7,8 +7,10 @@ import type { QueryContext } from './query-context'
 export type CommandLike = (this: CommandContext, ...args: any) => any
 export type QueryLike = (this: QueryContext, ...args: any) => any
 
+export type DispatchContext = Pick<GraphQLContext, 'dataSource' | 'user' | 'services' | 'dataLoaders' | 'logger' | 'requestInfo'>
+
 export const dispatch = async <T extends CommandLike>(
-  context: Pick<GraphQLContext, 'dataSource' | 'user' | 'services' | 'dataLoaders' | 'logger' | 'requestInfo'>,
+  context: DispatchContext,
   command: T,
   ...args: Parameters<T>
 ): Promise<Awaited<ReturnType<T>>> => {

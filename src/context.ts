@@ -3,11 +3,13 @@ import { createContextFactory, createSubscriptionContextFactory, extractTokenFro
 import type { JwtPayload } from 'jsonwebtoken'
 import type { DataSource } from 'typeorm'
 import config from './config'
+import type { DispatchContext } from './cqrs/dispatcher'
 import { dispatch } from './cqrs/dispatcher'
 import { dataSource } from './data'
 import { getLimitedAccessData, limitedAccessRole } from './features/limited-access-tokens'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
 import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or-create-user'
+import { UserEntity } from './features/users/entities/user-entity'
 import type { DataLoaders } from './loaders'
 import { createDataLoaders } from './loaders'
 import { logger } from './logger'
@@ -31,6 +33,17 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
   invariant(claims.oid, '`oid` claim is required')
   invariant(claims.sub, '`sub` claim is required')
 
+  const isLimitedAccessClient = Array.isArray(claims.roles) && claims.roles.includes(limitedAccessRole)
+
+  // Special case: when called with a limited access token:
+  // - load the limited access data associated with the token
+  // - load the user that acquired token
+  if (isLimitedAccessClient) {
+    const limitedAccessData = await getLimitedAccessData(token)
+    const userEntity = await dataSource.getRepository(UserEntity).findOneOrFail({ where: { id: limitedAccessData.userId } })
+    return new User(claims, token, userEntity, limitedAccessData)
+  }
+
   /**
    * We determine whether the incoming identity is an app two ways:
    *  - If we have the `idtyp` claim, we check if its value is `app`
@@ -47,8 +60,8 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
     isApp,
   }
 
-  // we don't have a graphql context yet, so create just enough to dispatch FindUpdateOrCreateUser command
-  const context: Pick<GraphQLContext, 'dataSource' | 'user' | 'logger' | 'services' | 'dataLoaders' | 'requestInfo'> = {
+  // we don't have a graphql context yet, so create just enough to dispatch the FindUpdateOrCreateUser command
+  const context: DispatchContext = {
     dataSource,
     user: undefined,
     logger,
@@ -56,14 +69,9 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
     services: {} as any as Services,
     dataLoaders: {} as any as DataLoaders,
   }
-
   const userEntity = await dispatch(context, FindUpdateOrCreateUser, input)
 
-  // if the user has a limited access role, then also look up limited access data
-  const hasLimitedAccess = Array.isArray(claims.roles) && claims.roles.includes(limitedAccessRole)
-  const limitedAccessData = hasLimitedAccess ? await getLimitedAccessData(token) : undefined
-
-  return new User(claims, token, userEntity, limitedAccessData)
+  return new User(claims, token, userEntity)
 }
 
 const augmentContext = (context: BaseContext) => {

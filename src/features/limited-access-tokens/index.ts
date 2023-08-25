@@ -16,14 +16,16 @@ function createKey(token: string) {
   return hash.digest('hex')
 }
 
-export async function getLimitedAccessData(token: string): Promise<AcquireLimitedAccessTokenInput> {
+export type LimitedAccessData = AcquireLimitedAccessTokenInput & { userId: string }
+
+export async function getLimitedAccessData(token: string): Promise<LimitedAccessData> {
   const key = createKey(token)
   const data = await limitedAccessCache.get(key)
   if (!data) throw new Error(`No limited access data found`)
   return JSON.parse(data)
 }
 
-export async function setLimitedAccessData(token: string, data: AcquireLimitedAccessTokenInput): Promise<void> {
+export async function setLimitedAccessData(token: string, data: LimitedAccessData): Promise<void> {
   const key = createKey(token)
   await limitedAccessCache.set(key, JSON.stringify(data), { ttl: 60 * 60 }) // 1 hour - access tokens are valid for 50 minutes
 }
