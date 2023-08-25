@@ -17,9 +17,16 @@ export async function FindContractsQuery(
   if (criteria?.isProvisioned !== null && criteria?.isProvisioned !== undefined)
     where.provisionedAt = criteria.isProvisioned ? Not(IsNull()) : IsNull()
 
+  let whereAny: FindOptionsWhere<ContractEntity>[] | undefined
+  if (criteria?.credentialTypes)
+    whereAny = criteria.credentialTypes.map((type) => ({
+      ...where,
+      credentialTypesJson: ILike(`%"${type}"%`),
+    }))
+
   const contracts = await this.entityManager.getRepository(ContractEntity).find({
     comment: 'FindContractsQuery',
-    where,
+    where: whereAny ?? where,
     skip: offset ?? undefined,
     take: limit ?? undefined,
   })

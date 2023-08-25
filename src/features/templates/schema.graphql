@@ -383,15 +383,19 @@ input CreateUpdateTemplateDisplayClaimInput {
 }
 
 """
-Defines the searchable fields usable to find templates
+Defines the filter critiera used to find templates
 """
 input TemplateWhere {
   """
-  The name of the template to match
+  List only templates matching this name
   """
   name: String
   """
   List only root templates (without a parent)
   """
   isRoot: Boolean
+  """
+  List only the templates which include any of these credential types
+  """
+  credentialTypes: [String!]
 }

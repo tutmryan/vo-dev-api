@@ -470,11 +470,13 @@ export type ContractPresentationWhere = {
   requestedById?: InputMaybe<Scalars['ID']['input']>;
 };
 
-/** Defines the searchable fields usable to find contracts */
+/** Defines the filter critiera used to find contracts */
 export type ContractWhere = {
+  /** List only the contracts which include any of these credential types */
+  credentialTypes?: InputMaybe<Array<Scalars['String']['input']>>;
   /** List only contracts that are or are not published in the Verified Credentials Network */
   isProvisioned?: InputMaybe<Scalars['Boolean']['input']>;
-  /** The name of the contract to match */
+  /** List only contracts matching this name */
   name?: InputMaybe<Scalars['String']['input']>;
   /** List only contracts from this template */
   templateId?: InputMaybe<Scalars['ID']['input']>;
@@ -1616,11 +1618,13 @@ export type TemplateParentData = {
   validityIntervalInSeconds?: Maybe<Scalars['PositiveInt']['output']>;
 };
 
-/** Defines the searchable fields usable to find templates */
+/** Defines the filter critiera used to find templates */
 export type TemplateWhere = {
+  /** List only the templates which include any of these credential types */
+  credentialTypes?: InputMaybe<Array<Scalars['String']['input']>>;
   /** List only root templates (without a parent) */
   isRoot?: InputMaybe<Scalars['Boolean']['input']>;
-  /** The name of the template to match */
+  /** List only templates matching this name */
   name?: InputMaybe<Scalars['String']['input']>;
 };
 

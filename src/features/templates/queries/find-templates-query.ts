@@ -15,9 +15,16 @@ export async function FindTemplatesQuery(
   if (criteria?.name) where.name = ILike(`%${criteria.name}%`)
   if (criteria?.isRoot) where.parent = IsNull()
 
+  let whereAny: FindOptionsWhere<TemplateEntity>[] | undefined
+  if (criteria?.credentialTypes)
+    whereAny = criteria.credentialTypes.map((type) => ({
+      ...where,
+      credentialTypesJson: ILike(`%"${type}"%`),
+    }))
+
   const templates = await this.entityManager.getRepository(TemplateEntity).find({
     comment: 'FindTemplatesQuery',
-    where,
+    where: whereAny ?? where,
     skip: offset ?? undefined,
     take: limit ?? undefined,
   })
