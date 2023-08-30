@@ -25,6 +25,12 @@ export type IssuanceRequest = Omit<IssuanceRequestInput, 'contractId' | 'identit
   authority: string
   manifest: string
   registration: IssuanceRequestRegistration
+  /***
+   * The type field doesn't appear to be used by #MSFT lol
+   * https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/issuance-request-api#issuance-request-payload
+   * The verifiable credential type. Should match the type as defined in the verifiable credential manifest.
+   */
+  type: string
 }
 
 export interface IssuanceRequestRegistration {

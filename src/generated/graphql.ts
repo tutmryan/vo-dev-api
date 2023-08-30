@@ -736,11 +736,6 @@ export type IssuanceRequestInput = {
    */
   includeQRCode?: InputMaybe<Scalars['Boolean']['input']>;
   pin?: InputMaybe<Pin>;
-  /**
-   * The verifiable credential type.
-   * Should match the type (one of) as defined in the contract.
-   */
-  type: Scalars['String']['input'];
 };
 
 export type IssuanceRequestResponse = IssuanceResponse | RequestErrorResponse;

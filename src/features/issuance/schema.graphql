@@ -29,11 +29,6 @@ input IssuanceRequestInput {
   includeQRCode: Boolean
   callback: Callback
   """
-  The verifiable credential type.
-  Should match the type (one of) as defined in the contract.
-  """
-  type: String!
-  """
   Used for the ID token hint flow to include a collection of assertions made about the subject in the verifiable credential.
   For PIN code flow, it's important that you provide the user's first name and last name.
   """

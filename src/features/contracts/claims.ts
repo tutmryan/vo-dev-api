@@ -11,7 +11,7 @@ export enum StandardClaims {
 
 export const standardClaimLabels: Record<StandardClaims, string> = {
   [StandardClaims.issuanceId]: 'Credential ID',
-  [StandardClaims.name]: 'Name',
+  [StandardClaims.name]: 'Issued to',
 }
 
 export const standardClaims = Object.values(StandardClaims)

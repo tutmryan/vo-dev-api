@@ -47,7 +47,7 @@ describe('limited access issuance', () => {
     const { data, errors } = await executeOperationAsLimitedAccessClient(
       {
         query: createIssuanceMutation,
-        variables: { request: { contractId, type: 'Test', identityId } },
+        variables: { request: { contractId, identityId } },
       },
       { identityId, issuableContractIds: [contractId] },
     )
@@ -63,7 +63,7 @@ describe('limited access issuance', () => {
     const { errors } = await executeOperationAsLimitedAccessClient(
       {
         query: createIssuanceMutation,
-        variables: { request: { contractId: randomUUID(), type: 'Test', identityId } },
+        variables: { request: { contractId: randomUUID(), identityId } },
       },
       { identityId, issuableContractIds: [contractId] },
     )
@@ -78,7 +78,7 @@ describe('limited access issuance', () => {
     const { errors } = await executeOperationAsLimitedAccessClient(
       {
         query: createIssuanceMutation,
-        variables: { request: { contractId, type: 'Test', identityId: randomUUID() } },
+        variables: { request: { contractId, identityId: randomUUID() } },
       },
       { identityId, issuableContractIds: [contractId] },
     )
