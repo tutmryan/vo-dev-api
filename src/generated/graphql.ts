@@ -830,6 +830,8 @@ export type Mutation = {
   provisionContract: Contract;
   /** Revokes existing credentials for a contract. */
   revokeContractIssuances: Scalars['ID']['output'];
+  /** Revokes existing credentials for an identity. */
+  revokeIdentityIssuances: Scalars['ID']['output'];
   /** Revokes an existing credential. */
   revokeIssuance: Issuance;
   /** Revokes existing credentials. */
@@ -895,6 +897,11 @@ export type MutationProvisionContractArgs = {
 
 export type MutationRevokeContractIssuancesArgs = {
   contractId: Scalars['ID']['input'];
+};
+
+
+export type MutationRevokeIdentityIssuancesArgs = {
+  identityId: Scalars['ID']['input'];
 };
 
 
@@ -2462,6 +2469,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   deprecateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationDeprecateContractArgs, 'id'>>;
   provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
   revokeContractIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeContractIssuancesArgs, 'contractId'>>;
+  revokeIdentityIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeIdentityIssuancesArgs, 'identityId'>>;
   revokeIssuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<MutationRevokeIssuanceArgs, 'id'>>;
   revokeIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeIssuancesArgs, 'ids'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;

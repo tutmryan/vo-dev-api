@@ -197,6 +197,11 @@ type Mutation {
   Revokes existing credentials for a contract.
   """
   revokeContractIssuances(contractId: ID!): ID!
+
+  """
+  Revokes existing credentials for an identity.
+  """
+  revokeIdentityIssuances(identityId: ID!): ID!
 }
 
 """

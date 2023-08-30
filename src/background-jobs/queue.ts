@@ -20,8 +20,12 @@ export type RevokeContractIssuancesJobName = 'revokeContractIssuances'
 export type RevokeContractIssuancesJobPayload = { userId: string; contractId: string }
 export type RevokeContractIssuancesJobType = JobType<RevokeContractIssuancesJobName, RevokeContractIssuancesJobPayload>
 
-export type JobNames = RevokeIssuancesJobName | RevokeContractIssuancesJobName
-export type JobTypes = RevokeIssuancesJobType | RevokeContractIssuancesJobType
+export type RevokeIdentityIssuancesJobName = 'revokeIdentityIssuances'
+export type RevokeIdentityIssuancesJobPayload = { userId: string; identityId: string }
+export type RevokeIdentityIssuancesJobType = JobType<RevokeIdentityIssuancesJobName, RevokeIdentityIssuancesJobPayload>
+
+export type JobNames = RevokeIssuancesJobName | RevokeContractIssuancesJobName | RevokeIdentityIssuancesJobName
+export type JobTypes = RevokeIssuancesJobType | RevokeContractIssuancesJobType | RevokeIdentityIssuancesJobType
 
 export const jobQueue = Lazy(
   () =>

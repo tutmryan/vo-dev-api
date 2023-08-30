@@ -4,6 +4,7 @@ import { compactErrors } from '../../util/compact-errors'
 import { resolveIssuanceEventData, subscribeToIssuanceEventsWithFilter } from './callback/pubsub'
 import { CreateIssuanceRequestCommand } from './commands/create-issuance-request-command'
 import { RevokeContractIssuancesCommand } from './commands/revoke-contract-issuances-command'
+import { RevokeIdentityIssuancesCommand } from './commands/revoke-identity-issuances-command'
 import { RevokeIssuanceCommand } from './commands/revoke-issuance-command'
 import { RevokeIssuancesCommand } from './commands/revoke-issuances-command'
 import { CountIssuancesByContractQuery } from './queries/count-issuances-by-contract'
@@ -23,6 +24,7 @@ export const resolvers: Resolvers = {
     revokeIssuance: (_, { id }, context) => dispatch(context, RevokeIssuanceCommand, id),
     revokeIssuances: (_, { ids }, context) => dispatch(context, RevokeIssuancesCommand, ids),
     revokeContractIssuances: (_, { contractId }, context) => dispatch(context, RevokeContractIssuancesCommand, contractId),
+    revokeIdentityIssuances: (_, { identityId }, context) => dispatch(context, RevokeIdentityIssuancesCommand, identityId),
   },
   Contract: {
     issuances: (contract, { where, offset, limit }, context) =>

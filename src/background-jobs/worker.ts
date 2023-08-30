@@ -2,6 +2,7 @@ import type { Job } from 'bullmq'
 import { Worker } from 'bullmq'
 import { dataSource } from '../data'
 import { revokeContractIssuancesJobHandler } from '../features/issuance/jobs/revoke-contract-issuances-job-handler'
+import { revokeIdentityIssuancesJobHandler } from '../features/issuance/jobs/revoke-identity-issuances-job-handler'
 import { revokeIssuancesJobHandler } from '../features/issuance/jobs/revoke-issuances-job-handler'
 import { UserEntity } from '../features/users/entities/user-entity'
 import { BackgroundJobStatus } from '../generated/graphql'
@@ -27,6 +28,7 @@ type HandlerMap<T extends { name: JobNames }> = {
 const handlers: HandlerMap<JobTypes> = {
   revokeIssuances: revokeIssuancesJobHandler,
   revokeContractIssuances: revokeContractIssuancesJobHandler,
+  revokeIdentityIssuances: revokeIdentityIssuancesJobHandler,
 }
 
 const createWorkerContext = async (userId: string, correlationId?: string): Promise<WorkerContext> => ({
