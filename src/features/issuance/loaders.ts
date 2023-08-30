@@ -18,6 +18,7 @@ export const issuanceCountByIdentityLoader = () =>
       .addSelect('i.identity_id')
       .where('i.identity_id IN (:...identityIds)', { identityIds: ids })
       .groupBy('i.identity_id')
+      .comment('CountIssuancesByIdentityQuery')
       .getRawMany()
 
     return ids.map((id) => results.find((result) => result.identity_id.toUpperCase() === id.toUpperCase())?.count ?? 0)
