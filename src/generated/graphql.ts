@@ -577,6 +577,8 @@ export type Identity = {
   id: Scalars['ID']['output'];
   /** The unique identifier of the identity in the issuing tenant */
   identifier: Scalars['String']['output'];
+  /** Returns the total number of credential issuances for this identity. */
+  issuanceCount: Scalars['Int']['output'];
   /** Returns the successful credential issuances for this identity. */
   issuances: Array<Issuance>;
   /** The issuer of the identity */
@@ -2037,6 +2039,7 @@ export type ResolversTypes = {
   EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']['output']>;
   HexColorCode: ResolverTypeWrapper<Scalars['HexColorCode']['output']>;
   Identity: ResolverTypeWrapper<IdentityEntity>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   IdentityInput: IdentityInput;
   IdentityIssuanceWhere: IdentityIssuanceWhere;
   IdentityPresentationWhere: IdentityPresentationWhere;
@@ -2105,7 +2108,6 @@ export type ResolversTypes = {
   UserWhere: UserWhere;
   Void: ResolverTypeWrapper<Scalars['Void']['output']>;
   WebDidModel: ResolverTypeWrapper<WebDidModel>;
-  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
@@ -2151,6 +2153,7 @@ export type ResolversParentTypes = {
   EmailAddress: Scalars['EmailAddress']['output'];
   HexColorCode: Scalars['HexColorCode']['output'];
   Identity: IdentityEntity;
+  Int: Scalars['Int']['output'];
   IdentityInput: IdentityInput;
   IdentityIssuanceWhere: IdentityIssuanceWhere;
   IdentityPresentationWhere: IdentityPresentationWhere;
@@ -2217,7 +2220,6 @@ export type ResolversParentTypes = {
   UserWhere: UserWhere;
   Void: Scalars['Void']['output'];
   WebDidModel: WebDidModel;
-  Int: Scalars['Int']['output'];
 };
 
 export type CacheControlDirectiveArgs = {
@@ -2374,6 +2376,7 @@ export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<Resolv
 export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Identity'] = ResolversParentTypes['Identity']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  issuanceCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<IdentityIssuancesArgs>>;
   issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
