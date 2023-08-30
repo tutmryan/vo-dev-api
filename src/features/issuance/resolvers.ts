@@ -31,6 +31,7 @@ export const resolvers: Resolvers = {
   Identity: {
     issuances: (identity, { where, offset, limit }, context) =>
       query(context, FindIssuancesQuery, { identityId: identity.id, ...where }, offset, limit),
+    issuanceCount: ({ id }, _, { dataLoaders: { issuanceCountByIdentity } }) => issuanceCountByIdentity.load(id),
   },
   User: {
     issuances: (user, { where, offset, limit }, context) =>

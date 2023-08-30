@@ -331,6 +331,10 @@ extend type Identity {
   Returns the successful credential issuances for this identity.
   """
   issuances(where: IdentityIssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
+  """
+  Returns the total number of credential issuances for this identity.
+  """
+  issuanceCount: Int!
 }
 
 extend type User {

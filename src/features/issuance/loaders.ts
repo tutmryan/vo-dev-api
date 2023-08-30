@@ -8,3 +8,18 @@ export const issuanceLoader = () =>
     const results = await dataSource.getRepository(IssuanceEntity).find({ comment: 'FindIssuancesById', where: { id: In(ids) } })
     return ids.map((id) => results.find((result) => result.id.toUpperCase() === id.toUpperCase()) ?? new Error(`Issuance not found: ${id}`))
   })
+
+export const issuanceCountByIdentityLoader = () =>
+  new DataLoader<string, number>(async (ids) => {
+    const results: { identity_id: string; count: number }[] = await dataSource
+      .getRepository(IssuanceEntity)
+      .createQueryBuilder('i')
+      .select('COUNT(*)', 'count')
+      .addSelect('i.identity_id')
+      .where('i.identity_id IN (:...identityIds)', { identityIds: ids })
+      .groupBy('i.identity_id')
+      .comment('CountIssuancesByIdentityQuery')
+      .getRawMany()
+
+    return ids.map((id) => results.find((result) => result.identity_id.toUpperCase() === id.toUpperCase())?.count ?? 0)
+  })
