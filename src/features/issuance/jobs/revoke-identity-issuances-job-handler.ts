@@ -1,35 +1,30 @@
-import { UnrecoverableError, type Job } from 'bullmq'
-import type { RevokeContractIssuancesJobPayload } from '../../../background-jobs/queue'
+import { type Job } from 'bullmq'
+import type { RevokeIdentityIssuancesJobPayload } from '../../../background-jobs/queue'
 import type { WorkerContext } from '../../../background-jobs/worker'
 import { ISOLATION_LEVEL as TXN_ISOLATION_LEVEL, dataSource } from '../../../data'
 import type { AdminService } from '../../../services/admin'
 import { invariant } from '../../../util/invariant'
-import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import type { UserEntity } from '../../users/entities/user-entity'
 
-export const revokeContractIssuancesJobHandler = async (
+export const revokeIdentityIssuancesJobHandler = async (
   context: WorkerContext,
-  job: Omit<Job, 'data'> & { data: RevokeContractIssuancesJobPayload },
+  job: Omit<Job, 'data'> & { data: RevokeIdentityIssuancesJobPayload },
 ) => {
   const errorMessages = []
   const { logger, adminService, user } = context
 
-  const contract = await dataSource.getRepository(ContractEntity).findOneBy({ id: job.data.contractId })
-  if (!contract?.externalId)
-    throw new UnrecoverableError(`Contract (${job.data.contractId}) must have been provisioned for issuances to exist.`)
-
-  const issuances = await dataSource.getRepository(IssuanceEntity).find({ where: { contractId: job.data.contractId } })
+  const issuances = await dataSource.getRepository(IssuanceEntity).find({ where: { identityId: job.data.identityId } })
   for (let index = 0; index < issuances.length; index++) {
     const issuance = issuances[index]!
     try {
-      // if the issuance has been previously revoked, no further action is needed
+      // if the issuance has been previously revoked, we don't need to proceed further
       if (!issuance.isRevoked) {
         // start a new transaction for each issuance revocation
         await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
           logger.info(`revoking issuance ${issuance.id}`)
 
-          const result = await revokeIssuance(contract, issuance, adminService, user)
+          const result = await revokeIssuance(issuance, adminService, user)
           await entityManager.getRepository(IssuanceEntity).save(result)
         })
       }
@@ -45,11 +40,14 @@ export const revokeContractIssuancesJobHandler = async (
   }
 }
 
-const revokeIssuance = async (contract: ContractEntity, issuance: IssuanceEntity, admin: AdminService, user: UserEntity) => {
-  const credential = await admin.findCredential(contract.externalId!, issuance.id)
+const revokeIssuance = async (issuance: IssuanceEntity, admin: AdminService, user: UserEntity) => {
+  const contractExternalId = (await issuance.contract).externalId
+  invariant(contractExternalId, 'Contract must have been provisioned for an issuance to exist')
+
+  const credential = await admin.findCredential(contractExternalId, issuance.id)
   invariant(credential, 'Credential with issuance id as an index claim could not be found')
 
-  await admin.revokeCredential(contract.externalId!, credential.id)
+  await admin.revokeCredential(contractExternalId, credential.id)
 
   issuance.markAsRevoked(user)
   return issuance
