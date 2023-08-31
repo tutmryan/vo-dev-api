@@ -348,6 +348,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   location: location
   sku: {
     name: appServicePlanSku
+    capacity: 2
   }
   properties: {
     reserved: true
