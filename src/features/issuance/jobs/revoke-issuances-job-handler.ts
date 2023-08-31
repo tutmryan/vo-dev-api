@@ -16,16 +16,19 @@ export const revokeIssuancesJobHandler = async (context: WorkerContext, job: Omi
   for (let index = 0; index < job.data.issuanceIds.length; index++) {
     const id = job.data.issuanceIds[index]!
     try {
-      // start a new transaction for each issuance revocation
-      await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
-        logger.info(`revoking issuance ${id}`)
+      const issuance = issuances.find((i) => i.id.toLowerCase() === id.toLowerCase())
+      if (!issuance) throw new Error(`Issuance (${id}) not found.`)
 
-        const issuance = issuances.find((i) => i.id.toLowerCase() === id.toLowerCase())
-        if (!issuance) throw new Error(`Issuance (${id}) not found.`)
+      // if the issuance has been previously revoked, no action is needed
+      if (!issuance.isRevoked) {
+        // start a new transaction for each issuance revocation
+        await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
+          logger.info(`revoking issuance ${id}`)
 
-        const result = await revokeIssuance(issuance, adminService, user)
-        await entityManager.getRepository(IssuanceEntity).save(result)
-      })
+          const result = await revokeIssuance(issuance, adminService, user)
+          await entityManager.getRepository(IssuanceEntity).save(result)
+        })
+      }
     } catch (err) {
       logger.error(`Error occurred when revoking the issuance ${id}`, err)
       errorMessages.push(`Error occurred when revoking the issuance ${id}: ${(err as Error).message}`)
@@ -39,9 +42,6 @@ export const revokeIssuancesJobHandler = async (context: WorkerContext, job: Omi
 }
 
 const revokeIssuance = async (issuance: IssuanceEntity, admin: AdminService, user: UserEntity) => {
-  // if the issuance has been previously revoked, we don't need to proceed further
-  if (issuance.isRevoked) return issuance
-
   const contractExternalId = (await issuance.contract).externalId
   invariant(contractExternalId, 'Contract must have been provisioned for an issuance to exist')
 

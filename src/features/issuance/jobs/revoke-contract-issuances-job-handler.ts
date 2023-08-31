@@ -23,13 +23,16 @@ export const revokeContractIssuancesJobHandler = async (
   for (let index = 0; index < issuances.length; index++) {
     const issuance = issuances[index]!
     try {
-      // start a new transaction for each issuance revocation
-      await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
-        logger.info(`revoking issuance ${issuance.id}`)
+      // if the issuance has been previously revoked, no further action is needed
+      if (!issuance.isRevoked) {
+        // start a new transaction for each issuance revocation
+        await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
+          logger.info(`revoking issuance ${issuance.id}`)
 
-        const result = await revokeIssuance(contract, issuance, adminService, user)
-        await entityManager.getRepository(IssuanceEntity).save(result)
-      })
+          const result = await revokeIssuance(contract, issuance, adminService, user)
+          await entityManager.getRepository(IssuanceEntity).save(result)
+        })
+      }
     } catch (err) {
       logger.error(`Error occurred when revoking the issuance ${issuance.id}`, err)
       errorMessages.push(`Error occurred when revoking the issuance ${issuance.id}: ${(err as Error).message}`)
@@ -43,9 +46,6 @@ export const revokeContractIssuancesJobHandler = async (
 }
 
 const revokeIssuance = async (contract: ContractEntity, issuance: IssuanceEntity, admin: AdminService, user: UserEntity) => {
-  // if the issuance has been previously revoked, we don't need to proceed further
-  if (issuance.isRevoked) return issuance
-
   const credential = await admin.findCredential(contract.externalId!, issuance.id)
   invariant(credential, 'Credential with issuance id as an index claim could not be found')
 

@@ -4,7 +4,6 @@ import type { WorkerContext } from '../../../background-jobs/worker'
 import { ISOLATION_LEVEL as TXN_ISOLATION_LEVEL, dataSource } from '../../../data'
 import type { AdminService } from '../../../services/admin'
 import { invariant } from '../../../util/invariant'
-import type { ContractEntity } from '../../contracts/entities/contract-entity'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import type { UserEntity } from '../../users/entities/user-entity'
 
@@ -15,20 +14,20 @@ export const revokeIdentityIssuancesJobHandler = async (
   const errorMessages = []
   const { logger, adminService, user } = context
 
-  const issuances = await dataSource
-    .getRepository(IssuanceEntity)
-    .find({ where: { identityId: job.data.identityId }, relations: { contract: true } })
+  const issuances = await dataSource.getRepository(IssuanceEntity).find({ where: { identityId: job.data.identityId } })
   for (let index = 0; index < issuances.length; index++) {
     const issuance = issuances[index]!
-    const contract = await issuance.contract
     try {
-      // start a new transaction for each issuance revocation
-      await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
-        logger.info(`revoking issuance ${issuance.id}`)
+      // if the issuance has been previously revoked, we don't need to proceed further
+      if (!issuance.isRevoked) {
+        // start a new transaction for each issuance revocation
+        await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
+          logger.info(`revoking issuance ${issuance.id}`)
 
-        const result = await revokeIssuance(contract, issuance, adminService, user)
-        await entityManager.getRepository(IssuanceEntity).save(result)
-      })
+          const result = await revokeIssuance(issuance, adminService, user)
+          await entityManager.getRepository(IssuanceEntity).save(result)
+        })
+      }
     } catch (err) {
       logger.error(`Error occurred when revoking the issuance ${issuance.id}`, err)
       errorMessages.push(`Error occurred when revoking the issuance ${issuance.id}: ${(err as Error).message}`)
@@ -41,14 +40,14 @@ export const revokeIdentityIssuancesJobHandler = async (
   }
 }
 
-const revokeIssuance = async (contract: ContractEntity, issuance: IssuanceEntity, admin: AdminService, user: UserEntity) => {
-  // if the issuance has been previously revoked, we don't need to proceed further
-  if (issuance.isRevoked) return issuance
+const revokeIssuance = async (issuance: IssuanceEntity, admin: AdminService, user: UserEntity) => {
+  const contractExternalId = (await issuance.contract).externalId
+  invariant(contractExternalId, 'Contract must have been provisioned for an issuance to exist')
 
-  const credential = await admin.findCredential(contract.externalId!, issuance.id)
+  const credential = await admin.findCredential(contractExternalId, issuance.id)
   invariant(credential, 'Credential with issuance id as an index claim could not be found')
 
-  await admin.revokeCredential(contract.externalId!, credential.id)
+  await admin.revokeCredential(contractExternalId, credential.id)
 
   issuance.markAsRevoked(user)
   return issuance

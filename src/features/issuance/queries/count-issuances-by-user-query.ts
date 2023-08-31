@@ -25,7 +25,7 @@ export async function CountIssuancesByUserQuery(
   if (offset) query.skip(offset)
   if (limit) query.take(limit)
 
-  if (criteria?.requestId) query.andWhere('request_id = :requestId', { identityId: criteria.requestId.toUpperCase() })
+  if (criteria?.requestId) query.andWhere('request_id = :requestId', { requestId: criteria.requestId.toUpperCase() })
   if (criteria?.identityId) query.andWhere('identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
   if (criteria?.contractId) query.andWhere('contract_id = :contractId', { contractId: criteria.contractId.toUpperCase() })
   if (criteria?.issuedById) throw new Error("Sorry, can't filter by issuedById when grouping by issued by user.")
