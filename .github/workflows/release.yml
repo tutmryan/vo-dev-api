@@ -97,7 +97,7 @@ jobs:
           sql-instance-aad-administrator-object-id: cb26d064-654b-49d4-a96c-f296e3667a55
           sql-database-sku: S1
           redis-cache-name: vo-dev-verified-orchestration-redis
-          redis-cache-sku: Basic
+          redis-cache-sku: Standard
           redis-cache-family: C
           redis-cache-capacity: 1
           app-service-plan-sku: P1V3
