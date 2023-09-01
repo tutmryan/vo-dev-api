@@ -23,6 +23,8 @@ export const pubsub = isRedisEnabled ? redisPubsub() : new PubSub()
 
 export const REQUEST_CACHE_TTL = 60 * 60 // 1 hour
 export const PRESENTED_CREDENTIALS_TTL = 30 * 60 // 30 minutes
+export const BACKGROUND_JOB_EVENTS_TTL = 5 * 60 // 5 minutes
 export const requestCallbackCache = newCacheSection('requestCallback')
 export const requestDetailsCache = newCacheSection('requestDetails')
 export const presentedCredentialsCache = newCacheSection('presentedCredentials')
+export const finishedBackgroundJobEvents = newCacheSection('finishedBackgroundJobEvents')
