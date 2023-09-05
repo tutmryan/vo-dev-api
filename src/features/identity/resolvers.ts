@@ -4,6 +4,7 @@ import { CreateOrUpdateIdentityCommand } from './commands/create-or-update-ident
 import { resolveIssuer } from './issuer-resolver'
 import { FindIdentitiesQuery } from './queries/find-identities-query'
 import { FindTenantIdentitiesQuery } from './queries/find-tenant-identities-query'
+import { IdentityIssuersQuery } from './queries/identity-issuers-query'
 
 export const resolvers: Resolvers = {
   Mutation: {
@@ -13,6 +14,7 @@ export const resolvers: Resolvers = {
     identity: (_, { id }, { dataLoaders: { identities } }) => identities.load(id),
     findIdentities: (_, { where, offset, limit }, context) => query(context, FindIdentitiesQuery, where, offset, limit),
     findTenantIdentities: (_, { where, limit }, context) => query(context, FindTenantIdentitiesQuery, where, limit),
+    identityIssuers: (_, __, context) => query(context, IdentityIssuersQuery),
   },
   Identity: {
     issuer: resolveIssuer,

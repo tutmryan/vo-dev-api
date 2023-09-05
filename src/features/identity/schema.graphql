@@ -50,6 +50,10 @@ input IdentityWhere {
   The name of the identity to match
   """
   name: String
+  """
+  The issuer of the identity to match
+  """
+  issuer: String
 }
 
 """
@@ -106,4 +110,8 @@ type Query {
   Returns home tenant user identies matching the specified criteria
   """
   findTenantIdentities(where: TenantIdentityWhere!, limit: PositiveInt = 100): [TenantIdentity!]! @cacheControl(maxAge: 60)
+  """
+  Returns the distinct set of issuers from all identities
+  """
+  identityIssuers: [String!]! @cacheControl(maxAge: 60)
 }

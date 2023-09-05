@@ -1,5 +1,6 @@
 import type { QueryContext } from '../../../cqrs/query-context'
 import type { IssuanceWhere, Maybe } from '../../../generated/graphql'
+import { andWhereOptionalRange } from '../../../util/typeorm'
 import { IssuanceEntity } from '../entities/issuance-entity'
 
 export async function CountIssuancesByContractQuery(
@@ -28,12 +29,12 @@ export async function CountIssuancesByContractQuery(
   if (criteria?.requestId) query.andWhere('request_id = :requestId', { identityId: criteria.requestId.toUpperCase() })
   if (criteria?.identityId) query.andWhere('identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
   if (criteria?.issuedById) query.andWhere('issued_by_id = :issuedById', { issuedById: criteria.issuedById.toUpperCase() })
+  if (criteria?.revokedById) query.andWhere('revoked_by_id = :revokedById', { issuedById: criteria.revokedById.toUpperCase() })
   if (criteria?.contractId) throw new Error("Sorry, can't filter by contractId when grouping by contract.")
 
-  if (criteria?.from && criteria.to)
-    query.andWhere('issued_at BETWEEN :from AND :to', { from: criteria.from.toISOString(), to: criteria.to.toISOString() })
-  else if (criteria?.from) query.andWhere('issued_at >= :from', { from: criteria.from.toISOString() })
-  else if (criteria?.to) query.andWhere('issued_at <= :to', { to: criteria.to.toISOString() })
+  andWhereOptionalRange(query, 'issued_at', criteria?.from, criteria?.to)
+  andWhereOptionalRange(query, 'expires_at', criteria?.expiresFrom, criteria?.expiresTo)
+  andWhereOptionalRange(query, 'revoked_at', criteria?.revokedFrom, criteria?.revokedTo)
 
   return query.getRawMany().then((rows) => rows.map((row) => ({ contract: contracts.load(row.contract_id), count: row.count })))
 }

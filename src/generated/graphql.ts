@@ -452,12 +452,28 @@ export type ContractInput = {
 
 /** Criteria for filtering contract issuances. */
 export type ContractIssuanceWhere = {
+  /** The start of the expiresAt period to include. */
+  expiresFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the expiresAt period to include. */
+  expiresTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The start of the issuedAt period to include. */
+  from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
   issuedById?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the platform user (application or person) that revoked the credential. */
+  revokedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the revokedAt period to include. */
+  revokedFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the revokedAt period to include. */
+  revokedTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The status of the issuance. */
+  status?: InputMaybe<IssuanceStatus>;
+  /** The end of the issuedAt period to include. */
+  to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 /** Criteria for filtering contract presentations. */
@@ -619,10 +635,26 @@ export type IdentityInput = {
 export type IdentityIssuanceWhere = {
   /** The ID of the contract that was issued. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the expiresAt period to include. */
+  expiresFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the expiresAt period to include. */
+  expiresTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The start of the issuedAt period to include. */
+  from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
   issuedById?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the platform user (application or person) that revoked the credential. */
+  revokedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the revokedAt period to include. */
+  revokedFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the revokedAt period to include. */
+  revokedTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The status of the issuance. */
+  status?: InputMaybe<IssuanceStatus>;
+  /** The end of the issuedAt period to include. */
+  to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 /** Criteria for filtering identity presentations. */
@@ -637,6 +669,8 @@ export type IdentityPresentationWhere = {
 
 /** Defines the searchable fields usable to find identities */
 export type IdentityWhere = {
+  /** The issuer of the identity to match */
+  issuer?: InputMaybe<Scalars['String']['input']>;
   /** The name of the identity to match */
   name?: InputMaybe<Scalars['String']['input']>;
 };
@@ -660,12 +694,17 @@ export type Issuance = {
   __typename?: 'Issuance';
   /** The contract defining the issued credential. */
   contract: Contract;
-  /** When the issued credential expires according to the validity period of the contract. */
+  /**
+   * When the issued credential expires according to the validity period of the contract.
+   * @deprecated Renamed, use expiresAt instead
+   */
   credentialExpiresAt: Scalars['DateTime']['output'];
+  /** When the issued credential expires, according to the validity period of the published contract (at the time of issuance). */
+  expiresAt: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
   /** The identity of the person who was issued the credential. */
   identity: Identity;
-  /** Defines whether the issued credential has been revoked */
+  /** Indicates whether the issued credential has been revoked. */
   isRevoked?: Maybe<Scalars['Boolean']['output']>;
   issuedAt: Scalars['DateTime']['output'];
   /** The platform user (application or person) that issued the credential. */
@@ -674,6 +713,8 @@ export type Issuance = {
   revokedAt?: Maybe<Scalars['DateTime']['output']>;
   /** The platform user (application or person) that revoked the credential. */
   revokedBy?: Maybe<User>;
+  /** The issuance status. */
+  status: IssuanceStatus;
 };
 
 /** The callback endpoint is called when a user scans the QR code, uses the deep link the authenticator app, or finishes the issuance process. */
@@ -769,11 +810,22 @@ export type IssuanceResponse = {
   url: Scalars['URL']['output'];
 };
 
+/** The status of the issuance. */
+export enum IssuanceStatus {
+  Active = 'active',
+  Expired = 'expired',
+  Revoked = 'revoked'
+}
+
 /** Criteria for filtering issuances. */
 export type IssuanceWhere = {
   /** The ID of the contract that was issued. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
-  /** The start of the period to include. */
+  /** The start of the expiresAt period to include. */
+  expiresFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the expiresAt period to include. */
+  expiresTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The start of the issuedAt period to include. */
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
@@ -781,7 +833,15 @@ export type IssuanceWhere = {
   issuedById?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
-  /** The end of the period to include. */
+  /** The ID of the platform user (application or person) that revoked the credential. */
+  revokedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the revokedAt period to include. */
+  revokedFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the revokedAt period to include. */
+  revokedTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The status of the issuance. */
+  status?: InputMaybe<IssuanceStatus>;
+  /** The end of the issuedAt period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
@@ -1195,6 +1255,8 @@ export type Query = {
   healthcheck?: Maybe<Scalars['Void']['output']>;
   /** Returns an identity by ID */
   identity: Identity;
+  /** Returns the distinct set of issuers from all identities */
+  identityIssuers: Array<Scalars['String']['output']>;
   /** Returns the issuance count, optionally matching the specified criteria. */
   issuanceCount: Scalars['NonNegativeInt']['output'];
   /** Returns the issuance count, grouped by Contract, optionally matching the specified criteria. */
@@ -1712,10 +1774,26 @@ export type UserCount = {
 export type UserIssuanceWhere = {
   /** The ID of the contract that was issued. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the expiresAt period to include. */
+  expiresFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the expiresAt period to include. */
+  expiresTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The start of the issuedAt period to include. */
+  from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the platform user (application or person) that revoked the credential. */
+  revokedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the revokedAt period to include. */
+  revokedFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the revokedAt period to include. */
+  revokedTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The status of the issuance. */
+  status?: InputMaybe<IssuanceStatus>;
+  /** The end of the issuedAt period to include. */
+  to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 /** Criteria for filtering user presentations. */
@@ -2060,6 +2138,7 @@ export type ResolversTypes = {
   IssuanceRequestResponse: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['IssuanceRequestResponse']>;
   IssuanceRequestStatus: IssuanceRequestStatus;
   IssuanceResponse: ResolverTypeWrapper<IssuanceResponse>;
+  IssuanceStatus: IssuanceStatus;
   IssuanceWhere: IssuanceWhere;
   JSONObject: ResolverTypeWrapper<Scalars['JSONObject']['output']>;
   KeyVaultMetadata: ResolverTypeWrapper<KeyVaultMetadata>;
@@ -2405,6 +2484,7 @@ export type IonDidModelResolvers<ContextType = GraphQLContext, ParentType extend
 export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Issuance'] = ResolversParentTypes['Issuance']> = {
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType>;
   credentialExpiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  expiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
   isRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
@@ -2412,6 +2492,7 @@ export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends R
   issuedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   revokedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   revokedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['IssuanceStatus'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2574,6 +2655,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryFindUsersArgs, 'limit'>>;
   healthcheck?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityArgs, 'id'>>;
+  identityIssuers?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   issuanceCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryIssuanceCountArgs>>;
   issuanceCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByContractArgs>>;
   issuanceCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByUserArgs>>;

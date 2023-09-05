@@ -100,6 +100,7 @@ async function createContractWithIssuance() {
       contractId: contract.id,
       identityId: identity.id,
       issuedById: issuedBy.id,
+      expiresAt: new Date(),
     }),
   )
   return { identity, contract, issuedBy, issuance }

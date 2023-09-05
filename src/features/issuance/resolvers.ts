@@ -40,10 +40,7 @@ export const resolvers: Resolvers = {
       query(context, FindIssuancesQuery, { issuedById: user.id, ...where }, offset, limit),
   },
   Issuance: {
-    credentialExpiresAt: async ({ issuedAt, contractId }, _, { dataLoaders: { contracts } }) => {
-      const contract = await contracts.load(contractId)
-      return new Date(issuedAt.getTime() + contract.validityIntervalInSeconds * 1000)
-    },
+    credentialExpiresAt: async ({ expiresAt }) => expiresAt,
   },
   IssuanceRequestResponse: {
     __resolveType: (response) => ('error' in response ? 'RequestErrorResponse' : 'IssuanceResponse'),

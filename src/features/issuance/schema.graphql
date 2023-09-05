@@ -205,6 +205,15 @@ type Mutation {
 }
 
 """
+The status of the issuance.
+"""
+enum IssuanceStatus {
+  active
+  expired
+  revoked
+}
+
+"""
 An instance of a successful contract-to-credential issuance.
 """
 type Issuance {
@@ -225,9 +234,13 @@ type Issuance {
   """
   When the issued credential expires according to the validity period of the contract.
   """
-  credentialExpiresAt: DateTime!
+  credentialExpiresAt: DateTime! @deprecated(reason: "Renamed, use expiresAt instead")
   """
-  Defines whether the issued credential has been revoked
+  When the issued credential expires, according to the validity period of the published contract (at the time of issuance).
+  """
+  expiresAt: DateTime!
+  """
+  Indicates whether the issued credential has been revoked.
   """
   isRevoked: Boolean
   """
@@ -238,6 +251,10 @@ type Issuance {
   When the credential was revoked.
   """
   revokedAt: DateTime
+  """
+  The issuance status.
+  """
+  status: IssuanceStatus!
 }
 
 """
@@ -256,6 +273,38 @@ input ContractIssuanceWhere {
   The ID of the user (Person or Application) that issued the credential.
   """
   issuedById: ID
+  """
+  The start of the issuedAt period to include.
+  """
+  from: DateTime
+  """
+  The end of the issuedAt period to include.
+  """
+  to: DateTime
+  """
+  The start of the expiresAt period to include.
+  """
+  expiresFrom: DateTime
+  """
+  The end of the expiresAt period to include.
+  """
+  expiresTo: DateTime
+  """
+  The status of the issuance.
+  """
+  status: IssuanceStatus
+  """
+  The ID of the platform user (application or person) that revoked the credential.
+  """
+  revokedById: ID
+  """
+  The start of the revokedAt period to include.
+  """
+  revokedFrom: DateTime
+  """
+  The end of the revokedAt period to include.
+  """
+  revokedTo: DateTime
 }
 
 """
@@ -274,6 +323,38 @@ input IdentityIssuanceWhere {
   The ID of the user (Person or Application) that issued the credential.
   """
   issuedById: ID
+  """
+  The start of the issuedAt period to include.
+  """
+  from: DateTime
+  """
+  The end of the issuedAt period to include.
+  """
+  to: DateTime
+  """
+  The start of the expiresAt period to include.
+  """
+  expiresFrom: DateTime
+  """
+  The end of the expiresAt period to include.
+  """
+  expiresTo: DateTime
+  """
+  The status of the issuance.
+  """
+  status: IssuanceStatus
+  """
+  The ID of the platform user (application or person) that revoked the credential.
+  """
+  revokedById: ID
+  """
+  The start of the revokedAt period to include.
+  """
+  revokedFrom: DateTime
+  """
+  The end of the revokedAt period to include.
+  """
+  revokedTo: DateTime
 }
 
 """
@@ -292,6 +373,38 @@ input UserIssuanceWhere {
   The ID of the contract that was issued.
   """
   contractId: ID
+  """
+  The start of the issuedAt period to include.
+  """
+  from: DateTime
+  """
+  The end of the issuedAt period to include.
+  """
+  to: DateTime
+  """
+  The start of the expiresAt period to include.
+  """
+  expiresFrom: DateTime
+  """
+  The end of the expiresAt period to include.
+  """
+  expiresTo: DateTime
+  """
+  The status of the issuance.
+  """
+  status: IssuanceStatus
+  """
+  The ID of the platform user (application or person) that revoked the credential.
+  """
+  revokedById: ID
+  """
+  The start of the revokedAt period to include.
+  """
+  revokedFrom: DateTime
+  """
+  The end of the revokedAt period to include.
+  """
+  revokedTo: DateTime
 }
 
 """
@@ -315,13 +428,37 @@ input IssuanceWhere {
   """
   issuedById: ID
   """
-  The start of the period to include.
+  The start of the issuedAt period to include.
   """
   from: DateTime
   """
-  The end of the period to include.
+  The end of the issuedAt period to include.
   """
   to: DateTime
+  """
+  The start of the expiresAt period to include.
+  """
+  expiresFrom: DateTime
+  """
+  The end of the expiresAt period to include.
+  """
+  expiresTo: DateTime
+  """
+  The status of the issuance.
+  """
+  status: IssuanceStatus
+  """
+  The ID of the platform user (application or person) that revoked the credential.
+  """
+  revokedById: ID
+  """
+  The start of the revokedAt period to include.
+  """
+  revokedFrom: DateTime
+  """
+  The end of the revokedAt period to include.
+  """
+  revokedTo: DateTime
 }
 
 extend type Contract {

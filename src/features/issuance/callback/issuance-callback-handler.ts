@@ -1,8 +1,10 @@
 import { logger } from '@azure/identity'
+import { addSeconds } from 'date-fns'
 import { requestDetailsCache } from '../../../cache'
 import { dataSource } from '../../../data'
 import { IssuanceRequestStatus } from '../../../generated/graphql'
 import type { IssuanceCallbackHandler } from '../../callback'
+import { ContractEntity } from '../../contracts/entities/contract-entity'
 import type { IssuanceRequestDetails } from '../commands/create-issuance-request-command'
 import { IssuanceEntity } from '../entities/issuance-entity'
 import type { IssuanceTopicData } from './pubsub'
@@ -19,8 +21,16 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
   const topicData: IssuanceTopicData = { ...issuanceRequestDetails, event }
 
   if (event.requestStatus === IssuanceRequestStatus.IssuanceSuccessful) {
-    const issuanceEntity = new IssuanceEntity({ ...issuanceRequestDetails, requestId: event.requestId })
-    const { id } = await dataSource.createEntityManager().getRepository(IssuanceEntity).save(issuanceEntity)
+    const entityManager = dataSource.createEntityManager()
+    // look up the contract to get the validity interval
+    const contract = await entityManager.getRepository(ContractEntity).findOneByOrFail({ id: issuanceRequestDetails.contractId })
+    // create issuance record including expiresAt defn
+    const issuanceEntity = new IssuanceEntity({
+      ...issuanceRequestDetails,
+      requestId: event.requestId,
+      expiresAt: addSeconds(Date.now(), contract.validityIntervalInSeconds),
+    })
+    const { id } = await entityManager.getRepository(IssuanceEntity).save(issuanceEntity)
     topicData.issuanceId = id
   }
 
