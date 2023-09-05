@@ -14,7 +14,8 @@ import { FindIssuancesQuery } from './queries/find-issuances-query'
 
 export const resolvers: Resolvers = {
   Query: {
-    findIssuances: (_, { where, offset, limit }, context) => query(context, FindIssuancesQuery, where, offset, limit),
+    findIssuances: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
+      query(context, FindIssuancesQuery, where, offset, limit, orderBy, orderDirection),
     issuanceCount: (_, { where }, context) => query(context, CountIssuancesQuery, where),
     issuanceCountByUser: (_, { where, offset, limit }, context) => query(context, CountIssuancesByUserQuery, where, offset, limit),
     issuanceCountByContract: (_, { where, offset, limit }, context) => query(context, CountIssuancesByContractQuery, where, offset, limit),

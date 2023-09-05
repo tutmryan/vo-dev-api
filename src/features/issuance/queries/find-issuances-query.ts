@@ -1,6 +1,6 @@
-import { IsNull, type FindOptionsWhere } from 'typeorm'
+import { IsNull, type FindOptionsOrder, type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
 import type { QueryContext } from '../../../cqrs/query-context'
-import { IssuanceStatus, type IssuanceWhere, type Maybe } from '../../../generated/graphql'
+import { IssuanceOrderBy, IssuanceStatus, OrderDirection, type IssuanceWhere, type Maybe } from '../../../generated/graphql'
 import { LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp, OptionalRange } from '../../../util/typeorm'
 import { IssuanceEntity } from '../entities/issuance-entity'
 
@@ -9,8 +9,12 @@ export async function FindIssuancesQuery(
   criteria?: Maybe<IssuanceWhere>,
   offset?: Maybe<number>,
   limit?: Maybe<number>,
+  orderBy?: Maybe<IssuanceOrderBy>,
+  orderDirection?: Maybe<OrderDirection>,
 ) {
   const where: FindOptionsWhere<IssuanceEntity> = {}
+  const relations: FindOptionsRelations<IssuanceEntity> = {}
+  const order: FindOptionsOrder<IssuanceEntity> = {}
 
   if (criteria?.requestId) where.requestId = criteria.requestId.toUpperCase()
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
@@ -31,12 +35,38 @@ export async function FindIssuancesQuery(
     where.isRevoked = true
   }
 
+  const direction = orderDirection ?? OrderDirection.Asc
+  switch (orderBy) {
+    case IssuanceOrderBy.ContractName:
+      relations.contract = true
+      order.contract = { name: direction }
+      break
+    case IssuanceOrderBy.ExpiresAt:
+      order.expiresAt = direction
+      break
+    case IssuanceOrderBy.IdentityName:
+      relations.identity = true
+      order.identity = { name: direction }
+      break
+    case IssuanceOrderBy.IssuedAt:
+      order.issuedAt = direction
+      break
+    case IssuanceOrderBy.IssuedByName:
+      relations.issuedBy = true
+      order.issuedBy = { name: direction }
+      break
+    default:
+      order.issuedAt = direction
+      break
+  }
+
   const issuances = await this.entityManager.getRepository(IssuanceEntity).find({
     comment: 'FindIssuancesQuery',
     where,
+    relations,
     skip: offset ?? undefined,
     take: limit ?? undefined,
-    order: { issuedAt: 'DESC' },
+    order,
   })
 
   return issuances
