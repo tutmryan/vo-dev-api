@@ -32,10 +32,6 @@ export async function FindPresentationsQuery(
 
   const direction = orderDirection ?? OrderDirection.Asc
   switch (orderBy) {
-    case PresentationOrderBy.ContractName:
-      relations.issuances = { contract: true }
-      order.issuances = { contract: { name: direction } }
-      break
     case PresentationOrderBy.IdentityName:
       relations.identity = true
       order.identity = { name: direction }
