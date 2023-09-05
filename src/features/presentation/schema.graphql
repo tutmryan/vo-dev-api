@@ -388,11 +388,39 @@ extend type User {
   presentations(where: UserPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
 }
 
+"""
+Columns that can be used for sorting presentations.
+"""
+enum PresentationOrderBy {
+  """
+  The name of a contract used to make the presentation request.
+  """
+  contractName
+  """
+  The name of the identity who presented the credential.
+  """
+  identityName
+  """
+  The name of the user (Person or Application) that requested & received the presentation data.
+  """
+  requestedByName
+  """
+  The timestamp when the credential was presented
+  """
+  presentedAt
+}
+
 extend type Query {
   """
   Returns successful credential presentations, optionally matching the specified criteria.
   """
-  findPresentations(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
+  findPresentations(
+    where: PresentationWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: PresentationOrderBy
+    orderDirection: OrderDirection
+  ): [Presentation!]!
   """
   Returns the successful presentation count, optionally matching the specified criteria.
   """

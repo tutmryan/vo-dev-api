@@ -1034,6 +1034,11 @@ export type OnboardingInput = {
   kyc?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export enum OrderDirection {
+  Asc = 'ASC',
+  Desc = 'DESC'
+}
+
 /**
  * The pin type defines a PIN code that can be displayed as part of the issuance.
  * Pin is optional, and, if used, should always be sent out-of-band.
@@ -1130,6 +1135,18 @@ export type PresentationEventWhere = {
    */
   type?: InputMaybe<Scalars['String']['input']>;
 };
+
+/** Columns that can be used for sorting presentations. */
+export enum PresentationOrderBy {
+  /** The name of a contract used to make the presentation request. */
+  ContractName = 'contractName',
+  /** The name of the identity who presented the credential. */
+  IdentityName = 'identityName',
+  /** The timestamp when the credential was presented */
+  PresentedAt = 'presentedAt',
+  /** The name of the user (Person or Application) that requested & received the presentation data. */
+  RequestedByName = 'requestedByName'
+}
 
 /** The presentation request payload contains information about your verifiable credentials presentation request. */
 export type PresentationRequestInput = {
@@ -1322,6 +1339,8 @@ export type QueryFindNetworkIssuersArgs = {
 export type QueryFindPresentationsArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<PresentationOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<PresentationWhere>;
 };
 
@@ -2149,6 +2168,7 @@ export type ResolversTypes = {
   NetworkIssuersWhere: NetworkIssuersWhere;
   NonNegativeInt: ResolverTypeWrapper<Scalars['NonNegativeInt']['output']>;
   OnboardingInput: OnboardingInput;
+  OrderDirection: OrderDirection;
   Pin: Pin;
   PositiveInt: ResolverTypeWrapper<Scalars['PositiveInt']['output']>;
   Presentation: ResolverTypeWrapper<PresentationEntity>;
@@ -2156,6 +2176,7 @@ export type ResolversTypes = {
   PresentationEvent: ResolverTypeWrapper<PresentationEvent>;
   PresentationEventData: ResolverTypeWrapper<Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversTypes['Presentation']> }>;
   PresentationEventWhere: PresentationEventWhere;
+  PresentationOrderBy: PresentationOrderBy;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
   PresentationRequestResponse: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['PresentationRequestResponse']>;

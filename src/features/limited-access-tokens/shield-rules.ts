@@ -152,7 +152,7 @@ export const isValidLimitedIdentityFilter = rule({ cache: 'strict' })(
 )
 
 // criteria with requestId validation
-export const requestIdFilterDefined = rule({ cache: 'strict' })(async (_, { where }) => !!where.requestId)
+export const requestIdFilterDefined = rule({ cache: 'strict' })(async (_, { where }) => !!where?.requestId)
 
 // issuance and presentation access rules
 export const isValidLimitedAccessIssuanceFilter = and(isLimitedAccessApp, or(requestIdFilterDefined, isValidLimitedIdentityFilter))

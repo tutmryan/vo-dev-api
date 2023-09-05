@@ -10,7 +10,8 @@ import { FindPresentationsQuery } from './queries/find-presentations-query'
 
 export const resolvers: Resolvers = {
   Query: {
-    findPresentations: (_parent, { where, offset, limit }, context) => query(context, FindPresentationsQuery, where, offset, limit),
+    findPresentations: (_parent, { where, offset, limit, orderBy, orderDirection }, context) =>
+      query(context, FindPresentationsQuery, where, offset, limit, orderBy, orderDirection),
     presentationCount: (_parent, { where }, context) => query(context, CountPresentationsQuery, where),
     presentationCountByUser: (_parent, { where, offset, limit }, context) =>
       query(context, CountPresentationsByUserQuery, where, offset, limit),
