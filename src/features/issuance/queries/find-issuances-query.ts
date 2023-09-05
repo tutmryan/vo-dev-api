@@ -49,14 +49,14 @@ export async function FindIssuancesQuery(
       order.identity = { name: direction }
       break
     case IssuanceOrderBy.IssuedAt:
-      order.issuedAt = direction
+      order.issuedAt = orderDirection ?? OrderDirection.Desc
       break
     case IssuanceOrderBy.IssuedByName:
       relations.issuedBy = true
       order.issuedBy = { name: direction }
       break
     default:
-      order.issuedAt = direction
+      order.issuedAt = orderDirection ?? OrderDirection.Desc
       break
   }
 

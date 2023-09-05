@@ -41,14 +41,14 @@ export async function FindPresentationsQuery(
       order.identity = { name: direction }
       break
     case PresentationOrderBy.PresentedAt:
-      order.presentedAt = direction
+      order.presentedAt = orderDirection ?? OrderDirection.Desc
       break
     case PresentationOrderBy.RequestedByName:
       relations.requestedBy = true
       order.requestedBy = { name: direction }
       break
     default:
-      order.presentedAt = direction
+      order.presentedAt = orderDirection ?? OrderDirection.Desc
       break
   }
 
