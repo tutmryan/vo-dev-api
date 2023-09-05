@@ -48,7 +48,7 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   presentedAt!: Date
 
   @Column({ type: 'nvarchar', length: 'MAX' })
-  private requestedCredentialsJson!: string
+  requestedCredentialsJson!: string
 
   get requestedCredentials(): RequestCredential[] {
     return JSON.parse(this.requestedCredentialsJson)
@@ -59,7 +59,7 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   }
 
   @Column({ type: 'nvarchar', length: 'MAX' })
-  private presentedCredentialsJson!: string
+  presentedCredentialsJson!: string
 
   get presentedCredentials(): PresentedData[] {
     return JSON.parse(this.presentedCredentialsJson)

@@ -478,12 +478,20 @@ export type ContractIssuanceWhere = {
 
 /** Criteria for filtering contract presentations. */
 export type ContractPresentationWhere = {
+  /** The start of the presentedAt period to include. */
+  from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential presented. */
+  presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that requested & received the presentation. */
   requestedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential requested. */
+  requestedType?: InputMaybe<Scalars['String']['input']>;
+  /** The end of the presentedAt period to include. */
+  to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 /** Defines the filter critiera used to find contracts */
@@ -661,10 +669,18 @@ export type IdentityIssuanceWhere = {
 export type IdentityPresentationWhere = {
   /** The ID of a contract used to make the presentation request. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the presentedAt period to include. */
+  from?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The type of credential presented. */
+  presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that requested & received the presentation. */
   requestedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential requested. */
+  requestedType?: InputMaybe<Scalars['String']['input']>;
+  /** The end of the presentedAt period to include. */
+  to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 /** Defines the searchable fields usable to find identities */
@@ -1232,15 +1248,19 @@ export type PresentationResponse = {
 export type PresentationWhere = {
   /** The ID of a contract that was presented. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
-  /** The start of the period to count. */
+  /** The start of the presentedAt period to include. */
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential presented. */
+  presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that requested & received the presentation data. */
   requestedById?: InputMaybe<Scalars['ID']['input']>;
-  /** The end of the period to count. */
+  /** The type of credential requested. */
+  requestedType?: InputMaybe<Scalars['String']['input']>;
+  /** The end of the presentedAt period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
@@ -1835,10 +1855,18 @@ export type UserIssuanceWhere = {
 export type UserPresentationWhere = {
   /** The ID of a contract used to make the presentation request. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the presentedAt period to include. */
+  from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential presented. */
+  presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential requested. */
+  requestedType?: InputMaybe<Scalars['String']['input']>;
+  /** The end of the presentedAt period to include. */
+  to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 /** Defines the searchable fields usable to find users */

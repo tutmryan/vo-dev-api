@@ -1,9 +1,9 @@
 import type { FindOptionsOrder } from 'typeorm'
-import { type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
+import { ILike, type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
 import type { QueryContext } from '../../../cqrs/query-context'
 import type { Maybe, PresentationWhere } from '../../../generated/graphql'
 import { OrderDirection, PresentationOrderBy } from '../../../generated/graphql'
-import { BetweenTimestamp, LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp } from '../../../util/typeorm'
+import { OptionalRange } from '../../../util/typeorm'
 import { PresentationEntity } from '../entities/presentation-entity'
 
 export async function FindPresentationsQuery(
@@ -25,10 +25,10 @@ export async function FindPresentationsQuery(
     relations.issuances = true
     where.issuances = { contractId: criteria.contractId.toUpperCase() }
   }
+  if (criteria?.requestedType) where.requestedCredentialsJson = ILike(`%"type":"${criteria.requestedType}"%`)
+  if (criteria?.presentedType) where.presentedCredentialsJson = ILike(`%"type":[%"${criteria.presentedType}"%]%`)
 
-  if (criteria?.from && criteria.to) where.presentedAt = BetweenTimestamp(criteria.from, criteria.to)
-  else if (criteria?.from) where.presentedAt = MoreThanOrEqualTimestamp(criteria.from)
-  else if (criteria?.to) where.presentedAt = LessThanOrEqualTimestamp(criteria.to)
+  where.presentedAt = OptionalRange(criteria?.from, criteria?.to)
 
   const direction = orderDirection ?? OrderDirection.Asc
   switch (orderBy) {

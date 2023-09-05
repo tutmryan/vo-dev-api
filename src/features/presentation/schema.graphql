@@ -299,6 +299,22 @@ input ContractPresentationWhere {
   The ID of the user (Person or Application) that requested & received the presentation.
   """
   requestedById: ID
+  """
+  The start of the presentedAt period to include.
+  """
+  from: DateTime
+  """
+  The end of the presentedAt period to include.
+  """
+  to: DateTime
+  """
+  The type of credential requested.
+  """
+  requestedType: String
+  """
+  The type of credential presented.
+  """
+  presentedType: String
 }
 
 """
@@ -317,6 +333,22 @@ input IdentityPresentationWhere {
   The ID of the user (Person or Application) that requested & received the presentation.
   """
   requestedById: ID
+  """
+  The start of the presentedAt period to include.
+  """
+  from: DateTime
+  """
+  The end of the presentedAt period to include.
+  """
+  to: DateTime
+  """
+  The type of credential requested.
+  """
+  requestedType: String
+  """
+  The type of credential presented.
+  """
+  presentedType: String
 }
 
 """
@@ -335,6 +367,22 @@ input UserPresentationWhere {
   The ID of a contract used to make the presentation request.
   """
   contractId: ID
+  """
+  The start of the presentedAt period to include.
+  """
+  from: DateTime
+  """
+  The end of the presentedAt period to include.
+  """
+  to: DateTime
+  """
+  The type of credential requested.
+  """
+  requestedType: String
+  """
+  The type of credential presented.
+  """
+  presentedType: String
 }
 
 """
@@ -358,13 +406,21 @@ input PresentationWhere {
   """
   requestedById: ID
   """
-  The start of the period to count.
+  The start of the presentedAt period to include.
   """
   from: DateTime
   """
-  The end of the period to count.
+  The end of the presentedAt period to include.
   """
   to: DateTime
+  """
+  The type of credential requested.
+  """
+  requestedType: String
+  """
+  The type of credential presented.
+  """
+  presentedType: String
 }
 
 extend type Contract {
