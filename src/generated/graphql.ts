@@ -752,6 +752,20 @@ export type IssuanceEventWhere = {
   status?: InputMaybe<IssuanceRequestStatus>;
 };
 
+/** Columns that can be used for sorting issuances. */
+export enum IssuanceOrderBy {
+  /** The name of the contract that was issued. */
+  ContractName = 'contractName',
+  /** The timestamp When the issued credential expires */
+  ExpiresAt = 'expiresAt',
+  /** The name of the identity that the issuance is for. */
+  IdentityName = 'identityName',
+  /** The timestamp when the credential was issued */
+  IssuedAt = 'issuedAt',
+  /** The name of the user (Person or Application) that requested issuance. */
+  IssuedByName = 'issuedByName'
+}
+
 /**
  * The issuance request payload contains information about your verifiable credentials issuance request.
  * The following example demonstrates an issuance request by using a PIN code flow with user claims, such as first name and last name.
@@ -1327,6 +1341,8 @@ export type QueryFindIdentitiesArgs = {
 export type QueryFindIssuancesArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<IssuanceOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<IssuanceWhere>;
 };
 
@@ -2153,6 +2169,7 @@ export type ResolversTypes = {
   IssuanceCallbackEvent: ResolverTypeWrapper<IssuanceCallbackEvent>;
   IssuanceEventData: ResolverTypeWrapper<Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversTypes['Issuance']> }>;
   IssuanceEventWhere: IssuanceEventWhere;
+  IssuanceOrderBy: IssuanceOrderBy;
   IssuanceRequestInput: IssuanceRequestInput;
   IssuanceRequestResponse: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['IssuanceRequestResponse']>;
   IssuanceRequestStatus: IssuanceRequestStatus;

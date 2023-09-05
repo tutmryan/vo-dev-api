@@ -486,11 +486,43 @@ extend type User {
   issuances(where: UserIssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
 }
 
+"""
+Columns that can be used for sorting issuances.
+"""
+enum IssuanceOrderBy {
+  """
+  The name of the contract that was issued.
+  """
+  contractName
+  """
+  The name of the identity that the issuance is for.
+  """
+  identityName
+  """
+  The name of the user (Person or Application) that requested issuance.
+  """
+  issuedByName
+  """
+  The timestamp when the credential was issued
+  """
+  issuedAt
+  """
+  The timestamp When the issued credential expires
+  """
+  expiresAt
+}
+
 extend type Query {
   """
   Returns successful credential issuances, optionally matching the specified criteria.
   """
-  findIssuances(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt = 100): [Issuance!]!
+  findIssuances(
+    where: IssuanceWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: IssuanceOrderBy
+    orderDirection: OrderDirection
+  ): [Issuance!]!
   """
   Returns the issuance count, optionally matching the specified criteria.
   """
