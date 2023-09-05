@@ -1168,8 +1168,6 @@ export type PresentationEventWhere = {
 
 /** Columns that can be used for sorting presentations. */
 export enum PresentationOrderBy {
-  /** The name of a contract used to make the presentation request. */
-  ContractName = 'contractName',
   /** The name of the identity who presented the credential. */
   IdentityName = 'identityName',
   /** The timestamp when the credential was presented */

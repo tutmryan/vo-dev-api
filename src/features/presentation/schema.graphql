@@ -449,10 +449,6 @@ Columns that can be used for sorting presentations.
 """
 enum PresentationOrderBy {
   """
-  The name of a contract used to make the presentation request.
-  """
-  contractName
-  """
   The name of the identity who presented the credential.
   """
   identityName
