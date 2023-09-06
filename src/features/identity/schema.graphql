@@ -1,3 +1,4 @@
+# eslint-disable @graphql-eslint/naming-convention
 """
 Represents an identity that is issued credentials
 """

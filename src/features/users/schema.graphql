@@ -1,3 +1,4 @@
+# eslint-disable @graphql-eslint/naming-convention
 """
 Represents a user of the platform, whether a person (interactive user) or a third-party application.
 Users are members of the platform home tenant, people are AAD tenant users, applications are app registrations.
