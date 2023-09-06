@@ -13,7 +13,7 @@ export async function CountPresentationsQuery(this: QueryContext, criteria?: May
   if (criteria?.contractId || criteria?.issuanceId) {
     relations.issuances = true
     if (criteria.contractId) where.issuances = { contractId: criteria.contractId.toUpperCase() }
-    if (criteria.issuanceId) where.issuances = { issuedById: criteria.issuanceId.toUpperCase() }
+    if (criteria.issuanceId) where.issuances = { id: criteria.issuanceId.toUpperCase() }
   }
   if (criteria?.requestedById) where.requestedById = criteria.requestedById.toUpperCase()
 
