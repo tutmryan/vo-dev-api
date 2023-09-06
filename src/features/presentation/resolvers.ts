@@ -36,6 +36,10 @@ export const resolvers: Resolvers = {
     presentations: (user, { where, offset, limit }, context) =>
       query(context, FindPresentationsQuery, { requestedById: user.id, ...where }, offset, limit),
   },
+  Issuance: {
+    presentations: (issuance, { where, offset, limit }, context) =>
+      query(context, FindPresentationsQuery, { issuanceId: issuance.id, ...where }, offset, limit),
+  },
   PresentationRequestResponse: {
     __resolveType: (response) => ('error' in response ? 'RequestErrorResponse' : 'PresentationResponse'),
   },

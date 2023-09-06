@@ -21,9 +21,10 @@ export async function FindPresentationsQuery(
   if (criteria?.requestId) where.requestId = criteria.requestId.toUpperCase()
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.requestedById) where.requestedById = criteria.requestedById.toUpperCase()
-  if (criteria?.contractId) {
+  if (criteria?.contractId || criteria?.issuanceId) {
     relations.issuances = true
-    where.issuances = { contractId: criteria.contractId.toUpperCase() }
+    if (criteria.contractId) where.issuances = { contractId: criteria.contractId.toUpperCase() }
+    if (criteria.issuanceId) where.issuances = { id: criteria.issuanceId.toUpperCase() }
   }
   if (criteria?.requestedType) where.requestedCredentialsJson = ILike(`%"type":"${criteria.requestedType}"%`)
   if (criteria?.presentedType) where.presentedCredentialsJson = ILike(`%"type":[%"${criteria.presentedType}"%]%`)

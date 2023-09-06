@@ -482,6 +482,8 @@ export type ContractPresentationWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The issuance that was presented */
+  issuanceId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
   presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
@@ -679,6 +681,8 @@ export type IdentityPresentationWhere = {
   contractId?: InputMaybe<Scalars['ID']['input']>;
   /** The start of the presentedAt period to include. */
   from?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The issuance that was presented */
+  issuanceId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
   presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
@@ -733,12 +737,22 @@ export type Issuance = {
   issuedAt: Scalars['DateTime']['output'];
   /** The platform user (application or person) that issued the credential. */
   issuedBy: User;
+  /** Returns the successful credential presentations for this issuance. */
+  presentations: Array<Presentation>;
   /** When the credential was revoked. */
   revokedAt?: Maybe<Scalars['DateTime']['output']>;
   /** The platform user (application or person) that revoked the credential. */
   revokedBy?: Maybe<User>;
   /** The issuance status. */
   status: IssuanceStatus;
+};
+
+
+/** An instance of a successful contract-to-credential issuance. */
+export type IssuancePresentationsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<IssuancePresentationWhere>;
 };
 
 /** The callback endpoint is called when a user scans the QR code, uses the deep link the authenticator app, or finishes the issuance process. */
@@ -789,6 +803,24 @@ export enum IssuanceOrderBy {
   /** The name of the user (Person or Application) that requested issuance. */
   IssuedByName = 'issuedByName'
 }
+
+/** Criteria for filtering issuance presentations. */
+export type IssuancePresentationWhere = {
+  /** The start of the presentedAt period to include. */
+  from?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the identity who presented the credential (if known). */
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential presented. */
+  presentedType?: InputMaybe<Scalars['String']['input']>;
+  /** The requestId of the presentation request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that requested & received the presentation. */
+  requestedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential requested. */
+  requestedType?: InputMaybe<Scalars['String']['input']>;
+  /** The end of the presentedAt period to include. */
+  to?: InputMaybe<Scalars['DateTime']['input']>;
+};
 
 /**
  * The issuance request payload contains information about your verifiable credentials issuance request.
@@ -1258,6 +1290,8 @@ export type PresentationWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The issuance that was presented */
+  issuanceId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
   presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
@@ -1884,6 +1918,8 @@ export type UserPresentationWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The issuance that was presented */
+  issuanceId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
   presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
@@ -2224,6 +2260,7 @@ export type ResolversTypes = {
   IssuanceEventData: ResolverTypeWrapper<Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversTypes['Issuance']> }>;
   IssuanceEventWhere: IssuanceEventWhere;
   IssuanceOrderBy: IssuanceOrderBy;
+  IssuancePresentationWhere: IssuancePresentationWhere;
   IssuanceRequestInput: IssuanceRequestInput;
   IssuanceRequestResponse: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['IssuanceRequestResponse']>;
   IssuanceRequestStatus: IssuanceRequestStatus;
@@ -2342,6 +2379,7 @@ export type ResolversParentTypes = {
   IssuanceCallbackEvent: IssuanceCallbackEvent;
   IssuanceEventData: Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversParentTypes['Issuance']> };
   IssuanceEventWhere: IssuanceEventWhere;
+  IssuancePresentationWhere: IssuancePresentationWhere;
   IssuanceRequestInput: IssuanceRequestInput;
   IssuanceRequestResponse: ResolversUnionTypes<ResolversParentTypes>['IssuanceRequestResponse'];
   IssuanceResponse: IssuanceResponse;
@@ -2583,6 +2621,7 @@ export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends R
   isRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   issuedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   issuedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<IssuancePresentationsArgs>>;
   revokedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   revokedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['IssuanceStatus'], ParentType, ContextType>;
