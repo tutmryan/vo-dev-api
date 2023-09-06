@@ -665,6 +665,14 @@ export type IdentityIssuanceWhere = {
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
+/** Columns that can be used for sorting identities. */
+export enum IdentityOrderBy {
+  /** The unique identifier of the identity in the issuing tenant */
+  Identifier = 'identifier',
+  /** The name of the identity. */
+  Name = 'name'
+}
+
 /** Criteria for filtering identity presentations. */
 export type IdentityPresentationWhere = {
   /** The ID of a contract used to make the presentation request. */
@@ -1352,6 +1360,8 @@ export type QueryFindContractsArgs = {
 export type QueryFindIdentitiesArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<IdentityOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<IdentityWhere>;
 };
 
@@ -2188,6 +2198,7 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   IdentityInput: IdentityInput;
   IdentityIssuanceWhere: IdentityIssuanceWhere;
+  IdentityOrderBy: IdentityOrderBy;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
   IonDidModel: ResolverTypeWrapper<IonDidModel>;

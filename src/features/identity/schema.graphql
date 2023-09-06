@@ -96,6 +96,20 @@ type Mutation {
   saveIdentity(input: IdentityInput!): Identity!
 }
 
+"""
+Columns that can be used for sorting identities.
+"""
+enum IdentityOrderBy {
+  """
+  The name of the identity.
+  """
+  name
+  """
+  The unique identifier of the identity in the issuing tenant
+  """
+  identifier
+}
+
 # eslint-disable-next-line @graphql-eslint/require-description
 type Query {
   """
@@ -105,7 +119,13 @@ type Query {
   """
   Returns identites, optionally matching the specified criteria
   """
-  findIdentities(where: IdentityWhere, offset: PositiveInt, limit: PositiveInt = 100): [Identity!]! @cacheControl(maxAge: 60)
+  findIdentities(
+    where: IdentityWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: IdentityOrderBy
+    orderDirection: OrderDirection
+  ): [Identity!]! @cacheControl(maxAge: 60)
   """
   Returns home tenant user identies matching the specified criteria
   """
