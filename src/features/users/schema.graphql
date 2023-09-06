@@ -1,3 +1,4 @@
+# eslint-disable @graphql-eslint/naming-convention
 """
 Represents a user of the platform, whether a person (interactive user) or a third-party application.
 Users are members of the platform home tenant, people are AAD tenant users, applications are app registrations.
@@ -59,6 +60,20 @@ input UserWhere {
   isApp: Boolean
 }
 
+"""
+Columns that can be used for sorting users.
+"""
+enum UserOrderBy {
+  """
+  The name of the user.
+  """
+  name
+  """
+  The email of the user.
+  """
+  email
+}
+
 # eslint-disable-next-line @graphql-eslint/require-description
 type Query {
   """
@@ -68,5 +83,11 @@ type Query {
   """
   Returns users, optionally matching the specified criteria
   """
-  findUsers(where: UserWhere, offset: PositiveInt, limit: PositiveInt = 100): [User!]! @cacheControl(maxAge: 60)
+  findUsers(
+    where: UserWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: UserOrderBy
+    orderDirection: OrderDirection
+  ): [User!]! @cacheControl(maxAge: 60)
 }

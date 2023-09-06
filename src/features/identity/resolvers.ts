@@ -12,7 +12,8 @@ export const resolvers: Resolvers = {
   },
   Query: {
     identity: (_, { id }, { dataLoaders: { identities } }) => identities.load(id),
-    findIdentities: (_, { where, offset, limit }, context) => query(context, FindIdentitiesQuery, where, offset, limit),
+    findIdentities: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
+      query(context, FindIdentitiesQuery, where, offset, limit, orderBy, orderDirection),
     findTenantIdentities: (_, { where, limit }, context) => query(context, FindTenantIdentitiesQuery, where, limit),
     identityIssuers: (_, __, context) => query(context, IdentityIssuersQuery),
   },

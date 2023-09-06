@@ -665,6 +665,14 @@ export type IdentityIssuanceWhere = {
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
+/** Columns that can be used for sorting identities. */
+export enum IdentityOrderBy {
+  /** The unique identifier of the identity in the issuing tenant */
+  Identifier = 'identifier',
+  /** The name of the identity. */
+  Name = 'name'
+}
+
 /** Criteria for filtering identity presentations. */
 export type IdentityPresentationWhere = {
   /** The ID of a contract used to make the presentation request. */
@@ -1352,6 +1360,8 @@ export type QueryFindContractsArgs = {
 export type QueryFindIdentitiesArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<IdentityOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<IdentityWhere>;
 };
 
@@ -1395,6 +1405,8 @@ export type QueryFindTenantIdentitiesArgs = {
 export type QueryFindUsersArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<UserOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<UserWhere>;
 };
 
@@ -1849,6 +1861,14 @@ export type UserIssuanceWhere = {
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
+/** Columns that can be used for sorting users. */
+export enum UserOrderBy {
+  /** The email of the user. */
+  Email = 'email',
+  /** The name of the user. */
+  Name = 'name'
+}
+
 /** Criteria for filtering user presentations. */
 export type UserPresentationWhere = {
   /** The ID of a contract used to make the presentation request. */
@@ -2188,6 +2208,7 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   IdentityInput: IdentityInput;
   IdentityIssuanceWhere: IdentityIssuanceWhere;
+  IdentityOrderBy: IdentityOrderBy;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
   IonDidModel: ResolverTypeWrapper<IonDidModel>;
@@ -2254,6 +2275,7 @@ export type ResolversTypes = {
   User: ResolverTypeWrapper<UserEntity>;
   UserCount: ResolverTypeWrapper<Omit<UserCount, 'user'> & { user: ResolversTypes['User'] }>;
   UserIssuanceWhere: UserIssuanceWhere;
+  UserOrderBy: UserOrderBy;
   UserPresentationWhere: UserPresentationWhere;
   UserWhere: UserWhere;
   Void: ResolverTypeWrapper<Scalars['Void']['output']>;
