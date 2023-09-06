@@ -514,6 +514,10 @@ enum IssuanceOrderBy {
 
 extend type Query {
   """
+  Returns an issuance by ID
+  """
+  issuance(id: ID!): Issuance!
+  """
   Returns successful credential issuances, optionally matching the specified criteria.
   """
   findIssuances(

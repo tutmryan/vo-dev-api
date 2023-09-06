@@ -14,6 +14,7 @@ import { FindIssuancesQuery } from './queries/find-issuances-query'
 
 export const resolvers: Resolvers = {
   Query: {
+    issuance: (_, { id }, { dataLoaders: { issuances } }) => issuances.load(id),
     findIssuances: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindIssuancesQuery, where, offset, limit, orderBy, orderDirection),
     issuanceCount: (_, { where }, context) => query(context, CountIssuancesQuery, where),

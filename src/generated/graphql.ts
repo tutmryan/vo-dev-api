@@ -1314,6 +1314,8 @@ export type Query = {
   identity: Identity;
   /** Returns the distinct set of issuers from all identities */
   identityIssuers: Array<Scalars['String']['output']>;
+  /** Returns an issuance by ID */
+  issuance: Issuance;
   /** Returns the issuance count, optionally matching the specified criteria. */
   issuanceCount: Scalars['NonNegativeInt']['output'];
   /** Returns the issuance count, grouped by Contract, optionally matching the specified criteria. */
@@ -1412,6 +1414,11 @@ export type QueryFindUsersArgs = {
 
 
 export type QueryIdentityArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryIssuanceArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -2742,6 +2749,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   healthcheck?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityArgs, 'id'>>;
   identityIssuers?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  issuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<QueryIssuanceArgs, 'id'>>;
   issuanceCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryIssuanceCountArgs>>;
   issuanceCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByContractArgs>>;
   issuanceCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByUserArgs>>;
