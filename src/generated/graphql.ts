@@ -1405,6 +1405,8 @@ export type QueryFindTenantIdentitiesArgs = {
 export type QueryFindUsersArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<UserOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<UserWhere>;
 };
 
@@ -1859,6 +1861,14 @@ export type UserIssuanceWhere = {
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
+/** Columns that can be used for sorting users. */
+export enum UserOrderBy {
+  /** The email of the user. */
+  Email = 'email',
+  /** The name of the user. */
+  Name = 'name'
+}
+
 /** Criteria for filtering user presentations. */
 export type UserPresentationWhere = {
   /** The ID of a contract used to make the presentation request. */
@@ -2265,6 +2275,7 @@ export type ResolversTypes = {
   User: ResolverTypeWrapper<UserEntity>;
   UserCount: ResolverTypeWrapper<Omit<UserCount, 'user'> & { user: ResolversTypes['User'] }>;
   UserIssuanceWhere: UserIssuanceWhere;
+  UserOrderBy: UserOrderBy;
   UserPresentationWhere: UserPresentationWhere;
   UserWhere: UserWhere;
   Void: ResolverTypeWrapper<Scalars['Void']['output']>;
