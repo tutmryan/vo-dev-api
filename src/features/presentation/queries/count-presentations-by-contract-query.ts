@@ -32,6 +32,11 @@ export async function CountPresentationsByContractQuery(
   if (criteria?.identityId) query.andWhere('p.identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
   if (criteria?.requestedById) query.andWhere('p.requested_by_id = :requestedById', { requestedById: criteria.requestedById.toUpperCase() })
   if (criteria?.contractId) throw new Error("Sorry, can't filter by contractId when grouping by contract.")
+  if (criteria?.issuanceId) {
+    query.innerJoin('presentation_issuances', 'pi', 'p.id = pi.presentation_id')
+    query.innerJoin('issuance', 'i', 'pi.issuance_id = i.id')
+    query.andWhere('issuance_id = :issuanceId', { issuanceId: criteria.issuanceId.toUpperCase() })
+  }
 
   if (criteria?.from && criteria.to)
     query.andWhere('p.presented_at BETWEEN :from AND :to', { from: criteria.from.toISOString(), to: criteria.to.toISOString() })

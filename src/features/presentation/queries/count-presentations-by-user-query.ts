@@ -27,10 +27,11 @@ export async function CountPresentationsByUserQuery(
 
   if (criteria?.requestId) query.andWhere('p.request_id = :requestId', { requestId: criteria.requestId.toUpperCase() })
   if (criteria?.identityId) query.andWhere('p.identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
-  if (criteria?.contractId) {
+  if (criteria?.contractId || criteria?.issuanceId) {
     query.innerJoin('presentation_issuances', 'pi', 'p.id = pi.presentation_id')
     query.innerJoin('issuance', 'i', 'pi.issuance_id = i.id')
-    query.andWhere('contract_id = :contractId', { contractId: criteria.contractId.toUpperCase() })
+    if (criteria.contractId) query.andWhere('contract_id = :contractId', { contractId: criteria.contractId.toUpperCase() })
+    if (criteria.issuanceId) query.andWhere('issuance_id = :issuanceId', { issuanceId: criteria.issuanceId.toUpperCase() })
   }
   if (criteria?.requestedById) throw new Error("Sorry, can't filter by requestedById when grouping by requested by user.")
 
