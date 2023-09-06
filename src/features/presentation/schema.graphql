@@ -300,6 +300,10 @@ input ContractPresentationWhere {
   """
   requestedById: ID
   """
+  The issuance that was presented
+  """
+  issuanceId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -334,6 +338,10 @@ input IdentityPresentationWhere {
   """
   requestedById: ID
   """
+  The issuance that was presented
+  """
+  issuanceId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -367,6 +375,44 @@ input UserPresentationWhere {
   The ID of a contract used to make the presentation request.
   """
   contractId: ID
+  """
+  The issuance that was presented
+  """
+  issuanceId: ID
+  """
+  The start of the presentedAt period to include.
+  """
+  from: DateTime
+  """
+  The end of the presentedAt period to include.
+  """
+  to: DateTime
+  """
+  The type of credential requested.
+  """
+  requestedType: String
+  """
+  The type of credential presented.
+  """
+  presentedType: String
+}
+
+"""
+Criteria for filtering issuance presentations.
+"""
+input IssuancePresentationWhere {
+  """
+  The requestId of the presentation request.
+  """
+  requestId: ID
+  """
+  The ID of the identity who presented the credential (if known).
+  """
+  identityId: ID
+  """
+  The ID of the user (Person or Application) that requested & received the presentation.
+  """
+  requestedById: ID
   """
   The start of the presentedAt period to include.
   """
@@ -406,6 +452,10 @@ input PresentationWhere {
   """
   requestedById: ID
   """
+  The issuance that was presented
+  """
+  issuanceId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -442,6 +492,13 @@ extend type User {
   Returns the successful credential presentations this user has requested (presentation.requestedBy => user).
   """
   presentations(where: UserPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+}
+
+extend type Issuance {
+  """
+  Returns the successful credential presentations for this issuance.
+  """
+  presentations(where: IssuancePresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
 }
 
 """
