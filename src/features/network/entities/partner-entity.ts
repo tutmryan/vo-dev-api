@@ -4,14 +4,7 @@ import { typeSafeAssign } from '../../../util/type-safe-assign'
 
 @Entity('partner')
 export class PartnerEntity extends VerifiedOrchestrationEntity {
-  constructor(args?: {
-    name: string
-    did: string
-    credentialTypes: string[]
-    tenantId: string | null
-    issuerId: string | null
-    linkedDomainUrls: string[] | null
-  }) {
+  constructor(args?: Pick<PartnerEntity, 'name' | 'did' | 'credentialTypes' | 'tenantId' | 'issuerId' | 'linkedDomainUrls'>) {
     super()
     if (args) typeSafeAssign(this, args)
   }
@@ -28,6 +21,9 @@ export class PartnerEntity extends VerifiedOrchestrationEntity {
   get credentialTypes(): string[] {
     return JSON.parse(this.credentialTypesJson)
   }
+  set credentialTypes(types: string[]) {
+    this.credentialTypesJson = JSON.stringify(types)
+  }
 
   @Column({ type: 'uniqueidentifier', nullable: true })
   tenantId!: string | null
@@ -36,9 +32,12 @@ export class PartnerEntity extends VerifiedOrchestrationEntity {
   issuerId!: string | null
 
   @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
-  linkedDomainUrlsJson!: string | null
+  private linkedDomainUrlsJson!: string | null
 
   get linkedDomainUrls(): string[] | null {
     return this.linkedDomainUrlsJson ? JSON.parse(this.linkedDomainUrlsJson) : null
+  }
+  set linkedDomainUrls(urls: string[] | null) {
+    this.linkedDomainUrlsJson = urls ? JSON.stringify(urls) : null
   }
 }

@@ -21,6 +21,7 @@ extensions:
                 Issuance: ../features/issuance/entities/issuance-entity#IssuanceEntity
                 Presentation: ../features/presentation/entities/presentation-entity#PresentationEntity
                 Identity: ../features/identity/entities/identity-entity#IdentityEntity
+                Partner: ../features/network/entities/partner-entity#PartnerEntity
         config:
           strictScalars: true
           scalars:
