@@ -2,6 +2,7 @@ import type { FindOptionsRelations, FindOptionsWhere } from 'typeorm'
 import type { QueryContext } from '../../../cqrs/query-context'
 import type { Maybe, PresentationWhere } from '../../../generated/graphql'
 import { BetweenTimestamp, LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp } from '../../../util/typeorm'
+import type { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { PresentationEntity } from '../entities/presentation-entity'
 
 export async function CountPresentationsQuery(this: QueryContext, criteria?: Maybe<PresentationWhere>) {
@@ -12,8 +13,10 @@ export async function CountPresentationsQuery(this: QueryContext, criteria?: May
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.contractId || criteria?.issuanceId) {
     relations.issuances = true
-    if (criteria.contractId) where.issuances = { contractId: criteria.contractId.toUpperCase() }
-    if (criteria.issuanceId) where.issuances = { id: criteria.issuanceId.toUpperCase() }
+    const issuanceWhere: FindOptionsWhere<IssuanceEntity> = {}
+    if (criteria.contractId) issuanceWhere.contractId = criteria.contractId.toUpperCase()
+    if (criteria.issuanceId) issuanceWhere.id = criteria.issuanceId.toUpperCase()
+    where.issuances = issuanceWhere
   }
   if (criteria?.requestedById) where.requestedById = criteria.requestedById.toUpperCase()
 

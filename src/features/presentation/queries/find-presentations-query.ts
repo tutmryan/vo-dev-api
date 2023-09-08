@@ -4,6 +4,7 @@ import type { QueryContext } from '../../../cqrs/query-context'
 import type { Maybe, PresentationWhere } from '../../../generated/graphql'
 import { OrderDirection, PresentationOrderBy } from '../../../generated/graphql'
 import { OptionalRange } from '../../../util/typeorm'
+import type { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { PresentationEntity } from '../entities/presentation-entity'
 
 export async function FindPresentationsQuery(
@@ -23,8 +24,10 @@ export async function FindPresentationsQuery(
   if (criteria?.requestedById) where.requestedById = criteria.requestedById.toUpperCase()
   if (criteria?.contractId || criteria?.issuanceId) {
     relations.issuances = true
-    if (criteria.contractId) where.issuances = { contractId: criteria.contractId.toUpperCase() }
-    if (criteria.issuanceId) where.issuances = { id: criteria.issuanceId.toUpperCase() }
+    const issuanceWhere: FindOptionsWhere<IssuanceEntity> = {}
+    if (criteria.contractId) issuanceWhere.contractId = criteria.contractId.toUpperCase()
+    if (criteria.issuanceId) issuanceWhere.id = criteria.issuanceId.toUpperCase()
+    where.issuances = issuanceWhere
   }
   if (criteria?.requestedType) where.requestedCredentialsJson = ILike(`%"type":"${criteria.requestedType}"%`)
   if (criteria?.presentedType) where.presentedCredentialsJson = ILike(`%"type":[[]%"${criteria.presentedType}"%]%`) // [[] is how you escape [ https://stackoverflow.com/questions/439495/how-can-i-escape-square-brackets-in-a-like-clause
