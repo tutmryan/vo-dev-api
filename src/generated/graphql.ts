@@ -1158,6 +1158,26 @@ export type PartnerInput = {
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+/** Columns that can be used for sorting partners. */
+export enum PartnerOrderBy {
+  /** The unique identifier of the verifiable credential service instance if the partner is on Entra network */
+  IssuerId = 'issuerId',
+  /** The name of the identity. */
+  Name = 'name',
+  /** The Azure AD tenant identifier if the partner is on Entra network */
+  TenantId = 'tenantId'
+}
+
+/** Defines the searchable fields usable to find partners */
+export type PartnerWhere = {
+  /** The type of credential the partner provides. */
+  credentialType?: InputMaybe<Scalars['String']['input']>;
+  /** The partial domain url linked to the partner to match */
+  linkedDomainUrl?: InputMaybe<Scalars['String']['input']>;
+  /** The partial name of the partner to match */
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
 /**
  * The pin type defines a PIN code that can be displayed as part of the issuance.
  * Pin is optional, and, if used, should always be sent out-of-band.
@@ -1383,6 +1403,8 @@ export type Query = {
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-issuers
    */
   findNetworkIssuers: Array<NetworkIssuer>;
+  /** Returns partners, optionally matching the specified criteria */
+  findPartners: Array<Partner>;
   /** Returns successful credential presentations, optionally matching the specified criteria. */
   findPresentations: Array<Presentation>;
   /** Returns templates, optionally matching the specified criteria */
@@ -1462,6 +1484,15 @@ export type QueryFindIssuancesArgs = {
 
 export type QueryFindNetworkIssuersArgs = {
   where: NetworkIssuersWhere;
+};
+
+
+export type QueryFindPartnersArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<PartnerOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<PartnerWhere>;
 };
 
 
@@ -2328,6 +2359,8 @@ export type ResolversTypes = {
   OrderDirection: OrderDirection;
   Partner: ResolverTypeWrapper<PartnerEntity>;
   PartnerInput: PartnerInput;
+  PartnerOrderBy: PartnerOrderBy;
+  PartnerWhere: PartnerWhere;
   Pin: Pin;
   PositiveInt: ResolverTypeWrapper<Scalars['PositiveInt']['output']>;
   Presentation: ResolverTypeWrapper<PresentationEntity>;
@@ -2446,6 +2479,7 @@ export type ResolversParentTypes = {
   OnboardingInput: OnboardingInput;
   Partner: PartnerEntity;
   PartnerInput: PartnerInput;
+  PartnerWhere: PartnerWhere;
   Pin: Pin;
   PositiveInt: Scalars['PositiveInt']['output'];
   Presentation: PresentationEntity;
@@ -2846,6 +2880,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findIdentities?: Resolver<Array<ResolversTypes['Identity']>, ParentType, ContextType, RequireFields<QueryFindIdentitiesArgs, 'limit'>>;
   findIssuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, RequireFields<QueryFindIssuancesArgs, 'limit'>>;
   findNetworkIssuers?: Resolver<Array<ResolversTypes['NetworkIssuer']>, ParentType, ContextType, RequireFields<QueryFindNetworkIssuersArgs, 'where'>>;
+  findPartners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType, RequireFields<QueryFindPartnersArgs, 'limit'>>;
   findPresentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<QueryFindPresentationsArgs, 'limit'>>;
   findTemplates?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType, Partial<QueryFindTemplatesArgs>>;
   findTenantIdentities?: Resolver<Array<ResolversTypes['TenantIdentity']>, ParentType, ContextType, RequireFields<QueryFindTenantIdentitiesArgs, 'limit' | 'where'>>;

@@ -16,7 +16,7 @@ export class PartnerEntity extends VerifiedOrchestrationEntity {
   did!: string
 
   @Column({ type: 'nvarchar', length: 'MAX' })
-  private credentialTypesJson!: string
+  credentialTypesJson!: string
 
   get credentialTypes(): string[] {
     return JSON.parse(this.credentialTypesJson)
@@ -32,7 +32,7 @@ export class PartnerEntity extends VerifiedOrchestrationEntity {
   issuerId!: string | null
 
   @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
-  private linkedDomainUrlsJson!: string | null
+  linkedDomainUrlsJson!: string | null
 
   get linkedDomainUrls(): string[] | null {
     return this.linkedDomainUrlsJson ? JSON.parse(this.linkedDomainUrlsJson) : null
