@@ -1,3 +1,90 @@
+# eslint-disable @graphql-eslint/naming-convention
+
+"""
+Input type representing a partner
+"""
+input PartnerInput {
+  """
+  The name of the partner
+  """
+  name: String!
+
+  """
+  The DID of the partner
+  """
+  did: String!
+
+  """
+  The type(s) of the contract / credential
+  Requires at least one type, and cannot have duplicate types
+  """
+  credentialTypes: [String!]!
+
+  """
+  The Azure AD tenant identifier if the partner is on Entra network
+  """
+  tenantId: ID
+
+  """
+  The unique identifier of the verifiable credential service instance if the partner is on Entra network
+  """
+  issuerId: ID
+
+  """
+  Domains linked to this partner's DID
+  """
+  linkedDomainUrls: [URL!]
+}
+
+"""
+A credential issuer partner trusted by the platform
+"""
+type Partner {
+  """
+  The local id of this partner
+  """
+  id: ID!
+
+  """
+  The name of the partner
+  """
+  name: String!
+
+  """
+  The DID of the partner
+  """
+  did: String!
+
+  """
+  The type(s) of the contract / credential
+  Requires at least one type, and cannot have duplicate types
+  """
+  credentialTypes: [String!]!
+
+  """
+  The Azure AD tenant identifier if the partner is on Entra network
+  """
+  tenantId: ID
+
+  """
+  The unique identifier of the verifiable credential service instance if the partner is on Entra network
+  """
+  issuerId: ID
+
+  """
+  Domains linked to this partner's DID
+  """
+  linkedDomainUrls: [URL!]
+}
+
+# eslint-disable-next-line @graphql-eslint/require-description
+type Mutation {
+  """
+  Creates or updates a partner based on its did
+  """
+  savePartner(input: PartnerInput!): Partner!
+}
+
 # eslint-disable-next-line @graphql-eslint/require-description
 type Query {
   """
@@ -10,6 +97,16 @@ type Query {
   See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
   """
   networkContracts(tenantId: ID!, issuerId: ID!): [NetworkContract!]! @cacheControl(maxAge: 60) # 1 minute since publishing takes some time to replicate anyway
+  """
+  Returns partners, optionally matching the specified criteria
+  """
+  findPartners(
+    where: PartnerWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: PartnerOrderBy
+    orderDirection: OrderDirection
+  ): [Partner!]! @cacheControl(maxAge: 60)
 }
 
 """
@@ -69,4 +166,40 @@ type NetworkContract {
   Claims included in the verifiable credential
   """
   claims: [String!]!
+}
+
+"""
+Defines the searchable fields usable to find partners
+"""
+input PartnerWhere {
+  """
+  The partial name of the partner to match
+  """
+  name: String
+  """
+  The type of credential the partner provides.
+  """
+  credentialType: String
+  """
+  The partial domain url linked to the partner to match
+  """
+  linkedDomainUrl: String
+}
+
+"""
+Columns that can be used for sorting partners.
+"""
+enum PartnerOrderBy {
+  """
+  The name of the identity.
+  """
+  name
+  """
+  The Azure AD tenant identifier if the partner is on Entra network
+  """
+  tenantId
+  """
+  The unique identifier of the verifiable credential service instance if the partner is on Entra network
+  """
+  issuerId
 }
