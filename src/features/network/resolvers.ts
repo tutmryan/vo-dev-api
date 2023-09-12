@@ -1,11 +1,13 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
-import { CreateOrUpdatePartnerCommand } from './commands/create-or-update-partner'
+import { CreatePartnerCommand } from './commands/create-partner-command'
+import { UpdatePartnerCommand } from './commands/update-partner-command'
 import { FindPartnersQuery } from './queries/find-partners-query'
 
 export const resolvers: Resolvers = {
   Mutation: {
-    savePartner: (_, { input }, context) => dispatch(context, CreateOrUpdatePartnerCommand, input),
+    createPartner: (_, { input }, context) => dispatch(context, CreatePartnerCommand, input),
+    updatePartner: (_, { id, input }, context) => dispatch(context, UpdatePartnerCommand, id, input),
   },
   Query: {
     findNetworkIssuers: (_, { where }, { services: { admin } }) => admin.findNetworkIssuers(where),
