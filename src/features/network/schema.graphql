@@ -106,7 +106,7 @@ type Query {
     limit: PositiveInt = 100
     orderBy: PartnerOrderBy
     orderDirection: OrderDirection
-  ): [Partner!]! @cacheControl(maxAge: 60)
+  ): [Partner!]!
 }
 
 """
