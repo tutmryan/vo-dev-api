@@ -90,7 +90,7 @@ export class AdminService extends HttpClient {
 
   async networkContracts(tenantId: string, issuerId: string): Promise<NetworkContract[]> {
     const { value: contracts } = await this.get<Value<NetworkContract[]>>(
-      `tenants/${tenantId}/verifiableCredentialsNetwork/authorities/${issuerId}/contracts`,
+      `tenants/${tenantId.toLowerCase()}/verifiableCredentialsNetwork/authorities/${issuerId.toLowerCase()}/contracts`,
     )
     return contracts
   }

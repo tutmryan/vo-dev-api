@@ -1440,6 +1440,8 @@ export type Query = {
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
    */
   networkContracts: Array<NetworkContract>;
+  /** Returns a partner by ID */
+  partner: Partner;
   /** Returns the successful presentation count, optionally matching the specified criteria. */
   presentationCount: Scalars['NonNegativeInt']['output'];
   /** Returns the successful presentation count, grouped by Contract, optionally matching the specified criteria. */
@@ -1567,6 +1569,11 @@ export type QueryIssuanceCountByUserArgs = {
 export type QueryNetworkContractsArgs = {
   issuerId: Scalars['ID']['input'];
   tenantId: Scalars['ID']['input'];
+};
+
+
+export type QueryPartnerArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2915,6 +2922,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   issuanceCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByContractArgs>>;
   issuanceCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByUserArgs>>;
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
+  partner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<QueryPartnerArgs, 'id'>>;
   presentationCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryPresentationCountArgs>>;
   presentationCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryPresentationCountByContractArgs>>;
   presentationCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryPresentationCountByUserArgs>>;

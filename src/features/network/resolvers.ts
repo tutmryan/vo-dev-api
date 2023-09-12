@@ -14,5 +14,6 @@ export const resolvers: Resolvers = {
     networkContracts: (_, { tenantId, issuerId }, { services: { admin } }) => admin.networkContracts(tenantId, issuerId),
     findPartners: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindPartnersQuery, where, offset, limit, orderBy, orderDirection),
+    partner: (_, { id }, { dataLoaders: { partners } }) => partners.load(id),
   },
 }

@@ -128,6 +128,10 @@ type Query {
     orderBy: PartnerOrderBy
     orderDirection: OrderDirection
   ): [Partner!]!
+  """
+  Returns a partner by ID
+  """
+  partner(id: ID!): Partner!
 }
 
 """
