@@ -509,6 +509,25 @@ export type ContractWhere = {
   templateId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+/** Input type for creating a new partner */
+export type CreatePartnerInput = {
+  /**
+   * The type(s) of the contract / credential
+   * Requires at least one type, and cannot have duplicate types
+   */
+  credentialTypes: Array<Scalars['String']['input']>;
+  /** The DID of the partner */
+  did: Scalars['String']['input'];
+  /** The unique identifier of the verifiable credential service instance if the partner is on Entra network */
+  issuerId?: InputMaybe<Scalars['ID']['input']>;
+  /** Domains linked to this partner's DID */
+  linkedDomainUrls?: InputMaybe<Array<Scalars['URL']['input']>>;
+  /** The name of the partner */
+  name: Scalars['String']['input'];
+  /** The Azure AD tenant identifier if the partner is on Entra network */
+  tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 /** Defines a claim included in a verifiable credential */
 export type CreateUpdateTemplateDisplayClaimInput = {
   /** The name of the claim to which the label applies */
@@ -947,6 +966,8 @@ export type Mutation = {
   createContract: Contract;
   /** The result of this request returns a QR code with a link to start the issuance process, or an error */
   createIssuanceRequest: IssuanceRequestResponse;
+  /** Creates a partner whose credential types can be requested for presentation */
+  createPartner: Partner;
   /** The result of this request returns a QR code with a link to start the presentation process, or an error */
   createPresentationRequest: PresentationRequestResponse;
   /** Creates a new template */
@@ -969,10 +990,10 @@ export type Mutation = {
   revokeIssuances: Scalars['ID']['output'];
   /** Creates or updates an identity based on its issuer and identifier */
   saveIdentity: Identity;
-  /** Creates or updates a partner based on its did */
-  savePartner: Partner;
   /** Updates an existing contract */
   updateContract: Contract;
+  /** Updates the name and credential types of a partner */
+  updatePartner: Partner;
   /** Updates an existing template */
   updateTemplate: Template;
 };
@@ -995,6 +1016,11 @@ export type MutationCreateContractArgs = {
 
 export type MutationCreateIssuanceRequestArgs = {
   request: IssuanceRequestInput;
+};
+
+
+export type MutationCreatePartnerArgs = {
+  input: CreatePartnerInput;
 };
 
 
@@ -1053,14 +1079,15 @@ export type MutationSaveIdentityArgs = {
 };
 
 
-export type MutationSavePartnerArgs = {
-  input: PartnerInput;
-};
-
-
 export type MutationUpdateContractArgs = {
   id: Scalars['ID']['input'];
   input: ContractInput;
+};
+
+
+export type MutationUpdatePartnerArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdatePartnerInput;
 };
 
 
@@ -1137,25 +1164,6 @@ export type Partner = {
   name: Scalars['String']['output'];
   /** The Azure AD tenant identifier if the partner is on Entra network */
   tenantId?: Maybe<Scalars['ID']['output']>;
-};
-
-/** Input type representing a partner */
-export type PartnerInput = {
-  /**
-   * The type(s) of the contract / credential
-   * Requires at least one type, and cannot have duplicate types
-   */
-  credentialTypes: Array<Scalars['String']['input']>;
-  /** The DID of the partner */
-  did: Scalars['String']['input'];
-  /** The unique identifier of the verifiable credential service instance if the partner is on Entra network */
-  issuerId?: InputMaybe<Scalars['ID']['input']>;
-  /** Domains linked to this partner's DID */
-  linkedDomainUrls?: InputMaybe<Array<Scalars['URL']['input']>>;
-  /** The name of the partner */
-  name: Scalars['String']['input'];
-  /** The Azure AD tenant identifier if the partner is on Entra network */
-  tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Columns that can be used for sorting partners. */
@@ -1432,6 +1440,8 @@ export type Query = {
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
    */
   networkContracts: Array<NetworkContract>;
+  /** Returns a partner by ID */
+  partner: Partner;
   /** Returns the successful presentation count, optionally matching the specified criteria. */
   presentationCount: Scalars['NonNegativeInt']['output'];
   /** Returns the successful presentation count, grouped by Contract, optionally matching the specified criteria. */
@@ -1559,6 +1569,11 @@ export type QueryIssuanceCountByUserArgs = {
 export type QueryNetworkContractsArgs = {
   issuerId: Scalars['ID']['input'];
   tenantId: Scalars['ID']['input'];
+};
+
+
+export type QueryPartnerArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1897,6 +1912,17 @@ export type TenantIdentity = {
 export type TenantIdentityWhere = {
   /** The partial name of the user to match */
   nameStartsWith: Scalars['String']['input'];
+};
+
+/** Input type for updating a new partner */
+export type UpdatePartnerInput = {
+  /**
+   * The type(s) of the contract / credential
+   * Requires at least one type, and cannot have duplicate types
+   */
+  credentialTypes: Array<Scalars['String']['input']>;
+  /** The name of the partner */
+  name: Scalars['String']['input'];
 };
 
 /**
@@ -2317,6 +2343,7 @@ export type ResolversTypes = {
   ContractIssuanceWhere: ContractIssuanceWhere;
   ContractPresentationWhere: ContractPresentationWhere;
   ContractWhere: ContractWhere;
+  CreatePartnerInput: CreatePartnerInput;
   CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
   CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
@@ -2358,7 +2385,6 @@ export type ResolversTypes = {
   OnboardingInput: OnboardingInput;
   OrderDirection: OrderDirection;
   Partner: ResolverTypeWrapper<PartnerEntity>;
-  PartnerInput: PartnerInput;
   PartnerOrderBy: PartnerOrderBy;
   PartnerWhere: PartnerWhere;
   Pin: Pin;
@@ -2400,6 +2426,7 @@ export type ResolversTypes = {
   TenantIdentity: ResolverTypeWrapper<TenantIdentity>;
   TenantIdentityWhere: TenantIdentityWhere;
   URL: ResolverTypeWrapper<Scalars['URL']['output']>;
+  UpdatePartnerInput: UpdatePartnerInput;
   User: ResolverTypeWrapper<UserEntity>;
   UserCount: ResolverTypeWrapper<Omit<UserCount, 'user'> & { user: ResolversTypes['User'] }>;
   UserIssuanceWhere: UserIssuanceWhere;
@@ -2443,6 +2470,7 @@ export type ResolversParentTypes = {
   ContractIssuanceWhere: ContractIssuanceWhere;
   ContractPresentationWhere: ContractPresentationWhere;
   ContractWhere: ContractWhere;
+  CreatePartnerInput: CreatePartnerInput;
   CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
   CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
@@ -2478,7 +2506,6 @@ export type ResolversParentTypes = {
   NonNegativeInt: Scalars['NonNegativeInt']['output'];
   OnboardingInput: OnboardingInput;
   Partner: PartnerEntity;
-  PartnerInput: PartnerInput;
   PartnerWhere: PartnerWhere;
   Pin: Pin;
   PositiveInt: Scalars['PositiveInt']['output'];
@@ -2517,6 +2544,7 @@ export type ResolversParentTypes = {
   TenantIdentity: TenantIdentity;
   TenantIdentityWhere: TenantIdentityWhere;
   URL: Scalars['URL']['output'];
+  UpdatePartnerInput: UpdatePartnerInput;
   User: UserEntity;
   UserCount: Omit<UserCount, 'user'> & { user: ResolversParentTypes['User'] };
   UserIssuanceWhere: UserIssuanceWhere;
@@ -2762,6 +2790,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   beginOnboarding?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationBeginOnboardingArgs, 'input'>>;
   createContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationCreateContractArgs, 'input'>>;
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
+  createPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationCreatePartnerArgs, 'input'>>;
   createPresentationRequest?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestArgs, 'request'>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
@@ -2773,8 +2802,8 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   revokeIssuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<MutationRevokeIssuanceArgs, 'id'>>;
   revokeIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeIssuancesArgs, 'ids'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
-  savePartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationSavePartnerArgs, 'input'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
+  updatePartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationUpdatePartnerArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;
 };
 
@@ -2893,6 +2922,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   issuanceCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByContractArgs>>;
   issuanceCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByUserArgs>>;
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
+  partner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<QueryPartnerArgs, 'id'>>;
   presentationCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryPresentationCountArgs>>;
   presentationCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryPresentationCountByContractArgs>>;
   presentationCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryPresentationCountByUserArgs>>;

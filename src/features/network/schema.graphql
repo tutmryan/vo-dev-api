@@ -1,9 +1,9 @@
 # eslint-disable @graphql-eslint/naming-convention
 
 """
-Input type representing a partner
+Input type for creating a new partner
 """
-input PartnerInput {
+input CreatePartnerInput {
   """
   The name of the partner
   """
@@ -34,6 +34,22 @@ input PartnerInput {
   Domains linked to this partner's DID
   """
   linkedDomainUrls: [URL!]
+}
+
+"""
+Input type for updating a new partner
+"""
+input UpdatePartnerInput {
+  """
+  The name of the partner
+  """
+  name: String!
+
+  """
+  The type(s) of the contract / credential
+  Requires at least one type, and cannot have duplicate types
+  """
+  credentialTypes: [String!]!
 }
 
 """
@@ -80,9 +96,14 @@ type Partner {
 # eslint-disable-next-line @graphql-eslint/require-description
 type Mutation {
   """
-  Creates or updates a partner based on its did
+  Creates a partner whose credential types can be requested for presentation
   """
-  savePartner(input: PartnerInput!): Partner!
+  createPartner(input: CreatePartnerInput!): Partner!
+
+  """
+  Updates the name and credential types of a partner
+  """
+  updatePartner(id: ID!, input: UpdatePartnerInput!): Partner!
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description
@@ -107,6 +128,10 @@ type Query {
     orderBy: PartnerOrderBy
     orderDirection: OrderDirection
   ): [Partner!]!
+  """
+  Returns a partner by ID
+  """
+  partner(id: ID!): Partner!
 }
 
 """
