@@ -37,6 +37,10 @@ export async function CountPresentationsByContractQuery(
     query.innerJoin('issuance', 'i', 'pi.issuance_id = i.id')
     query.andWhere('issuance_id = :issuanceId', { issuanceId: criteria.issuanceId.toUpperCase() })
   }
+  if (criteria?.partnerId) {
+    query.innerJoin('presentation_partners', 'pp', 'p.id = pp.presentation_id')
+    query.andWhere('partner_id = :partnerId', { partnerId: criteria.partnerId.toUpperCase() })
+  }
 
   if (criteria?.from && criteria.to)
     query.andWhere('p.presented_at BETWEEN :from AND :to', { from: criteria.from.toISOString(), to: criteria.to.toISOString() })
