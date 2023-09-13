@@ -274,6 +274,10 @@ type Presentation {
   """
   issuances: [Issuance!]!
   """
+  The partners who issued the credentials that were presented (which may be none, if the presented credentials were internal)
+  """
+  partners: [Partner!]!
+  """
   The credentials that were requested
   """
   requestedCredentials: [RequestedCredential!]!
@@ -303,6 +307,10 @@ input ContractPresentationWhere {
   The issuance that was presented
   """
   issuanceId: ID
+  """
+  The partner who issued the credential that was presented
+  """
+  partnerId: ID
   """
   The start of the presentedAt period to include.
   """
@@ -342,6 +350,10 @@ input IdentityPresentationWhere {
   """
   issuanceId: ID
   """
+  The partner who issued the credential that was presented
+  """
+  partnerId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -380,6 +392,10 @@ input UserPresentationWhere {
   """
   issuanceId: ID
   """
+  The partner who issued the credential that was presented
+  """
+  partnerId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -413,6 +429,52 @@ input IssuancePresentationWhere {
   The ID of the user (Person or Application) that requested & received the presentation.
   """
   requestedById: ID
+  """
+  The partner who issued the credential that was presented
+  """
+  partnerId: ID
+  """
+  The start of the presentedAt period to include.
+  """
+  from: DateTime
+  """
+  The end of the presentedAt period to include.
+  """
+  to: DateTime
+  """
+  The type of credential requested.
+  """
+  requestedType: String
+  """
+  The type of credential presented.
+  """
+  presentedType: String
+}
+
+"""
+Criteria for filtering presentations of credentials issued by the partner.
+"""
+input PartnerPresentationWhere {
+  """
+  The requestId of the presentation request.
+  """
+  requestId: ID
+  """
+  The ID of the identity who presented the credential (if known).
+  """
+  identityId: ID
+  """
+  The ID of the user (Person or Application) that requested & received the presentation.
+  """
+  requestedById: ID
+  """
+  The ID of a contract used to make the presentation request.
+  """
+  contractId: ID
+  """
+  The issuance that was presented
+  """
+  issuanceId: ID
   """
   The start of the presentedAt period to include.
   """
@@ -455,6 +517,10 @@ input PresentationWhere {
   The issuance that was presented
   """
   issuanceId: ID
+  """
+  The partner who issued the credential that was presented
+  """
+  partnerId: ID
   """
   The start of the presentedAt period to include.
   """
@@ -499,6 +565,13 @@ extend type Issuance {
   Returns the successful credential presentations for this issuance.
   """
   presentations(where: IssuancePresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+}
+
+extend type Partner {
+  """
+  Returns the successful credential presentations of credentails issued by this partner.
+  """
+  presentations(where: PartnerPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
 }
 
 """

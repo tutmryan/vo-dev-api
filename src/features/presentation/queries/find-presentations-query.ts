@@ -29,6 +29,10 @@ export async function FindPresentationsQuery(
     if (criteria.issuanceId) issuanceWhere.id = criteria.issuanceId.toUpperCase()
     where.issuances = issuanceWhere
   }
+  if (criteria?.partnerId) {
+    relations.partners = true
+    where.partners = { id: criteria.partnerId.toUpperCase() }
+  }
   if (criteria?.requestedType) where.requestedCredentialsJson = ILike(`%"type":"${criteria.requestedType}"%`)
   if (criteria?.presentedType) where.presentedCredentialsJson = ILike(`%"type":[[]%"${criteria.presentedType}"%]%`) // [[] is how you escape [ https://stackoverflow.com/questions/439495/how-can-i-escape-square-brackets-in-a-like-clause
 

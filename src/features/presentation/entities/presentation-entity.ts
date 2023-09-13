@@ -4,6 +4,7 @@ import type { PresentedCredential, RequestCredential } from '../../../generated/
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
+import { PartnerEntity } from '../../network/entities/partner-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
 export type PresentedData = Omit<PresentedCredential, 'claims'>
@@ -13,13 +14,17 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   constructor(
     args?: Pick<
       PresentationEntity,
-      'requestId' | 'identityId' | 'requestedById' | 'issuanceIds' | 'requestedCredentials' | 'presentedCredentials'
+      'requestId' | 'identityId' | 'requestedById' | 'issuanceIds' | 'requestedCredentials' | 'presentedCredentials' | 'partnerIds'
     >,
   ) {
     super()
     if (!args) return
-    const { issuanceIds, ...rest } = args
-    typeSafeAssign(this, { ...rest, issuances: Promise.resolve(args.issuanceIds.map((id) => ({ id } as IssuanceEntity))) })
+    const { issuanceIds, partnerIds, ...rest } = args
+    typeSafeAssign(this, {
+      ...rest,
+      issuances: Promise.resolve(issuanceIds.map((id) => ({ id } as IssuanceEntity))),
+      partners: Promise.resolve(partnerIds.map((id) => ({ id } as PartnerEntity))),
+    })
   }
 
   @Column({ type: 'nvarchar', nullable: true })
@@ -43,6 +48,13 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
 
   @RelationId((presentation: PresentationEntity) => presentation.issuances)
   issuanceIds!: string[]
+
+  @ManyToMany(() => PartnerEntity)
+  @JoinTable({ name: 'presentation_partners' })
+  partners!: Promise<PartnerEntity[]>
+
+  @RelationId((presentation: PresentationEntity) => presentation.partners)
+  partnerIds!: string[]
 
   @CreateDateColumn({ type: 'datetimeoffset' })
   presentedAt!: Date
