@@ -34,6 +34,10 @@ export async function CountPresentationsByUserQuery(
     if (criteria.issuanceId) query.andWhere('issuance_id = :issuanceId', { issuanceId: criteria.issuanceId.toUpperCase() })
   }
   if (criteria?.requestedById) throw new Error("Sorry, can't filter by requestedById when grouping by requested by user.")
+  if (criteria?.partnerId) {
+    query.innerJoin('presentation_partners', 'pp', 'p.id = pp.presentation_id')
+    query.andWhere('partner_id = :partnerId', { partnerId: criteria.partnerId.toUpperCase() })
+  }
 
   if (criteria?.from && criteria.to)
     query.andWhere('presented_at BETWEEN :from AND :to', { from: criteria.from.toISOString(), to: criteria.to.toISOString() })
