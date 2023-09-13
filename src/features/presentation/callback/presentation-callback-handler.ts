@@ -8,6 +8,7 @@ import { invariant } from '../../../util/invariant'
 import type { PresentationCallbackHandler } from '../../callback'
 import { StandardClaims } from '../../contracts/claims'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
+import { PartnerEntity } from '../../network/entities/partner-entity'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import type { PresentedData } from '../entities/presentation-entity'
 import { PresentationEntity } from '../entities/presentation-entity'
@@ -65,7 +66,8 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     const presentedCredentials: PresentedData[] = event.verifiedCredentialsData
       ? event.verifiedCredentialsData.map((credential) => omit(credential, 'claims'))
       : []
-
+    const presentedIssuers = presentedCredentials.map((c) => c.issuer)
+    const partners = await entityManager.getRepository(PartnerEntity).findBy({ did: In([...new Set(presentedIssuers)]) })
     const { requestedById, requestedCredentials } = presentationRequestDetails
     const presentationEntity = new PresentationEntity({
       requestId: event.requestId,
@@ -74,6 +76,7 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
       issuanceIds,
       requestedCredentials,
       presentedCredentials,
+      partnerIds: partners.map((p) => p.id),
     })
 
     const { id } = await entityManager.getRepository(PresentationEntity).save(presentationEntity)

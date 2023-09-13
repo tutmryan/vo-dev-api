@@ -1,5 +1,6 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
+import { compactErrors } from '../../util/compact-errors'
 import { CreatePartnerCommand } from './commands/create-partner-command'
 import { UpdatePartnerCommand } from './commands/update-partner-command'
 import { FindPartnersQuery } from './queries/find-partners-query'
@@ -15,5 +16,8 @@ export const resolvers: Resolvers = {
     findPartners: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindPartnersQuery, where, offset, limit, orderBy, orderDirection),
     partner: (_, { id }, { dataLoaders: { partners } }) => partners.load(id),
+  },
+  Presentation: {
+    partners: (presentation, _, { dataLoaders: { partners } }) => partners.loadMany(presentation.partnerIds).then(compactErrors),
   },
 }

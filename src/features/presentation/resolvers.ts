@@ -40,6 +40,10 @@ export const resolvers: Resolvers = {
     presentations: (issuance, { where, offset, limit }, context) =>
       query(context, FindPresentationsQuery, { issuanceId: issuance.id, ...where }, offset, limit),
   },
+  Partner: {
+    presentations: (partner, { where, offset, limit }, context) =>
+      query(context, FindPresentationsQuery, { partnerId: partner.id, ...where }, offset, limit),
+  },
   PresentationRequestResponse: {
     __resolveType: (response) => ('error' in response ? 'RequestErrorResponse' : 'PresentationResponse'),
   },

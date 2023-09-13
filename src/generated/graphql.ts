@@ -485,6 +485,8 @@ export type ContractPresentationWhere = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The partner who issued the credential that was presented */
+  partnerId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
   presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
@@ -703,6 +705,8 @@ export type IdentityPresentationWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The partner who issued the credential that was presented */
+  partnerId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
   presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
@@ -830,6 +834,8 @@ export type IssuancePresentationWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The partner who issued the credential that was presented */
+  partnerId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
   presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
@@ -1162,8 +1168,18 @@ export type Partner = {
   linkedDomainUrls?: Maybe<Array<Scalars['URL']['output']>>;
   /** The name of the partner */
   name: Scalars['String']['output'];
+  /** Returns the successful credential presentations of credentails issued by this partner. */
+  presentations: Array<Presentation>;
   /** The Azure AD tenant identifier if the partner is on Entra network */
   tenantId?: Maybe<Scalars['ID']['output']>;
+};
+
+
+/** A credential issuer partner trusted by the platform */
+export type PartnerPresentationsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<PartnerPresentationWhere>;
 };
 
 /** Columns that can be used for sorting partners. */
@@ -1175,6 +1191,28 @@ export enum PartnerOrderBy {
   /** The Azure AD tenant identifier if the partner is on Entra network */
   TenantId = 'tenantId'
 }
+
+/** Criteria for filtering presentations of credentials issued by the partner. */
+export type PartnerPresentationWhere = {
+  /** The ID of a contract used to make the presentation request. */
+  contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the presentedAt period to include. */
+  from?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the identity who presented the credential (if known). */
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The issuance that was presented */
+  issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential presented. */
+  presentedType?: InputMaybe<Scalars['String']['input']>;
+  /** The requestId of the presentation request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that requested & received the presentation. */
+  requestedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential requested. */
+  requestedType?: InputMaybe<Scalars['String']['input']>;
+  /** The end of the presentedAt period to include. */
+  to?: InputMaybe<Scalars['DateTime']['input']>;
+};
 
 /** Defines the searchable fields usable to find partners */
 export type PartnerWhere = {
@@ -1214,6 +1252,8 @@ export type Presentation = {
   identity?: Maybe<Identity>;
   /** The issuances that were presented (which may be none, if the presented credentials were from an external issuer) */
   issuances: Array<Issuance>;
+  /** The partners who issued the credentials that were presented (which may be none, if the presented credentials were internal) */
+  partners: Array<Partner>;
   presentedAt: Scalars['DateTime']['output'];
   /** The credentials that were presented (excluding claims data) */
   presentedCredentials: Array<PresentedCredential>;
@@ -1369,6 +1409,8 @@ export type PresentationWhere = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The partner who issued the credential that was presented */
+  partnerId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
   presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
@@ -2026,6 +2068,8 @@ export type UserPresentationWhere = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The partner who issued the credential that was presented */
+  partnerId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
   presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
@@ -2386,6 +2430,7 @@ export type ResolversTypes = {
   OrderDirection: OrderDirection;
   Partner: ResolverTypeWrapper<PartnerEntity>;
   PartnerOrderBy: PartnerOrderBy;
+  PartnerPresentationWhere: PartnerPresentationWhere;
   PartnerWhere: PartnerWhere;
   Pin: Pin;
   PositiveInt: ResolverTypeWrapper<Scalars['PositiveInt']['output']>;
@@ -2506,6 +2551,7 @@ export type ResolversParentTypes = {
   NonNegativeInt: Scalars['NonNegativeInt']['output'];
   OnboardingInput: OnboardingInput;
   Partner: PartnerEntity;
+  PartnerPresentationWhere: PartnerPresentationWhere;
   PartnerWhere: PartnerWhere;
   Pin: Pin;
   PositiveInt: Scalars['PositiveInt']['output'];
@@ -2835,6 +2881,7 @@ export type PartnerResolvers<ContextType = GraphQLContext, ParentType extends Re
   issuerId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   linkedDomainUrls?: Resolver<Maybe<Array<ResolversTypes['URL']>>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<PartnerPresentationsArgs>>;
   tenantId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -2847,6 +2894,7 @@ export type PresentationResolvers<ContextType = GraphQLContext, ParentType exten
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<Maybe<ResolversTypes['Identity']>, ParentType, ContextType>;
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType>;
+  partners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType>;
   presentedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   presentedCredentials?: Resolver<Array<ResolversTypes['PresentedCredential']>, ParentType, ContextType>;
   requestedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
