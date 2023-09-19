@@ -1,3 +1,28 @@
+"""
+Defines the criteria used to find credential types.
+"""
+input CredentialTypesWhere {
+  """
+  If true, or not specified, template types are returned.
+  If false, template types are excluded.
+  """
+  includeTemplateTypes: Boolean
+  """
+  If true, or not specified, contract types are returned.
+  If false, contract types are excluded.
+  """
+  includeContractTypes: Boolean
+  """
+  If true, or not specified, partner types are returned.
+  If false, partner types are excluded.
+  """
+  includePartnerTypes: Boolean
+}
+
 extend type Query {
-  credentialTypes: [String!]!
+  """
+  Returns a list of credential types, optionally filtered by the given criteria.
+  By default, all credential types are returned.
+  """
+  credentialTypes(where: CredentialTypesWhere): [String!]!
 }

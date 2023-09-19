@@ -4,6 +4,6 @@ import { CredentialTypesQuery } from './queries/credential-types-query'
 
 export const resolvers: Resolvers = {
   Query: {
-    credentialTypes: (_, __, context) => query(context, CredentialTypesQuery),
+    credentialTypes: (_, { where }, context) => query(context, CredentialTypesQuery, where ?? undefined),
   },
 }

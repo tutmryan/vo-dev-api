@@ -601,6 +601,25 @@ export type CreateUpdateTemplateDisplayModelInput = {
   locale?: InputMaybe<Scalars['Locale']['input']>;
 };
 
+/** Defines the criteria used to find credential types. */
+export type CredentialTypesWhere = {
+  /**
+   * If true, or not specified, contract types are returned.
+   * If false, contract types are excluded.
+   */
+  includeContractTypes?: InputMaybe<Scalars['Boolean']['input']>;
+  /**
+   * If true, or not specified, partner types are returned.
+   * If false, partner types are excluded.
+   */
+  includePartnerTypes?: InputMaybe<Scalars['Boolean']['input']>;
+  /**
+   * If true, or not specified, template types are returned.
+   * If false, template types are excluded.
+   */
+  includeTemplateTypes?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 /** status of the DID, published when it's written to ION otherwise it will be submitted */
 export enum DidDocumentStatus {
   Published = 'published',
@@ -1441,6 +1460,10 @@ export type Query = {
   authority?: Maybe<Authority>;
   /** Returns a contract by ID */
   contract: Contract;
+  /**
+   * Returns a list of credential types, optionally filtered by the given criteria.
+   * By default, all credential types are returned.
+   */
   credentialTypes: Array<Scalars['String']['output']>;
   /** Returns contracts, optionally matching the specified criteria */
   findContracts: Array<Contract>;
@@ -1506,6 +1529,11 @@ export type QueryAuthorityArgs = {
 
 export type QueryContractArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryCredentialTypesArgs = {
+  where?: InputMaybe<CredentialTypesWhere>;
 };
 
 
@@ -2393,6 +2421,7 @@ export type ResolversTypes = {
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
   CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
   CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
+  CredentialTypesWhere: CredentialTypesWhere;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   DidDocumentStatus: DidDocumentStatus;
   DidModel: ResolverTypeWrapper<ResolversInterfaceTypes<ResolversTypes>['DidModel']>;
@@ -2521,6 +2550,7 @@ export type ResolversParentTypes = {
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
   CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
   CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
+  CredentialTypesWhere: CredentialTypesWhere;
   DateTime: Scalars['DateTime']['output'];
   DidModel: ResolversInterfaceTypes<ResolversParentTypes>['DidModel'];
   EmailAddress: Scalars['EmailAddress']['output'];
@@ -2952,7 +2982,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   authorities?: Resolver<Array<ResolversTypes['Authority']>, ParentType, ContextType>;
   authority?: Resolver<Maybe<ResolversTypes['Authority']>, ParentType, ContextType, RequireFields<QueryAuthorityArgs, 'id'>>;
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
-  credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, Partial<QueryCredentialTypesArgs>>;
   findContracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType, Partial<QueryFindContractsArgs>>;
   findIdentities?: Resolver<Array<ResolversTypes['Identity']>, ParentType, ContextType, RequireFields<QueryFindIdentitiesArgs, 'limit'>>;
   findIssuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, RequireFields<QueryFindIssuancesArgs, 'limit'>>;
