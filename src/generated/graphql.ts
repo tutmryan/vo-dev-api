@@ -1356,13 +1356,13 @@ export enum PresentationOrderBy {
 export type PresentationRequestInput = {
   callback?: InputMaybe<Callback>;
   /**
-   * The identity you wish to present (alternatively use the identityId property, if known).
-   * Presentation identity information is only required for presentations of externally issued credentials.
+   * The identity who will present (alternatively use the identityId property, if known).
+   * Presentation identity information is only required for presentations of all externally issued credentials.
    */
   identity?: InputMaybe<IdentityInput>;
   /**
-   * The ID of the identity you wish to present (alternatively use the identity property).
-   * Presentation identity information is only required for presentations of externally issued credentials.
+   * The ID of the identity who will present (alternatively use the identity property).
+   * Presentation identity information is only required for presentations of all externally issued credentials.
    */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /**

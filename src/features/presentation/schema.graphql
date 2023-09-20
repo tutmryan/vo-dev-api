@@ -7,13 +7,13 @@ The presentation request payload contains information about your verifiable cred
 """
 input PresentationRequestInput {
   """
-  The ID of the identity you wish to present (alternatively use the identity property).
-  Presentation identity information is only required for presentations of externally issued credentials.
+  The ID of the identity who will present (alternatively use the identity property).
+  Presentation identity information is only required for presentations where all requested credentials are issued by external partners.
   """
   identityId: ID
   """
-  The identity you wish to present (alternatively use the identityId property, if known).
-  Presentation identity information is only required for presentations of externally issued credentials.
+  The identity who will present (alternatively use the identityId property, if known).
+  Presentation identity information is only required for presentations where all requested credentials are issued by external partners.
   """
   identity: IdentityInput
   """

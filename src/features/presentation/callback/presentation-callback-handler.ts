@@ -57,7 +57,8 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
           )}`,
         )
     } else {
-      if (issuances.length === 0) throw new Error('No identityId or issuanceIds found in presentation request or event data')
+      if (issuances.length === 0)
+        throw new Error('No identityId or issuanceIds found in presentation request or presented credential claims')
       identityId = issuances[0]!.identityId
     }
     invariant(identityId, 'identityId could not be determined')

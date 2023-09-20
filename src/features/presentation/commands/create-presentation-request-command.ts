@@ -39,10 +39,11 @@ export async function CreatePresentationRequestCommand(
     presentationRequest.requestedCredentials.map((c) => c.acceptedIssuers!.map((i) => ({ issuer: i, type: c.type }))),
   )
 
-  const doesIncludeExternalIssuer = requestedIssuersAndTypes.some(({ issuer }) => issuer && issuer !== platformIssuerDid)
-  if (doesIncludeExternalIssuer && !identityId && !identityInput)
-    throw new Error('Either identityId or identity info must be provided for presentations from external issuers')
+  const hasInternallyIssuedTypes = requestedIssuersAndTypes.some(({ issuer }) => issuer === platformIssuerDid)
+  if (!hasInternallyIssuedTypes && !identityId && !identityInput)
+    throw new Error('Either identityId or identity info must be provided for presentations from all external issuers')
 
+  const doesIncludeExternalIssuer = requestedIssuersAndTypes.some(({ issuer }) => issuer && issuer !== platformIssuerDid)
   if (doesIncludeExternalIssuer) {
     const partners = await entityManager
       .getRepository(PartnerEntity)
