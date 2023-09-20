@@ -41,7 +41,9 @@ export async function CreatePresentationRequestCommand(
 
   const hasInternallyIssuedTypes = requestedIssuersAndTypes.some(({ issuer }) => issuer === platformIssuerDid)
   if (!hasInternallyIssuedTypes && !identityId && !identityInput)
-    throw new Error('Either identityId or identity info must be provided for presentations from all external issuers')
+    throw new Error(
+      'Either identityId or identity info must be provided for presentations where all requested credentials are issued by external partners.',
+    )
 
   const doesIncludeExternalIssuer = requestedIssuersAndTypes.some(({ issuer }) => issuer && issuer !== platformIssuerDid)
   if (doesIncludeExternalIssuer) {
