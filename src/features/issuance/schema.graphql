@@ -202,6 +202,11 @@ type Mutation {
   Revokes existing credentials for an identity.
   """
   revokeIdentityIssuances(identityId: ID!): ID!
+
+  """
+  Revokes existing credentials issued by a user.
+  """
+  revokeUserIssuances(userId: ID!): ID!
 }
 
 """

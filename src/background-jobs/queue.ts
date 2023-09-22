@@ -3,29 +3,15 @@ import { randomUUID } from 'crypto'
 import { logger } from '../logger'
 import { redisOptions } from '../redis'
 import { Lazy } from '../util/lazy'
+import type { JobTypes } from './worker'
 
 export const JobQueueName = 'jobQueue'
 export const MAX_RETRY = 3
-type JobType<TName extends string, TPayload extends { userId: string }> = {
+export type JobType<TName extends string, TPayload extends { userId: string }> = {
   correlationId?: string
   name: TName
   payload: TPayload
 }
-
-export type RevokeIssuancesJobName = 'revokeIssuances'
-export type RevokeIssuancesJobPayload = { userId: string; issuanceIds: string[] }
-export type RevokeIssuancesJobType = JobType<RevokeIssuancesJobName, RevokeIssuancesJobPayload>
-
-export type RevokeContractIssuancesJobName = 'revokeContractIssuances'
-export type RevokeContractIssuancesJobPayload = { userId: string; contractId: string }
-export type RevokeContractIssuancesJobType = JobType<RevokeContractIssuancesJobName, RevokeContractIssuancesJobPayload>
-
-export type RevokeIdentityIssuancesJobName = 'revokeIdentityIssuances'
-export type RevokeIdentityIssuancesJobPayload = { userId: string; identityId: string }
-export type RevokeIdentityIssuancesJobType = JobType<RevokeIdentityIssuancesJobName, RevokeIdentityIssuancesJobPayload>
-
-export type JobNames = RevokeIssuancesJobName | RevokeContractIssuancesJobName | RevokeIdentityIssuancesJobName
-export type JobTypes = RevokeIssuancesJobType | RevokeContractIssuancesJobType | RevokeIdentityIssuancesJobType
 
 export const jobQueue = Lazy(
   () =>

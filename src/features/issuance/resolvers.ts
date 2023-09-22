@@ -7,6 +7,7 @@ import { RevokeContractIssuancesCommand } from './commands/revoke-contract-issua
 import { RevokeIdentityIssuancesCommand } from './commands/revoke-identity-issuances-command'
 import { RevokeIssuanceCommand } from './commands/revoke-issuance-command'
 import { RevokeIssuancesCommand } from './commands/revoke-issuances-command'
+import { RevokeUserIssuancesCommand } from './commands/revoke-user-issuances-command'
 import { CountIssuancesByContractQuery } from './queries/count-issuances-by-contract'
 import { CountIssuancesByUserQuery } from './queries/count-issuances-by-user-query'
 import { CountIssuancesQuery } from './queries/count-issuances-query'
@@ -27,6 +28,7 @@ export const resolvers: Resolvers = {
     revokeIssuances: (_, { ids }, context) => dispatch(context, RevokeIssuancesCommand, ids),
     revokeContractIssuances: (_, { contractId }, context) => dispatch(context, RevokeContractIssuancesCommand, contractId),
     revokeIdentityIssuances: (_, { identityId }, context) => dispatch(context, RevokeIdentityIssuancesCommand, identityId),
+    revokeUserIssuances: (_, { userId }, context) => dispatch(context, RevokeUserIssuancesCommand, userId),
   },
   Contract: {
     issuances: (contract, { where, offset, limit }, context) =>

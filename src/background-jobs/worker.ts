@@ -1,9 +1,17 @@
 import type { Job } from 'bullmq'
 import { Worker } from 'bullmq'
 import { dataSource } from '../data'
-import { revokeContractIssuancesJobHandler } from '../features/issuance/jobs/revoke-contract-issuances-job-handler'
-import { revokeIdentityIssuancesJobHandler } from '../features/issuance/jobs/revoke-identity-issuances-job-handler'
-import { revokeIssuancesJobHandler } from '../features/issuance/jobs/revoke-issuances-job-handler'
+import type { RevokeContractIssuancesJobName, RevokeContractIssuancesJobType } from '../features/issuance/jobs/revoke-contract-issuances'
+import { revokeContractIssuancesJobHandler } from '../features/issuance/jobs/revoke-contract-issuances'
+import type { RevokeIdentityIssuancesJobName, RevokeIdentityIssuancesJobType } from '../features/issuance/jobs/revoke-identity-issuances'
+import { revokeIdentityIssuancesJobHandler } from '../features/issuance/jobs/revoke-identity-issuances'
+import type { RevokeIssuancesJobName, RevokeIssuancesJobType } from '../features/issuance/jobs/revoke-issuances'
+import { revokeIssuancesJobHandler } from '../features/issuance/jobs/revoke-issuances'
+import {
+  revokeUserIssuancesJobHandler,
+  type RevokeUserIssuancesJobName,
+  type RevokeUserIssuancesJobType,
+} from '../features/issuance/jobs/revoke-user-issuances'
 import { UserEntity } from '../features/users/entities/user-entity'
 import { BackgroundJobStatus } from '../generated/graphql'
 import { logger } from '../logger'
@@ -12,10 +20,12 @@ import { createAdminService } from '../services'
 import type { AdminService } from '../services/admin'
 import { Lazy } from '../util/lazy'
 import { publishBackgroundJobEvent } from './pubsub'
-import type { JobNames, JobTypes } from './queue'
 import { JobQueueName, MAX_RETRY } from './queue'
 
-type BackgroundJob = Omit<Job, 'data'> & { data: { correlationId?: string; userId?: string } }
+export type JobNames = RevokeIssuancesJobName | RevokeContractIssuancesJobName | RevokeIdentityIssuancesJobName | RevokeUserIssuancesJobName
+export type JobTypes = RevokeIssuancesJobType | RevokeContractIssuancesJobType | RevokeIdentityIssuancesJobType | RevokeUserIssuancesJobType
+
+type BackgroundJob = Job<{ correlationId?: string; userId?: string }>
 export type WorkerContext = {
   logger: typeof logger
   adminService: AdminService
@@ -29,6 +39,7 @@ const handlers: HandlerMap<JobTypes> = {
   revokeIssuances: revokeIssuancesJobHandler,
   revokeContractIssuances: revokeContractIssuancesJobHandler,
   revokeIdentityIssuances: revokeIdentityIssuancesJobHandler,
+  revokeUserIssuances: revokeUserIssuancesJobHandler,
 }
 
 const createWorkerContext = async (userId: string, correlationId?: string): Promise<WorkerContext> => ({
