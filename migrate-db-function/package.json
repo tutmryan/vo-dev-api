@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "description": "Run TypeORM migrations",
   "author": "MakerX",
+  "main": "index.js",
   "scripts": {
     "check-types": "tsc --noEmit",
     "build": "npm run clean && tsc && npm run build:copy-files && npm run build:install && npm run build:post-build",
     "clean": "rimraf build",
-    "build:copy-files": "copyfiles \"package*.json\" \"**/function.json\" host.json build",
+    "build:copy-files": "copyfiles \"package*.json\" host.json build",
     "build:install": "npm ci --omit=dev --prefix build",
-    "build:post-build": "rimraf build/package.json build/package-lock.json"
+    "build:post-build": "rimraf build/package-lock.json"
   },
   "devDependencies": {
-    "@azure/functions": "^3.5.1",
     "@tsconfig/node18": "^18.2.2",
     "@types/node": "^20.7.1",
     "copyfiles": "^2.4.1",
@@ -20,6 +20,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@azure/functions": "^4.0.1",
     "mssql": "^9.3.2",
     "typeorm": "^0.3.17"
   },
