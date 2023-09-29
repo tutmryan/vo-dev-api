@@ -70,5 +70,41 @@
     "isEnabled": true,
     "origin": "Application",
     "value": "VerifiableCredential.LimitedAccess"
+  },
+  {
+    "allowedMemberTypes": ["User"],
+    "description": "Provides read access to templates, contracts, issuances, presentations, etc.",
+    "displayName": "Reader",
+    "id": "db1fb18e-e4d8-4798-9330-2e28175d2cdd",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "VerifiableCredential.Reader"
+  },
+  {
+    "allowedMemberTypes": ["User"],
+    "description": "Provides access to manual issuance of credentials; includes Reader access",
+    "displayName": "Issuer",
+    "id": "a63b9452-8854-48a4-9a67-73d64edcc325",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "VerifiableCredential.Issuer"
+  },
+  {
+    "allowedMemberTypes": ["User"],
+    "description": "Provides access to administer contracts and templates, and revoke issuances; includes Reader access",
+    "displayName": "Credential Admin",
+    "id": "8998562a-ab60-4af4-89fb-d2455bd8d4b5",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "VerifiableCredential.CredentialAdmin"
+  },
+  {
+    "allowedMemberTypes": ["User"],
+    "description": "Provide access to administer partners; includes Reader access",
+    "displayName": "Partner admin",
+    "id": "3f36f954-ec66-4fe9-89ed-25038be51bc5",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "VerifiableCredential.PartnerAdmin"
   }
 ]
