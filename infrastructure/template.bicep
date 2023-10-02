@@ -451,21 +451,25 @@ resource logoImageContainer 'Microsoft.Storage/storageAccounts/blobServices/cont
   }
 }
 
-@description('This is the built-in Storage Blob Data Contributor role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor')
-resource storageBlobContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
-  scope: subscription()
-  name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
-}
+// Instead of automating this, we will use the Azure portal to assign the role to the service principal
+// see ../docs/infrastructure/manual-steps.md#
+// This approach avoids granting role assignment permissions to the deployment service principal
+//
+// @description('This is the built-in Storage Blob Data Contributor role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor')
+// resource storageBlobContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+//   scope: subscription()
+//   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+// }
 
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: logoImageContainer
-  name: guid(logoImageContainer.id, apiAppService.id, storageBlobContributorRoleDefinition.id)
-  properties: {
-    roleDefinitionId: storageBlobContributorRoleDefinition.id
-    principalId: apiAppService.identity.principalId
-    principalType: 'ServicePrincipal'
-  }
-}
+// resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+//   scope: logoImageContainer
+//   name: guid(logoImageContainer.id, apiAppService.id, storageBlobContributorRoleDefinition.id)
+//   properties: {
+//     roleDefinitionId: storageBlobContributorRoleDefinition.id
+//     principalId: apiAppService.identity.principalId
+//     principalType: 'ServicePrincipal'
+//   }
+// }
 
 resource migrationsStorageSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'MIGRATIONS-STORAGE-CONNECTION-STRING'

@@ -62,7 +62,7 @@ We need a service principal so that GitHub Actions can:
 - Provision infrastructure and deploy our applications on Azure.
 - Execute the migrations on our database.
 
-We automated the creation and configuration of this service principal in the [`create-deployment-service-principal.ps1` script](../../infrastructure/scripts/create-api-app-registration.ps1).
+We automated the creation and configuration of this service principal in the [`create-deployment-service-principal.ps1` script](../../infrastructure/scripts/create-deployment-service-principal.ps1).
 We need to be logged in to the Azure CLI to the correct tenant with appropriate permissions before running it.
 
 ```powershell
@@ -177,3 +177,13 @@ We need to add the new client secret to the GitHub secrets:
 1. Navigate to the environment for the repository at <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>.
 1. Click on the relevant environment.
 1. Add the secret as `VID_CALLBACK_CLIENT_SECRET`.
+
+## Give the API app registration service principal blob contributor role membership
+
+1. Go to the Identity tab for the API app registration (where it shows the app service principal).
+1. Click on "Azure role assignments".
+1. Click on "+ Add role assignment".
+1. Select Storage as the scope
+1. Select the storage account for the Resource, e.g. vo{env}vrfdorchstnst
+1. Select "Storage Blob Data Contributor" as the role
+1. Click "Save".
