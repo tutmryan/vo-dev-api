@@ -465,24 +465,16 @@ exports[`shield rules are setup correctly 1`] = `
     "*": {
       "rulesOr": [
         {
-          "rulesOr": [
-            {
-              "name": "isUserWithReadPermissions",
-              "cache": "contextual"
-            },
-            {
-              "name": "isIssuanceApp",
-              "cache": "contextual"
-            },
-            {
-              "name": "isPresentationApp",
-              "cache": "contextual"
-            },
-            {
-              "name": "isLimitedAccessApp",
-              "cache": "contextual"
-            }
-          ]
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "isPresentationApp",
+          "cache": "contextual"
         },
         {
           "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",

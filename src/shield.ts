@@ -85,7 +85,7 @@ export const rules = {
     presentations: isAllowedToViewPresentations,
   },
   Identity: {
-    '*': or(fallbackRule, hasTokenAcquisitionRoleRequiringIdentityAccess),
+    '*': or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, hasTokenAcquisitionRoleRequiringIdentityAccess),
   },
   AccessTokenResponse: {
     '*': hasTokenAcquisitionRole,
