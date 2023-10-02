@@ -20,66 +20,74 @@ import {
   requestIdFilterDefined,
 } from './features/limited-access-tokens'
 import type { Resolvers } from './generated/graphql'
-import { hasRoleRule, hasScopeRule } from './util/shield-utils'
+import { hasAnyRoleRuleWithName, hasRoleRule } from './util/shield-utils'
 
-// delegated auth permission: 'Admin'
-const isAdminApp = hasScopeRule('Admin')
+const isUserWithReadPermissions = hasAnyRoleRuleWithName(
+  'isUserWithReadPermissions',
+  'VerifiableCredential.Reader',
+  'VerifiableCredential.Issuer',
+  'VerifiableCredential.CredentialAdmin',
+  'VerifiableCredential.PartnerAdmin',
+)
 
-// admin app roles
 const isIssuerUser = hasRoleRule('VerifiableCredential.Issuer')
 const isCredentialAdminUser = hasRoleRule('VerifiableCredential.CredentialAdmin')
 const isPartnerAdminUser = hasRoleRule('VerifiableCredential.PartnerAdmin')
 
 // general app roles for Issue & Present
-const isIssuanceApp = hasRoleRule('VerifiableCredential.Issue')
-const isPresentationApp = hasRoleRule('VerifiableCredential.Present')
+const isIssuanceApp = hasRoleRule('VerifiableCredential.Issue', 'isIssuanceApp')
+const isPresentationApp = hasRoleRule('VerifiableCredential.Present', 'isPresentationApp')
 
-const isAuthorisedUnlimited = or(isAdminApp, isIssuanceApp, isPresentationApp)
-const fallbackRule = or(isAuthorisedUnlimited, isLimitedAccessApp)
+const isAllowedToIssue = or(isIssuerUser, isCredentialAdminUser, isIssuanceApp, isValidLimitedIssuanceRequest)
+
+const fallbackRule = or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isLimitedAccessApp)
 
 // issuance and presentation access rules
-const isValidIssuanceFilter = or(isAdminApp, isIssuanceApp, isValidLimitedAccessIssuanceFilter)
-const isValidPresentationFilter = or(isAdminApp, isPresentationApp, isValidLimitedAccessPresentationFilter)
+const isAllowedToViewIssuances = or(isUserWithReadPermissions, isIssuanceApp, isValidLimitedAccessIssuanceFilter)
+const isAllowedToViewPresentations = or(isUserWithReadPermissions, isPresentationApp, isValidLimitedAccessPresentationFilter)
 export const rules = {
   Query: {
-    '*': isAdminApp,
+    '*': isUserWithReadPermissions,
     healthcheck: allow,
-    contract: or(isAuthorisedUnlimited, isValidLimitedContractRequest),
-    findContracts: or(isAuthorisedUnlimited, isLimitedListContractsApp),
-    identity: or(isAuthorisedUnlimited, isValidLimitedIdentityRequest),
-    findIssuances: isValidIssuanceFilter,
-    findPresentations: isValidPresentationFilter,
+    contract: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isValidLimitedContractRequest),
+    findContracts: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isLimitedListContractsApp),
+    identity: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isValidLimitedIdentityRequest),
+    findIssuances: isAllowedToViewIssuances,
+    findPresentations: isAllowedToViewPresentations,
     findNetworkIssuers: isPartnerAdminUser,
     networkContracts: isPartnerAdminUser,
   },
   Mutation: {
-    '*': isAdminApp,
-    createIssuanceRequest: or(isIssuerUser, isCredentialAdminUser, isIssuanceApp, isValidLimitedIssuanceRequest),
-    createPresentationRequest: or(isAdminApp, isPresentationApp, isValidLimitedPresentationRequest),
-    saveIdentity: or(isAuthorisedUnlimited, hasTokenAcquisitionRoleRequiringIdentityAccess),
+    '*': isCredentialAdminUser,
     acquireLimitedAccessToken: isValidAcquireLimitedAccessTokenRequest,
+    createIssuanceRequest: isAllowedToIssue,
+    createPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedPresentationRequest),
+    saveIdentity: or(isAllowedToIssue, hasTokenAcquisitionRoleRequiringIdentityAccess),
     createPartner: isPartnerAdminUser,
     updatePartner: isPartnerAdminUser,
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
   Subscription: {
-    '*': isAdminApp,
+    '*': isCredentialAdminUser,
     // Lock down presentations and issuance event subscriptions to the app that created the request (or admins)
     presentationEvent: or(
-      isAdminApp,
-      and(requestIdFilterDefined, or(isPresentationApp, isLimitedPresentationApp, isLimitedAnonymousPresentationApp)),
+      isCredentialAdminUser,
+      and(
+        requestIdFilterDefined,
+        or(isUserWithReadPermissions, isPresentationApp, isLimitedPresentationApp, isLimitedAnonymousPresentationApp),
+      ),
     ),
     issuanceEvent: or(isIssuerUser, isCredentialAdminUser, and(requestIdFilterDefined, or(isIssuanceApp, isLimitedIssuanceApp))),
   },
   Contract: {
-    issuances: isValidIssuanceFilter,
-    presentations: isValidPresentationFilter,
+    issuances: isAllowedToViewIssuances,
+    presentations: isAllowedToViewPresentations,
   },
   Identity: {
     '*': or(fallbackRule, hasTokenAcquisitionRoleRequiringIdentityAccess),
   },
   AccessTokenResponse: {
-    '*': or(fallbackRule, hasTokenAcquisitionRole),
+    '*': hasTokenAcquisitionRole,
   },
 }
 export const permissions = wrappedShield(rules)
