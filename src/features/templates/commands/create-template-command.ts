@@ -22,8 +22,8 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
   const templateId = randomUUID().toUpperCase()
 
   if (input.display?.card?.logo?.image) {
-    await this.services.logoImages.uploadDataUrl(templateId, input.display.card.logo.image)
-    assignLogoUri(input.display.card.logo, templateId)
+    const fileName = await this.services.logoImages.uploadDataUrl(templateId, input.display.card.logo.image, { appendExtension: true })
+    assignLogoUri(input.display.card.logo, fileName)
   }
 
   const template = new TemplateEntity({
