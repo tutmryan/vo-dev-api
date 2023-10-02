@@ -58,6 +58,14 @@ export type Config = {
     host: string
     key: string
   }
+  blobStorage: {
+    url: string
+    credential?: {
+      accountName: string
+      accountKey: string
+    }
+    logoImagesContainer: string
+  }
   homeTenantGraph: GraphServiceConfig
   limitedAccessClient: ClientCredentialsConfig
   limitedAccessSecret: string

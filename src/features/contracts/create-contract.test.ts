@@ -73,7 +73,7 @@ describe('createContract mutation', () => {
               textColor: '#321321',
               issuedBy: 'Card issuer',
               logo: {
-                image: 'https://updated-image.com/updated-image.png',
+                uri: 'https://updated-image.com/updated-image.png',
                 description: 'Logo description',
               },
             },
@@ -90,7 +90,7 @@ describe('createContract mutation', () => {
     // Arrange
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toMatchInlineSnapshot(
-      `"The contract overrides the following properties from its template: display.locale, display.card.title, display.card.logo.image, display.consent.title, isPublic, display.claims[claim_two]"`,
+      `"The contract overrides the following properties from its template: display.locale, display.card.title, display.card.logo.uri, display.consent.title, isPublic, display.claims[claim_two]"`,
     )
   })
 
@@ -140,7 +140,7 @@ describe('createContract mutation', () => {
           textColor: '#321321',
           backgroundColor: '#213123',
           logo: {
-            image: 'https://image.com/image.png',
+            uri: 'https://image.com/image.png',
             description: 'Logo description',
           },
         },

@@ -1,7 +1,9 @@
+import { randomUUID } from 'crypto'
 import { merge } from 'lodash'
 import type { CommandContext } from '../../../cqrs/command-context'
 import type { TemplateInput } from '../../../generated/graphql'
 import { validateContractClaims } from '../../contracts/claims'
+import { assignLogoUri } from '../../contracts/mapping'
 import { TemplateEntity } from '../entities/template-entity'
 import { ensureNoIntersectingTemplateData, toDisplayModel, toTemplateParentData } from '../mapping'
 
@@ -17,7 +19,15 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
     ensureNoIntersectingTemplateData(toTemplateParentData(input), parentData)
   }
 
+  const templateId = randomUUID().toUpperCase()
+
+  if (input.display?.card?.logo?.image) {
+    await this.services.logoImages.uploadDataUrl(templateId, input.display.card.logo.image)
+    assignLogoUri(input.display.card.logo, templateId)
+  }
+
   const template = new TemplateEntity({
+    id: templateId,
     name: input.name,
     description: input.description,
     isPublic: input.isPublic ?? null,

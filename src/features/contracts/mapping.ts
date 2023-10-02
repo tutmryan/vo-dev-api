@@ -2,9 +2,10 @@ import { get, intersection, omit } from 'lodash'
 import config from '../../config'
 import type {
   ContractDisplayClaimInput,
-  ContractDisplayCredentialLogoInput,
+  ContractDisplayCredentialLogo,
   ContractInput,
   TemplateDisplayClaim,
+  TemplateDisplayCredentialLogo,
   TemplateParentData,
 } from '../../generated/graphql'
 import { findKeysOverriding } from '../../util/intersection'
@@ -46,6 +47,10 @@ export function ensureNoOverridingTemplateData(a: ContractInput, b: TemplatePare
   }
 }
 
-export function applyLogoImageUrlDefault(logo: ContractDisplayCredentialLogoInput) {
-  if (!logo.uri) logo.uri = config.get('cardLogoImageUrlDefault')
+/**
+ * Assigns the logo URI to the config blob storage URL
+ */
+export function assignLogoUri(logo: TemplateDisplayCredentialLogo | ContractDisplayCredentialLogo, id: string) {
+  const { url, logoImagesContainer } = config.get('blobStorage')
+  logo.uri = [url, logoImagesContainer, id].join('/')
 }

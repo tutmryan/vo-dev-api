@@ -27,6 +27,13 @@ const config: DeepPartial<Config> = {
   },
   database: { logging: true },
   redis: { host: 'localhost' },
+  blobStorage: {
+    url: 'http://127.0.0.1:10000/devstoreaccount1',
+    credential: {
+      accountName: 'devstoreaccount1',
+      accountKey: 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==',
+    },
+  },
   auth: {
     bearer: {
       jwksUri: 'https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/discovery/v2.0/keys',

@@ -153,7 +153,7 @@ describe('template.parentData field', () => {
         card: {
           backgroundColor: '#321321',
           title: 'Parent template card title',
-          logo: { image: 'https://parent-template.com/image.png' },
+          logo: { uri: 'https://parent-template.com/image.png' },
         },
       },
     })
@@ -190,7 +190,7 @@ describe('template.parentData field', () => {
           textColor: '#112233',
           backgroundColor: '#321321',
           title: 'Parent template card title',
-          logo: { image: 'https://parent-template.com/image.png' },
+          logo: { uri: 'https://parent-template.com/image.png' },
         },
       },
     })

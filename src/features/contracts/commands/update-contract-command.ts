@@ -2,7 +2,7 @@ import type { CommandContext } from '../../../cqrs/command-context'
 import type { ContractInput } from '../../../generated/graphql'
 import { validateContractClaims } from '../claims'
 import { ContractEntity } from '../entities/contract-entity'
-import { applyLogoImageUrlDefault, ensureNoOverridingTemplateData } from '../mapping'
+import { assignLogoUri, ensureNoOverridingTemplateData } from '../mapping'
 
 export async function UpdateContractCommand(this: CommandContext, id: string, input: ContractInput) {
   const repository = this.entityManager.getRepository(ContractEntity)
@@ -17,7 +17,10 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
     ensureNoOverridingTemplateData(input, await template.combinedData())
   }
 
-  applyLogoImageUrlDefault(input.display.card.logo)
+  if (input.display.card.logo.image) {
+    await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image)
+    assignLogoUri(input.display.card.logo, id)
+  }
 
   await contract.update({
     name: input.name,

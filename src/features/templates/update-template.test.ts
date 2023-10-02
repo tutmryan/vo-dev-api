@@ -18,7 +18,7 @@ describe('updateTemplate mutation', () => {
         display: {
           card: {
             backgroundColor: '#222222',
-            logo: { image: 'https://parent-image.com/logo.png' },
+            logo: { uri: 'https://parent-image.com/logo.png' },
           },
           consent: { title: 'Parent template consent title' },
           claims: [{ claim: 'parent_claim', label: 'Parent claim', type: 'String', value: 'value' }],
@@ -121,7 +121,7 @@ describe('updateTemplate mutation', () => {
     // Assert
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toMatchInlineSnapshot(
-      `"The template overrides the following properties from its parent: display.card.backgroundColor, display.consent.title, display.claims[parent_claim], credentialTypes[ParentType]"`,
+      `"The template overrides the following properties from its parent: display.card.backgroundColor, display.card.logo.uri, display.consent.title, display.claims[parent_claim], credentialTypes[ParentType]"`,
     )
   })
 
