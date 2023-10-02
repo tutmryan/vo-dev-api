@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { graphql } from '../../../generated'
 import type { TemplateInput } from '../../../generated/graphql'
-import { executeOperationAsAdmin } from '../../../test'
+import { executeOperationAsCredentialAdmin } from '../../../test'
 
 export const TemplateFragment = graphql(
   `
@@ -67,7 +67,7 @@ export function getEmptyTemplateInput(): TemplateInput {
 }
 
 export async function createTemplate(input: TemplateInput) {
-  const { data, errors } = await executeOperationAsAdmin({
+  const { data, errors } = await executeOperationAsCredentialAdmin({
     query: createTemplateMutation,
     variables: {
       input,

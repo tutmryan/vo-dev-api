@@ -7,6 +7,7 @@ import type { GraphQLContext } from '../context'
 import { limitedAccessRole } from '../features/limited-access-tokens'
 import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
 import schema from '../schema'
+import { UserRoles } from '../shield'
 import { buildJwt, createContext } from './context'
 
 export const server = new ApolloServer<GraphQLContext>({
@@ -43,11 +44,14 @@ export const executeOperationAnonymous = async <TData = Record<string, unknown>,
   },
 ): Promise<FormattedExecutionResult<TData>> => executeOperation(request)
 
-export const executeOperationAsAdmin = async <TData = Record<string, unknown>, TVariables extends VariableValues = VariableValues>(
+export const executeOperationAsCredentialAdmin = async <
+  TData = Record<string, unknown>,
+  TVariables extends VariableValues = VariableValues,
+>(
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
-): Promise<FormattedExecutionResult<TData>> => executeOperation(request, buildJwt({ scopes: ['Admin'] }))
+): Promise<FormattedExecutionResult<TData>> => executeOperation(request, buildJwt({ roles: [UserRoles.credentialAdmin] }))
 
 export const executeOperationAsLimitedAccessClient = async <
   TData = Record<string, unknown>,

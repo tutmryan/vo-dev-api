@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { TemplateInput } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
 import { buildTemplateInput, createTemplate, createTemplateMutation, getEmptyTemplateInput } from './test/create-template'
 
 describe('createTemplate mutation', () => {
@@ -23,7 +23,7 @@ describe('createTemplate mutation', () => {
   it(`returns an error if the parent template ID doesn't exist`, async () => {
     // Act
     const bogusParentId = randomUUID()
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: createTemplateMutation,
       variables: {
         input: buildTemplateInput({ parentTemplateId: bogusParentId }),
@@ -61,7 +61,7 @@ describe('createTemplate mutation', () => {
 
     // Act
     const emptyTemplateInput = getEmptyTemplateInput()
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: createTemplateMutation,
       variables: {
         input: {
@@ -126,7 +126,7 @@ describe('createTemplate mutation', () => {
     })
 
     // Act
-    const { data, errors } = await executeOperationAsAdmin({
+    const { data, errors } = await executeOperationAsCredentialAdmin({
       query: createTemplateMutation,
       variables: {
         input,

@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
 import { createTemplate, getEmptyTemplateInput } from './test/create-template'
 import { getTemplate } from './test/get-template'
 import { getUpdateTemplateInput, updateTemplateMutation } from './test/update-template'
@@ -64,7 +64,7 @@ describe('updateTemplate mutation', () => {
   it(`returns an error if the template ID doesn't exist`, async () => {
     // Act
     const bogusTemplateId = randomUUID()
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: updateTemplateMutation,
       variables: {
         id: bogusTemplateId,
@@ -83,7 +83,7 @@ describe('updateTemplate mutation', () => {
     const { template } = await givenTemplate({ hasParent: true })
 
     // Act
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: updateTemplateMutation,
       variables: {
         id: template.id,
@@ -130,7 +130,7 @@ describe('updateTemplate mutation', () => {
     const { template } = await givenTemplate({})
 
     // Act
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: updateTemplateMutation,
       variables: {
         id: template.id,

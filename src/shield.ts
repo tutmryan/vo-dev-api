@@ -22,17 +22,18 @@ import {
 import type { Resolvers } from './generated/graphql'
 import { hasAnyRoleRuleWithName, hasRoleRule } from './util/shield-utils'
 
-const isUserWithReadPermissions = hasAnyRoleRuleWithName(
-  'isUserWithReadPermissions',
-  'VerifiableCredential.Reader',
-  'VerifiableCredential.Issuer',
-  'VerifiableCredential.CredentialAdmin',
-  'VerifiableCredential.PartnerAdmin',
-)
+export enum UserRoles {
+  reader = 'VerifiableCredential.Reader',
+  issuer = 'VerifiableCredential.Issuer',
+  credentialAdmin = 'VerifiableCredential.CredentialAdmin',
+  partnerAdmin = 'VerifiableCredential.PartnerAdmin',
+}
 
-const isIssuerUser = hasRoleRule('VerifiableCredential.Issuer')
-const isCredentialAdminUser = hasRoleRule('VerifiableCredential.CredentialAdmin')
-const isPartnerAdminUser = hasRoleRule('VerifiableCredential.PartnerAdmin')
+const isUserWithReadPermissions = hasAnyRoleRuleWithName('isUserWithReadPermissions', ...Object.values(UserRoles))
+
+const isIssuerUser = hasRoleRule(UserRoles.issuer)
+const isCredentialAdminUser = hasRoleRule(UserRoles.credentialAdmin)
+const isPartnerAdminUser = hasRoleRule(UserRoles.partnerAdmin)
 
 // general app roles for Issue & Present
 const isIssuanceApp = hasRoleRule('VerifiableCredential.Issue', 'isIssuanceApp')

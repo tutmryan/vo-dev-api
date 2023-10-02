@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { mock as AdminService, mockCreateContract, mockUpdateContract } from '../../services/__mocks__/admin'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
 import { provisionContractMutation } from './test/provision-contract'
@@ -41,7 +41,7 @@ describe('provisionContract mutation', () => {
     mockCreateContract.mockResolvedValue({ id: externalContractId })
 
     // Act
-    const { errors, data } = await executeOperationAsAdmin({
+    const { errors, data } = await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,
       variables: {
         id: contract.id,
@@ -62,7 +62,7 @@ describe('provisionContract mutation', () => {
     const externalContractId = randomUUID()
     mockCreateContract.mockResolvedValue({ id: externalContractId })
     //publishing for the first time
-    await executeOperationAsAdmin({
+    await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,
       variables: {
         id: contract.id,
@@ -71,7 +71,7 @@ describe('provisionContract mutation', () => {
 
     // Act
     // re-publishing the contract
-    const { errors, data } = await executeOperationAsAdmin({
+    const { errors, data } = await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,
       variables: {
         id: contract.id,
@@ -92,14 +92,14 @@ describe('provisionContract mutation', () => {
     const externalContractId = randomUUID()
     mockCreateContract.mockResolvedValue({ id: externalContractId })
     //publishing for the first time
-    await executeOperationAsAdmin({
+    await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,
       variables: {
         id: contract.id,
       },
     })
     //deprecate the contract
-    await executeOperationAsAdmin({
+    await executeOperationAsCredentialAdmin({
       query: deprecateContractMutation,
       variables: {
         id: contract.id,
@@ -108,7 +108,7 @@ describe('provisionContract mutation', () => {
 
     // Act
     // re-publishing the contract
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,
       variables: {
         id: contract.id,
