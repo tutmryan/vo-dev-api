@@ -58,6 +58,7 @@
     "@types/cors": "^2.8.14",
     "@types/cross-spawn": "^6.0.3",
     "@types/jest": "^29.5.5",
+    "@types/mime-types": "^2.1.2",
     "@types/mssql": "^9.1.0",
     "@types/prompt-sync": "^4.2.0",
     "casual": "^1.6.2",
@@ -131,6 +132,7 @@
     "graphql-ws": "^5.14.0",
     "keyv": "^4.5.3",
     "lodash": "^4.17.21",
+    "mime-types": "^2.1.35",
     "mssql": "^9.3.2",
     "typeorm": "^0.3.17",
     "ws": "^8.14.2"

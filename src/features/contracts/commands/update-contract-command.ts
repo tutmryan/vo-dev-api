@@ -18,8 +18,8 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
   }
 
   if (input.display.card.logo.image) {
-    await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image)
-    assignLogoUri(input.display.card.logo, id)
+    const fileName = await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image, { appendExtension: true })
+    assignLogoUri(input.display.card.logo, fileName)
   }
 
   await contract.update({

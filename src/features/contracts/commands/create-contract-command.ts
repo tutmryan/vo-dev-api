@@ -21,8 +21,8 @@ export async function CreateContractCommand(this: CommandContext, input: Contrac
   const contractId = randomUUID().toUpperCase()
 
   if (input.display.card.logo.image) {
-    await this.services.logoImages.uploadDataUrl(contractId, input.display.card.logo.image)
-    assignLogoUri(input.display.card.logo, contractId)
+    const fileName = await this.services.logoImages.uploadDataUrl(contractId, input.display.card.logo.image, { appendExtension: true })
+    assignLogoUri(input.display.card.logo, fileName)
   }
 
   const contract = new ContractEntity({

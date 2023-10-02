@@ -50,7 +50,7 @@ export function ensureNoOverridingTemplateData(a: ContractInput, b: TemplatePare
 /**
  * Assigns the logo URI to the config blob storage URL
  */
-export function assignLogoUri(logo: TemplateDisplayCredentialLogo | ContractDisplayCredentialLogo, id: string) {
+export function assignLogoUri(logo: TemplateDisplayCredentialLogo | ContractDisplayCredentialLogo, fileName: string) {
   const { url, logoImagesContainer } = config.get('blobStorage')
-  logo.uri = [url, logoImagesContainer, id].join('/')
+  logo.uri = [url, logoImagesContainer, fileName].join('/')
 }
