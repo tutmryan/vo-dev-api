@@ -39,7 +39,7 @@ const isPartnerAdminUser = hasRoleRule(UserRoles.partnerAdmin)
 const isIssuanceApp = hasRoleRule('VerifiableCredential.Issue', 'isIssuanceApp')
 const isPresentationApp = hasRoleRule('VerifiableCredential.Present', 'isPresentationApp')
 
-const isAllowedToIssue = or(isIssuerUser, isCredentialAdminUser, isIssuanceApp, isValidLimitedIssuanceRequest)
+const isAllowedToIssue = or(isIssuerUser, isIssuanceApp, isValidLimitedIssuanceRequest)
 
 const fallbackRule = or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isLimitedAccessApp)
 
@@ -63,7 +63,7 @@ export const rules = {
     acquireLimitedAccessToken: isValidAcquireLimitedAccessTokenRequest,
     createIssuanceRequest: isAllowedToIssue,
     createPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedPresentationRequest),
-    saveIdentity: or(isAllowedToIssue, hasTokenAcquisitionRoleRequiringIdentityAccess),
+    saveIdentity: or(isAllowedToIssue, isCredentialAdminUser, hasTokenAcquisitionRoleRequiringIdentityAccess),
     createPartner: isPartnerAdminUser,
     updatePartner: isPartnerAdminUser,
   },
