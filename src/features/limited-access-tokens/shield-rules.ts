@@ -29,7 +29,7 @@ export const hasTokenAcquisitionRoleRequiringIdentityAccess = hasAnyRoleRule(
 )
 
 // validate input to acquire limited access token
-export const isValidAcquireLimitedAccessTokenRequest = rule({ cache: 'strict' })(
+export const isValidAcquireLimitedAccessTokenRequest = rule('isValidAcquireLimitedAccessTokenRequest', { cache: 'strict' })(
   async (_, { input }: MutationAcquireLimitedAccessTokenArgs, { user }) => {
     if (!user) return false
     if (input.allowAnonymousPresentation) {
@@ -90,18 +90,20 @@ function hasLimitedAccessDataRule(ruleKey: string, verify: (data: AcquireLimited
 // limited access issuance validation
 export const isValidLimitedIssuanceRequest = and(
   isLimitedIssuanceApp,
-  rule({ cache: 'strict' })((_, { request: { contractId, identityId } }: MutationCreateIssuanceRequestArgs, { user }: GraphQLContext) => {
-    if (!identityId || !user?.limitedAccessData?.identityId) return false
-    if (identityId !== user.limitedAccessData.identityId) return false
-    if (!user.limitedAccessData.issuableContractIds) return false
-    return user.limitedAccessData.issuableContractIds.includes(contractId)
-  }),
+  rule('isValidLimitedIssuanceRequest', { cache: 'strict' })(
+    (_, { request: { contractId, identityId } }: MutationCreateIssuanceRequestArgs, { user }: GraphQLContext) => {
+      if (!identityId || !user?.limitedAccessData?.identityId) return false
+      if (identityId !== user.limitedAccessData.identityId) return false
+      if (!user.limitedAccessData.issuableContractIds) return false
+      return user.limitedAccessData.issuableContractIds.includes(contractId)
+    },
+  ),
 )
 
 // limited access presentation validation
 export const isValidLimitedPresentationRequest = and(
   isLimitedPresentationApp,
-  rule({ cache: 'strict' })(
+  rule('isValidLimitedPresentationRequest', { cache: 'strict' })(
     (_, { request: { requestedCredentials, identityId } }: MutationCreatePresentationRequestArgs, { user }: GraphQLContext) => {
       if (!user || !user.limitedAccessData || !user.limitedAccessData.requestableCredentials) return false
       const requestableCredentials = user.limitedAccessData.requestableCredentials
@@ -133,7 +135,7 @@ export const isValidLimitedPresentationRequest = and(
 // limited contract access
 export const isValidLimitedContractRequest = and(
   isLimitedAccessApp,
-  rule({ cache: 'strict' })(
+  rule('isValidLimitedContractRequest', { cache: 'strict' })(
     (_, args: QueryContractArgs, { user }: GraphQLContext) =>
       !!user?.limitedAccessData?.issuableContractIds && user.limitedAccessData.issuableContractIds.includes(args.id),
   ),
@@ -142,17 +144,19 @@ export const isValidLimitedContractRequest = and(
 // limited identity access
 export const isValidLimitedIdentityRequest = and(
   isLimitedAccessApp,
-  rule({ cache: 'strict' })((_, args: QueryIdentityArgs, { user }: GraphQLContext) => args.id === user?.limitedAccessData?.identityId),
+  rule('isValidLimitedIdentityRequest', { cache: 'strict' })(
+    (_, args: QueryIdentityArgs, { user }: GraphQLContext) => args.id === user?.limitedAccessData?.identityId,
+  ),
 )
 
 // limited identity filter
-export const isValidLimitedIdentityFilter = rule({ cache: 'strict' })(
+export const isValidLimitedIdentityFilter = rule('isValidLimitedIdentitierFilter', { cache: 'strict' })(
   (_, args: { where?: { identityId?: string } }, { user }: GraphQLContext) =>
     !!args.where?.identityId && !!user?.limitedAccessData?.identityId && args.where.identityId === user.limitedAccessData.identityId,
 )
 
 // criteria with requestId validation
-export const requestIdFilterDefined = rule({ cache: 'strict' })(async (_, { where }) => !!where?.requestId)
+export const requestIdFilterDefined = rule('isRequestIdFilterDefined', { cache: 'strict' })(async (_, { where }) => !!where?.requestId)
 
 // issuance and presentation access rules
 export const isValidLimitedAccessIssuanceFilter = and(isLimitedAccessApp, or(requestIdFilterDefined, isValidLimitedIdentityFilter))

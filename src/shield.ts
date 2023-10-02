@@ -38,8 +38,7 @@ const fallbackRule = or(isAuthorisedUnlimited, isLimitedAccessApp)
 // issuance and presentation access rules
 const isValidIssuanceFilter = or(isAdminApp, isIssuanceApp, isValidLimitedAccessIssuanceFilter)
 const isValidPresentationFilter = or(isAdminApp, isPresentationApp, isValidLimitedAccessPresentationFilter)
-
-export const permissions = wrappedShield({
+export const rules = {
   Query: {
     '*': isAdminApp,
     healthcheck: allow,
@@ -80,7 +79,8 @@ export const permissions = wrappedShield({
   AccessTokenResponse: {
     '*': or(fallbackRule, hasTokenAcquisitionRole),
   },
-})
+}
+export const permissions = wrappedShield(rules)
 
 function wrappedShield(x: ShieldSchema<Resolvers>) {
   return shield(x as IRules, {
