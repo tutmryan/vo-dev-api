@@ -58,7 +58,7 @@ describe('updateContract mutation', () => {
     input.isPublic = false
     input.display.locale = 'fr-FR'
     input.display.card.title = 'Updated card title'
-    input.display.card.logo.image = 'https://updated-image.com/updated-image.png'
+    input.display.card.logo.uri = 'https://updated-image.com/updated-image.png'
     input.display.consent.title = 'Updated consent title'
     input.display.claims[1]!.value = 'Updated Claim 2'
 
@@ -73,7 +73,7 @@ describe('updateContract mutation', () => {
     // Assert
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toMatchInlineSnapshot(
-      `"The contract overrides the following properties from its template: display.locale, display.card.title, display.card.logo.image, display.consent.title, isPublic, display.claims[claim_two]"`,
+      `"The contract overrides the following properties from its template: display.locale, display.card.title, display.card.logo.uri, display.consent.title, isPublic, display.claims[claim_two]"`,
     )
   })
 

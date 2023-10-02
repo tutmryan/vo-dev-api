@@ -93,7 +93,7 @@ export function buildTemplateInput(args: Partial<TemplateInput>): TemplateInput 
       card: {
         title: 'Card title',
         logo: {
-          image: 'https://image.com/image.png',
+          uri: 'https://image.com/image.png',
           ...args.display?.card?.logo,
         },
         ...args.display?.card,

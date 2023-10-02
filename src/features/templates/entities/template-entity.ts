@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { compact, flatten, isEqual, merge, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
 import type { TemplateDisplayClaim, TemplateDisplayModel, TemplateParentData } from '../../../generated/graphql'
@@ -11,6 +12,7 @@ import { toTemplateParentData } from '../mapping'
 @Entity('template', { orderBy: { createdAt: 'ASC' } })
 export class TemplateEntity extends AuditedAndTrackedEntity {
   constructor(args?: {
+    id?: string
     name: string
     description: string
     parent: TemplateEntity | null
@@ -21,8 +23,8 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
   }) {
     super()
     if (!args) return
-    const { parent, ...rest } = args
-    typeSafeAssign(this, { ...rest, parent: Promise.resolve(parent) })
+    const { id, parent, ...rest } = args
+    typeSafeAssign(this, { ...rest, id: id ?? randomUUID(), parent: Promise.resolve(parent) })
   }
 
   @Column({ type: 'nvarchar' })

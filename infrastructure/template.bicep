@@ -397,7 +397,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   }
 }
 
-resource migrationsStorage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+resource verifiedOrchestrationStorage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: '${resourcePrefix}${environment}vrfdorchstnst'
   location: location
   kind: 'StorageV2'
@@ -405,13 +405,65 @@ resource migrationsStorage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
     name: 'Standard_GRS'
   }
   properties: {
-    allowBlobPublicAccess: false
+    allowBlobPublicAccess: true
     publicNetworkAccess: 'Enabled'
     minimumTlsVersion: 'TLS1_2'
     networkAcls: {
       defaultAction: 'Allow'
     }
     supportsHttpsTrafficOnly: true
+  }
+}
+
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
+  name: 'default'
+  parent: verifiedOrchestrationStorage
+  properties: {
+    cors: {
+      corsRules: [
+        {
+          allowedHeaders: [
+            '*'
+          ]
+          allowedMethods: [
+            'GET'
+            'HEAD'
+            'OPTIONS'
+          ]
+          allowedOrigins: [
+            '*'
+          ]
+          exposedHeaders: [
+            '*'
+          ]
+          maxAgeInSeconds: 86400
+        }
+      ]
+    }
+  }
+}
+
+resource logoImageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+  name: 'logo-images'
+  parent: blobService
+  properties: {
+    publicAccess: 'Blob'
+  }
+}
+
+@description('This is the built-in Storage Blob Data Contributor role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor')
+resource storageBlobContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+}
+
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: logoImageContainer
+  name: guid(logoImageContainer.id, apiAppService.id, storageBlobContributorRoleDefinition.id)
+  properties: {
+    roleDefinitionId: storageBlobContributorRoleDefinition.id
+    principalId: apiAppService.identity.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
@@ -422,7 +474,7 @@ resource migrationsStorageSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' 
     attributes: {
       enabled: true
     }
-    value: 'DefaultEndpointsProtocol=https;AccountName=${migrationsStorage.name};AccountKey=${migrationsStorage.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
+    value: 'DefaultEndpointsProtocol=https;AccountName=${verifiedOrchestrationStorage.name};AccountKey=${verifiedOrchestrationStorage.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
   }
 }
 

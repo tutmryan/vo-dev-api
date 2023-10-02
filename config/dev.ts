@@ -47,6 +47,9 @@ const config: DeepPartial<Config> = {
   redis: {
     host: 'vo-dev-verified-orchestration-redis.redis.cache.windows.net',
   },
+  blobStorage: {
+    url: 'https://vodevvrfdorchstnst.blob.core.windows.net',
+  },
   limitedAccessClient: {
     clientId: '53022c73-6efc-406b-873a-8916c3451006',
     scope: apiDefaultScope,

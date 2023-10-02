@@ -29,6 +29,9 @@ const config: DeepPartial<Config> = {
     port: 1433,
     logging: true,
   },
+  blobStorage: {
+    logoImagesContainer: 'logo-images',
+  },
   auth: {
     pkce: {
       logoutUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/logout',

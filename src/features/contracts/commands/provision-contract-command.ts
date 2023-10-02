@@ -38,8 +38,7 @@ function toCreateContractInput({
   display: { card, claims, consent, locale },
 }: ContractEntity): CreateContractInput {
   const { logo, ...cardRest } = card
-  const { image, ...logoRest } = logo
-  const imageInBase64UrlFormatWithoutMimeType = image ? toBase64UrlWithoutMimeType(image) : undefined
+  const { image: _discardDeprecatedImage, ...logoRest } = logo
   return {
     name: name,
     availableInVcDirectory: isPublic,
@@ -68,7 +67,7 @@ function toCreateContractInput({
       {
         locale,
         consent,
-        card: { ...cardRest, logo: { ...logoRest, image: imageInBase64UrlFormatWithoutMimeType } },
+        card: { ...cardRest, logo: { ...logoRest } },
         claims: [
           ...claims.map(({ claim, type, label, description }) => ({
             label,
@@ -86,10 +85,4 @@ function toCreateContractInput({
 function toUpdateContractInput(contract: ContractEntity): UpdateContractInput {
   // VID API seems to have a bug? in that you can't update the name of a contract
   return omit(toCreateContractInput(contract), 'name')
-}
-
-function toBase64UrlWithoutMimeType(base64Image: string) {
-  const [_mimeType, base64Data] = base64Image.split(',')
-  const buffer = Buffer.from(base64Data!, 'base64')
-  return buffer.toString('base64url')
 }

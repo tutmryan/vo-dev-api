@@ -4,6 +4,7 @@ import config from '../config'
 import type { BaseContext } from '../context'
 import type { logger } from '../logger'
 import { AdminService } from './admin'
+import { BlobStorageContainerService } from './blob-storage-container-service'
 import { GraphService } from './graph-service'
 import { RequestService } from './request'
 
@@ -14,6 +15,7 @@ export interface Services {
   b2cGraph: GraphService
   admin: AdminService
   request: RequestService
+  logoImages: BlobStorageContainerService
 }
 
 export const createServices = (context: BaseContext): Services => {
@@ -22,6 +24,7 @@ export const createServices = (context: BaseContext): Services => {
     homeTenantGraph: new GraphService(config.get('homeTenantGraph')),
     admin: createAdminService(context.logger, context.requestInfo.correlationId),
     request: createRequestService(context),
+    logoImages: new BlobStorageContainerService({ containerName: config.get('blobStorage.logoImagesContainer') }),
   }
 }
 

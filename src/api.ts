@@ -1,5 +1,7 @@
+import { isLocalDev } from '@makerx/node-common'
 import http from 'http'
 import { startApolloServer } from './apollo'
+import { initializeAzurite } from './azurite'
 import config from './config'
 import { dataSource } from './data'
 import { getExpressApp } from './express'
@@ -11,6 +13,11 @@ export const runApi = async () => {
 
   logger.info('Initialising data-source')
   await dataSource.initialize()
+
+  if (isLocalDev) {
+    logger.info('Initialising azurite blob storage')
+    await initializeAzurite()
+  }
 
   logger.info('Initialising http server')
   const httpServer = http.createServer(app)

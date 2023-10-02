@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { isEqual, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm'
 import type { ContractDisplayModel } from '../../../generated/graphql'
@@ -10,6 +11,7 @@ import { UserEntity } from '../../users/entities/user-entity'
 @Entity('contract', { orderBy: { createdAt: 'ASC' } })
 export class ContractEntity extends AuditedAndTrackedEntity {
   constructor(args?: {
+    id?: string
     name: string
     description: string
     template: TemplateEntity | null
@@ -20,8 +22,8 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   }) {
     super()
     if (!args) return
-    const { template, ...rest } = args
-    typeSafeAssign(this, { ...rest, template: Promise.resolve(template) })
+    const { id, template, ...rest } = args
+    typeSafeAssign(this, { ...rest, id: id ?? randomUUID(), template: Promise.resolve(template) })
   }
 
   @Column({ type: 'nvarchar' })
