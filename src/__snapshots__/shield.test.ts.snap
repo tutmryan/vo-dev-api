@@ -187,7 +187,11 @@ exports[`shield rules are setup correctly 1`] = `
     "createIssuanceRequest": {
       "rules": [
         {
-          "name": "hasScope-Admin",
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
           "cache": "contextual"
         },
         {
@@ -341,7 +345,11 @@ exports[`shield rules are setup correctly 1`] = `
     "issuanceEvent": {
       "rules": [
         {
-          "name": "hasScope-Admin",
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
           "cache": "contextual"
         },
         {

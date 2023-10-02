@@ -26,6 +26,8 @@ import { hasRoleRule, hasScopeRule } from './util/shield-utils'
 const isAdminApp = hasScopeRule('Admin')
 
 // admin app roles
+const isIssuerUser = hasRoleRule('VerifiableCredential.Issuer')
+const isCredentialAdminUser = hasRoleRule('VerifiableCredential.CredentialAdmin')
 const isPartnerAdminUser = hasRoleRule('VerifiableCredential.PartnerAdmin')
 
 // general app roles for Issue & Present
@@ -52,7 +54,7 @@ export const rules = {
   },
   Mutation: {
     '*': isAdminApp,
-    createIssuanceRequest: or(isAdminApp, isIssuanceApp, isValidLimitedIssuanceRequest),
+    createIssuanceRequest: or(isIssuerUser, isCredentialAdminUser, isIssuanceApp, isValidLimitedIssuanceRequest),
     createPresentationRequest: or(isAdminApp, isPresentationApp, isValidLimitedPresentationRequest),
     saveIdentity: or(isAuthorisedUnlimited, hasTokenAcquisitionRoleRequiringIdentityAccess),
     acquireLimitedAccessToken: isValidAcquireLimitedAccessTokenRequest,
@@ -67,7 +69,7 @@ export const rules = {
       isAdminApp,
       and(requestIdFilterDefined, or(isPresentationApp, isLimitedPresentationApp, isLimitedAnonymousPresentationApp)),
     ),
-    issuanceEvent: or(isAdminApp, and(requestIdFilterDefined, or(isIssuanceApp, isLimitedIssuanceApp))),
+    issuanceEvent: or(isIssuerUser, isCredentialAdminUser, and(requestIdFilterDefined, or(isIssuanceApp, isLimitedIssuanceApp))),
   },
   Contract: {
     issuances: isValidIssuanceFilter,
