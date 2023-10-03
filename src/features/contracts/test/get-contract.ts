@@ -1,5 +1,5 @@
 import { graphql } from '../../../generated'
-import { executeOperationAsAdmin } from '../../../test'
+import { executeOperationAsCredentialAdmin } from '../../../test'
 
 export const getContractQuery = graphql(
   `
@@ -11,7 +11,7 @@ export const getContractQuery = graphql(
 )
 
 export async function getContract(id: string) {
-  const { data, errors } = await executeOperationAsAdmin({
+  const { data, errors } = await executeOperationAsCredentialAdmin({
     query: getContractQuery,
     variables: { id },
   })

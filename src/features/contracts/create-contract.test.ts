@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
 import type { ContractInput } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { StandardClaims } from './claims'
 import { createContractMutation, getDefaultContractInput } from './test/create-contract'
@@ -36,7 +36,7 @@ describe('createContract mutation', () => {
     const contractInput = getDefaultContractInput()
     contractInput.templateId = bogusTemplateId
 
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: createContractMutation,
       variables: {
         input: contractInput,
@@ -54,7 +54,7 @@ describe('createContract mutation', () => {
     const { template } = await givenTemplate()
 
     // Act
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: createContractMutation,
       variables: {
         input: {
@@ -105,7 +105,7 @@ describe('createContract mutation', () => {
     })
 
     // Act
-    const { data, errors } = await executeOperationAsAdmin({
+    const { data, errors } = await executeOperationAsCredentialAdmin({
       query: createContractMutation,
       variables: {
         input,
@@ -156,7 +156,7 @@ describe('createContract mutation', () => {
     }
 
     // Act
-    const { data, errors } = await executeOperationAsAdmin({
+    const { data, errors } = await executeOperationAsCredentialAdmin({
       query: createContractMutation,
       variables: {
         input,
@@ -181,7 +181,7 @@ describe('createContract mutation', () => {
     })
 
     // Act
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: createContractMutation,
       variables: {
         input,

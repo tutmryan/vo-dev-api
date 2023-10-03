@@ -36,6 +36,8 @@ const documents = {
     "\n  mutation CreateTemplate($input: TemplateInput!) {\n    createTemplate(input: $input) {\n      ...TemplateFragment\n    }\n  }\n": types.CreateTemplateDocument,
     "\n  query GetTemplate($id: ID!) {\n    template(id: $id) {\n      ...TemplateFragment\n    }\n  }": types.GetTemplateDocument,
     "\n  mutation UpdateTemplate($id: ID!, $input: TemplateInput!) {\n    updateTemplate(id: $id, input: $input) {\n      ...TemplateFragment\n    }\n  }\n": types.UpdateTemplateDocument,
+    "\n  mutation CreatePartner($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n    }\n  }\n": types.CreatePartnerDocument,
+    "\n    mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {\n      acquireLimitedAccessToken(input: $input) {\n        expires\n        token\n      }\n    }\n  ": types.AcquireLimitedAccessTokenDocument,
 };
 
 /**
@@ -144,6 +146,14 @@ export function graphql(source: "\n  query GetTemplate($id: ID!) {\n    template
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation UpdateTemplate($id: ID!, $input: TemplateInput!) {\n    updateTemplate(id: $id, input: $input) {\n      ...TemplateFragment\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateTemplate($id: ID!, $input: TemplateInput!) {\n    updateTemplate(id: $id, input: $input) {\n      ...TemplateFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreatePartner($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation CreatePartner($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n    mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {\n      acquireLimitedAccessToken(input: $input) {\n        expires\n        token\n      }\n    }\n  "): (typeof documents)["\n    mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {\n      acquireLimitedAccessToken(input: $input) {\n        expires\n        token\n      }\n    }\n  "];
 
 export function graphql(source: string) {
   return (documents as any)[source] ?? {};

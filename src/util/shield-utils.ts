@@ -11,12 +11,18 @@ export type ShieldSchema<TResolver> = TResolver extends Primitive
       '*'?: ShieldRule
     }
 
-export function hasRoleRule(role: string) {
-  return rule(`hasRole-${role}`, { cache: 'contextual' })((_, __, { user }: GraphQLContext) => user?.roles.includes(role) === true)
+export function hasRoleRule(role: string, ruleName?: string) {
+  return rule(ruleName ?? `hasRole-${role}`, { cache: 'contextual' })(
+    (_, __, { user }: GraphQLContext) => user?.roles.includes(role) === true,
+  )
 }
 
 export function hasAnyRoleRule(...roles: string[]) {
-  return rule(`hasAnyRole-${roles.join(',')}`, { cache: 'contextual' })((_, __, { user }: GraphQLContext) => {
+  return hasAnyRoleRuleWithName(`hasAnyRole-${roles.join(',')}`, ...roles)
+}
+
+export function hasAnyRoleRuleWithName(ruleName: string, ...roles: string[]) {
+  return rule(ruleName, { cache: 'contextual' })((_, __, { user }: GraphQLContext) => {
     return user?.roles.some((role) => roles.includes(role)) === true
   })
 }

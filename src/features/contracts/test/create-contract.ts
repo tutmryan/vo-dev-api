@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { graphql } from '../../../generated'
 import type { ContractInput } from '../../../generated/graphql'
-import { executeOperationAsAdmin } from '../../../test'
+import { executeOperationAsCredentialAdmin } from '../../../test'
 
 export const ContractFragment = graphql(
   `
@@ -83,7 +83,7 @@ export function getDefaultContractInput(): ContractInput {
 }
 
 export async function createContract(input: ContractInput) {
-  const { data, errors } = await executeOperationAsAdmin({
+  const { data, errors } = await executeOperationAsCredentialAdmin({
     query: createContractMutation,
     variables: {
       input,

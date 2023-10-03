@@ -2,7 +2,7 @@ import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { graphql } from '../../generated'
 import type { IdentityInput } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
 import { invariant } from '../../util/invariant'
 
 export const identityQuery = graphql(`
@@ -37,7 +37,7 @@ export function createIdentityInput(input?: Partial<IdentityInput>): IdentityInp
 }
 
 export async function createIdentity(input: IdentityInput = createIdentityInput()) {
-  const { data } = await executeOperationAsAdmin({
+  const { data } = await executeOperationAsCredentialAdmin({
     query: saveIdentityMutation,
     variables: {
       input,
@@ -55,7 +55,7 @@ describe('create-update-identity', () => {
     const input = createIdentityInput()
 
     // Act
-    const { data, errors } = await executeOperationAsAdmin({
+    const { data, errors } = await executeOperationAsCredentialAdmin({
       query: saveIdentityMutation,
       variables: {
         input,
@@ -76,7 +76,7 @@ describe('create-update-identity', () => {
     const input = createIdentityInput()
 
     // first save
-    const firstResponse = await executeOperationAsAdmin({
+    const firstResponse = await executeOperationAsCredentialAdmin({
       query: saveIdentityMutation,
       variables: {
         input,
@@ -87,7 +87,7 @@ describe('create-update-identity', () => {
 
     // update the identity to have a different name
     const updatedInput = { ...input, name: casual.name }
-    const updateResponse = await executeOperationAsAdmin({
+    const updateResponse = await executeOperationAsCredentialAdmin({
       query: saveIdentityMutation,
       variables: {
         input: updatedInput,
@@ -104,7 +104,7 @@ describe('create-update-identity', () => {
   it('should return an identity by ID', async () => {
     const input = createIdentityInput()
 
-    const saveResponse = await executeOperationAsAdmin({
+    const saveResponse = await executeOperationAsCredentialAdmin({
       query: saveIdentityMutation,
       variables: {
         input,
@@ -113,7 +113,7 @@ describe('create-update-identity', () => {
 
     invariant(saveResponse.data?.saveIdentity.id, 'saveResponse.data?.saveIdentity.id is undefined')
 
-    const { data, errors } = await executeOperationAsAdmin({
+    const { data, errors } = await executeOperationAsCredentialAdmin({
       query: identityQuery,
       variables: {
         id: saveResponse.data?.saveIdentity.id,

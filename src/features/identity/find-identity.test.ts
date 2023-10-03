@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { graphql } from '../../generated'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
 import { createIdentityInput, saveIdentityMutation } from './create-update-identity.test'
 
 export const findIdentitiesQuery = graphql(`
@@ -21,7 +21,7 @@ describe('find-identity', () => {
     // Arrange
     const input = createIdentityInput({ name: randomUUID() })
 
-    await executeOperationAsAdmin({
+    await executeOperationAsCredentialAdmin({
       query: saveIdentityMutation,
       variables: {
         input,
@@ -29,7 +29,7 @@ describe('find-identity', () => {
     })
 
     // Act
-    const { data } = await executeOperationAsAdmin({
+    const { data } = await executeOperationAsCredentialAdmin({
       query: findIdentitiesQuery,
       variables: {
         where: {
