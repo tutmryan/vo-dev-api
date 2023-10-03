@@ -1,18 +1,20 @@
 import { randomUUID } from 'crypto'
-import { omit } from 'lodash'
 import type { CommandContext } from '../../../cqrs/command-context'
 import type { ContractInput } from '../../../generated/graphql'
+import { invariant } from '../../../util/invariant'
 import { TemplateEntity } from '../../templates/entities/template-entity'
-import { validateContractClaims } from '../claims'
 import { ContractEntity } from '../entities/contract-entity'
-import { assignLogoUri, ensureNoOverridingTemplateData } from '../mapping'
+import { ensureNoOverridingTemplateData, toPersistedDisplayModel } from '../mapping'
+import { LogoImageOrUriRequiredError, validateContractInput, validateDisplayLogo } from '../validation'
 
 export async function CreateContractCommand(this: CommandContext, input: ContractInput) {
+  const { templateId, display: displayInput, ...rest } = input
+
+  validateContractInput(input)
+
   const template = input.templateId
     ? await this.entityManager.getRepository(TemplateEntity).findOneByOrFail({ id: input.templateId })
     : null
-
-  validateContractClaims(input.display.claims)
 
   if (template) {
     ensureNoOverridingTemplateData(input, await template.combinedData())
@@ -20,13 +22,19 @@ export async function CreateContractCommand(this: CommandContext, input: Contrac
 
   const contractId = randomUUID().toUpperCase()
 
-  if (input.display.card.logo.image) {
-    const fileName = await this.services.logoImages.uploadDataUrl(contractId, input.display.card.logo.image, { appendExtension: true })
-    assignLogoUri(input.display.card.logo, fileName)
-  }
+  const displayLogoUri = displayInput.card.logo.image
+    ? await this.services.logoImages.uploadDataUrl(contractId, displayInput.card.logo.image, {
+        appendExtension: true,
+      })
+    : displayInput.card.logo.uri?.toString() ?? undefined
+
+  invariant(displayLogoUri, LogoImageOrUriRequiredError)
+
+  validateDisplayLogo(displayLogoUri)
 
   const contract = new ContractEntity({
-    ...omit(input, 'templateId'),
+    ...rest,
+    display: toPersistedDisplayModel(displayInput, displayLogoUri),
     id: contractId,
     template,
   })

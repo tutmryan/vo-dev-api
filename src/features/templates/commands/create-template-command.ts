@@ -3,9 +3,9 @@ import { merge } from 'lodash'
 import type { CommandContext } from '../../../cqrs/command-context'
 import type { TemplateInput } from '../../../generated/graphql'
 import { validateContractClaims } from '../../contracts/claims'
-import { assignLogoUri } from '../../contracts/mapping'
+import { validateDisplayLogo } from '../../contracts/validation'
 import { TemplateEntity } from '../entities/template-entity'
-import { ensureNoIntersectingTemplateData, toDisplayModel, toTemplateParentData } from '../mapping'
+import { ensureNoIntersectingTemplateData, toPersistedDisplayModel, toTemplateParentData } from '../mapping'
 
 export async function CreateTemplateCommand(this: CommandContext, input: TemplateInput) {
   const repository = this.entityManager.getRepository(TemplateEntity)
@@ -21,10 +21,11 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
 
   const templateId = randomUUID().toUpperCase()
 
-  if (input.display?.card?.logo?.image) {
-    const fileName = await this.services.logoImages.uploadDataUrl(templateId, input.display.card.logo.image, { appendExtension: true })
-    assignLogoUri(input.display.card.logo, fileName)
-  }
+  const displayLogoUri = input.display?.card?.logo?.image
+    ? await this.services.logoImages.uploadDataUrl(templateId, input.display.card.logo.image, { appendExtension: true })
+    : input.display?.card?.logo?.uri?.toString() ?? null
+
+  if (displayLogoUri) validateDisplayLogo(displayLogoUri)
 
   const template = new TemplateEntity({
     id: templateId,
@@ -34,7 +35,7 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
     validityIntervalInSeconds: input.validityIntervalInSeconds ?? null,
     credentialTypes: input.credentialTypes ?? null,
     parent,
-    display: toDisplayModel(input.display),
+    display: toPersistedDisplayModel(input.display, displayLogoUri),
   })
 
   return await repository.save(template)

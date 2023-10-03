@@ -26,7 +26,6 @@ export const TemplateFragment = graphql(
         description
         logo {
           uri
-          image
           description
         }
       }

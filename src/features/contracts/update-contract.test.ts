@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
 import { mock as AdminService, mockCreateContract } from '../../services/__mocks__/admin'
+import { mock as BlobStorageContainerService } from '../../services/__mocks__/blob-storage-container-service'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { buildContractInput, createContract } from './test/create-contract'
@@ -11,10 +12,14 @@ import { provisionContractMutation } from './test/provision-contract'
 import { getUpdateContractInput, updateContractMutation } from './test/update-contract'
 
 jest.mock('../../services/admin')
+jest.mock('../../services/blob-storage-container-service')
 
 describe('updateContract mutation', () => {
   beforeAfterAll()
-  beforeEach(() => AdminService.clearAllMocks())
+  beforeEach(() => {
+    AdminService.clearAllMocks()
+    BlobStorageContainerService.clearAllMocks()
+  })
 
   async function givenContract({ withTemplate = false }: { withTemplate?: boolean }) {
     let template: TemplateFragmentFragment | undefined = undefined

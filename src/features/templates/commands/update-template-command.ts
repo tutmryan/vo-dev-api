@@ -1,9 +1,10 @@
+import { basename } from 'path'
 import type { CommandContext } from '../../../cqrs/command-context'
 import type { TemplateInput } from '../../../generated/graphql'
 import { validateContractClaims } from '../../contracts/claims'
-import { assignLogoUri } from '../../contracts/mapping'
+import { validateDisplayLogo } from '../../contracts/validation'
 import { TemplateEntity } from '../entities/template-entity'
-import { ensureNoIntersectingTemplateData, toDisplayModel, toTemplateParentData } from '../mapping'
+import { ensureNoIntersectingTemplateData, toPersistedDisplayModel, toTemplateParentData } from '../mapping'
 
 export async function UpdateTemplateCommand(this: CommandContext, id: string, input: TemplateInput) {
   const repository = this.entityManager.getRepository(TemplateEntity)
@@ -17,10 +18,14 @@ export async function UpdateTemplateCommand(this: CommandContext, id: string, in
     ensureNoIntersectingTemplateData(toTemplateParentData(input), await parent.combinedData())
   }
 
-  if (input.display?.card?.logo?.image) {
-    const fileName = await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image, { appendExtension: true })
-    assignLogoUri(input.display.card.logo, fileName)
-  }
+  if (template.display?.card?.logo?.uri)
+    await this.services.logoImages.deleteIfExists(decodeURIComponent(basename(template.display.card.logo.uri)))
+
+  const displayLogoUri = input.display?.card?.logo?.image
+    ? await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image, { appendExtension: true })
+    : input.display?.card?.logo?.uri?.toString() ?? null
+
+  if (displayLogoUri) validateDisplayLogo(displayLogoUri)
 
   await template.update({
     name: input.name,
@@ -28,7 +33,7 @@ export async function UpdateTemplateCommand(this: CommandContext, id: string, in
     isPublic: input.isPublic ?? null,
     validityIntervalInSeconds: input.validityIntervalInSeconds ?? null,
     credentialTypes: input.credentialTypes ?? null,
-    display: toDisplayModel(input.display),
+    display: toPersistedDisplayModel(input.display, displayLogoUri),
     parent,
   })
 

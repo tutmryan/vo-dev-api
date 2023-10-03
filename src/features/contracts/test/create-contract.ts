@@ -27,7 +27,6 @@ export const ContractFragment = graphql(
         description
         logo {
           uri
-          image
           description
         }
       }
@@ -72,7 +71,7 @@ export function getDefaultContractInput(): ContractInput {
         title: 'Credential title',
         description: 'Credential description',
         issuedBy: 'Credential issuer',
-        logo: { description: 'Logo description' },
+        logo: { description: 'Logo description', uri: 'https://makerx.com.au/credential.png' },
         textColor: '#ffffff',
         backgroundColor: '#000000',
       },

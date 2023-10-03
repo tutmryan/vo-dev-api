@@ -1,5 +1,6 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
+import { downloadToDataUrl } from '../../util/data-url'
 import { resolveUpdatedAt } from '../auditing/updated-at-resolver'
 import { CreateTemplateCommand } from './commands/create-template-command'
 import { DeleteTemplateCommand } from './commands/delete-template-command'
@@ -22,5 +23,8 @@ export const resolvers: Resolvers = {
   },
   Template: {
     updatedAt: resolveUpdatedAt,
+  },
+  TemplateDisplayCredentialLogo: {
+    image: ({ uri }) => (uri ? downloadToDataUrl(uri) : null),
   },
 }

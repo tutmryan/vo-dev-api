@@ -1,14 +1,13 @@
-import { get, intersection, omit } from 'lodash'
-import config from '../../config'
+import { get, intersection, merge, omit } from 'lodash'
 import type {
   ContractDisplayClaimInput,
-  ContractDisplayCredentialLogo,
+  ContractDisplayModelInput,
   ContractInput,
   TemplateDisplayClaim,
-  TemplateDisplayCredentialLogo,
   TemplateParentData,
 } from '../../generated/graphql'
 import { findKeysOverriding } from '../../util/intersection'
+import type { ContractEntity } from './entities/contract-entity'
 
 /**
  * Recursively finds properties from ContractInput overriding its TemplateParentData counterpart
@@ -48,9 +47,10 @@ export function ensureNoOverridingTemplateData(a: ContractInput, b: TemplatePare
 }
 
 /**
- * Assigns the logo URI to the config blob storage URL
+ * Converts a ContractDisplayModelInput to the persisted ContractDisplayModel by omitting the card.logo.image and ensuring card.logo.uri is set
  */
-export function assignLogoUri(logo: TemplateDisplayCredentialLogo | ContractDisplayCredentialLogo, fileName: string) {
-  const { url, logoImagesContainer } = config.get('blobStorage')
-  logo.uri = [url, logoImagesContainer, fileName].join('/')
+export function toPersistedDisplayModel(input: ContractDisplayModelInput, displayLogoUrl: string): ContractEntity['display'] {
+  return merge(omit(input, 'card.logo.image'), {
+    card: { logo: { uri: displayLogoUrl } },
+  })
 }

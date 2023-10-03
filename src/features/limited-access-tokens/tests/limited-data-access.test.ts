@@ -23,7 +23,6 @@ const findContractsQuery = graphql(`
           description
           logo {
             uri
-            image
             description
           }
         }
@@ -31,7 +30,7 @@ const findContractsQuery = graphql(`
       issuances(where: { identityId: $forIdentityId }, limit: 1) {
         id
         issuedAt
-        credentialExpiresAt
+        expiresAt
       }
       presentations(where: { identityId: $forIdentityId }, limit: 1) {
         id
@@ -55,7 +54,6 @@ const contractQuery = graphql(`
           description
           logo {
             uri
-            image
             description
           }
         }
@@ -63,7 +61,7 @@ const contractQuery = graphql(`
       issuances(where: { identityId: $forIdentityId }, limit: 1) {
         id
         issuedAt
-        credentialExpiresAt
+        expiresAt
       }
       presentations(where: { identityId: $forIdentityId }, limit: 1) {
         id

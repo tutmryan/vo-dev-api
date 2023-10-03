@@ -1,5 +1,6 @@
 import { dispatch, query } from '../../cqrs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
+import { downloadToDataUrl } from '../../util/data-url'
 import { resolveUpdatedAt } from '../auditing/updated-at-resolver'
 import { CreateContractCommand } from './commands/create-contract-command'
 import { DeleteContractCommand } from './commands/delete-contract-command'
@@ -31,5 +32,8 @@ export const resolvers: Resolvers = {
   },
   Issuance: {
     contract: ({ contractId }, _, { dataLoaders: { contracts } }) => contracts.load(contractId),
+  },
+  ContractDisplayCredentialLogo: {
+    image: ({ uri }) => downloadToDataUrl(uri),
   },
 }

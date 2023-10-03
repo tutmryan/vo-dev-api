@@ -27,7 +27,7 @@ export class BlobStorageContainerService {
    * @param dataUrl The data URL content to upload. See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs
    * @param options
    *  - appendExtension: If true, the extension of the data URL mimetype will be appended to the blob name
-   * @returns The name of the blob that was uploaded, including the appended extension if appendExtension was true
+   * @returns The fully qualified URL of the blob that was uploaded, including the appended extension if appendExtension was true
    */
   async uploadDataUrl(blobName: string, dataUrl: string, options: { appendExtension?: boolean } = {}): Promise<string> {
     const { appendExtension = false } = options
@@ -36,7 +36,7 @@ export class BlobStorageContainerService {
     await this.upload(name, Buffer.from(data, encoding), {
       blobHTTPHeaders: { blobContentType: mimeType },
     })
-    return name
+    return [this.containerClient().url, name].join('/')
   }
 
   async upload(blobName: string, buffer: Buffer, options?: BlockBlobParallelUploadOptions): Promise<void> {
