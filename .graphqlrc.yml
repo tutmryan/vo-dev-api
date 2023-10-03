@@ -4,6 +4,7 @@ schema:
   - src/schema/**/*.graphql
 documents:
   - 'src/features/**/*.{ts,tsx}'
+  - 'src/shield-rbac.test.ts'
 extensions:
   codegen:
     generates:

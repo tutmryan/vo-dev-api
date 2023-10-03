@@ -60,7 +60,7 @@ export const rules = {
   },
   Mutation: {
     '*': isCredentialAdminUser,
-    acquireLimitedAccessToken: isValidAcquireLimitedAccessTokenRequest,
+    acquireLimitedAccessToken: and(hasTokenAcquisitionRole, isValidAcquireLimitedAccessTokenRequest),
     createIssuanceRequest: isAllowedToIssue,
     createPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedPresentationRequest),
     saveIdentity: or(isAllowedToIssue, isCredentialAdminUser, hasTokenAcquisitionRoleRequiringIdentityAccess),

@@ -173,8 +173,16 @@ exports[`shield rules are setup correctly 1`] = `
       "cache": "contextual"
     },
     "acquireLimitedAccessToken": {
-      "name": "isValidAcquireLimitedAccessTokenRequest",
-      "cache": "strict"
+      "rulesAnd": [
+        {
+          "name": "hasLimitedAccessTokenAcquisitionRole",
+          "cache": "contextual"
+        },
+        {
+          "name": "isValidAcquireLimitedAccessTokenRequest",
+          "cache": "strict"
+        }
+      ]
     },
     "createIssuanceRequest": {
       "rulesOr": [
