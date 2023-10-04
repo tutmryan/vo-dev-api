@@ -251,34 +251,22 @@ exports[`shield rules are setup correctly 1`] = `
     "saveIdentity": {
       "rulesOr": [
         {
-          "rulesOr": [
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
             {
-              "name": "hasRole-VerifiableCredential.Issuer",
+              "name": "isLimitedAccessApp",
               "cache": "contextual"
             },
             {
-              "name": "isIssuanceApp",
+              "name": "hasLimitedAccessData-limitedIssuance",
               "cache": "contextual"
-            },
-            {
-              "rulesAnd": [
-                {
-                  "rulesAnd": [
-                    {
-                      "name": "isLimitedAccessApp",
-                      "cache": "contextual"
-                    },
-                    {
-                      "name": "hasLimitedAccessData-limitedIssuance",
-                      "cache": "contextual"
-                    }
-                  ]
-                },
-                {
-                  "name": "isValidLimitedIssuanceRequest",
-                  "cache": "strict"
-                }
-              ]
             }
           ]
         },
