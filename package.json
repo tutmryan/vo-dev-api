@@ -93,6 +93,7 @@
     "@graphql-tools/merge": "^9.0.0",
     "@graphql-tools/schema": "^10.0.0",
     "@graphql-tools/utils": "^10.0.6",
+    "@jenniferplusplus/opentelemetry-instrumentation-bullmq": "^0.3.1",
     "@keyv/redis": "^2.7.1",
     "@makerx/express-bearer": "^1.1.0",
     "@makerx/express-msal": "^1.0.0",
