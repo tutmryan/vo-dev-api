@@ -1,6 +1,8 @@
-import type { ApolloServerPlugin } from '@apollo/server'
+import type { ApolloServerPlugin, GraphQLRequestContext } from '@apollo/server'
 import { ApolloServer } from '@apollo/server'
+import responseCachePlugin from '@apollo/server-plugin-response-cache'
 import { expressMiddleware } from '@apollo/server/express4'
+import { ApolloServerPluginCacheControl } from '@apollo/server/plugin/cacheControl'
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace'
 import {
@@ -14,6 +16,7 @@ import { isProduction } from '@makerx/node-common'
 import type { Express } from 'express'
 import { json } from 'express'
 import type http from 'http'
+import { newCacheSection } from './cache'
 import config from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
@@ -34,11 +37,11 @@ const plugins = (httpServer: http.Server, serverCleanup?: () => Promise<void>): 
         }
       },
     },
-    // ApolloServerPluginCacheControl({ defaultMaxAge: 0 }),
-    // responseCachePlugin({
-    //   cache: newCacheSection('apollo'),
-    //   sessionId: (requestContext: GraphQLRequestContext<GraphQLContext>) => Promise.resolve(requestContext.contextValue.user?.id ?? null),
-    // }),
+    ApolloServerPluginCacheControl({ defaultMaxAge: 0 }),
+    responseCachePlugin({
+      cache: newCacheSection('apollo'),
+      sessionId: (requestContext: GraphQLRequestContext<GraphQLContext>) => Promise.resolve(requestContext.contextValue.user?.id ?? null),
+    }),
   ]
   if (!isProduction) {
     plugins.push(ApolloServerPluginInlineTrace())
