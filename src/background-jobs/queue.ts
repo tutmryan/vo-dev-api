@@ -46,6 +46,6 @@ export const jobQueueEvents = Lazy(() => {
 
 export const addToJobQueue = async (jobType: JobTypes): Promise<string> => {
   const jobId = randomUUID()
-  await jobQueue().add(jobType.name, jobType.payload, { jobId })
+  await jobQueue().add(jobType.name, jobType.payload, { jobId, removeOnComplete: true, removeDependencyOnFailure: true })
   return jobId
 }
