@@ -15,10 +15,9 @@ export type PersistedContractDisplayModel = Omit<ContractDisplayModel, 'card'> &
 @Entity('contract', { orderBy: { createdAt: 'ASC' } })
 export class ContractEntity extends AuditedAndTrackedEntity {
   constructor(
-    args?: Pick<
-      ContractEntity,
-      'id' | 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'credentialTypes' | 'display'
-    > & { template: TemplateEntity | null },
+    args?: Pick<ContractEntity, 'id' | 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'credentialTypes' | 'display'> & {
+      template: TemplateEntity | null
+    },
   ) {
     super()
     if (!args) return
@@ -28,9 +27,6 @@ export class ContractEntity extends AuditedAndTrackedEntity {
 
   @Column({ type: 'nvarchar' })
   name!: string
-
-  @Column({ type: 'nvarchar' })
-  description!: string
 
   @ManyToOne(() => TemplateEntity, { nullable: true })
   template!: Promise<TemplateEntity | null>
@@ -103,10 +99,7 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   }
 
   async update(
-    input: Pick<
-      ContractEntity,
-      'name' | 'description' | 'credentialTypes' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'templateId'
-    >,
+    input: Pick<ContractEntity, 'name' | 'credentialTypes' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'templateId'>,
   ) {
     typeSafeAssign(this, input)
   }

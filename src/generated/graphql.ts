@@ -437,8 +437,6 @@ export type ContractInput = {
    * Requires at least one type, and cannot have duplicate types
    */
   credentialTypes: Array<Scalars['String']['input']>;
-  /** The description of the template */
-  description: Scalars['String']['input'];
   /** The credential display definition defined by this contract. */
   display: ContractDisplayModelInput;
   /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */

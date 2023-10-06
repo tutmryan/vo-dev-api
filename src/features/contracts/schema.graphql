@@ -51,7 +51,7 @@ type Contract {
   """
   The description of the contract
   """
-  description: String!
+  description: String! @deprecated(reason: "no longer in use")
 
   """
   The template that this contract is based on
@@ -143,10 +143,6 @@ input ContractInput {
   The name of the template
   """
   name: String!
-  """
-  The description of the template
-  """
-  description: String!
 
   """
   The ID of the template used as a base for the contract

@@ -61,7 +61,6 @@ export const createContractMutation = graphql(
 export function getDefaultContractInput(): ContractInput {
   return {
     name: randomUUID(),
-    description: randomUUID(),
     isPublic: true,
     validityIntervalInSeconds: 1_440,
     credentialTypes: ['DefaultCredential'],
@@ -99,7 +98,6 @@ export async function createContract(input: ContractInput) {
 export function buildContractInput(args: Partial<ContractInput>): ContractInput {
   return {
     name: randomUUID(),
-    description: randomUUID(),
     templateId: null,
     isPublic: true,
     validityIntervalInSeconds: 1000,

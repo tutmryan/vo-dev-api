@@ -89,7 +89,6 @@ describe('updateContract mutation', () => {
     // Act
     const input = getUpdateContractInput(contract)
     input.name = 'Updated contract name'
-    input.description = 'Updated contract description'
     input.isPublic = false
     input.validityIntervalInSeconds = 500
     input.display.locale = 'en-GB'
