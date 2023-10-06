@@ -91,7 +91,13 @@ export const rules = {
     presentations: isAllowedToViewPresentations,
   },
   Identity: {
-    '*': or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, hasTokenAcquisitionRoleRequiringIdentityAccess),
+    '*': or(
+      isUserWithReadPermissions,
+      isIssuanceApp,
+      isPresentationApp,
+      hasTokenAcquisitionRoleRequiringIdentityAccess,
+      isLimitedAccessApp,
+    ),
   },
   AccessTokenResponse: {
     '*': hasTokenAcquisitionRole,
