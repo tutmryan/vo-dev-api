@@ -48,7 +48,7 @@ type Template {
   """
   The description of the template
   """
-  description: String!
+  description: String! @deprecated(reason: "no longer in use")
 
   """
   The parent template, if any.
@@ -143,10 +143,6 @@ input TemplateInput {
   The name of the template
   """
   name: String!
-  """
-  The description of the template
-  """
-  description: String!
 
   """
   The ID of the parent template, if any

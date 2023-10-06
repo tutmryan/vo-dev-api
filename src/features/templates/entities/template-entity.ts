@@ -23,10 +23,7 @@ type PersistedTemplateDisplayModel = Maybe<Omit<TemplateDisplayModel, 'card'>> &
 @Entity('template', { orderBy: { createdAt: 'ASC' } })
 export class TemplateEntity extends AuditedAndTrackedEntity {
   constructor(
-    args?: Pick<
-      TemplateEntity,
-      'id' | 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'credentialTypes' | 'display'
-    > & {
+    args?: Pick<TemplateEntity, 'id' | 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'credentialTypes' | 'display'> & {
       parent: TemplateEntity | null
     },
   ) {
@@ -38,9 +35,6 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
 
   @Column({ type: 'nvarchar' })
   name!: string
-
-  @Column({ type: 'nvarchar' })
-  description!: string
 
   @ManyToOne(() => TemplateEntity, { nullable: true })
   parent!: Promise<TemplateEntity | null>
@@ -141,7 +135,7 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
   }
 
   async update(
-    input: Pick<TemplateEntity, 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes'> & {
+    input: Pick<TemplateEntity, 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes'> & {
       parent: TemplateEntity | null
     },
   ) {

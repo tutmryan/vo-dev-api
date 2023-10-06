@@ -225,7 +225,10 @@ export type Contract = {
   deprecatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** Who deprecated the contract. */
   deprecatedBy?: Maybe<User>;
-  /** The description of the contract */
+  /**
+   * The description of the contract
+   * @deprecated no longer in use
+   */
   description: Scalars['String']['output'];
   /** The full or partial credential display definition defined by this contract */
   display: ContractDisplayModel;
@@ -1831,7 +1834,10 @@ export type Template = {
   createdBy: User;
   /** The type(s) of the contract / credential */
   credentialTypes?: Maybe<Array<Scalars['String']['output']>>;
-  /** The description of the template */
+  /**
+   * The description of the template
+   * @deprecated no longer in use
+   */
   description: Scalars['String']['output'];
   /** The full or partial credential display definition defined by this template, if any. */
   display?: Maybe<TemplateDisplayModel>;
@@ -1933,8 +1939,6 @@ export type TemplateDisplayModel = {
 export type TemplateInput = {
   /** The type(s) of the contract / credential */
   credentialTypes?: InputMaybe<Array<Scalars['String']['input']>>;
-  /** The description of the template */
-  description: Scalars['String']['input'];
   /** The full or partial credential display definition defined by this template, if any. */
   display?: InputMaybe<CreateUpdateTemplateDisplayModelInput>;
   /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
