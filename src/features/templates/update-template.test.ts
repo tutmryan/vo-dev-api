@@ -13,7 +13,6 @@ describe('updateTemplate mutation', () => {
     if (hasParent) {
       parentTemplate = await createTemplate({
         name: 'Parent template',
-        description: 'This is the parent template',
         credentialTypes: ['ParentType'],
         display: {
           card: {
@@ -28,14 +27,12 @@ describe('updateTemplate mutation', () => {
 
     const template = await createTemplate({
       name: 'SUT template',
-      description: 'This is the SUT template',
       parentTemplateId: parentTemplate?.id,
     })
 
     if (hasChildren) {
       await createTemplate({
         name: 'Child template',
-        description: 'This is the child template',
         parentTemplateId: template.id,
       })
     }
@@ -137,7 +134,6 @@ describe('updateTemplate mutation', () => {
         input: {
           ...getUpdateTemplateInput(template),
           name: 'Updated SUT template',
-          description: 'Updated SUT template description',
           isPublic: true,
           validityIntervalInSeconds: 1_000,
           display: {
@@ -160,7 +156,6 @@ describe('updateTemplate mutation', () => {
     expect(updatedTemplate).toMatchObject({
       ...getUpdateTemplateInput(template),
       name: 'Updated SUT template',
-      description: 'Updated SUT template description',
       isPublic: true,
       validityIntervalInSeconds: 1_000,
       display: {

@@ -22,6 +22,7 @@ export const resolvers: Resolvers = {
     },
   },
   Template: {
+    description: () => '',
     updatedAt: resolveUpdatedAt,
   },
   TemplateDisplayCredentialLogo: {

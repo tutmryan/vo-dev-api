@@ -22,6 +22,7 @@ export const resolvers: Resolvers = {
     deprecateContract: (_, { id }, context) => dispatch(context, DeprecateContractCommand, id),
   },
   Contract: {
+    description: () => '',
     updatedAt: resolveUpdatedAt,
     template: ({ templateId }, _, { dataLoaders: { templates } }) => (templateId ? templates.load(templateId) : null),
     templateData: async ({ templateId }, _, { dataLoaders: { templates } }) => {

@@ -29,7 +29,6 @@ export async function UpdateTemplateCommand(this: CommandContext, id: string, in
 
   await template.update({
     name: input.name,
-    description: input.description,
     isPublic: input.isPublic ?? null,
     validityIntervalInSeconds: input.validityIntervalInSeconds ?? null,
     credentialTypes: input.credentialTypes ?? null,

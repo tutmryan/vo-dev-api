@@ -61,7 +61,6 @@ export const createTemplateMutation = graphql(
 export function getEmptyTemplateInput(): TemplateInput {
   return {
     name: randomUUID(),
-    description: randomUUID(),
   }
 }
 
@@ -83,7 +82,6 @@ export async function createTemplate(input: TemplateInput) {
 export function buildTemplateInput(args: Partial<TemplateInput>): TemplateInput {
   return {
     name: randomUUID(),
-    description: randomUUID(),
     isPublic: true,
     ...args,
     display: {

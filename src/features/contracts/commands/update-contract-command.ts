@@ -31,7 +31,6 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
 
   await contract.update({
     name: input.name,
-    description: input.description,
     credentialTypes: input.credentialTypes,
     isPublic: input.isPublic,
     validityIntervalInSeconds: input.validityIntervalInSeconds,

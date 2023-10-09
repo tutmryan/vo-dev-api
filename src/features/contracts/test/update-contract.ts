@@ -13,7 +13,7 @@ export const updateContractMutation = graphql(
 )
 
 export function getUpdateContractInput(contract: ContractFragmentFragment): ContractInput {
-  const input: ContractInput = omit(contract, 'id', 'template')
+  const input: ContractInput = omit(contract, 'id', 'template', 'description')
   if (contract.template) input.templateId = contract.template.id
 
   return input

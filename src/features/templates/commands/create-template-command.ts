@@ -30,7 +30,6 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
   const template = new TemplateEntity({
     id: templateId,
     name: input.name,
-    description: input.description,
     isPublic: input.isPublic ?? null,
     validityIntervalInSeconds: input.validityIntervalInSeconds ?? null,
     credentialTypes: input.credentialTypes ?? null,

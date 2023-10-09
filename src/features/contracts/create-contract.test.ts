@@ -59,7 +59,6 @@ describe('createContract mutation', () => {
       variables: {
         input: {
           name: 'Contract',
-          description: 'Contract description',
           templateId: template.id,
           isPublic: false,
           validityIntervalInSeconds: 1000,
@@ -126,7 +125,6 @@ describe('createContract mutation', () => {
 
     const input: ContractInput = {
       name: randomUUID(),
-      description: randomUUID(),
       templateId: template.id,
       isPublic: true,
       validityIntervalInSeconds: 1000,
