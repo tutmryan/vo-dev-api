@@ -1,8 +1,6 @@
-import { differenceInSeconds } from 'date-fns'
 import { isEqual, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm'
 import type { ContractDisplayCredential, ContractDisplayCredentialLogo, ContractDisplayModel } from '../../../generated/graphql'
-import { ContractStatus } from '../../../generated/graphql'
 import { domainInvariant } from '../../../util/domain-invariant'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
@@ -121,14 +119,5 @@ export class ContractEntity extends AuditedAndTrackedEntity {
     this.isDeprecated = true
     this.deprecatedBy = Promise.resolve(user)
     this.deprecatedAt = new Date()
-  }
-
-  get status(): ContractStatus {
-    const lastSaved = this.updatedAt ?? this.createdAt
-    const lastProvisioned = this.lastProvisionedAt ?? this.provisionedAt ?? undefined
-    if (this.isDeprecated) return ContractStatus.Deprecated
-    if (!lastProvisioned) return ContractStatus.Draft
-    if (differenceInSeconds(lastSaved, lastProvisioned) > 2) return ContractStatus.PublishedOutdated
-    return ContractStatus.Published
   }
 }
