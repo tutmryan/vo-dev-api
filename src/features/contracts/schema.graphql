@@ -421,6 +421,18 @@ input ContractWhere {
   List only the contracts which include any of these credential types
   """
   credentialTypes: [String!]
+  """
+  The ID of the user (Person or Application) that created the contract.
+  """
+  createdById: ID
+  """
+  The start of the createdAt period to include.
+  """
+  createdFrom: DateTime
+  """
+  The end of the createdAt period to include.
+  """
+  createdTo: DateTime
 }
 
 """

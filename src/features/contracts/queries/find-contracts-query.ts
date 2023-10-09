@@ -3,6 +3,7 @@ import { ILike, IsNull, Not } from 'typeorm'
 import type { QueryContext } from '../../../cqrs/query-context'
 import type { ContractWhere, Maybe } from '../../../generated/graphql'
 import { ContractOrderBy, OrderDirection } from '../../../generated/graphql'
+import { OptionalRange } from '../../../util/typeorm'
 import { ContractEntity } from '../entities/contract-entity'
 
 export async function FindContractsQuery(
@@ -28,6 +29,8 @@ export async function FindContractsQuery(
       ...where,
       credentialTypesJson: ILike(`%"${type}"%`),
     }))
+  if (criteria?.createdById) where.createdById = criteria.createdById.toUpperCase()
+  where.createdAt = OptionalRange(criteria?.createdFrom, criteria?.createdTo)
 
   const direction = orderDirection ?? OrderDirection.Asc
   switch (orderBy) {
