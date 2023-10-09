@@ -1,9 +1,35 @@
+# eslint-disable @graphql-eslint/naming-convention
+
+"""
+Columns that can be used for sorting contracts.
+"""
+enum ContractOrderBy {
+  """
+  The name of the contract.
+  """
+  contractName
+  """
+  The name of the user that created the contract.
+  """
+  createdByName
+  """
+  The timestamp when the contract was created.
+  """
+  createdAt
+}
+
 # eslint-disable-next-line @graphql-eslint/require-description
 type Query {
   """
   Returns contracts, optionally matching the specified criteria
   """
-  findContracts(where: ContractWhere, offset: PositiveInt, limit: PositiveInt): [Contract!]!
+  findContracts(
+    where: ContractWhere
+    offset: PositiveInt
+    limit: PositiveInt
+    orderBy: ContractOrderBy
+    orderDirection: OrderDirection
+  ): [Contract!]!
 
   """
   Returns a contract by ID

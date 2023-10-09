@@ -11,7 +11,8 @@ import { FindContractsQuery } from './queries/find-contracts-query'
 
 export const resolvers: Resolvers = {
   Query: {
-    findContracts: (_, { where, offset, limit }, context) => query(context, FindContractsQuery, where, offset, limit),
+    findContracts: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
+      query(context, FindContractsQuery, where, offset, limit, orderBy, orderDirection),
     contract: (_, { id }, { dataLoaders: { contracts } }) => contracts.load(id),
   },
   Mutation: {
