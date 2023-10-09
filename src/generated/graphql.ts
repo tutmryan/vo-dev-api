@@ -243,6 +243,8 @@ export type Contract = {
   isDeprecated?: Maybe<Scalars['Boolean']['output']>;
   /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
   isPublic: Scalars['Boolean']['output'];
+  /** Returns the total number of credential issuances for this contract. */
+  issuanceCount: Scalars['Int']['output'];
   /** Returns the successful credential issuances for this contract. */
   issuances: Array<Issuance>;
   /** When the contract was last provisioned in the Verified ID service. */
@@ -477,6 +479,16 @@ export type ContractIssuanceWhere = {
   /** The end of the issuedAt period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
+
+/** Columns that can be used for sorting contracts. */
+export enum ContractOrderBy {
+  /** The name of the contract. */
+  ContractName = 'contractName',
+  /** The timestamp when the contract was created. */
+  CreatedAt = 'createdAt',
+  /** The name of the user that created the contract. */
+  CreatedByName = 'createdByName'
+}
 
 /** Criteria for filtering contract presentations. */
 export type ContractPresentationWhere = {
@@ -1548,6 +1560,8 @@ export type QueryCredentialTypesArgs = {
 export type QueryFindContractsArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<ContractOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<ContractWhere>;
 };
 
@@ -2417,6 +2431,7 @@ export type ResolversTypes = {
   Callback: Callback;
   ConfigurationValidation: ConfigurationValidation;
   Contract: ResolverTypeWrapper<ContractEntity>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   ContractCount: ResolverTypeWrapper<Omit<ContractCount, 'contract'> & { contract: ResolversTypes['Contract'] }>;
   ContractDisplayClaim: ResolverTypeWrapper<ContractDisplayClaim>;
   ContractDisplayClaimInput: ContractDisplayClaimInput;
@@ -2430,6 +2445,7 @@ export type ResolversTypes = {
   ContractDisplayModelInput: ContractDisplayModelInput;
   ContractInput: ContractInput;
   ContractIssuanceWhere: ContractIssuanceWhere;
+  ContractOrderBy: ContractOrderBy;
   ContractPresentationWhere: ContractPresentationWhere;
   ContractWhere: ContractWhere;
   CreatePartnerInput: CreatePartnerInput;
@@ -2445,7 +2461,6 @@ export type ResolversTypes = {
   EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']['output']>;
   HexColorCode: ResolverTypeWrapper<Scalars['HexColorCode']['output']>;
   Identity: ResolverTypeWrapper<IdentityEntity>;
-  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   IdentityInput: IdentityInput;
   IdentityIssuanceWhere: IdentityIssuanceWhere;
   IdentityOrderBy: IdentityOrderBy;
@@ -2546,6 +2561,7 @@ export type ResolversParentTypes = {
   Callback: Callback;
   ConfigurationValidation: ConfigurationValidation;
   Contract: ContractEntity;
+  Int: Scalars['Int']['output'];
   ContractCount: Omit<ContractCount, 'contract'> & { contract: ResolversParentTypes['Contract'] };
   ContractDisplayClaim: ContractDisplayClaim;
   ContractDisplayClaimInput: ContractDisplayClaimInput;
@@ -2573,7 +2589,6 @@ export type ResolversParentTypes = {
   EmailAddress: Scalars['EmailAddress']['output'];
   HexColorCode: Scalars['HexColorCode']['output'];
   Identity: IdentityEntity;
-  Int: Scalars['Int']['output'];
   IdentityInput: IdentityInput;
   IdentityIssuanceWhere: IdentityIssuanceWhere;
   IdentityPresentationWhere: IdentityPresentationWhere;
@@ -2717,6 +2732,7 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isDeprecated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  issuanceCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<ContractIssuancesArgs>>;
   lastProvisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastProvisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;

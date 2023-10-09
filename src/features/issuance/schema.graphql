@@ -471,6 +471,10 @@ extend type Contract {
   Returns the successful credential issuances for this contract.
   """
   issuances(where: ContractIssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
+  """
+  Returns the total number of credential issuances for this contract.
+  """
+  issuanceCount: Int!
 }
 
 extend type Identity {
