@@ -259,6 +259,8 @@ export type Contract = {
   provisionedAt?: Maybe<Scalars['DateTime']['output']>;
   /** Who initially provisioned the contract in the Verified ID service. */
   provisionedBy?: Maybe<User>;
+  /** The status of the contract. */
+  status?: Maybe<ContractStatus>;
   /** The template that this contract is based on */
   template?: Maybe<Template>;
   /** The combined representation of the template's parent chain. */
@@ -512,6 +514,14 @@ export type ContractPresentationWhere = {
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
+/** The status of the contract. */
+export enum ContractStatus {
+  Deprecated = 'deprecated',
+  Draft = 'draft',
+  Published = 'published',
+  PublishedOutdated = 'publishedOutdated'
+}
+
 /** Defines the filter critiera used to find contracts */
 export type ContractWhere = {
   /** The ID of the user (Person or Application) that created the contract. */
@@ -526,6 +536,8 @@ export type ContractWhere = {
   isProvisioned?: InputMaybe<Scalars['Boolean']['input']>;
   /** List only contracts matching this name */
   name?: InputMaybe<Scalars['String']['input']>;
+  /** The status of the contract. */
+  status?: InputMaybe<ContractStatus>;
   /** List only contracts from this template */
   templateId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -2453,6 +2465,7 @@ export type ResolversTypes = {
   ContractIssuanceWhere: ContractIssuanceWhere;
   ContractOrderBy: ContractOrderBy;
   ContractPresentationWhere: ContractPresentationWhere;
+  ContractStatus: ContractStatus;
   ContractWhere: ContractWhere;
   CreatePartnerInput: CreatePartnerInput;
   CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
@@ -2746,6 +2759,7 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<ContractPresentationsArgs>>;
   provisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   provisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  status?: Resolver<Maybe<ResolversTypes['ContractStatus']>, ParentType, ContextType>;
   template?: Resolver<Maybe<ResolversTypes['Template']>, ParentType, ContextType>;
   templateData?: Resolver<Maybe<ResolversTypes['TemplateParentData']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;

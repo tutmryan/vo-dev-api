@@ -1,8 +1,8 @@
 import type { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere } from 'typeorm'
-import { ILike, IsNull, Not } from 'typeorm'
+import { ILike, IsNull, Not, Raw } from 'typeorm'
 import type { QueryContext } from '../../../cqrs/query-context'
 import type { ContractWhere, Maybe } from '../../../generated/graphql'
-import { ContractOrderBy, OrderDirection } from '../../../generated/graphql'
+import { ContractOrderBy, ContractStatus, OrderDirection } from '../../../generated/graphql'
 import { OptionalRange } from '../../../util/typeorm'
 import { ContractEntity } from '../entities/contract-entity'
 
@@ -31,6 +31,19 @@ export async function FindContractsQuery(
     }))
   if (criteria?.createdById) where.createdById = criteria.createdById.toUpperCase()
   where.createdAt = OptionalRange(criteria?.createdFrom, criteria?.createdTo)
+  if (criteria?.status === ContractStatus.Deprecated) {
+    where.isDeprecated = true
+  } else if (criteria?.status === ContractStatus.Draft) {
+    where.provisionedAt = IsNull()
+  } else if (criteria?.status === ContractStatus.Published) {
+    where.provisionedAt = Raw(
+      (alias) => `ISNULL(ContractEntity.last_provisioned_at, ${alias}) >= ISNULL(ContractEntity.updated_at, ContractEntity.created_at)`,
+    )
+  } else if (criteria?.status === ContractStatus.PublishedOutdated) {
+    where.provisionedAt = Raw(
+      (alias) => `ISNULL(ContractEntity.last_provisioned_at, ${alias}) < ISNULL(ContractEntity.updated_at, ContractEntity.created_at)`,
+    )
+  }
 
   const direction = orderDirection ?? OrderDirection.Asc
   switch (orderBy) {

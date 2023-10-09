@@ -18,6 +18,16 @@ enum ContractOrderBy {
   createdAt
 }
 
+"""
+The status of the contract.
+"""
+enum ContractStatus {
+  draft
+  published
+  publishedOutdated
+  deprecated
+}
+
 # eslint-disable-next-line @graphql-eslint/require-description
 type Query {
   """
@@ -159,6 +169,10 @@ type Contract {
   When the contract was deprecated.
   """
   deprecatedAt: DateTime
+  """
+  The status of the contract.
+  """
+  status: ContractStatus
 }
 
 """
@@ -433,6 +447,10 @@ input ContractWhere {
   The end of the createdAt period to include.
   """
   createdTo: DateTime
+  """
+  The status of the contract.
+  """
+  status: ContractStatus
 }
 
 """
