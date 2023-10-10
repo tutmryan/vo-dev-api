@@ -514,8 +514,16 @@ export type ContractPresentationWhere = {
 
 /** Defines the filter critiera used to find contracts */
 export type ContractWhere = {
+  /** The ID of the user (Person or Application) that created the contract. */
+  createdById?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the createdAt period to include. */
+  createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the createdAt period to include. */
+  createdTo?: InputMaybe<Scalars['DateTime']['input']>;
   /** List only the contracts which include any of these credential types */
   credentialTypes?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** List only the contracts whose deprecation status matches the flag */
+  isDeprecated?: InputMaybe<Scalars['Boolean']['input']>;
   /** List only contracts that are or are not published in the Verified Credentials Network */
   isProvisioned?: InputMaybe<Scalars['Boolean']['input']>;
   /** List only contracts matching this name */

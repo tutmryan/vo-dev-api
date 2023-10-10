@@ -1,8 +1,9 @@
 import type { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere } from 'typeorm'
-import { ILike, IsNull, Not } from 'typeorm'
+import { ILike, IsNull, Not, Raw } from 'typeorm'
 import type { QueryContext } from '../../../cqrs/query-context'
 import type { ContractWhere, Maybe } from '../../../generated/graphql'
 import { ContractOrderBy, OrderDirection } from '../../../generated/graphql'
+import { OptionalRange } from '../../../util/typeorm'
 import { ContractEntity } from '../entities/contract-entity'
 
 export async function FindContractsQuery(
@@ -28,6 +29,11 @@ export async function FindContractsQuery(
       ...where,
       credentialTypesJson: ILike(`%"${type}"%`),
     }))
+  if (criteria?.createdById) where.createdById = criteria.createdById.toUpperCase()
+  where.createdAt = OptionalRange(criteria?.createdFrom, criteria?.createdTo)
+
+  if (criteria && criteria.isDeprecated !== null && criteria.isDeprecated !== undefined)
+    where.isDeprecated = Raw((alias) => `ISNULL(${alias}, 0) = :isDeprecated`, { isDeprecated: criteria.isDeprecated })
 
   const direction = orderDirection ?? OrderDirection.Asc
   switch (orderBy) {
