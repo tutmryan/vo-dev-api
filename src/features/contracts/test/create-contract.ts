@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { graphql } from '../../../generated'
 import type { ContractInput } from '../../../generated/graphql'
-import { executeOperationAsAdmin } from '../../../test'
+import { executeOperationAsCredentialAdmin } from '../../../test'
 
 export const ContractFragment = graphql(
   `
@@ -27,7 +27,6 @@ export const ContractFragment = graphql(
         description
         logo {
           uri
-          image
           description
         }
       }
@@ -62,7 +61,6 @@ export const createContractMutation = graphql(
 export function getDefaultContractInput(): ContractInput {
   return {
     name: randomUUID(),
-    description: randomUUID(),
     isPublic: true,
     validityIntervalInSeconds: 1_440,
     credentialTypes: ['DefaultCredential'],
@@ -72,7 +70,7 @@ export function getDefaultContractInput(): ContractInput {
         title: 'Credential title',
         description: 'Credential description',
         issuedBy: 'Credential issuer',
-        logo: { description: 'Logo description' },
+        logo: { description: 'Logo description', uri: 'https://makerx.com.au/credential.png' },
         textColor: '#ffffff',
         backgroundColor: '#000000',
       },
@@ -83,7 +81,7 @@ export function getDefaultContractInput(): ContractInput {
 }
 
 export async function createContract(input: ContractInput) {
-  const { data, errors } = await executeOperationAsAdmin({
+  const { data, errors } = await executeOperationAsCredentialAdmin({
     query: createContractMutation,
     variables: {
       input,
@@ -100,7 +98,6 @@ export async function createContract(input: ContractInput) {
 export function buildContractInput(args: Partial<ContractInput>): ContractInput {
   return {
     name: randomUUID(),
-    description: randomUUID(),
     templateId: null,
     isPublic: true,
     validityIntervalInSeconds: 1000,

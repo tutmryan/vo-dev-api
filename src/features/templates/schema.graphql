@@ -48,7 +48,7 @@ type Template {
   """
   The description of the template
   """
-  description: String!
+  description: String! @deprecated(reason: "no longer in use")
 
   """
   The parent template, if any.
@@ -143,10 +143,6 @@ input TemplateInput {
   The name of the template
   """
   name: String!
-  """
-  The description of the template
-  """
-  description: String!
 
   """
   The ID of the parent template, if any
@@ -260,11 +256,11 @@ See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credenti
 """ # eslint-disable @graphql-eslint/strict-id-in-types
 type TemplateDisplayCredentialLogo {
   """
-  URI of the logo (optional if image is specified)
+  URI of the logo
   """
   uri: URL
   """
-  The base-64 encoded image (optional if url is specified)
+  The base-64 encoded logo in [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) format
   """
   image: String
   """
@@ -283,7 +279,7 @@ input CreateUpdateTemplateDisplayCredentialLogoInput {
   """
   uri: URL
   """
-  The base-64 encoded image (optional if url is specified)
+  The base-64 encoded logo (optional if url is specified) in [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) format
   """
   image: String
   """

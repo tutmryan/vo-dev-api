@@ -13,7 +13,7 @@ export const updateTemplateMutation = graphql(
 )
 
 export function getUpdateTemplateInput(template: TemplateFragmentFragment): TemplateInput {
-  const input: TemplateInput = omit(template, 'id', 'parent')
+  const input: TemplateInput = omit(template, 'id', 'parent', 'description')
   if (template.parent?.id) input.parentTemplateId = template.parent.id
   return input
 }

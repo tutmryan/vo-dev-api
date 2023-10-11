@@ -1,5 +1,5 @@
 import { graphql } from '../../../generated'
-import { executeOperationAsAdmin } from '../../../test'
+import { executeOperationAsCredentialAdmin } from '../../../test'
 
 const getTemplateQuery = graphql(
   `
@@ -11,7 +11,7 @@ const getTemplateQuery = graphql(
 )
 
 export async function getTemplate(id: string) {
-  const { data, errors } = await executeOperationAsAdmin({
+  const { data, errors } = await executeOperationAsCredentialAdmin({
     query: getTemplateQuery,
     variables: { id },
   })

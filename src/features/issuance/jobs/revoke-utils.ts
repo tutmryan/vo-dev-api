@@ -4,6 +4,7 @@ import type { WorkerContext } from '../../../background-jobs/worker'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import type { AdminService } from '../../../services/admin'
 import { invariant } from '../../../util/invariant'
+import { addUserToManager } from '../../auditing/user-context-helper'
 import type { ContractEntity } from '../../contracts/entities/contract-entity'
 import type { UserEntity } from '../../users/entities/user-entity'
 import { IssuanceEntity } from '../entities/issuance-entity'
@@ -35,6 +36,7 @@ export const revokeIssuances = async (
           logger.info(`revoking issuance ${issuance.id}`)
 
           const result = await revokeIssuance(issuance, adminService, user, contract)
+          addUserToManager(entityManager, user.id)
           await entityManager.getRepository(IssuanceEntity).save(result)
         })
       }

@@ -1,35 +1,48 @@
+import { BullMQInstrumentation } from '@jenniferplusplus/opentelemetry-instrumentation-bullmq'
+import type { ProxyTracerProvider } from '@opentelemetry/api'
+import { trace } from '@opentelemetry/api'
+import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express'
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
 import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis'
 import { TediousInstrumentation } from '@opentelemetry/instrumentation-tedious'
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston'
 import { Resource } from '@opentelemetry/resources'
+import type { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
-import { ApplicationInsightsClient, ApplicationInsightsConfig } from 'applicationinsights'
+import { useAzureMonitor } from 'applicationinsights'
 
 const resource = Resource.EMPTY
 resource.attributes[SemanticResourceAttributes.SERVICE_NAME] = 'VerifiableOrchestration'
 resource.attributes[SemanticResourceAttributes.SERVICE_NAMESPACE] = 'verifiable-orchestration-api'
 
-const config = new ApplicationInsightsConfig()
-config.resource = resource
+useAzureMonitor({
+  resource,
+  instrumentationOptions: {
+    azureSdk: { enabled: false },
+    http: { enabled: true },
 
-/**
- * Disabling this for now as it shows 1000s of failed requests on the App Insights dashboard.
- * See https://github.com/microsoft/ApplicationInsights-node.js/issues/1123
- */
-config.enableAutoCollectStandardMetrics = false
+    mongoDb: { enabled: false },
+    mySql: { enabled: false },
+    postgreSql: { enabled: false },
+    redis: { enabled: false },
+    redis4: { enabled: false },
+  },
+  logInstrumentationOptions: {
+    winston: { enabled: true },
+  },
+})
 
-config.instrumentations.http = { enabled: true }
-config.instrumentations.azureSdk = { enabled: true }
-config.logInstrumentations.winston = { enabled: true }
+const tracerProvider = (trace.getTracerProvider() as ProxyTracerProvider).getDelegate() as NodeTracerProvider
 
-const client = new ApplicationInsightsClient(config)
-
-client.getTraceHandler().addInstrumentation(new ExpressInstrumentation())
-client.getTraceHandler().addInstrumentation(new WinstonInstrumentation())
-client.getTraceHandler().addInstrumentation(new GraphQLInstrumentation())
-client.getTraceHandler().addInstrumentation(new TediousInstrumentation())
-client.getTraceHandler().addInstrumentation(new IORedisInstrumentation())
-
-client.start()
+registerInstrumentations({
+  tracerProvider,
+  instrumentations: [
+    new ExpressInstrumentation(),
+    new WinstonInstrumentation(),
+    new GraphQLInstrumentation(),
+    new TediousInstrumentation(),
+    new IORedisInstrumentation(),
+    new BullMQInstrumentation(),
+  ],
+})

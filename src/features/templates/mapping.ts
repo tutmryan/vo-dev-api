@@ -1,12 +1,18 @@
-import { get, intersection, isNil, omit, omitBy, pick } from 'lodash'
-import type { CreateUpdateTemplateDisplayClaimInput, TemplateDisplayModel, TemplateParentData } from '../../generated/graphql'
+import { get, intersection, isNil, merge, omit, omitBy, pick } from 'lodash'
+import type {
+  CreateUpdateTemplateDisplayClaimInput,
+  CreateUpdateTemplateDisplayModelInput,
+  TemplateDisplayModel,
+  TemplateParentData,
+} from '../../generated/graphql'
 import { findKeysIntersection } from '../../util/intersection'
 import { pruneNil } from '../../util/prune-nil'
+import type { TemplateEntity } from './entities/template-entity'
 
 /**
  * Creates a TemplateDisplayModel based on input, extracting only the properties that are defined and removing nill values
  */
-export function toDisplayModel(input?: Omit<TemplateDisplayModel, '__typename'> | null): TemplateDisplayModel | null {
+export function toDisplayModel(input?: Omit<CreateUpdateTemplateDisplayModelInput, '__typename'> | null): TemplateDisplayModel | null {
   if (!input) return null
   return pruneNil(pick(input, ['card', 'claims', 'consent', 'locale']))
 }
@@ -49,4 +55,16 @@ export function ensureNoIntersectingTemplateData(a: TemplateParentData, b: Templ
   if (intersectingProps.length > 0) {
     throw new Error(`The template overrides the following properties from its parent: ${intersectingProps.join(', ')}`)
   }
+}
+
+/**
+ * Converts a TemplateDisplayModelInput to the persisted TemplateDisplayModel by omitting the card.logo.image and only keeping card.logo.uri
+ */
+export function toPersistedDisplayModel(
+  input?: CreateUpdateTemplateDisplayModelInput | null,
+  displayLogoUri?: string | null,
+): TemplateEntity['display'] | null {
+  const persistedModel = omit(toDisplayModel(input), 'card.logo.image')
+  if (displayLogoUri) merge(persistedModel, { card: { logo: { uri: displayLogoUri } } })
+  return persistedModel as TemplateEntity['display']
 }

@@ -2,7 +2,8 @@ import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
 import { mock as AdminService, mockCreateContract } from '../../services/__mocks__/admin'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
+import { mock as BlobStorageContainerService } from '../../services/__mocks__/blob-storage-container-service'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
@@ -11,10 +12,14 @@ import { provisionContractMutation } from './test/provision-contract'
 import { getUpdateContractInput, updateContractMutation } from './test/update-contract'
 
 jest.mock('../../services/admin')
+jest.mock('../../services/blob-storage-container-service')
 
 describe('updateContract mutation', () => {
   beforeAfterAll()
-  beforeEach(() => AdminService.clearAllMocks())
+  beforeEach(() => {
+    AdminService.clearAllMocks()
+    BlobStorageContainerService.clearAllMocks()
+  })
 
   async function givenContract({ withTemplate = false }: { withTemplate?: boolean }) {
     let template: TemplateFragmentFragment | undefined = undefined
@@ -62,7 +67,7 @@ describe('updateContract mutation', () => {
     input.display.consent.title = 'Updated consent title'
     input.display.claims[1]!.value = 'Updated Claim 2'
 
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: updateContractMutation,
       variables: {
         id: contract.id,
@@ -84,7 +89,6 @@ describe('updateContract mutation', () => {
     // Act
     const input = getUpdateContractInput(contract)
     input.name = 'Updated contract name'
-    input.description = 'Updated contract description'
     input.isPublic = false
     input.validityIntervalInSeconds = 500
     input.display.locale = 'en-GB'
@@ -93,7 +97,7 @@ describe('updateContract mutation', () => {
     input.display.claims = [{ claim: 'claim_name', label: 'Claim', type: 'String', value: 'Updated claim value' }]
     input.display.consent.title = 'Updated consent title'
 
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: updateContractMutation,
       variables: {
         id: contract.id,
@@ -120,7 +124,7 @@ describe('updateContract mutation', () => {
     input.display.consent.instructions = 'Updated consent instructions'
     input.display.claims[0]!.value = 'Updated Claim 1'
 
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: updateContractMutation,
       variables: {
         id: contract.id,
@@ -141,14 +145,14 @@ describe('updateContract mutation', () => {
     const externalContractId = randomUUID()
     mockCreateContract.mockResolvedValue({ id: externalContractId })
     //publishing for the first time
-    await executeOperationAsAdmin({
+    await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,
       variables: {
         id: contract.id,
       },
     })
     //deprecating the contract
-    await executeOperationAsAdmin({
+    await executeOperationAsCredentialAdmin({
       query: deprecateContractMutation,
       variables: {
         id: contract.id,
@@ -159,7 +163,7 @@ describe('updateContract mutation', () => {
     const input = getUpdateContractInput(contract)
     input.display.card.description = 'Updated card description'
 
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: updateContractMutation,
       variables: {
         id: contract.id,

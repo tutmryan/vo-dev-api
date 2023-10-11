@@ -471,6 +471,10 @@ extend type Contract {
   Returns the successful credential issuances for this contract.
   """
   issuances(where: ContractIssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
+  """
+  Returns the total number of credential issuances for this contract.
+  """
+  issuanceCount: Int!
 }
 
 extend type Identity {
@@ -535,15 +539,15 @@ extend type Query {
   """
   Returns the issuance count, optionally matching the specified criteria.
   """
-  issuanceCount(where: IssuanceWhere): NonNegativeInt! @cacheControl(maxAge: 60)
+  issuanceCount(where: IssuanceWhere): NonNegativeInt!
   """
   Returns the issuance count, grouped by Contract, optionally matching the specified criteria.
   """
-  issuanceCountByContract(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [ContractCount!]! @cacheControl(maxAge: 60)
+  issuanceCountByContract(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [ContractCount!]!
   """
   Returns the issuance count, grouped by User, optionally matching the specified criteria.
   """
-  issuanceCountByUser(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]! @cacheControl(maxAge: 60)
+  issuanceCountByUser(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]!
 }
 
 """

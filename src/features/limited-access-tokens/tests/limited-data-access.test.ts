@@ -1,9 +1,10 @@
 import casual from 'casual'
 import { randomUUID } from 'crypto'
-import { dataSource } from '../../../data'
+import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { graphql } from '../../../generated'
 import type { AcquireLimitedAccessTokenInput } from '../../../generated/graphql'
 import { beforeAfterAll, executeOperationAsLimitedAccessClient, expectToBeDefined, expectUnauthorizedError } from '../../../test'
+import { addUserToManager } from '../../auditing/user-context-helper'
 import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
 import { createIdentity } from '../../identity/create-update-identity.test'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
@@ -23,7 +24,6 @@ const findContractsQuery = graphql(`
           description
           logo {
             uri
-            image
             description
           }
         }
@@ -31,7 +31,7 @@ const findContractsQuery = graphql(`
       issuances(where: { identityId: $forIdentityId }, limit: 1) {
         id
         issuedAt
-        credentialExpiresAt
+        expiresAt
       }
       presentations(where: { identityId: $forIdentityId }, limit: 1) {
         id
@@ -55,7 +55,6 @@ const contractQuery = graphql(`
           description
           logo {
             uri
-            image
             description
           }
         }
@@ -63,7 +62,7 @@ const contractQuery = graphql(`
       issuances(where: { identityId: $forIdentityId }, limit: 1) {
         id
         issuedAt
-        credentialExpiresAt
+        expiresAt
       }
       presentations(where: { identityId: $forIdentityId }, limit: 1) {
         id
@@ -90,19 +89,24 @@ const credentialTypesQuery = graphql(`
 async function createContractWithIssuance() {
   const identity = await createIdentity()
   const contract = await createContract(getDefaultContractInput())
-  const issuedBy = await dataSource
-    .getRepository(UserEntity)
-    .save(new UserEntity({ email: casual.email, isApp: true, name: 'Test', oid: randomUUID(), tenantId: randomUUID() }))
-  const issuance = await dataSource.getRepository(IssuanceEntity).save(
-    new IssuanceEntity({
-      id: randomUUID(),
-      requestId: randomUUID(),
-      contractId: contract.id,
-      identityId: identity.id,
-      issuedById: issuedBy.id,
-      expiresAt: new Date(),
-    }),
-  )
+  const { issuedBy, issuance } = await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
+    const issuedBy = await entityManager
+      .getRepository(UserEntity)
+      .save(new UserEntity({ email: casual.email, isApp: true, name: 'Test', oid: randomUUID(), tenantId: randomUUID() }))
+    addUserToManager(entityManager, issuedBy.id)
+    const issuance = await entityManager.getRepository(IssuanceEntity).save(
+      new IssuanceEntity({
+        id: randomUUID(),
+        requestId: randomUUID(),
+        contractId: contract.id,
+        identityId: identity.id,
+        issuedById: issuedBy.id,
+        expiresAt: new Date(),
+      }),
+    )
+    return { issuedBy, issuance }
+  })
+
   return { identity, contract, issuedBy, issuance }
 }
 

@@ -1,8 +1,6 @@
-import type { ApolloServerPlugin, GraphQLRequestContext } from '@apollo/server'
+import type { ApolloServerPlugin } from '@apollo/server'
 import { ApolloServer } from '@apollo/server'
-import responseCachePlugin from '@apollo/server-plugin-response-cache'
 import { expressMiddleware } from '@apollo/server/express4'
-import { ApolloServerPluginCacheControl } from '@apollo/server/plugin/cacheControl'
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace'
 import {
@@ -15,21 +13,15 @@ import { useSubscriptionsServer } from '@makerx/graphql-core'
 import { isProduction } from '@makerx/node-common'
 import type { Express } from 'express'
 import { json } from 'express'
-import type { Disposable } from 'graphql-ws'
 import type http from 'http'
 import { useBackgroundJob } from './background-jobs'
-import { newCacheSection } from './cache'
 import config from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
 import { logger } from './logger'
 import createSchema from './schema'
 
-const plugins = (
-  httpServer: http.Server,
-  serverCleanup: Disposable,
-  jobRunnerCleanup: Disposable,
-): ApolloServerPlugin<GraphQLContext>[] => {
+const plugins = (httpServer: http.Server, serverCleanup?: () => Promise<void>): ApolloServerPlugin<GraphQLContext>[] => {
   const plugins: ApolloServerPlugin<GraphQLContext>[] = [
     createLoggingPlugin({ contextCreationFailureLogger: logger }),
     introspectionControlPlugin as ApolloServerPlugin<GraphQLContext>,
@@ -38,17 +30,11 @@ const plugins = (
       async serverWillStart() {
         return {
           async drainServer() {
-            await serverCleanup.dispose()
-            await jobRunnerCleanup.dispose()
+            await serverCleanup?.()
           },
         }
       },
     },
-    ApolloServerPluginCacheControl({ defaultMaxAge: 0 }),
-    responseCachePlugin({
-      cache: newCacheSection('apollo'),
-      sessionId: (requestContext: GraphQLRequestContext<GraphQLContext>) => Promise.resolve(requestContext.contextValue.user?.id ?? null),
-    }),
   ]
   if (!isProduction) {
     plugins.push(ApolloServerPluginInlineTrace())
@@ -83,7 +69,9 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
   const server = new ApolloServer<GraphQLContext>({
     logger,
     schema,
-    plugins: plugins(httpServer, wsServerCleanup, jobRunnerCleanup),
+    plugins: plugins(httpServer, async () => {
+      await Promise.all([wsServerCleanup.dispose(), jobRunnerCleanup.dispose()])
+    }),
     introspection: true,
     csrfPrevention: true,
   })

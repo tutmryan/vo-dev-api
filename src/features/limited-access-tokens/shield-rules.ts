@@ -9,7 +9,7 @@ import type {
   QueryIdentityArgs,
 } from '../../generated/graphql'
 import { invariant } from '../../util/invariant'
-import { hasAnyRoleRule, hasRoleRule } from '../../util/shield-utils'
+import { hasAnyRoleRuleWithName, hasRoleRule } from '../../util/shield-utils'
 
 export const limitedAccessRole = 'VerifiableCredential.LimitedAccess'
 
@@ -20,9 +20,13 @@ export enum LimitedAccessTokenAcquisitionRoles {
   anonymousPresentations = 'VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations',
 }
 
-export const hasTokenAcquisitionRole = hasAnyRoleRule(...Object.values(LimitedAccessTokenAcquisitionRoles))
+export const hasTokenAcquisitionRole = hasAnyRoleRuleWithName(
+  'hasLimitedAccessTokenAcquisitionRole',
+  ...Object.values(LimitedAccessTokenAcquisitionRoles),
+)
 
-export const hasTokenAcquisitionRoleRequiringIdentityAccess = hasAnyRoleRule(
+export const hasTokenAcquisitionRoleRequiringIdentityAccess = hasAnyRoleRuleWithName(
+  'hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess',
   LimitedAccessTokenAcquisitionRoles.issuance,
   LimitedAccessTokenAcquisitionRoles.presentation,
   LimitedAccessTokenAcquisitionRoles.listContracts,
@@ -60,7 +64,7 @@ export const isValidAcquireLimitedAccessTokenRequest = rule('isValidAcquireLimit
 )
 
 // limited access app variants
-export const isLimitedAccessApp = hasRoleRule(limitedAccessRole)
+export const isLimitedAccessApp = hasRoleRule(limitedAccessRole, 'isLimitedAccessApp')
 export const isLimitedAnonymousPresentationApp = and(
   isLimitedAccessApp,
   hasLimitedAccessDataRule('allowAnonymousPresentation', ({ allowAnonymousPresentation }) => allowAnonymousPresentation === true),

@@ -83,11 +83,5 @@ type Query {
   """
   Returns users, optionally matching the specified criteria
   """
-  findUsers(
-    where: UserWhere
-    offset: PositiveInt
-    limit: PositiveInt = 100
-    orderBy: UserOrderBy
-    orderDirection: OrderDirection
-  ): [User!]! @cacheControl(maxAge: 60)
+  findUsers(where: UserWhere, offset: PositiveInt, limit: PositiveInt = 100, orderBy: UserOrderBy, orderDirection: OrderDirection): [User!]!
 }

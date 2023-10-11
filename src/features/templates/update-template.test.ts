@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
 import { createTemplate, getEmptyTemplateInput } from './test/create-template'
 import { getTemplate } from './test/get-template'
 import { getUpdateTemplateInput, updateTemplateMutation } from './test/update-template'
@@ -13,7 +13,6 @@ describe('updateTemplate mutation', () => {
     if (hasParent) {
       parentTemplate = await createTemplate({
         name: 'Parent template',
-        description: 'This is the parent template',
         credentialTypes: ['ParentType'],
         display: {
           card: {
@@ -28,14 +27,12 @@ describe('updateTemplate mutation', () => {
 
     const template = await createTemplate({
       name: 'SUT template',
-      description: 'This is the SUT template',
       parentTemplateId: parentTemplate?.id,
     })
 
     if (hasChildren) {
       await createTemplate({
         name: 'Child template',
-        description: 'This is the child template',
         parentTemplateId: template.id,
       })
     }
@@ -64,7 +61,7 @@ describe('updateTemplate mutation', () => {
   it(`returns an error if the template ID doesn't exist`, async () => {
     // Act
     const bogusTemplateId = randomUUID()
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: updateTemplateMutation,
       variables: {
         id: bogusTemplateId,
@@ -83,7 +80,7 @@ describe('updateTemplate mutation', () => {
     const { template } = await givenTemplate({ hasParent: true })
 
     // Act
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: updateTemplateMutation,
       variables: {
         id: template.id,
@@ -130,14 +127,13 @@ describe('updateTemplate mutation', () => {
     const { template } = await givenTemplate({})
 
     // Act
-    const { errors } = await executeOperationAsAdmin({
+    const { errors } = await executeOperationAsCredentialAdmin({
       query: updateTemplateMutation,
       variables: {
         id: template.id,
         input: {
           ...getUpdateTemplateInput(template),
           name: 'Updated SUT template',
-          description: 'Updated SUT template description',
           isPublic: true,
           validityIntervalInSeconds: 1_000,
           display: {
@@ -160,7 +156,6 @@ describe('updateTemplate mutation', () => {
     expect(updatedTemplate).toMatchObject({
       ...getUpdateTemplateInput(template),
       name: 'Updated SUT template',
-      description: 'Updated SUT template description',
       isPublic: true,
       validityIntervalInSeconds: 1_000,
       display: {

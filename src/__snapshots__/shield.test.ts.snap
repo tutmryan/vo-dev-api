@@ -4,34 +4,30 @@ exports[`shield rules are setup correctly 1`] = `
 "{
   "Query": {
     "*": {
-      "name": "hasScope-Admin",
+      "name": "isUserWithReadPermissions",
       "cache": "contextual"
     },
     "healthcheck": {
       "rules": []
     },
     "contract": {
-      "rules": [
+      "rulesOr": [
         {
-          "rules": [
-            {
-              "name": "hasScope-Admin",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasRole-VerifiableCredential.Issue",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasRole-VerifiableCredential.Present",
-              "cache": "contextual"
-            }
-          ]
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
         },
         {
-          "rules": [
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "isPresentationApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
             {
-              "name": "hasRole-VerifiableCredential.LimitedAccess",
+              "name": "isLimitedAccessApp",
               "cache": "contextual"
             },
             {
@@ -43,27 +39,23 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "findContracts": {
-      "rules": [
+      "rulesOr": [
         {
-          "rules": [
-            {
-              "name": "hasScope-Admin",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasRole-VerifiableCredential.Issue",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasRole-VerifiableCredential.Present",
-              "cache": "contextual"
-            }
-          ]
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
         },
         {
-          "rules": [
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "isPresentationApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
             {
-              "name": "hasRole-VerifiableCredential.LimitedAccess",
+              "name": "isLimitedAccessApp",
               "cache": "contextual"
             },
             {
@@ -75,27 +67,23 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "identity": {
-      "rules": [
+      "rulesOr": [
         {
-          "rules": [
-            {
-              "name": "hasScope-Admin",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasRole-VerifiableCredential.Issue",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasRole-VerifiableCredential.Present",
-              "cache": "contextual"
-            }
-          ]
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
         },
         {
-          "rules": [
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "isPresentationApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
             {
-              "name": "hasRole-VerifiableCredential.LimitedAccess",
+              "name": "isLimitedAccessApp",
               "cache": "contextual"
             },
             {
@@ -107,23 +95,23 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "findIssuances": {
-      "rules": [
+      "rulesOr": [
         {
-          "name": "hasScope-Admin",
+          "name": "isUserWithReadPermissions",
           "cache": "contextual"
         },
         {
-          "name": "hasRole-VerifiableCredential.Issue",
+          "name": "isIssuanceApp",
           "cache": "contextual"
         },
         {
-          "rules": [
+          "rulesAnd": [
             {
-              "name": "hasRole-VerifiableCredential.LimitedAccess",
+              "name": "isLimitedAccessApp",
               "cache": "contextual"
             },
             {
-              "rules": [
+              "rulesOr": [
                 {
                   "name": "isRequestIdFilterDefined",
                   "cache": "strict"
@@ -139,23 +127,23 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "findPresentations": {
-      "rules": [
+      "rulesOr": [
         {
-          "name": "hasScope-Admin",
+          "name": "isUserWithReadPermissions",
           "cache": "contextual"
         },
         {
-          "name": "hasRole-VerifiableCredential.Present",
+          "name": "isPresentationApp",
           "cache": "contextual"
         },
         {
-          "rules": [
+          "rulesAnd": [
             {
-              "name": "hasRole-VerifiableCredential.LimitedAccess",
+              "name": "isLimitedAccessApp",
               "cache": "contextual"
             },
             {
-              "rules": [
+              "rulesOr": [
                 {
                   "name": "isRequestIdFilterDefined",
                   "cache": "strict"
@@ -181,25 +169,37 @@ exports[`shield rules are setup correctly 1`] = `
   },
   "Mutation": {
     "*": {
-      "name": "hasScope-Admin",
+      "name": "hasRole-VerifiableCredential.CredentialAdmin",
       "cache": "contextual"
     },
+    "acquireLimitedAccessToken": {
+      "rulesAnd": [
+        {
+          "name": "hasLimitedAccessTokenAcquisitionRole",
+          "cache": "contextual"
+        },
+        {
+          "name": "isValidAcquireLimitedAccessTokenRequest",
+          "cache": "strict"
+        }
+      ]
+    },
     "createIssuanceRequest": {
-      "rules": [
+      "rulesOr": [
         {
-          "name": "hasScope-Admin",
+          "name": "hasRole-VerifiableCredential.Issuer",
           "cache": "contextual"
         },
         {
-          "name": "hasRole-VerifiableCredential.Issue",
+          "name": "isIssuanceApp",
           "cache": "contextual"
         },
         {
-          "rules": [
+          "rulesAnd": [
             {
-              "rules": [
+              "rulesAnd": [
                 {
-                  "name": "hasRole-VerifiableCredential.LimitedAccess",
+                  "name": "isLimitedAccessApp",
                   "cache": "contextual"
                 },
                 {
@@ -217,21 +217,21 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "createPresentationRequest": {
-      "rules": [
+      "rulesOr": [
         {
-          "name": "hasScope-Admin",
+          "name": "isUserWithReadPermissions",
           "cache": "contextual"
         },
         {
-          "name": "hasRole-VerifiableCredential.Present",
+          "name": "isPresentationApp",
           "cache": "contextual"
         },
         {
-          "rules": [
+          "rulesAnd": [
             {
-              "rules": [
+              "rulesAnd": [
                 {
-                  "name": "hasRole-VerifiableCredential.LimitedAccess",
+                  "name": "isLimitedAccessApp",
                   "cache": "contextual"
                 },
                 {
@@ -249,32 +249,36 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "saveIdentity": {
-      "rules": [
+      "rulesOr": [
         {
-          "rules": [
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
             {
-              "name": "hasScope-Admin",
+              "name": "isLimitedAccessApp",
               "cache": "contextual"
             },
             {
-              "name": "hasRole-VerifiableCredential.Issue",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasRole-VerifiableCredential.Present",
+              "name": "hasLimitedAccessData-limitedIssuance",
               "cache": "contextual"
             }
           ]
         },
         {
-          "name": "hasAnyRole-VerifiableCredential.AcquireLimitedAccessToken.Issue,VerifiableCredential.AcquireLimitedAccessToken.Present,VerifiableCredential.AcquireLimitedAccessToken.ListContracts",
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",
           "cache": "contextual"
         }
       ]
-    },
-    "acquireLimitedAccessToken": {
-      "name": "isValidAcquireLimitedAccessTokenRequest",
-      "cache": "strict"
     },
     "createPartner": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
@@ -287,31 +291,35 @@ exports[`shield rules are setup correctly 1`] = `
   },
   "Subscription": {
     "*": {
-      "name": "hasScope-Admin",
+      "name": "hasRole-VerifiableCredential.CredentialAdmin",
       "cache": "contextual"
     },
     "presentationEvent": {
-      "rules": [
+      "rulesOr": [
         {
-          "name": "hasScope-Admin",
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
           "cache": "contextual"
         },
         {
-          "rules": [
+          "rulesAnd": [
             {
               "name": "isRequestIdFilterDefined",
               "cache": "strict"
             },
             {
-              "rules": [
+              "rulesOr": [
                 {
-                  "name": "hasRole-VerifiableCredential.Present",
+                  "name": "isUserWithReadPermissions",
                   "cache": "contextual"
                 },
                 {
-                  "rules": [
+                  "name": "isPresentationApp",
+                  "cache": "contextual"
+                },
+                {
+                  "rulesAnd": [
                     {
-                      "name": "hasRole-VerifiableCredential.LimitedAccess",
+                      "name": "isLimitedAccessApp",
                       "cache": "contextual"
                     },
                     {
@@ -321,9 +329,9 @@ exports[`shield rules are setup correctly 1`] = `
                   ]
                 },
                 {
-                  "rules": [
+                  "rulesAnd": [
                     {
-                      "name": "hasRole-VerifiableCredential.LimitedAccess",
+                      "name": "isLimitedAccessApp",
                       "cache": "contextual"
                     },
                     {
@@ -339,27 +347,31 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "issuanceEvent": {
-      "rules": [
+      "rulesOr": [
         {
-          "name": "hasScope-Admin",
+          "name": "hasRole-VerifiableCredential.Issuer",
           "cache": "contextual"
         },
         {
-          "rules": [
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
             {
               "name": "isRequestIdFilterDefined",
               "cache": "strict"
             },
             {
-              "rules": [
+              "rulesOr": [
                 {
-                  "name": "hasRole-VerifiableCredential.Issue",
+                  "name": "isIssuanceApp",
                   "cache": "contextual"
                 },
                 {
-                  "rules": [
+                  "rulesAnd": [
                     {
-                      "name": "hasRole-VerifiableCredential.LimitedAccess",
+                      "name": "isLimitedAccessApp",
                       "cache": "contextual"
                     },
                     {
@@ -377,23 +389,23 @@ exports[`shield rules are setup correctly 1`] = `
   },
   "Contract": {
     "issuances": {
-      "rules": [
+      "rulesOr": [
         {
-          "name": "hasScope-Admin",
+          "name": "isUserWithReadPermissions",
           "cache": "contextual"
         },
         {
-          "name": "hasRole-VerifiableCredential.Issue",
+          "name": "isIssuanceApp",
           "cache": "contextual"
         },
         {
-          "rules": [
+          "rulesAnd": [
             {
-              "name": "hasRole-VerifiableCredential.LimitedAccess",
+              "name": "isLimitedAccessApp",
               "cache": "contextual"
             },
             {
-              "rules": [
+              "rulesOr": [
                 {
                   "name": "isRequestIdFilterDefined",
                   "cache": "strict"
@@ -409,23 +421,23 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "presentations": {
-      "rules": [
+      "rulesOr": [
         {
-          "name": "hasScope-Admin",
+          "name": "isUserWithReadPermissions",
           "cache": "contextual"
         },
         {
-          "name": "hasRole-VerifiableCredential.Present",
+          "name": "isPresentationApp",
           "cache": "contextual"
         },
         {
-          "rules": [
+          "rulesAnd": [
             {
-              "name": "hasRole-VerifiableCredential.LimitedAccess",
+              "name": "isLimitedAccessApp",
               "cache": "contextual"
             },
             {
-              "rules": [
+              "rulesOr": [
                 {
                   "name": "isRequestIdFilterDefined",
                   "cache": "strict"
@@ -443,33 +455,25 @@ exports[`shield rules are setup correctly 1`] = `
   },
   "Identity": {
     "*": {
-      "rules": [
+      "rulesOr": [
         {
-          "rules": [
-            {
-              "rules": [
-                {
-                  "name": "hasScope-Admin",
-                  "cache": "contextual"
-                },
-                {
-                  "name": "hasRole-VerifiableCredential.Issue",
-                  "cache": "contextual"
-                },
-                {
-                  "name": "hasRole-VerifiableCredential.Present",
-                  "cache": "contextual"
-                }
-              ]
-            },
-            {
-              "name": "hasRole-VerifiableCredential.LimitedAccess",
-              "cache": "contextual"
-            }
-          ]
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
         },
         {
-          "name": "hasAnyRole-VerifiableCredential.AcquireLimitedAccessToken.Issue,VerifiableCredential.AcquireLimitedAccessToken.Present,VerifiableCredential.AcquireLimitedAccessToken.ListContracts",
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "isPresentationApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",
+          "cache": "contextual"
+        },
+        {
+          "name": "isLimitedAccessApp",
           "cache": "contextual"
         }
       ]
@@ -477,36 +481,8 @@ exports[`shield rules are setup correctly 1`] = `
   },
   "AccessTokenResponse": {
     "*": {
-      "rules": [
-        {
-          "rules": [
-            {
-              "rules": [
-                {
-                  "name": "hasScope-Admin",
-                  "cache": "contextual"
-                },
-                {
-                  "name": "hasRole-VerifiableCredential.Issue",
-                  "cache": "contextual"
-                },
-                {
-                  "name": "hasRole-VerifiableCredential.Present",
-                  "cache": "contextual"
-                }
-              ]
-            },
-            {
-              "name": "hasRole-VerifiableCredential.LimitedAccess",
-              "cache": "contextual"
-            }
-          ]
-        },
-        {
-          "name": "hasAnyRole-VerifiableCredential.AcquireLimitedAccessToken.Issue,VerifiableCredential.AcquireLimitedAccessToken.Present,VerifiableCredential.AcquireLimitedAccessToken.ListContracts,VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations",
-          "cache": "contextual"
-        }
-      ]
+      "name": "hasLimitedAccessTokenAcquisitionRole",
+      "cache": "contextual"
     }
   }
 }"

@@ -1,7 +1,13 @@
-import { randomUUID } from 'crypto'
 import { compact, flatten, isEqual, merge, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
-import type { TemplateDisplayClaim, TemplateDisplayModel, TemplateParentData } from '../../../generated/graphql'
+import type {
+  Maybe,
+  TemplateDisplayClaim,
+  TemplateDisplayCredential,
+  TemplateDisplayCredentialLogo,
+  TemplateDisplayModel,
+  TemplateParentData,
+} from '../../../generated/graphql'
 import { domainInvariant } from '../../../util/domain-invariant'
 import { Lazy } from '../../../util/lazy'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
@@ -9,29 +15,26 @@ import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tra
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { toTemplateParentData } from '../mapping'
 
+// same as TemplateDisplayModel but without card.logo.image
+type PersistedTemplateDisplayModel = Maybe<Omit<TemplateDisplayModel, 'card'>> & {
+  card?: Maybe<Omit<TemplateDisplayCredential, 'logo'>> & { logo?: Maybe<Omit<TemplateDisplayCredentialLogo, 'image'>> }
+}
+
 @Entity('template', { orderBy: { createdAt: 'ASC' } })
 export class TemplateEntity extends AuditedAndTrackedEntity {
-  constructor(args?: {
-    id?: string
-    name: string
-    description: string
-    parent: TemplateEntity | null
-    isPublic: boolean | null
-    validityIntervalInSeconds: number | null
-    credentialTypes: string[] | null
-    display: TemplateDisplayModel | null
-  }) {
+  constructor(
+    args?: Pick<TemplateEntity, 'id' | 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'credentialTypes' | 'display'> & {
+      parent: TemplateEntity | null
+    },
+  ) {
     super()
     if (!args) return
-    const { id, parent, ...rest } = args
-    typeSafeAssign(this, { ...rest, id: id ?? randomUUID(), parent: Promise.resolve(parent) })
+    const { parent, ...rest } = args
+    typeSafeAssign(this, { ...rest, parent: Promise.resolve(parent) })
   }
 
   @Column({ type: 'nvarchar' })
   name!: string
-
-  @Column({ type: 'nvarchar' })
-  description!: string
 
   @ManyToOne(() => TemplateEntity, { nullable: true })
   parent!: Promise<TemplateEntity | null>
@@ -51,10 +54,10 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
   private displayJson?: string | null
 
-  get display(): TemplateDisplayModel | null {
+  get display(): PersistedTemplateDisplayModel | null {
     return this.displayJson ? JSON.parse(this.displayJson) : null
   }
-  set display(display: TemplateDisplayModel | null) {
+  set display(display: PersistedTemplateDisplayModel | null) {
     this.displayJson = display ? JSON.stringify(display) : null
   }
 
@@ -132,7 +135,7 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
   }
 
   async update(
-    input: Pick<TemplateEntity, 'name' | 'description' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes'> & {
+    input: Pick<TemplateEntity, 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes'> & {
       parent: TemplateEntity | null
     },
   ) {

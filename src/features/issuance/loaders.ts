@@ -23,3 +23,18 @@ export const issuanceCountByIdentityLoader = () =>
 
     return ids.map((id) => results.find((result) => result.identity_id.toUpperCase() === id.toUpperCase())?.count ?? 0)
   })
+
+export const issuanceCountByContractLoader = () =>
+  new DataLoader<string, number>(async (ids) => {
+    const results: { contract_id: string; count: number }[] = await dataSource
+      .getRepository(IssuanceEntity)
+      .createQueryBuilder('i')
+      .select('COUNT(*)', 'count')
+      .addSelect('i.contract_id')
+      .where('i.contract_id IN (:...contractIds)', { contractIds: ids })
+      .groupBy('i.contract_id')
+      .comment('CountIssuancesByContractQuery')
+      .getRawMany()
+
+    return ids.map((id) => results.find((result) => result.contract_id.toUpperCase() === id.toUpperCase())?.count ?? 0)
+  })

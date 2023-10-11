@@ -1,13 +1,13 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, RelationId } from 'typeorm'
-import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import { IssuanceStatus } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
+import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('issuance')
-export class IssuanceEntity extends VerifiedOrchestrationEntity {
+export class IssuanceEntity extends AuditedAndTrackedEntity {
   constructor(args?: Pick<IssuanceEntity, 'id' | 'requestId' | 'contractId' | 'identityId' | 'issuedById' | 'expiresAt'>) {
     super()
     if (!args) return

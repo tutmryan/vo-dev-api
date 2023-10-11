@@ -59,7 +59,7 @@ export const worker = Lazy(
           await handler(context, job)
         }
       },
-      { concurrency: 10, connection: redisOptions },
+      { concurrency: 2, connection: redisOptions },
     ),
 )
 

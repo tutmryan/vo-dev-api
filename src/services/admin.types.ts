@@ -56,7 +56,6 @@ type DisplayCard = {
 type DisplayCredentialLogo = {
   uri?: string | null
   description: string
-  image?: string | null
 }
 
 type DisplayConsent = {

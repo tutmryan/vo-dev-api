@@ -113,7 +113,6 @@ const config: DeepPartial<Config> = {
     'a4577872-4a36-4a93-9846-b29a1220ca89': { name: 'verifiedorchestration.com' },
     '10b631d3-9e47-49e1-a938-cbd933f0488d': { name: 'voonboardingdemo.onmicrosoft.com' },
   },
-  cardLogoImageUrlDefault: 'https://green-sky-0f070b000.2.azurestaticapps.net/icons/favicon-310x310.png',
 }
 
 module.exports = config

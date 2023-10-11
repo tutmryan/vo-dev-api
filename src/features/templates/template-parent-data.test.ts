@@ -1,5 +1,5 @@
 import { graphql } from '../../generated'
-import { beforeAfterAll, executeOperationAsAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAsCredentialAdmin } from '../../test'
 import { createTemplate, getEmptyTemplateInput } from './test/create-template'
 
 graphql(
@@ -16,7 +16,6 @@ graphql(
           description
           logo {
             uri
-            image
             description
           }
         }
@@ -57,7 +56,7 @@ describe('template.parentData field', () => {
     const createdTemplate = await createTemplate(getEmptyTemplateInput())
 
     // Act
-    const { data } = await executeOperationAsAdmin({
+    const { data } = await executeOperationAsCredentialAdmin({
       query: getTemplateParentDataQuery,
       variables: {
         id: createdTemplate.id,
@@ -95,7 +94,7 @@ describe('template.parentData field', () => {
     })
 
     // Act
-    const { data } = await executeOperationAsAdmin({
+    const { data } = await executeOperationAsCredentialAdmin({
       query: getTemplateParentDataQuery,
       variables: {
         id: childTemplate.id,
@@ -164,7 +163,7 @@ describe('template.parentData field', () => {
     })
 
     // Act
-    const { data } = await executeOperationAsAdmin({
+    const { data } = await executeOperationAsCredentialAdmin({
       query: getTemplateParentDataQuery,
       variables: {
         id: childTemplate.id,

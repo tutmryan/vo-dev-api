@@ -126,13 +126,13 @@ type Query {
     limit: PositiveInt = 100
     orderBy: IdentityOrderBy
     orderDirection: OrderDirection
-  ): [Identity!]! @cacheControl(maxAge: 60)
+  ): [Identity!]!
   """
   Returns home tenant user identies matching the specified criteria
   """
-  findTenantIdentities(where: TenantIdentityWhere!, limit: PositiveInt = 100): [TenantIdentity!]! @cacheControl(maxAge: 60)
+  findTenantIdentities(where: TenantIdentityWhere!, limit: PositiveInt = 100): [TenantIdentity!]!
   """
   Returns the distinct set of issuers from all identities
   """
-  identityIssuers: [String!]! @cacheControl(maxAge: 60)
+  identityIssuers: [String!]!
 }

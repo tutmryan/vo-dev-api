@@ -1,9 +1,35 @@
+# eslint-disable @graphql-eslint/naming-convention
+
+"""
+Columns that can be used for sorting contracts.
+"""
+enum ContractOrderBy {
+  """
+  The name of the contract.
+  """
+  contractName
+  """
+  The name of the user that created the contract.
+  """
+  createdByName
+  """
+  The timestamp when the contract was created.
+  """
+  createdAt
+}
+
 # eslint-disable-next-line @graphql-eslint/require-description
 type Query {
   """
   Returns contracts, optionally matching the specified criteria
   """
-  findContracts(where: ContractWhere, offset: PositiveInt, limit: PositiveInt): [Contract!]!
+  findContracts(
+    where: ContractWhere
+    offset: PositiveInt
+    limit: PositiveInt
+    orderBy: ContractOrderBy
+    orderDirection: OrderDirection
+  ): [Contract!]!
 
   """
   Returns a contract by ID
@@ -51,7 +77,7 @@ type Contract {
   """
   The description of the contract
   """
-  description: String!
+  description: String! @deprecated(reason: "no longer in use")
 
   """
   The template that this contract is based on
@@ -143,10 +169,6 @@ input ContractInput {
   The name of the template
   """
   name: String!
-  """
-  The description of the template
-  """
-  description: String!
 
   """
   The ID of the template used as a base for the contract
@@ -261,13 +283,13 @@ See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credenti
 """ # eslint-disable @graphql-eslint/strict-id-in-types
 type ContractDisplayCredentialLogo {
   """
-  URI of the logo (optional if image is specified)
+  URI of the logo
   """
-  uri: URL
+  uri: URL!
   """
-  The base-64 encoded image (optional if url is specified)
+  The base-64 encoded logo in [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) format
   """
-  image: String
+  image: String!
   """
   The description of the logo
   """
@@ -284,7 +306,7 @@ input ContractDisplayCredentialLogoInput {
   """
   uri: URL
   """
-  The base-64 encoded image (optional if url is specified)
+  The base-64 encoded logo (optional if url is specified) in [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) format
   """
   image: String
   """
@@ -399,6 +421,22 @@ input ContractWhere {
   List only the contracts which include any of these credential types
   """
   credentialTypes: [String!]
+  """
+  The ID of the user (Person or Application) that created the contract.
+  """
+  createdById: ID
+  """
+  The start of the createdAt period to include.
+  """
+  createdFrom: DateTime
+  """
+  The end of the createdAt period to include.
+  """
+  createdTo: DateTime
+  """
+  List only the contracts whose deprecation status matches the flag
+  """
+  isDeprecated: Boolean
 }
 
 """

@@ -1,36 +1,32 @@
-import { randomUUID } from 'crypto'
 import { isEqual, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm'
-import type { ContractDisplayModel } from '../../../generated/graphql'
+import type { ContractDisplayCredential, ContractDisplayCredentialLogo, ContractDisplayModel } from '../../../generated/graphql'
 import { domainInvariant } from '../../../util/domain-invariant'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { TemplateEntity } from '../../templates/entities/template-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
+// same as ContractDisplayModel but without card.logo.image
+export type PersistedContractDisplayModel = Omit<ContractDisplayModel, 'card'> & {
+  card: Omit<ContractDisplayCredential, 'logo'> & { logo: Omit<ContractDisplayCredentialLogo, 'image'> }
+}
+
 @Entity('contract', { orderBy: { createdAt: 'ASC' } })
 export class ContractEntity extends AuditedAndTrackedEntity {
-  constructor(args?: {
-    id?: string
-    name: string
-    description: string
-    template: TemplateEntity | null
-    isPublic: boolean
-    validityIntervalInSeconds: number
-    credentialTypes: string[]
-    display: ContractDisplayModel
-  }) {
+  constructor(
+    args?: Pick<ContractEntity, 'id' | 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'credentialTypes' | 'display'> & {
+      template: TemplateEntity | null
+    },
+  ) {
     super()
     if (!args) return
-    const { id, template, ...rest } = args
-    typeSafeAssign(this, { ...rest, id: id ?? randomUUID(), template: Promise.resolve(template) })
+    const { template, ...rest } = args
+    typeSafeAssign(this, { ...rest, template: Promise.resolve(template) })
   }
 
   @Column({ type: 'nvarchar' })
   name!: string
-
-  @Column({ type: 'nvarchar' })
-  description!: string
 
   @ManyToOne(() => TemplateEntity, { nullable: true })
   template!: Promise<TemplateEntity | null>
@@ -80,11 +76,11 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'nvarchar', length: 'MAX' })
   private displayJson!: string
 
-  get display(): ContractDisplayModel {
+  get display(): PersistedContractDisplayModel {
     return JSON.parse(this.displayJson)
   }
 
-  set display(display: ContractDisplayModel) {
+  set display(display: PersistedContractDisplayModel) {
     this.displayJson = JSON.stringify(display)
   }
 
@@ -103,10 +99,7 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   }
 
   async update(
-    input: Pick<
-      ContractEntity,
-      'name' | 'description' | 'credentialTypes' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'templateId'
-    >,
+    input: Pick<ContractEntity, 'name' | 'credentialTypes' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'templateId'>,
   ) {
     typeSafeAssign(this, input)
   }
