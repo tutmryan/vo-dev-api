@@ -1,10 +1,10 @@
 import { Column, Entity, Index } from 'typeorm'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
-import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
+import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 
 @Entity('identity')
 @Index(['issuer', 'identifier'], { unique: true })
-export class IdentityEntity extends VerifiedOrchestrationEntity {
+export class IdentityEntity extends AuditedAndTrackedEntity {
   constructor(args?: { issuer: string; identifier: string; name: string }) {
     super()
     if (!args) return

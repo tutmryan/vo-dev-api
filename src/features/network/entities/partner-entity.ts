@@ -1,9 +1,9 @@
 import { Column, Entity } from 'typeorm'
-import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
+import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 
 @Entity('partner')
-export class PartnerEntity extends VerifiedOrchestrationEntity {
+export class PartnerEntity extends AuditedAndTrackedEntity {
   constructor(args?: Pick<PartnerEntity, 'name' | 'did' | 'credentialTypes' | 'tenantId' | 'issuerId' | 'linkedDomainUrls'>) {
     super()
     if (args) typeSafeAssign(this, args)
