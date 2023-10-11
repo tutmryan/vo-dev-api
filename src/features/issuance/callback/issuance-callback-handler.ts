@@ -1,8 +1,9 @@
 import { logger } from '@azure/identity'
 import { addSeconds } from 'date-fns'
 import { requestDetailsCache } from '../../../cache'
-import { dataSource } from '../../../data'
+import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { IssuanceRequestStatus } from '../../../generated/graphql'
+import { addUserToManager } from '../../auditing/user-context-helper'
 import type { IssuanceCallbackHandler } from '../../callback'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import type { IssuanceRequestDetails } from '../commands/create-issuance-request-command'
@@ -21,17 +22,19 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
   const topicData: IssuanceTopicData = { ...issuanceRequestDetails, event }
 
   if (event.requestStatus === IssuanceRequestStatus.IssuanceSuccessful) {
-    const entityManager = dataSource.createEntityManager()
-    // look up the contract to get the validity interval
-    const contract = await entityManager.getRepository(ContractEntity).findOneByOrFail({ id: issuanceRequestDetails.contractId })
-    // create issuance record including expiresAt defn
-    const issuanceEntity = new IssuanceEntity({
-      ...issuanceRequestDetails,
-      requestId: event.requestId,
-      expiresAt: addSeconds(Date.now(), contract.validityIntervalInSeconds),
+    await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
+      // look up the contract to get the validity interval
+      const contract = await entityManager.getRepository(ContractEntity).findOneByOrFail({ id: issuanceRequestDetails.contractId })
+      // create issuance record including expiresAt defn
+      const issuanceEntity = new IssuanceEntity({
+        ...issuanceRequestDetails,
+        requestId: event.requestId,
+        expiresAt: addSeconds(Date.now(), contract.validityIntervalInSeconds),
+      })
+      addUserToManager(entityManager, issuanceRequestDetails.issuedById)
+      const { id } = await entityManager.getRepository(IssuanceEntity).save(issuanceEntity)
+      topicData.issuanceId = id
     })
-    const { id } = await entityManager.getRepository(IssuanceEntity).save(issuanceEntity)
-    topicData.issuanceId = id
   }
 
   await publishIssuanceEvent(topicData)
