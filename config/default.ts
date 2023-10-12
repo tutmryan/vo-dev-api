@@ -12,7 +12,7 @@ const config: DeepPartial<Config> = {
       defaultMeta: {
         service: 'verified-orchestation-api',
       },
-      level: 'info',
+      level: 'audit',
     },
     consoleOptions: {
       silent: false,

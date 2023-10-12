@@ -1,15 +1,28 @@
-import type { Logger } from '@makerx/node-common'
 import { isLocalDev } from '@makerx/node-common'
 import { createLogger } from '@makerx/node-winston'
+import { configs } from 'triple-beam'
 import type { LoggerOptions, QueryRunner, Logger as TypeOrmLoggerInterface } from 'typeorm'
+import * as winston from 'winston'
 import config from './config'
+
+/**
+ * set up 'audit' log level, replacing 'http' level
+ */
+export type Logger = ReturnType<typeof createLogger> & { audit: winston.LeveledLogMethod }
+// extract http from levels and colors
+const { http: httpLevel, ...levelsRest } = configs.npm.levels
+const { http: httpColor, ...colorsRest } = configs.npm.colors
+// configure levels
+export const levels: winston.config.AbstractConfigSetLevels & { audit: number } = { ...levelsRest, audit: httpLevel as number }
+// configure colors
+winston.addColors({ ...colorsRest, audit: httpColor as string })
 
 export const logger = createLogger({
   consoleFormat: isLocalDev ? 'pretty' : 'json',
   consoleOptions: config.get('logging.consoleOptions'),
-  loggerOptions: config.get('logging.loggerOptions'),
+  loggerOptions: { ...config.get('logging.loggerOptions'), levels },
   omitPaths: config.get('logging.omitPaths'),
-})
+}) as Logger
 
 export class LoggerForTypeOrm implements TypeOrmLoggerInterface {
   constructor(private options: LoggerOptions, private logger: Logger) {}

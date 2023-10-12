@@ -8,7 +8,7 @@ import {
   ApolloServerPluginLandingPageProductionDefault,
 } from '@apollo/server/plugin/landingPage/default'
 import { verifyForHost } from '@makerx/express-bearer'
-import { createLoggingPlugin, introspectionControlPlugin } from '@makerx/graphql-apollo-server'
+import { introspectionControlPlugin } from '@makerx/graphql-apollo-server'
 import { useSubscriptionsServer } from '@makerx/graphql-core'
 import { isProduction } from '@makerx/node-common'
 import type { Express } from 'express'
@@ -18,12 +18,20 @@ import { useBackgroundJob } from './background-jobs'
 import config from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
+import { graphqlOperationLoggingPlugin } from './features/auditing/graphql-operation-logging-plugin'
+import type { Logger } from './logger'
 import { logger } from './logger'
 import createSchema from './schema'
+import { pruneKeys } from './util/prune-keys'
 
 const plugins = (httpServer: http.Server, serverCleanup?: () => Promise<void>): ApolloServerPlugin<GraphQLContext>[] => {
   const plugins: ApolloServerPlugin<GraphQLContext>[] = [
-    createLoggingPlugin({ contextCreationFailureLogger: logger }),
+    graphqlOperationLoggingPlugin<GraphQLContext, Logger>({
+      logLevel: 'audit',
+      contextCreationFailureLogger: logger,
+      includeMutationResponseData: true,
+      adjustVariables: (variables) => pruneKeys(variables, 'headers'),
+    }),
     introspectionControlPlugin as ApolloServerPlugin<GraphQLContext>,
     ApolloServerPluginDrainHttpServer({ httpServer }),
     {

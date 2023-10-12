@@ -1,8 +1,9 @@
-import { logger } from '@azure/identity'
 import { addSeconds } from 'date-fns'
+import { omit } from 'lodash'
 import { requestDetailsCache } from '../../../cache'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { IssuanceRequestStatus } from '../../../generated/graphql'
+import { logger } from '../../../logger'
 import { addUserToManager } from '../../auditing/user-context-helper'
 import type { IssuanceCallbackHandler } from '../../callback'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
@@ -34,12 +35,11 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
       addUserToManager(entityManager, issuanceRequestDetails.issuedById)
       const { id } = await entityManager.getRepository(IssuanceEntity).save(issuanceEntity)
       topicData.issuanceId = id
+      logger.audit('Issuance complete', { issuance: issuanceEntity })
     })
-  }
+  } else if (event.requestStatus === IssuanceRequestStatus.RequestRetrieved)
+    logger.audit('Issuance retrieved', { event: omit(event, 'state') })
+  else logger.audit('Issuance error', { event: omit(event, 'state') })
 
   await publishIssuanceEvent(topicData)
-
-  if (event.requestStatus === IssuanceRequestStatus.RequestRetrieved) logger.info('Issuance started', { event })
-  else if (event.requestStatus === IssuanceRequestStatus.IssuanceError) logger.error('Issuance error', { event })
-  else logger.info('Issuance completed', { event })
 }

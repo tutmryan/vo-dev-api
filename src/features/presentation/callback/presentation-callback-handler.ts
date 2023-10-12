@@ -1,9 +1,9 @@
-import { logger } from '@azure/identity'
 import { omit } from 'lodash'
 import { In } from 'typeorm'
 import { PRESENTED_CREDENTIALS_TTL, presentedCredentialsCache, requestDetailsCache } from '../../../cache'
 import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
+import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
 import type { PresentationCallbackHandler } from '../../callback'
 import { StandardClaims } from '../../contracts/claims'
@@ -86,10 +86,8 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     presentedCredentialsCache.set(event.requestId, JSON.stringify(event.verifiedCredentialsData || []), {
       ttl: PRESENTED_CREDENTIALS_TTL,
     })
-  }
+    logger.audit('Presentation complete', { presentation: presentationEntity })
+  } else logger.audit('Presentation retrieved', { event: omit(event, 'state') })
 
   await publishPresentationEvent(topicData)
-
-  if (event.requestStatus === PresentationRequestStatus.RequestRetrieved) logger.info('Presentation started', { event })
-  else logger.info('Presentation verified', { event })
 }
