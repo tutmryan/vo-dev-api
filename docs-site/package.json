@@ -40,7 +40,11 @@
       "last 1 safari version"
     ]
   },
+  "overrides": {
+    "update-notifier": "^6.0.2",
+    "trim": "^1.0.1"
+  },
   "engines": {
-    "node": ">=16.14"
+    "node": ">=18.0.0"
   }
 }
