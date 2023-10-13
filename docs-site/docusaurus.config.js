@@ -43,6 +43,19 @@ const config = {
     ],
   ],
 
+  plugins: [
+    [
+      '@graphql-markdown/docusaurus',
+      {
+        schema: '../src/**/*.graphql',
+        baseURL: '/reference',
+        loaders: {
+          GraphQLFileLoader: '@graphql-tools/graphql-file-loader',
+        },
+      },
+    ],
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
