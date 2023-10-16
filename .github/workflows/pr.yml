@@ -23,3 +23,11 @@ jobs:
     with:
       node-version: 18.x
       working-directory: ./migrate-db-function
+
+  ci-docs-site:
+    name: CI Docs Site
+    uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
+    with:
+      node-version: 18.x
+      working-directory: ./docs-site
+      run-build: true
