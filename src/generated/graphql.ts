@@ -661,6 +661,10 @@ export type DidModel = {
 /** Represents an identity that is issued credentials */
 export type Identity = {
   __typename?: 'Identity';
+  /** When the identity was created. */
+  createdAt: Scalars['DateTime']['output'];
+  /** The user who created the identity. */
+  createdBy: User;
   /** The local id of this identity */
   id: Scalars['ID']['output'];
   /** The unique identifier of the identity in the issuing tenant */
@@ -675,6 +679,10 @@ export type Identity = {
   name: Scalars['String']['output'];
   /** Returns the successful credential presentations for this identity. */
   presentations: Array<Presentation>;
+  /** When the identity was last updated. */
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The user who last updated the identity. */
+  updatedBy?: Maybe<User>;
 };
 
 
@@ -1200,6 +1208,10 @@ export enum OrderDirection {
 /** A credential issuer partner trusted by the platform */
 export type Partner = {
   __typename?: 'Partner';
+  /** When the partner was created. */
+  createdAt: Scalars['DateTime']['output'];
+  /** The user who created the partner. */
+  createdBy: User;
   /**
    * The type(s) of the contract / credential
    * Requires at least one type, and cannot have duplicate types
@@ -1219,6 +1231,10 @@ export type Partner = {
   presentations: Array<Presentation>;
   /** The Azure AD tenant identifier if the partner is on Entra network */
   tenantId?: Maybe<Scalars['ID']['output']>;
+  /** When the partner was last updated. */
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The user who last updated the partner. */
+  updatedBy?: Maybe<User>;
 };
 
 
@@ -2823,6 +2839,8 @@ export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<Resolv
 }
 
 export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Identity'] = ResolversParentTypes['Identity']> = {
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   issuanceCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -2830,6 +2848,8 @@ export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends R
   issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<IdentityPresentationsArgs>>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2947,6 +2967,8 @@ export interface NonNegativeIntScalarConfig extends GraphQLScalarTypeConfig<Reso
 }
 
 export type PartnerResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Partner'] = ResolversParentTypes['Partner']> = {
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   did?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -2955,6 +2977,8 @@ export type PartnerResolvers<ContextType = GraphQLContext, ParentType extends Re
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<PartnerPresentationsArgs>>;
   tenantId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

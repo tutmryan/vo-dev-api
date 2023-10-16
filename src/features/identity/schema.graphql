@@ -21,6 +21,24 @@ type Identity {
   The name of the identity
   """
   name: String!
+
+  """
+  The user who created the identity.
+  """
+  createdBy: User!
+  """
+  When the identity was created.
+  """
+  createdAt: DateTime!
+
+  """
+  The user who last updated the identity.
+  """
+  updatedBy: User
+  """
+  When the identity was last updated.
+  """
+  updatedAt: DateTime
 }
 
 """

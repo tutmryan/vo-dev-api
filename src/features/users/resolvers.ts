@@ -1,6 +1,17 @@
+import type { GraphQLContext } from '../../context'
 import { query } from '../../cqrs/dispatcher'
-import type { Resolvers } from '../../generated/graphql'
+import type { Resolver, Resolvers, ResolversTypes } from '../../generated/graphql'
 import { FindUsersQuery } from './queries/find-users-query'
+
+type CreatedByUpdatedByResolvers = {
+  createdBy: Resolver<ResolversTypes['User'], { createdById: string }, GraphQLContext>
+  updatedBy: Resolver<ResolversTypes['User'] | null, { updatedById: string | null }, GraphQLContext>
+}
+
+const createdByUpdatedBy: CreatedByUpdatedByResolvers = {
+  createdBy: ({ createdById }, _, { dataLoaders: { users } }) => users.load(createdById),
+  updatedBy: ({ updatedById }, _, { dataLoaders: { users } }) => (updatedById ? users.load(updatedById) : null),
+}
 
 export const resolvers: Resolvers = {
   Query: {
@@ -9,12 +20,10 @@ export const resolvers: Resolvers = {
       query(context, FindUsersQuery, where, offset, limit, orderBy, orderDirection),
   },
   Template: {
-    createdBy: ({ createdById }, _, { dataLoaders: { users } }) => users.load(createdById),
-    updatedBy: ({ createdById }, _, { dataLoaders: { users } }) => users.load(createdById),
+    ...createdByUpdatedBy,
   },
   Contract: {
-    createdBy: ({ createdById }, _, { dataLoaders: { users } }) => users.load(createdById),
-    updatedBy: ({ createdById }, _, { dataLoaders: { users } }) => users.load(createdById),
+    ...createdByUpdatedBy,
     provisionedBy: ({ provisionedById }, _, { dataLoaders: { users } }) => (provisionedById ? users.load(provisionedById) : null),
     lastProvisionedBy: ({ lastProvisionedById }, _, { dataLoaders: { users } }) =>
       lastProvisionedById ? users.load(lastProvisionedById) : null,
@@ -26,5 +35,11 @@ export const resolvers: Resolvers = {
   },
   Presentation: {
     requestedBy: ({ requestedById }, _, { dataLoaders: { users } }) => users.load(requestedById),
+  },
+  Identity: {
+    ...createdByUpdatedBy,
+  },
+  Partner: {
+    ...createdByUpdatedBy,
   },
 }

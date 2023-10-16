@@ -91,6 +91,24 @@ type Partner {
   Domains linked to this partner's DID
   """
   linkedDomainUrls: [URL!]
+
+  """
+  The user who created the partner.
+  """
+  createdBy: User!
+  """
+  When the partner was created.
+  """
+  createdAt: DateTime!
+
+  """
+  The user who last updated the partner.
+  """
+  updatedBy: User
+  """
+  When the partner was last updated.
+  """
+  updatedAt: DateTime
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description
