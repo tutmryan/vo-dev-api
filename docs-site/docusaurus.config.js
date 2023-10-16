@@ -48,7 +48,8 @@ const config = {
       '@graphql-markdown/docusaurus',
       {
         schema: '../src/**/*.graphql',
-        baseURL: '/reference',
+        baseURL: 'reference',
+        linkRoot: '/docs',
         loaders: {
           GraphQLFileLoader: '@graphql-tools/graphql-file-loader',
         },
