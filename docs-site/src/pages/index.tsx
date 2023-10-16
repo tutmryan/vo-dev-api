@@ -3,7 +3,7 @@ import useDocusaurusContext from '@docusaurus/useDocusaurusContext'
 import Layout from '@theme/Layout'
 import clsx from 'clsx'
 import React from 'react'
-
+import HomepageFeatures from '../components/HomepageFeatures'
 import styles from './index.module.css'
 
 function HomepageHeader() {
@@ -27,7 +27,9 @@ export default function Home(): JSX.Element {
   return (
     <Layout description="Description will go into a meta tag in <head />">
       <HomepageHeader />
-      <main></main>
+      <main>
+        <HomepageFeatures />
+      </main>
     </Layout>
   )
 }
