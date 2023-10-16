@@ -83,11 +83,14 @@ jobs:
         run: npm run build
         working-directory: ./docs-site
 
+      - name: Zip build folder
+        run: pushd ./docs-site/build; zip -q -r ../docs-site.zip *
+
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: docs-site
-          path: ./docs-site/build
+          path: ./docs-site/docs-site.zip
           if-no-files-found: error
 
 

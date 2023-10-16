@@ -196,6 +196,11 @@ runs:
         echo "::add-mask::$DOCS_SITE_WEB_APPS_TOKEN"
         echo DOCS_SITE_WEB_APPS_TOKEN=$DOCS_SITE_WEB_APPS_TOKEN >> $GITHUB_ENV
 
+    - name: Unzip docs site content
+      shell: bash
+      run: |
+        unzip -qq ./docs-site/docs-site.zip -d ./docs-site/build
+
     - name: Deploy docs site
       id: deploy-docs-site
       uses: Azure/static-web-apps-deploy@v1
@@ -205,5 +210,4 @@ runs:
         skip_app_build: true
         skip_api_build: true
         output_location: ''
-        # This matches the name of the artifact created in ../workflows/release.yml
-        app_location: docs-site
+        app_location: ./docs-site/build
