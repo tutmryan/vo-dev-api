@@ -584,3 +584,18 @@ resource migrationsFunctionAppAuthConfig 'Microsoft.Web/sites/config@2022-03-01'
     }
   }
 }
+
+resource docsSiteWebApp 'Microsoft.Web/staticSites@2022-03-01' = {
+  name: '${resourcePrefix}-${environment}-${appName}-docs-site'
+  // Static Web Apps is a global service, but ARM only accepts a few locations
+  // See https://learn.microsoft.com/en-us/azure/static-web-apps/faq#how-do-i-ensure-my-app-is-deployed-to-a-specific-azure-region-
+  #disable-next-line no-hardcoded-location
+  location: 'eastasia'
+  sku: {
+    name: 'Standard'
+    size: 'Standard'
+  }
+  properties: {}
+}
+
+output docsSiteWebAppName string = docsSiteWebApp.name
