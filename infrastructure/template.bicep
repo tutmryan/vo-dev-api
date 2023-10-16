@@ -84,6 +84,27 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   }
 }
 
+resource keyVaultDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diagnostics'
+  scope: keyVault
+  properties: {
+    workspaceId: logAnalytics.id
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        timeGrain: null
+      }
+    ]
+    logs: [
+      {
+        category: 'AuditEvent'
+        enabled: true
+      }
+    ]
+  }
+}
+
 @description('The cookie secret used by the cookie-session Express middleware')
 @secure()
 param apiCookieSecret string
@@ -249,6 +270,33 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
   }
 }
 
+// https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/2021-05-01-preview/diagnosticsettings?pivots=deployment-language-bicep
+resource sqlDatabaseDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diagnostics'
+  scope: sqlDatabase
+  properties: {
+    workspaceId: logAnalytics.id
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        timeGrain: null
+      }
+    ]
+    // https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/resource-logs-categories#microsoftsqlserversdatabases
+    logs: [
+      {
+        category: 'SQLInsights'
+        enabled: true
+      }
+      {
+        category: 'Errors'
+        enabled: true
+      }
+    ]
+  }
+}
+
 @description('Specify the name of the Azure Redis Cache to create.')
 param redisCacheName string
 
@@ -301,6 +349,21 @@ resource redisKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
       enabled: true
     }
     value: redisCache.listKeys().primaryKey
+  }
+}
+
+resource redisCacheDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  scope: redisCache
+  name: 'diagnostics'
+  properties: {
+    workspaceId: logAnalytics.id
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        timeGrain: null
+      }
+    ]
   }
 }
 
