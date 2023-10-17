@@ -1,3 +1,4 @@
+import Link from '@docusaurus/Link'
 import clsx from 'clsx'
 import React from 'react'
 import styles from './styles.module.css'
@@ -10,27 +11,28 @@ type FeatureItem = {
 
 const FeatureList: FeatureItem[] = [
   {
-    title: 'Easy to Use',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
-    description: (
-      <>Docusaurus was designed from the ground up to be easily installed and used to get your website up and running quickly.</>
-    ),
+    title: 'Easy to integrate with',
+    Svg: require('@site/static/img/integrations.svg').default,
+    description: <>We offer comprehensive guides and code samples for multiple platforms to integrate with us.</>,
   },
   {
-    title: 'Focus on What Matters',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    title: 'Focus on seamless experience',
+    Svg: require('@site/static/img/rocket.svg').default,
     description: (
       <>
-        Docusaurus lets you focus on your docs, and we&apos;ll do the chores. Go ahead and move your docs into the <code>docs</code>{' '}
-        directory.
+        The articles in the <Link to="/docs/guides">Guides</Link> section will get you started on issuing and presenting verifiable
+        credentials virtually friction free.
       </>
     ),
   },
   {
-    title: 'Powered by React',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    title: 'Powered by GraphQL',
+    Svg: require('@site/static/img/network.svg').default,
     description: (
-      <>Extend or customize your website layout by reusing React. Docusaurus can be extended while reusing the same header and footer.</>
+      <>
+        Provide declarative, efficient data fetching to suit the requirements of your app with the help of explorable{' '}
+        <Link to="/docs/reference">Schema reference</Link>.
+      </>
     ),
   },
 ]

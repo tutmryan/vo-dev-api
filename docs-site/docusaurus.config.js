@@ -9,7 +9,8 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula')
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Verified Orchestration - Developer Portal',
-  tagline: 'Integrate your applications with the Verified Orchestration platform using our flexible and powerful GraphQL API',
+  tagline:
+    'Empowering organizations with a user-centric approach to manage and integrate decentralized identity and verifiable credentials, simplifying deployment and fostering intuitive trust.',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here

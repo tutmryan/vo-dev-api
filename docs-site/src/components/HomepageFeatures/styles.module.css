@@ -3,9 +3,16 @@
   align-items: center;
   padding: 2rem 0;
   width: 100%;
+  margin-top: 2rem;
 }
 
 .featureSvg {
-  height: 200px;
-  width: 200px;
+  height: 100px;
+  width: 100px;
+  margin: 2rem;
+}
+
+[data-theme='dark'] .featureSvg {
+  fill: var(--ifm-font-color-base);
+  stroke: var(--ifm-font-color-base);
 }
