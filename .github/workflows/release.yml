@@ -84,13 +84,13 @@ jobs:
         working-directory: ./docs-site
 
       - name: Zip dev build folder
-        run: pushd ./docs-site-dev; zip -q -r docs-site.zip *
+        run: pushd ./docs-site/docs-site-dev; zip -q -r docs-site.zip *
 
       - name: Upload dev artifact
         uses: actions/upload-artifact@v3
         with:
           name: docs-site-dev
-          path: ./docs-site-dev/docs-site.zip
+          path: ./docs-site/docs-site-dev/docs-site.zip
           if-no-files-found: error
 
 
