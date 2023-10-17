@@ -78,19 +78,19 @@ jobs:
         run: npm run generate-graphql-docs
         working-directory: ./docs-site
 
-      - name: Build Site
+      - name: Build dev site
         shell: bash
-        run: npm run build
+        run: npm run build:dev -- --out-dir ./docs-site-dev
         working-directory: ./docs-site
 
-      - name: Zip build folder
-        run: pushd ./docs-site/build; zip -q -r ../docs-site.zip *
+      - name: Zip dev build folder
+        run: pushd ./docs-site-dev; zip -q -r docs-site.zip *
 
-      - name: Upload artifact
+      - name: Upload dev artifact
         uses: actions/upload-artifact@v3
         with:
-          name: docs-site
-          path: ./docs-site/docs-site.zip
+          name: docs-site-dev
+          path: ./docs-site-dev/docs-site.zip
           if-no-files-found: error
 
 
@@ -165,3 +165,4 @@ jobs:
           sendgrid-api-key: ${{ secrets.SENDGRID_API_KEY }}
           # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context:~:text=artifacts%20are%20kept.-,github.run_id,-string
           migrations-app-version: ${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}
+          docsSiteArtifactName: docs-site-dev
