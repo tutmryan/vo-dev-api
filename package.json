@@ -1,7 +1,7 @@
 {
   "name": "verified-orchestration-api",
   "version": "0.0.1",
-  "description": "Verified Orchestation platform GraphQL API backend",
+  "description": "Verified Orchestration platform GraphQL API backend",
   "main": "src/main",
   "engines": {
     "node": ">=18.0.0"

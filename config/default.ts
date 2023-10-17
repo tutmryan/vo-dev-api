@@ -10,7 +10,7 @@ const config: DeepPartial<Config> = {
     omitPaths: [],
     loggerOptions: {
       defaultMeta: {
-        service: 'verified-orchestation-api',
+        service: 'verified-orchestration-api',
       },
       level: 'audit',
     },
