@@ -6,6 +6,7 @@
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",
+    "build:dev": "dotenv -c dev docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
@@ -32,6 +33,7 @@
     "@docusaurus/module-type-aliases": "2.4.3",
     "@graphql-inspector/cli": "^4.0.2",
     "@tsconfig/docusaurus": "^1.0.5",
+    "dotenv": "^16.3.1",
     "typescript": "^4.7.4"
   },
   "browserslist": {

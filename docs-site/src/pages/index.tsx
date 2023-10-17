@@ -17,6 +17,9 @@ function HomepageHeader() {
           <Link className="button button--secondary button--lg" to="/docs/">
             Documentation
           </Link>
+          <Link className="button button--secondary button--lg" to={siteConfig.customFields.GRAPHQL_ENDPOINT as string}>
+            Sandbox
+          </Link>
         </div>
       </div>
     </header>

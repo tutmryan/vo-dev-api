@@ -1,6 +1,8 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
+require('dotenv').config()
+
 const lightCodeTheme = require('prism-react-renderer/themes/github')
 const darkCodeTheme = require('prism-react-renderer/themes/dracula')
 
@@ -84,6 +86,9 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
+  customFields: {
+    GRAPHQL_ENDPOINT: process.env.GRAPHQL_ENDPOINT,
+  },
 }
 
 module.exports = config
