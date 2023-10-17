@@ -1,0 +1,9 @@
+{
+  "label": "Guides",
+  "position": 2,
+  "link": {
+    "slug": "guides",
+    "type": "generated-index",
+    "description": "The following guides will help you get started with utilising Verified Orchestration platform effectively"
+  }
+}
