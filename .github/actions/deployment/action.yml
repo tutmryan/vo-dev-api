@@ -89,6 +89,11 @@ inputs:
     description: Version returned by the GetVersion function of the migrations Function app
     required: true
 
+  docsSiteArtifactName:
+    description: Environment specific artifact name for docs site
+    required: true
+
+
 outputs:
   api-url:
     description: URL of the deployed API
@@ -199,7 +204,7 @@ runs:
     - name: Unzip docs site content
       shell: bash
       run: |
-        unzip -qq ./docs-site/docs-site.zip -d ./docs-site/build
+        unzip -qq ./${{ inputs.docsSiteArtifactName }}/docs-site.zip -d ./docs-site/build
 
     - name: Deploy docs site
       id: deploy-docs-site
