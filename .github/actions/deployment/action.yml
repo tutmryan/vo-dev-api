@@ -204,7 +204,7 @@ runs:
     - name: Unzip docs site content
       shell: bash
       run: |
-        unzip -qq ./${{ inputs.docsSiteArtifactName }}/docs-site.zip -d ./docs-site/build
+        unzip -qq ./${{ inputs.docsSiteArtifactName }}/docs-site.zip -d ./${{ inputs.docsSiteArtifactName }}/build
 
     - name: Deploy docs site
       id: deploy-docs-site
@@ -215,4 +215,4 @@ runs:
         skip_app_build: true
         skip_api_build: true
         output_location: ''
-        app_location: ./docs-site/build
+        app_location: ./${{ inputs.docsSiteArtifactName }}/build
