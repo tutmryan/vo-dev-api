@@ -106,47 +106,41 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
     eventsOutOfOrderPolicy: 'Adjust'
     outputErrorPolicy: 'Stop'
     jobType: 'Cloud'
-    // inputs: [
-    //   {
-    //     name: 'string'
-    //     properties: {
-    //       compression: {
-    //         type: 'string'
-    //       }
-    //       partitionKey: 'string'
-    //       serialization: {
-    //         type: 'string'
-    //         // For remaining properties, see Serialization objects
-    //       }
-    //       watermarkSettings: {
-    //         watermarkMode: 'string'
-    //       }
-    //       type: 'string'
-    //       // For remaining properties, see InputProperties objects
-    //     }
-    //   }
-    // ]
-    // outputs: [
-    //   {
-    //     name: 'string'
-    //     properties: {
-    //       datasource: {
-    //         type: 'string'
-    //         // For remaining properties, see OutputDataSource objects
-    //       }
-    //       serialization: {
-    //         type: 'string'
-    //         // For remaining properties, see Serialization objects
-    //       }
-    //       sizeWindow: int
-    //       timeWindow: 'string'
-    //       watermarkSettings: {
-    //         maxWatermarkDifferenceAcrossPartitions: 'string'
-    //         watermarkMode: 'string'
-    //       }
-    //     }
-    //   }
-    // ]
+    inputs: [
+      {
+        name: 'app-traces-eh'
+        properties: {
+          type: 'Stream'
+          datasource: {
+            type: 'Microsoft.EventHub/EventHub'
+            properties: {
+              serviceBusNamespace: eventHubNamespace.name
+              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-audit-traces-job_a_policy'
+              sharedAccessPolicyKey: eventHubNamespace.listKeys().key1
+              eventHubName: appTracesEventHub.name
+              consumerGroupName: '${resourcePrefix}-${environment}-extract-audit-traces-job__consumer_group'
+            }
+          }
+        }
+      }
+    ]
+    outputs: [
+      {
+        name: 'audit-traces-eh'
+        properties: {
+          datasource: {
+            type: 'Microsoft.EventHub/EventHub'
+            properties: {
+              serviceBusNamespace: eventHubNamespace.name
+              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-audit-traces-job_a_policy'
+              sharedAccessPolicyKey: eventHubNamespace.listKeys().key1
+              eventHubName: auditTracesEventHub.name
+              authenticationMode: 'ConnectionString'
+            }
+          }
+        }
+      }
+    ]
     transformation: {
       name: 'unwrap-traces-filter-audits'
       properties: {
