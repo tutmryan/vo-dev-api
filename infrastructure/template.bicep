@@ -66,7 +66,7 @@ resource appTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-p
 }
 
 resource appTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExports@2020-08-01' = {
-  name: 'string'
+  name: 'ExportAppTracesToEventHubRule'
   parent: logAnalytics
   properties: {
     destination: {
