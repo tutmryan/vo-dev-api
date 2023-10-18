@@ -90,6 +90,7 @@ const config = {
     }),
   customFields: {
     GRAPHQL_ENDPOINT: process.env.GRAPHQL_ENDPOINT,
+    ADMIN_URL: process.env.ADMIN_URL,
   },
 }
 
