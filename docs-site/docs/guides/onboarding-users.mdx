@@ -1,0 +1,89 @@
+---
+sidebar_position: 3
+---
+
+import { AdminUrl } from '@site/src/components/admin-url'
+import { ApiUrl } from '@site/src/components/api-url'
+
+# Onboarding a user
+
+The individuals who would like to access <AdminUrl path='/'>Admin UI</AdminUrl> or <ApiUrl path='/'>GraphQL API</ApiUrl> will need to be onboarded to Microsoft Entra ID tenant of Verified Orchestration platform and added to one or more of the following Microsoft Entra ID groups depending on the tasks they would like to carry out on the platform.
+
+- [Reader](#reader)
+- [Issuer](#issuer)
+- [Credential admin](#credential-admin)
+- [Partner admin](#partner-admin)
+
+A set of the above Microsoft Entra ID groups is created for each deployed environment (local, dev, etc.) and each group is mapped to the equivalent App role of the Verified Orchestration API App registration.
+
+An administrator of Verified Orchestration platform would be able to help with onboarding an individual and adding him/her to the groups in Microsoft Azure Portal [[doc](https://learn.microsoft.com/en-us/azure/active-directory/fundamentals/how-to-create-delete-users)].
+
+## Reader
+
+Microsoft Entra ID Groups:
+
+- Verified Orchestration Reader (localdev)
+- Verified Orchestration Reader (dev)
+
+App role value: `VerifiableCredential.Reader`
+
+Permissions:
+
+- view templates
+- view credentials
+- view issuances
+- view presentations
+- view identities
+
+## Issuer
+
+Microsoft Entra ID Groups:
+
+- Verified Orchestration Issuer (localdev)
+- Verified Orchestration Issuer (dev)
+
+App role value: `VerifiableCredential.Issuer`
+
+Permissions:
+
+- all the permissions of [Reader](#reader) role, and
+- issue credential
+
+## Credential admin
+
+Microsoft Entra ID Groups:
+
+- Verified Orchestration Credential Admin (localdev)
+- Verified Orchestration Credential Admin (dev)
+
+App role value: `VerifiableCredential.CredentialAdmin`
+
+Permissions:
+
+- all the permissions of [Reader](#reader) role, and
+- create template
+- edit template
+- delete template
+- create contract
+- edit contract
+- delete contract
+- publish contract
+- deprecate contract
+- revoke issuances
+
+## Partner admin
+
+Microsoft Entra ID Groups:
+
+- Verified Orchestration Partner Admin (localdev)
+- Verified Orchestration Partner Admin (dev)
+
+App role value: `VerifiableCredential.PartnerAdmin`
+
+Permissions:
+
+- all the permissions of [Reader](#reader) role, and
+- find authorities / issuers in verifiable credentials network
+- find contracts / credentials in verifiable credentials network
+- add partner
+- edit partner
