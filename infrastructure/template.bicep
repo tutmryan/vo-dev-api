@@ -20,6 +20,9 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
       name: 'PerGB2018'
     }
     retentionInDays: 180
+    features: {
+      enableDataExport: true
+    }
   }
 }
 
@@ -77,6 +80,18 @@ resource appTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExpor
     tableNames: [
       'AppTraces'
     ]
+  }
+}
+
+resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-preview' = {
+  name: '${resourcePrefix}-${environment}-${appName}-audit-traces-eh'
+  parent: eventHubNamespace
+  properties: {
+    partitionCount: 1
+    retentionDescription: {
+      cleanupPolicy: 'Delete'
+      retentionTimeInHours: 168
+    }
   }
 }
 
