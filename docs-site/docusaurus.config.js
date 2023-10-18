@@ -68,7 +68,8 @@ const config = {
         title: 'Developer Portal',
         logo: {
           alt: 'Verified Orchestration Logo',
-          src: 'img/logo-primary-white.svg',
+          src: 'img/logo-secondary-greyscale-white.svg',
+          srcDark: 'img/logo-primary-white.svg',
         },
         items: [],
       },
