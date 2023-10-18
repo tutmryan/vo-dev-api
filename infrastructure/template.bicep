@@ -60,7 +60,7 @@ resource appTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-p
   name: '${resourcePrefix}-${environment}-${appName}-app-traces-eh'
   parent: eventHubNamespace
   properties: {
-    partitionCount: 1
+    partitionCount: 4
     retentionDescription: {
       cleanupPolicy: 'Delete'
       retentionTimeInHours: 168
@@ -87,10 +87,82 @@ resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01
   name: '${resourcePrefix}-${environment}-${appName}-audit-traces-eh'
   parent: eventHubNamespace
   properties: {
-    partitionCount: 1
+    partitionCount: 2
     retentionDescription: {
       cleanupPolicy: 'Delete'
       retentionTimeInHours: 168
+    }
+  }
+}
+
+resource symbolicname 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-preview' = {
+  name: '${resourcePrefix}-${environment}-${appName}-extract-audit-traces-job'
+  location: location
+  sku: {
+    name: 'StandardV2'
+  }
+  properties: {
+    eventsLateArrivalMaxDelayInSeconds: 5
+    eventsOutOfOrderMaxDelayInSeconds: 5
+    eventsOutOfOrderPolicy: 'Adjust'
+    outputErrorPolicy: 'Stop'
+    jobType: 'Cloud'
+    // inputs: [
+    //   {
+    //     name: 'string'
+    //     properties: {
+    //       compression: {
+    //         type: 'string'
+    //       }
+    //       partitionKey: 'string'
+    //       serialization: {
+    //         type: 'string'
+    //         // For remaining properties, see Serialization objects
+    //       }
+    //       watermarkSettings: {
+    //         watermarkMode: 'string'
+    //       }
+    //       type: 'string'
+    //       // For remaining properties, see InputProperties objects
+    //     }
+    //   }
+    // ]
+    // outputs: [
+    //   {
+    //     name: 'string'
+    //     properties: {
+    //       datasource: {
+    //         type: 'string'
+    //         // For remaining properties, see OutputDataSource objects
+    //       }
+    //       serialization: {
+    //         type: 'string'
+    //         // For remaining properties, see Serialization objects
+    //       }
+    //       sizeWindow: int
+    //       timeWindow: 'string'
+    //       watermarkSettings: {
+    //         maxWatermarkDifferenceAcrossPartitions: 'string'
+    //         watermarkMode: 'string'
+    //       }
+    //     }
+    //   }
+    // ]
+    transformation: {
+      name: 'unwrap-traces-filter-audits'
+      properties: {
+        query: '''
+        WITH logs AS (
+          SELECT data.arrayvalue as log
+          FROM [app-traces-eh]
+          CROSS APPLY GetArrayElements(records) AS data
+        )
+        SELECT *
+        INTO [audit-traces-eh]
+        FROM logs
+        WHERE log.Properties.logLevel = 'audit'
+        '''
+      }
     }
   }
 }
