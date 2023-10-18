@@ -53,6 +53,18 @@ resource eventHubNamespace 'Microsoft.EventHub/namespaces@2022-10-01-preview' = 
   }
 }
 
+resource appTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-preview' = {
+  name: '${resourcePrefix}-${environment}-${appName}-app-traces-eh'
+  parent: eventHubNamespace
+  properties: {
+    partitionCount: 1
+    retentionDescription: {
+      cleanupPolicy: 'Delete'
+      retentionTimeInHours: 168
+    }
+  }
+}
+
 var keyVaultName = '${resourcePrefix}-${environment}-vrfd-orchstn-kv'
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
