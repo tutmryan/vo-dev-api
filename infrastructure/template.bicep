@@ -76,7 +76,6 @@ resource appTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExpor
       resourceId: appTracesEventHub.id
     }
     enable: true
-    lastModifiedDate: 'string'
     tableNames: [
       'AppTraces'
     ]
@@ -95,7 +94,7 @@ resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01
   }
 }
 
-resource symbolicname 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-preview' = {
+resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-preview' = {
   name: '${resourcePrefix}-${environment}-${appName}-extract-audit-traces-job'
   location: location
   sku: {
@@ -164,6 +163,28 @@ resource symbolicname 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-previe
         '''
       }
     }
+  }
+}
+
+resource extractAuditTracesJobDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diagnostics'
+  scope: extractAuditTracesJob
+  properties: {
+    workspaceId: logAnalytics.id
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        timeGrain: null
+      }
+    ]
+    logs: [
+      {
+        category: null
+        categoryGroup: 'allLogs'
+        enabled: true
+      }
+    ]
   }
 }
 
