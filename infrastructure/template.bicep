@@ -65,6 +65,21 @@ resource appTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-p
   }
 }
 
+resource appTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExports@2020-08-01' = {
+  name: 'string'
+  parent: logAnalytics
+  properties: {
+    destination: {
+      resourceId: appTracesEventHub.id
+    }
+    enable: true
+    lastModifiedDate: 'string'
+    tableNames: [
+      'AppTraces'
+    ]
+  }
+}
+
 var keyVaultName = '${resourcePrefix}-${environment}-vrfd-orchstn-kv'
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
