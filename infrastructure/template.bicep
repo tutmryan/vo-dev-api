@@ -38,6 +38,21 @@ resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
+resource eventHubNamespace 'Microsoft.EventHub/namespaces@2022-10-01-preview' = {
+  name: '${resourcePrefix}-${environment}-${appName}-eventhub-ns'
+  location: location
+  sku: {
+    name: 'Standard'
+    tier: 'Standard'
+    capacity: 1
+  }
+  properties: {
+    isAutoInflateEnabled: true
+    maximumThroughputUnits: 20
+    minimumTlsVersion: '1.2'
+  }
+}
+
 var keyVaultName = '${resourcePrefix}-${environment}-vrfd-orchstn-kv'
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
