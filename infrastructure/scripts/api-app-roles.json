@@ -92,7 +92,7 @@
   {
     "allowedMemberTypes": ["User"],
     "description": "Provides access to administer contracts and templates, and revoke issuances; includes Reader access",
-    "displayName": "Credential Admin",
+    "displayName": "Credential admin",
     "id": "8998562a-ab60-4af4-89fb-d2455bd8d4b5",
     "isEnabled": true,
     "origin": "Application",
