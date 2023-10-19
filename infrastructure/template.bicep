@@ -225,6 +225,20 @@ resource sendgridApiKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   }
 }
 
+@description('The client secret of the docs site app registration in Azure AD')
+@secure()
+param docsSiteClientSecret string
+resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'DOCS-SITE-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: docsSiteClientSecret
+  }
+}
+
 @description('Name of the Azure SQL AAD administrator')
 param sqlInstanceAadAdministratorName string
 
@@ -662,6 +676,18 @@ resource docsSiteWebApp 'Microsoft.Web/staticSites@2022-03-01' = {
     size: 'Standard'
   }
   properties: {}
+}
+
+@description('The client ID of the docs site app registration in Azure AD')
+param docsSiteClientId string
+resource docsSiteWebAppAppSettings 'Microsoft.Web/staticSites/config@2022-09-01' = {
+  name: 'appsettings'
+  kind: 'string'
+  parent: docsSiteWebApp
+  properties: {
+    AZURE_CLIENT_ID: docsSiteClientId
+    AZURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${docsSiteClientSecretSecret.properties.secretUri})'
+  }
 }
 
 output docsSiteWebAppName string = docsSiteWebApp.name

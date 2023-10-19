@@ -164,4 +164,6 @@ jobs:
           sendgrid-api-key: ${{ secrets.SENDGRID_API_KEY }}
           # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context:~:text=artifacts%20are%20kept.-,github.run_id,-string
           migrations-app-version: ${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}
-          docsSiteArtifactName: docs-site-dev
+          docs-site-artifact-name: docs-site-dev
+          docs-site-client-id: ${{ vars.DOCS_SITE_CLIENT_ID }}
+          docs-site-client-secret: ${{ secrets.DOCS_SITE_CLIENT_SECRET }}

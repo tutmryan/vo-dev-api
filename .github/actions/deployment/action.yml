@@ -89,10 +89,15 @@ inputs:
     description: Version returned by the GetVersion function of the migrations Function app
     required: true
 
-  docsSiteArtifactName:
+  docs-site-artifact-name:
     description: Environment specific artifact name for docs site
     required: true
-
+  docs-site-client-id:
+    description: Client id of the docs site app registration in Azure AD
+    required: true
+  docs-site-client-secret:
+    description: Client secret of the docs site app registration in Azure AD
+    required: true
 
 outputs:
   api-url:
@@ -150,6 +155,8 @@ runs:
           redisCacheSKU=${{ inputs.redis-cache-sku }}
           redisCacheFamily=${{ inputs.redis-cache-family }}
           redisCacheCapacity=${{ inputs.redis-cache-capacity }}
+          docsSiteClientId=${{ inputs.docs-site-client-id }}
+          docsSiteClientSecret=${{ inputs.docs-site-client-secret }}
 
     - name: Log in to Azure again after potential long deployment
       uses: azure/login@v1
@@ -204,7 +211,7 @@ runs:
     - name: Unzip docs site content
       shell: bash
       run: |
-        unzip -qq ./${{ inputs.docsSiteArtifactName }}/docs-site.zip -d ./${{ inputs.docsSiteArtifactName }}/build
+        unzip -qq ./${{ inputs.docs-site-artifact-name }}/docs-site.zip -d ./${{ inputs.docs-site-artifact-name }}/build
 
     - name: Deploy docs site
       id: deploy-docs-site
@@ -215,4 +222,4 @@ runs:
         skip_app_build: true
         skip_api_build: true
         output_location: ''
-        app_location: ./${{ inputs.docsSiteArtifactName }}/build
+        app_location: ./${{ inputs.docs-site-artifact-name }}/build
