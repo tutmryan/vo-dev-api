@@ -684,6 +684,9 @@ resource docsSiteWebApp 'Microsoft.Web/staticSites@2022-03-01' = {
     name: 'Standard'
     size: 'Standard'
   }
+  identity: {
+    type: 'SystemAssigned'
+  }
   properties: {}
 }
 
