@@ -31,7 +31,6 @@ jobs:
     with:
       node-version: 18.x
       working-directory: ./docs-site
-      run-build: true
 
   build-api:
     name: Build API

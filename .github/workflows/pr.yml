@@ -31,3 +31,4 @@ jobs:
       node-version: 18.x
       working-directory: ./docs-site
       run-build: true
+      build-script: npm run build:pr

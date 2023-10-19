@@ -8,7 +8,7 @@ const darkCodeTheme = require('prism-react-renderer/themes/dracula')
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Verified Orchestration - Developer Portal',
+  title: 'Verified Orchestration',
   tagline:
     'Empowering organizations with a user-centric approach to manage and integrate decentralized identity and verifiable credentials, simplifying deployment and fostering intuitive trust.',
   favicon: 'img/favicon.ico',
@@ -65,7 +65,7 @@ const config = {
     ({
       navbar: {
         style: 'primary',
-        title: 'Developer Portal',
+        title: 'Documentation Portal',
         logo: {
           alt: 'Verified Orchestration Logo',
           src: 'img/logo-secondary-greyscale-white.svg',

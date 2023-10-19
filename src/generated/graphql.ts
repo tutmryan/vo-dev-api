@@ -56,12 +56,13 @@ export type AccessTokenResponse = {
 export type AcquireLimitedAccessTokenInput = {
   /**
    * If true, the limited access token can be used to request presentations of internally-issued credentials from any identity.
-   * Note:
+   *
    *   - The app acquiring the token must be granted the `VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations` role
    */
   allowAnonymousPresentation?: InputMaybe<Scalars['Boolean']['input']>;
   /**
    * The ID of the identity to which access will be limited.
+   *
    * This must match the identity in:
    * - issuance requests
    * - presented credentials (if credentials are presented from other identities, the entire presentation will be rejected)
@@ -71,22 +72,21 @@ export type AcquireLimitedAccessTokenInput = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /**
    * The ID(s) of the contract(s) that can be issued.
-   * Note:
+   *
    *   - The app acquiring the token must be granted the `VerifiableCredential.AcquireLimitedAccessToken.Issue` role
    *   - identityId must also be specified (i.e. the token can only be used to issue credentials to one identity)
    */
   issuableContractIds?: InputMaybe<Array<Scalars['String']['input']>>;
   /**
    * If true, the limited access token can be used to list contracts via Query.findContracts
-   * Note:
+   *
    *   - The app acquiring the token must be granted the `VerifiableCredential.AcquireLimitedAccessToken.ListContracts` role
-   *   - identityId is also required (this can be called in an anonymous context)
-   *   - issuances and presentations of contracts can be queried as long as identityId is supplied as criteria
+   *   - issuances and presentations of contracts can be queried if `identityId` is also supplied as criteria
    */
   listContracts?: InputMaybe<Scalars['Boolean']['input']>;
   /**
    * Defines the types of credentials that can requested for presentation.
-   * Note:
+   *
    *   - The app acquiring the token must be granted the `VerifiableCredential.AcquireLimitedAccessToken.Present` role
    */
   requestableCredentials?: InputMaybe<Array<RequestedCredentialSpecificationInput>>;
@@ -1009,10 +1009,10 @@ export type Mutation = {
    * - issue one or more credentials to a specified identity
    * - request and receive presentations of one or more credential types from a specified identity (this supports both internally-issued and externally-issued credentials)
    * - request and receive presentations of internally-issued credential types from any identity (anonymous presentations)
+   *
    * The following restrictions apply:
    * - For issuance and presentation operations, requestId is the only supported method to subscribe to issuance and presentation events.
    * - Issuance and presentation data can be queried, but only for the specified identity.
-   * -
    */
   acquireLimitedAccessToken: AccessTokenResponse;
   beginOnboarding?: Maybe<Scalars['Void']['output']>;
