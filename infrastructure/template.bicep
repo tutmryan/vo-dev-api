@@ -67,6 +67,15 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
       }
       {
         tenantId: subscription().tenantId
+        objectId: docsSiteWebApp.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+          ]
+        }
+      }
+      {
+        tenantId: subscription().tenantId
         objectId: servicePrincipalObjectId
         permissions: {
           secrets: [
