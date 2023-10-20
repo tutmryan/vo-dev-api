@@ -61,6 +61,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
   logger.info('Initialising subscriptions websocket server')
   const wsServerCleanup = useSubscriptionsServer({
     logger,
+    operationLogLevel: 'audit',
     schema,
     httpServer,
     createSubscriptionContext,
