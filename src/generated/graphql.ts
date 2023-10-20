@@ -64,7 +64,7 @@ export type AcquireLimitedAccessTokenInput = {
    * The ID of the identity to which access will be limited.
    *
    * This must match the identity in:
-   * - issuance requests
+   * - issuance requests, if specified (identity info is not required when issuing using a limited access token)
    * - presented credentials (if credentials are presented from other identities, the entire presentation will be rejected)
    * - presentation requests for external-issuer presentations
    * - identity query, issuance and presentation criteria
@@ -910,9 +910,17 @@ export type IssuanceRequestInput = {
   claims?: InputMaybe<Scalars['JSONObject']['input']>;
   /** The ID of the contract you wish to issue */
   contractId: Scalars['ID']['input'];
-  /** The identity you wish to issue to (alternatively use the identityId property, if known) */
+  /**
+   * The identity you wish to issue to (alternatively use the identityId property, if known)
+   *
+   * - Not required when issuing using a limited access token
+   */
   identity?: InputMaybe<IdentityInput>;
-  /** The ID of the identity you wish to issue to (alternatively use the identity property) */
+  /**
+   * The ID of the identity you wish to issue to (alternatively use the identity property)
+   *
+   * - Not required when issuing using a limited access token
+   */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /**
    * Determines whether a QR code is included in the response of this request

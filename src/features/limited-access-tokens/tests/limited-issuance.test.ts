@@ -71,6 +71,22 @@ describe('limited access issuance', () => {
     expectUnauthorizedError(errors)
   })
 
+  it('can create an issuance request without an identityId', async () => {
+    const contractId = randomUUID()
+    const identityId = randomUUID()
+
+    const { data, errors } = await executeOperationAsLimitedAccessClient(
+      {
+        query: createIssuanceMutation,
+        variables: { request: { contractId } },
+      },
+      { identityId, issuableContractIds: [contractId] },
+    )
+
+    expectToBeDefined(data?.createIssuanceRequest)
+    expect(errors).toBeUndefined()
+  })
+
   it('cannot create an issuance request with a mismatching identityId', async () => {
     const contractId = randomUUID()
     const identityId = randomUUID()

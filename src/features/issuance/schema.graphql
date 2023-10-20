@@ -13,10 +13,14 @@ input IssuanceRequestInput {
   contractId: ID!
   """
   The ID of the identity you wish to issue to (alternatively use the identity property)
+
+  - Not required when issuing using a limited access token
   """
   identityId: ID
   """
   The identity you wish to issue to (alternatively use the identityId property, if known)
+
+  - Not required when issuing using a limited access token
   """
   identity: IdentityInput
   """

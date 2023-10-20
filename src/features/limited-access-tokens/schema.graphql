@@ -22,7 +22,7 @@ input AcquireLimitedAccessTokenInput {
   The ID of the identity to which access will be limited.
 
   This must match the identity in:
-  - issuance requests
+  - issuance requests, if specified (identity info is not required when issuing using a limited access token)
   - presented credentials (if credentials are presented from other identities, the entire presentation will be rejected)
   - presentation requests for external-issuer presentations
   - identity query, issuance and presentation criteria

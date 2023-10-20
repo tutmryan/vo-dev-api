@@ -96,8 +96,8 @@ export const isValidLimitedIssuanceRequest = and(
   isLimitedIssuanceApp,
   rule('isValidLimitedIssuanceRequest', { cache: 'strict' })(
     (_, { request: { contractId, identityId } }: MutationCreateIssuanceRequestArgs, { user }: GraphQLContext) => {
-      if (!identityId || !user?.limitedAccessData?.identityId) return false
-      if (identityId !== user.limitedAccessData.identityId) return false
+      if (!user?.limitedAccessData?.identityId) return false
+      if (identityId && identityId !== user.limitedAccessData.identityId) return false
       if (!user.limitedAccessData.issuableContractIds) return false
       return user.limitedAccessData.issuableContractIds.includes(contractId)
     },

@@ -42,7 +42,9 @@ export async function CreateIssuanceRequestCommand(
 
   // find or create the identity
   let identity: IdentityEntity
-  if (identityId) identity = await entityManager.getRepository(IdentityEntity).findOneByOrFail({ id: identityId })
+  if (user.limitedAccessData?.identityId)
+    identity = await entityManager.getRepository(IdentityEntity).findOneByOrFail({ id: user.limitedAccessData.identityId })
+  else if (identityId) identity = await entityManager.getRepository(IdentityEntity).findOneByOrFail({ id: identityId })
   else if (!identityInput) throw new Error('Either identityId or identity must be provided')
   else identity = await createOrUpdateIdentity(entityManager, identityInput)
 
