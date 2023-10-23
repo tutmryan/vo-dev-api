@@ -1,0 +1,200 @@
+---
+sidebar_position: 5
+---
+
+import ThemedImage from '@theme/ThemedImage'
+
+# Secure backend API for Limited Access Tokens
+
+As shown in the [diagram](#example-issuance-or-presentation-for-a-known-user) below, a secure backend API is needed to get limited access tokens from Verification Orchestration platform for the client applications to communicate with the platform.
+
+The secure backend API can be built using any technology stack as long as it can securely store the client secret provisioned by the administrator of Verification Orchestration platform during [onboarding](./onboarding-apps.mdx).
+
+### Example: issuance or presentation for a known user
+
+<ThemedImage
+  alt="example: issuance or presentation for a known user"
+  sources={{
+    light: '/img/limited-access-example-identity.svg',
+    dark: '/img/limited-access-example-identity-dark.svg',
+  }}
+/>
+
+It is recommended that the communication between the client application and the secure backend API (noted as step 1. in the [diagram](#example-issuance-or-presentation-for-a-known-user) above) should be properly authenticated and authorised in all cases except for the [anonymous presentations](./anonymous-presentations.md) use case. It is up to the team working on the client application and the secure backend API to agree upon and implement the appropriate method of authentication and authorisation between those two components.
+
+The following outlines the steps the secure backend API has to perform to get a limited access token from Verification Orchestration platform when it receives a request form the client application (noted as step 2. in the [diagram](#example-issuance-or-presentation-for-a-known-user) above).
+
+- [Get access token to call Verification Orchestration platform using the client secret](#get-access-token-to-call-verification-orchestration-platform).
+- [Save identity information unless limited access token is requested for anonymous presentations](#save-identity-information).
+- [Invoke limited access token GraphQL mutation with appropriate inputs](#invoke-limited-access-token-graphql-mutation).
+- [Pass on the limited access token received from Verification Platform to the client application](#sample-secure-backend-api-using-express-web-framework).
+
+The following code snippets demonstrating the above steps are taken from [a sample secure backend API](#sample-secure-backend-api-using-express-web-framework) implemented using [Node.JS](https://nodejs.org/en/about), [Express](https://www.npmjs.com/package/express), and [@azure/msal-node](https://www.npmjs.com/package/@azure/msal-node).
+
+### Sample secure backend API using Express web framework
+
+```ts title="Sample secure backend API using Express web framework"
+const app = express()
+// endpoint to get limited access token to issue credentials
+app.post('/acquireTokenForIssuanceAndListContracts', async (req, res, next) => {
+  try {
+    // since it is not a limited access token for anonymous presentations, identity information is needed
+    const identity = await saveIdentity(req.user)
+    // identity ID is passed to get limited access token
+    const { expires, token } = await acquireTokenForIssuanceAndListContracts(identity.id)
+
+    res.send({ token, expires, identityId: identity.id })
+  } catch (err) {
+    next(err)
+  }
+})
+app.post('/acquireTokenForAnonymousPresentations', async (req, res, next) => {
+  try {
+    // identity information is not needed to get limited access token for anonymous presentations
+    const { expires, token } = await acquireTokenForAnonymousPresentations()
+    res.send({ expires, token })
+  } catch (err) {
+    next(err)
+  }
+})
+```
+
+### Get access token to call Verification Orchestration platform
+
+```ts title="Get access token to call Verification Orchestration platform using the client secret."
+const getAccessTokenToCallPlatformService = async () => {
+  // <tenant ID> to be provided by an administrator of Verified Orchestration platform
+  const authority = 'https://login.microsoftonline.com/<tenant ID>'
+  // <client ID> provided during onboarding of the app
+  const clientId = '<client ID>'
+  // <client secret> provided during onboarding of the app; retrieved from a secure storage such as Azure Key Vault
+  const clientSecret = '<client secret>'
+  // <scope> to be provided by an administrator of Verified Orchestration platform;
+  // e.g. 'api://verified-orchestration-api-dev/.default'
+  const scope = '<scope>'
+
+  const msalClientApplication = new ConfidentialClientApplication({
+    auth: {
+      authority: authority,
+      clientId: clientId,
+      clientSecret: clientSecret,
+    },
+  })
+  const clientCredentialTokenResponse = await msalClientApplication.acquireTokenByClientCredential({
+    scopes: [scope],
+  })
+  if (!clientCredentialTokenResponse) throw new Error('Failed to get access token by client credentials')
+  return clientCredentialTokenResponse.accessToken
+}
+```
+
+### Save identity information
+
+```ts title="Save identity information unless limited access token is requested for anonymous presentations."
+type Identity = {
+  id: string
+  name: string
+}
+const saveIdentityMutation = `
+  mutation SaveIdentity($input: IdentityInput!) {
+    saveIdentity(input: $input) {
+      id
+      name
+    }
+  }
+`
+const saveIdentity = async (user: JwtPayload | undefined) => {
+  // identity information is retrieved from the claims in the JWT token of the current logged in user
+  const variables = {
+    identifier: user?.oid || user?.sub || '',
+    issuer: user?.iss || '',
+    name: user?.name || [user?.given_name, user?.family_name].join(' ').trim() || '',
+  }
+  if (!variables.identifier || !variables.issuer || !variables.name) {
+    throw new Error(`Invalid user object ${JSON.stringify(user)}`)
+  }
+
+  // `post` is a custom-built utility method for calling Verified Orchestration GraphQL API
+  const result = await post<typeof variables, { saveIdentity: Identity }>(saveIdentityMutation, variables)
+  if (!result.data) throw new Error('Failed to save identity')
+  return result.data.saveIdentity as Identity
+}
+```
+
+### Invoke limited access token GraphQL mutation
+
+```ts title="Invoke limited access token GraphQL mutation with appropriate inputs."
+type AcquireLimitedAccessTokenInput = {
+  allowAnonymousPresentation?: boolean
+  identityId?: string
+  issuableContractIds?: string[]
+  listContracts?: boolean
+  requestableCredentials?: RequestedCredentialSpecificationInput[]
+}
+type RequestedCredentialSpecificationInput = {
+  acceptedIssuers?: string[]
+  credentialType: string
+}
+type LimitedAccessToken = {
+  expires: string
+  token: string
+}
+const acquireLimitedAccessTokenMutation = `
+  mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {
+    acquireLimitedAccessToken(input: $input) {
+      expires
+      token
+    }
+  }
+`
+const acquireTokenForIssuanceAndListContracts = async (identityId: string) => {
+  // a list of contract IDs the client application is allowed to view and issue credentials with limited access token
+  // e.g. ['AA7ED447-232D-400A-9D96-BD0C9F4E108D', '54EDC080-F6C5-4902-90C9-7C0A7CD479F3']
+  const contractIds = ['<contract ID>', '<contract ID>']
+
+  // `post` is a custom-built utility method for calling Verified Orchestration GraphQL API
+  const result = await post<AcquireLimitedAccessTokenInput, { acquireLimitedAccessToken: LimitedAccessToken }>(
+    acquireLimitedAccessTokenMutation,
+    { identityId, issuableContractIds: contractIds, listContracts: true },
+  )
+  if (!result.data) throw new Error('Failed to acquire token')
+  return result.data.acquireLimitedAccessToken
+}
+const acquireTokenForAnonymousPresentations = async () => {
+  // a list of Verified Orchestration credential types of which the client application
+  // can request presentation anonymously (without a logged in user) using limited access token
+  // e.g. ['VerifiedContractor', 'MediumRigidLicense']
+  const credentialTypes = ['<credential type>', '<credential type>']
+
+  // `post` is a custom-built utility method for calling Verified Orchestration GraphQL API
+  const result = await post<AcquireLimitedAccessTokenInput, { acquireLimitedAccessToken: LimitedAccessToken }>(
+    acquireLimitedAccessTokenMutation,
+    {
+      allowAnonymousPresentation: true,
+      requestableCredentials: credentialTypes.map((credentialType) => ({ credentialType })),
+    },
+  )
+  if (!result.data) throw new Error('Failed to acquire token')
+  return result.data.acquireLimitedAccessToken
+}
+```
+
+### Utility method for calling Verified Orchestration GraphQL API
+
+```ts title="A custom-built utility method for calling Verified Orchestration GraphQL API"
+const post = async <TVariables, TResult>(query: string, variables: TVariables) => {
+  const platformAccessToken = await getAccessTokenToCallPlatformService()
+  // Verified Orchestration GraphQL API url; to be provided by an administrator of Verified Orchestration platform
+  // e.g. 'https://vo-dev-verified-orchestration-api.azurewebsites.net/graphql'
+  const url = '<Verified Orchestration API URL>'
+  const response = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify({ query, variables: { input: variables } }),
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${platformAccessToken}` },
+  })
+  if (!response.ok) throw new Error(`${response.status}: ${response.statusText}`)
+  const json = await response.json()
+  if (json.errors) throw new Error(json.errors.map((error: Error) => `${error}`).join('\n'))
+  return json as { data: TResult }
+}
+```
