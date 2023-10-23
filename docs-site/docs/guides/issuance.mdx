@@ -1,0 +1,215 @@
+---
+sidebar_position: 6
+---
+
+import ThemedImage from '@theme/ThemedImage'
+import { AdminUrl } from '@site/src/components/admin-url'
+
+# Issuance
+
+Issuance is the process of adding a credential to the recipient's wallet (Microsoft Authenticator or custom wallet implementation). The recipient can then use the credential to prove claims about themselves to a verifier.
+
+Issuance is a multi-step process:
+
+1. [Create an issuance request](#create-issuance-request)
+1. [Display QR code or open link](#display-qr-code-or-open-link)
+1. [Relay PIN to recipient (optional)](#relay-pin-to-recipient)
+1. [Receive issuance notification](#receive-issuance-notification)
+
+<ThemedImage
+  alt="issuance interaction diagram"
+  sources={{
+    light: '/img/issuance.svg',
+    dark: '/img/issuance-dark.svg',
+  }}
+/>
+
+## Create issuance request
+
+:::tip
+To create an issuance request definition and explore the API, use the <AdminUrl path="issuance-builder">issuance builder</AdminUrl> as a starting point.
+:::
+
+The issuance request specifies:
+
+1. Which credential will be issued
+1. The identity to whom the credential will be issued (recipient / issuee)
+1. Other optional input:
+   1. Values of any claims included in the credential (the claims are defined in the contract)
+   1. A PIN code that the recipient must enter to install the credential (to increase security of issuance)
+   1. Callback info, if the issuer wants to be notified of issuance events via a server-side endpoint)
+
+```graphql title="CreateIssuanceRequest mutation: will return a response with issuance request or error details"
+mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
+  createIssuanceRequest(request: $request) {
+    ... on IssuanceResponse {
+      requestId
+      url
+      qrCode
+      expiry
+    }
+    ... on RequestErrorResponse {
+      error {
+        code
+        message
+        innererror {
+          code
+          message
+          target
+        }
+      }
+    }
+  }
+}
+```
+
+```json title="Example variables with optional callback and PIN defined"
+{
+  "request": {
+    "contractId": "<id of the contract to be issued>",
+    "identityId": "<id of identity of recipient; or specify via identity field>",
+    "includeQRCode": true,
+    "callback": {
+      "headers": {
+        "Authorization": "MySecretTokenToCallMyEndpoint"
+      },
+      "url": "https://enr3r4d4gvwrb.x.pipedream.net",
+      "state": "Any extra state you need to correlate the request with the callback"
+    },
+    "pin": {
+      "value": "1234",
+      "length": 4
+    }
+  }
+}
+```
+
+```json title="Example response of the issuance request"
+{
+  "data": {
+    "createIssuanceRequest": {
+      "requestId": "<request ID>",
+      "url": "openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/<tenant ID>/verifiableCredentials/issuanceRequests/<request ID>",
+      "qrCode": "data:image/png;base64,iVBORw0...<base64 encoded image data>",
+      "expiry": 1695285131
+    }
+  }
+}
+```
+
+## Display QR code or open link
+
+Once the issuance request is created, it must be opened by Microsoft Authenticator (or custom wallet application) to complete issuance.
+
+The issuance request can be opened in one of two ways:
+
+- On a desktop or web application, display a QR code that the recipient can scan with their mobile device.
+- On a mobile application, the URL can be opened directly.
+
+### Display QR code
+
+```tsx title="Example display QR code"
+<img src={response.qrCode} alt="Scan this QR code to install your credential" />
+```
+
+### Open link on mobile device
+
+```tsx title="Example which opens the link automatically if running on a mobile device"
+if ('error' in response) displayError(response.error)
+else if (/Android|iPhone/i.test(navigator.userAgent)) window.location.href = response.url
+else displayQrCode(response.qrCode)
+```
+
+### Handle issuance received event
+
+Your application can subscribe to issuance events to be notified when the issuance is received by the wallet.
+
+```graphql title="IssuanceEvent subscription notifies when issuance is A) received and B) installed"
+subscription IssuanceEvent($requestId: ID!) {
+  issuanceEvent(where: { requestId: $requestId }) {
+    event {
+      requestStatus
+      error {
+        code
+        message
+      }
+    }
+  }
+}
+```
+
+```json title="Event data when issuance is received"
+{
+  "data": {
+    "issuanceEvent": {
+      "event": {
+        "requestStatus": "request_retrieved"
+      }
+    }
+  }
+}
+```
+
+:::tip
+Issuance received events can be received via the IssuanceEvent subscription and the server-side callback, however you cannot poll for issuance recevied events because they are not stored. See the [issuance samples](/docs/samples/issuance) for further details.
+:::
+
+## Relay PIN to recipient
+
+:::info
+Use of a PIN is optional. A PIN can improve the security of issuances to help ensure the credential goes to the intended recipient.
+:::
+
+The PIN can be sent to the recipient via a separate channel (e.g. via SMS or email). Doing so can provide a higher level of confidence than displaying the PIN inline.
+
+Alternatively, displaying the PIN after the QR code has been opened may help prevent an unauthorised party scanning a QR code and 'taking' the issuance over the intended recipient's shoulder from a distance without their knowledge.
+
+Microsoft Authenticator will display the PIN entry screen as soon as the QR code is scanned or the link is opened.
+
+You might send the PIN to the recipient via a separate channel at the time you create the issuance request, or wait until the issuance is received by the wallet.
+
+![Issuance PIN entry](../../static/img/issuance-pin.jpeg)
+![Issuance prompt](../../static/img/issuance-prompt.jpeg)
+
+If an invalid PIN is entered, an error event will be returned via the IssuanceEvent subscription and the server-side callback.
+
+```json title="Event data when incorrect PIN is entered"
+{
+  "data": {
+    "issuanceEvent": {
+      "event": {
+        "requestStatus": "issuance_error",
+        "error": {
+          "code": "badOrMissingField",
+          "message": "issuance_service_error"
+        }
+      }
+    }
+  }
+}
+```
+
+## Receive issuance notification
+
+Upon successful issuance, the issuing application can receive notification by any combination of:
+
+1. Subscription to the issuance event
+1. Polling for issuance data
+1. Server-side callback
+
+```json title="Event data when issuance is completed successfully"
+{
+  "data": {
+    "issuanceEvent": {
+      "event": {
+        "requestStatus": "issuance_successful",
+        "error": null
+      }
+    }
+  }
+}
+```
+
+:::tip
+For complete code samples of different methods of receiving issuance events, see the [issuance samples](/docs/samples/issuance).
+:::
