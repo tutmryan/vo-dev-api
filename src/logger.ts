@@ -17,12 +17,27 @@ export const levels: winston.config.AbstractConfigSetLevels & { audit: number } 
 // configure colors
 winston.addColors({ ...colorsRest, audit: httpColor as string })
 
-export const logger = createLogger({
+const baseLogger = createLogger({
   consoleFormat: isLocalDev ? 'pretty' : 'json',
   consoleOptions: config.get('logging.consoleOptions'),
   loggerOptions: { ...config.get('logging.loggerOptions'), levels },
   omitPaths: config.get('logging.omitPaths'),
 }) as Logger
+
+/**
+ * When records are sent to app insights, the level is converted to the AppInsights severity level, so we lose the original log level fidelity.
+ * To work around this, add a `logLevel` property to the record and set it to the same value as the `level` property.
+ * We can then filter logs using the `logLevel` property instead.
+ * Implementation as per logger.child() winston/lib/winston/logger.js
+ */
+export const logger = Object.create(baseLogger, {
+  write: {
+    value: function (info: { level: any }) {
+      const transform = baseLogger as any
+      transform.write(Object.assign({}, { logLevel: info.level }, info))
+    },
+  },
+})
 
 export class LoggerForTypeOrm implements TypeOrmLoggerInterface {
   constructor(private options: LoggerOptions, private logger: Logger) {}

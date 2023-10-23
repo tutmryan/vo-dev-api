@@ -20,7 +20,7 @@ const config: DeepPartial<Config> = {
   logging: {
     userClaimsToLog: [],
     requestInfoToLog: [],
-    omitPaths: ['service', 'trace_id', 'span_id', 'trace_flags'],
+    omitPaths: ['service', 'trace_id', 'span_id', 'trace_flags', 'logLevel'],
     loggerOptions: {
       level: 'verbose',
     },

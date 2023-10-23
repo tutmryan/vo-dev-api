@@ -134,6 +134,7 @@
     "lodash": "^4.17.21",
     "mime-types": "^2.1.35",
     "mssql": "^9.3.2",
+    "opentelemetry-instrumentation-ws": "^0.4.3",
     "typeorm": "^0.3.17",
     "ws": "^8.14.2"
   },
