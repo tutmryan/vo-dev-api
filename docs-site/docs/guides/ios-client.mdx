@@ -1,0 +1,21 @@
+---
+sidebar_position: 6
+---
+
+# iOS client
+
+This guide assumes a [secure backend API](./secure-backend-api-for-limited-access-tokens.mdx) has been setup for the client applications to acquire limited access tokens. It is also assumed that an appropirate authentication and authorisation method has been put in place for communication between the iOS app and the secure backend API.
+
+It is recommended to use [Apollo iOS](https://www.apollographql.com/docs/ios/) package as the client library for communicating with the Verified Orchestration GraphQL API. In particular, the following tutorials from Apollo are helpful with setting up the Apollo client in the iOS app.
+
+- [Build a project with Apollo](https://www.apollographql.com/docs/ios/tutorial/tutorial-introduction)
+- [Subscriptions](https://www.apollographql.com/docs/ios/fetching/subscriptions/)
+
+For subscribing to events in Verified Orchestration platform, it is recommended to use `WebSocket` protocol with `graphql-transport-ws` subprotocol [[doc](https://www.apollographql.com/docs/ios/fetching/subscriptions#websocket-subprotocols)].
+
+It is necessary to pass the limited access token obtained from the [secure backend API](./secure-backend-api-for-limited-access-tokens.mdx) to the Verified Orchestration platform for all GrapqhQL operations and subscriptions. These two tutorials from Apollo demonstrate how to pass an access token as the authorisation header for the GraphQL operations and subscriptions.
+
+- [Authenticate your operations](https://www.apollographql.com/docs/ios/tutorial/tutorial-authenticate-operations)
+- [Providing authorisation tokens for subscriptions](https://www.apollographql.com/docs/ios/fetching/subscriptions/#providing-authorization-tokens)
+
+Once the `ApolloClient` has been configured appropriately, [issuance](./issuance.mdx) and presentation operations can be implemented in the app using GraphQL operations and subscriptions.
