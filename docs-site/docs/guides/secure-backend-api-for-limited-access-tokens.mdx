@@ -4,7 +4,7 @@ sidebar_position: 5
 
 import ThemedImage from '@theme/ThemedImage'
 
-# Secure backend API for Limited Access Tokens
+# Secure backend API for limited access tokens
 
 As shown in the [diagram](#example-issuance-or-presentation-for-a-known-user) below, a secure backend API is needed to get limited access tokens from Verification Orchestration platform for the client applications to communicate with the platform.
 
@@ -20,7 +20,7 @@ The secure backend API can be built using any technology stack as long as it can
   }}
 />
 
-It is recommended that the communication between the client application and the secure backend API (noted as step 1. in the [diagram](#example-issuance-or-presentation-for-a-known-user) above) should be properly authenticated and authorised in all cases except for the [anonymous presentations](./anonymous-presentations.md) use case. It is up to the team working on the client application and the secure backend API to agree upon and implement the appropriate method of authentication and authorisation between those two components.
+It is recommended that the communication between the client application and the secure backend API (noted as step 1. in the [diagram](#example-issuance-or-presentation-for-a-known-user) above) should be properly authenticated and authorised in all cases except for the anonymous presentations use case. It is up to the team working on the client application and the secure backend API to agree upon and implement the appropriate method of authentication and authorisation between those two components.
 
 The following outlines the steps the secure backend API has to perform to get a limited access token from Verification Orchestration platform when it receives a request form the client application (noted as step 2. in the [diagram](#example-issuance-or-presentation-for-a-known-user) above).
 

@@ -4,14 +4,16 @@ sidebar_position: 1
 
 import ThemedImage from '@theme/ThemedImage'
 
-# Limited Access Tokens
+# Limited access tokens
 
 Limited access tokens support access to the Verified Orchestration platform API from a client application (e.g. a browser or mobile app, where an API access secret cannot be stored securely). This avoids the need to proxy API requests and callbacks through a secure back-end application.
 
 Limited access tokens have limited lifetime and capability, for example:
 
-- Issue one or more credentials to a single identity
-- Request and receive credential presentations (either from a known identity or anonymously)
+- Issue one or more pre-selected credentials to a single identity
+- Request and receive presentations of one or more pre-selected credential types;
+  - either from a known identity, or
+  - anonymously
 - Query limited data related to the issuance or presentation
 
 ### Example: issuance or presentation for a known user
@@ -32,6 +34,8 @@ Before you can acquire limited access tokens, a platform administrator must gran
 - **VerifiableCredential.AcquireLimitedAccessToken.Present** provides access to acquire limited access tokens for presentation operations
 - **VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations** provides access to acquire limited access tokens for anonymous presentation operations
 - **VerifiableCredential.AcquireLimitedAccessToken.ListContracts** provides access to acquire limited access tokens for listing contracts.
+
+For detailed info on onboarding your backend application, refer to the [Onboarding guide](./onboarding-apps.mdx).
 
 ## Acquiring a limited access token
 
@@ -84,6 +88,8 @@ const variables: AcquireLimitedAccessTokenInput = {
   },
 }
 ```
+
+A sample implementation of the backend API for acquiring limited access tokens from the Verified Orchestration platform using [Node.JS](https://nodejs.org/en/about) is provided in the [Secure backend API guide](./secure-backend-api-for-limited-access-tokens.mdx).
 
 ## Saving an identity reference
 
