@@ -1,0 +1,211 @@
+import { ApiUrl } from '@site/src/components/api-url'
+
+# Issuance
+
+This page shows you how to use the JavaScript client to issue credentials. For detailed info on credential issuance, refer to the [Issuance guide](/docs/guides/issuance).
+
+## Authorization
+
+It is expected that all applications that issue credentials will have user authentication and will provide the identity reference to the Verified Orchestration platform to track the issuance. Refer to the Authorization guide for more info [TODO]. The complete example below uses Microsoft authorization however there is no restriction on where identity references are sourced.
+
+## Issuance steps
+
+Issuance is a multi-step process described in the [Issuance guide](/docs/guides/issuance).
+
+### 1. Acquire an access token
+
+Obtain a limited access token for issuances from your [secure backend API](../../secure-backend-api-for-limited-access-tokens.mdx). Refer to the [Limited access tokens guide](/docs/guides/limited-access-tokens) for more info.
+
+```js
+let apiAccessToken, verifiedOrchestrationClient
+// obtain an access token to call your API
+msalInstance.acquireTokenSilent({ scopes: ['api://<your-backend-API>/.default'] }).then((response) => {
+  apiAccessToken = response.accessToken
+  // call your backend API for an issuance token
+  acquireIssuanceToken().then((data) => {
+    // contruct a VerifiedOrchestrationClient with the issuance token
+    verifiedOrchestrationClient = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
+      url: '<ApiUrl path="/">',
+      accessToken: data.token,
+    })
+    // now we can issue the credential
+    issue()
+  })
+})
+```
+
+### 2. Create an issuance request
+
+Create an issuance request specifying the contract of the credential to be issued and optionally (not shown in this example):
+
+- the values for any claims defined in the contract
+- a PIN code that the recipient must enter to retrieve the credential (best sent via a separate channel)
+- callback info, if issuance event data should also be sent to a server-side endpoint
+
+```js
+const contractId = 'TODO: fill this in'
+let pin
+function issue() {
+  app.innerHTML = 'Generating issuance request...'
+  pin = [...Array(4)].map(() => Math.floor(Math.random() * 10)).join('')
+  verifiedOrchestrationClient.createIssuanceRequest({ contractId, pin }, onIssuanceEvent).then(displayQRCodeOrOpenLink).catch(displayError)
+}
+```
+
+### 3. Display QR code or open link
+
+If the user is on a mobile device, open the issuance link in the browser. Otherwise, display the QR code for the user to scan.
+
+```js
+function displayQRCodeOrOpenLink(response) {
+  if ('error' in response) {
+    displayError(response.error)
+    return
+  }
+  const isMobile = /Android|iPhone/i.test(navigator.userAgent)
+  if (isMobile) window.location.href = data.createIssuanceRequest.url
+  else app.innerHTML = '<img src="' + response.qrCode + '" alt="scan qr code to issue credential(s)" />'
+}
+```
+
+### 4. Relay PIN to recipient (optional)
+
+If a PIN was specified in the issuance request, it must be entered by the recipient. Ideally, the PIN should be sent via a separate channel (e.g. via SMS or email), but for this example we show it on screen once the issuance request is opened.
+
+```js
+function onIssuanceEvent(data) {
+  if (data instanceof Error) displayError(data)
+  else if (data.event.requestStatus === 'request_retrieved') app.innerHTML = `Enter verification code ${pin} to complete issuance...`
+  else // TODO
+}
+```
+
+### 5. Receive issuance notification
+
+On successful issuance, the `event.requestStatus` will be `issuance_successful` and `event.issuance` will contain data (see the `Issuance` type for details).
+
+```js
+function onIssuanceEvent(data) {
+  if (data instanceof Error) displayError(data)
+  else if (data.event.requestStatus === 'request_retrieved') app.innerHTML = `Enter verification code ${pin} to complete issuance...`
+  else
+    app.innerHTML = `
+      <div>Issuance complete ✅</div>
+    `
+}
+```
+
+## Complete example
+
+The following HTML page is a complete working example showing all the steps
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Present Credentials</title>
+    <script type="text/javascript" src="https://unpkg.com/@verified-orchestration/client-js/index.min.js"></script>
+    <script type="text/javascript" src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      const contractId = 'TODO: fill this in'
+
+      let msalInstance, apiAccessToken, verifiedOrchestrationClient, pin
+
+      function displayError(error) {
+        app.innerHTML = 'Error: ' + error.message
+      }
+
+      function issue() {
+        app.innerHTML = 'Generating issuance request...'
+        pin = [...Array(4)].map(() => Math.floor(Math.random() * 10)).join('')
+        verifiedOrchestrationClient
+          .createIssuanceRequest({ contractId, pin }, onIssuanceEvent)
+          .then(displayQRCodeOrOpenLink)
+          .catch(displayError)
+      }
+
+      function displayQRCodeOrOpenLink(response) {
+        if ('error' in response) {
+          displayError(response.error)
+          return
+        }
+        const isMobile = /Android|iPhone/i.test(navigator.userAgent)
+        if (isMobile) window.location.href = data.createIssuanceRequest.url
+        else app.innerHTML = '<img src="' + response.qrCode + '" alt="scan qr code to issue credential(s)" />'
+      }
+
+      function onIssuanceEvent(data) {
+        if (data instanceof Error) displayError(data)
+        else if (data.event.requestStatus === 'request_retrieved') app.innerHTML = `Enter verification code ${pin} to complete issuance...`
+        else
+          app.innerHTML = `
+          <div>Issuance complete ✅</div>
+        `
+      }
+
+      // Acquire an issuance token from your secure backend API,
+      // the issuance token allows a credential to be issued to the logged-in user,
+      // our backend API also creates a reference to the logged-in user, which is fixed for the issuance token
+      async function acquireIssuanceToken() {
+        app.innerHTML = 'Acquiring identity-based token for issuance...'
+        const response = await fetch('https://<TODO: your backend API>/acquireTokenForIssuance', {
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiAccessToken}` },
+          method: 'POST',
+        })
+        return await response.json()
+      }
+
+      addEventListener('load', () => {
+        const app = document.getElementById('app')
+
+        // MSAL authentication - set up MSAL and log in
+        msalInstance = new msal.PublicClientApplication({
+          auth: {
+            clientId: '<client ID>',
+            authority: 'https://login.microsoftonline.com/<tenant ID>/v2.0',
+          },
+        })
+
+        msalInstance.addEventCallback(({ eventType, payload }) => {
+          if (eventType === msal.EventType.LOGIN_SUCCESS && payload && 'account' in payload && payload.account)
+            msalInstance.setActiveAccount(payload.account)
+        })
+
+        msalInstance.handleRedirectPromise().then(() => {
+          const accounts = msalInstance.getAllAccounts()
+          if (accounts.length > 0) {
+            msalInstance.setActiveAccount(accounts[0])
+            // now we are logged in
+            // obtain an access token to call your API
+            msalInstance
+              .acquireTokenSilent({ scopes: ['api://<your-backend-API>/.default'] })
+              .then((response) => {
+                apiAccessToken = response.accessToken
+                // call your backend API for an issuance token
+                acquireIssuanceToken().then((data) => {
+                  // contruct a VerifiedOrchestrationClient with the issuance token
+                  verifiedOrchestrationClient = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
+                    url: '<ApiUrl path="/">',
+                    accessToken: data.token,
+                  })
+                  // now we can issue credentials
+                  issue()
+                })
+              })
+              .catch(displayError)
+          } else {
+            app.innerHTML = 'Logging in...'
+            msalInstance.loginRedirect({
+              scopes: ['openid', 'profile', 'email'],
+            })
+          }
+        })
+      })
+    </script>
+    <div id="app">Loading...</div>
+  </body>
+</html>
+```

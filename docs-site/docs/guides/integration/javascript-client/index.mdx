@@ -1,0 +1,93 @@
+---
+sidebar_position: 4
+---
+
+# JavaScript client
+
+The [JavaScript client](https://www.npmjs.com/package/@verified-orchestration/client-js) provides a convenient way to issue or present credentials with minimal coding in JavaScript or Typescript applications.
+
+The client supports use of subscriptions over websockets to receive issuance and presentation events without needing to configure and code against a websocket client yourself. The client also supports polling for event data for situations where websockets cannot be used.
+
+This client may be the best choice:
+
+- To get started issuing credentials and receiving presentations fast
+- If you are developing applications in a low-code environment such as [Power Apps](https://powerapps.microsoft.com/en-us/) or a CMS
+- If you only need to issue credentials and receive presentations, and do not need to query or manage other data in the API
+
+The client is available for usage in the browser via UMD script or via npm. Typescript types and documentation are included.
+
+## Usage in the browser via script reference
+
+1. Reference the client script in your HTML page
+1. Create a client instance with the API URL and an access token (refer to the authorization guide)
+1. [Issue](/docs/guides/integration/javascript-client/issuance) or [present](/docs/guides/integration/javascript-client/presentations) credentials (for more info, refer to complete examples below)
+
+```html title="Browser usage example (simplified)"
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Verified Orchestration client - browser usage example</title>
+    <script type="text/javascript" src="https://unpkg.com/@verified-orchestration/client-js/index.min.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      const verifiedOrchestrationApiUrl = 'TODO: fill this in'
+      const credentialTypes = ['VerifiedEmployee', 'KycVerifiedIdentity'] // TODO: fill this in
+
+      acquirePresentationToken().then((accessToken) => {
+        const client = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
+          url: verifiedOrchestrationApiUrl,
+          accessToken,
+        })
+
+        const showQrCodeOrOpenUrl = (presentationRequest) => console.log // TODO: show the QR code or open the presentation URL
+        const onPresentationEvent = (event) => console.log // TODO: use the presentation data
+
+        client
+          .createPresentationRequest(
+            { clientName: 'Test client', requestedCredentials: credentialTypes.map((credentialType) => ({ type: credentialType })) },
+            onPresentationEvent,
+          )
+          .then(showQrCodeOrOpenUrl)
+      })
+    </script>
+  </body>
+</html>
+```
+
+## Usage via npm
+
+1. Install the package: `npm i @verified-orchestration/client-js`
+1. Create a client instance with the API URL and an access token (refer to the authorization guide)
+1. Issue or present credentials
+
+```typescript title="npm usage example (simplified)"
+import type { PresentationEventData, PresentationResponse } from '@verified-orchestration/client-js'
+import { VerifiedOrchestrationClient } from '@verified-orchestration/client-js'
+
+const verifiedOrchestrationApiUrl = 'TODO: fill this in'
+const acquireAccessToken = async (): Promise<string> => throw new Error('TODO: acquireAccessToken')
+
+const showQrCodeOrOpenUrl = (presentationRequest: PresentationResponse) => console.log // TODO: show the QR code or open the presentation URL
+const onPresentationEvent = (event: PresentationEventData) => console.log // TODO: use the presentation data
+
+const client = new VerifiedOrchestrationClient({
+  url: verifiedOrchestrationApiUrl,
+  accessToken: await acquireAccessToken(),
+})
+
+client
+  .createPresentationRequest(
+    { clientName: 'Test client', requestedCredentials: credentialTypes.map((credentialType) => ({ type: credentialType })) },
+    onPresentationEvent,
+  )
+  .then(showQrCodeOrOpenUrl)
+```
+
+## Examples
+
+For detailed JavaScript client examples, refer to the following pages:
+
+- [Issuance](/docs/guides/integration/javascript-client/issuance)
+- [Presentations](/docs/guides/integration/javascript-client/presentations)

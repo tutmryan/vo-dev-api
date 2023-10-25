@@ -1,9 +1,0 @@
-{
-  "label": "Code Samples",
-  "position": 3,
-  "link": {
-    "slug": "samples",
-    "type": "generated-index",
-    "description": "The following code samples will help you develop applications to issue credentials using your preferred development stacks"
-  }
-}

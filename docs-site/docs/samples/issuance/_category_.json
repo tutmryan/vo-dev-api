@@ -1,9 +1,0 @@
-{
-  "label": "Issuance",
-  "position": 3,
-  "link": {
-    "slug": "samples/issuance",
-    "type": "generated-index",
-    "description": "The following code samples will help you develop applications to issue credentials using your preferred development stacks"
-  }
-}
