@@ -330,6 +330,19 @@ input ContractPresentationWhere {
 }
 
 """
+Criteria for calculating weekly average of contract presentations.
+"""
+input ContractPresentationWeeklyAverageWhere {
+  """
+  The end of the presentedAt period to include.
+  """
+  to: DateTime!
+  """
+  The number of weeks to calculate average for.
+  """
+  numberOfWeeks: Int!
+}
+"""
 Criteria for filtering identity presentations.
 """
 input IdentityPresentationWhere {
@@ -544,6 +557,10 @@ extend type Contract {
   Returns the successful credential presentations for this contract.
   """
   presentations(where: ContractPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+  """
+  Returns the weekly average of credential presentations for this contract.
+  """
+  presentationWeeklyAverage(where: ContractPresentationWeeklyAverageWhere!): Float!
 }
 
 extend type Identity {

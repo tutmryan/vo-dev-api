@@ -245,6 +245,8 @@ export type Contract = {
   isPublic: Scalars['Boolean']['output'];
   /** Returns the total number of credential issuances for this contract. */
   issuanceCount: Scalars['Int']['output'];
+  /** Returns the weekly average of credential issuances for this contract. */
+  issuanceWeeklyAverage: Scalars['Float']['output'];
   /** Returns the successful credential issuances for this contract. */
   issuances: Array<Issuance>;
   /** When the contract was last provisioned in the Verified ID service. */
@@ -253,6 +255,8 @@ export type Contract = {
   lastProvisionedBy?: Maybe<User>;
   /** The name of the contract */
   name: Scalars['String']['output'];
+  /** Returns the weekly average of credential presentations for this contract. */
+  presentationWeeklyAverage: Scalars['Float']['output'];
   /** Returns the successful credential presentations for this contract. */
   presentations: Array<Presentation>;
   /** When the contract was initially provisioned in the Verified ID service. */
@@ -273,10 +277,22 @@ export type Contract = {
 
 
 /** Defines a contract that can be used to issue credentials */
+export type ContractIssuanceWeeklyAverageArgs = {
+  where: ContractIssuanceWeeklyAverageWhere;
+};
+
+
+/** Defines a contract that can be used to issue credentials */
 export type ContractIssuancesArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
   where?: InputMaybe<ContractIssuanceWhere>;
+};
+
+
+/** Defines a contract that can be used to issue credentials */
+export type ContractPresentationWeeklyAverageArgs = {
+  where: ContractPresentationWeeklyAverageWhere;
 };
 
 
@@ -454,6 +470,14 @@ export type ContractInput = {
   validityIntervalInSeconds: Scalars['PositiveInt']['input'];
 };
 
+/** Criteria for calculating weekly average of contract issuances. */
+export type ContractIssuanceWeeklyAverageWhere = {
+  /** The number of weeks to calculate average for. */
+  numberOfWeeks: Scalars['Int']['input'];
+  /** The end of the issuedAt period to include. */
+  to: Scalars['DateTime']['input'];
+};
+
 /** Criteria for filtering contract issuances. */
 export type ContractIssuanceWhere = {
   /** The start of the expiresAt period to include. */
@@ -489,6 +513,14 @@ export enum ContractOrderBy {
   /** The name of the user that created the contract. */
   CreatedByName = 'createdByName'
 }
+
+/** Criteria for calculating weekly average of contract presentations. */
+export type ContractPresentationWeeklyAverageWhere = {
+  /** The number of weeks to calculate average for. */
+  numberOfWeeks: Scalars['Int']['input'];
+  /** The end of the presentedAt period to include. */
+  to: Scalars['DateTime']['input'];
+};
 
 /** Criteria for filtering contract presentations. */
 export type ContractPresentationWhere = {
@@ -2464,6 +2496,7 @@ export type ResolversTypes = {
   ConfigurationValidation: ConfigurationValidation;
   Contract: ResolverTypeWrapper<ContractEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ContractCount: ResolverTypeWrapper<Omit<ContractCount, 'contract'> & { contract: ResolversTypes['Contract'] }>;
   ContractDisplayClaim: ResolverTypeWrapper<ContractDisplayClaim>;
   ContractDisplayClaimInput: ContractDisplayClaimInput;
@@ -2476,8 +2509,10 @@ export type ResolversTypes = {
   ContractDisplayModel: ResolverTypeWrapper<ContractDisplayModel>;
   ContractDisplayModelInput: ContractDisplayModelInput;
   ContractInput: ContractInput;
+  ContractIssuanceWeeklyAverageWhere: ContractIssuanceWeeklyAverageWhere;
   ContractIssuanceWhere: ContractIssuanceWhere;
   ContractOrderBy: ContractOrderBy;
+  ContractPresentationWeeklyAverageWhere: ContractPresentationWeeklyAverageWhere;
   ContractPresentationWhere: ContractPresentationWhere;
   ContractWhere: ContractWhere;
   CreatePartnerInput: CreatePartnerInput;
@@ -2594,6 +2629,7 @@ export type ResolversParentTypes = {
   ConfigurationValidation: ConfigurationValidation;
   Contract: ContractEntity;
   Int: Scalars['Int']['output'];
+  Float: Scalars['Float']['output'];
   ContractCount: Omit<ContractCount, 'contract'> & { contract: ResolversParentTypes['Contract'] };
   ContractDisplayClaim: ContractDisplayClaim;
   ContractDisplayClaimInput: ContractDisplayClaimInput;
@@ -2606,7 +2642,9 @@ export type ResolversParentTypes = {
   ContractDisplayModel: ContractDisplayModel;
   ContractDisplayModelInput: ContractDisplayModelInput;
   ContractInput: ContractInput;
+  ContractIssuanceWeeklyAverageWhere: ContractIssuanceWeeklyAverageWhere;
   ContractIssuanceWhere: ContractIssuanceWhere;
+  ContractPresentationWeeklyAverageWhere: ContractPresentationWeeklyAverageWhere;
   ContractPresentationWhere: ContractPresentationWhere;
   ContractWhere: ContractWhere;
   CreatePartnerInput: CreatePartnerInput;
@@ -2765,10 +2803,12 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   isDeprecated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issuanceCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  issuanceWeeklyAverage?: Resolver<ResolversTypes['Float'], ParentType, ContextType, RequireFields<ContractIssuanceWeeklyAverageArgs, 'where'>>;
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<ContractIssuancesArgs>>;
   lastProvisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastProvisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  presentationWeeklyAverage?: Resolver<ResolversTypes['Float'], ParentType, ContextType, RequireFields<ContractPresentationWeeklyAverageArgs, 'where'>>;
   presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<ContractPresentationsArgs>>;
   provisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   provisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
