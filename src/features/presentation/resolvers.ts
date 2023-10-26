@@ -7,6 +7,7 @@ import { CountPresentationsByContractQuery } from './queries/count-presentations
 import { CountPresentationsByUserQuery } from './queries/count-presentations-by-user-query'
 import { CountPresentationsQuery } from './queries/count-presentations-query'
 import { FindPresentationsQuery } from './queries/find-presentations-query'
+import { WeeklyAveragePresentationsByContractQuery } from './queries/weekly-average-presentations-by-contract-query'
 
 export const resolvers: Resolvers = {
   Query: {
@@ -27,6 +28,8 @@ export const resolvers: Resolvers = {
   Contract: {
     presentations: (contract, { where, offset, limit }, context) =>
       query(context, FindPresentationsQuery, { contractId: contract.id, ...where }, offset, limit),
+    presentationWeeklyAverage: ({ id }, { where }, context) =>
+      query(context, WeeklyAveragePresentationsByContractQuery, { contractId: id, ...where }),
   },
   Identity: {
     presentations: (identity, { where, offset, limit }, context) =>
