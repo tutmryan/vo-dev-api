@@ -278,7 +278,7 @@ export type Contract = {
 
 /** Defines a contract that can be used to issue credentials */
 export type ContractIssuanceWeeklyAverageArgs = {
-  where?: InputMaybe<ContractIssuanceWeeklyAverageWhere>;
+  where: ContractIssuanceWeeklyAverageWhere;
 };
 
 
@@ -292,7 +292,7 @@ export type ContractIssuancesArgs = {
 
 /** Defines a contract that can be used to issue credentials */
 export type ContractPresentationWeeklyAverageArgs = {
-  where?: InputMaybe<ContractPresentationWeeklyAverageWhere>;
+  where: ContractPresentationWeeklyAverageWhere;
 };
 
 
@@ -473,9 +473,9 @@ export type ContractInput = {
 /** Criteria for calculating weekly average of contract issuances. */
 export type ContractIssuanceWeeklyAverageWhere = {
   /** The number of weeks to calculate average for. */
-  numberOfWeeks?: InputMaybe<Scalars['Int']['input']>;
+  numberOfWeeks: Scalars['Int']['input'];
   /** The end of the issuedAt period to include. */
-  to?: InputMaybe<Scalars['DateTime']['input']>;
+  to: Scalars['DateTime']['input'];
 };
 
 /** Criteria for filtering contract issuances. */
@@ -517,9 +517,9 @@ export enum ContractOrderBy {
 /** Criteria for calculating weekly average of contract presentations. */
 export type ContractPresentationWeeklyAverageWhere = {
   /** The number of weeks to calculate average for. */
-  numberOfWeeks?: InputMaybe<Scalars['Int']['input']>;
+  numberOfWeeks: Scalars['Int']['input'];
   /** The end of the presentedAt period to include. */
-  to?: InputMaybe<Scalars['DateTime']['input']>;
+  to: Scalars['DateTime']['input'];
 };
 
 /** Criteria for filtering contract presentations. */
@@ -2801,12 +2801,12 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   isDeprecated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issuanceCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  issuanceWeeklyAverage?: Resolver<ResolversTypes['Int'], ParentType, ContextType, Partial<ContractIssuanceWeeklyAverageArgs>>;
+  issuanceWeeklyAverage?: Resolver<ResolversTypes['Int'], ParentType, ContextType, RequireFields<ContractIssuanceWeeklyAverageArgs, 'where'>>;
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<ContractIssuancesArgs>>;
   lastProvisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastProvisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  presentationWeeklyAverage?: Resolver<ResolversTypes['Int'], ParentType, ContextType, Partial<ContractPresentationWeeklyAverageArgs>>;
+  presentationWeeklyAverage?: Resolver<ResolversTypes['Int'], ParentType, ContextType, RequireFields<ContractPresentationWeeklyAverageArgs, 'where'>>;
   presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<ContractPresentationsArgs>>;
   provisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   provisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;

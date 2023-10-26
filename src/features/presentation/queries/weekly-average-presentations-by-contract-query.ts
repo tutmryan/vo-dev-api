@@ -1,4 +1,4 @@
-import { endOfToday, formatISO, subWeeks } from 'date-fns'
+import { formatISO, subWeeks } from 'date-fns'
 import type { QueryContext } from '../../../cqrs/query-context'
 import type { ContractPresentationWeeklyAverageWhere } from '../../../generated/graphql'
 import { PresentationEntity } from '../entities/presentation-entity'
@@ -8,8 +8,8 @@ export async function WeeklyAveragePresentationsByContractQuery(
   criteria: ContractPresentationWeeklyAverageWhere & { contractId: string },
 ) {
   const { entityManager } = this
-  const toDate = criteria.to ?? endOfToday()
-  const numberOfWeeks = criteria.numberOfWeeks ?? 12
+  const toDate = criteria.to
+  const numberOfWeeks = criteria.numberOfWeeks
   const rawData = await entityManager.getRepository(PresentationEntity).query(
     `
 SELECT SUM(weekly_total) / @0 AS weekly_average
@@ -26,7 +26,7 @@ FROM (
 	GROUP BY DATEDIFF(wk, [presentation].[presented_at], @3)
 ) AS PresentationTotal
 `,
-    [numberOfWeeks, criteria?.contractId, formatISO(subWeeks(toDate, numberOfWeeks), { representation: 'date' }), formatISO(toDate)],
+    [numberOfWeeks, criteria.contractId, formatISO(subWeeks(toDate, numberOfWeeks), { representation: 'date' }), formatISO(toDate)],
   )
 
   return (rawData as Record<string, number>[])[0]?.['weekly_average'] ?? 0

@@ -336,11 +336,11 @@ input ContractPresentationWeeklyAverageWhere {
   """
   The end of the presentedAt period to include.
   """
-  to: DateTime
+  to: DateTime!
   """
   The number of weeks to calculate average for.
   """
-  numberOfWeeks: Int
+  numberOfWeeks: Int!
 }
 """
 Criteria for filtering identity presentations.
@@ -560,7 +560,7 @@ extend type Contract {
   """
   Returns the weekly average of credential presentations for this contract.
   """
-  presentationWeeklyAverage(where: ContractPresentationWeeklyAverageWhere): Int!
+  presentationWeeklyAverage(where: ContractPresentationWeeklyAverageWhere!): Int!
 }
 
 extend type Identity {

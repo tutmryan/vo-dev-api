@@ -322,11 +322,11 @@ input ContractIssuanceWeeklyAverageWhere {
   """
   The end of the issuedAt period to include.
   """
-  to: DateTime
+  to: DateTime!
   """
   The number of weeks to calculate average for.
   """
-  numberOfWeeks: Int
+  numberOfWeeks: Int!
 }
 
 """
@@ -495,7 +495,7 @@ extend type Contract {
   """
   Returns the weekly average of credential issuances for this contract.
   """
-  issuanceWeeklyAverage(where: ContractIssuanceWeeklyAverageWhere): Int!
+  issuanceWeeklyAverage(where: ContractIssuanceWeeklyAverageWhere!): Int!
 }
 
 extend type Identity {
