@@ -13,9 +13,9 @@ It is recommended to use [Apollo iOS](https://www.apollographql.com/docs/ios/) p
 
 For subscribing to events in Verified Orchestration platform, it is recommended to use `WebSocket` protocol with `graphql-transport-ws` subprotocol [[doc](https://www.apollographql.com/docs/ios/fetching/subscriptions#websocket-subprotocols)].
 
-It is necessary to pass the limited access token obtained from the [secure backend API](../limited-access-tokens/secure-backend-api.mdx) to the Verified Orchestration platform for all GrapqhQL operations and subscriptions. These two tutorials from Apollo demonstrate how to pass an access token as the authorisation header for the GraphQL operations and subscriptions.
+It is necessary to pass the limited access token obtained from the [secure backend API](../limited-access-tokens/secure-backend-api) to the Verified Orchestration platform for all GrapqhQL operations and subscriptions. These two tutorials from Apollo demonstrate how to pass an access token as the authorisation header for the GraphQL operations and subscriptions.
 
 - [Authenticate your operations](https://www.apollographql.com/docs/ios/tutorial/tutorial-authenticate-operations)
 - [Providing authorisation tokens for subscriptions](https://www.apollographql.com/docs/ios/fetching/subscriptions/#providing-authorization-tokens)
 
-Once the `ApolloClient` has been configured appropriately, [issuance](../issuance.mdx) and presentation operations can be implemented in the app using GraphQL operations and subscriptions.
+Once the `ApolloClient` has been configured appropriately, [issuance](../issuance) and [presentation](../presentation) operations can be implemented in the app using GraphQL operations and subscriptions.
