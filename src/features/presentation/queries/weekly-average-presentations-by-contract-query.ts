@@ -12,7 +12,7 @@ export async function WeeklyAveragePresentationsByContractQuery(
   const numberOfWeeks = criteria.numberOfWeeks
   const rawData = await entityManager.getRepository(PresentationEntity).query(
     `
-SELECT SUM(weekly_total) / @0 AS weekly_average
+SELECT SUM(weekly_total) / CAST(@0 AS NUMERIC) AS weekly_average
 FROM (
 	SELECT DATEDIFF(wk, [presentation].[presented_at], @3) AS week_ago, COUNT(DISTINCT [presentation].[id]) AS weekly_total
 	FROM
@@ -29,5 +29,5 @@ FROM (
     [numberOfWeeks, criteria.contractId, formatISO(subWeeks(toDate, numberOfWeeks), { representation: 'date' }), formatISO(toDate)],
   )
 
-  return (rawData as Record<string, number>[])[0]?.['weekly_average'] ?? 0
+  return (rawData as Record<string, number>[])[0]?.['weekly_average'] ?? 0.0
 }

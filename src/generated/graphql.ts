@@ -246,7 +246,7 @@ export type Contract = {
   /** Returns the total number of credential issuances for this contract. */
   issuanceCount: Scalars['Int']['output'];
   /** Returns the weekly average of credential issuances for this contract. */
-  issuanceWeeklyAverage: Scalars['Int']['output'];
+  issuanceWeeklyAverage: Scalars['Float']['output'];
   /** Returns the successful credential issuances for this contract. */
   issuances: Array<Issuance>;
   /** When the contract was last provisioned in the Verified ID service. */
@@ -256,7 +256,7 @@ export type Contract = {
   /** The name of the contract */
   name: Scalars['String']['output'];
   /** Returns the weekly average of credential presentations for this contract. */
-  presentationWeeklyAverage: Scalars['Int']['output'];
+  presentationWeeklyAverage: Scalars['Float']['output'];
   /** Returns the successful credential presentations for this contract. */
   presentations: Array<Presentation>;
   /** When the contract was initially provisioned in the Verified ID service. */
@@ -2496,6 +2496,7 @@ export type ResolversTypes = {
   ConfigurationValidation: ConfigurationValidation;
   Contract: ResolverTypeWrapper<ContractEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ContractCount: ResolverTypeWrapper<Omit<ContractCount, 'contract'> & { contract: ResolversTypes['Contract'] }>;
   ContractDisplayClaim: ResolverTypeWrapper<ContractDisplayClaim>;
   ContractDisplayClaimInput: ContractDisplayClaimInput;
@@ -2628,6 +2629,7 @@ export type ResolversParentTypes = {
   ConfigurationValidation: ConfigurationValidation;
   Contract: ContractEntity;
   Int: Scalars['Int']['output'];
+  Float: Scalars['Float']['output'];
   ContractCount: Omit<ContractCount, 'contract'> & { contract: ResolversParentTypes['Contract'] };
   ContractDisplayClaim: ContractDisplayClaim;
   ContractDisplayClaimInput: ContractDisplayClaimInput;
@@ -2801,12 +2803,12 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   isDeprecated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issuanceCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  issuanceWeeklyAverage?: Resolver<ResolversTypes['Int'], ParentType, ContextType, RequireFields<ContractIssuanceWeeklyAverageArgs, 'where'>>;
+  issuanceWeeklyAverage?: Resolver<ResolversTypes['Float'], ParentType, ContextType, RequireFields<ContractIssuanceWeeklyAverageArgs, 'where'>>;
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<ContractIssuancesArgs>>;
   lastProvisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastProvisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  presentationWeeklyAverage?: Resolver<ResolversTypes['Int'], ParentType, ContextType, RequireFields<ContractPresentationWeeklyAverageArgs, 'where'>>;
+  presentationWeeklyAverage?: Resolver<ResolversTypes['Float'], ParentType, ContextType, RequireFields<ContractPresentationWeeklyAverageArgs, 'where'>>;
   presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<ContractPresentationsArgs>>;
   provisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   provisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;

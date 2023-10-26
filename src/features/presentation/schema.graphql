@@ -560,7 +560,7 @@ extend type Contract {
   """
   Returns the weekly average of credential presentations for this contract.
   """
-  presentationWeeklyAverage(where: ContractPresentationWeeklyAverageWhere!): Int!
+  presentationWeeklyAverage(where: ContractPresentationWeeklyAverageWhere!): Float!
 }
 
 extend type Identity {
