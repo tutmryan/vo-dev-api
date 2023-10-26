@@ -1,0 +1,270 @@
+---
+sidebar_position: 6
+---
+
+import ThemedImage from '@theme/ThemedImage'
+import { AdminUrl } from '@site/src/components/admin-url'
+
+# Presentation
+
+Presentation is the process of having a credential holder present credentials from their wallet, to prove claims about themselves to a verifier.
+
+Presentation is a multi-step process:
+
+1. [Create a presentation request](#create-presentation-request)
+1. [Display QR code or open link](#display-qr-code-or-open-link)
+1. [Receive presentation notification](#receive-presentation-notification)
+
+<ThemedImage
+  alt="presentation interaction diagram"
+  sources={{
+    light: '/img/presentation.svg',
+    dark: '/img/presentation-dark.svg',
+  }}
+/>
+
+## Create presentation request
+
+:::tip
+To create a presentation request definition and explore the presentation API, use the <AdminUrl path="/presentation-builder">presentation builder</AdminUrl> as a starting point.
+:::
+
+The [presentation request input](/docs/reference/inputs/presentation-request-input) specifies:
+
+1. One or more requested credentials. For partner types, the issuer must be specified, otherwise just the credential type is required.
+1. The name of the requesting client application (for display in the wallet prompt)
+1. The identity to whom the credential will be issued (recipient / issuee)
+1. Other optional input:
+   1. For each requested credential, whether revoked credentials can be presented. It is recommended that the requesting application handle presentation of revoked credentials gracefully.
+   1. Callback info, if presentation event data should also be sent to a server-side endpoint
+
+```graphql title="CreatePresentationRequest mutation: will return a response with presentation request or error details"
+mutation CreatePresentationRequest($request: PresentationRequestInput!) {
+  createPresentationRequest(request: $request) {
+    ... on PresentationResponse {
+      requestId
+      url
+      qrCode
+      expiry
+    }
+    ... on RequestErrorResponse {
+      error {
+        code
+        message
+        innererror {
+          code
+          message
+          target
+        }
+      }
+    }
+  }
+}
+```
+
+```json title="Example variables requesting internal and partner credentials, allowing revoked, with optional callback defined"
+{
+  "request": {
+    "requestedCredentials": [
+      {
+        "type": "VerifiedContractor",
+        "configuration": {
+          "validation": {
+            "allowRevoked": true
+          }
+        }
+      },
+      {
+        "type": "TrueIdentity",
+        "acceptedIssuers": "did:ion:EiDXOEH-<DID data>",
+        "configuration": {
+          "validation": {
+            "allowRevoked": true
+          }
+        }
+      }
+    ],
+    "includeQRCode": true,
+    "registration": {
+      "clientName": "Test client"
+    },
+    "callback": {
+      "headers": {
+        "Authorization": "MySecretTokenToCallMyEndpoint"
+      },
+      "url": "https://enr3r4d4gvwrb.x.pipedream.net",
+      "state": "Any extra state you need to correlate the request with the callback"
+    }
+  }
+}
+```
+
+```json title="Example response of the presentation request"
+{
+  "data": {
+    "createPresentationRequest": {
+      "requestId": "<request id>",
+      "url": "openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/<tenant ID>/verifiableCredentials/presentationRequests/<request id>",
+      "qrCode": "data:image/png;base64,iVBORw0KG..<base64 encoded image data>",
+      "expiry": 1695285131
+    }
+  }
+}
+```
+
+## Display QR code or open link
+
+Once the presentation request is created, it must be opened by Microsoft Authenticator (or custom wallet application) to complete the presentation.
+
+The presentation request can be opened in one of two ways:
+
+- On a desktop or web application, display a QR code that the recipient can scan with their mobile device.
+- On a mobile application, the URL can be opened directly.
+
+### Display QR code
+
+```tsx title="Example display QR code"
+<img src={response.qrCode} alt="Scan this QR code to present credential(s)" />
+```
+
+### Open link on mobile device
+
+```tsx title="Example which opens the link automatically if running on a mobile device"
+if ('error' in response) displayError(response.error)
+else if (/Android|iPhone/i.test(navigator.userAgent)) window.location.href = response.url
+else displayQrCode(response.qrCode)
+```
+
+### Handle presentation received event
+
+Your application can subscribe to presentation events to be notified when the presentation is received by the wallet.
+
+```graphql title="PresentationEvent subscription notifies when presentation is A) received and B) completed successfully"
+  subscription PresentationEvent($requestId: ID!) {
+    presentationEvent(where: { requestId: $requestId }) {
+      event {
+        requestStatus
+      }
+      presentation {
+        id
+        presentedAt
+        # select presentation data here
+      }
+    }
+  }
+}
+```
+
+```json title="Event data when presentation is received"
+{
+  "data": {
+    "presentationEvent": {
+      "event": {
+        "requestStatus": "request_retrieved"
+      }
+    }
+  }
+}
+```
+
+:::tip
+Presentation received events can be received via the PresentationEvent subscription and the server-side callback, however you cannot poll for presentation received events because they are not stored.
+:::
+
+## Receive presentation notification
+
+Upon successful presentation, the requesting application can receive data by any combination of:
+
+1. Subscription to the presentation event
+1. Polling for presentation data
+1. Server-side callback
+
+```json title="Example event data for successfull presentation of both internal and partner type credentials"
+{
+  "data": {
+    "presentationEvent": {
+      "event": {
+        "requestStatus": "presentation_verified"
+      },
+      "presentation": {
+        "presentedAt": "2023-10-25T06:03:28.443Z",
+        "identity": {
+          "id": "<GUID>",
+          "identifier": "<GUID>",
+          "issuer": "<identity issuer>",
+          "name": "Mary Smith"
+        },
+        "presentedCredentials": [
+          {
+            "issuer": "did:ion:EiDKU4Ss...<DID data>",
+            "type": ["VerifiableCredential", "VerifiedContractor"],
+            "claims": {
+              "issuanceId": "<GUID>",
+              "name": "Mary Smith"
+            },
+            "credentialState": {
+              "revocationStatus": "VALID"
+            }
+          },
+          {
+            "issuer": "did:ion:EiDXOEH-<DID data>",
+            "type": ["VerifiableCredential", "TrueIdentity"],
+            "claims": {
+              "firstName": "Mary",
+              "lastName": "Smith",
+              "scanneddoc": "NY State Drivers License",
+              "selfie": "Verified Selfie",
+              "verification": "Fully Verified",
+              "address": "2345 Anywhere Street, Your City, NY 12345",
+              "ageverified": "Older than 21"
+            },
+            "credentialState": {
+              "revocationStatus": "VALID"
+            }
+          }
+        ],
+        "issuances": [
+          {
+            "id": "<GUID>",
+            "status": "active",
+            "issuedAt": "2023-10-10T02:48:44.983Z",
+            "expiresAt": "2024-10-09T02:48:44.970Z",
+            "revokedAt": null,
+            "contract": {
+              "id": "<GUID>",
+              "name": "Skysprint contractor credential",
+              "credentialTypes": ["VerifiedContractor"],
+              "display": {
+                "card": {
+                  "title": "Verified Skysprint contractor",
+                  "issuedBy": "Skysprint Pty Ltd",
+                  "backgroundColor": "#ffffff",
+                  "textColor": "#000000",
+                  "description": "This credential verifies you are a Skysprint contractor",
+                  "logo": {
+                    "uri": "https://vodevvrfdorchstnst.blob.core.windows.net/logo-images/AA7ED447-232D-400A-9D96-BD0C9F4E108D.png",
+                    "description": "Skysprint company logo"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "partners": [
+          {
+            "id": "C4B8B982-C804-4891-AFEE-716BDB1EC636",
+            "did": "did:ion:EiDXOEH-<DID data>",
+            "name": "Wood Grove Demo",
+            "credentialTypes": ["TrueIdentity", "VerifiedEmployee"],
+            "linkedDomainUrls": ["https://did.woodgrovedemo.com/"]
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+:::tip
+For complete code samples of different methods of receiving presentation events, view the presentation samples for [your development stack](/docs/guides/integration/).
+:::

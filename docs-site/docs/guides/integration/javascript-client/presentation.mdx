@@ -1,0 +1,289 @@
+import { ApiUrl } from '@site/src/components/api-url'
+
+# Presentation
+
+This page shows you how to use the JavaScript client to present credentials. For detailed info on credential presentation, refer to the [Presentation guide](/docs/guides/presentation).
+
+## Authentication
+
+Applications with an authenticated user should include an identity reference when acquiring presentation tokens. This ensures presentations of platform credentials cannot be made using credentials from another identity and also supports presentation of partner credentials. Anonymous presentations are also supported, for applications where there is no authenticated user. Refer to the [Authorization guide](../authn.mdx) for further info. The [complete example below](#complete-example) uses Microsoft authorization, however there is no restriction on where identity references are sourced.
+
+## Presentation steps
+
+Presentation is a multi-step process described in the [Presentation guide](/docs/guides/presentation).
+
+### 1. Acquire an access token
+
+Obtain a limited access token for presentations from your [secure backend API](/docs/guides/limited-access-tokens/secure-backend-api). Refer to the [Limited access tokens guide](/docs/guides/limited-access-tokens) for more info.
+
+```js
+let apiAccessToken, verifiedOrchestrationClient
+// obtain an access token to call your API
+msalInstance.acquireTokenSilent({ scopes: ['api://<your-backend-API>/.default'] }).then((response) => {
+  apiAccessToken = response.accessToken
+  // call your backend API for a presentation token
+  acquireTokenForPresentation()
+    .then((data) => {
+      verifiedOrchestrationClient = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
+        url: '<Verified Orchestration API URL>',
+        accessToken: data.token,
+      })
+      present()
+    })
+    .catch(displayError)
+})
+```
+
+### 2. Create a presentation request
+
+Create a presentation request specifying the requested credentials and optionally:
+
+- whether revoked credentials can be presented
+- callback info, if presentation event data should also be sent to a server-side endpoint
+
+```js
+const credentialTypes = ['VerifiedContractor', 'TrueIdentity']
+const allowRevokedConfiguration = {
+  configuration: {
+    validation: {
+      allowRevoked: true,
+    },
+  },
+}
+function present() {
+  app.innerHTML = 'Generating presentation request...'
+  verifiedOrchestrationClient
+    .createPresentationRequest(
+      {
+        clientName: 'Test client',
+        requestedCredentials: credentialTypes.map((credentialType) => ({ type: credentialType, ...allowRevokedConfiguration })),
+      },
+      onPresentationEvent,
+    )
+    .then(displayQRCodeOrOpenLink)
+    .catch(displayError)
+}
+```
+
+### 3. Display QR code or open link
+
+If the user is on a mobile device, open the presentation link in the browser. Otherwise, display the QR code for the user to scan.
+
+```js
+function displayQRCodeOrOpenLink(response) {
+  if ('error' in response) {
+    displayError(response.error)
+    return
+  }
+  const isMobile = /Android|iPhone/i.test(navigator.userAgent)
+  if (isMobile) window.location.href = data.createPresentationRequest.url
+  else app.innerHTML = '<img src="' + response.qrCode + '" alt="scan qr code to issue credential(s)" />'
+}
+```
+
+### 5. Receive presentation notification
+
+Upon completion of presentation, the `event.requestStatus` will be `presentation_successful` and `event.presentation` will contain data (see the `PresentationEventData` type for details).
+
+```js title="Example handling presentation events and displaying a subset of data"
+function onPresentationEvent(data) {
+  if (data instanceof Error) displayError(data)
+  else if (data.event.requestStatus === 'request_retrieved') app.innerHTML = 'Scanned, waiting for presentation...'
+  else displayPresentation(data.presentation)
+}
+
+function displayPresentation(presentation) {
+  const { presentedCredentials, identity } = presentation
+  const credentialsWithIssuance = presentedCredentials.map((presentedCredential) => ({
+    presentedCredential,
+    issuance: presentation?.issuances.find((issuance) => issuance.contract.credentialTypes.includes(presentedCredential.type[1])),
+  }))
+  app.innerHTML = `
+    <div>Presentation complete ✅</div>
+    <div>
+    Presented types:
+    <ul>${credentialsWithIssuance
+      .map(
+        ({
+          issuance: { contract },
+          presentedCredential: {
+            type: [_, credentialType],
+          },
+        }) =>
+          `<li key="${credentialType}"">${credentialType} - ${contract.name} <img height="24" src="${contract.display.card.logo.uri}" /></li>`,
+      )
+      .join('\n')}
+    </ul>
+    </div>
+    <div>
+    Presenter identity:
+    <ul>
+        <li>name: ${identity.name}</li>
+        <li>issuer: ${identity.issuer}</li>
+        <li>identifier: ${identity.identifier}</li>
+    </ul>
+    </div>
+  `
+}
+```
+
+## Complete example
+
+```html title="Complete working HTML page example"
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Present Credentials</title>
+    <script type="text/javascript" src="https://unpkg.com/@verified-orchestration/client-js/index.min.js"></script>
+    <script type="text/javascript" src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      // The credential types to be requested
+      const credentialTypes = ['VerifiedContractor', 'TrueIdentity']
+      // Allowing revoked credentials allows the verifying application to handle revocation status gracefully
+      const allowRevokedConfiguration = {
+        configuration: {
+          validation: {
+            allowRevoked: true,
+          },
+        },
+      }
+
+      let app, verifiedOrchestrationClient
+
+      function displayError(error) {
+        app.innerHTML = 'Error: ' + error.message
+      }
+
+      // Create presentation request
+      function present() {
+        app.innerHTML = 'Generating presentation request...'
+        verifiedOrchestrationClient
+          .createPresentationRequest(
+            {
+              clientName: 'Test client',
+              requestedCredentials: credentialTypes.map((credentialType) => ({ type: credentialType, ...allowRevokedConfiguration })),
+            },
+            onPresentationEvent,
+          )
+          .then(displayQRCodeOrOpenLink)
+          .catch(displayError)
+      }
+
+      function displayQRCodeOrOpenLink(response) {
+        if ('error' in response) {
+          displayError(response.error)
+          return
+        }
+        const isMobile = /Android|iPhone/i.test(navigator.userAgent)
+        if (isMobile) window.location.href = data.createIssuanceRequest.url
+        else app.innerHTML = '<img src="' + response.qrCode + '" alt="scan qr code to present credential(s)" />'
+      }
+
+      // Handle presentation events
+      function onPresentationEvent(data) {
+        console.debug('presentation event', data)
+        if (data instanceof Error) displayError(data)
+        else if (data.event.requestStatus === 'request_retrieved') app.innerHTML = 'Scanned, waiting for presentation...'
+        else displayPresentation(data.presentation)
+      }
+
+      function displayPresentation(presentation) {
+        const { presentedCredentials, identity } = presentation
+        const credentialsWithIssuance = presentedCredentials.map((presentedCredential) => ({
+          presentedCredential,
+          issuance: presentation?.issuances.find((issuance) => issuance.contract.credentialTypes.includes(presentedCredential.type[1])),
+        }))
+        app.innerHTML = `
+          <div>Presentation complete ✅</div>
+          <div>
+          Presented types:
+          <ul>${credentialsWithIssuance
+            .map(
+              ({
+                issuance: { contract },
+                presentedCredential: {
+                  type: [_, credentialType],
+                },
+              }) =>
+                `<li key="${credentialType}"">${credentialType} - ${contract.name} <img height="24" src="${contract.display.card.logo.uri}" /></li>`,
+            )
+            .join('\n')}
+          </ul>
+          </div>
+          <div>
+          Presenter identity:
+          <ul>
+              <li>name: ${identity.name}</li>
+              <li>issuer: ${identity.issuer}</li>
+              <li>identifier: ${identity.identifier}</li>
+          </ul>
+          </div>
+          <button onClick="present()">Present again</button>
+        `
+      }
+
+      // Acquire a presentation token from a secure backend API,
+      // the presentation token allows a fixed set of credential types to be presented by the user
+      // (or alternatively by anonymous users, if your secure backend API supports it)
+      async function acquireTokenForPresentation() {
+        app.innerHTML = 'Acquiring token for presentations...'
+        const response = await fetch('https://<TODO: your backend API>/acquireTokenForPresentation', {
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiAccessToken}` },
+          method: 'POST',
+        })
+        return await response.json()
+      }
+
+      addEventListener('load', () => {
+        app = document.getElementById('app')
+
+        // MSAL authentication - set up MSAL and log in
+        msalInstance = new msal.PublicClientApplication({
+          auth: {
+            clientId: '<client ID>',
+            authority: 'https://login.microsoftonline.com/<tenant ID>/v2.0',
+          },
+        })
+
+        msalInstance.addEventCallback(({ eventType, payload }) => {
+          if (eventType === msal.EventType.LOGIN_SUCCESS && payload && 'account' in payload && payload.account)
+            msalInstance.setActiveAccount(payload.account)
+        })
+
+        msalInstance.handleRedirectPromise().then(() => {
+          const accounts = msalInstance.getAllAccounts()
+          if (accounts.length > 0) {
+            msalInstance.setActiveAccount(accounts[0])
+            // now we are logged in
+            // obtain an access token to call your API
+            msalInstance
+              .acquireTokenSilent({ scopes: ['api://<your-backend-API>/.default'] })
+              .then((response) => {
+                apiAccessToken = response.accessToken
+                // call your backend API for a presentation token
+                acquireTokenForPresentation().then((data) => {
+                  verifiedOrchestrationClient = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
+                    url: '<Verified Orchestration API URL>',
+                    accessToken: data.token,
+                  })
+                  present()
+                })
+              })
+              .catch(displayError)
+          } else {
+            app.innerHTML = 'Logging in...'
+            msalInstance.loginRedirect({
+              scopes: ['openid', 'profile', 'email'],
+            })
+          }
+        })
+      })
+    </script>
+
+    <div id="app">Loading...</div>
+  </body>
+</html>
+```

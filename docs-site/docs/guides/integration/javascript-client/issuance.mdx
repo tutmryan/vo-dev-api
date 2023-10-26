@@ -4,9 +4,9 @@ import { ApiUrl } from '@site/src/components/api-url'
 
 This page shows you how to use the JavaScript client to issue credentials. For detailed info on credential issuance, refer to the [Issuance guide](/docs/guides/issuance).
 
-## Authorization
+## Authentication
 
-It is expected that all applications that issue credentials will have user authentication and will provide the identity reference to the Verified Orchestration platform to track the issuance. Refer to the Authorization guide for more info [TODO]. The complete example below uses Microsoft authorization however there is no restriction on where identity references are sourced.
+All applications that issue credentials require user authentication and must provide an identity reference to the Verified Orchestration platform to track the issuance. Refer to the [Authorization guide](../authn.mdx) for further info. The [complete example below](#complete-example) uses Microsoft authorization, however there is no restriction on where identity references are sourced.
 
 ## Issuance steps
 
@@ -14,7 +14,7 @@ Issuance is a multi-step process described in the [Issuance guide](/docs/guides/
 
 ### 1. Acquire an access token
 
-Obtain a limited access token for issuances from your [secure backend API](../../secure-backend-api-for-limited-access-tokens.mdx). Refer to the [Limited access tokens guide](/docs/guides/limited-access-tokens) for more info.
+Obtain a limited access token for issuances from your [secure backend API](/docs/guides/limited-access-tokens/secure-backend-api). Refer to the [Limited access tokens guide](/docs/guides/limited-access-tokens) for more info.
 
 ```js
 let apiAccessToken, verifiedOrchestrationClient
@@ -25,7 +25,7 @@ msalInstance.acquireTokenSilent({ scopes: ['api://<your-backend-API>/.default'] 
   acquireIssuanceToken().then((data) => {
     // contruct a VerifiedOrchestrationClient with the issuance token
     verifiedOrchestrationClient = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
-      url: '<ApiUrl path="/">',
+      url: '<Verified Orchestration API URL>',
       accessToken: data.token,
     })
     // now we can issue the credential
@@ -38,7 +38,7 @@ msalInstance.acquireTokenSilent({ scopes: ['api://<your-backend-API>/.default'] 
 
 Create an issuance request specifying the contract of the credential to be issued and optionally (not shown in this example):
 
-- the values for any claims defined in the contract
+- the values of any claims defined in the contract
 - a PIN code that the recipient must enter to retrieve the credential (best sent via a separate channel)
 - callback info, if issuance event data should also be sent to a server-side endpoint
 
@@ -76,13 +76,13 @@ If a PIN was specified in the issuance request, it must be entered by the recipi
 function onIssuanceEvent(data) {
   if (data instanceof Error) displayError(data)
   else if (data.event.requestStatus === 'request_retrieved') app.innerHTML = `Enter verification code ${pin} to complete issuance...`
-  else // TODO
+  else // TODO: handle issuance_complete
 }
 ```
 
 ### 5. Receive issuance notification
 
-On successful issuance, the `event.requestStatus` will be `issuance_successful` and `event.issuance` will contain data (see the `Issuance` type for details).
+Upon completion of issuance, the `event.requestStatus` will be `issuance_successful` and `event.issuance` will contain data (see the `Issuance` type for details).
 
 ```js
 function onIssuanceEvent(data) {
@@ -97,9 +97,7 @@ function onIssuanceEvent(data) {
 
 ## Complete example
 
-The following HTML page is a complete working example showing all the steps
-
-```html
+```html title="Complete working HTML page example"
 <!DOCTYPE html>
 <html>
   <head>
@@ -188,7 +186,7 @@ The following HTML page is a complete working example showing all the steps
                 acquireIssuanceToken().then((data) => {
                   // contruct a VerifiedOrchestrationClient with the issuance token
                   verifiedOrchestrationClient = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
-                    url: '<ApiUrl path="/">',
+                    url: '<Verified Orchestration API URL>',
                     accessToken: data.token,
                   })
                   // now we can issue credentials

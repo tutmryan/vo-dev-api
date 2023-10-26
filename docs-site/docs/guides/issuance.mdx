@@ -27,17 +27,17 @@ Issuance is a multi-step process:
 ## Create issuance request
 
 :::tip
-To create an issuance request definition and explore the API, use the <AdminUrl path="issuance-builder">issuance builder</AdminUrl> as a starting point.
+To create an issuance request definition and explore the API, use the <AdminUrl path="/issuance-builder">issuance builder</AdminUrl> as a starting point.
 :::
 
-The issuance request specifies:
+The [issuance request input](/docs/reference/inputs/issuance-request-input) specifies:
 
 1. Which credential will be issued
 1. The identity to whom the credential will be issued (recipient / issuee)
 1. Other optional input:
-   1. Values of any claims included in the credential (the claims are defined in the contract)
-   1. A PIN code that the recipient must enter to install the credential (to increase security of issuance)
-   1. Callback info, if the issuer wants to be notified of issuance events via a server-side endpoint)
+   1. Values of any claims defined in the contract
+   1. A PIN code that the recipient must enter to retrieve the credential (best sent via a separate channel)
+   1. Callback info, if issuance event data should also be sent to a server-side endpoint
 
 ```graphql title="CreateIssuanceRequest mutation: will return a response with issuance request or error details"
 mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
@@ -124,7 +124,7 @@ else displayQrCode(response.qrCode)
 
 Your application can subscribe to issuance events to be notified when the issuance is received by the wallet.
 
-```graphql title="IssuanceEvent subscription notifies when issuance is A) received and B) installed"
+```graphql title="IssuanceEvent subscription notifies when issuance is A) received and B) completed successfully"
 subscription IssuanceEvent($requestId: ID!) {
   issuanceEvent(where: { requestId: $requestId }) {
     event {
@@ -151,7 +151,7 @@ subscription IssuanceEvent($requestId: ID!) {
 ```
 
 :::tip
-Issuance received events can be received via the IssuanceEvent subscription and the server-side callback, however you cannot poll for issuance recevied events because they are not stored. See the TODO for further details.
+Issuance received events can be received via the IssuanceEvent subscription and the server-side callback, however you cannot poll for issuance received events because they are not stored.
 :::
 
 ## Relay PIN to recipient
@@ -191,7 +191,7 @@ If an invalid PIN is entered, an error event will be returned via the IssuanceEv
 
 ## Receive issuance notification
 
-Upon successful issuance, the issuing application can receive notification by any combination of:
+Upon successful issuance, the issuing application can receive data by any combination of:
 
 1. Subscription to the issuance event
 1. Polling for issuance data
@@ -211,5 +211,5 @@ Upon successful issuance, the issuing application can receive notification by an
 ```
 
 :::tip
-For complete code samples of different methods of receiving issuance events, see the issuance samples TODO.
+For complete code samples of different methods of receiving issuance events, view the issuance samples for [your development stack](/docs/guides/integration/).
 :::

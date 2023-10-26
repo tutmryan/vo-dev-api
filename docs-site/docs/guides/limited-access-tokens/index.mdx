@@ -1,7 +1,3 @@
----
-sidebar_position: 3
----
-
 import ThemedImage from '@theme/ThemedImage'
 
 # Limited access tokens
@@ -35,20 +31,33 @@ Before you can acquire limited access tokens, a platform administrator must gran
 - **VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations** provides access to acquire limited access tokens for anonymous presentation operations
 - **VerifiableCredential.AcquireLimitedAccessToken.ListContracts** provides access to acquire limited access tokens for listing contracts.
 
-For detailed info on onboarding your secure backend API, refer to the [Onboarding guide](./onboarding-apps.mdx).
+For detailed info on onboarding your secure backend API, refer to the [Onboarding guide](../onboarding-apps.mdx).
 
 ## Acquiring a limited access token
 
-The [acquireLimitedAccessToken](/docs/reference/mutations/acquire-limited-access-token) mutation returns an access token with capabilities defined by the [AcquireLimitedAccessTokenInput](/docs/reference/inputs/acquire-limited-access-token-input):
+The [acquireLimitedAccessToken](/docs/reference/mutations/acquire-limited-access-token) mutation returns an access token with specific capabilities according to the [AcquireLimitedAccessTokenInput](/docs/reference/inputs/acquire-limited-access-token-input):
 
-- **Issuance** tokens require:
-  - a reference to the identity to which access (issuance and related data) will be limited
-  - a list of one or more contracts that can be issued with the token
-- **Presentation** tokens require:
-  - a reference to the identity to which access (presentation and related data) will be limited
-  - a list of the credentials that can be requested
-- **Anonymous presentation** tokens require:
-  - a list of the credentials that can be requested
+### Issuance tokens
+
+Issuance tokens require:
+
+- a reference to the identity to which access (issuance and related data) will be limited
+- a list of one or more contracts that can be issued with the token
+
+### Presentation tokens
+
+Presentation tokens require:
+
+- a reference to the identity to which access (presentation and related data) will be limited
+- a list of the credentials that can be requested
+
+### Anonymous presentation tokens
+
+Anonymous presentation tokens require:
+
+- a list of the credentials that can be requested
+
+### API usage
 
 ```graphql title="acquireLimitedAccessToken returns the access token and expiry"
 mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {
@@ -89,7 +98,7 @@ const variables: AcquireLimitedAccessTokenInput = {
 }
 ```
 
-A sample implementation of the backend API for acquiring limited access tokens from the Verified Orchestration platform using [Node.JS](https://nodejs.org/en/about) is provided in the [Secure backend API guide](./secure-backend-api-for-limited-access-tokens.mdx).
+A sample implementation of the backend API for acquiring limited access tokens from the Verified Orchestration platform using [Node.JS](https://nodejs.org/en/about) is provided in the [Secure backend API guide](../limited-access-tokens/secure-backend-api.mdx).
 
 ## Saving an identity reference
 
