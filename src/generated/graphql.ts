@@ -245,6 +245,8 @@ export type Contract = {
   isPublic: Scalars['Boolean']['output'];
   /** Returns the total number of credential issuances for this contract. */
   issuanceCount: Scalars['Int']['output'];
+  /** Returns the weekly average of credential issuances for this contract. */
+  issuanceWeeklyAverage: Scalars['Int']['output'];
   /** Returns the successful credential issuances for this contract. */
   issuances: Array<Issuance>;
   /** When the contract was last provisioned in the Verified ID service. */
@@ -269,6 +271,12 @@ export type Contract = {
   updatedBy?: Maybe<User>;
   /** The lifespan of the credential expressed in seconds */
   validityIntervalInSeconds: Scalars['PositiveInt']['output'];
+};
+
+
+/** Defines a contract that can be used to issue credentials */
+export type ContractIssuanceWeeklyAverageArgs = {
+  where?: InputMaybe<ContractIssuanceWeeklyAverageWhere>;
 };
 
 
@@ -452,6 +460,14 @@ export type ContractInput = {
   templateId?: InputMaybe<Scalars['ID']['input']>;
   /** The lifespan of the credential expressed in seconds */
   validityIntervalInSeconds: Scalars['PositiveInt']['input'];
+};
+
+/** Criteria for calculating weekly average of contract issuances. */
+export type ContractIssuanceWeeklyAverageWhere = {
+  /** The number of weeks to calculate average for. */
+  numberOfWeeks?: InputMaybe<Scalars['Int']['input']>;
+  /** The end of the issuedAt period to include. */
+  to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 /** Criteria for filtering contract issuances. */
@@ -2476,6 +2492,7 @@ export type ResolversTypes = {
   ContractDisplayModel: ResolverTypeWrapper<ContractDisplayModel>;
   ContractDisplayModelInput: ContractDisplayModelInput;
   ContractInput: ContractInput;
+  ContractIssuanceWeeklyAverageWhere: ContractIssuanceWeeklyAverageWhere;
   ContractIssuanceWhere: ContractIssuanceWhere;
   ContractOrderBy: ContractOrderBy;
   ContractPresentationWhere: ContractPresentationWhere;
@@ -2606,6 +2623,7 @@ export type ResolversParentTypes = {
   ContractDisplayModel: ContractDisplayModel;
   ContractDisplayModelInput: ContractDisplayModelInput;
   ContractInput: ContractInput;
+  ContractIssuanceWeeklyAverageWhere: ContractIssuanceWeeklyAverageWhere;
   ContractIssuanceWhere: ContractIssuanceWhere;
   ContractPresentationWhere: ContractPresentationWhere;
   ContractWhere: ContractWhere;
@@ -2765,6 +2783,7 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   isDeprecated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issuanceCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  issuanceWeeklyAverage?: Resolver<ResolversTypes['Int'], ParentType, ContextType, Partial<ContractIssuanceWeeklyAverageArgs>>;
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<ContractIssuancesArgs>>;
   lastProvisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastProvisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;

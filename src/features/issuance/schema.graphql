@@ -315,6 +315,19 @@ input ContractIssuanceWhere {
   """
   revokedTo: DateTime
 }
+"""
+Criteria for calculating weekly average of contract issuances.
+"""
+input ContractIssuanceWeeklyAverageWhere {
+  """
+  The end of the issuedAt period to include.
+  """
+  to: DateTime
+  """
+  The number of weeks to calculate average for.
+  """
+  numberOfWeeks: Int
+}
 
 """
 Criteria for filtering issuances for an identity.
@@ -479,6 +492,10 @@ extend type Contract {
   Returns the total number of credential issuances for this contract.
   """
   issuanceCount: Int!
+  """
+  Returns the weekly average of credential issuances for this contract.
+  """
+  issuanceWeeklyAverage(where: ContractIssuanceWeeklyAverageWhere): Int!
 }
 
 extend type Identity {

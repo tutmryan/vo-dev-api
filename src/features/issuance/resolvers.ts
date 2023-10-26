@@ -12,6 +12,7 @@ import { CountIssuancesByContractQuery } from './queries/count-issuances-by-cont
 import { CountIssuancesByUserQuery } from './queries/count-issuances-by-user-query'
 import { CountIssuancesQuery } from './queries/count-issuances-query'
 import { FindIssuancesQuery } from './queries/find-issuances-query'
+import { WeeklyAverageIssuancesByContractQuery } from './queries/weekly-average-issuances-by-contract-query'
 
 export const resolvers: Resolvers = {
   Query: {
@@ -34,6 +35,8 @@ export const resolvers: Resolvers = {
     issuances: (contract, { where, offset, limit }, context) =>
       query(context, FindIssuancesQuery, { contractId: contract.id, ...where }, offset, limit),
     issuanceCount: ({ id }, _, { dataLoaders: { issuanceCountByContract } }) => issuanceCountByContract.load(id),
+    issuanceWeeklyAverage: ({ id }, { where }, context) =>
+      query(context, WeeklyAverageIssuancesByContractQuery, { contractId: id, ...where }),
   },
   Identity: {
     issuances: (identity, { where, offset, limit }, context) =>
