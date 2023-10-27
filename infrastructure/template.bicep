@@ -42,7 +42,7 @@ resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
 }
 
 resource eventHubNamespace 'Microsoft.EventHub/namespaces@2022-10-01-preview' = {
-  name: '${resourcePrefix}-${environment}-${appName}-eventhub-ns'
+  name: '${resourcePrefix}-${environment}-${appName}-eventhub-namespace'
   location: location
   sku: {
     name: 'Standard'
@@ -57,7 +57,7 @@ resource eventHubNamespace 'Microsoft.EventHub/namespaces@2022-10-01-preview' = 
 }
 
 resource appTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-preview' = {
-  name: '${resourcePrefix}-${environment}-${appName}-app-traces-eh'
+  name: '${resourcePrefix}-${environment}-${appName}-eh-app-traces'
   parent: eventHubNamespace
   properties: {
     partitionCount: 4
@@ -69,7 +69,7 @@ resource appTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-p
 }
 
 resource appTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExports@2020-08-01' = {
-  name: 'ExportAppTracesToEventHubRule'
+  name: '${resourcePrefix}-${environment}-${appName}-ehr-export-app-traces'
   parent: logAnalytics
   properties: {
     destination: {
@@ -83,7 +83,7 @@ resource appTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExpor
 }
 
 resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-preview' = {
-  name: '${resourcePrefix}-${environment}-${appName}-audit-traces-eh'
+  name: '${resourcePrefix}-${environment}-${appName}-eh-audit-traces'
   parent: eventHubNamespace
   properties: {
     partitionCount: 2
@@ -95,7 +95,7 @@ resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01
 }
 
 resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-preview' = {
-  name: '${resourcePrefix}-${environment}-${appName}-extract-audit-traces-job'
+  name: '${resourcePrefix}-${environment}-${appName}-stream-job-extract-audit-traces'
   location: location
   sku: {
     name: 'StandardV2'
@@ -108,17 +108,17 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
     jobType: 'Cloud'
     inputs: [
       {
-        name: 'app-traces-eh'
+        name: 'eh-app-traces'
         properties: {
           type: 'Stream'
           datasource: {
             type: 'Microsoft.EventHub/EventHub'
             properties: {
               serviceBusNamespace: eventHubNamespace.name
-              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-audit-traces-job_a_policy'
+              sharedAccessPolicyName: '${resourcePrefix}-${environment}-steam-job-extract-audit-traces-job-policy'
               sharedAccessPolicyKey: eventHubNamespace.listKeys().key1
               eventHubName: appTracesEventHub.name
-              consumerGroupName: '${resourcePrefix}-${environment}-extract-audit-traces-job__consumer_group'
+              consumerGroupName: '${resourcePrefix}-${environment}-stream-job-extract-audit-traces-job-consumer-group'
             }
           }
         }
@@ -126,13 +126,13 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
     ]
     outputs: [
       {
-        name: 'audit-traces-eh'
+        name: 'eh-audit-traces'
         properties: {
           datasource: {
             type: 'Microsoft.EventHub/EventHub'
             properties: {
               serviceBusNamespace: eventHubNamespace.name
-              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-audit-traces-job_a_policy'
+              sharedAccessPolicyName: '${resourcePrefix}-${environment}-steam-job-extract-audit-traces-job-policy'
               sharedAccessPolicyKey: eventHubNamespace.listKeys().key1
               eventHubName: auditTracesEventHub.name
               authenticationMode: 'ConnectionString'
@@ -147,11 +147,11 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
         query: '''
         WITH logs AS (
           SELECT data.arrayvalue as log
-          FROM [app-traces-eh]
+          FROM [eh-app-traces]
           CROSS APPLY GetArrayElements(records) AS data
         )
         SELECT *
-        INTO [audit-traces-eh]
+        INTO [eh-audit-traces]
         FROM logs
         WHERE log.Properties.logLevel = 'audit'
         '''
