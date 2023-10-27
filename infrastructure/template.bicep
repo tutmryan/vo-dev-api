@@ -73,7 +73,10 @@ resource appTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExpor
   parent: logAnalytics
   properties: {
     destination: {
-      resourceId: appTracesEventHub.id
+      resourceId: eventHubNamespace.id
+      metaData: {
+        eventHubName: appTracesEventHub.name
+      }
     }
     enable: true
     tableNames: [
