@@ -105,10 +105,10 @@ resource eventHubNamespaceAuthRule 'Microsoft.EventHub/namespaces/authorizationR
 resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-preview' = {
   name: '${resourcePrefix}-${environment}-${appName}-stream-job-extract-audit-traces'
   location: location
-  sku: {
-    name: 'Standard'
-  }
   properties: {
+    sku: {
+      name: 'StandardV2'
+    }
     eventsLateArrivalMaxDelayInSeconds: 5
     eventsOutOfOrderMaxDelayInSeconds: 5
     eventsOutOfOrderPolicy: 'Adjust'
