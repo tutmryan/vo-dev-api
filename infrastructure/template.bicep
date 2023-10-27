@@ -106,7 +106,7 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
   name: '${resourcePrefix}-${environment}-${appName}-stream-job-extract-audit-traces'
   location: location
   sku: {
-    name: 'StandardV2'
+    name: 'Standard'
   }
   properties: {
     eventsLateArrivalMaxDelayInSeconds: 5
