@@ -119,6 +119,9 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
         name: 'eh-app-traces'
         properties: {
           type: 'Stream'
+          serialization: {
+            type: 'Json'
+          }
           datasource: {
             type: 'Microsoft.EventHub/EventHub'
             properties: {
