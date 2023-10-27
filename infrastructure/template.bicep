@@ -123,7 +123,6 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
             type: 'Json'
             properties: {
               encoding: 'UTF8'
-              format: 'string'
             }
           }
           datasource: {
@@ -143,6 +142,12 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
       {
         name: 'eh-audit-traces'
         properties: {
+          serialization: {
+            type: 'Json'
+            properties: {
+              encoding: 'UTF8'
+            }
+          }
           datasource: {
             type: 'Microsoft.EventHub/EventHub'
             properties: {
