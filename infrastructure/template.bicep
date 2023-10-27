@@ -121,6 +121,10 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
           type: 'Stream'
           serialization: {
             type: 'Json'
+            properties: {
+              encoding: 'UTF8'
+              format: 'string'
+            }
           }
           datasource: {
             type: 'Microsoft.EventHub/EventHub'
