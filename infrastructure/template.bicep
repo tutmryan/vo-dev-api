@@ -115,10 +115,10 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
             type: 'Microsoft.EventHub/EventHub'
             properties: {
               serviceBusNamespace: eventHubNamespace.name
-              sharedAccessPolicyName: '${resourcePrefix}-${environment}-steam-job-extract-audit-traces-job-policy'
+              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-audit-traces-job-policy'
               sharedAccessPolicyKey: eventHubNamespace.listKeys().key1
               eventHubName: appTracesEventHub.name
-              consumerGroupName: '${resourcePrefix}-${environment}-stream-job-extract-audit-traces-job-consumer-group'
+              consumerGroupName: '${resourcePrefix}-${environment}-extract-audit-traces-job-consumer-group'
             }
           }
         }
@@ -132,7 +132,7 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
             type: 'Microsoft.EventHub/EventHub'
             properties: {
               serviceBusNamespace: eventHubNamespace.name
-              sharedAccessPolicyName: '${resourcePrefix}-${environment}-steam-job-extract-audit-traces-job-policy'
+              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-audit-traces-job-policy'
               sharedAccessPolicyKey: eventHubNamespace.listKeys().key1
               eventHubName: auditTracesEventHub.name
               authenticationMode: 'ConnectionString'
