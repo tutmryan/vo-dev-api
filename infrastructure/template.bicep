@@ -20,6 +20,9 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
       name: 'PerGB2018'
     }
     retentionInDays: 180
+    features: {
+      enableDataExport: true
+    }
   }
 }
 
@@ -35,6 +38,147 @@ resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
     RetentionInDays: 180
     SamplingPercentage: 100
     WorkspaceResourceId: logAnalytics.id
+  }
+}
+
+resource eventHubNamespace 'Microsoft.EventHub/namespaces@2022-10-01-preview' = {
+  name: '${resourcePrefix}-${environment}-${appName}-eventhub-namespace'
+  location: location
+  sku: {
+    name: 'Standard'
+    tier: 'Standard'
+    capacity: 1
+  }
+  properties: {
+    isAutoInflateEnabled: true
+    maximumThroughputUnits: 20
+    minimumTlsVersion: '1.2'
+  }
+}
+
+resource appTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-preview' = {
+  name: '${resourcePrefix}-${environment}-${appName}-eh-app-traces'
+  parent: eventHubNamespace
+  properties: {
+    partitionCount: 4
+    retentionDescription: {
+      cleanupPolicy: 'Delete'
+      retentionTimeInHours: 168
+    }
+  }
+}
+
+resource appTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExports@2020-08-01' = {
+  name: '${resourcePrefix}-${environment}-${appName}-ehr-export-app-traces'
+  parent: logAnalytics
+  properties: {
+    destination: {
+      resourceId: appTracesEventHub.id
+    }
+    enable: true
+    tableNames: [
+      'AppTraces'
+    ]
+  }
+}
+
+resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-preview' = {
+  name: '${resourcePrefix}-${environment}-${appName}-eh-audit-traces'
+  parent: eventHubNamespace
+  properties: {
+    partitionCount: 2
+    retentionDescription: {
+      cleanupPolicy: 'Delete'
+      retentionTimeInHours: 168
+    }
+  }
+}
+
+resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-preview' = {
+  name: '${resourcePrefix}-${environment}-${appName}-stream-job-extract-audit-traces'
+  location: location
+  sku: {
+    name: 'StandardV2'
+  }
+  properties: {
+    eventsLateArrivalMaxDelayInSeconds: 5
+    eventsOutOfOrderMaxDelayInSeconds: 5
+    eventsOutOfOrderPolicy: 'Adjust'
+    outputErrorPolicy: 'Stop'
+    jobType: 'Cloud'
+    inputs: [
+      {
+        name: 'eh-app-traces'
+        properties: {
+          type: 'Stream'
+          datasource: {
+            type: 'Microsoft.EventHub/EventHub'
+            properties: {
+              serviceBusNamespace: eventHubNamespace.name
+              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-audit-traces-job-policy'
+              sharedAccessPolicyKey: eventHubNamespace.listKeys().key1
+              eventHubName: appTracesEventHub.name
+              consumerGroupName: '${resourcePrefix}-${environment}-extract-audit-traces-job-consumer-group'
+            }
+          }
+        }
+      }
+    ]
+    outputs: [
+      {
+        name: 'eh-audit-traces'
+        properties: {
+          datasource: {
+            type: 'Microsoft.EventHub/EventHub'
+            properties: {
+              serviceBusNamespace: eventHubNamespace.name
+              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-audit-traces-job-policy'
+              sharedAccessPolicyKey: eventHubNamespace.listKeys().key1
+              eventHubName: auditTracesEventHub.name
+              authenticationMode: 'ConnectionString'
+            }
+          }
+        }
+      }
+    ]
+    transformation: {
+      name: 'unwrap-traces-filter-audits'
+      properties: {
+        query: '''
+        WITH logs AS (
+          SELECT data.arrayvalue as log
+          FROM [eh-app-traces]
+          CROSS APPLY GetArrayElements(records) AS data
+        )
+        SELECT *
+        INTO [eh-audit-traces]
+        FROM logs
+        WHERE log.Properties.logLevel = 'audit'
+        '''
+      }
+    }
+  }
+}
+
+resource extractAuditTracesJobDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diagnostics'
+  scope: extractAuditTracesJob
+  properties: {
+    workspaceId: logAnalytics.id
+    metrics: [
+      {
+        category: 'AllMetrics'
+        enabled: true
+        timeGrain: null
+      }
+    ]
+    logs: [
+      {
+        category: null
+        categoryGroup: 'allLogs'
+        enabled: true
+      }
+    ]
   }
 }
 
