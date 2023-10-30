@@ -68,6 +68,21 @@ resource appTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-p
   }
 }
 
+resource appTracesEventHubRule 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-10-01-preview' = {
+  name: '${resourcePrefix}-${environment}-extract-app-traces-job-policy'
+  parent: appTracesEventHub
+  properties: {
+    rights: [
+      'Listen'
+    ]
+  }
+}
+
+resource appTracesEventHubConsumerGroups 'Microsoft.EventHub/namespaces/eventhubs/consumergroups@2022-10-01-preview' = {
+  name: '${resourcePrefix}-${environment}-extract-audit-traces-job-consumer-group'
+  parent: appTracesEventHub
+}
+
 resource appTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExports@2020-08-01' = {
   name: '${resourcePrefix}-${environment}-${appName}-ehr-export-app-traces'
   parent: logAnalytics
@@ -97,9 +112,15 @@ resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01
   }
 }
 
-resource eventHubNamespaceAuthRule 'Microsoft.EventHub/namespaces/authorizationRules@2021-11-01' existing = {
-  name: 'RootManageSharedAccessKey'
-  parent: eventHubNamespace
+resource auditTracesEventHubRule 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-10-01-preview' = {
+  name: '${resourcePrefix}-${environment}-extract-audit-traces-job-policy'
+  parent: auditTracesEventHub
+  properties: {
+    rights: [
+      'Send'
+      'Listen'
+    ]
+  }
 }
 
 resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-preview' = {
@@ -129,8 +150,8 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
             type: 'Microsoft.EventHub/EventHub'
             properties: {
               serviceBusNamespace: eventHubNamespace.name
-              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-audit-traces-job-policy'
-              sharedAccessPolicyKey: eventHubNamespaceAuthRule.listKeys().primaryKey
+              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-app-traces-job-policy'
+              sharedAccessPolicyKey: appTracesEventHubRule.listKeys().primaryKey
               eventHubName: appTracesEventHub.name
               consumerGroupName: '${resourcePrefix}-${environment}-extract-audit-traces-job-consumer-group'
             }
@@ -153,7 +174,7 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
             properties: {
               serviceBusNamespace: eventHubNamespace.name
               sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-audit-traces-job-policy'
-              sharedAccessPolicyKey: eventHubNamespaceAuthRule.listKeys().primaryKey
+              sharedAccessPolicyKey: auditTracesEventHubRule.listKeys().primaryKey
               eventHubName: auditTracesEventHub.name
               authenticationMode: 'ConnectionString'
             }
