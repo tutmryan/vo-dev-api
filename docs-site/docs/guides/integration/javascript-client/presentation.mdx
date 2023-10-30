@@ -1,12 +1,14 @@
-import { ApiUrl } from '@site/src/components/api-url'
-
 # Presentation
 
 This page shows you how to use the JavaScript client to present credentials. For detailed info on credential presentation, refer to the [Presentation guide](/docs/guides/presentation).
 
 ## Authentication
 
-Applications with an authenticated user should include an identity reference when acquiring presentation tokens. This ensures presentations of platform credentials cannot be made using credentials from another identity and also supports presentation of partner credentials. Anonymous presentations are also supported, for applications where there is no authenticated user. Refer to the [Authorization guide](../authn.mdx) for further info. The [complete example below](#complete-example) uses Microsoft authorization, however there is no restriction on where identity references are sourced.
+Applications with an authenticated user should include an identity reference when acquiring presentation tokens. This ensures presentations of platform credentials cannot be made using credentials from another identity and also supports presentation of partner credentials.
+
+Anonymous presentations are also supported, for applications where there is no authenticated user, those applications should use [anonymous presentation tokens](/docs/guides/limited-access-tokens/#anonymous-presentation-tokens).
+
+Refer to the [Authorization guide](../authn.mdx) for further info. The [complete example below](#complete-example) uses Microsoft authorization, however there is no restriction on where identity references are sourced.
 
 ## Presentation steps
 

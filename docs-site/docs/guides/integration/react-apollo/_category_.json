@@ -1,6 +1,6 @@
 {
-  "label": "JavaScript client",
-  "position": 2,
+  "label": "React + Apollo Client",
+  "position": 3,
   "link": {
     "type": "doc",
     "id": "index"

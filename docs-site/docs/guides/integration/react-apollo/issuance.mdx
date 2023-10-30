@@ -1,0 +1,136 @@
+# Issuance
+
+This page shows you how to issue credentials with React and Apollo Client. For detailed info on credential issuance, refer to the [Issuance guide](/docs/guides/issuance).
+
+## Authentication
+
+All applications that issue credentials must authenticate users and provide an identity reference to obtain an issuance access token. Refer to the [Authorization guide](../authn.mdx) for further info. The React examples below run within an authenticated application.
+
+## Issuance steps
+
+Issuance is a multi-step process described in the [Issuance guide](/docs/guides/issuance).
+
+### 1. Acquire an access token
+
+Obtain a limited access token for issuances from your [secure backend API](/docs/guides/limited-access-tokens/secure-backend-api). Refer to the [Limited access tokens guide](/docs/guides/limited-access-tokens) for more info.
+
+```jsx title="The useVerifiedOrchestrationAccessToken hook calls your fetcher function and makes the token available to the Apollo Client"
+const { loading, error, accessToken } = useVerifiedOrchestrationSessionToken(getLimitedAccessToken, 'issuance')
+
+return error ? (
+  <Alert variant="error">{error}</Alert>
+) : (
+  <Button loading={loading} onClick={() => createIssuanceRequest()}>
+    Issue
+  </Button>
+)
+```
+
+### 2. Create an issuance request
+
+Create an issuance request specifying the contract of the credential to be issued and optionally (not shown in this example):
+
+- the values of any claims defined in the contract
+- a PIN code that the recipient must enter to retrieve the credential (best sent via a separate channel)
+- callback info, if issuance event data should also be sent to a server-side endpoint
+
+The [CreateIssuanceRequest](/docs/reference/mutations/create-issuance-request) mutation returns the issuance request details, including a URL to open in the browser or a QR code to scan.
+
+```tsx title="Create an issuance request"
+const createIssuanceMutation = graphql(`
+  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
+    createIssuanceRequest(request: $request) {
+      ... on IssuanceResponse {
+        url
+        qrCode
+        requestId
+      }
+      ... on RequestErrorResponse {
+        error {
+          code
+          message
+        }
+      }
+    }
+  }
+`)
+
+const [createIssuanceRequest, { data: createIssuanceData, reset: resetIssuanceData, loading: createIssuanceLoading }] =
+  useMutation(createIssuanceMutation {
+    variables: {
+      request: {
+        contractId,
+        includeQRCode: true,
+      },
+    },
+  })
+```
+
+### 3. Display QR code or open link
+
+If the user is on a mobile device, open the issuance link in the browser. Otherwise, display the QR code for the user to scan.
+
+```jsx title="Example: on completion of the initial issuance request, display the QR code or open the link"
+const [createIssuanceRequest, { data: createIssuanceData, reset: resetIssuanceData, loading: createIssuanceLoading }] = useMutation(
+  createIssuanceMutation,
+  {
+    onCompleted: (data) => {
+      if (!data) return
+      if ('error' in data.createIssuanceRequest) {
+        setIssuanceError(data.createIssuanceRequest)
+        return
+      }
+      const isMobile = /Android|iPhone/i.test(navigator.userAgent)
+      if (isMobile) window.location.href = data.createIssuanceRequest.url
+      else setQrCodeOpen(true)
+    },
+    onError: setIssuanceError,
+  },
+)
+
+return (
+  <>
+    <Button loading={createIssuanceLoading} onClick={() => createIssuanceRequest()}>
+      Issue
+    </Button>
+    <QrCodeModal open={qrCodeOpen} onClose={resetIssuanceData} qrCode={createIssuanceData.createIssuanceResponse.qrCode} />
+  </>
+)
+```
+
+### 4. Handle issuance events
+
+The [IssuanceEvent](/docs/reference/subscriptions/issuance-event) subscription returns event data during the issuance process. The `requestStatus`` field can be used to determine the current state of the issuance:
+
+- `request_retrieved`: the recipient has opened the issuance link
+- `issuance_complete`: the recipient has completed the issuance process, the credential has been issued
+- `issuance_error`: an error occurred during issuance, normally caused by incorrect PIN entry
+
+```jsx title="Example: on issuance events, send the PIN, display completion or error message"
+const issuanceEventSubscription = graphql(`
+  subscription IssuanceEvent($where: IssuanceEventWhere) {
+    issuanceEvent(where: $where) {
+      event {
+        requestStatus
+        error {
+          code
+          message
+        }
+      }
+    }
+  }
+`)
+
+useSubscription(issuanceEventSubscription, {
+  variables: { requestId: createIssuanceData.createIssuanceResponse?.requestId ?? '' },
+  skip: !createIssuanceResponse,
+  onError: setIssuanceError,
+  onData: ({ data: { data } }) => {
+    if (!data?.issuanceEvent) return
+    const { requestStatus, error } = data.issuanceEvent.event
+    if (requestStatus === IssuanceRequestStatus.RequestRetrieved) sendPinToRecipient()
+    else if (requestStatus === IssuanceRequestStatus.IssuanceSuccessful) showIssuanceSuccessful()
+    else if (requestStatus === IssuanceRequestStatus.IssuanceError) setIssuanceError(error)
+  },
+})
+```

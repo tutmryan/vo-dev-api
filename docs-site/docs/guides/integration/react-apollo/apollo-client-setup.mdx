@@ -1,0 +1,156 @@
+# Apollo Client setup
+
+Prior to writing any React code using GraphQL via Apollo Client, you will need to set up Apollo Client to work with the Verified Orchestration API.
+
+This section assumes you will be using limited access tokens from your [secure backend API](../../limited-access-tokens/secure-backend-api.mdx) to authenticate with the Verified Orchestration API.
+
+:::info
+The code samples in this guide use the `getVerifiedOrchestrationToken` function and `useVerifiedOrchestrationSessionToken` hook from the [JavaScript client](https://www.npmjs.com/package/@verified-orchestration/client-js) package for convenience.
+
+You may prefer to swap in your own code to make limited access tokens available to the Apollo network links.
+:::
+
+## Prepare a function to obtain limited access tokens
+
+This function will be called in React components to obtain limited access tokens from your [secure backend API](../../limited-access-tokens/secure-backend-api.mdx).
+
+```ts title="Example function to obtain limited access tokens for issuance or presentation"
+export async function getLimitedAccessToken(type: 'issuance' | 'presentation') {
+  const accessToken = await getApiAccessToken()
+  const url = `${import.meta.env.VITE_API_URL}/limited-access-tokens/${type}`
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  return (await response.json()) as AccessTokenResponse
+}
+```
+
+## Configure Apollo Client to use limited access tokens
+
+```console title="Install @verified-orchestration/client-js to provide getVerifiedOrchestrationToken and useVerifiedOrchestrationSessionToken"
+npm i @verified-orchestration/client-js
+
+```
+
+```ts title="Example: set up Apollo Client to use limited access tokens"
+import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
+import { getVerifiedOrchestrationToken } from '@verified-orchestration/client-js'
+
+const verifiedOrchestrationAuthLink = setContext(async (_, { headers }) => {
+  const voAccessToken = await getVerifiedOrchestrationToken()
+  return {
+    headers: {
+      ...headers,
+      Authorization: `Bearer ${voAccessToken.token}`,
+    },
+  }
+})
+
+const verifiedOrchestrationApiLink = verifiedOrchestrationAuthLink.concat(
+  createHttpLink({
+    uri: import.meta.env.VITE_VO_API_URL,
+  }),
+)
+
+export const client = new ApolloClient({
+  link: verifiedOrchestrationApiLink,
+  cache: new InMemoryCache(),
+})
+```
+
+## Configure Apollo Client to work with subscriptions
+
+Assuming you want to subscribe to issuance and presentations events, you will need to configure Apollo Client to work with subscriptions.
+
+```console title="Install dependencies"
+npm i graphql-ws ws
+```
+
+The following code adds a `GraphQLWsLink` and splits traffic between it and the `HttpLink` based on whether the operation is a subscription or not.
+
+```ts title="Example: set up Apollo Client to work with subscriptions"
+const websocketsLink = new GraphQLWsLink(
+  createClient({
+    url: import.meta.env.VITE_VO_WS_URL ?? import.meta.env.VITE_VO_API_URL.replace(/^http/, 'ws'),
+    connectionParams: async () => {
+      const voAccessToken = getVerifiedOrchestrationToken()
+      if (!voAccessToken) throw new Error('Verified Orchestration access token is not set')
+      return { Authorization: `Bearer ${voAccessToken.token}` }
+    },
+  }),
+)
+
+const verifiedOrchestrationSplitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query)
+    return definition.kind === 'OperationDefinition' && definition.operation === 'subscription'
+  },
+  websocketsLink,
+  verifiedOrchestrationApiLink,
+)
+
+export const client = new ApolloClient({
+  link: verifiedOrchestrationSplitLink,
+  cache: new InMemoryCache(),
+})
+```
+
+## Complete example
+
+Here's the complete example, based on the steps above.
+
+```ts title="apollo.ts"
+import { ApolloClient, createHttpLink, InMemoryCache, split } from '@apollo/client'
+import { setContext } from '@apollo/client/link/context'
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+import { getMainDefinition } from '@apollo/client/utilities'
+import { getVerifiedOrchestrationToken } from '@verified-orchestration/client-js'
+import { createClient } from 'graphql-ws'
+
+const verifiedOrchestrationAuthLink = setContext(async (_, { headers }) => {
+  const voAccessToken = getVerifiedOrchestrationToken()
+  if (!voAccessToken) throw new Error('Verified Orchestration access token is not set')
+  return {
+    headers: {
+      ...headers,
+      Authorization: `Bearer ${voAccessToken.token}`,
+    },
+  }
+})
+
+const verifiedOrchestrationApiLink = verifiedOrchestrationAuthLink.concat(
+  createHttpLink({
+    uri: import.meta.env.VITE_VO_API_URL,
+  }),
+)
+
+const websocketsLink = new GraphQLWsLink(
+  createClient({
+    url: import.meta.env.VITE_VO_WS_URL ?? import.meta.env.VITE_VO_API_URL.replace(/^http/, 'ws'),
+    connectionParams: async () => {
+      const voAccessToken = getVerifiedOrchestrationToken()
+      if (!voAccessToken) throw new Error('Verified Orchestration access token is not set')
+      return { Authorization: `Bearer ${voAccessToken.token}` }
+    },
+  }),
+)
+
+const verifiedOrchestrationSplitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query)
+    return definition.kind === 'OperationDefinition' && definition.operation === 'subscription'
+  },
+  websocketsLink,
+  verifiedOrchestrationApiLink,
+)
+
+export const client = new ApolloClient({
+  link: verifiedOrchestrationSplitLink,
+  cache: new InMemoryCache(),
+})
+```
+
+## Next steps
+
+Proceed to the [Issuance](./issuance.mdx) or [Presentation](./presentation.mdx) samples.

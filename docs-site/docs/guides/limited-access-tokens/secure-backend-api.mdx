@@ -26,7 +26,7 @@ The following outlines the steps the secure backend API has to perform to get a 
 
 - [Get access token to call Verification Orchestration platform using the client secret](#get-access-token-to-call-verification-orchestration-platform).
 - [Save identity information unless limited access token is requested for anonymous presentations](#save-identity-information).
-- [Invoke limited access token GraphQL mutation with appropriate inputs](#invoke-limited-access-token-graphql-mutation).
+- [Get limited access token from the Verified Orchestration platform](#invoke-limited-access-token-graphql-mutation).
 - [Pass on the limited access token received from Verification Platform to the client application](#sample-secure-backend-api-using-express-web-framework).
 
 The following code snippets demonstrating the above steps are taken from [a sample secure backend API](#sample-secure-backend-api-using-express-web-framework) implemented using [Node.JS](https://nodejs.org/en/about), [Express](https://www.npmjs.com/package/express), and [@azure/msal-node](https://www.npmjs.com/package/@azure/msal-node).
@@ -121,9 +121,9 @@ const saveIdentity = async (user: JwtPayload | undefined) => {
 }
 ```
 
-### Invoke limited access token GraphQL mutation
+### Get limited access token from the Verified Orchestration platform
 
-```ts title="Invoke limited access token GraphQL mutation with appropriate inputs."
+```ts title="Invoke the AcquireLimitedAccessToken mutation with appropriate inputs."
 type AcquireLimitedAccessTokenInput = {
   allowAnonymousPresentation?: boolean
   identityId?: string

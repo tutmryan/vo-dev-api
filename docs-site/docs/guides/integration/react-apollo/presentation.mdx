@@ -1,0 +1,214 @@
+# Presentation
+
+This page shows you how to present credentials with React and Apollo Client. For detailed info on credential presentation, refer to the [Presentation guide](/docs/guides/presentation).
+
+## Authentication
+
+Applications with an authenticated user should include an identity reference when acquiring presentation tokens. This ensures presentations of platform credentials cannot be made using credentials from another identity and also supports presentation of partner credentials.
+
+Anonymous presentations are also supported, for applications where there is no authenticated user, those applications should use [anonymous presentation tokens](/docs/guides/limited-access-tokens/#anonymous-presentation-tokens).
+
+Refer to the [Authorization guide](../authn.mdx) for further info. The [complete example below](#complete-example) uses Microsoft authorization, however there is no restriction on where identity references are sourced.
+
+## Presentation steps
+
+Presentation is a multi-step process described in the [Presentation guide](/docs/guides/presentation).
+
+### 1. Acquire an access token
+
+Obtain a limited access token for presentations from your [secure backend API](/docs/guides/limited-access-tokens/secure-backend-api). Refer to the [Limited access tokens guide](/docs/guides/limited-access-tokens) for more info.
+
+```jsx title="The useVerifiedOrchestrationAccessToken hook calls your fetcher function and makes the token available to the Apollo Client"
+const { loading, error, accessToken } = useVerifiedOrchestrationSessionToken(getLimitedAccessToken, 'presentation')
+
+return error ? (
+  <Alert variant="error">{error}</Alert>
+) : (
+  <Button loading={loading} onClick={() => createPresentationRequest()}>
+    Present
+  </Button>
+)
+```
+
+### 2. Create a presentation request
+
+Create a presentation request specifying the requested credentials and optionally:
+
+- whether revoked credentials can be presented
+- callback info, if presentation event data should also be sent to a server-side endpoint
+
+The [CreatePresentationRequest](/docs/reference/mutations/create-presentation-request) mutation returns the presentation request details, including a URL to open in the browser or a QR code to scan.
+
+```tsx title="Create a presentation request"
+const presentationRequest = graphql(`
+  mutation CreatePresentationRequest($request: PresentationRequestInput!) {
+    createPresentationRequest(request: $request) {
+      ... on PresentationResponse {
+        requestId
+        url
+        qrCode
+        expiry
+      }
+      ... on RequestErrorResponse {
+        error {
+          code
+          message
+          innererror {
+            code
+            message
+            target
+          }
+        }
+      }
+    }
+  }
+`)
+
+const credentialTypes = ['VerifiedContractor', 'TrueIdentity']
+const allowRevokedConfiguration = {
+  configuration: {
+    validation: {
+      allowRevoked: true,
+    },
+  },
+}
+const [createPresentationRequest, { data, loading, reset }] = useMutation(presentationRequest, {
+  variables: {
+    request: {
+      includeQRCode: true,
+      requestedCredentials: credentialTypes.map((credentialType) => ({ type: credentialType, ...allowRevokedConfiguration })),
+      registration: { clientName: 'Example client', purpose: 'Present credentials for presentation example' },
+    },
+  },
+})
+```
+
+### 3. Display QR code or open link
+
+If the user is on a mobile device, open the presentation link in the browser. Otherwise, display the QR code for the user to scan.
+
+```jsx title="Example: on completion of the initial presentation request, display the QR code or open the link"
+const [createPresentationRequest, { data, loading, reset }] = useMutation(presentationRequest, {
+  variables: {
+    request: {
+      includeQRCode: true,
+      requestedCredentials: credentialTypes.map((credentialType) => ({ type: credentialType, ...allowRevokedConfiguration })),
+      registration: { clientName: 'Example client', purpose: 'Present credentials for presentation example' },
+    },
+  },
+  onCompleted: (data) => {
+    if (!data) return
+    if ('error' in data.createPresentationRequest) {
+      setError(data.createPresentationRequest)
+      return
+    }
+    const isMobile = /Android|iPhone/i.test(navigator.userAgent)
+    if (isMobile) window.location.href = data.createPresentationRequest.url
+    else setQrCodeOpen(true)
+  },
+  onError: setError,
+})
+
+return (
+  <>
+    <Button loading={loading} onClick={() => createPresentationRequest()}>
+      Issue
+    </Button>
+    <QrCodeModal open={qrCodeOpen} onClose={reset} qrCode={data.createIssuanceResponse.qrCode} />
+  </>
+)
+```
+
+### 4. Handle presentation events
+
+The [PresentationEvent](/docs/reference/subscriptions/presentation-event) subscription returns event data during the presentation process. The `requestStatus` field can be used to determine the current state of the presentation:
+
+- `request_retrieved`: the credential holder has opened the presentation link
+- `presentation_verified`: the credential holder has presented the requested credentials
+
+```jsx title="Example: handle presentation events"
+const presentationEventSubscription = graphql(`
+  subscription PresentationEvent($requestId: ID!) {
+    presentationEvent(where: { requestId: $requestId }) {
+      event {
+        requestStatus
+      }
+      presentation {
+        id
+        presentedAt
+        identity {
+          id
+          identifier
+          issuer
+          name
+        }
+        presentedCredentials {
+          issuer
+          type
+          claims
+          credentialState
+          domainValidation
+        }
+        issuances {
+          id
+          status
+          issuedAt
+          expiresAt
+          revokedAt
+          contract {
+            id
+            name
+            description
+            credentialTypes
+            display {
+              card {
+                title
+                issuedBy
+                backgroundColor
+                textColor
+                description
+                logo {
+                  uri
+                  description
+                }
+              }
+            }
+          }
+        }
+        partners {
+          id
+          did
+          name
+          credentialTypes
+          linkedDomainUrls
+        }
+      }
+    }
+  }
+`)
+
+useSubscription(presentationEventSubscription, {
+  variables: { requestId: data.createPresentationResponse?.requestId ?? '' },
+  skip: !data.createPresentationResponse,
+  onError: setError,
+  onData: ({ data: { data } }) => {
+    if (!data?.presentationEvent) return
+    const { requestStatus } = data.presentationEvent.event
+    if (requestStatus === PresentationRequestStatus.RequestRetrieved) handlePresentationRetrieved()
+    else if (requestStatus === PresentationRequestStatus.PresentationVerified) handlePresentation((data.presentationEvent.presentation)
+  },
+})
+
+// example of consuming presentation data
+// map presented credentials to the corresponding issuance or partner by credential type
+const handlePresentation = (presentation: Presentation) => {
+  const { presentedCredentials, identity, partners } = presentation
+  const credentialsWithIssuanceOrPartner = presentedCredentials.map((presentedCredential) => ({
+    presentedCredential,
+    issuance: presentation.issuances.find((issuance) => issuance.contract.credentialTypes.includes(presentedCredential.type[1])),
+    partner: partners.find((partner) => partner.credentialTypes.includes(presentedCredential.type[1])),
+  }))
+  reset()
+  setPresentationData({ identity, credentialsWithIssuanceOrPartner })
+}
+```

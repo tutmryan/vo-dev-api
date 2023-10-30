@@ -1366,7 +1366,7 @@ export type Presentation = {
   requestedCredentials: Array<RequestedCredential>;
 };
 
-/** The callback endpoint is called when a user scans the QR code, uses the deep link the authenticator app, or finishes the issuance process. */
+/** The callback endpoint is called when a user scans the QR code, uses the deep link the authenticator app, or finishes the presentation process. */
 export type PresentationCallbackEvent = {
   __typename?: 'PresentationCallbackEvent';
   /**
@@ -1400,7 +1400,7 @@ export type PresentationEvent = {
   time: Scalars['DateTime']['output'];
 };
 
-/** Data representing an presentation event (see PresentationRequestStatus, could be received, successful, failed). */
+/** Data representing an presentation event. */
 export type PresentationEventData = {
   __typename?: 'PresentationEventData';
   /** The callback event data */

@@ -190,7 +190,7 @@ type PresentedCredential {
 }
 
 """
-The callback endpoint is called when a user scans the QR code, uses the deep link the authenticator app, or finishes the issuance process.
+The callback endpoint is called when a user scans the QR code, uses the deep link the authenticator app, or finishes the presentation process.
 """
 type PresentationCallbackEvent {
   """
@@ -663,7 +663,7 @@ input PresentationEventWhere {
 }
 
 """
-Data representing an presentation event (see PresentationRequestStatus, could be received, successful, failed).
+Data representing an presentation event.
 """
 type PresentationEventData {
   """
