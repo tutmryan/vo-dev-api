@@ -161,7 +161,7 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
         }
       }
     ]
-    outputStartMode: 'LastOutputEventTime'
+    outputStartMode: 'JobStartTime'
     transformation: {
       name: 'unwrap-traces-filter-audits'
       properties: {
