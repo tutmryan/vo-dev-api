@@ -53,7 +53,6 @@ resource eventHubNamespace 'Microsoft.EventHub/namespaces@2022-10-01-preview' = 
     isAutoInflateEnabled: true
     maximumThroughputUnits: 20
     minimumTlsVersion: '1.2'
-    zoneRedundant: true
   }
 }
 
