@@ -1,1 +1,264 @@
-# Audit data
+---
+sidebar_position: 7
+---
+
+# Audit
+
+Verified Orchestration plaform creates audit entries for the following event types;
+
+- invocations of GraphQL queries and mutations<br/>
+  [sample audit entry for GraphQL query](#sample-audit-entry-for-graphql-query), [sample audit entry for GraphQL mutation](#sample-audit-entry-for-graphql-mutation)
+
+- GraphQL subscriptions<br/>
+  [sample audit entry for GraphQL subscription](#sample-audit-entry-for-graphql-subscription)
+- callbacks for issuances and presentations from Microsoft Entra Verified ID<br/>
+  [sample audit entry for callback Microsoft Entra Verified ID](#sample-audit-entry-for-a-callback-from-microsoft-entra-verified-id)
+- revoking credentials of an issuee, a contract, or a user in a background job<br/>
+  [sample audit entry for revocation of credentials in a background job](#sample-audit-entry-for-revocation-of-issuances-in-a-background-job)
+
+The platform audit log is avaiable in [Azure Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about) for integration with a System Information and Event Management (SIEM) tool of choice, e.g. [splunk](https://www.splunk.com/en_us/blog/platform/splunking-azure-event-hubs.html), [sumo logic](https://help.sumologic.com/docs/send-data/hosted-collectors/cloud-to-cloud-integration-framework/azure-event-hubs-source/), etc.
+
+Generally, an administrator of Verified Orchestration platform would create a dedicated Shared Access Policy (SAS) and provide the access keys and connection string for each integration with the SIEM tool.
+
+## Sample audit entry for GraphQL query
+
+```ts title="Sample audit entry for GraphQL query"
+{
+  "log": {
+    "AppRoleInstance": "dd1e06f6d167",
+    "AppRoleName": "verifiable-orchestration-api.VerifiableOrchestration",
+    "ClientBrowser": "Other",
+    "ClientCity": "Sydney",
+    "ClientCountryOrRegion": "Australia",
+    "ClientIP": "0.0.0.0",
+    "ClientModel": "Other",
+    "ClientOS": "Linux 5.15.116.1-1.cm2",
+    "ClientStateOrProvince": "New South Wales",
+    "ClientType": "PC",
+    "IKey": "edcfb4d0-521b-4b97-965e-af732a986b84",
+    "ItemCount": 1,
+    "Message": "GraphQL operation",
+    "OperationId": "8f61f14e7c7bedbb63acdf2187b59b30",
+    "ParentId": "06d8b7642ef19196",
+    "Properties": {
+      "logLevel": "audit",
+      "request": "{\"origin\":\"https://green-sky-0f070b000.2.azurestaticapps.net\",\"requestId\":\"2de26a6c-a297-4f2d-bcaa-13d67ac0894d\"}",
+      "user": "{\"oid\":\"84ea005a-58fe-4195-86a8-8a0a1b707dae\",\"aud\":\"api://verified-orchestration-api-dev\",\"tid\":\"a4577872-4a36-4a93-9846-b29a1220ca89\",\"iss\":\"https://sts.windows.net/a4577872-4a36-4a93-9846-b29a1220ca89/\",\"scp\":\"VerifiedOrchestration\",\"roles\":[\"VerifiableCredential.Reader\",\"VerifiableCredential.Issuer\",\"VerifiableCredential.CredentialAdmin\",\"VerifiableCredential.PartnerAdmin\"]}",
+      "service": "verified-orchestration-api",
+      "type": "query",
+      "operationName": "FindIssuancesTotal",
+      "query": "query FindIssuancesTotal($issuancesWhere: ContractIssuanceWhere, $orderBy: ContractOrderBy, $orderDirection: OrderDirection, $contractIssuanceWeeklyAverageWhere: ContractIssuanceWeeklyAverageWhere!) {\n  findContracts(orderBy: $orderBy, orderDirection: $orderDirection) {\n    id\n    name\n    issuanceWeeklyAverage(where: $contractIssuanceWeeklyAverageWhere)\n    issuances(where: $issuancesWhere) {\n      issuedBy {\n        id\n        name\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}",
+      "variables": "{\"issuancesWhere\":{\"from\":\"2023-10-24T00:00:00+11:00\"},\"contractIssuanceWeeklyAverageWhere\":{\"to\":\"2023-10-31T23:59:59+11:00\",\"numberOfWeeks\":12},\"orderBy\":\"contractName\",\"orderDirection\":\"ASC\"}",
+      "duration": "756",
+      "trace_id": "8f61f14e7c7bedbb63acdf2187b59b30",
+      "span_id": "06d8b7642ef19196",
+      "trace_flags": "01"
+    },
+    "ResourceGUID": "bf680fa7-1510-4f4f-b0cd-dfff4d505db3",
+    "SDKVersion": "node18:otel1.15.2:dst1.0.0",
+    "SeverityLevel": 1,
+    "SourceSystem": "Azure",
+    "TenantId": "129c3f1e-ba9b-45e5-b7f4-6df8048e3e90",
+    "TimeGenerated": "2023-10-31T01:55:56.9220000Z",
+    "Type": "AppTraces",
+    "_BilledSize": 2156,
+    "_Internal_WorkspaceResourceId": "/subscriptions/de5e410a-fa03-4be4-bcda-b068b4be7f52/resourcegroups/vo-dev-verified-orchestration/providers/microsoft.operationalinsights/workspaces/vo-dev-verified-orchestration-la",
+    "_ResourceId": "/SUBSCRIPTIONS/DE5E410A-FA03-4BE4-BCDA-B068B4BE7F52/RESOURCEGROUPS/VO-DEV-VERIFIED-ORCHESTRATION/PROVIDERS/MICROSOFT.INSIGHTS/COMPONENTS/VO-DEV-VERIFIED-ORCHESTRATION-API-AI"
+  },
+  "EventProcessedUtcTime": "2023-10-31T01:57:01.6774564Z",
+  "PartitionId": 0,
+  "EventEnqueuedUtcTime": "2023-10-31T01:56:34.4670000Z"
+}
+```
+
+## Sample audit entry for GraphQL mutation
+
+```ts title="Sample audit entry for GraphQL mutation"
+{
+  "log": {
+    "AppRoleInstance": "dd1e06f6d167",
+    "AppRoleName": "verifiable-orchestration-api.VerifiableOrchestration",
+    "ClientBrowser": "Other",
+    "ClientCity": "Sydney",
+    "ClientCountryOrRegion": "Australia",
+    "ClientIP": "0.0.0.0",
+    "ClientModel": "Other",
+    "ClientOS": "Linux 5.15.116.1-1.cm2",
+    "ClientStateOrProvince": "New South Wales",
+    "ClientType": "PC",
+    "IKey": "edcfb4d0-521b-4b97-965e-af732a986b84",
+    "ItemCount": 1,
+    "Message": "GraphQL operation",
+    "OperationId": "ba0dbfb7a4918b6621950c7e4d3e0d90",
+    "ParentId": "cc78db47ada505f7",
+    "Properties": {
+      "logLevel": "audit",
+      "request": "{\"origin\":\"https://green-sky-0f070b000.2.azurestaticapps.net\",\"requestId\":\"820daab3-8baa-4a9a-a872-bcf5c1dd1bae\"}",
+      "user": "{\"oid\":\"eafa1892-3c05-4e76-b62f-0643bbe1363a\",\"aud\":\"api://verified-orchestration-api-dev\",\"tid\":\"a4577872-4a36-4a93-9846-b29a1220ca89\",\"iss\":\"https://sts.windows.net/a4577872-4a36-4a93-9846-b29a1220ca89/\",\"scp\":\"VerifiedOrchestration\",\"roles\":[\"VerifiableCredential.Reader\",\"VerifiableCredential.Issuer\",\"VerifiableCredential.CredentialAdmin\",\"VerifiableCredential.PartnerAdmin\"]}",
+      "service": "verified-orchestration-api",
+      "type": "mutation",
+      "operationName": "RevokeIssuances",
+      "query": "mutation RevokeIssuances($ids: [ID!]!) {\n  revokeIssuances(ids: $ids)\n}",
+      "variables": "{\"ids\":[\"35E435EB-FEE6-4B13-8658-8EE05AD32AE1\",\"5A04FB47-A254-49C7-AA81-101B80332D08\"]}",
+      "duration": "9",
+      "result": "{\"data\":{\"revokeIssuances\":\"b966c5c5-caf8-40a8-aa51-578f57ba5c23\"}}",
+      "trace_id": "ba0dbfb7a4918b6621950c7e4d3e0d90",
+      "span_id": "cc78db47ada505f7",
+      "trace_flags": "01"
+    },
+    "ResourceGUID": "bf680fa7-1510-4f4f-b0cd-dfff4d505db3",
+    "SDKVersion": "node18:otel1.15.2:dst1.0.0",
+    "SeverityLevel": 1,
+    "SourceSystem": "Azure",
+    "TenantId": "129c3f1e-ba9b-45e5-b7f4-6df8048e3e90",
+    "TimeGenerated": "2023-10-31T02:20:08.0980000Z",
+    "Type": "AppTraces",
+    "_BilledSize": 1666,
+    "_Internal_WorkspaceResourceId": "/subscriptions/de5e410a-fa03-4be4-bcda-b068b4be7f52/resourcegroups/vo-dev-verified-orchestration/providers/microsoft.operationalinsights/workspaces/vo-dev-verified-orchestration-la",
+    "_ResourceId": "/SUBSCRIPTIONS/DE5E410A-FA03-4BE4-BCDA-B068B4BE7F52/RESOURCEGROUPS/VO-DEV-VERIFIED-ORCHESTRATION/PROVIDERS/MICROSOFT.INSIGHTS/COMPONENTS/VO-DEV-VERIFIED-ORCHESTRATION-API-AI"
+  },
+  "EventProcessedUtcTime": "2023-10-31T02:21:26.1868933Z",
+  "PartitionId": 0,
+  "EventEnqueuedUtcTime": "2023-10-31T02:20:44.6800000Z"
+}
+```
+
+## Sample audit entry for GraphQL subscription
+
+```ts title="Sample audit entry for GraphQL subscription"
+{
+  "log": {
+    "AppRoleInstance": "dd1e06f6d167",
+    "AppRoleName": "verifiable-orchestration-api.VerifiableOrchestration",
+    "ClientBrowser": "Other",
+    "ClientCity": "Sydney",
+    "ClientCountryOrRegion": "Australia",
+    "ClientIP": "0.0.0.0",
+    "ClientModel": "Other",
+    "ClientOS": "Linux 5.15.116.1-1.cm2",
+    "ClientStateOrProvince": "New South Wales",
+    "ClientType": "PC",
+    "IKey": "edcfb4d0-521b-4b97-965e-af732a986b84",
+    "ItemCount": 1,
+    "Message": "GraphQL operation",
+    "Properties": {
+      "logLevel": "audit",
+      "request": "{\"origin\":\"https://green-sky-0f070b000.2.azurestaticapps.net\",\"requestId\":\"64a95a3c-287f-434d-876e-5f0ee81caa19\"}",
+      "user": "{\"oid\":\"eafa1892-3c05-4e76-b62f-0643bbe1363a\",\"aud\":\"api://verified-orchestration-api-dev\",\"tid\":\"a4577872-4a36-4a93-9846-b29a1220ca89\",\"iss\":\"https://sts.windows.net/a4577872-4a36-4a93-9846-b29a1220ca89/\",\"scp\":\"VerifiedOrchestration\",\"roles\":[\"VerifiableCredential.Reader\",\"VerifiableCredential.Issuer\",\"VerifiableCredential.CredentialAdmin\",\"VerifiableCredential.PartnerAdmin\"]}",
+      "service": "verified-orchestration-api",
+      "type": "subscription",
+      "operationName": "BackgroundJobEvent",
+      "query": "subscription BackgroundJobEvent($where: BackgroundJobEventWhere) {\n  backgroundJobEvent(where: $where) {\n    jobId\n    jobName\n    event {\n      ... on BackgroundJobActiveEvent {\n        status\n        __typename\n      }\n      ... on BackgroundJobProgressEvent {\n        status\n        progress\n        __typename\n      }\n      ... on BackgroundJobErrorEvent {\n        status\n        error\n        __typename\n      }\n      ... on BackgroundJobCompletedEvent {\n        status\n        result\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}",
+      "variables": "{\"where\":{\"jobId\":\"b966c5c5-caf8-40a8-aa51-578f57ba5c23\"}}",
+      "result": "{}"
+    },
+    "ResourceGUID": "bf680fa7-1510-4f4f-b0cd-dfff4d505db3",
+    "SDKVersion": "node18:otel1.15.2:dst1.0.0",
+    "SeverityLevel": 1,
+    "SourceSystem": "Azure",
+    "TenantId": "129c3f1e-ba9b-45e5-b7f4-6df8048e3e90",
+    "TimeGenerated": "2023-10-31T02:20:13.7520000Z",
+    "Type": "AppTraces",
+    "_BilledSize": 1885,
+    "_Internal_WorkspaceResourceId": "/subscriptions/de5e410a-fa03-4be4-bcda-b068b4be7f52/resourcegroups/vo-dev-verified-orchestration/providers/microsoft.operationalinsights/workspaces/vo-dev-verified-orchestration-la",
+    "_ResourceId": "/SUBSCRIPTIONS/DE5E410A-FA03-4BE4-BCDA-B068B4BE7F52/RESOURCEGROUPS/VO-DEV-VERIFIED-ORCHESTRATION/PROVIDERS/MICROSOFT.INSIGHTS/COMPONENTS/VO-DEV-VERIFIED-ORCHESTRATION-API-AI"
+  },
+  "EventProcessedUtcTime": "2023-10-31T02:21:26.1868933Z",
+  "PartitionId": 1,
+  "EventEnqueuedUtcTime": "2023-10-31T02:20:44.4510000Z"
+}
+```
+
+## Sample audit entry for revocation of credentials in a background job
+
+```ts title="Sample audit entry for revocation of credentials in a background job"
+{
+  "log": {
+    "AppRoleInstance": "db0a0780dbd2",
+    "AppRoleName": "verifiable-orchestration-api.VerifiableOrchestration",
+    "ClientBrowser": "Other",
+    "ClientCity": "Sydney",
+    "ClientCountryOrRegion": "Australia",
+    "ClientIP": "0.0.0.0",
+    "ClientModel": "Other",
+    "ClientOS": "Linux 5.15.116.1-1.cm2",
+    "ClientStateOrProvince": "New South Wales",
+    "ClientType": "PC",
+    "IKey": "edcfb4d0-521b-4b97-965e-af732a986b84",
+    "ItemCount": 1,
+    "Message": "Issuance revoked",
+    "OperationId": "2cadd3d65a8b8d425063604ce17bffd7",
+    "ParentId": "b48c110b7917890f",
+    "Properties": {
+      "logLevel": "audit",
+      "service": "verified-orchestration-api",
+      "issuance":
+        '{"id":"6BFA848D-4447-4173-B045-A094EEB56F68","createdAt":"2023-10-11T09:29:39.720Z","updatedAt":"2023-10-31T02:46:42.218Z","createdById":"80E40BEA-99EE-4BE0-B1B0-1729ADED782F","updatedById":"80E40BEA-99EE-4BE0-B1B0-1729ADED782F","requestId":"e0a3647c-a95a-4d1e-acd7-ec5a16904ade","contractId":"D1F2A6DA-8E3B-406B-B540-5840536F25E4","identityId":"02EA0AA7-4AB3-496A-B0CD-7C4B186A5B0E","issuedById":"80E40BEA-99EE-4BE0-B1B0-1729ADED782F","issuedAt":"2023-09-27T06:38:18.713Z","expiresAt":"2024-09-26T06:38:18.701Z","isRevoked":true,"revokedAt":"2023-10-31T02:46:42.211Z","revokedById":"80E40BEA-99EE-4BE0-B1B0-1729ADED782F",__has_contract__":true,"__revokedBy__":{"id":"80E40BEA-99EE-4BE0-B1B0-1729ADED782F","oid":"EAFA1892-3C05-4E76-B62F-0643BBE1363A","tenantId":"A4577872-4A36-4A93-9846-B29A1220CA89","email":"bobby.lat@makerx.com.au","name":"Bobby Lat","isApp":false},"__has_revokedBy__":true}',
+      "jobId": "3580d3bc-99ff-4c78-92ad-5443c1d5ba5e",
+      "trace_id": "2cadd3d65a8b8d425063604ce17bffd7",
+      "span_id": "b48c110b7917890f",
+      "trace_flags": "01",
+    },
+    "ResourceGUID": "bf680fa7-1510-4f4f-b0cd-dfff4d505db3",
+    "SDKVersion": "node18:otel1.15.2:dst1.0.0",
+    "SeverityLevel": 1,
+    "SourceSystem": "Azure",
+    "TenantId": "129c3f1e-ba9b-45e5-b7f4-6df8048e3e90",
+    "TimeGenerated": "2023-10-31T02:46:42.2370000Z",
+    "Type": "AppTraces",
+    "_BilledSize": 57497,
+    "_Internal_WorkspaceResourceId":
+      "/subscriptions/de5e410a-fa03-4be4-bcda-b068b4be7f52/resourcegroups/vo-dev-verified-orchestration/providers/microsoft.operationalinsights/workspaces/vo-dev-verified-orchestration-la",
+    "_ResourceId":
+      "/SUBSCRIPTIONS/DE5E410A-FA03-4BE4-BCDA-B068B4BE7F52/RESOURCEGROUPS/VO-DEV-VERIFIED-ORCHESTRATION/PROVIDERS/MICROSOFT.INSIGHTS/COMPONENTS/VO-DEV-VERIFIED-ORCHESTRATION-API-AI",
+  },
+  "EventProcessedUtcTime": "2023-10-31T02:47:55.1123734Z",
+  "PartitionId": 0,
+  "EventEnqueuedUtcTime": "2023-10-31T02:47:13.0090000Z",
+}
+```
+
+## Sample audit entry for a callback from Microsoft Entra Verified ID
+
+```ts title="Sample audit entry for a callback from Microsoft Entra Verified ID"
+{
+  "log": {
+    "AppRoleInstance": "dd1e06f6d167",
+    "AppRoleName": "verifiable-orchestration-api.VerifiableOrchestration",
+    "ClientBrowser": "Other",
+    "ClientCity": "Sydney",
+    "ClientCountryOrRegion": "Australia",
+    "ClientIP": "0.0.0.0",
+    "ClientModel": "Other",
+    "ClientOS": "Linux 5.15.116.1-1.cm2",
+    "ClientStateOrProvince": "New South Wales",
+    "ClientType": "PC",
+    "IKey": "edcfb4d0-521b-4b97-965e-af732a986b84",
+    "ItemCount": 1,
+    "Message": "Presentation complete",
+    "OperationId": "8acb64a6fc6a4ee48a69517fa1c4b3be",
+    "ParentId": "a108d3fa13056b76",
+    "Properties": {
+      "logLevel": "audit",
+      "service": "verified-orchestration-api",
+      "presentation": "{\"id\":\"6fde5d9c-6c2f-4eb3-af5a-046f503427f7\",\"requestId\":\"b5d442c4-ec83-44a4-8de8-7490cb7e3f39\",\"requestedById\":\"1B07992D-5A18-419E-A007-2A77161B6F95\",\"identityId\":\"02EA0AA7-4AB3-496A-B0CD-7C4B186A5B0E\",\"requestedCredentialsJson\":\"[{\\\"type\\\":\\\"VerifiedContractor\\\",\\\"acceptedIssuers\\\":[\\\"did:ion:EiDKU...\\\"]},{\\\"type\\\":\\\"MediumRigidLicense\\\",\\\"acceptedIssuers\\\":[\\\"did:ion:EiD...\\\"]},{\\\"type\\\":\\\"LightRigidLicense\\\",\\\"acceptedIssuers\\\":[\\\"did:ion:EiDK...\\\"]}]\",\"presentedCredentialsJson\":\"[{\\\"issuer\\\":\\\"did:ion:EiDK...\\\",\\\"type\\\":[\\\"VerifiableCredential\\\",\\\"VerifiedContractor\\\"],\\\"credentialState\\\":{\\\"revocationStatus\\\":\\\"VALID\\\"},\\\"expirationDate\\\":\\\"2024-09-26T07:16:06.000Z\\\",\\\"issuanceDate\\\":\\\"2023-09-27T07:16:06.000Z\\\"},{\\\"issuer\\\":\\\"did:ion:EiDK...\\\",\\\"type\\\":[\\\"VerifiableCredential\\\",\\\"MediumRigidLicense\\\"],\\\"credentialState\\\":{\\\"revocationStatus\\\":\\\"VALID\\\"},\\\"expirationDate\\\":\\\"2024-09-26T07:10:49.000Z\\\",\\\"issuanceDate\\\":\\\"2023-09-27T07:10:49.000Z\\\"},{\\\"issuer\\\":\\\"did:ion:EiDK...\\\",\\\"type\\\":[\\\"VerifiableCredential\\\",\\\"LightRigidLicense\\\"],\\\"credentialState\\\":{\\\"revocationStatus\\\":\\\"VALID\\\"},\\\"expirationDate\\\":\\\"2024-09-26T07:11:03.000Z\\\",\\\"issuanceDate\\\":\\\"2023-09-27T07:11:03.000Z\\\"}]\",\"__issuances__\":[{\"id\":\"E36EABFA-E684-42F8-BA35-BD05C33119B0\"},{\"id\":\"0160883C-A574-4189-9D4A-B4FDE76FB8D6\"},{\"id\":\"D26B8A73-B20E-43A9-B820-288695F1548E\"}],\"__has_issuances__\":true,\"__partners__\":[],\"__has_partners__\":true,\"presentedAt\":\"2023-10-31T02:53:16.630Z\",\"issuanceIds\":[\"E36EABFA-E684-42F8-BA35-BD05C33119B0\",\"0160883C-A574-4189-9D4A-B4FDE76FB8D6\",\"D26B8A73-B20E-43A9-B820-288695F1548E\"],\"partnerIds\":[]}",
+      "trace_id": "8acb64a6fc6a4ee48a69517fa1c4b3be",
+      "span_id": "a108d3fa13056b76",
+      "trace_flags": "01"
+    },
+    "ResourceGUID": "bf680fa7-1510-4f4f-b0cd-dfff4d505db3",
+    "SDKVersion": "node18:otel1.15.2:dst1.0.0",
+    "SeverityLevel": 1,
+    "SourceSystem": "Azure",
+    "TenantId": "129c3f1e-ba9b-45e5-b7f4-6df8048e3e90",
+    "TimeGenerated": "2023-10-31T02:53:16.6520000Z",
+    "Type": "AppTraces",
+    "_BilledSize": 9766,
+    "_Internal_WorkspaceResourceId": "/subscriptions/de5e410a-fa03-4be4-bcda-b068b4be7f52/resourcegroups/vo-dev-verified-orchestration/providers/microsoft.operationalinsights/workspaces/vo-dev-verified-orchestration-la",
+    "_ResourceId": "/SUBSCRIPTIONS/DE5E410A-FA03-4BE4-BCDA-B068B4BE7F52/RESOURCEGROUPS/VO-DEV-VERIFIED-ORCHESTRATION/PROVIDERS/MICROSOFT.INSIGHTS/COMPONENTS/VO-DEV-VERIFIED-ORCHESTRATION-API-AI"
+  },
+  "EventProcessedUtcTime": "2023-10-31T02:54:22.8799487Z",
+  "PartitionId": 0,
+  "EventEnqueuedUtcTime": "2023-10-31T02:53:55.1120000Z"
+}
+```
