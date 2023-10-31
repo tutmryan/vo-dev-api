@@ -5,37 +5,14 @@ Prior to writing any React code using GraphQL via Apollo Client, you will need t
 This section assumes you will be using limited access tokens from your [secure backend API](../../limited-access-tokens/secure-backend-api.mdx) to authenticate with the Verified Orchestration API.
 
 :::info
-The code samples in this guide use the `getVerifiedOrchestrationToken` function and `useVerifiedOrchestrationSessionToken` hook from the [JavaScript client](https://www.npmjs.com/package/@verified-orchestration/client-js) package for convenience.
-
-You may prefer to swap in your own code to make limited access tokens available to the Apollo network links.
+The code samples in this guide use the `getVerifiedOrchestrationToken` function and `useVerifiedOrchestrationSessionToken` hook from the [managing limited access tokens](#managing-limited-access-tokens) section below.
 :::
-
-## Prepare a function to obtain limited access tokens
-
-This function will be called in React components to obtain limited access tokens from your [secure backend API](../../limited-access-tokens/secure-backend-api.mdx).
-
-```ts title="Example function to obtain limited access tokens for issuance or presentation"
-export async function getLimitedAccessToken(type: 'issuance' | 'presentation') {
-  const accessToken = await getApiAccessToken()
-  const url = `${import.meta.env.VITE_API_URL}/limited-access-tokens/${type}`
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${accessToken}` },
-  })
-  return (await response.json()) as AccessTokenResponse
-}
-```
 
 ## Configure Apollo Client to use limited access tokens
 
-```console title="Install @verified-orchestration/client-js to provide getVerifiedOrchestrationToken and useVerifiedOrchestrationSessionToken"
-npm i @verified-orchestration/client-js
-
-```
-
 ```ts title="Example: set up Apollo Client to use limited access tokens"
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client'
-import { getVerifiedOrchestrationToken } from '@verified-orchestration/client-js'
+import { getVerifiedOrchestrationToken } from './limited-access-session'
 
 const verifiedOrchestrationAuthLink = setContext(async (_, { headers }) => {
   const voAccessToken = await getVerifiedOrchestrationToken()
@@ -149,6 +126,121 @@ export const client = new ApolloClient({
   link: verifiedOrchestrationSplitLink,
   cache: new InMemoryCache(),
 })
+```
+
+## Managing limited access tokens
+
+The code samples above do not cover fetching and using limited access tokens. Exactly how you do this will depend on:
+
+- What type of tokens your React app needs
+- How your [secure backend API](../../limited-access-tokens/secure-backend-api.mdx) provides those tokens
+- How your React app authenticates users and maintains session state
+
+The following file shows an example of how you might:
+
+1. Fetch different limited access tokens from your secure backend API
+2. Provide the tokens to the Apollo Client network stack
+3. Provide control over access token fetching and state to React components
+
+```ts title="Example: verified-orchestration-token.ts contains a function to fetch limited access tokens from your secure backend API"
+export async function getLimitedAccessToken<TTokenResponse extends AccessTokenResponse = AccessTokenResponse>(type: 'issuance' | 'presentation') {
+  const accessToken = await getApiAccessToken()
+  const url = `${import.meta.env.VITE_API_URL}/limited-access-tokens/${type}`
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  return (await response.json()) as TTokenResponse
+}
+```
+
+```ts title="Example: limited-access-session.ts supports fetching and storing (one) limited access token in session storage"
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { AccessTokenResponse } from '../generated/graphql'
+
+type VerifiedOrchestrationSessionToken = AccessTokenResponse & { inputKey: string } & Record<string, any>
+
+const storageKey = 'VerifiedOrchestrationAccessToken'
+
+/***
+ * Gets the most recent Verified Orchestration Access Token response from session storage (to make it available outside of a React component e.g. the network stack).
+ * If the token is expired, it will be removed from session storage and undefined will be returned.
+ * Note: it may contain additional data returned by the access token fetcher.
+ */
+export function getVerifiedOrchestrationToken<
+  TSessionToken extends VerifiedOrchestrationSessionToken = VerifiedOrchestrationSessionToken,
+>() {
+  const data = sessionStorage.getItem(storageKey)
+  if (!data) return undefined
+  const parsed = JSON.parse(data) as TSessionToken
+  const expires = new Date(parsed.expires)
+  if (expires < new Date()) {
+    sessionStorage.removeItem(storageKey)
+    return undefined
+  }
+  return parsed
+}
+
+/***
+ * Sets the Verified Orchestration Access Token response in session storage (to make it available to the network stack).
+ */
+const setVerifiedOrchestrationSessionToken = (token: VerifiedOrchestrationSessionToken) =>
+  sessionStorage.setItem(storageKey, JSON.stringify(token))
+
+/**
+ *
+ * @param fetcher A function that fetches the an AccessTokenResponse + any additional response data.
+ * @param input The input passed to the fetcher function, used to generate a key to ensure any cached response matches the specified input (otherwise, a new access token will be fetched).
+ * @returns An object containing the loading state, access token fetcher response or error.
+ */
+export function useVerifiedOrchestrationSessionToken<TInput, TAccessTokenResponse extends AccessTokenResponse = AccessTokenResponse>(
+  fetcher: (input: TInput) => Promise<TAccessTokenResponse>,
+  input: TInput,
+): {
+  loading: boolean
+  error?: Error
+  accessToken?: TAccessTokenResponse
+} {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error>()
+
+  const inputKey = useMemo(() => JSON.stringify(input), [input])
+
+  const getAccessToken = useCallback(async () => {
+    setLoading(true)
+    setError(undefined)
+    try {
+      const token = await fetcher(input)
+      const sessionToken = { ...token, inputKey }
+      setVerifiedOrchestrationSessionToken(sessionToken)
+      setAccessToken(sessionToken)
+    } catch (error) {
+      setError(error as Error)
+    } finally {
+      setLoading(false)
+    }
+  }, [fetcher, input, inputKey])
+
+  const [accessToken, setAccessToken] = useState(getVerifiedOrchestrationToken())
+
+  useEffect(() => {
+    // if we don't have a token and we're not already fetching it, fetch it
+    if (loading || error) return
+    if (!accessToken) {
+      getAccessToken()
+      return
+    }
+
+    // re-fetch access token if it doesn't match the input
+    if (inputKey !== accessToken.inputKey) {
+      getAccessToken()
+      return
+    }
+  }, [accessToken, error, getAccessToken, inputKey, loading])
+
+  return useMemo(() => ({ accessToken: accessToken as TAccessTokenResponse, loading, error }), [accessToken, error, loading])
+}
+
 ```
 
 ## Next steps
