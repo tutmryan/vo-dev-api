@@ -3,24 +3,24 @@ import { AdminUrl } from '@site/src/components/admin-url'
 
 # Application integration
 
-The Verified Orchestration platform is based on a GraphQL API which supports integration with custom applications.
+The Verified Orchestration platform is based on a GraphQL API, facilitating seamless integration with custom applications.
 
-We provide info and examples for the following development stacks:
+We offer guidance and provide examples for the following development stacks:
 
-- [JavaScript using client library](javascript-client)
-- [React + Apollo Client](react-apollo)
-- [iOS Swift + Apollo Client](ios-apollo)
-- [Android Kotlin + Apollo Client](android-apollo)
+- [JavaScript using client library](./javascript-client/)
+- [React + Apollo Client](./react-apollo/)
+- [iOS Swift + Apollo Client](./ios-apollo.mdx)
+- [Android Kotlin + Apollo Client](./android-apollo.mdx)
 
-You may wish to use a completely different development stack. The guides and examples should still be useful as a reference. Refer to the [GraphQL API](#graphql-api) section for more info on integration to the API via whatever development stack you use.
+If you're using a different development stack, our guides and examples can still serve as valuable references. The [GraphQL API](#graphql-api) section provides further details on integrating with the API using your chosen development stack.
 
 ## GraphQL API
 
-The Verified Orchestration platform is based on a GraphQL API. All data and operations are available through the API, which presents a strongly typed, documented and discoverable schema.
+All data and operations are accessible through the API, which presents a strongly typed, documented and discoverable schema.
 
 ### Apollo Sandbox UI
 
-Apollo Sandbox is a GraphQL IDE that allows you to explore the Verified Orchestration API. It is useful for exploring the schema, documentation, building and running queries.
+Apollo Sandbox is a GraphQL IDE that enables you to explore the Verified Orchestration API. It's an ideal tool for delving into the schema, building and running queries, as well as referencing the documentation.
 
 You will need to be [onboarded as a platform user](../onboarding-users.mdx) to access Apollo Sandbox and the API.
 
@@ -28,11 +28,11 @@ You will need to be [onboarded as a platform user](../onboarding-users.mdx) to a
 
 #### Basic Apollo Sandbox usage
 
-- Use the Documentation tab in the Explorer view to navigate the schema and select operations, types and fields.
-- Use the Variables tab to define operation variables.
-- The Traces view can help you understand the performance of your query.
-- Use the Share button to generate a link to an operation definition.
-- Export data as JSON or CSV.
+- Navigate the schema and select operations, types, and fields using the Documentation tab in the Explorer view.
+- Define operation variables through the Variables tab.
+- Utilize the Traces view to gauge the performance of your query.
+- Generate a link to an operation definition using the Share button.
+- Export data in JSON or CSV format.
 
 ![Apollo Sandbox Basic](../../../static/img/apollo-sandbox-basic.png)
 
@@ -40,19 +40,19 @@ You will need to be [onboarded as a platform user](../onboarding-users.mdx) to a
 
 #### Subscriptions in Apollo Sandbox
 
-Query and Mutation operations work *out of the box* in Apollo Sandbox using cookie authentication (see the *Include cookies* setting in *Connection settings*).
+Query and Mutation operations work *out of the box* through cookie authentication (see the *Include cookies* setting in *Connection settings*).
 
-Subscription connections do not include cookies, will need to provide an Authorization header for the subscription operation.
+To use subscription connections, which do not include cookies, you need to provide an Authorization header for the subscription operation.
 
 1. Copy an Authorization header value from the <AdminUrl>Admin website</AdminUrl> using your browser dev tools
-1. Paste the Authorization header into the **Headers** section in Apollo Sandbox
+1. Insert the Authorization header into the **Headers** section in Apollo Sandbox
 
-You can now subscribe to events and see event data. An access token normally lasts for around 50 minutes depending on your tenant configuration.
+You can now subscribe to events and see event data. Typically, an access token is valid for approximately 50 minutes, subject to your tenant configuration.
 
 ![Apollo Sandbox Subscriptions](../../../static/img/apollo-sandbox-subscriptions.png)
 
 ### Voyager UI
 
-Voyager is a visualisation tool for GraphQL APIs. It is useful for exploring the schema and relationships between types.
+Voyager is a visualisation tool for GraphQL APIs, ideal for exploring the schema and discerning relationships between types.
 
 <ApiUrl path="/voyager">Access Voyager here</ApiUrl>
