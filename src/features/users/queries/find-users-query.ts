@@ -35,7 +35,7 @@ export async function FindUsersQuery(
       break
   }
 
-  const presentations = await this.entityManager.getRepository(UserEntity).find({
+  const users = await this.entityManager.getRepository(UserEntity).find({
     comment: 'FindUsersQuery',
     where,
     relations,
@@ -44,5 +44,5 @@ export async function FindUsersQuery(
     order,
   })
 
-  return presentations
+  return users
 }
