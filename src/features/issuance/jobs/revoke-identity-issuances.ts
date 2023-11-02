@@ -4,7 +4,7 @@ import type { WorkerContext } from '../../../background-jobs/worker'
 import { revokeIssuances } from './revoke-utils'
 
 export type RevokeIdentityIssuancesJobName = 'revokeIdentityIssuances'
-export type RevokeIdentityIssuancesJobPayload = { userId: string; identityId: string }
+export type RevokeIdentityIssuancesJobPayload = { userId: string; identityId: string; requestId?: string }
 export type RevokeIdentityIssuancesJobType = JobType<RevokeIdentityIssuancesJobName, RevokeIdentityIssuancesJobPayload>
 
 export const revokeIdentityIssuancesJobHandler = async (context: WorkerContext, job: Job<RevokeIdentityIssuancesJobPayload>) =>

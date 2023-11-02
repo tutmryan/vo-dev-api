@@ -38,7 +38,7 @@ export const revokeIssuances = async (
           const result = await revokeIssuance(issuance, adminService, user, contract)
           addUserToManager(entityManager, user.id)
           await entityManager.getRepository(IssuanceEntity).save(result)
-          logger.audit('Issuance revoked', { issuance: result, jobId: job.id })
+          logger.audit('Issuance revoked', { issuance: result, jobId: job.id, jobData: job.data })
         })
       }
     } catch (err) {

@@ -7,8 +7,7 @@ import type { JobTypes } from './worker'
 
 export const JobQueueName = 'jobQueue'
 export const MAX_RETRY = 3
-export type JobType<TName extends string, TPayload extends { userId: string }> = {
-  correlationId?: string
+export type JobType<TName extends string, TPayload extends { userId: string; requestId?: string }> = {
   name: TName
   payload: TPayload
 }
