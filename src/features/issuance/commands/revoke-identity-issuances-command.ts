@@ -9,7 +9,7 @@ export async function RevokeIdentityIssuancesCommand(this: CommandContext, id: s
 
   const jobId = await addToJobQueue({
     name: 'revokeIdentityIssuances',
-    payload: { userId: user.userEntity.id, identityId: id, correlationId: requestInfo.correlationId },
+    payload: { userId: user.userEntity.id, identityId: id, requestId: requestInfo.requestId },
   })
   return jobId
 }

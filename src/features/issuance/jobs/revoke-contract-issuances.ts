@@ -6,7 +6,7 @@ import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { revokeIssuances } from './revoke-utils'
 
 export type RevokeContractIssuancesJobName = 'revokeContractIssuances'
-export type RevokeContractIssuancesJobPayload = { userId: string; contractId: string; correlationId?: string }
+export type RevokeContractIssuancesJobPayload = { userId: string; contractId: string; requestId?: string }
 export type RevokeContractIssuancesJobType = JobType<RevokeContractIssuancesJobName, RevokeContractIssuancesJobPayload>
 
 export const revokeContractIssuancesJobHandler = async (context: WorkerContext, job: Job<RevokeContractIssuancesJobPayload>) => {
