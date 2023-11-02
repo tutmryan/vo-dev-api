@@ -71,7 +71,34 @@ const config = {
           src: 'img/logo-secondary-greyscale-white.svg',
           srcDark: 'img/logo-primary-white.svg',
         },
-        items: [],
+        items: [
+          {
+            label: 'Tools',
+            position: 'left',
+            items: [
+              {
+                label: 'Apollo Sandbox',
+                href: `${process.env.GRAPHQL_ENDPOINT}/graphql`,
+                prependBaseUrlToHref: false,
+              },
+              {
+                label: 'GraphQL Voyager',
+                href: `${process.env.GRAPHQL_ENDPOINT}/voyager`,
+                prependBaseUrlToHref: false,
+              },
+              {
+                label: 'Issuance builder',
+                href: `${process.env.ADMIN_URL}/issuance-builder`,
+                prependBaseUrlToHref: false,
+              },
+              {
+                label: 'Presentation builder',
+                href: `${process.env.ADMIN_URL}/presentation-builder`,
+                prependBaseUrlToHref: false,
+              },
+            ],
+          },
+        ],
       },
       footer: {
         style: 'dark',
