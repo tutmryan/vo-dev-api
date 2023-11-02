@@ -25,7 +25,7 @@ import { JobQueueName, MAX_RETRY } from './queue'
 export type JobNames = RevokeIssuancesJobName | RevokeContractIssuancesJobName | RevokeIdentityIssuancesJobName | RevokeUserIssuancesJobName
 export type JobTypes = RevokeIssuancesJobType | RevokeContractIssuancesJobType | RevokeIdentityIssuancesJobType | RevokeUserIssuancesJobType
 
-type BackgroundJob = Job<{ correlationId?: string; userId?: string }>
+type BackgroundJob = Job<{ correlationId?: string; userId: string }>
 export type WorkerContext = {
   logger: typeof logger
   adminService: AdminService
@@ -52,7 +52,7 @@ export const worker = Lazy(
   () =>
     new Worker(
       JobQueueName,
-      async (job) => {
+      async (job: BackgroundJob) => {
         const handler = handlers[job.name as JobNames]
         if (handler) {
           const context = await createWorkerContext(job.data.userId, job.data.correlationId)
