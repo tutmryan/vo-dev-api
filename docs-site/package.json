@@ -6,7 +6,7 @@
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",
-    "build:pr": "npm run generate-graphql-docs && npm run build",
+    "build:pr": "npm run generate-graphql-docs && npm run build:dev",
     "build:dev": "npx --yes -p dotenv-cli dotenv -c dev -- docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
