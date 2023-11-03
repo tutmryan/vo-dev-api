@@ -2,6 +2,8 @@ import type { Job } from 'bullmq'
 import type { FindOptionsWhere } from 'typeorm'
 import type { WorkerContext } from '../../../background-jobs/worker'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
+import { IssuanceStatus } from '../../../generated/graphql'
+import type { logger } from '../../../logger'
 import type { AdminService } from '../../../services/admin'
 import { invariant } from '../../../util/invariant'
 import { addUserToManager } from '../../auditing/user-context-helper'
@@ -35,10 +37,12 @@ export const revokeIssuances = async (
         await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
           logger.info(`revoking issuance ${issuance.id}`)
 
-          const result = await revokeIssuance(issuance, adminService, user, contract)
-          addUserToManager(entityManager, user.id)
-          await entityManager.getRepository(IssuanceEntity).save(result)
-          logger.audit('Issuance revoked', { issuance: result, jobId: job.id, jobData: job.data })
+          const result = await revokeIssuance(issuance, adminService, user, logger, contract)
+          if (result) {
+            addUserToManager(entityManager, user.id)
+            await entityManager.getRepository(IssuanceEntity).save(result)
+            logger.audit('Issuance revoked', { issuance: result, jobId: job.id, jobData: job.data })
+          }
         })
       }
     } catch (err) {
@@ -53,13 +57,23 @@ export const revokeIssuances = async (
   }
 }
 
-const revokeIssuance = async (issuance: IssuanceEntity, admin: AdminService, user: UserEntity, contract?: ContractEntity) => {
+const revokeIssuance = async (
+  issuance: IssuanceEntity,
+  admin: AdminService,
+  user: UserEntity,
+  log: typeof logger,
+  contract?: ContractEntity,
+) => {
   const contractExternalId = contract?.externalId ?? (await issuance.contract).externalId
   invariant(contractExternalId, 'Contract must have been provisioned for an issuance to exist')
 
   const credential = await admin.findCredential(contractExternalId, issuance.id)
-  invariant(credential, 'Credential with issuance id as an index claim could not be found')
+  if (!credential && issuance.status === IssuanceStatus.Expired) {
+    log.warn(`Expired credential with issuance id ${issuance.id} could not be found`)
+    return null
+  }
 
+  invariant(credential, 'Credential with issuance id as an index claim could not be found')
   await admin.revokeCredential(contractExternalId, credential.id)
 
   issuance.markAsRevoked(user)

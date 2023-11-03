@@ -1,4 +1,5 @@
 import type { CommandContext } from '../../../cqrs/command-context'
+import { IssuanceStatus } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { IssuanceEntity } from '../entities/issuance-entity'
@@ -8,6 +9,7 @@ export async function RevokeIssuanceCommand(this: CommandContext, id: string) {
     user,
     entityManager,
     services: { admin },
+    logger,
   } = this
 
   userInvariant(user)
@@ -22,8 +24,12 @@ export async function RevokeIssuanceCommand(this: CommandContext, id: string) {
   invariant(contractExternalId, 'Contract must have been provisioned for an issuance to exist')
 
   const credential = await admin.findCredential(contractExternalId, issuance.id)
-  invariant(credential, 'Credential with issuance id as an index claim could not be found')
+  if (!credential && issuance.status === IssuanceStatus.Expired) {
+    logger.warn(`Expired credential with issuance id ${issuance.id} could not be found`)
+    return issuance
+  }
 
+  invariant(credential, 'Credential with issuance id as an index claim could not be found')
   await admin.revokeCredential(contractExternalId, credential.id)
 
   issuance.markAsRevoked(user.userEntity)
