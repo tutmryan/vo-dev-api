@@ -174,7 +174,7 @@ Generally, an administrator of Verified Orchestration platform would create a de
 ```ts title="Sample audit entry for revocation of credentials in a background job"
 {
   "log": {
-    "AppRoleInstance": "db0a0780dbd2",
+    "AppRoleInstance": "dcc84c70813f",
     "AppRoleName": "verifiable-orchestration-api.VerifiableOrchestration",
     "ClientBrowser": "Other",
     "ClientCity": "Sydney",
@@ -187,34 +187,32 @@ Generally, an administrator of Verified Orchestration platform would create a de
     "IKey": "edcfb4d0-521b-4b97-965e-af732a986b84",
     "ItemCount": 1,
     "Message": "Issuance revoked",
-    "OperationId": "2cadd3d65a8b8d425063604ce17bffd7",
-    "ParentId": "b48c110b7917890f",
+    "OperationId": "857b0fc01edfd449a1916c7414c44b57",
+    "ParentId": "d998a046d4dcc4f5",
     "Properties": {
       "logLevel": "audit",
       "service": "verified-orchestration-api",
-      "issuance":
-        '{"id":"6BFA848D-4447-4173-B045-A094EEB56F68","createdAt":"2023-10-11T09:29:39.720Z","updatedAt":"2023-10-31T02:46:42.218Z","createdById":"80E40BEA-99EE-4BE0-B1B0-1729ADED782F","updatedById":"80E40BEA-99EE-4BE0-B1B0-1729ADED782F","requestId":"e0a3647c-a95a-4d1e-acd7-ec5a16904ade","contractId":"D1F2A6DA-8E3B-406B-B540-5840536F25E4","identityId":"02EA0AA7-4AB3-496A-B0CD-7C4B186A5B0E","issuedById":"80E40BEA-99EE-4BE0-B1B0-1729ADED782F","issuedAt":"2023-09-27T06:38:18.713Z","expiresAt":"2024-09-26T06:38:18.701Z","isRevoked":true,"revokedAt":"2023-10-31T02:46:42.211Z","revokedById":"80E40BEA-99EE-4BE0-B1B0-1729ADED782F",__has_contract__":true,"__revokedBy__":{"id":"80E40BEA-99EE-4BE0-B1B0-1729ADED782F","oid":"EAFA1892-3C05-4E76-B62F-0643BBE1363A","tenantId":"A4577872-4A36-4A93-9846-B29A1220CA89","email":"bobby.lat@makerx.com.au","name":"Bobby Lat","isApp":false},"__has_revokedBy__":true}',
-      "jobId": "3580d3bc-99ff-4c78-92ad-5443c1d5ba5e",
-      "trace_id": "2cadd3d65a8b8d425063604ce17bffd7",
-      "span_id": "b48c110b7917890f",
-      "trace_flags": "01",
+      "issuance": "{\"id\":\"5CE8C5FF-AA39-44E9-B35A-63064E198F51\",\"createdAt\":\"2023-10-12T08:16:48.970Z\",\"updatedAt\":\"2023-11-03T03:38:58.198Z\",\"createdById\":\"545AA50F-CE56-4514-9479-1D6280A164D7\",\"updatedById\":\"80E40BEA-99EE-4BE0-B1B0-1729ADED782F\",\"requestId\":\"d972ec4e-241f-4770-b244-7edb3e65cd27\",\"contractId\":\"86F06732-096B-4B76-AF1C-5849310B8ACC\",\"identityId\":\"55AADFA5-A90C-49E4-BFEB-78C03933AE93\",\"issuedById\":\"545AA50F-CE56-4514-9479-1D6280A164D7\",\"issuedAt\":\"2023-10-12T08:16:48.970Z\",\"expiresAt\":\"2023-10-13T08:16:48.949Z\",\"isRevoked\":true,\"revokedAt\":\"2023-11-03T03:38:58.188Z\",\"revokedById\":\"80E40BEA-99EE-4BE0-B1B0-1729ADED782F\",\"__has_contract__\":true,\"__revokedBy__\":{\"id\":\"80E40BEA-99EE-4BE0-B1B0-1729ADED782F\",\"oid\":\"EAFA1892-3C05-4E76-B62F-0643BBE1363A\",\"tenantId\":\"A4577872-4A36-4A93-9846-B29A1220CA89\",\"email\":\"bobby.lat@makerx.com.au\",\"name\":\"Bobby Lat\",\"isApp\":false},\"__has_revokedBy__\":true}",
+      "jobId": "795806a8-eb90-48e4-940d-453856b34bce",
+      "jobData": "{\"userId\":\"80E40BEA-99EE-4BE0-B1B0-1729ADED782F\",\"issuanceIds\":[\"5CE8C5FF-AA39-44E9-B35A-63064E198F51\",\"ECD02E9A-0822-4A6F-9418-FC339D5072A6\"],\"requestId\":\"a8479c7a-9222-48fd-8da4-ed67427f3d71\"}",
+      "trace_id": "857b0fc01edfd449a1916c7414c44b57",
+      "span_id": "d998a046d4dcc4f5",
+      "trace_flags": "01"
     },
     "ResourceGUID": "bf680fa7-1510-4f4f-b0cd-dfff4d505db3",
     "SDKVersion": "node18:otel1.15.2:dst1.0.0",
     "SeverityLevel": 1,
     "SourceSystem": "Azure",
     "TenantId": "129c3f1e-ba9b-45e5-b7f4-6df8048e3e90",
-    "TimeGenerated": "2023-10-31T02:46:42.2370000Z",
+    "TimeGenerated": "2023-11-03T03:38:58.2200000Z",
     "Type": "AppTraces",
-    "_BilledSize": 57497,
-    "_Internal_WorkspaceResourceId":
-      "/subscriptions/de5e410a-fa03-4be4-bcda-b068b4be7f52/resourcegroups/vo-dev-verified-orchestration/providers/microsoft.operationalinsights/workspaces/vo-dev-verified-orchestration-la",
-    "_ResourceId":
-      "/SUBSCRIPTIONS/DE5E410A-FA03-4BE4-BCDA-B068B4BE7F52/RESOURCEGROUPS/VO-DEV-VERIFIED-ORCHESTRATION/PROVIDERS/MICROSOFT.INSIGHTS/COMPONENTS/VO-DEV-VERIFIED-ORCHESTRATION-API-AI",
+    "_BilledSize": 48751,
+    "_Internal_WorkspaceResourceId": "/subscriptions/de5e410a-fa03-4be4-bcda-b068b4be7f52/resourcegroups/vo-dev-verified-orchestration/providers/microsoft.operationalinsights/workspaces/vo-dev-verified-orchestration-la",
+    "_ResourceId": "/SUBSCRIPTIONS/DE5E410A-FA03-4BE4-BCDA-B068B4BE7F52/RESOURCEGROUPS/VO-DEV-VERIFIED-ORCHESTRATION/PROVIDERS/MICROSOFT.INSIGHTS/COMPONENTS/VO-DEV-VERIFIED-ORCHESTRATION-API-AI"
   },
-  "EventProcessedUtcTime": "2023-10-31T02:47:55.1123734Z",
-  "PartitionId": 0,
-  "EventEnqueuedUtcTime": "2023-10-31T02:47:13.0090000Z",
+  "EventProcessedUtcTime": "2023-11-03T03:39:38.2530839Z",
+  "PartitionId": 1,
+  "EventEnqueuedUtcTime": "2023-11-03T03:39:22.6580000Z"
 }
 ```
 
