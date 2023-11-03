@@ -2,6 +2,7 @@ import type { Job } from 'bullmq'
 import type { FindOptionsWhere } from 'typeorm'
 import type { WorkerContext } from '../../../background-jobs/worker'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
+import { IssuanceStatus } from '../../../generated/graphql'
 import type { AdminService } from '../../../services/admin'
 import { invariant } from '../../../util/invariant'
 import { addUserToManager } from '../../auditing/user-context-helper'
@@ -57,10 +58,14 @@ const revokeIssuance = async (issuance: IssuanceEntity, admin: AdminService, use
   const contractExternalId = contract?.externalId ?? (await issuance.contract).externalId
   invariant(contractExternalId, 'Contract must have been provisioned for an issuance to exist')
 
-  const credential = await admin.findCredential(contractExternalId, issuance.id)
-  invariant(credential, 'Credential with issuance id as an index claim could not be found')
+  try {
+    const credential = await admin.findCredential(contractExternalId, issuance.id)
+    invariant(credential, 'Credential with issuance id as an index claim could not be found')
 
-  await admin.revokeCredential(contractExternalId, credential.id)
+    await admin.revokeCredential(contractExternalId, credential.id)
+  } catch (err) {
+    if (issuance.status !== IssuanceStatus.Expired) throw err
+  }
 
   issuance.markAsRevoked(user)
   return issuance
