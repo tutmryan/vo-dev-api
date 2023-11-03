@@ -4,6 +4,8 @@ import { requestDetailsCache } from '../../../cache'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { IssuanceRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
+import { createAdminService } from '../../../services'
+import { invariant } from '../../../util/invariant'
 import { addUserToManager } from '../../auditing/user-context-helper'
 import type { IssuanceCallbackHandler } from '../../callback'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
@@ -13,6 +15,8 @@ import type { IssuanceTopicData } from './pubsub'
 import { publishIssuanceEvent } from './pubsub'
 
 export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) => {
+  const eventReceived = Date.now()
+
   const requestDetails = await requestDetailsCache.get(event.requestId)
   if (!requestDetails) {
     logger.error('Failed to locate a matching request details for issuance event', { event })
@@ -26,11 +30,20 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
     await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
       // look up the contract to get the validity interval
       const contract = await entityManager.getRepository(ContractEntity).findOneByOrFail({ id: issuanceRequestDetails.contractId })
+      let validityIntervalInSeconds = contract.validityIntervalInSeconds
+      // if the contract has unpublished changes, use the validity interval from the published contract
+      if (contract.hasUnpublishedChanges) {
+        const adminService = createAdminService(logger)
+        const publishedContract = await adminService.contract(contract.externalId!)
+        const publishedValidityInterval = publishedContract?.rules.validityInterval
+        invariant(publishedValidityInterval, 'Published contract validity interval not found')
+        validityIntervalInSeconds = publishedValidityInterval
+      }
       // create issuance record including expiresAt defn
       const issuanceEntity = new IssuanceEntity({
         ...issuanceRequestDetails,
         requestId: event.requestId,
-        expiresAt: addSeconds(Date.now(), contract.validityIntervalInSeconds),
+        expiresAt: addSeconds(eventReceived, validityIntervalInSeconds),
       })
       addUserToManager(entityManager, issuanceRequestDetails.issuedById)
       const { id } = await entityManager.getRepository(IssuanceEntity).save(issuanceEntity)

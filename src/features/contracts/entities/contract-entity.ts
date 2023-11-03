@@ -1,3 +1,4 @@
+import { differenceInSeconds } from 'date-fns'
 import { isEqual, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm'
 import type { ContractDisplayCredential, ContractDisplayCredentialLogo, ContractDisplayModel } from '../../../generated/graphql'
@@ -119,5 +120,12 @@ export class ContractEntity extends AuditedAndTrackedEntity {
     this.isDeprecated = true
     this.deprecatedBy = Promise.resolve(user)
     this.deprecatedAt = new Date()
+  }
+
+  get hasUnpublishedChanges(): boolean {
+    const lastSaved = this.updatedAt ?? this.createdAt
+    const lastProvisioned = this.lastProvisionedAt ?? this.provisionedAt ?? undefined
+    const wasProvisionedBeforeSave = !!lastProvisioned && differenceInSeconds(lastSaved, lastProvisioned) > 2
+    return wasProvisionedBeforeSave
   }
 }
