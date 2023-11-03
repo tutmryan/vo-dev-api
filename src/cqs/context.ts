@@ -5,3 +5,8 @@ export type CommandContext = Readonly<Pick<GraphQLContext, 'user' | 'logger' | '
   readonly entityManager: VerifiedOrchestrationEntityManager
   readonly contextType: 'command'
 }
+
+export type QueryContext = Readonly<Pick<GraphQLContext, 'user' | 'logger' | 'services' | 'dataLoaders'>> & {
+  readonly entityManager: VerifiedOrchestrationEntityManager
+  readonly contextType: 'query'
+}

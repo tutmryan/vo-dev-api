@@ -1,4 +1,4 @@
-import { dispatch, query } from '../../cqrs/dispatcher'
+import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { resolvePresentationEventData, subscribeToPresentationEventsWithFilter } from './callback/pubsub'
 import { CreatePresentationRequestCommand } from './commands/create-presentation-request-command'

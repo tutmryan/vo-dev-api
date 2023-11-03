@@ -1,4 +1,4 @@
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import type { Maybe, PresentationWhere } from '../../../generated/graphql'
 import { PresentationEntity } from '../entities/presentation-entity'
 

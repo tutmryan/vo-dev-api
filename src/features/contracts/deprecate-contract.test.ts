@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { mock as AdminService, mockCreateContract } from '../../services/__mocks__/admin'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
 import { provisionContractMutation } from './test/provision-contract'
@@ -31,7 +31,7 @@ describe('deprecateContract mutation', () => {
 
     // Assert
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toBe('Not Authorised!')
+    expectUnauthorizedError(errors)
   })
 
   it('marks the contract as deprecated if the contract has been provisioned', async () => {

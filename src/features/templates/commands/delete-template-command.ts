@@ -1,5 +1,5 @@
 import { basename } from 'path'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import { TemplateEntity } from '../entities/template-entity'
 
 export async function DeleteTemplateCommand(this: CommandContext, id: string) {

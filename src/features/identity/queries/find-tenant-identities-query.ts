@@ -1,5 +1,5 @@
 import config from '../../../config'
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import type { TenantIdentity, TenantIdentityWhere } from '../../../generated/graphql'
 
 export async function FindTenantIdentitiesQuery(

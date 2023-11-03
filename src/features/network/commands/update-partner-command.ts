@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import type { UpdatePartnerInput } from '../../../generated/graphql'
 import { PartnerEntity } from '../entities/partner-entity'
 

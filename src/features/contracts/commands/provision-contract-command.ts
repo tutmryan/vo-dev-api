@@ -1,5 +1,5 @@
 import { omit } from 'lodash'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import type { Contract, CreateContractInput, UpdateContractInput } from '../../../services/admin.types'
 import { displayClaimPrefix, standardClaimAttestations, standardContractDislayClaims } from '../claims'
 import { ContractEntity } from '../entities/contract-entity'

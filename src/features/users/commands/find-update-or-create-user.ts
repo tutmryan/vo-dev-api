@@ -1,6 +1,6 @@
 import { InMemoryLRUCache } from '@apollo/utils.keyvaluecache'
 import { pick } from 'lodash'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import type { UpdateIdentityInput } from '../entities/user-entity'
 import { UserEntity } from '../entities/user-entity'
 

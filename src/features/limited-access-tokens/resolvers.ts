@@ -1,4 +1,4 @@
-import { dispatch } from '../../cqrs/dispatcher'
+import { dispatch } from '../../cqs'
 import type { Resolvers } from '../../generated/graphql'
 import { AcquireLimitedAccessTokenCommand } from './commands/acquire-limited-access-token-command'
 

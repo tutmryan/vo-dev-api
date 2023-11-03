@@ -1,7 +1,7 @@
 import type { FindOptionsOrder, FindOptionsWhere } from 'typeorm'
 import { ILike } from 'typeorm'
 import config from '../../../config'
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import type { IdentityWhere, Maybe } from '../../../generated/graphql'
 import { IdentityOrderBy, OrderDirection } from '../../../generated/graphql'
 import { IdentityEntity } from '../entities/identity-entity'

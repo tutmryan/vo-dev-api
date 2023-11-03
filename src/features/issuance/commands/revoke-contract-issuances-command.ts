@@ -1,5 +1,5 @@
 import { addToJobQueue } from '../../../background-jobs/queue'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import { userInvariant } from '../../../util/user-invariant'
 
 export async function RevokeContractIssuancesCommand(this: CommandContext, id: string): Promise<string> {

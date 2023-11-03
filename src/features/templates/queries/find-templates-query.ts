@@ -1,6 +1,6 @@
 import type { FindOptionsWhere } from 'typeorm'
 import { ILike, IsNull } from 'typeorm'
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import type { Maybe, TemplateWhere } from '../../../generated/graphql'
 import { TemplateEntity } from '../entities/template-entity'
 

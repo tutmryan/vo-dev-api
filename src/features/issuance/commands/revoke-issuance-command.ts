@@ -1,4 +1,4 @@
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import { IssuanceStatus } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'

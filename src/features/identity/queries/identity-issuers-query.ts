@@ -1,5 +1,5 @@
 import config from '../../../config'
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import { IdentityEntity } from '../entities/identity-entity'
 
 export async function IdentityIssuersQuery(this: QueryContext) {

@@ -1,4 +1,4 @@
-import { query } from '../../cqrs/dispatcher'
+import { query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { CredentialTypesQuery } from './queries/credential-types-query'
 

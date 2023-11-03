@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
 import type { ContractInput } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { StandardClaims } from './claims'
 import { createContractMutation, getDefaultContractInput } from './test/create-contract'
@@ -26,7 +26,7 @@ describe('createContract mutation', () => {
 
     // Assert
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toBe('Not Authorised!')
+    expectUnauthorizedError(errors)
   })
 
   it(`returns an error if the template ID doesn't exist`, async () => {

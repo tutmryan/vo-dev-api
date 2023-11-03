@@ -1,5 +1,5 @@
 import { basename } from 'path'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import type { ContractInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { ContractEntity } from '../entities/contract-entity'

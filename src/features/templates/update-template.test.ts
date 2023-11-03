@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
 import { createTemplate, getEmptyTemplateInput } from './test/create-template'
 import { getTemplate } from './test/get-template'
 import { getUpdateTemplateInput, updateTemplateMutation } from './test/update-template'
@@ -55,7 +55,7 @@ describe('updateTemplate mutation', () => {
 
     // Assert
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toBe('Not Authorised!')
+    expectUnauthorizedError(errors)
   })
 
   it(`returns an error if the template ID doesn't exist`, async () => {

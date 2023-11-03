@@ -1,6 +1,6 @@
 import type { FindOptionsOrder } from 'typeorm'
 import { ILike, type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import type { Maybe, UserWhere } from '../../../generated/graphql'
 import { OrderDirection, UserOrderBy } from '../../../generated/graphql'
 import { UserEntity } from '../entities/user-entity'

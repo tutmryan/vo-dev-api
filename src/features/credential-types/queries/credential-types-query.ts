@@ -1,4 +1,4 @@
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import { dataSource } from '../../../data'
 import type { CredentialTypesWhere } from '../../../generated/graphql'
 

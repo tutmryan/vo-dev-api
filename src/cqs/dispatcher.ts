@@ -1,8 +1,7 @@
+import type { CommandContext, QueryContext } from '.'
 import type { GraphQLContext } from '../context'
 import { entityManager, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../data'
 import { addUserToManager } from '../features/auditing/user-context-helper'
-import type { CommandContext } from './command-context'
-import type { QueryContext } from './query-context'
 
 export type CommandLike = (this: CommandContext, ...args: any) => any
 export type QueryLike = (this: QueryContext, ...args: any) => any
@@ -10,12 +9,11 @@ export type QueryLike = (this: QueryContext, ...args: any) => any
 export type DispatchContext = Pick<GraphQLContext, 'dataSource' | 'user' | 'services' | 'dataLoaders' | 'logger' | 'requestInfo'>
 
 export const dispatch = async <T extends CommandLike>(
-  context: DispatchContext,
+  { dataSource, user, logger, services, dataLoaders, requestInfo }: DispatchContext,
   command: T,
   ...args: Parameters<T>
 ): Promise<Awaited<ReturnType<T>>> => {
-  return await context.dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
-    const { user } = context
+  return await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
     if (user) {
       addUserToManager(entityManager, user.userEntity.id)
     }
@@ -24,10 +22,10 @@ export const dispatch = async <T extends CommandLike>(
       {
         user,
         entityManager,
-        logger: context.logger,
-        services: context.services,
-        dataLoaders: context.dataLoaders,
-        requestInfo: context.requestInfo,
+        logger,
+        services,
+        dataLoaders,
+        requestInfo,
         contextType: 'command',
       },
       args,
@@ -36,18 +34,18 @@ export const dispatch = async <T extends CommandLike>(
 }
 
 export const query = async <T extends QueryLike>(
-  context: GraphQLContext,
+  context: Omit<QueryContext, 'entityManager' | 'contextType'>,
   query: T,
   ...args: Parameters<T>
 ): Promise<Awaited<ReturnType<T>>> => {
-  const { user } = context
+  const { user, logger, services, dataLoaders } = context
   return (await query.apply(
     {
       user,
       entityManager,
-      logger: context.logger,
-      services: context.services,
-      dataLoaders: context.dataLoaders,
+      logger,
+      services,
+      dataLoaders,
       contextType: 'query',
     },
     args,

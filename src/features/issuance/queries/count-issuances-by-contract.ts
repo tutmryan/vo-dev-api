@@ -1,4 +1,4 @@
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import type { IssuanceWhere, Maybe } from '../../../generated/graphql'
 import { andWhereOptionalRange } from '../../../util/typeorm'
 import { IssuanceEntity } from '../entities/issuance-entity'

@@ -1,4 +1,4 @@
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import type { OnboardingInput } from '../../../generated/graphql'
 import { sendOnboardingEmail } from '../../../services/email'
 

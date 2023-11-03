@@ -1,4 +1,4 @@
-import { dispatch, query } from '../../cqrs/dispatcher'
+import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { CreateOrUpdateIdentityCommand } from './commands/create-or-update-identity'
 import { resolveIssuer } from './issuer-resolver'

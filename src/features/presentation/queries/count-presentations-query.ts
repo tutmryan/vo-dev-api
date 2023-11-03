@@ -1,5 +1,5 @@
 import type { FindOptionsRelations, FindOptionsWhere } from 'typeorm'
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import type { Maybe, PresentationWhere } from '../../../generated/graphql'
 import { BetweenTimestamp, LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp } from '../../../util/typeorm'
 import type { IssuanceEntity } from '../../issuance/entities/issuance-entity'

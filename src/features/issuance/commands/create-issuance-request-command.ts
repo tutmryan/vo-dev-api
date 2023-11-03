@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
 import config from '../../../config'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import type { IssuanceRequestInput } from '../../../generated/graphql'
 import type { IssuanceRequest } from '../../../services/request'
 import { invariant } from '../../../util/invariant'

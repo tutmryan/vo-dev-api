@@ -1,5 +1,5 @@
 import { IsNull, type FindOptionsOrder, type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import { IssuanceOrderBy, IssuanceStatus, OrderDirection, type IssuanceWhere, type Maybe } from '../../../generated/graphql'
 import { LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp, OptionalRange } from '../../../util/typeorm'
 import { IssuanceEntity } from '../entities/issuance-entity'

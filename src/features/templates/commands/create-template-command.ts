@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { merge } from 'lodash'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import type { TemplateInput } from '../../../generated/graphql'
 import { validateContractClaims } from '../../contracts/claims'
 import { validateDisplayLogo } from '../../contracts/validation'

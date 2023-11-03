@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { graphql } from '../../generated'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
 import { createIdentityInput, saveIdentityMutation } from './create-update-identity.test'
 
 export const findIdentitiesQuery = graphql(`
@@ -55,6 +55,6 @@ describe('find-identity', () => {
 
     // Assert
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toBe('Not Authorised!')
+    expectUnauthorizedError(errors)
   })
 })

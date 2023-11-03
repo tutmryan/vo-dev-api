@@ -1,7 +1,7 @@
 import { flatten } from 'lodash'
 import { In } from 'typeorm'
 import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import type { PresentationRequestInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'

@@ -3,7 +3,7 @@ import { updateContractMutation } from './features/contracts/test/update-contrac
 import { graphql } from './generated'
 import type { AcquireLimitedAccessTokenInput, CreatePartnerInput, IssuanceRequestInput } from './generated/graphql'
 import { UserRoles } from './shield'
-import { beforeAfterAll, buildJwt, executeOperationAs, executeOperationAsCredentialAdmin } from './test'
+import { beforeAfterAll, buildJwt, executeOperationAs, executeOperationAsCredentialAdmin, expectUnauthorizedError } from './test'
 
 const createIssuanceRequestMutation = graphql(
   `
@@ -54,7 +54,7 @@ describe('smoke test shield rules application', () => {
         variables: { request: { contractId: 'contract-1' } as IssuanceRequestInput },
       })
       expect(errors).toBeDefined()
-      expect(errors?.[0]?.message).toBe('Not Authorised!')
+      expectUnauthorizedError(errors)
     },
   )
 
@@ -64,7 +64,7 @@ describe('smoke test shield rules application', () => {
       variables: { input: { name: 'Partner-1', did: 'partner-did-1', credentialTypes: ['partner-type-1'] } as CreatePartnerInput },
     })
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toBe('Not Authorised!')
+    expectUnauthorizedError(errors)
   })
 
   it.each([UserRoles.credentialAdmin, UserRoles.issuer, UserRoles.partnerAdmin, UserRoles.reader])(
@@ -80,7 +80,7 @@ describe('smoke test shield rules application', () => {
         buildJwt({ roles: [role] }),
       )
       expect(errors).toBeDefined()
-      expect(errors?.[0]?.message).toBe('Not Authorised!')
+      expectUnauthorizedError(errors)
     },
   )
 
@@ -98,7 +98,7 @@ describe('smoke test shield rules application', () => {
         buildJwt({ roles: [role] }),
       )
       expect(errors).toBeDefined()
-      expect(errors?.[0]?.message).toBe('Not Authorised!')
+      expectUnauthorizedError(errors)
     },
   )
 })

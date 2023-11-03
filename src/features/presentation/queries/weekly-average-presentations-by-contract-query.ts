@@ -1,5 +1,5 @@
 import { formatISO, subWeeks } from 'date-fns'
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import type { ContractPresentationWeeklyAverageWhere } from '../../../generated/graphql'
 import { PresentationEntity } from '../entities/presentation-entity'
 

@@ -9,5 +9,5 @@ export const addUserToManager = (entityManager: EntityManager | VerifiedOrchestr
 }
 
 export const getUserFromManager = (entityManager: EntityManager | VerifiedOrchestrationEntityManager): string => {
-  return contextMap.get(entityManager) ?? throwError(new Error('No user has been attached to this '))
+  return contextMap.get(entityManager) ?? throwError(new Error('No user has been attached to this EntityManager'))
 }

@@ -1,7 +1,7 @@
 import { getClientCredentialsToken } from '@makerx/node-common'
 import { setLimitedAccessData } from '..'
 import config from '../../../config'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import type { AccessTokenResponse, AcquireLimitedAccessTokenInput } from '../../../generated/graphql'
 import { userInvariant } from '../../../util/user-invariant'
 

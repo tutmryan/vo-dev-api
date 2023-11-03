@@ -1,5 +1,5 @@
 import type { GraphQLContext } from '../../context'
-import { query } from '../../cqrs/dispatcher'
+import { query } from '../../cqs/dispatcher'
 import type { Resolver, Resolvers, ResolversTypes } from '../../generated/graphql'
 import { FindUsersQuery } from './queries/find-users-query'
 

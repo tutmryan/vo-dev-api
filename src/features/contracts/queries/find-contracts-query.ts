@@ -1,6 +1,6 @@
 import type { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere } from 'typeorm'
 import { ILike, IsNull, Not, Raw } from 'typeorm'
-import type { QueryContext } from '../../../cqrs/query-context'
+import type { QueryContext } from '../../../cqs'
 import type { ContractWhere, Maybe } from '../../../generated/graphql'
 import { ContractOrderBy, OrderDirection } from '../../../generated/graphql'
 import { OptionalRange } from '../../../util/typeorm'

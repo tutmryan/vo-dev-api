@@ -1,5 +1,5 @@
 import { basename } from 'path'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import { ContractEntity } from '../entities/contract-entity'
 
 export async function DeleteContractCommand(this: CommandContext, id: string) {

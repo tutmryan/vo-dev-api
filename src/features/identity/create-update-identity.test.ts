@@ -2,7 +2,7 @@ import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { graphql } from '../../generated'
 import type { IdentityInput } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
 import { invariant } from '../../util/invariant'
 
 export const identityQuery = graphql(`
@@ -140,6 +140,6 @@ describe('create-update-identity', () => {
 
     // Assert
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toBe('Not Authorised!')
+    expectUnauthorizedError(errors)
   })
 })

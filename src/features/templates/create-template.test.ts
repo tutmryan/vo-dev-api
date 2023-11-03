@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { TemplateInput } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
 import { buildTemplateInput, createTemplate, createTemplateMutation, getEmptyTemplateInput } from './test/create-template'
 
 describe('createTemplate mutation', () => {
@@ -17,7 +17,7 @@ describe('createTemplate mutation', () => {
 
     // Assert
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toBe('Not Authorised!')
+    expectUnauthorizedError(errors)
   })
 
   it(`returns an error if the parent template ID doesn't exist`, async () => {

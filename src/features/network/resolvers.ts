@@ -1,4 +1,4 @@
-import { dispatch, query } from '../../cqrs/dispatcher'
+import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { compactErrors } from '../../util/compact-errors'
 import { CreatePartnerCommand } from './commands/create-partner-command'

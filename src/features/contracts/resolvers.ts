@@ -1,4 +1,4 @@
-import { dispatch, query } from '../../cqrs/dispatcher'
+import { dispatch, query } from '../../cqs'
 import type { Resolvers } from '../../generated/graphql'
 import { downloadToDataUrl } from '../../util/data-url'
 import { resolveUpdatedAt } from '../auditing/updated-at-resolver'

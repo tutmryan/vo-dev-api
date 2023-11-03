@@ -1,4 +1,4 @@
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import { userInvariant } from '../../../util/user-invariant'
 import { ContractEntity } from '../entities/contract-entity'
 

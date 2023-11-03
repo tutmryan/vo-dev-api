@@ -1,5 +1,6 @@
 import type { ShieldSchema } from '@makerx/graphql-core'
 import { isDev, isLocalDev } from '@makerx/node-common'
+import { GraphQLError } from 'graphql'
 import { allow, and, or, shield } from 'graphql-shield'
 import type { IRules } from 'graphql-shield/typings/types'
 import {
@@ -46,7 +47,7 @@ const fallbackRule = or(isUserWithReadPermissions, isIssuanceApp, isPresentation
 // issuance and presentation access rules
 const isAllowedToViewIssuances = or(isUserWithReadPermissions, isIssuanceApp, isValidLimitedAccessIssuanceFilter)
 const isAllowedToViewPresentations = or(isUserWithReadPermissions, isPresentationApp, isValidLimitedAccessPresentationFilter)
-export const rules = {
+export const rules: ShieldSchema<Resolvers> = {
   Query: {
     '*': isUserWithReadPermissions,
     healthcheck: allow,
@@ -110,5 +111,11 @@ function wrappedShield(x: ShieldSchema<Resolvers>) {
     fallbackRule,
     debug: isLocalDev || isDev, // [doc](https://the-guild.dev/graphql/shield/docs/shield) says: _Toggle debug mode._ (???)
     allowExternalErrors: true, // we don't want shield to catch and convert all errors to: Not Authorised!
+    fallbackError: new GraphQLError('Not Authorized!', {
+      extensions: {
+        code: 'FORBIDDEN',
+        status: 403,
+      },
+    }),
   })
 }

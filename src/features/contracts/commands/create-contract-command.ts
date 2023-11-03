@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto'
-import type { CommandContext } from '../../../cqrs/command-context'
+import type { CommandContext } from '../../../cqs'
 import type { ContractInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { TemplateEntity } from '../../templates/entities/template-entity'

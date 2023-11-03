@@ -1,4 +1,4 @@
-import { dispatch } from '../../cqrs/dispatcher'
+import { dispatch } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { BeginOnboardingCommand } from './commands/begin-onboarding-command'
 

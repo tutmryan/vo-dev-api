@@ -3,7 +3,7 @@ import { omit } from 'lodash'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
 import { mock as AdminService, mockCreateContract } from '../../services/__mocks__/admin'
 import { mock as BlobStorageContainerService } from '../../services/__mocks__/blob-storage-container-service'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
@@ -51,7 +51,7 @@ describe('updateContract mutation', () => {
 
     // Assert
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toBe('Not Authorised!')
+    expectUnauthorizedError(errors)
   })
 
   it('returns an error when the updated template overrides properties from its template', async () => {
