@@ -95,7 +95,7 @@ export class AdminService extends HttpClient {
     return contracts
   }
 
-  async findCredential(contractId: string, claimValue: string): Promise<Credential | null> {
+  async findCredential(contractId: string, claimValue: string): Promise<Credential | undefined> {
     // reference article on how to generate sha256 hash
     // https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/admin-api#search-credentials
     const contractIdLowerCase = contractId.toLowerCase()
@@ -107,7 +107,6 @@ export class AdminService extends HttpClient {
       )}`,
     )
     const [first] = credentials
-    invariant(first, 'Unable to find a credential when querying the Verified ID service')
     return first
   }
 
