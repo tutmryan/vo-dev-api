@@ -1,4 +1,5 @@
 import type { Job } from 'bullmq'
+import { omit } from 'lodash'
 import type { FindOptionsWhere } from 'typeorm'
 import type { WorkerContext } from '../../../background-jobs/worker'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
@@ -41,7 +42,7 @@ export const revokeIssuances = async (
           if (result) {
             addUserToManager(entityManager, user.id)
             await entityManager.getRepository(IssuanceEntity).save(result)
-            logger.audit('Issuance revoked', { issuance: result, jobId: job.id, jobData: job.data })
+            logger.audit('Issuance revoked', { issuance: omit(result, '__contract__', '__revokedBy__'), jobId: job.id, jobData: job.data })
           }
         })
       }
