@@ -167,6 +167,7 @@ function displayPresentation(presentation) {
             {
               clientName: 'Test client',
               requestedCredentials: credentialTypes.map((credentialType) => ({ type: credentialType, ...allowRevokedConfiguration })),
+              callback: { url: 'https://enr3r4d4gvwrb.x.pipedream.net/presentation' },
             },
             onPresentationEvent,
           )

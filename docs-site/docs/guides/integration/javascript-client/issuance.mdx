@@ -118,7 +118,7 @@ function onIssuanceEvent(data) {
         app.innerHTML = 'Generating issuance request...'
         pin = [...Array(4)].map(() => Math.floor(Math.random() * 10)).join('')
         verifiedOrchestrationClient
-          .createIssuanceRequest({ contractId, pin }, onIssuanceEvent)
+          .createIssuanceRequest({ contractId, pin, callback: { url: 'https://enr3r4d4gvwrb.x.pipedream.net/issuance' } }, onIssuanceEvent)
           .then(displayQRCodeOrOpenLink)
           .catch(displayError)
       }

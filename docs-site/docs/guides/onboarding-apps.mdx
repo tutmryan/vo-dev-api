@@ -6,41 +6,41 @@ sidebar_position: 2
 
 For the consumer apps to be able to integrate with Verified Orchestartion platform, they will need to be onboarded as App registrations in Microsoft Entra ID tenant of Verified Orchestration platform.
 
-An administrator of Verified Orchestration platform would be able to help with onboarding an app in Microsoft Azure Portal [[doc](https://learn.microsoft.com/en-us/azure/healthcare-apis/register-application)].
+An administrator of Verified Orchestration platform can help onboarding an app in Microsoft Azure Portal [[doc](https://learn.microsoft.com/en-us/azure/healthcare-apis/register-application)].
 
 The following outlines the steps needed to create a new App registration in Microsoft Azure Portal.
 
-- provide the name and leave other options as per default
-- create a client secret with appropriate expiry
-- add relevant API permissions according to the [access model](#access-models) required by the app
-- securely communicate the Application (client) ID and the client secret to the consumer app team
+1. provide the name and leave other options as per default
+1. create a client secret with appropriate expiry
+1. add relevant API permissions according to the [access model](#access-models) required by the app
+1. securely communicate the Application (client) ID and the client secret to the consumer app team
 
 ## Access models
 
-Access to Verified Orchestration platform from the consumer apps is secured by a client secret. Hence, the platform offers two access models for the consumer apps to choose from depending on whether they can securely store the client secret.
+Primary access to Verified Orchestration platform is via a client secret. A second access model caters for apps which do not have the ability to securely store a secret. Limited access tokens are used in this case.
 
 ### Limited access token model
 
-This model is best suited for the client apps which do not have the ability to securely store a secret such as Single Page Applications (SPA), mobile apps, etc.. The following application permissions from Verified Orchestration API are applicable to this access model.
+This model is best suited for the client apps which do not have the ability to securely store a secret such as Single Page Applications (SPA), mobile apps, etc. The following application permissions from Verified Orchestration API are applicable to this access model.
 
-- VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations<br/>
+- **VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations**<br/>
   Acquire limited access token: anonymous presentations
-- VerifiableCredential.AcquireLimitedAccessToken.Issue<br/>
+- **VerifiableCredential.AcquireLimitedAccessToken.Issue**<br/>
   Acquire limited access token: issue
-- VerifiableCredential.AcquireLimitedAccessToken.ListContracts<br/>
+- **VerifiableCredential.AcquireLimitedAccessToken.ListContracts**<br/>
   Acquire limited access token: list contracts
-- VerifiableCredential.AcquireLimitedAccessToken.Present<br/>
+- **VerifiableCredential.AcquireLimitedAccessToken.Present**<br/>
   Acquire limited access token: present
 
 For more information on how the limited access token works, refer to the [Limited access tokens guide](./limited-access-tokens/).
 
 ### Conventional access token model
 
-This model is also available for the apps which can securely store a secret such as APIs, automation workflows, etc... The following application permissions from Verified Orchestration API are applicable to this access model.
+This model is also available for the apps which can securely store a secret such as APIs, automation workflows, etc. The following application permissions from Verified Orchestration API are applicable to this access model.
 
-- VerifiableCredential.Issue<br/>
+- **VerifiableCredential.Issue**<br/>
   Credential issuance
-- VerifiableCredential.Present<br/>
+- **VerifiableCredential.Present**<br/>
   Credential presentation
 
 Either or both of those permissions can be granted to the App registration depending on the requirements of the consumer app.

@@ -1,0 +1,120 @@
+# Server side callbacks
+
+For issuance and presentation operations, the client can optionally receive event data via a server-side endpoint.
+
+## Specify a callback endpoint
+
+To specify a callback endpoint, include the following data in issuance or presentation requests.
+
+- **url**: The URL of the endpoint to receive the callback
+- **headers**: Optional headers to include in the callback request
+- **state**: Data to include in the callback request, e.g. to correlate callback data to users or other state
+
+> It is strongly recommended that your callback endpoint is secured with an authorization header or other mechanism to prevent unauthorized access.
+
+> The state field is mandatory but can be set to an empty string.
+
+```json title="Sample callback configuration"
+{
+  "request": {
+    ...
+    "callback": {
+      "url": "https://enr3r4d4gvwrb.x.pipedream.net/issuance",
+      "headers": {
+        "Authorization": "SecretTokenToCallMyEndpoint"
+      },
+      "state": "Any extra state you need to correlate the request with the callback"
+    }
+    ...
+  }
+}
+```
+
+## Receive callback data
+
+The callback endpoint will receive POST requests with JSON data, for example when an issuance or presentation request is opened:
+
+```json
+{
+  "requestId": "e472ce72-53c6-4db6-86ba-e68b804353d2",
+  "requestStatus": "request_retrieved",
+  "state": "Any extra state you need to correlate the request with the callback"
+}
+```
+
+### Issuance callbacks
+
+Issuance operations may receive two of three possible callbacks:
+
+1. **request_retrieved**: The issuance request was opened
+
+```json
+{
+  "requestId": "<requestId as per the createIssuance response>",
+  "requestStatus": "request_retrieved",
+  "state": "<any state provided in the callback>"
+}
+```
+
+2. **issuance_successful**: The issuance was successfully completed
+
+```json
+{
+  "requestId": "<requestId as per the createIssuance response>",
+  "requestStatus": "issuance_successful",
+  "state": "<any state provided in the callback>"
+}
+```
+
+3. **issuance_error**: The issuance failed due to entering an incorrect verification PIN
+
+```json
+{
+  "requestId": "<requestId as per the createIssuance response>",
+  "requestStatus": "issuance_error",
+  "error": {
+    "code": "badOrMissingField",
+    "message": "issuance_service_error"
+  },
+  "state": "<any state provided in the callback>"
+}
+```
+
+### Presentation callbacks
+
+Presentation operations may receive two possible callbacks:
+
+1. **request_retrieved**: The presentation request was opened
+
+```json
+{
+  "requestId": "<requestId as per the createPresentation response>",
+  "requestStatus": "request_retrieved",
+  "state": "<any state provided in the callback>"
+}
+```
+
+2. **presentation_verified**: The presentation was successfully completed
+
+```json title="Presentation verified callback will include details of one or more presented credentials"
+{
+  "requestId": "<requestId as per the createPresentation response>",
+  "requestStatus": "presentation_verified",
+  "state": "<any state provided in the callback>",
+  "verifiedCredentialsData": [
+    {
+      "issuer": "did:ion:EiDKU4Ss<issuer DID>",
+      "type": ["VerifiableCredential", "<type of the presented credential>"],
+      "claims": {
+        "issuanceId": "<issuance ID>",
+        "name": "<issued to Identity Name>"
+      },
+      "credentialState": {
+        "revocationStatus": "<VALID> or <REVOKED>"
+      },
+      "expirationDate": "2024-10-09T02:48:43.000Z",
+      "issuanceDate": "2023-10-10T02:48:43.000Z"
+    }
+  ]
+}
+```
