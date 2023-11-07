@@ -199,9 +199,9 @@ type PresentationCallbackEvent {
   requestId: ID!
   requestStatus: PresentationRequestStatus!
   """
-  Returns the state value that you passed in the original payload.
+  The optional state value that you passed in the original request payload.
   """
-  state: String!
+  state: String
   """
   The verifiable credential user DID.
   """

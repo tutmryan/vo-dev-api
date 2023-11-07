@@ -1,6 +1,5 @@
 import type { ClientCredentialsConfig, HttpClientOptions } from '@makerx/node-common'
 import { HttpClient, HttpResponseError, getClientCredentialsToken } from '@makerx/node-common'
-import { randomUUID } from 'crypto'
 import { REQUEST_CACHE_TTL, requestCallbackCache } from '../cache'
 import type { BaseContext } from '../context'
 import type {
@@ -69,7 +68,7 @@ export class RequestService extends HttpClient<BaseContext> {
     // build the callback payload with url, auth headers and state
     const callback: Callback = {
       url: this.issuanceCallbackUrl,
-      state: request.callback?.state ?? randomUUID(),
+      state: request.callback?.state ?? '',
       headers: {
         authorization: `Bearer ${callbackCredentials.access_token}`,
       },
@@ -103,7 +102,7 @@ export class RequestService extends HttpClient<BaseContext> {
     // build the callback payload with url, auth headers and state
     const callback: Callback = {
       url: this.presentationCallbackUrl,
-      state: request.callback?.state ?? randomUUID(),
+      state: request.callback?.state ?? '',
       headers: {
         authorization: `Bearer ${callbackCredentials.access_token}`,
       },

@@ -52,9 +52,10 @@ input Callback {
   """
   url: URL!
   """
-  Correlates the callback event with the state passed in the original payload.
+  Optional data that is passed to the callback endpoint.
+  E.g. to correlate information between the issuance request and the callback.
   """
-  state: String!
+  state: String
   """
   You can include a collection of HTTP headers required by the receiving end of the POST message.
   The current supported header values are the api-key or the Authorization headers.
@@ -640,9 +641,9 @@ type IssuanceCallbackEvent {
   requestId: ID!
   requestStatus: IssuanceRequestStatus!
   """
-  Returns the state value that you passed in the original payload.
+  The optional state value that you passed in the original request payload.
   """
-  state: String!
+  state: String
   """
   When the code property value is issuance_error, this property contains information about the error.
   """

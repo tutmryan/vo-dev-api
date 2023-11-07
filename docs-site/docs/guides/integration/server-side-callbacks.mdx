@@ -8,11 +8,9 @@ To specify a callback endpoint, include the following data in issuance or presen
 
 - **url**: The URL of the endpoint to receive the callback
 - **headers**: Optional headers to include in the callback request
-- **state**: Data to include in the callback request, e.g. to correlate callback data to users or other state
+- **state**: Optional data to include in the callback request, e.g. to correlate callback data to users or other state
 
 > It is strongly recommended that your callback endpoint is secured with an authorization header or other mechanism to prevent unauthorized access.
-
-> The state field is mandatory but can be set to an empty string.
 
 ```json title="Sample callback configuration"
 {

@@ -191,8 +191,11 @@ export type Callback = {
    * Any other header will throw an invalid callback header error
    */
   headers?: InputMaybe<Scalars['JSONObject']['input']>;
-  /** Correlates the callback event with the state passed in the original payload. */
-  state: Scalars['String']['input'];
+  /**
+   * Optional data that is passed to the callback endpoint.
+   * E.g. to correlate information between the issuance request and the callback.
+   */
+  state?: InputMaybe<Scalars['String']['input']>;
   /**
    * URI to the callback endpoint of your application.
    * The URI must point to a reachable endpoint on the internet otherwise the service will throw callback URL unreadable error.
@@ -867,8 +870,8 @@ export type IssuanceCallbackEvent = {
   /** Mapped to the original request when the payload was posted to the Verifiable Credentials service. */
   requestId: Scalars['ID']['output'];
   requestStatus: IssuanceRequestStatus;
-  /** Returns the state value that you passed in the original payload. */
-  state: Scalars['String']['output'];
+  /** The optional state value that you passed in the original request payload. */
+  state?: Maybe<Scalars['String']['output']>;
 };
 
 /** Data representing an issuance event (see IssuanceRequestStatus, could be received, successful, failed). */
@@ -1378,8 +1381,8 @@ export type PresentationCallbackEvent = {
   /** Mapped to the original request when the payload was posted to the Verifiable Credentials service. */
   requestId: Scalars['ID']['output'];
   requestStatus: PresentationRequestStatus;
-  /** Returns the state value that you passed in the original payload. */
-  state: Scalars['String']['output'];
+  /** The optional state value that you passed in the original request payload. */
+  state?: Maybe<Scalars['String']['output']>;
   /** The verifiable credential user DID. */
   subject?: Maybe<Scalars['String']['output']>;
   verifiedCredentialsData?: Maybe<Array<PresentedCredential>>;
@@ -2932,7 +2935,7 @@ export type IssuanceCallbackEventResolvers<ContextType = GraphQLContext, ParentT
   error?: Resolver<Maybe<ResolversTypes['RequestError']>, ParentType, ContextType>;
   requestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   requestStatus?: Resolver<ResolversTypes['IssuanceRequestStatus'], ParentType, ContextType>;
-  state?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -3050,7 +3053,7 @@ export type PresentationCallbackEventResolvers<ContextType = GraphQLContext, Par
   receipt?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   requestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   requestStatus?: Resolver<ResolversTypes['PresentationRequestStatus'], ParentType, ContextType>;
-  state?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   subject?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   verifiedCredentialsData?: Resolver<Maybe<Array<ResolversTypes['PresentedCredential']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
