@@ -4,7 +4,7 @@
   "description": "Verified Orchestration platform GraphQL API backend",
   "main": "src/main",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.10.0"
   },
   "scripts": {
     "start": "ts-node --transpile-only -r dotenv/config ./src/main",
