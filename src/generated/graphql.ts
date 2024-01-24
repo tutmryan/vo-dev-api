@@ -921,7 +921,7 @@ export type IssuanceRequestInput = {
   contractId: Scalars['ID']['input'];
   /**
    * Use this setting to explicitly control when a credential expires, regardless of when it is issued.
-   * Please note that the date should be UTC+0 in UTC format.
+   * Please note that the date should be in ISO format.
    */
   expirationDate?: InputMaybe<Scalars['DateTime']['input']>;
   /**
