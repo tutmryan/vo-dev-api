@@ -38,6 +38,12 @@ input IssuanceRequestInput {
   """
   claims: JSONObject
   pin: Pin
+
+  """
+  Use this setting to explicitly control when a credential expires, regardless of when it is issued.
+  Please note that the date should be UTC+0 in UTC format.
+  """
+  expirationDate: DateTime
 }
 
 """
