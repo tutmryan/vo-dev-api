@@ -60,12 +60,7 @@ const config: EnvVarSubstitution<Config> = {
     key: 'SENDGRID_API_KEY',
   },
   integrations: {
-    verifiedIdAdmin: {
-      auth: {
-        clientSecret: 'API_CLIENT_SECRET',
-      },
-    },
-    verifiedIdRequest: {
+    verifiedIdService: {
       auth: {
         clientSecret: 'API_CLIENT_SECRET',
       },
