@@ -13,8 +13,7 @@ type Authority {
   The friendly name of this instance of the verifiable credential service
   """
   name: String!
-  didModel: DidModel!
-  keyVaultMetadata: KeyVaultMetadata!
+  didModel: WebDidModel!
   """
   Indicates whether the linked domains have been verified
   """
@@ -22,49 +21,10 @@ type Authority {
 }
 
 """
-Information about the DID and keys
-"""
-interface DidModel {
-  """
-  The DID for this verifiable credential service instance
-  """
-  did: ID!
-  """
-  URL to the signing key
-  """
-  signingKeys: [String!]!
-  """
-  Domains linked to this DID
-  """
-  linkedDomainUrls: [URL!]!
-  didDocumentStatus: DidDocumentStatus!
-}
-
-"""
-DID information for the ION model
-"""
-type IonDidModel implements DidModel {
-  did: ID!
-  signingKeys: [String!]!
-  """
-  URL to the recovery  key
-  """
-  recoveryKeys: [String!]!
-  """
-  URL to the encryption  key
-  """
-  updateKeys: [String!]!
-  encryptionKeys: [String!]!
-  linkedDomainUrls: [URL!]!
-  didDocumentStatus: DidDocumentStatus!
-}
-
-"""
 DID information for the Web model
 """
-type WebDidModel implements DidModel {
+type WebDidModel {
   did: ID!
-  signingKeys: [String!]!
   linkedDomainUrls: [URL!]!
   didDocumentStatus: DidDocumentStatus!
 }
@@ -75,28 +35,6 @@ status of the DID, published when it's written to ION otherwise it will be submi
 enum DidDocumentStatus {
   submitted
   published
-}
-
-"""
-Information about the used Key Vault
-"""
-type KeyVaultMetadata {
-  """
-  The Azure subscription this Key Vault resides in
-  """
-  subscriptionId: ID!
-  """
-  Name of this Key Vault's resource group
-  """
-  resourceGroup: String!
-  """
-  Key Vault name
-  """
-  resourceName: String!
-  """
-  URL to this Key Vault
-  """
-  resourceUrl: URL!
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description
