@@ -107,6 +107,8 @@ const config: DeepPartial<Config> = {
     'dc8366b4-ba83-48e5-8ab2-9a852a4500c6': { name: 'Onboarding Demo API' },
     '682447f2-12b8-4ec1-a78e-fef3bf5e42f5': { name: 'Limited Access Client' },
     'a774bb59-1fb3-47c7-bbe3-d666fe3f6ca8': { name: 'Barhead Demo' },
+    '730966fe-a5f8-4227-b30b-63626a28188f': { name: 'NDIS Demo' },
+    '8db8c852-e896-496d-9b3b-fd6911836f4e': { name: 'Arpansa Demo' },
   },
   identityIssuers: {
     manual: { name: 'Manually Issued' },
