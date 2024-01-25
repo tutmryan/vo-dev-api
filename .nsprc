@@ -1,0 +1,6 @@
+{
+  "GHSA-p6mc-m468-83gw": {
+    "notes": "lodash.pick, no fix available yet: https://github.com/advisories/GHSA-p6mc-m468-83gw https://github.com/lodash/lodash/issues/5808",
+    "expiry": "2024-02-01"
+  }
+}
