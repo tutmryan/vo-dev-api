@@ -1,5 +1,5 @@
 import type { ContractDisplayModelInput, CreateUpdateTemplateDisplayModelInput, IssuanceRequestInput } from '../../generated/graphql'
-import type { AttestationClaimMapping, DisplayClaim } from '../../services/admin.types'
+import type { AttestationClaimMapping, DisplayClaim } from '../../services/verified-id'
 
 export const displayClaimPrefix = 'vc.credentialSubject.'
 export const claimTypeString = 'String'

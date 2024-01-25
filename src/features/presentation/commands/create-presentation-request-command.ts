@@ -19,7 +19,7 @@ export async function CreatePresentationRequestCommand(
   const {
     user,
     entityManager,
-    services: { request, admin },
+    services: { verifiedIdRequest, verifiedIdAdmin },
   } = this
 
   userInvariant(user)
@@ -27,7 +27,7 @@ export async function CreatePresentationRequestCommand(
   invariant(presentationRequest.requestedCredentials.length > 0, 'Requested credentials must be provided')
 
   // validate identity info is provided IF requested credentials are from external issuers
-  const platformIssuerDid = (await admin.authority()).didModel.did
+  const platformIssuerDid = (await verifiedIdAdmin.authority()).didModel.did
 
   // assign requested credential acceptedIssuers, if not provided
   presentationRequest.requestedCredentials.forEach((requestedCredential) => {
@@ -67,7 +67,7 @@ export async function CreatePresentationRequestCommand(
     : undefined
 
   // send it
-  const response = await request.createPresentationRequest({ ...presentationRequest, authority: platformIssuerDid })
+  const response = await verifiedIdRequest.createPresentationRequest({ ...presentationRequest, authority: platformIssuerDid })
 
   // cache presentation details for use in the callback
   const requestDetails: PresentationRequestDetails = {

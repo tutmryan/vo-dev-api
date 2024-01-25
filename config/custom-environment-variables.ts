@@ -61,6 +61,7 @@ const config: EnvVarSubstitution<Config> = {
   },
   integrations: {
     verifiedIdService: {
+      authorityId: 'VERIFIED_ID_AUTHORITY_ID',
       auth: {
         clientSecret: 'API_CLIENT_SECRET',
       },
