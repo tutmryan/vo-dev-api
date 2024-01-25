@@ -43,7 +43,7 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
       const issuanceEntity = new IssuanceEntity({
         ...issuanceRequestDetails,
         requestId: event.requestId,
-        expiresAt: addSeconds(eventReceived, validityIntervalInSeconds),
+        expiresAt: issuanceRequestDetails.expirationDate ?? addSeconds(eventReceived, validityIntervalInSeconds),
       })
       addUserToManager(entityManager, issuanceRequestDetails.issuedById)
       const { id } = await entityManager.getRepository(IssuanceEntity).save(issuanceEntity)

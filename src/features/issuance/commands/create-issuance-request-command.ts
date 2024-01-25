@@ -13,7 +13,8 @@ import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import type { IssuanceEntity } from '../entities/issuance-entity'
 
-export type IssuanceRequestDetails = Pick<IssuanceEntity, 'id' | 'issuedById' | 'identityId' | 'contractId'>
+export type IssuanceRequestDetails = Pick<IssuanceEntity, 'id' | 'issuedById' | 'identityId' | 'contractId'> &
+  Pick<IssuanceRequestInput, 'expirationDate'>
 
 type StandardClaimsData = Record<StandardClaims, string>
 
@@ -78,6 +79,7 @@ export async function CreateIssuanceRequestCommand(
     issuedById: user.userEntity.id.toUpperCase(),
     identityId: identity.id.toUpperCase(),
     contractId: contract.id.toUpperCase(),
+    expirationDate: issuanceRequest.expirationDate,
   }
   await requestDetailsCache.set(response.requestId, JSON.stringify(requestDetails), {
     ttl: REQUEST_CACHE_TTL,
