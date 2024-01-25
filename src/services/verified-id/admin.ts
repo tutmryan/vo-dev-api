@@ -1,35 +1,24 @@
 import type { HttpClientOptions } from '@makerx/node-common'
 import { HttpClient, HttpResponseError } from '@makerx/node-common'
 import { createHash } from 'crypto'
-import type { Authority, NetworkContract, NetworkIssuer, NetworkIssuersWhere } from '../generated/graphql'
-import { invariant } from '../util/invariant'
+import type { Authority, NetworkContract, NetworkIssuer, NetworkIssuersWhere } from '../../generated/graphql'
+import { Lazy } from '../../util/lazy'
 import type { Contract, CreateContractInput, Credential, UpdateContractInput } from './admin.types'
 
 interface Value<T> {
   value: T
 }
 
-// keep an authority reference at the module level
-// to avoid having to repeatedly load it
-let authority: Authority | undefined = undefined
-
-export class AdminService extends HttpClient {
-  constructor(options: HttpClientOptions) {
+export class VerifiedIdAdminService extends HttpClient {
+  constructor(options: HttpClientOptions, private authorityId: string) {
     super(options)
   }
 
-  async authorities(): Promise<Authority[]> {
-    const { value: authorities } = await this.get<Value<Authority[]>>('verifiableCredentials/authorities')
-    return authorities
-  }
-
-  async authorityById(id: string): Promise<Authority> {
-    return this.get<Authority>(`verifiableCredentials/authorities/${id}`)
-  }
+  authority = Lazy(() => this.get<Authority>(`verifiableCredentials/authorities/${this.authorityId}`))
 
   async createContract(input: CreateContractInput): Promise<Contract> {
     try {
-      return await this.post<Contract>(`verifiableCredentials/authorities/${await this.authorityId()}/contracts`, { data: input })
+      return await this.post<Contract>(`verifiableCredentials/authorities/${this.authorityId}/contracts`, { data: input })
     } catch (error: any) {
       const { message, ...rest } = error
       this.options.logger?.error('Error creating contract', { message, ...rest })
@@ -41,12 +30,9 @@ export class AdminService extends HttpClient {
     // The service is case-sensitive on GUIDs, and we get the contract ID from SQL Server / mssql as uppercase, so
     // we need to lowercase it ourselves #prettylame
     try {
-      return await this.patch<Contract>(
-        `verifiableCredentials/authorities/${await this.authorityId()}/contracts/${contractId.toLowerCase()}`,
-        {
-          data: input,
-        },
-      )
+      return await this.patch<Contract>(`verifiableCredentials/authorities/${this.authorityId}/contracts/${contractId.toLowerCase()}`, {
+        data: input,
+      })
     } catch (error: any) {
       const { message, ...rest } = error
       this.options.logger?.error('Error updating contract', { message, ...rest })
@@ -54,31 +40,13 @@ export class AdminService extends HttpClient {
     }
   }
 
-  async contracts(authorityId?: string): Promise<Contract[]> {
-    const { value: contracts } = await this.get<Value<Contract[]>>(
-      `verifiableCredentials/authorities/${authorityId ?? (await this.authorityId())}/contracts`,
-    )
+  async contracts(): Promise<Contract[]> {
+    const { value: contracts } = await this.get<Value<Contract[]>>(`verifiableCredentials/authorities/${this.authorityId}/contracts`)
     return contracts
   }
 
   async contract(id: string): Promise<Contract | null> {
-    return this.get<Contract>(`verifiableCredentials/authorities/${await this.authorityId()}/contracts/${id.toLowerCase()}`)
-  }
-
-  async authority(): Promise<Authority> {
-    if (authority) return authority
-
-    const { value: authorities } = await this.get<Value<Authority[]>>('verifiableCredentials/authorities')
-
-    const [first] = authorities
-    invariant(first, 'Unable to find an authority when querying the Verified ID service')
-
-    authority = first
-    return authority
-  }
-
-  async authorityId(): Promise<string> {
-    return (await this.authority()).id
+    return this.get<Contract>(`verifiableCredentials/authorities/${this.authorityId}/contracts/${id.toLowerCase()}`)
   }
 
   async findNetworkIssuers({ linkedDomainUrlsLike }: NetworkIssuersWhere): Promise<NetworkIssuer[]> {
@@ -102,7 +70,7 @@ export class AdminService extends HttpClient {
     const indexClaimHash = createHash('sha256').update(`${contractIdLowerCase}${claimValue.toLowerCase()}`).digest('base64')
 
     const { value: credentials } = await this.get<Value<Credential[]>>(
-      `verifiableCredentials/authorities/${await this.authorityId()}/contracts/${contractIdLowerCase}/credentials?filter=${encodeURIComponent(
+      `verifiableCredentials/authorities/${this.authorityId}/contracts/${contractIdLowerCase}/credentials?filter=${encodeURIComponent(
         `indexclaimhash eq ${indexClaimHash}`,
       )}`,
     )
@@ -113,7 +81,7 @@ export class AdminService extends HttpClient {
   async revokeCredential(contractId: string, credentialId: string): Promise<void> {
     try {
       await this.post<undefined>(
-        `verifiableCredentials/authorities/${await this.authorityId()}/contracts/${contractId.toLowerCase()}/credentials/${credentialId}/revoke`,
+        `verifiableCredentials/authorities/${this.authorityId}/contracts/${contractId.toLowerCase()}/credentials/${credentialId}/revoke`,
         {},
       )
     } catch (error: any) {

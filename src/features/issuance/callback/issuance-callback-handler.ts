@@ -4,7 +4,7 @@ import { requestDetailsCache } from '../../../cache'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { IssuanceRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
-import { createAdminService } from '../../../services'
+import { createVerifiedIdAdminService } from '../../../services'
 import { invariant } from '../../../util/invariant'
 import { addUserToManager } from '../../auditing/user-context-helper'
 import type { IssuanceCallbackHandler } from '../../callback'
@@ -33,7 +33,7 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
       let validityIntervalInSeconds = contract.validityIntervalInSeconds
       // if the contract has unpublished changes, use the validity interval from the published contract
       if (contract.hasUnpublishedChanges) {
-        const adminService = createAdminService(logger)
+        const adminService = createVerifiedIdAdminService(logger)
         const publishedContract = await adminService.contract(contract.externalId!)
         const publishedValidityInterval = publishedContract?.rules.validityInterval
         invariant(publishedValidityInterval, 'Published contract validity interval not found')

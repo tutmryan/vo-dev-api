@@ -1,6 +1,6 @@
 import { omit } from 'lodash'
 import type { CommandContext } from '../../../cqs'
-import type { Contract, CreateContractInput, UpdateContractInput } from '../../../services/admin.types'
+import type { Contract, CreateContractInput, UpdateContractInput } from '../../../services/verified-id'
 import { displayClaimPrefix, standardClaimAttestations, standardContractDislayClaims } from '../claims'
 import { ContractEntity } from '../entities/contract-entity'
 
@@ -12,7 +12,7 @@ export async function ProvisionContractCommand(this: CommandContext, id: string)
   let provisionedContract: Contract | undefined = undefined
   if (!contract.externalId) {
     const createContractInput = toCreateContractInput(contract)
-    provisionedContract = await this.services.admin.createContract(createContractInput)
+    provisionedContract = await this.services.verifiedIdAdmin.createContract(createContractInput)
 
     contract.markAsProvisioned({
       externalId: provisionedContract.id,
@@ -22,7 +22,7 @@ export async function ProvisionContractCommand(this: CommandContext, id: string)
     if (contract.isDeprecated) throw new Error('Contract has been deprecated, it cannot be published again')
 
     const updateContractInput = toUpdateContractInput(contract)
-    await this.services.admin.updateContract(contract.externalId, updateContractInput)
+    await this.services.verifiedIdAdmin.updateContract(contract.externalId, updateContractInput)
 
     contract.markAsReprovisioned(this.user!.userEntity)
   }

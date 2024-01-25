@@ -5,7 +5,7 @@ import type { WorkerContext } from '../../../background-jobs/worker'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { IssuanceStatus } from '../../../generated/graphql'
 import type { logger } from '../../../logger'
-import type { AdminService } from '../../../services/admin'
+import type { VerifiedIdAdminService } from '../../../services/verified-id'
 import { invariant } from '../../../util/invariant'
 import { addUserToManager } from '../../auditing/user-context-helper'
 import type { ContractEntity } from '../../contracts/entities/contract-entity'
@@ -26,7 +26,7 @@ export const revokeIssuances = async (
   contract?: ContractEntity,
 ) => {
   const errorMessages = []
-  const { logger, adminService, user } = context
+  const { logger, verifiedIdAdminService: adminService, user } = context
   const issuances = await dataSource.getRepository(IssuanceEntity).find({ where })
 
   for (let index = 0; index < issuances.length; index++) {
@@ -60,7 +60,7 @@ export const revokeIssuances = async (
 
 const revokeIssuance = async (
   issuance: IssuanceEntity,
-  admin: AdminService,
+  verifiedIdAdminService: VerifiedIdAdminService,
   user: UserEntity,
   log: typeof logger,
   contract?: ContractEntity,
@@ -68,14 +68,14 @@ const revokeIssuance = async (
   const contractExternalId = contract?.externalId ?? (await issuance.contract).externalId
   invariant(contractExternalId, 'Contract must have been provisioned for an issuance to exist')
 
-  const credential = await admin.findCredential(contractExternalId, issuance.id)
+  const credential = await verifiedIdAdminService.findCredential(contractExternalId, issuance.id)
   if (!credential && issuance.status === IssuanceStatus.Expired) {
     log.warn(`Expired credential with issuance id ${issuance.id} could not be found`)
     return null
   }
 
   invariant(credential, 'Credential with issuance id as an index claim could not be found')
-  await admin.revokeCredential(contractExternalId, credential.id)
+  await verifiedIdAdminService.revokeCredential(contractExternalId, credential.id)
 
   issuance.markAsRevoked(user)
   return issuance
