@@ -16,8 +16,8 @@ import { UserEntity } from '../features/users/entities/user-entity'
 import { BackgroundJobStatus } from '../generated/graphql'
 import { logger } from '../logger'
 import { redisOptions } from '../redis'
-import { createAdminService } from '../services'
-import type { AdminService } from '../services/admin'
+import { createVerifiedIdAdminService } from '../services'
+import type { VerifiedIdAdminService } from '../services/verified-id'
 import { Lazy } from '../util/lazy'
 import { publishBackgroundJobEvent } from './pubsub'
 import { JobQueueName, MAX_RETRY } from './queue'
@@ -28,7 +28,7 @@ export type JobTypes = RevokeIssuancesJobType | RevokeContractIssuancesJobType |
 type BackgroundJob = Job<{ userId: string; requestId?: string }>
 export type WorkerContext = {
   logger: typeof logger
-  adminService: AdminService
+  verifiedIdAdminService: VerifiedIdAdminService
   user: UserEntity
 }
 type HandlerMap<T extends { name: JobNames }> = {
@@ -44,7 +44,7 @@ const handlers: HandlerMap<JobTypes> = {
 
 const createWorkerContext = async (userId: string): Promise<WorkerContext> => ({
   logger,
-  adminService: createAdminService(logger),
+  verifiedIdAdminService: createVerifiedIdAdminService(logger),
   user: await dataSource.getRepository(UserEntity).findOneByOrFail({ id: userId }),
 })
 

@@ -675,7 +675,7 @@ export type CredentialTypesWhere = {
   includeTemplateTypes?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-/** status of the DID, published when it's written to ION otherwise it will be submitted */
+/** status of the DID */
 export enum DidDocumentStatus {
   Published = 'published',
   Submitted = 'submitted'
@@ -1507,10 +1507,8 @@ export type PresentedCredential = {
 
 export type Query = {
   __typename?: 'Query';
-  /** Lists all the configured authorities */
-  authorities: Array<Authority>;
-  /** Returns an authority by ID */
-  authority?: Maybe<Authority>;
+  /** Returns the details of the configured instance authority */
+  authority: Authority;
   /** Returns a contract by ID */
   contract: Contract;
   /**
@@ -1572,11 +1570,6 @@ export type Query = {
   templateCombinedData: TemplateParentData;
   /** Returns a user by ID */
   user: User;
-};
-
-
-export type QueryAuthorityArgs = {
-  id: Scalars['ID']['input'];
 };
 
 
@@ -3023,8 +3016,7 @@ export type PresentedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
 };
 
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  authorities?: Resolver<Array<ResolversTypes['Authority']>, ParentType, ContextType>;
-  authority?: Resolver<Maybe<ResolversTypes['Authority']>, ParentType, ContextType, RequireFields<QueryAuthorityArgs, 'id'>>;
+  authority?: Resolver<ResolversTypes['Authority'], ParentType, ContextType>;
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, Partial<QueryCredentialTypesArgs>>;
   findContracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType, Partial<QueryFindContractsArgs>>;

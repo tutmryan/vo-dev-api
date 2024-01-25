@@ -1,7 +1,7 @@
 import type { ClientCredentialsConfig, HttpClientOptions } from '@makerx/node-common'
 import { HttpClient, HttpResponseError, getClientCredentialsToken } from '@makerx/node-common'
-import { REQUEST_CACHE_TTL, requestCallbackCache } from '../cache'
-import type { BaseContext } from '../context'
+import { REQUEST_CACHE_TTL, requestCallbackCache } from '../../cache'
+import type { BaseContext } from '../../context'
 import type {
   Callback,
   IssuanceRequestInput,
@@ -11,7 +11,7 @@ import type {
   PresentationRequestResponse,
   PresentationResponse,
   RequestErrorResponse,
-} from '../generated/graphql'
+} from '../../generated/graphql'
 
 type RequestServiceOptions = HttpClientOptions<BaseContext> & {
   issuanceCallbackUrl: string
@@ -42,7 +42,7 @@ export type PresentationRequest = Omit<PresentationRequestInput, 'requestedContr
   authority: string
 }
 
-export class RequestService extends HttpClient<BaseContext> {
+export class VerifiedIdRequestService extends HttpClient<BaseContext> {
   readonly issuanceCallbackUrl: string
   readonly issuanceCallbackAuthConfig: ClientCredentialsConfig
   readonly presentationCallbackUrl: string

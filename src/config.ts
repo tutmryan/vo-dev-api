@@ -9,7 +9,7 @@ import type { CorsOptions, CorsOptionsDelegate } from 'cors'
 import type { LoggerOptions } from 'typeorm'
 import type { ConsoleTransportOptions } from 'winston/lib/winston/transports'
 import type { GraphServiceConfig } from './services'
-import type { IssuanceRequestRegistration } from './services/request'
+import type { IssuanceRequestRegistration } from './services/verified-id'
 
 export type Config = {
   cors: CorsOptions | CorsOptionsDelegate
@@ -76,13 +76,10 @@ export type Config = {
     }
   }
   integrations: {
-    verifiedIdAdmin: {
+    verifiedIdService: {
       baseUrl: string
       auth: ClientCredentialsConfig
-    }
-    verifiedIdRequest: {
-      baseUrl: string
-      auth: ClientCredentialsConfig
+      authorityId: string
     }
     b2cGraph: GraphServiceConfig
   }

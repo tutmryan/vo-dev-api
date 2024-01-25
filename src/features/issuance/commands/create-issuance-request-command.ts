@@ -3,7 +3,7 @@ import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
 import config from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import type { IssuanceRequestInput } from '../../../generated/graphql'
-import type { IssuanceRequest } from '../../../services/request'
+import type { IssuanceRequest } from '../../../services/verified-id'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import type { StandardClaims } from '../../contracts/claims'
@@ -25,7 +25,7 @@ export async function CreateIssuanceRequestCommand(
   const {
     user,
     entityManager,
-    services: { request, admin },
+    services: { verifiedIdRequest: request, verifiedIdAdmin },
   } = this
 
   userInvariant(user)
@@ -38,7 +38,7 @@ export async function CreateIssuanceRequestCommand(
   invariant(!contract.isDeprecated, 'Contract must not be deprecated')
 
   // find the provisioned contract
-  const provisionedContract = await admin.contract(contract.externalId)
+  const provisionedContract = await verifiedIdAdmin.contract(contract.externalId)
   invariant(provisionedContract, 'Published contract could not be found')
 
   // find or create the identity
@@ -65,7 +65,7 @@ export async function CreateIssuanceRequestCommand(
     claims,
     ...rest,
     type: contract.credentialTypes.join(','), // the Azure portal issuance example joins the types with a comma
-    authority: (await admin.authority()).didModel.did,
+    authority: (await verifiedIdAdmin.authority()).didModel.did,
     manifest: provisionedContract.manifestUrl,
     registration: config.get('issuanceRequestRegistration'),
   }

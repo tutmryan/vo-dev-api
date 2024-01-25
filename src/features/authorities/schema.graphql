@@ -30,7 +30,7 @@ type WebDidModel {
 }
 
 """
-status of the DID, published when it's written to ION otherwise it will be submitted
+status of the DID
 """
 enum DidDocumentStatus {
   submitted
@@ -40,11 +40,7 @@ enum DidDocumentStatus {
 # eslint-disable-next-line @graphql-eslint/require-description
 type Query {
   """
-  Returns an authority by ID
+  Returns the details of the configured instance authority
   """
-  authority(id: ID!): Authority
-  """
-  Lists all the configured authorities
-  """
-  authorities: [Authority!]!
+  authority: Authority!
 }

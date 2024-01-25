@@ -1,8 +1,8 @@
 import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
-import { mock as AdminService, mockCreateContract } from '../../services/__mocks__/admin'
 import { mock as BlobStorageContainerService } from '../../services/__mocks__/blob-storage-container-service'
+import { mock as AdminService, mockCreateContract } from '../../services/__mocks__/verified-id'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { buildContractInput, createContract } from './test/create-contract'
@@ -11,7 +11,7 @@ import { getContract } from './test/get-contract'
 import { provisionContractMutation } from './test/provision-contract'
 import { getUpdateContractInput, updateContractMutation } from './test/update-contract'
 
-jest.mock('../../services/admin')
+jest.mock('../../services/verified-id')
 jest.mock('../../services/blob-storage-container-service')
 
 describe('updateContract mutation', () => {

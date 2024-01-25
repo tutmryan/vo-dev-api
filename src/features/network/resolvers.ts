@@ -11,8 +11,9 @@ export const resolvers: Resolvers = {
     updatePartner: (_, { id, input }, context) => dispatch(context, UpdatePartnerCommand, id, input),
   },
   Query: {
-    findNetworkIssuers: (_, { where }, { services: { admin } }) => admin.findNetworkIssuers(where),
-    networkContracts: (_, { tenantId, issuerId }, { services: { admin } }) => admin.networkContracts(tenantId, issuerId),
+    findNetworkIssuers: (_, { where }, { services: { verifiedIdAdmin } }) => verifiedIdAdmin.findNetworkIssuers(where),
+    networkContracts: (_, { tenantId, issuerId }, { services: { verifiedIdAdmin } }) =>
+      verifiedIdAdmin.networkContracts(tenantId, issuerId),
     findPartners: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindPartnersQuery, where, offset, limit, orderBy, orderDirection),
     partner: (_, { id }, { dataLoaders: { partners } }) => partners.load(id),
