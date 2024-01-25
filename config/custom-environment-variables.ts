@@ -1,12 +1,12 @@
-import type { Config } from '../src/config'
+import type { Config } from '../src/config';
 
 type EnvVarParsingRule = { __name: string; __format: string }
 
 type EnvVarSubstitution<T> = {
   [key in keyof T]?:
-    | Uppercase<string>
-    | EnvVarParsingRule
-    | (T[key] extends Date ? never : T[key] extends object ? EnvVarSubstitution<T[key]> : never)
+  | Uppercase<string>
+  | EnvVarParsingRule
+  | (T[key] extends Date ? never : T[key] extends object ? EnvVarSubstitution<T[key]> : never)
 }
 
 const json = <T extends Uppercase<string>>(varName: T): { __name: T; __format: 'json' } => ({
@@ -60,8 +60,13 @@ const config: EnvVarSubstitution<Config> = {
     key: 'SENDGRID_API_KEY',
   },
   integrations: {
-    verifiedIdService: {
+    verifiedIdAdmin: {
       authorityId: 'VERIFIED_ID_AUTHORITY_ID',
+      auth: {
+        clientSecret: 'API_CLIENT_SECRET',
+      },
+    },
+    verifiedIdRequest: {
       auth: {
         clientSecret: 'API_CLIENT_SECRET',
       },

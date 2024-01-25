@@ -27,7 +27,7 @@ export const createServices = (context: BaseContext): Services => {
 }
 
 export function createVerifiedIdAdminService(logger: BaseContext['logger'], correlationId?: string) {
-  const { authorityId, baseUrl, auth } = config.get('integrations.verifiedIdService')
+  const { authorityId, baseUrl, auth } = config.get('integrations.verifiedIdAdmin')
 
   return new VerifiedIdAdminService(
     {
@@ -41,7 +41,7 @@ export function createVerifiedIdAdminService(logger: BaseContext['logger'], corr
 }
 
 function createVerifiedIdRequestService(context: BaseContext) {
-  const { baseUrl, auth } = config.get('integrations.verifiedIdService')
+  const { baseUrl, auth } = config.get('integrations.verifiedIdRequest')
 
   const httpClientOptions = {
     baseUrl,

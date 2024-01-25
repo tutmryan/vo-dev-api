@@ -76,10 +76,14 @@ export type Config = {
     }
   }
   integrations: {
-    verifiedIdService: {
+    verifiedIdAdmin: {
+      authorityId: string
       baseUrl: string
       auth: ClientCredentialsConfig
-      authorityId: string
+    }
+    verifiedIdRequest: {
+      baseUrl: string
+      auth: ClientCredentialsConfig
     }
     b2cGraph: GraphServiceConfig
   }
