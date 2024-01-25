@@ -62,8 +62,15 @@ const config: DeepPartial<Config> = {
     },
   },
   integrations: {
-    verifiedIdService: {
+    verifiedIdAdmin: {
       authorityId: '9568e470-f1e8-755f-94df-19e75efd45a1',
+      auth: {
+        // Verified Orchestration API (dev)
+        // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/e53f942c-c727-4db9-a857-988bae3e07b6/isMSAApp~/false
+        clientId: 'e53f942c-c727-4db9-a857-988bae3e07b6',
+      },
+    },
+    verifiedIdRequest: {
       auth: {
         // Verified Orchestration API (dev)
         // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/e53f942c-c727-4db9-a857-988bae3e07b6/isMSAApp~/false
