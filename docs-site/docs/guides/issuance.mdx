@@ -38,6 +38,7 @@ The [issuance request input](/docs/reference/inputs/issuance-request-input) spec
    1. Values of any claims defined in the contract
    1. A PIN code that the recipient must enter to retrieve the credential (best sent via a separate channel)
    1. Callback info, if issuance event data should also be sent to a server-side endpoint
+   1. An expiration date to explicitly control when a credential expires, regardless of when it is issued
 
 ```graphql title="CreateIssuanceRequest mutation: will return a response with issuance request or error details"
 mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
@@ -79,7 +80,8 @@ mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
     "pin": {
       "value": "1234",
       "length": 4
-    }
+    },
+    "expirationDate": "<explicit expiry date of the credential in ISO format>"
   }
 }
 ```
