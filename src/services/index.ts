@@ -2,7 +2,6 @@ import type { HttpAuthFactory } from '@makerx/node-common'
 import { createClientCredentialsAuthFactory as clientCredentialsAuth } from '@makerx/node-common'
 import config from '../config'
 import type { BaseContext } from '../context'
-import type { logger } from '../logger'
 import { BlobStorageContainerService } from './blob-storage-container-service'
 import { GraphService } from './graph-service'
 import { VerifiedIdAdminService, VerifiedIdRequestService } from './verified-id'
@@ -27,14 +26,14 @@ export const createServices = (context: BaseContext): Services => {
   }
 }
 
-export function createVerifiedIdAdminService(loggerParam: typeof logger, correlationId?: string) {
+export function createVerifiedIdAdminService(logger: BaseContext['logger'], correlationId?: string) {
   const { authorityId, baseUrl, auth } = config.get('integrations.verifiedIdService')
 
   return new VerifiedIdAdminService(
     {
-      logger: loggerParam,
-      correlationId,
       baseUrl,
+      logger,
+      correlationId,
       authFactory: <HttpAuthFactory>clientCredentialsAuth(auth),
     },
     authorityId,
@@ -42,18 +41,18 @@ export function createVerifiedIdAdminService(loggerParam: typeof logger, correla
 }
 
 function createVerifiedIdRequestService(context: BaseContext) {
+  const { baseUrl, auth } = config.get('integrations.verifiedIdService')
+
   const httpClientOptions = {
+    baseUrl,
     requestContext: context,
     logger: context.logger,
     correlationId: context.requestInfo.correlationId,
+    authFactory: <HttpAuthFactory<BaseContext>>clientCredentialsAuth(auth),
   }
-
-  const { baseUrl, auth } = config.get('integrations.verifiedIdService')
 
   return new VerifiedIdRequestService({
     ...httpClientOptions,
-    baseUrl,
-    authFactory: <HttpAuthFactory<BaseContext>>clientCredentialsAuth(auth),
     issuanceCallbackUrl: `https://${context.requestInfo.host}${config.get('issuanceCallback.route')}`,
     issuanceCallbackAuthConfig: config.get('issuanceCallback.auth'),
     presentationCallbackUrl: `https://${context.requestInfo.host}${config.get('presentationCallback.route')}`,
