@@ -1,7 +1,7 @@
 import type { Configuration as MsalConfiguration } from '@azure/msal-node'
 import type { BearerConfig } from '@makerx/express-bearer'
 import type { ClientCredentialsConfig } from '@makerx/node-common'
-import { createTypedConfig } from '@makerx/node-common/typed-config-factory'
+import { createTypedConfig } from '@makerx/node-common'
 import type { MailDataRequired } from '@sendgrid/mail'
 // eslint-disable-next-line no-restricted-imports
 import config from 'config'
