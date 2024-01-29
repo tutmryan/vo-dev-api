@@ -1,8 +1,6 @@
 import { extractErrorResponseInfo } from '@makerx/node-common'
 import type { RequestHandler } from 'express'
 import { capitalize } from 'lodash'
-import type { RequestInit } from 'node-fetch'
-import fetch from 'node-fetch'
 import { requestCallbackCache } from '../../cache'
 import type { Callback, IssuanceCallbackEvent, PresentationCallbackEvent } from '../../generated/graphql'
 import { logger } from '../../logger'
