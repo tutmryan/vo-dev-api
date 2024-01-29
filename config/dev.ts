@@ -54,13 +54,6 @@ const config: DeepPartial<Config> = {
     clientId: '53022c73-6efc-406b-873a-8916c3451006',
     scope: apiDefaultScope,
   },
-  sendgrid: {
-    templates: {
-      onboarding: {
-        baseUrl: 'https://green-forest-0f87c3200.2.azurestaticapps.net',
-      },
-    },
-  },
   integrations: {
     verifiedIdAdmin: {
       authorityId: '9568e470-f1e8-755f-94df-19e75efd45a1',

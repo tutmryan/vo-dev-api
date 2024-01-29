@@ -390,21 +390,6 @@ resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01
   }
 }
 
-@description('API key for SendGrid')
-@secure()
-param sendgridApiKey string
-
-resource sendgridApiKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  name: 'SENDGRID-API-KEY'
-  parent: keyVault
-  properties: {
-    attributes: {
-      enabled: true
-    }
-    value: sendgridApiKey
-  }
-}
-
 @description('The client secret of the docs site app registration in Azure AD')
 @secure()
 param docsSiteClientSecret string
@@ -648,12 +633,10 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     WEBSITE_RUN_FROM_PACKAGE: '1'
     API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
     UI_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${uiClientSecretSecret.properties.secretUri})'
-    B2C_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${b2cGraphClientSecretSecret.properties.secretUri})'
     VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
     LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
     LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessSecretSecret.properties.secretUri})'
     REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
-    SENDGRID_API_KEY: '@Microsoft.KeyVault(SecretUri=${sendgridApiKeySecret.properties.secretUri})'
   }
 }
 

@@ -73,13 +73,6 @@ const config: DeepPartial<Config> = {
     clientId: 'c712fd5e-3317-47b8-bb22-c26296661a51',
     scope: apiDefaultScope,
   },
-  sendgrid: {
-    templates: {
-      onboarding: {
-        baseUrl: 'http://localhost:4001',
-      },
-    },
-  },
   integrations: {
     verifiedIdAdmin: {
       authorityId: '9568e470-f1e8-755f-94df-19e75efd45a1',

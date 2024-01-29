@@ -56,9 +56,6 @@ const config: EnvVarSubstitution<Config> = {
     clientSecret: 'LIMITED_ACCESS_CLIENT_SECRET',
   },
   limitedAccessSecret: 'LIMITED_ACCESS_SECRET',
-  sendgrid: {
-    key: 'SENDGRID_API_KEY',
-  },
   integrations: {
     verifiedIdAdmin: {
       authorityId: 'VERIFIED_ID_AUTHORITY_ID',
