@@ -345,21 +345,6 @@ resource uiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   }
 }
 
-@description('The client secret of the API integration app registration in the B2C tenant')
-@secure()
-param b2cGraphClientSecret string
-
-resource b2cGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  name: 'B2C-GRAPH-CLIENT-SECRET'
-  parent: keyVault
-  properties: {
-    attributes: {
-      enabled: true
-    }
-    value: b2cGraphClientSecret
-  }
-}
-
 @description('The client secret of the VID callback app registration in Azure AD')
 @secure()
 param vidCallbackClientSecret string

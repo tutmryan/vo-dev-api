@@ -85,7 +85,6 @@ export type Config = {
       baseUrl: string
       auth: ClientCredentialsConfig
     }
-    b2cGraph: GraphServiceConfig
   }
   issuanceCallback: {
     route: string

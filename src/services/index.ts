@@ -10,7 +10,6 @@ export * from './graph-service'
 
 export interface Services {
   homeTenantGraph: GraphService
-  b2cGraph: GraphService
   verifiedIdAdmin: VerifiedIdAdminService
   verifiedIdRequest: VerifiedIdRequestService
   logoImages: BlobStorageContainerService
@@ -18,7 +17,6 @@ export interface Services {
 
 export const createServices = (context: BaseContext): Services => {
   return {
-    b2cGraph: new GraphService(config.get('integrations.b2cGraph')),
     homeTenantGraph: new GraphService(config.get('homeTenantGraph')),
     verifiedIdAdmin: createVerifiedIdAdminService(context.logger, context.requestInfo.correlationId),
     verifiedIdRequest: createVerifiedIdRequestService(context),

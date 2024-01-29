@@ -69,9 +69,6 @@ inputs:
   ui-client-secret:
     description: Client secret of the UI app registration in Azure AD
     required: true
-  b2c-graph-client-secret:
-    description: Client secret of the API integration app registration in the B2C tenant
-    required: true
   vid-callback-client-secret:
     description: Client secret of the VID callback app registration in Azure AD
     required: true

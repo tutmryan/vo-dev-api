@@ -1024,7 +1024,6 @@ export type Mutation = {
    * - Issuance and presentation data can be queried, but only for the specified identity.
    */
   acquireLimitedAccessToken: AccessTokenResponse;
-  beginOnboarding?: Maybe<Scalars['Void']['output']>;
   /** Creates a new contract */
   createContract: Contract;
   /** The result of this request returns a QR code with a link to start the issuance process, or an error */
@@ -1066,11 +1065,6 @@ export type Mutation = {
 
 export type MutationAcquireLimitedAccessTokenArgs = {
   input: AcquireLimitedAccessTokenInput;
-};
-
-
-export type MutationBeginOnboardingArgs = {
-  input: OnboardingInput;
 };
 
 
@@ -1199,14 +1193,6 @@ export type NetworkIssuersWhere = {
   /** Only include issuers that are trusted (by this organisation) */
   isTrusted?: InputMaybe<Scalars['Boolean']['input']>;
   linkedDomainUrlsLike?: InputMaybe<Scalars['String']['input']>;
-};
-
-/** Input to start the onboarding process. */
-export type OnboardingInput = {
-  email: Scalars['EmailAddress']['input'];
-  familyName: Scalars['String']['input'];
-  givenName: Scalars['String']['input'];
-  kyc?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export enum OrderDirection {
@@ -2508,7 +2494,6 @@ export type ResolversTypes = {
   NetworkIssuer: ResolverTypeWrapper<NetworkIssuer>;
   NetworkIssuersWhere: NetworkIssuersWhere;
   NonNegativeInt: ResolverTypeWrapper<Scalars['NonNegativeInt']['output']>;
-  OnboardingInput: OnboardingInput;
   OrderDirection: OrderDirection;
   Partner: ResolverTypeWrapper<PartnerEntity>;
   PartnerOrderBy: PartnerOrderBy;
@@ -2632,7 +2617,6 @@ export type ResolversParentTypes = {
   NetworkIssuer: NetworkIssuer;
   NetworkIssuersWhere: NetworkIssuersWhere;
   NonNegativeInt: Scalars['NonNegativeInt']['output'];
-  OnboardingInput: OnboardingInput;
   Partner: PartnerEntity;
   PartnerPresentationWhere: PartnerPresentationWhere;
   PartnerWhere: PartnerWhere;
@@ -2895,7 +2879,6 @@ export interface LocaleScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
 
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   acquireLimitedAccessToken?: Resolver<ResolversTypes['AccessTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireLimitedAccessTokenArgs, 'input'>>;
-  beginOnboarding?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationBeginOnboardingArgs, 'input'>>;
   createContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationCreateContractArgs, 'input'>>;
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
   createPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationCreatePartnerArgs, 'input'>>;

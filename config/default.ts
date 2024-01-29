@@ -80,12 +80,6 @@ const config: DeepPartial<Config> = {
         scope: '3db474b9-6a0c-4840-96ac-1fceb342124f/.default',
       },
     },
-    b2cGraph: {
-      auth: {
-        tenantId: '10b631d3-9e47-49e1-a938-cbd933f0488d',
-      },
-      tenantName: 'voonboardingdemo.onmicrosoft.com',
-    },
   },
   issuanceCallback: {
     route: '/issuance/callback',

@@ -158,7 +158,6 @@ jobs:
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
           api-client-secret: ${{ secrets.API_CLIENT_SECRET }}
           ui-client-secret: ${{ secrets.UI_CLIENT_SECRET }}
-          b2c-graph-client-secret: ${{ secrets.B2C_GRAPH_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.VID_CALLBACK_CLIENT_SECRET }}
           limited-access-client-secret: ${{ secrets.LIMITED_ACCESS_CLIENT_SECRET }}
           limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
