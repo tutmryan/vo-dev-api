@@ -681,6 +681,19 @@ export enum DidDocumentStatus {
   Submitted = 'submitted'
 }
 
+/** Returns discoverable information about this API instance */
+export type Discovery = {
+  __typename?: 'Discovery';
+  /** Returns the features enabled for this API instance. */
+  features: Features;
+};
+
+/** Specifies which features are enabled for this API instance. */
+export type Features = {
+  __typename?: 'Features';
+  findIdentities: Scalars['Boolean']['output'];
+};
+
 /** Represents an identity that is issued credentials */
 export type Identity = {
   __typename?: 'Identity';
@@ -1502,6 +1515,7 @@ export type Query = {
    * By default, all credential types are returned.
    */
   credentialTypes: Array<Scalars['String']['output']>;
+  discovery: Discovery;
   /** Returns contracts, optionally matching the specified criteria */
   findContracts: Array<Contract>;
   /** Returns identites, optionally matching the specified criteria */
@@ -2467,7 +2481,9 @@ export type ResolversTypes = {
   CredentialTypesWhere: CredentialTypesWhere;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   DidDocumentStatus: DidDocumentStatus;
+  Discovery: ResolverTypeWrapper<Discovery>;
   EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']['output']>;
+  Features: ResolverTypeWrapper<Features>;
   HexColorCode: ResolverTypeWrapper<Scalars['HexColorCode']['output']>;
   Identity: ResolverTypeWrapper<IdentityEntity>;
   IdentityInput: IdentityInput;
@@ -2594,7 +2610,9 @@ export type ResolversParentTypes = {
   CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
   CredentialTypesWhere: CredentialTypesWhere;
   DateTime: Scalars['DateTime']['output'];
+  Discovery: Discovery;
   EmailAddress: Scalars['EmailAddress']['output'];
+  Features: Features;
   HexColorCode: Scalars['HexColorCode']['output'];
   Identity: IdentityEntity;
   IdentityInput: IdentityInput;
@@ -2804,9 +2822,19 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
   name: 'DateTime';
 }
 
+export type DiscoveryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Discovery'] = ResolversParentTypes['Discovery']> = {
+  features?: Resolver<ResolversTypes['Features'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface EmailAddressScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['EmailAddress'], any> {
   name: 'EmailAddress';
 }
+
+export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Features'] = ResolversParentTypes['Features']> = {
+  findIdentities?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 
 export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['HexColorCode'], any> {
   name: 'HexColorCode';
@@ -3002,6 +3030,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   authority?: Resolver<ResolversTypes['Authority'], ParentType, ContextType>;
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, Partial<QueryCredentialTypesArgs>>;
+  discovery?: Resolver<ResolversTypes['Discovery'], ParentType, ContextType>;
   findContracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType, Partial<QueryFindContractsArgs>>;
   findIdentities?: Resolver<Array<ResolversTypes['Identity']>, ParentType, ContextType, RequireFields<QueryFindIdentitiesArgs, 'limit'>>;
   findIssuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, RequireFields<QueryFindIssuancesArgs, 'limit'>>;
@@ -3205,7 +3234,9 @@ export type Resolvers<ContextType = GraphQLContext> = {
   ContractDisplayCredentialLogo?: ContractDisplayCredentialLogoResolvers<ContextType>;
   ContractDisplayModel?: ContractDisplayModelResolvers<ContextType>;
   DateTime?: GraphQLScalarType;
+  Discovery?: DiscoveryResolvers<ContextType>;
   EmailAddress?: GraphQLScalarType;
+  Features?: FeaturesResolvers<ContextType>;
   HexColorCode?: GraphQLScalarType;
   Identity?: IdentityResolvers<ContextType>;
   Issuance?: IssuanceResolvers<ContextType>;

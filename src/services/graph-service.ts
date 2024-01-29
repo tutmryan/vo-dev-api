@@ -20,10 +20,18 @@ export class GraphService {
     this.config = config
   }
 
+  get isConfigured() {
+    const {
+      tenantName,
+      auth: { tenantId, clientId, clientSecret },
+    } = this.config
+    return !!tenantName && !!tenantId && !!clientId && !!clientSecret
+  }
+
   config: GraphServiceConfig
   client = Lazy(() => {
+    if (!this.isConfigured) throw new Error('GraphService is not configured')
     const { tenantId, clientId, clientSecret } = this.config.auth
-    if (!tenantId || !clientId || !clientSecret) throw new Error('GraphService is not configured')
     const credential = new ClientSecretCredential(tenantId, clientId, clientSecret)
     const authProvider = new TokenCredentialAuthenticationProvider(credential, { scopes: ['https://graph.microsoft.com/.default'] })
 

@@ -1,0 +1,20 @@
+"""
+Specifies which features are enabled for this API instance.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type Features {
+  findIdentities: Boolean!
+}
+
+"""
+Returns discoverable information about this API instance
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type Discovery {
+  """
+  Returns the features enabled for this API instance.
+  """
+  features: Features!
+}
+
+extend type Query {
+  discovery: Discovery!
+}
