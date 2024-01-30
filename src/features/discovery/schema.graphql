@@ -2,7 +2,10 @@
 Specifies which features are enabled for this API instance.
 """ # eslint-disable-next-line @graphql-eslint/strict-id-in-types
 type Features {
-  findIdentities: Boolean!
+  """
+  Indicates whether the API instance is configured to support finding home tenant identities via the findTenantIdentities query.
+  """
+  findTenantIdentities: Boolean!
 }
 
 """

@@ -691,7 +691,8 @@ export type Discovery = {
 /** Specifies which features are enabled for this API instance. */
 export type Features = {
   __typename?: 'Features';
-  findIdentities: Scalars['Boolean']['output'];
+  /** Indicates whether the API instance is configured to support finding home tenant identities via the findTenantIdentities query. */
+  findTenantIdentities: Scalars['Boolean']['output'];
 };
 
 /** Represents an identity that is issued credentials */
@@ -2832,7 +2833,7 @@ export interface EmailAddressScalarConfig extends GraphQLScalarTypeConfig<Resolv
 }
 
 export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Features'] = ResolversParentTypes['Features']> = {
-  findIdentities?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  findTenantIdentities?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
