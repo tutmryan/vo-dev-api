@@ -55,15 +55,6 @@ const config: DeepPartial<Config> = {
   limitedAccessClient: {
     tokenUrl,
   },
-  sendgrid: {
-    templates: {
-      onboarding: {
-        kycPath: '/',
-        issuancePath: '/credentials/issue',
-        mailData: { templateId: 'd-8c0c050b6a94416f9c6936b305ccb3ee', from: { email: 'sam.curry@makerx.com.au', name: 'Sam Curry' } },
-      },
-    },
-  },
   integrations: {
     verifiedIdAdmin: {
       baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/',
@@ -79,12 +70,6 @@ const config: DeepPartial<Config> = {
         tokenUrl,
         scope: '3db474b9-6a0c-4840-96ac-1fceb342124f/.default',
       },
-    },
-    b2cGraph: {
-      auth: {
-        tenantId: '10b631d3-9e47-49e1-a938-cbd933f0488d',
-      },
-      tenantName: 'voonboardingdemo.onmicrosoft.com',
     },
   },
   issuanceCallback: {

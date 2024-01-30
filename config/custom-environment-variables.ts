@@ -1,12 +1,12 @@
-import type { Config } from '../src/config';
+import type { Config } from '../src/config'
 
 type EnvVarParsingRule = { __name: string; __format: string }
 
 type EnvVarSubstitution<T> = {
   [key in keyof T]?:
-  | Uppercase<string>
-  | EnvVarParsingRule
-  | (T[key] extends Date ? never : T[key] extends object ? EnvVarSubstitution<T[key]> : never)
+    | Uppercase<string>
+    | EnvVarParsingRule
+    | (T[key] extends Date ? never : T[key] extends object ? EnvVarSubstitution<T[key]> : never)
 }
 
 const json = <T extends Uppercase<string>>(varName: T): { __name: T; __format: 'json' } => ({
@@ -56,9 +56,6 @@ const config: EnvVarSubstitution<Config> = {
     clientSecret: 'LIMITED_ACCESS_CLIENT_SECRET',
   },
   limitedAccessSecret: 'LIMITED_ACCESS_SECRET',
-  sendgrid: {
-    key: 'SENDGRID_API_KEY',
-  },
   integrations: {
     verifiedIdAdmin: {
       authorityId: 'VERIFIED_ID_AUTHORITY_ID',
@@ -69,11 +66,6 @@ const config: EnvVarSubstitution<Config> = {
     verifiedIdRequest: {
       auth: {
         clientSecret: 'API_CLIENT_SECRET',
-      },
-    },
-    b2cGraph: {
-      auth: {
-        clientSecret: 'B2C_GRAPH_CLIENT_SECRET',
       },
     },
   },

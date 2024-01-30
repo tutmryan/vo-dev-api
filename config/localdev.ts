@@ -73,13 +73,6 @@ const config: DeepPartial<Config> = {
     clientId: 'c712fd5e-3317-47b8-bb22-c26296661a51',
     scope: apiDefaultScope,
   },
-  sendgrid: {
-    templates: {
-      onboarding: {
-        baseUrl: 'http://localhost:4001',
-      },
-    },
-  },
   integrations: {
     verifiedIdAdmin: {
       authorityId: '9568e470-f1e8-755f-94df-19e75efd45a1',
@@ -94,13 +87,6 @@ const config: DeepPartial<Config> = {
         // Verified Orchestration API (localdev)
         // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/3f0968a8-aaf0-407a-b7e9-826d82f0f6a9/isMSAApp~/false
         clientId: '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9',
-      },
-    },
-    b2cGraph: {
-      auth: {
-        // Verified Orchestration API B2C Integration (localdev)
-        // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/0593ae4c-c277-43fd-ae67-082645e28373/isMSAApp~/false
-        clientId: '0593ae4c-c277-43fd-ae67-082645e28373',
       },
     },
   },

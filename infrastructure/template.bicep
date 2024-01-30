@@ -345,21 +345,6 @@ resource uiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   }
 }
 
-@description('The client secret of the API integration app registration in the B2C tenant')
-@secure()
-param b2cGraphClientSecret string
-
-resource b2cGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  name: 'B2C-GRAPH-CLIENT-SECRET'
-  parent: keyVault
-  properties: {
-    attributes: {
-      enabled: true
-    }
-    value: b2cGraphClientSecret
-  }
-}
-
 @description('The client secret of the VID callback app registration in Azure AD')
 @secure()
 param vidCallbackClientSecret string
@@ -402,21 +387,6 @@ resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01
       enabled: true
     }
     value: limitedAccessSecret
-  }
-}
-
-@description('API key for SendGrid')
-@secure()
-param sendgridApiKey string
-
-resource sendgridApiKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  name: 'SENDGRID-API-KEY'
-  parent: keyVault
-  properties: {
-    attributes: {
-      enabled: true
-    }
-    value: sendgridApiKey
   }
 }
 
@@ -663,12 +633,10 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     WEBSITE_RUN_FROM_PACKAGE: '1'
     API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
     UI_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${uiClientSecretSecret.properties.secretUri})'
-    B2C_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${b2cGraphClientSecretSecret.properties.secretUri})'
     VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
     LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
     LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessSecretSecret.properties.secretUri})'
     REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
-    SENDGRID_API_KEY: '@Microsoft.KeyVault(SecretUri=${sendgridApiKeySecret.properties.secretUri})'
   }
 }
 

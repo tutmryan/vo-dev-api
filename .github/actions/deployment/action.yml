@@ -69,9 +69,6 @@ inputs:
   ui-client-secret:
     description: Client secret of the UI app registration in Azure AD
     required: true
-  b2c-graph-client-secret:
-    description: Client secret of the API integration app registration in the B2C tenant
-    required: true
   vid-callback-client-secret:
     description: Client secret of the VID callback app registration in Azure AD
     required: true
@@ -80,9 +77,6 @@ inputs:
     required: true
   limited-access-secret:
     description: "The secret for limited access client data keys"
-    required: true
-  sendgrid-api-key:
-    description: API key for SendGrid
     required: true
 
   migrations-app-version:
@@ -145,11 +139,9 @@ runs:
           uiClientSecret=${{ inputs.ui-client-secret }}
           migrationsAppClientId=${{ inputs.migrations-app-client-id }}
           deploymentAppClientId=${{ inputs.azure-client-id }}
-          b2cGraphClientSecret=${{ inputs.b2c-graph-client-secret }}
           vidCallbackClientSecret=${{ inputs.vid-callback-client-secret }}
           limitedAccessClientSecret=${{ inputs.limited-access-client-secret }}
           limitedAccessSecret=${{ inputs.limited-access-secret }}
-          sendgridApiKey=${{ inputs.sendgrid-api-key }}
           migrationsAppVersion=${{ inputs.migrations-app-version }}
           redisCacheName=${{ inputs.redis-cache-name }}
           redisCacheSKU=${{ inputs.redis-cache-sku }}
