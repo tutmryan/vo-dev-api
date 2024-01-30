@@ -2,6 +2,8 @@ import type { Resolvers } from '../../generated/graphql'
 
 export const resolvers: Resolvers = {
   Query: {
-    discovery: (_parent, _args, { services: { homeTenantGraph } }) => ({ features: { findIdentities: homeTenantGraph.isConfigured } }),
+    discovery: (_parent, _args, { services: { homeTenantGraph } }) => ({
+      features: { findTenantIdentities: homeTenantGraph.isConfigured },
+    }),
   },
 }
