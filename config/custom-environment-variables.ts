@@ -40,7 +40,7 @@ const config: EnvVarSubstitution<Config> = {
   },
   homeTenantGraph: {
     auth: {
-      clientSecret: 'API_CLIENT_SECRET',
+      clientSecret: 'HOME_TENANT_CLIENT_SECRET',
     },
   },
   auth: {
@@ -60,12 +60,12 @@ const config: EnvVarSubstitution<Config> = {
     verifiedIdAdmin: {
       authorityId: 'VERIFIED_ID_AUTHORITY_ID',
       auth: {
-        clientSecret: 'API_CLIENT_SECRET',
+        clientSecret: 'VID_CLIENT_SECRET',
       },
     },
     verifiedIdRequest: {
       auth: {
-        clientSecret: 'API_CLIENT_SECRET',
+        clientSecret: 'VID_CLIENT_SECRET',
       },
     },
   },
