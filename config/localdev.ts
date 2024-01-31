@@ -4,11 +4,16 @@ import type { DeepPartial } from '../src/util/type-helpers'
 
 const homeTenantName = 'verifiedorchestration.com'
 const homeTenantId = 'a4577872-4a36-4a93-9846-b29a1220ca89'
+const homeTenantClientId = '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9'
+
 const platformTenantId = '5c14bb50-7602-4c0d-b785-5dee865e4665'
 const platformApiDefaultScope = 'api://verified-orchestration-non-prod/.default'
 const platformApiClientId = 'c015d766-3423-4d30-8fbc-014191d27825'
 const platformTokenUrl = `https://login.microsoftonline.com/${platformTenantId}/oauth2/v2.0/token`
+
+const limitedAccessClientId = '5869060c-373e-4eef-97de-967cfb2d6a92'
 const limitedAccessTokenAudience = 'api://verified-orchestration-internal-non-prod'
+const vidCallbackClientId = '2e2b9262-ec52-45da-95bb-4db42286ab52'
 
 const config: DeepPartial<Config> = {
   server: {
@@ -73,13 +78,13 @@ const config: DeepPartial<Config> = {
   homeTenantGraph: {
     auth: {
       tenantId: homeTenantId,
-      clientId: '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9',
+      clientId: homeTenantClientId,
     },
     tenantName: homeTenantName,
   },
   limitedAccessClient: {
-    clientId: '5869060c-373e-4eef-97de-967cfb2d6a92',
-    scope: 'api://verified-orchestration-internal-non-prod/.default',
+    clientId: limitedAccessClientId,
+    scope: `${limitedAccessTokenAudience}/.default`,
     tokenUrl: platformTokenUrl,
   },
   integrations: {
@@ -104,7 +109,7 @@ const config: DeepPartial<Config> = {
     auth: {
       // Verified Orchestration VID Callback (non prod)
       // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/2e2b9262-ec52-45da-95bb-4db42286ab52/isMSAApp~/false
-      clientId: '2e2b9262-ec52-45da-95bb-4db42286ab52',
+      clientId: vidCallbackClientId,
       scope: platformApiDefaultScope,
       tokenUrl: platformTokenUrl,
     },
@@ -113,7 +118,7 @@ const config: DeepPartial<Config> = {
     auth: {
       // Verified Orchestration VID Callback (non prod)
       // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/2e2b9262-ec52-45da-95bb-4db42286ab52/isMSAApp~/false
-      clientId: '2e2b9262-ec52-45da-95bb-4db42286ab52',
+      clientId: vidCallbackClientId,
       scope: platformApiDefaultScope,
       tokenUrl: platformTokenUrl,
     },
