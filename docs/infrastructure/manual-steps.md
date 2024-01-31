@@ -20,25 +20,100 @@ Most of the provisioning is automated, but there are still some steps that need 
 
 See <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>.
 
-## Create an app registration for the API
+## Create an app registration for the Verified Orchestration
 
-```powershell
-./infrastructure/script/create-api-app-registration.ps1 `
-  -Name '<name-of-application>' `
-  -IdentifierUri '<identifier-uri>'
-```
+A single app registration is created in each of the non prod and prod environments for all the customer facing components; (e.g.(API, Admin UI, and Docs site).
 
-We need to create a client secret for this application:
+- creat app registration named `Verified Orchestration` (wth `(non prod)` suffix for the non prod environment)
+- choose `(Any Microsoft Entra ID tenant - Multitenant)` option for `Supported account types`
+- add `Application ID URI` (e.g. `api://verified-orchestration-non-prod` for the non prod environment)
+- add a scope (e.g. `api://verified-orchestration-non-prod/platform` for the non prod environment)
+- create a client secret for the app registration to access the Verified ID API and store it in 1password
+- create another client secret to be used for PKCE and store it in 1password
+- add the following permissions from `Verifiable Credentials Service Admin` API
+  - VerifiableCredential.Authority.ReadWrite
+  - VerifiableCredential.Contract.ReadWrite
+  - VerifiableCredential.Credential.Revoke
+  - VerifiableCredential.Credential.Search
+  - VerifiableCredential.Network.Read
+- add the following permissions from `Verifiable Credentials Service Request` API
+  - VerifiableCredential.Create.All
+- grant admin consent for the added permissions
+- create the following Applications roles
 
-1. Navigate to the link in the script output.
-1. Click on "Certificates & secrets", then "+ New client secret".
-1. Give a description, select the appropriate expiry date, then "Add".
+  ```JSON
+  {
+    value: "VerifiableCredential.AcquireLimitedAccessToken.ListContracts",
+    description: "Provides access to acquire limited access tokens for listing contracts via the acquireLimitedAccessToken mutation"
+    displayName: "Acquire limited access token: list contracts",
+  }
+  ```
+
+  ```JSON
+  {
+    value: "VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations",
+    description: "Provides access to acquire limited access tokens for anonymous presentations via the acquireLimitedAccessToken mutation",
+    displayName: "Acquire limited access token: anonymous presentations",
+  }
+  ```
+
+  ```JSON
+  {
+    value: "VerifiableCredential.AcquireLimitedAccessToken.Issue",
+    description: "Provides access to acquire limited access tokens for issuance operations via the acquireLimitedAccessToken mutation",
+    displayName: "Acquire limited access token: issue",
+  }
+  ```
+
+  ````JSON
+  {
+    value: "VerifiableCredential.AcquireLimitedAccessToken.Present",
+    description: "Provides access to acquire limited access tokens for presentation operations via the acquireLimitedAccessToken mutation",```
+    displayName: "Acquire limited access token: present",
+  ````
+
+- create the following Users/Groups roles
+
+  ```JSON
+  {
+    value: "VerifiableCredential.Reader",
+    description: "Provides read access to templates, contracts, issuances, presentations, etc.",
+    displayName: "Reader",
+  }
+  ```
+
+  ```JSON
+  {
+     value: "VerifiableCredential.Issuer",
+     description: "Provides access to manual issuance of credentials; includes Reader access",
+     displayName: "Issuer",
+  }
+  ```
+
+  ```JSON
+  {
+    value: "VerifiableCredential.CredentialAdmin",
+    description: "Provides access to administer contracts and templates, and revoke issuances; includes Reader access",
+    displayName: "Credential Admin",
+  }
+  ```
+
+  ```JSON
+  {
+    value: "VerifiableCredential.PartnerAdmin",
+    description: "Provide access to administer partners; includes Reader access",
+    displayName: "Partner admin",
+  }
+  ```
+
+- add `Single-page application` platform in `Authentication` -> `Platform configurations` section
+- add relevant redirect URIs (e.g. `http://localhost` for local dev)
 
 We need to add the new client secret to the GitHub secrets:
 
 1. Navigate to the environment for the repository at <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>.
 1. Click on the relevant environment.
-1. Add the secret as `API_CLIENT_SECRET`.
+1. Add the secrets as `VID_CLIENT_SECRET` and `UI_CLIENT_SECRET` respectively.
 
 ## Create an app registration for the UI (admin app)
 
