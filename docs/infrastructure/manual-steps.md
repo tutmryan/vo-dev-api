@@ -149,6 +149,7 @@ A single app registration is created in each of the non prod and prod environmen
   - set `LIMITED_ACCESS_CLIENT_SECRET` variable in the relevant GitHub environment
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.LimitedAccess
+- grant admin consent for the added permissions
 
 ## Create an app registration for Verified ID callback token generation
 
@@ -160,6 +161,7 @@ A single app registration is created in each of the non prod and prod environmen
   - set `VID_CALLBACK_CLIENT_SECRET` variable in the relevant GitHub environment
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.Request.Callback
+- grant admin consent for the added permissions
 
 ## Create an app registration for the migrations application
 
@@ -271,26 +273,6 @@ To create the users:
 1. In the left menu, click on "Query editor", then click on the "Continue as..." button in the "Azure Active Directory" section.
 1. Copy the contents of the [`create-aad-user.sql` script](../../infrastructure/scripts/create-aad-user.sql) and replace the `<aad-user>` token with the name of the application.
 1. The Functions app needs the `db_ddladmin` and `db_securityadmin` roles (db_securityadmin to create roles and grant permissions to role), the GraphQL API doesn't.
-
-## Create an app registration for the authenticated callbacks from the Verified ID service
-
-```powershell
-./infrastructure/scripts/create-callback-app-registration.ps1 `
-  -Name '<name-of-application>' `
-  -ApiAppRegistrationName '<api-app-registration-name>'
-```
-
-We need to create a client secret for this application:
-
-1. Navigate to the link in the script output.
-1. Click on "Certificates & secrets", then "+ New client secret".
-1. Give a description, select the appropriate expiry date, then "Add".
-
-We need to add the new client secret to the GitHub secrets:
-
-1. Navigate to the environment for the repository at <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>.
-1. Click on the relevant environment.
-1. Add the secret as `VID_CALLBACK_CLIENT_SECRET`.
 
 ## Give the API app registration service principal blob contributor role membership
 
