@@ -60,12 +60,12 @@ const config: EnvVarSubstitution<Config> = {
     verifiedIdAdmin: {
       authorityId: 'VERIFIED_ID_AUTHORITY_ID',
       auth: {
-        clientSecret: 'VID_CLIENT_SECRET',
+        clientSecret: 'API_CLIENT_SECRET',
       },
     },
     verifiedIdRequest: {
       auth: {
-        clientSecret: 'VID_CLIENT_SECRET',
+        clientSecret: 'API_CLIENT_SECRET',
       },
     },
   },
