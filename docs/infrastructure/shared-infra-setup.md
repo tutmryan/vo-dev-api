@@ -106,3 +106,5 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 ```
 
 ## Create and run the shared infrastructure pipeline
+
+You can now create a new workflow in the `.github/workflows` directory to call the `shared-infra` action for the hosting tenant.
