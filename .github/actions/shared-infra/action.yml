@@ -1,0 +1,93 @@
+name: Shared infrastructure
+description: Deploys shared infrastructure
+
+inputs:
+  azure-client-id:
+    description: App ID of the deployment app registration
+    required: true
+  azure-tenant-id:
+    description: ID of the target Azure AD tenant
+    required: true
+  azure-subscription-id:
+    description: ID of the target Azure subscription
+    required: true
+  infra-environment:
+    description: The hosting environment, either 'nonprd' or 'prd'
+    required: true
+  resource-group-name:
+    description: Name of the resource group to deploy resources to
+    required: true
+
+  sql-server-aad-administrator-name:
+    description: Name of the Azure SQL administrator principal e.g. Verified Orchestration SQL Admins (non prod)
+    required: true
+  sql-server-aad-administrator-object-id:
+    description: Object ID of the Azure SQL administrator principal
+    required: true
+
+  elastic-pool-edition:
+    description: Edition of the Elastic Pool
+    required: true
+  elastic-pool-capacity:
+    description: Capacity of the Elastic Pool
+    required: true
+  elastic-pool-per-database-min-capacity:
+    description: Minimum capacity per database in the Elastic Pool
+  elastic-pool-per-database-max-capacity:
+    description: Maximum capacity per database in the Elastic Pool
+  elastic-pool-zone-redundant:
+    description: Whether the Elastic Pool should be zone redundant
+
+  app-service-plan-sku:
+    description: SKU of the App Service Plan
+    required: true
+  app-service-plan-capacity:
+    description: Capacity of the App Service Plan
+    required: true
+
+outputs:
+  sql-server-name:
+    description: Name of the deployed SQL Server
+    value: ${{ steps.deploy-shared-infrastructure.outputs.sqlServerName }}
+  elastic-pool-name:
+    description: Name of the deployed Elastic Pool
+    value: ${{ steps.deploy-shared-infrastructure.outputs.elasticPoolName }}
+  elastic-pool-id:
+    description: ID of the deployed Elastic Pool
+    value: ${{ steps.deploy-shared-infrastructure.outputs.elasticPoolId }}
+  app-service-plan-name:
+    description: Name of the deployed App Service Plan
+    value: ${{ steps.deploy-shared-infrastructure.outputs.appServicePlanName }}
+  app-service-plan-id:
+    description: ID of the deployed App Service Plan
+    value: ${{ steps.deploy-shared-infrastructure.outputs.appServicePlanId }}
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Deploy shared infrastructure
+      id: deploy-shared-infrastructure
+      uses: azure/arm-deploy@v1
+      with:
+        deploymentName: ${{env.NOW}}-shared-infra-github-actions
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/shared.bicep
+        parameters: >-
+          environment=${{ inputs.infra-environment }}
+          sqlServerAadAdministratorName=${{ inputs.sql-server-aad-administrator-name }}
+          sqlServerAadAdministratorObjectId=${{ inputs.sql-server-aad-administrator-object-id }}
+          elasticPoolEdition=${{ inputs.elastic-pool-edition }}
+          elasticPoolCapacity=${{ inputs.elastic-pool-capacity }}
+          elasticPoolPerDatabaseMinCapacity=${{ inputs.elastic-pool-per-database-min-capacity }}
+          elasticPoolPerDatabaseMaxCapacity=${{ inputs.elastic-pool-per-database-max-capacity }}
+          elasticPoolZoneRedundant=${{ inputs.elastic-pool-zone-redundant }}
+          appServicePlanSku=${{ inputs.app-service-plan-sku }}
+          appServicePlanCapacity=${{ inputs.app-service-plan-capacity }}
+

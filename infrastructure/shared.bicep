@@ -1,0 +1,175 @@
+@description('Environment the resources are deployed in')
+@allowed([
+  'nonprd', 'prd'
+])
+param environment string
+
+var resourcePrefix = 'vo-${environment}-platform'
+
+param location string = resourceGroup().location
+
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+  name: '${resourcePrefix}-la'
+  location: location
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 180
+    features: {
+      enableDataExport: true
+    }
+  }
+}
+
+@description('Name of the Azure SQL AAD administrator')
+param sqlServerAadAdministratorName string
+
+@description('Object ID of the Azure SQL AAD administrator')
+param sqlServerAadAdministratorObjectId string
+
+resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' = {
+  name: '${resourcePrefix}-sql-server'
+  location: location
+  properties: {
+    administratorLogin: 'vo-admin'
+    administratorLoginPassword: guid(resourceGroup().id)
+    administrators: {
+      administratorType: 'ActiveDirectory'
+      login: sqlServerAadAdministratorName
+      sid: sqlServerAadAdministratorObjectId
+      tenantId: subscription().tenantId
+    }
+  }
+}
+
+resource sqlServerAllowAzureWorkloadsFirewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
+  name: 'AllowAllWindowsAzureIps'
+  parent: sqlServer
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
+@description('Elastic Pool edition')
+@allowed([ 'Basic', 'Standard', 'Premium', 'GP_Gen5', 'BC_Gen5' ])
+param elasticPoolEdition string = 'Basic'
+
+@description('Elastic Pool Capacity (vCores or DTU, depends on tier, please refer to docs)')
+param elasticPoolCapacity int
+
+@description('Elastic Pool zone redundant')
+param elasticPoolZoneRedundant bool = false
+
+@description('Elastic Pool DB Max Size, in bytes')
+param elasticPoolDBMaxSize int = 5242880000
+
+@description('Elastic Pool - The minimum capacity any one database can consume, .')
+param elasticPoolPerDatabaseMinCapacity int = 0
+
+@description('Elastic Pool - The maximum capacity any one database can consume, not set if left as default.')
+param elasticPoolPerDatabaseMaxCapacity int = 0
+
+var editionToSkuMap = {
+  Basic: {
+    name: 'BasicPool'
+    tier: 'Basic'
+  }
+  Standard: {
+    name: 'StandardPool'
+    tier: 'Standard'
+  }
+  Premium: {
+    name: 'PremiumPool'
+    tier: 'Premium'
+  }
+  GP_Gen5: {
+    family: 'Gen5'
+    name: 'GP_Gen5'
+    tier: 'GeneralPurpose'
+  }
+  BC_Gen5: {
+    family: 'Gen5'
+    name: 'BC_Gen5'
+    tier: 'BusinessCritical'
+  }
+}
+
+resource sqlServerElasticPool 'Microsoft.Sql/servers/elasticPools@2022-05-01-preview' = {
+  name: '${resourcePrefix}-sql-elastic-pool'
+  location: location
+  sku: {
+    capacity: elasticPoolCapacity
+    name: editionToSkuMap[elasticPoolEdition].name
+    tier: editionToSkuMap[elasticPoolEdition].tier
+  }
+  parent: sqlServer
+  properties: {
+    zoneRedundant: elasticPoolZoneRedundant
+    maxSizeBytes: elasticPoolDBMaxSize
+    perDatabaseSettings: union({ minCapacity: elasticPoolPerDatabaseMinCapacity }, elasticPoolPerDatabaseMaxCapacity > 0 ? { maxCapacity: elasticPoolPerDatabaseMaxCapacity } : {})
+  }
+}
+
+output sqlServerName string = sqlServer.name
+output elasticPoolName string = sqlServerElasticPool.name
+output elasticPoolId string = sqlServerElasticPool.id
+
+@description('App Service Plan SKU')
+@allowed([
+  'B1'
+  'B2'
+  'B3'
+  'D1'
+  'F1'
+  'FREE'
+  'I1'
+  'I1v2'
+  'I2'
+  'I2v2'
+  'I3'
+  'I3v2'
+  'I4v2'
+  'I5v2'
+  'I6v2'
+  'P0V3'
+  'P1MV3'
+  'P1V2'
+  'P1V3'
+  'P2MV3'
+  'P2V2'
+  'P2V3'
+  'P3MV3'
+  'P3V2'
+  'P3V3'
+  'P4MV3'
+  'P5MV3'
+  'S1'
+  'S2'
+  'S3'
+  'SHARED'
+  'WS1'
+  'WS2'
+  'WS3'
+])
+param appServicePlanSku string
+
+@description('App Service Plan Capacity (instances)')
+param appServicePlanCapacity int = 1
+
+resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
+  name: '${resourcePrefix}-app-service-plan'
+  location: location
+  sku: {
+    name: appServicePlanSku
+    capacity: appServicePlanCapacity
+  }
+  properties: {
+    reserved: true
+  }
+  kind: 'linux'
+}
+
+output appServicePlanName string = appServicePlan.name
+output appServicePlanId string = appServicePlan.id

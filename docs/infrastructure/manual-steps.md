@@ -1,3 +1,17 @@
+# DEPRECATED - Warning
+
+This doc will be replaced by:
+
+- ./shared-infra-setup.md
+- auth setup
+
+Auth setup will become a separate doc.
+
+Unused scripts will be removed. The following are in use by ./shared-infra-setup.md:
+
+- ./scripts/create-deployment-service-principal.ps1
+- ./scripts/create-migrations-app-registration.ps1
+
 # Manual steps required for infrastructure provisioning
 
 Most of the provisioning is automated, but there are still some steps that need to be performed manually on a per-environment basis.
