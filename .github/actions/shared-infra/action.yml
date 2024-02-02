@@ -18,33 +18,6 @@ inputs:
     description: Name of the resource group to deploy resources to
     required: true
 
-  sql-server-aad-administrator-name:
-    description: Name of the Azure SQL administrator principal e.g. Verified Orchestration SQL Admins (non prod)
-    required: true
-  sql-server-aad-administrator-object-id:
-    description: Object ID of the Azure SQL administrator principal
-    required: true
-
-  elastic-pool-edition:
-    description: Edition of the Elastic Pool
-    required: true
-  elastic-pool-capacity:
-    description: Capacity of the Elastic Pool
-    required: true
-  elastic-pool-per-database-min-capacity:
-    description: Minimum capacity per database in the Elastic Pool
-  elastic-pool-per-database-max-capacity:
-    description: Maximum capacity per database in the Elastic Pool
-  elastic-pool-zone-redundant:
-    description: Whether the Elastic Pool should be zone redundant
-
-  app-service-plan-sku:
-    description: SKU of the App Service Plan
-    required: true
-  app-service-plan-capacity:
-    description: Capacity of the App Service Plan
-    required: true
-
 outputs:
   sql-server-name:
     description: Name of the deployed SQL Server
@@ -79,15 +52,5 @@ runs:
         deploymentName: ${{env.NOW}}-shared-infra-github-actions
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/shared.bicep
-        parameters: >-
-          environment=${{ inputs.infra-environment }}
-          sqlServerAadAdministratorName=${{ inputs.sql-server-aad-administrator-name }}
-          sqlServerAadAdministratorObjectId=${{ inputs.sql-server-aad-administrator-object-id }}
-          elasticPoolEdition=${{ inputs.elastic-pool-edition }}
-          elasticPoolCapacity=${{ inputs.elastic-pool-capacity }}
-          elasticPoolPerDatabaseMinCapacity=${{ inputs.elastic-pool-per-database-min-capacity }}
-          elasticPoolPerDatabaseMaxCapacity=${{ inputs.elastic-pool-per-database-max-capacity }}
-          elasticPoolZoneRedundant=${{ inputs.elastic-pool-zone-redundant }}
-          appServicePlanSku=${{ inputs.app-service-plan-sku }}
-          appServicePlanCapacity=${{ inputs.app-service-plan-capacity }}
+        parameters: ./infrastructure/parameters/shared.${{ inputs.infra-environment }}.bicepparam
 

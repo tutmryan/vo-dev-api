@@ -22,10 +22,3 @@ jobs:
           azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
           azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
           infra-environment: nonprd
-          resource-group-name: vo-nonprd-platform-shared-infra
-          sql-server-aad-administrator-name: Verified Orchestration SQL Administrators (non prod)
-          sql-server-aad-administrator-object-id: 0239fa85-50e8-461d-921d-9bb2a5f896c7
-          elastic-pool-edition: Basic
-          elastic-pool-capacity: 50 # DTUs
-          app-service-plan-sku: P1V3
-          app-service-plan-capacity: 1
