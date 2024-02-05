@@ -46,12 +46,14 @@ Gather the following details:
 - Client ID
 - Tenant ID
 - Subscription ID
+- Service principal object ID
 
 #### Non-prod app registration details
 
 - Client ID: `33bc2302-a407-4504-8b3a-e92add06cfc4`
 - Tenant ID: `5c14bb50-7602-4c0d-b785-5dee865e4665`
 - Subscription ID: `05c17245-e1b2-4870-96ff-0711f5eaa466`
+- Service principal object ID: `0c8ae26a-f0ad-418f-a0f6-7082b7b02f87`
 
 ## Configure GitHub repo OIDC subject claims
 
@@ -87,11 +89,12 @@ Add organisation variables to GitHub using the output from the previous step.
 
 Prefix the variable names with the hosting tenant name, e.g. `[NON_]PROD_AZURE_CLIENT_ID`.
 
-| Name                    | Value                                 |
-| ----------------------- | ------------------------------------- |
-| `AZURE_CLIENT_ID`       | The client ID of the app registration |
-| `AZURE_TENANT_ID`       | The ID of the target tenant           |
-| `AZURE_SUBSCRIPTION_ID` | The ID of the target subscription     |
+| Name                                | Value                                  |
+| ----------------------------------- | -------------------------------------- |
+| `AZURE_CLIENT_ID`                   | The client ID of the app registration  |
+| `AZURE_TENANT_ID`                   | The ID of the target tenant            |
+| `AZURE_SUBSCRIPTION_ID`             | The ID of the target subscription      |
+| `AZURE_SERVICE_PRINCIPAL_OBJECT_ID` | The object ID of the service principal |
 
 To do so:
 
