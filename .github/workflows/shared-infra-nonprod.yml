@@ -11,6 +11,8 @@ jobs:
     name: Deploy shared infrastructure to the non prod environment
     runs-on: ubuntu-latest
     concurrency: deploy-to-non-prod
+    environment:
+      name: Non-production
     permissions:
       contents: read
       id-token: write

@@ -45,6 +45,10 @@ runs:
         tenant-id: ${{ inputs.azure-tenant-id }}
         subscription-id: ${{ inputs.azure-subscription-id }}
 
+    - name: Set current date as environment variable
+      run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+      shell: bash
+
     - name: Deploy shared infrastructure
       id: deploy-shared-infrastructure
       uses: azure/arm-deploy@v1
