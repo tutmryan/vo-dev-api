@@ -63,8 +63,8 @@ const config: DeepPartial<Config> = {
           // Verified Orchestration (non prod)
           // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/c015d766-3423-4d30-8fbc-014191d27825/isMSAApp~/false
           clientId: platformApiClientId,
-          authority: `https://login.microsoftonline.com/${platformTenantId}`,
-          knownAuthorities: [`https://login.microsoftonline.com/${platformTenantId}`],
+          authority: `https://login.microsoftonline.com/${homeTenantId}`,
+          knownAuthorities: [`https://login.microsoftonline.com/${homeTenantId}`],
         },
         system: {
           loggerOptions: {
