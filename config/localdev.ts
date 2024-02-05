@@ -2,10 +2,18 @@ import { LogLevel } from '@azure/msal-node'
 import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 
-const tenantName = 'verifiedorchestration.com'
-const tenantId = 'a4577872-4a36-4a93-9846-b29a1220ca89'
-const apiDefaultScope = 'api://verified-orchestration-api-localdev/.default'
-const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`
+const homeTenantName = 'verifiedorchestration.com'
+const homeTenantId = 'a4577872-4a36-4a93-9846-b29a1220ca89'
+const homeTenantClientId = '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9'
+
+const platformTenantId = '5c14bb50-7602-4c0d-b785-5dee865e4665'
+const platformApiClientId = 'c015d766-3423-4d30-8fbc-014191d27825'
+const platformApiDefaultScope = `${platformApiClientId}/.default`
+const platformTokenUrl = `https://login.microsoftonline.com/${platformTenantId}/oauth2/v2.0/token`
+
+const limitedAccessClientId = '5869060c-373e-4eef-97de-967cfb2d6a92'
+const limitedAccessTokenAudience = 'api://verified-orchestration-internal-non-prod'
+const vidCallbackClientId = '2e2b9262-ec52-45da-95bb-4db42286ab52'
 
 const config: DeepPartial<Config> = {
   server: {
@@ -39,24 +47,24 @@ const config: DeepPartial<Config> = {
   },
   auth: {
     bearer: {
-      jwksUri: `https://login.microsoftonline.com/${tenantId}/discovery/v2.0/keys`,
+      jwksUri: `https://login.microsoftonline.com/${homeTenantId}/discovery/v2.0/keys`,
       verifyOptions: {
-        issuer: `https://sts.windows.net/${tenantId}/`,
-        audience: ['api://verified-orchestration-api-localdev'],
+        issuer: [`https://sts.windows.net/${homeTenantId}/`, `https://sts.windows.net/${platformTenantId}/`],
+        audience: [platformApiClientId, limitedAccessTokenAudience],
         clockTolerance: 5,
       },
     },
     pkce: {
       enabled: true,
-      scopes: [apiDefaultScope, 'profile'],
-      logoutUrl: `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/logout`,
+      scopes: [platformApiDefaultScope, 'profile'],
+      logoutUrl: `https://login.microsoftonline.com/${homeTenantId}/oauth2/v2.0/logout`,
       msalConfig: {
         auth: {
-          // Verified Orchestration API UI (localdev)
-          // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/20bcde12-9cbc-4a37-9e69-200a1e210530/isMSAApp~/false
-          clientId: '20bcde12-9cbc-4a37-9e69-200a1e210530',
-          authority: `https://login.microsoftonline.com/${tenantId}`,
-          knownAuthorities: [`https://login.microsoftonline.com/${tenantId}`],
+          // Verified Orchestration (non prod)
+          // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/c015d766-3423-4d30-8fbc-014191d27825/isMSAApp~/false
+          clientId: platformApiClientId,
+          authority: `https://login.microsoftonline.com/${homeTenantId}`,
+          knownAuthorities: [`https://login.microsoftonline.com/${homeTenantId}`],
         },
         system: {
           loggerOptions: {
@@ -69,51 +77,50 @@ const config: DeepPartial<Config> = {
   },
   homeTenantGraph: {
     auth: {
-      tenantId,
-      clientId: '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9',
+      tenantId: homeTenantId,
+      clientId: homeTenantClientId,
     },
-    tenantName,
+    tenantName: homeTenantName,
   },
   limitedAccessClient: {
-    clientId: 'c712fd5e-3317-47b8-bb22-c26296661a51',
-    scope: apiDefaultScope,
-    tokenUrl,
+    clientId: limitedAccessClientId,
+    scope: `${limitedAccessTokenAudience}/.default`,
+    tokenUrl: platformTokenUrl,
   },
   integrations: {
     verifiedIdAdmin: {
-      authorityId: '9568e470-f1e8-755f-94df-19e75efd45a1',
       auth: {
-        // Verified Orchestration API (localdev)
-        // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/3f0968a8-aaf0-407a-b7e9-826d82f0f6a9/isMSAApp~/false
-        clientId: '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9',
-        tokenUrl,
+        // Verified Orchestration (non prod)
+        // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/c015d766-3423-4d30-8fbc-014191d27825/isMSAApp~/false
+        clientId: platformApiClientId,
+        tokenUrl: platformTokenUrl,
       },
     },
     verifiedIdRequest: {
       auth: {
-        // Verified Orchestration API (localdev)
-        // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/3f0968a8-aaf0-407a-b7e9-826d82f0f6a9/isMSAApp~/false
-        clientId: '3f0968a8-aaf0-407a-b7e9-826d82f0f6a9',
-        tokenUrl,
+        // Verified Orchestration (non prod)
+        // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/c015d766-3423-4d30-8fbc-014191d27825/isMSAApp~/false
+        clientId: platformApiClientId,
+        tokenUrl: platformTokenUrl,
       },
     },
   },
   issuanceCallback: {
     auth: {
-      // Verified Orchestration VID callback (localdev)
-      // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/bafdce32-e946-4b0a-a630-f7a2fe4229e4/isMSAApp~/false
-      clientId: 'bafdce32-e946-4b0a-a630-f7a2fe4229e4',
-      scope: apiDefaultScope,
-      tokenUrl,
+      // Verified Orchestration VID Callback (non prod)
+      // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/2e2b9262-ec52-45da-95bb-4db42286ab52/isMSAApp~/false
+      clientId: vidCallbackClientId,
+      scope: platformApiDefaultScope,
+      tokenUrl: platformTokenUrl,
     },
   },
   presentationCallback: {
     auth: {
-      // Verified Orchestration VID callback (localdev)
-      // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/bafdce32-e946-4b0a-a630-f7a2fe4229e4/isMSAApp~/false
-      clientId: 'bafdce32-e946-4b0a-a630-f7a2fe4229e4',
-      scope: apiDefaultScope,
-      tokenUrl,
+      // Verified Orchestration VID Callback (non prod)
+      // https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/Overview/appId/2e2b9262-ec52-45da-95bb-4db42286ab52/isMSAApp~/false
+      clientId: vidCallbackClientId,
+      scope: platformApiDefaultScope,
+      tokenUrl: platformTokenUrl,
     },
   },
   platformConsumerApps: {
@@ -121,7 +128,7 @@ const config: DeepPartial<Config> = {
   },
   identityIssuers: {
     manual: { name: 'Manually Issued' },
-    tenantId: { name: tenantName },
+    tenantId: { name: homeTenantName },
     '10b631d3-9e47-49e1-a938-cbd933f0488d': { name: 'voonboardingdemo.onmicrosoft.com' },
   },
 }

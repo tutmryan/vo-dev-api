@@ -40,7 +40,7 @@ const config: EnvVarSubstitution<Config> = {
   },
   homeTenantGraph: {
     auth: {
-      clientSecret: 'API_CLIENT_SECRET',
+      clientSecret: 'HOME_TENANT_CLIENT_SECRET',
     },
   },
   auth: {
