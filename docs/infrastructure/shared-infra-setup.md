@@ -59,7 +59,7 @@ By default, we need federated credentials for every Org/Repo/Environment combina
 
 We can customise the [GitHub repo subject claim](https://docs.github.com/en/rest/actions/oidc?apiVersion=2022-11-28#set-the-customization-template-for-an-oidc-subject-claim-for-a-repository) to use just the Org/Repo combination.
 
-Using the GitHub CLI, run the following commands to customise the API and Admin website repos.
+Using the GitHub CLI, run the following commands to customise the API and Admin website repos, dropping use of the `context` claim key.
 
 ```bash
 gh api \
