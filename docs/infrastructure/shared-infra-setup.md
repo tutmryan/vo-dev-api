@@ -17,33 +17,70 @@ App registration client ID : c61b153c-b34e-4dfc-9368-198a3edc4dce
 App role ID:                 d7d87a02-23ac-4af4-b87d-2bb70b52bea3
 ```
 
-## Create a deployment service principal
+## Create and configure deployment service principal
 
 We need a service principal so that GitHub Actions can:
 
 - Provision infrastructure and deploy our applications on Azure.
 - Execute the migrations on our database.
 
-We automated the creation and configuration of this service principal in the [`create-deployment-service-principal.ps1` script](../../infrastructure/scripts/create-deployment-service-principal.ps1).
-We need to be logged in to the Azure CLI to the correct tenant with appropriate permissions before running it.
+### Create deployment app registration
 
-```powershell
-./infrastructure/scripts/create-deployment-service-principal.ps1 \
-  -Name 'Verified Orchestration Deployment[ (non prod)]' \
-  -GitHubOrganisationName 'VerifiedOrchestration' \
-  -GitHubRepositoryName 'verified-orchestration-api' \
-  -GitHubEnvironmentName '<Non Production | Production>' \
-  -MigrationsAppClientId '<client ID from prior step>' \
-  -MigrationsAppRoleId '<role ID from prior step>'
+1. Create a new app registration in the Azure Portal: <https://portal.azure.com/#blade/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/RegisteredApps>.
+1. Enter name: Verified Orchestration Deployment[ (non prod)]
+1. Click Register to create
+1. Click on "Certificates & secrets", select the "Federated credentials" tab, then "+ Add credential".
+1. For "Federated credential scenario", select "GitHub Actions deploying Azure resources".
+1. Enter:
+   - Subject identifier: `repo:VerifiedOrchestration/verified-orchestration-api`
+   - Name: `VerifiedOrchestration-verified-orchestration-api`
+1. Add a second federated credential:
+1. Enter:
+   - Subject identifier: `repo:VerifiedOrchestration/verified-orchestration-admin`
+   - Name: `VerifiedOrchestration-verified-orchestration-admin`
+
+Refer to [documentation here](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux)
+
+Gather the following details:
+
+- Client ID
+- Tenant ID
+- Subscription ID
+- Service principal object ID
+
+#### Non-prod app registration details
+
+- Client ID: `33bc2302-a407-4504-8b3a-e92add06cfc4`
+- Tenant ID: `5c14bb50-7602-4c0d-b785-5dee865e4665`
+- Subscription ID: `05c17245-e1b2-4870-96ff-0711f5eaa466`
+- Service principal object ID: `0c8ae26a-f0ad-418f-a0f6-7082b7b02f87`
+
+## Configure GitHub repo OIDC subject claims
+
+By default, we need federated credentials for every Org/Repo/Environment combination. This scenario won't work well with us adding new environments for every instance.
+
+We can customise the [GitHub repo subject claim](https://docs.github.com/en/rest/actions/oidc?apiVersion=2022-11-28#set-the-customization-template-for-an-oidc-subject-claim-for-a-repository) to use just the Org/Repo combination.
+
+Using the GitHub CLI, run the following commands to customise the API and Admin website repos, dropping use of the `context` claim key.
+
+```bash
+gh api \
+  --method PUT \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /repos/VerifiedOrchestration/verified-orchestration-api/actions/oidc/customization/sub \
+  -F use_default=false \
+  -f "include_claim_keys[]=repo"
 ```
 
-### Non-prod output
-
-```
-- AZURE_CLIENT_ID:                   33bc2302-a407-4504-8b3a-e92add06cfc4
-- AZURE_SERVICE_PRINCIPAL_OBJECT_ID: 0c8ae26a-f0ad-418f-a0f6-7082b7b02f87
-- AZURE_TENANT_ID:                   5c14bb50-7602-4c0d-b785-5dee865e4665
-- AZURE_SUBSCRIPTION_ID:             05c17245-e1b2-4870-96ff-0711f5eaa466
+```bash
+gh api \
+  --method PUT \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /repos/VerifiedOrchestration/verified-orchestration-admin/actions/oidc/customization/sub \
+  -F use_default=false \
+  -f "include_claim_keys[]=repo"
 ```
 
 ## Configure organisation variables in GitHub
@@ -55,9 +92,9 @@ Prefix the variable names with the hosting tenant name, e.g. `[NON_]PROD_AZURE_C
 | Name                                | Value                                  |
 | ----------------------------------- | -------------------------------------- |
 | `AZURE_CLIENT_ID`                   | The client ID of the app registration  |
-| `AZURE_SERVICE_PRINCIPAL_OBJECT_ID` | The object ID of the service principal |
 | `AZURE_TENANT_ID`                   | The ID of the target tenant            |
 | `AZURE_SUBSCRIPTION_ID`             | The ID of the target subscription      |
+| `AZURE_SERVICE_PRINCIPAL_OBJECT_ID` | The object ID of the service principal |
 
 To do so:
 
