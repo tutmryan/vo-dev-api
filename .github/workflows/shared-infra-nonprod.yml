@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     concurrency: deploy-to-non-prod
     permissions:
+      contents: read
       id-token: write
     steps:
       - name: Checkout
