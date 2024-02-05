@@ -1,6 +1,6 @@
 # Role-based access control (RBAC) setup
 
-It is assumed that the Verified Orchestration app registration has been carried out with all the roles including both application and user specific roles as described in [manual steps](../infrastructure/manual-steps.md#create-an-app-registration-for-the-verified-orchestration).
+It is assumed that the Verified Orchestration app registration has been carried out with all the roles including both application and user specific roles as described in the [multitenant auth setup](../infrastructure/multitenant-auth-setup.md#create-an-app-registration-for-the-verified-orchestration).
 
 ## Create security groups in Azure AD to ease assignment of users to app roles
 

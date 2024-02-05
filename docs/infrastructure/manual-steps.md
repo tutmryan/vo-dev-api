@@ -20,148 +20,46 @@ Most of the provisioning is automated, but there are still some steps that need 
 
 See <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>.
 
-## Create an app registration for the Verified Orchestration
+## Create an app registration for the API
 
-A single app registration is created in each of the non prod and prod environments for all the customer facing components; (e.g.(API, Admin UI, and Docs site).
+```powershell
+./infrastructure/script/create-api-app-registration.ps1 `
+  -Name '<name-of-application>' `
+  -IdentifierUri '<identifier-uri>'
+```
 
-- creat app registration named `Verified Orchestration` (wth `(non prod)` suffix for the non prod environment)
-- choose `(Any Microsoft Entra ID tenant - Multitenant)` option for `Supported account types`
-- add `Application ID URI` (e.g. `api://verified-orchestration-non-prod` for the non prod environment)
-- add a scope (e.g. `api://verified-orchestration-non-prod/platform` for the non prod environment)
-- create a client secret for the app registration to access the Verified ID API
-  - set it to expires in 24 months
-  - store it in 1Password, `NonProd - Verified Orchestration -> API client secret` for the non prod environment
-  - set `API_CLIENT_SECRET` variable in the relevant GitHub environment
-- create another client secret to be used for PKCE
-  - set it to expires in 24 months
-  - store it in 1Password, `NonProd - Verified Orchestration -> API PKCE client secret` for the non prod environment
-  - set `UI_CLIENT_SECRET` variable in the relevant GitHub environment
-- add the following application permissions from `Verifiable Credentials Service Admin` API
-  - VerifiableCredential.Authority.ReadWrite
-  - VerifiableCredential.Contract.ReadWrite
-  - VerifiableCredential.Credential.Revoke
-  - VerifiableCredential.Credential.Search
-  - VerifiableCredential.Network.Read
-- add the following application permissions from `Verifiable Credentials Service Request` API
-  - VerifiableCredential.Create.All
-- grant admin consent for the added permissions
-- create the following Applications roles
+We need to create a client secret for this application:
 
-  ```JSON
-  {
-    value: "VerifiableCredential.AcquireLimitedAccessToken.ListContracts",
-    description: "Provides access to acquire limited access tokens for listing contracts via the acquireLimitedAccessToken mutation"
-    displayName: "Acquire limited access token: list contracts",
-  }
-  ```
+1. Navigate to the link in the script output.
+1. Click on "Certificates & secrets", then "+ New client secret".
+1. Give a description, select the appropriate expiry date, then "Add".
 
-  ```JSON
-  {
-    value: "VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations",
-    description: "Provides access to acquire limited access tokens for anonymous presentations via the acquireLimitedAccessToken mutation",
-    displayName: "Acquire limited access token: anonymous presentations",
-  }
-  ```
+We need to add the new client secret to the GitHub secrets:
 
-  ```JSON
-  {
-    value: "VerifiableCredential.AcquireLimitedAccessToken.Issue",
-    description: "Provides access to acquire limited access tokens for issuance operations via the acquireLimitedAccessToken mutation",
-    displayName: "Acquire limited access token: issue",
-  }
-  ```
+1. Navigate to the environment for the repository at <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>.
+1. Click on the relevant environment.
+1. Add the secret as `API_CLIENT_SECRET`.
 
-  ````JSON
-  {
-    value: "VerifiableCredential.AcquireLimitedAccessToken.Present",
-    description: "Provides access to acquire limited access tokens for presentation operations via the acquireLimitedAccessToken mutation",```
-    displayName: "Acquire limited access token: present",
-  ````
+## Create an app registration for the UI (admin app)
 
-- create the following Users/Groups roles
+```powershell
+./infrastructure/script/create-ui-app-registration.ps1 `
+  -Name '<name-of-application>' `
+  -RedirectUrl '<redirect-url>' `
+  -ApiAppRegistrationName '<api-app-registration-name>'
+```
 
-  ```JSON
-  {
-    value: "VerifiableCredential.Reader",
-    description: "Provides read access to templates, contracts, issuances, presentations, etc.",
-    displayName: "Reader",
-  }
-  ```
+We also need to create a client secret for this application:
 
-  ```JSON
-  {
-     value: "VerifiableCredential.Issuer",
-     description: "Provides access to manual issuance of credentials; includes Reader access",
-     displayName: "Issuer",
-  }
-  ```
+1. Navigate to the link in the script output.
+1. Click on "Certificates & secrets", then "+ New client secret".
+1. Give a description, select the appropriate expiry date, then "Add".
 
-  ```JSON
-  {
-    value: "VerifiableCredential.CredentialAdmin",
-    description: "Provides access to administer contracts and templates, and revoke issuances; includes Reader access",
-    displayName: "Credential Admin",
-  }
-  ```
+We need to add the new client secret to the GitHub secrets:
 
-  ```JSON
-  {
-    value: "VerifiableCredential.PartnerAdmin",
-    description: "Provide access to administer partners; includes Reader access",
-    displayName: "Partner admin",
-  }
-  ```
-
-- add `Single-page application` platform in `Authentication` -> `Platform configurations` section
-- add relevant redirect URIs (e.g. `http://localhost` for local dev)
-
-## Create an app registration to hold the roles for internal applications
-
-- creat app registration named `Verified Orchestration Internal` (wth `(non prod)` suffix for the non prod environment)
-- choose `Single tenant` option for `Supported account types`
-- add `Application ID URI` (e.g. `api://verified-orchestration-internal-non-prod` for the non prod environment)
-- add a scope (e.g. `api://verified-orchestration-internal-non-prod/platform` for the non prod environment)
-- create the following Applications roles
-
-  ```JSON
-  {
-    description: "Provides limited access to the Verified Orchestration platform - access tokens with this role are created by the API and given to limited access client. DO NOT GRANT TO OTHER APPLICATIONS.",
-    displayName: "Limited access [INTERNAL API USE ONLY]",
-    value: "VerifiableCredential.LimitedAccess"
-  }
-  ```
-
-  ```JSON
-  {
-    description "Used to secure the issuance and presentation request callback endpoints - access tokens with this role are creatd by the API and given to Entra to securely invoke the callback endpoint. DO NOT GRANT TO OTHER APPLICATIONS.",
-    displayName: "Request callback [INTERNAL API USE ONLY]",
-    value: "VerifiableCredential.Request.Callback"
-  }
-  ```
-
-## Create an app registration for acquiring limited access tokens
-
-- creat app registration named `Verified Orchestration Limited Access Client` (wth `(non prod)` suffix for the non prod environment)
-- choose `Single tenant` option for `Supported account types`
-- create a client secret for the Verified Orchestration API to generate a token
-  - set it to expires in 24 months
-  - store it in 1Password, `NonProd - Verified Orchestration -> Limited access client secret` for the non prod environment
-  - set `LIMITED_ACCESS_CLIENT_SECRET` variable in the relevant GitHub environment
-- add the following application permissions from `Verified Orchestration Internal` API
-  - VerifiableCredential.LimitedAccess
-- grant admin consent for the added permissions
-
-## Create an app registration for Verified ID callback token generation
-
-- creat app registration named `Verified Orchestration VID Callback` (wth `(non prod)` suffix for the non prod environment)
-- choose `Single tenant` option for `Supported account types`
-- create a client secret for the Verified Orchestration API to generate a callback token for the Verified ID
-  - set it to expires in 24 months
-  - store it in 1Password, `NonProd - Verified Orchestration -> VID callback client secret` for the non prod environment
-  - set `VID_CALLBACK_CLIENT_SECRET` variable in the relevant GitHub environment
-- add the following application permissions from `Verified Orchestration Internal` API
-  - VerifiableCredential.Request.Callback
-- grant admin consent for the added permissions
+1. Navigate to the environment for the repository at <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>.
+1. Click on the relevant environment.
+1. Add the secret as `UI_CLIENT_SECRET`.
 
 ## Create an app registration for the migrations application
 
@@ -273,6 +171,26 @@ To create the users:
 1. In the left menu, click on "Query editor", then click on the "Continue as..." button in the "Azure Active Directory" section.
 1. Copy the contents of the [`create-aad-user.sql` script](../../infrastructure/scripts/create-aad-user.sql) and replace the `<aad-user>` token with the name of the application.
 1. The Functions app needs the `db_ddladmin` and `db_securityadmin` roles (db_securityadmin to create roles and grant permissions to role), the GraphQL API doesn't.
+
+## Create an app registration for the authenticated callbacks from the Verified ID service
+
+```powershell
+./infrastructure/scripts/create-callback-app-registration.ps1 `
+  -Name '<name-of-application>' `
+  -ApiAppRegistrationName '<api-app-registration-name>'
+```
+
+We need to create a client secret for this application:
+
+1. Navigate to the link in the script output.
+1. Click on "Certificates & secrets", then "+ New client secret".
+1. Give a description, select the appropriate expiry date, then "Add".
+
+We need to add the new client secret to the GitHub secrets:
+
+1. Navigate to the environment for the repository at <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>.
+1. Click on the relevant environment.
+1. Add the secret as `VID_CALLBACK_CLIENT_SECRET`.
 
 ## Give the API app registration service principal blob contributor role membership
 
