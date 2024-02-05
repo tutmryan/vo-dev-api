@@ -32,9 +32,8 @@ resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' = {
   name: '${resourcePrefix}-sql-server'
   location: location
   properties: {
-    administratorLogin: 'vo-admin'
-    administratorLoginPassword: guid(resourceGroup().id)
     administrators: {
+      azureADOnlyAuthentication: true
       administratorType: 'ActiveDirectory'
       login: sqlServerAadAdministratorName
       sid: sqlServerAadAdministratorObjectId
