@@ -1,0 +1,25 @@
+name: Shared infra (non prod)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-to-non-prod:
+    name: Deploy shared infrastructure to the non prod environment
+    runs-on: ubuntu-latest
+    concurrency: deploy-to-non-prod
+    permissions:
+      id-token: write
+    steps:
+      - name: Deploy
+        id: deploy
+        uses: ./github-actions/shared-infra
+        with:
+          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          infra-environment: nonprd
+          resource-group-name: vo-nonprd-platform-shared-infra

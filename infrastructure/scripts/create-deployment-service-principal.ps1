@@ -87,7 +87,7 @@ $apiPermissionsPayload = @(
     )
   }
 )
-$apiPermissionsPayloadJson = (ConvertTo-Json -InputObject $apiPermissionsPayload -Depth 10 -Compress) -replace '"', '\"'
+$apiPermissionsPayloadJson = (ConvertTo-Json -InputObject $apiPermissionsPayload -Depth 10 -Compress)
 
 az ad app update `
   --id $appRegistrationClientId `
@@ -136,7 +136,7 @@ if ($null -ne $federatedCredential) {
     subject   = $federatedCredentialSubject
   }
 
-  $newFederatedCredentialPayloadJson = ($newFederatedCredentialPayload | ConvertTo-Json -Depth 10 -Compress) -replace '"', '\"'
+  $newFederatedCredentialPayloadJson = ($newFederatedCredentialPayload | ConvertTo-Json -Depth 10 -Compress)
 
   az ad app federated-credential create `
     --id $appRegistrationClientId `
@@ -158,7 +158,7 @@ if (-not $SkipAdminConsent) {
 
 $tenantId = az account show --query 'tenantId' --output tsv
 Write-Output ''
-Write-Output 'Add the following secrets to GitHub Actions'
+Write-Output 'Add the following variables to GitHub Actions'
 Write-Output ('- AZURE_CLIENT_ID:                   {0}' -f $appRegistrationClientId)
 Write-Output ('- AZURE_SERVICE_PRINCIPAL_OBJECT_ID: {0}' -f $servicePrincipalObjectId)
 Write-Output ('- AZURE_TENANT_ID:                   {0}' -f $tenantId)

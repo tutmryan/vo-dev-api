@@ -1,0 +1,56 @@
+name: Shared infrastructure
+description: Deploys shared infrastructure
+
+inputs:
+  azure-client-id:
+    description: App ID of the deployment app registration
+    required: true
+  azure-tenant-id:
+    description: ID of the target Azure AD tenant
+    required: true
+  azure-subscription-id:
+    description: ID of the target Azure subscription
+    required: true
+  infra-environment:
+    description: The hosting environment, either 'nonprd' or 'prd'
+    required: true
+  resource-group-name:
+    description: Name of the resource group to deploy resources to
+    required: true
+
+outputs:
+  sql-server-name:
+    description: Name of the deployed SQL Server
+    value: ${{ steps.deploy-shared-infrastructure.outputs.sqlServerName }}
+  elastic-pool-name:
+    description: Name of the deployed Elastic Pool
+    value: ${{ steps.deploy-shared-infrastructure.outputs.elasticPoolName }}
+  elastic-pool-id:
+    description: ID of the deployed Elastic Pool
+    value: ${{ steps.deploy-shared-infrastructure.outputs.elasticPoolId }}
+  app-service-plan-name:
+    description: Name of the deployed App Service Plan
+    value: ${{ steps.deploy-shared-infrastructure.outputs.appServicePlanName }}
+  app-service-plan-id:
+    description: ID of the deployed App Service Plan
+    value: ${{ steps.deploy-shared-infrastructure.outputs.appServicePlanId }}
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Deploy shared infrastructure
+      id: deploy-shared-infrastructure
+      uses: azure/arm-deploy@v1
+      with:
+        deploymentName: ${{env.NOW}}-shared-infra-github-actions
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/shared.bicep
+        parameters: ./infrastructure/parameters/shared.${{ inputs.infra-environment }}.bicepparam
+
