@@ -2,6 +2,9 @@ import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 
 const config: DeepPartial<Config> = {
+  cors: {
+    maxAge: 84000,
+  },
   logging: {
     userClaimsToLog: ['oid', 'aud', 'tid', 'azp', 'iss', 'scp', 'roles'],
     requestInfoToLog: ['origin', 'requestId', 'correlationId'],
@@ -23,7 +26,6 @@ const config: DeepPartial<Config> = {
     httpOnly: true,
   },
   database: {
-    database: 'VerifiedOrchestration',
     port: 1433,
     logging: true,
   },
@@ -44,34 +46,24 @@ const config: DeepPartial<Config> = {
       },
     },
   },
-  integrations: {
-    verifiedIdAdmin: {
-      baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/',
-      auth: {
-        // See https://learn.microsoft.com/en-us/entra/verified-id/admin-api#authentication
-        scope: '6a8b4b39-c021-437c-b060-5a14a3fd65f3/.default',
-      },
-    },
-    verifiedIdRequest: {
-      baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/',
-      auth: {
-        // See https://learn.microsoft.com/en-us/entra/verified-id/vc-network-api#authentication
-        scope: '3db474b9-6a0c-4840-96ac-1fceb342124f/.default',
-      },
-    },
+  verifiedIdAdmin: {
+    baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/',
+    // See https://learn.microsoft.com/en-us/entra/verified-id/admin-api#authentication
+    scope: '6a8b4b39-c021-437c-b060-5a14a3fd65f3/.default',
   },
-  issuanceCallback: {
-    route: '/issuance/callback',
+  verifiedIdRequest: {
+    baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/',
+    // See https://learn.microsoft.com/en-us/entra/verified-id/vc-network-api#authentication
+    scope: '3db474b9-6a0c-4840-96ac-1fceb342124f/.default',
   },
-  presentationCallback: {
-    route: '/presentation/callback',
-  },
+  issuanceCallbackRoute: '/issuance/callback',
+  presentationCallbackRoute: '/presentation/callback',
   issuanceRequestRegistration: {
     clientName: 'Verified Orchestration Platform',
   },
   platformConsumerApps: {},
   identityIssuers: {
-    manual: { name: 'Manually Issued' },
+    manual: 'Manually Issued',
   },
 }
 

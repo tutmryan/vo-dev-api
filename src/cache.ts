@@ -2,11 +2,10 @@ import type { KeyValueCache } from '@apollo/utils.keyvaluecache'
 import { InMemoryLRUCache, PrefixingKeyValueCache } from '@apollo/utils.keyvaluecache'
 import { environment, isLocalDev } from '@makerx/node-common'
 import { PubSub } from 'graphql-subscriptions'
-import config from './config'
+import { redisConfig } from './config'
 import { logger } from './logger'
 import { redisKeyVAdapter, redisPubsub } from './redis'
 
-const redisConfig = config.has('redis') ? config.get('redis') : undefined
 const isRedisEnabled = !!redisConfig?.host
 
 if (!isLocalDev && !isRedisEnabled) {

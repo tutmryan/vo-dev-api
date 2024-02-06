@@ -15,7 +15,7 @@ import cors from 'cors'
 import type { Express } from 'express'
 import express from 'express'
 import { clone, merge } from 'lodash'
-import config from './config'
+import config, { bearerConfig, pckeConfig } from './config'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
 import { issuanceCallbackHandler } from './features/issuance/callback/issuance-callback-handler'
 import { presentationCallbackHandler } from './features/presentation/callback/presentation-callback-handler'
@@ -31,7 +31,7 @@ export const getExpressApp = (): Express => {
     app.use(cors(config.get('cors')))
   }
 
-  if (config.get('auth.pkce.enabled') === true) {
+  if (pckeConfig.enabled) {
     app.use(cookieSession(clone(config.get('cookieSession'))))
 
     app.get('/user', (req, res) => {
@@ -40,9 +40,9 @@ export const getExpressApp = (): Express => {
     })
     logger.info('Added GET /user')
 
-    if (config.has('auth.pkce.logoutUrl')) {
+    if (pckeConfig.logoutUrl) {
       app.get('/logout', (req, res) =>
-        res.redirect(`${config.get('auth.pkce.logoutUrl')}?post_logout_redirect_uri=${req.protocol}://${req.get('Host')}/logged-out`),
+        res.redirect(`${pckeConfig.logoutUrl}?post_logout_redirect_uri=${req.protocol}://${req.get('Host')}/logged-out`),
       )
       app.get('/logged-out', logout)
       logger.info('Added GET /logout and /logged-out')
@@ -55,12 +55,12 @@ export const getExpressApp = (): Express => {
         },
       },
     }
-    const msalConfig = merge(msalLoggerConfig, config.get('auth.pkce.msalConfig'))
+    const msalConfig = merge(msalLoggerConfig, pckeConfig.msalConfig)
     const msalClient = new ConfidentialClientApplication(msalConfig)
     const authConfig: AuthConfig = {
       app,
       msalClient,
-      scopes: config.get('auth.pkce.scopes'),
+      scopes: pckeConfig.scopes,
       logger,
       augmentSession: (response) => {
         return { username: response.account?.username }
@@ -90,7 +90,7 @@ export const getExpressApp = (): Express => {
   // add bearer auth to all requests
   app.use(
     bearerTokenMiddleware({
-      config: config.get('auth.bearer'),
+      config: bearerConfig,
       tokenIsRequired: false, // introspection requests are anonymous outside prod, so allow requests without tokens to pass through
       logger,
     }),
@@ -99,11 +99,11 @@ export const getExpressApp = (): Express => {
   // add issuance and presentation callback routes
   const jsonParser = bodyParser.json()
 
-  app.post(config.get('issuanceCallback.route'), jsonParser, issuanceCallbackMiddleware(issuanceCallbackHandler))
-  logger.info(`Added POST ${config.get('issuanceCallback.route')}`)
+  app.post(config.get('issuanceCallbackRoute'), jsonParser, issuanceCallbackMiddleware(issuanceCallbackHandler))
+  logger.info(`Added POST ${config.get('issuanceCallbackRoute')}`)
 
-  app.post(config.get('presentationCallback.route'), jsonParser, presentationCallbackMiddleware(presentationCallbackHandler))
-  logger.info(`Added POST ${config.get('presentationCallback.route')}`)
+  app.post(config.get('presentationCallbackRoute'), jsonParser, presentationCallbackMiddleware(presentationCallbackHandler))
+  logger.info(`Added POST ${config.get('presentationCallbackRoute')}`)
 
   return app
 }

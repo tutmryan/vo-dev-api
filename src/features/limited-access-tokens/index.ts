@@ -11,7 +11,7 @@ function createKey(token: string) {
   const hash = createHash('sha512')
   // add a secret suffix to make the key more opaque
   // limitedAccessSecret needs only be set in deployed environments
-  const keySuffix = config.has('limitedAccessSecret') ? config.get('limitedAccessSecret') : ''
+  const keySuffix = config.has('limitedAccess.secret') ? config.get('limitedAccess.secret') : ''
   hash.update(token + keySuffix)
   return hash.digest('hex')
 }

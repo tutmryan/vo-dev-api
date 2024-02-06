@@ -1,6 +1,6 @@
 import { getClientCredentialsToken } from '@makerx/node-common'
 import { setLimitedAccessData } from '..'
-import config from '../../../config'
+import { limitedAccessAuth } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import type { AccessTokenResponse, AcquireLimitedAccessTokenInput } from '../../../generated/graphql'
 import { userInvariant } from '../../../util/user-invariant'
@@ -11,8 +11,7 @@ export async function AcquireLimitedAccessTokenCommand(
 ): Promise<AccessTokenResponse> {
   userInvariant(this.user)
 
-  const authConfig = config.get(`limitedAccessClient`)
-  const token = await getClientCredentialsToken(authConfig)
+  const token = await getClientCredentialsToken(limitedAccessAuth)
 
   await setLimitedAccessData(token.access_token, { ...input, userId: this.user.userEntity.id })
 

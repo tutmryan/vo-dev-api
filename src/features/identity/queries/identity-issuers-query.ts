@@ -10,6 +10,6 @@ export async function IdentityIssuersQuery(this: QueryContext) {
     .distinct(true)
     .getRawMany()
   return data.map(
-    ({ issuer }) => config.get('identityIssuers')[issuer]?.name ?? issuer, // return the mapped value if configured
+    ({ issuer }) => config.get('identityIssuers')[issuer] ?? issuer, // return the mapped value if configured
   )
 }

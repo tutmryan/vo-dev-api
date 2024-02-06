@@ -12,7 +12,7 @@ export async function FindTenantIdentitiesQuery(
   return users.map(({ id, displayName, userType }) => ({
     id: id!,
     name: displayName!,
-    issuer: config.get('homeTenantGraph.auth.tenantId'),
+    issuer: config.get('homeTenant.tenantId'),
     userType: userType!,
   }))
 }

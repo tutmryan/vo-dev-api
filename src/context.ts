@@ -55,7 +55,7 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
   const input: FindUpdateOrCreateUserInput = {
     tenantId,
     oid: claims.oid,
-    name: (isApp ? config.get('platformConsumerApps')[claims.oid]?.name : undefined) ?? claims.name ?? claims.sub,
+    name: (isApp ? config.get('platformConsumerApps')[claims.oid] : undefined) ?? claims.name ?? claims.sub,
     email: claims.email ?? null,
     isApp,
   }

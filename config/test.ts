@@ -9,14 +9,9 @@ const config: DeepPartial<Config> = {
     password: '7o}R~=XA1jmz!-aHQ^pA',
     logging: false,
   },
-  homeTenantGraph: {},
-  issuanceCallback: {
-    auth: {},
+  homeTenant: {
+    graphCredentials: {},
   },
-  presentationCallback: {
-    auth: {},
-  },
-  limitedAccessClient: {},
 }
 
 module.exports = config

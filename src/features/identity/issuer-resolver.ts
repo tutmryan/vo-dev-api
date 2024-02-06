@@ -6,5 +6,5 @@ export const resolveIssuer = (identityEntity: IdentityEntity) => {
 
   const tenantMap = config.get('identityIssuers')
   const tenantId = Object.keys(tenantMap).find((tenantId) => identityEntity.issuer.indexOf(tenantId) >= 0)
-  return tenantId ? tenantMap[tenantId]?.name || identityEntity.issuer : identityEntity.issuer
+  return tenantId ? tenantMap[tenantId] || identityEntity.issuer : identityEntity.issuer
 }
