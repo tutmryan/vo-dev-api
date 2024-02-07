@@ -1,8 +1,8 @@
 import { ContainerClient, StorageSharedKeyCredential } from '@azure/storage-blob'
-import { blobStorageConfig } from './config'
+import { blobStorage } from './config'
 
 export async function initializeAzurite() {
-  const { url, credential, logoImagesContainer } = blobStorageConfig
+  const { url, credential, logoImagesContainer } = blobStorage
   if (!credential) throw new Error('No credential provided for azurite blob storage')
   const containerClient = new ContainerClient(
     [url, logoImagesContainer].join('/'),

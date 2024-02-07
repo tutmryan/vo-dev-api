@@ -15,7 +15,7 @@ import cors from 'cors'
 import type { Express } from 'express'
 import express from 'express'
 import { clone, merge } from 'lodash'
-import config, { bearerConfig, pckeConfig } from './config'
+import config, { bearer, pkce } from './config'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
 import { issuanceCallbackHandler } from './features/issuance/callback/issuance-callback-handler'
 import { presentationCallbackHandler } from './features/presentation/callback/presentation-callback-handler'
@@ -31,7 +31,7 @@ export const getExpressApp = (): Express => {
     app.use(cors(config.get('cors')))
   }
 
-  if (pckeConfig.enabled) {
+  if (pkce.enabled) {
     app.use(cookieSession(clone(config.get('cookieSession'))))
 
     app.get('/user', (req, res) => {
@@ -40,9 +40,9 @@ export const getExpressApp = (): Express => {
     })
     logger.info('Added GET /user')
 
-    if (pckeConfig.logoutUrl) {
+    if (pkce.logoutUrl) {
       app.get('/logout', (req, res) =>
-        res.redirect(`${pckeConfig.logoutUrl}?post_logout_redirect_uri=${req.protocol}://${req.get('Host')}/logged-out`),
+        res.redirect(`${pkce.logoutUrl}?post_logout_redirect_uri=${req.protocol}://${req.get('Host')}/logged-out`),
       )
       app.get('/logged-out', logout)
       logger.info('Added GET /logout and /logged-out')
@@ -55,12 +55,12 @@ export const getExpressApp = (): Express => {
         },
       },
     }
-    const msalConfig = merge(msalLoggerConfig, pckeConfig.msalConfig)
+    const msalConfig = merge(msalLoggerConfig, pkce.msalConfig)
     const msalClient = new ConfidentialClientApplication(msalConfig)
     const authConfig: AuthConfig = {
       app,
       msalClient,
-      scopes: pckeConfig.scopes,
+      scopes: pkce.scopes,
       logger,
       augmentSession: (response) => {
         return { username: response.account?.username }
@@ -90,7 +90,7 @@ export const getExpressApp = (): Express => {
   // add bearer auth to all requests
   app.use(
     bearerTokenMiddleware({
-      config: bearerConfig,
+      config: bearer,
       tokenIsRequired: false, // introspection requests are anonymous outside prod, so allow requests without tokens to pass through
       logger,
     }),
