@@ -1,4 +1,4 @@
-import type { ClientCredentialsConfig } from '@makerx/node-common'
+import { environment, isLocalDev, type ClientCredentialsConfig } from '@makerx/node-common'
 import { merge } from 'lodash'
 import type { Config } from './raw'
 import config from './raw'
@@ -70,4 +70,6 @@ export const blobStorage: Config['blobStorage'] = merge(
   },
   config.get('blobStorage'),
 )
-export const redis: Config['redis'] = merge({ host: `${resourcePrefix}.redis.cache.windows.net` }, config.get('redis'))
+const isLocalDevOrUnderTest = isLocalDev || environment === 'test'
+const azureRedisHost = isLocalDevOrUnderTest ? undefined : `${resourcePrefix}.redis.cache.windows.net`
+export const redis: Config['redis'] = merge({ host: azureRedisHost }, config.get('redis'))
