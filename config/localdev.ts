@@ -2,15 +2,6 @@ import { LogLevel } from '@azure/msal-node'
 import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 
-const homeTenantId = 'a4577872-4a36-4a93-9846-b29a1220ca89'
-
-const platformTenantId = '5c14bb50-7602-4c0d-b785-5dee865e4665'
-const platformApiClientId = 'c015d766-3423-4d30-8fbc-014191d27825'
-const platformTokenUrl = `https://login.microsoftonline.com/${platformTenantId}/oauth2/v2.0/token`
-
-const limitedAccessTokenAudience = 'api://verified-orchestration-internal-non-prod'
-const vidCallbackClientId = '2e2b9262-ec52-45da-95bb-4db42286ab52'
-
 const config: DeepPartial<Config> = {
   server: {
     port: 4000,
