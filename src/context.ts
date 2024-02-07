@@ -2,7 +2,7 @@ import type { GraphQLContext as GraphQLContextBase, RequestInfo } from '@makerx/
 import { createContextFactory, createSubscriptionContextFactory, extractTokenFromConnectionParams } from '@makerx/graphql-core'
 import type { JwtPayload } from 'jsonwebtoken'
 import type { DataSource } from 'typeorm'
-import config from './config'
+import { logging, platformConsumerApps } from './config'
 import type { DispatchContext } from './cqs'
 import { dispatch } from './cqs'
 import { dataSource } from './data'
@@ -55,7 +55,7 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
   const input: FindUpdateOrCreateUserInput = {
     tenantId,
     oid: claims.oid,
-    name: (isApp ? config.get('platformConsumerApps')[claims.oid] : undefined) ?? claims.name ?? claims.sub,
+    name: (isApp ? platformConsumerApps[claims.oid] : undefined) ?? claims.name ?? claims.sub,
     email: claims.email ?? null,
     isApp,
   }
@@ -81,16 +81,16 @@ const augmentContext = (context: BaseContext) => {
 }
 
 export const createContext = createContextFactory<GraphQLContext>({
-  claimsToLog: config.get('logging.userClaimsToLog'),
-  requestInfoToLog: config.get('logging.requestInfoToLog'),
+  claimsToLog: logging.userClaimsToLog,
+  requestInfoToLog: logging.requestInfoToLog,
   requestLogger: (requestMetadata) => logger.child(requestMetadata),
   createUser: ({ claims, req }) => findUpdateOrCreateUser(claims, req.headers.authorization?.substring(7)),
   augmentContext,
 })
 
 export const createSubscriptionContext = createSubscriptionContextFactory<GraphQLContext>({
-  claimsToLog: config.get('logging.userClaimsToLog'),
-  requestInfoToLog: config.get('logging.requestInfoToLog'),
+  claimsToLog: logging.userClaimsToLog,
+  requestInfoToLog: logging.requestInfoToLog,
   requestLogger: (requestMetadata) => logger.child(requestMetadata),
   createUser: ({ claims, connectionParams }) => findUpdateOrCreateUser(claims, extractTokenFromConnectionParams(connectionParams)),
   augmentContext,

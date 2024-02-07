@@ -1,6 +1,16 @@
 import type { HttpAuthFactory } from '@makerx/node-common'
 import { createClientCredentialsAuthFactory as clientCredentialsAuth } from '@makerx/node-common'
-import config, { authorityId, callbackAuth, vidServiceAuth } from '../config'
+import {
+  authorityId,
+  blobStorage,
+  callbackAuth,
+  homeTenant,
+  issuanceCallbackRoute,
+  presentationCallbackRoute,
+  verifiedIdAdmin,
+  verifiedIdRequest,
+  vidServiceAuth,
+} from '../config'
 import type { BaseContext } from '../context'
 import { BlobStorageContainerService } from './blob-storage-container-service'
 import { GraphService } from './graph-service'
@@ -20,17 +30,17 @@ export const createServices = (context: BaseContext): Services => {
     homeTenantGraph: createGraphService(),
     verifiedIdAdmin: createVerifiedIdAdminService(context.logger, context.requestInfo.correlationId),
     verifiedIdRequest: createVerifiedIdRequestService(context),
-    logoImages: new BlobStorageContainerService({ containerName: config.get('blobStorage.logoImagesContainer') }),
+    logoImages: new BlobStorageContainerService({ containerName: blobStorage.logoImagesContainer }),
   }
 }
 
 function createGraphService() {
-  const { name: tenantName, tenantId, graphCredentials } = config.get('homeTenant')
+  const { name: tenantName, tenantId, graphCredentials } = homeTenant
   return new GraphService({ tenantName, auth: { tenantId, ...graphCredentials } })
 }
 
 export function createVerifiedIdAdminService(logger: BaseContext['logger'], correlationId?: string) {
-  const { baseUrl, scope } = config.get('verifiedIdAdmin')
+  const { baseUrl, scope } = verifiedIdAdmin
 
   return new VerifiedIdAdminService(
     {
@@ -44,7 +54,7 @@ export function createVerifiedIdAdminService(logger: BaseContext['logger'], corr
 }
 
 function createVerifiedIdRequestService(context: BaseContext) {
-  const { baseUrl, scope } = config.get('verifiedIdRequest')
+  const { baseUrl, scope } = verifiedIdRequest
 
   const httpClientOptions = {
     baseUrl,
@@ -56,9 +66,9 @@ function createVerifiedIdRequestService(context: BaseContext) {
 
   return new VerifiedIdRequestService({
     ...httpClientOptions,
-    issuanceCallbackUrl: `https://${context.requestInfo.host}${config.get('issuanceCallbackRoute')}`,
+    issuanceCallbackUrl: `https://${context.requestInfo.host}${issuanceCallbackRoute}`,
     issuanceCallbackAuthConfig: callbackAuth,
-    presentationCallbackUrl: `https://${context.requestInfo.host}${config.get('presentationCallbackRoute')}`,
+    presentationCallbackUrl: `https://${context.requestInfo.host}${presentationCallbackRoute}`,
     presentationCallbackAuthConfig: callbackAuth,
   })
 }

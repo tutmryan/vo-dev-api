@@ -1,6 +1,6 @@
 import type { FindOptionsOrder, FindOptionsWhere } from 'typeorm'
 import { ILike } from 'typeorm'
-import config from '../../../config'
+import { identityIssuers } from '../../../config'
 import type { QueryContext } from '../../../cqs'
 import type { IdentityWhere, Maybe } from '../../../generated/graphql'
 import { IdentityOrderBy, OrderDirection } from '../../../generated/graphql'
@@ -20,7 +20,7 @@ export async function FindIdentitiesQuery(
   if (criteria?.name) where.name = ILike(`%${criteria.name}%`)
   if (criteria?.issuer) {
     // look for the issuer by name in mapped config and use the key, if found
-    const mappedKey = Object.entries(config.get('identityIssuers')).find(([, value]) => value === criteria.issuer)?.[0]
+    const mappedKey = Object.entries(identityIssuers).find(([, value]) => value === criteria.issuer)?.[0]
     where.issuer = ILike(`%${mappedKey ?? criteria.issuer}%`)
   }
 

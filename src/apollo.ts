@@ -15,7 +15,7 @@ import type { Express } from 'express'
 import { json } from 'express'
 import type http from 'http'
 import { useBackgroundJob } from './background-jobs'
-import config from './config'
+import { bearer, logging } from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
 import type { Logger } from './logger'
@@ -65,9 +65,9 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
     schema,
     httpServer,
     createSubscriptionContext,
-    jwtClaimsToLog: config.get('logging.userClaimsToLog'),
+    jwtClaimsToLog: logging.userClaimsToLog,
     requireAuth: true,
-    verifyToken: (host, token) => verifyForHost(host, token, config.get('auth.bearer')),
+    verifyToken: (host, token) => verifyForHost(host, token, bearer),
   })
 
   logger.info('Starting background job processing')

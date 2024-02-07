@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
-import config from '../../../config'
+import { issuanceRequestRegistration } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import type { IssuanceRequestInput } from '../../../generated/graphql'
 import type { IssuanceRequest } from '../../../services/verified-id'
@@ -67,7 +67,7 @@ export async function CreateIssuanceRequestCommand(
     type: contract.credentialTypes.join(','), // the Azure portal issuance example joins the types with a comma
     authority: (await verifiedIdAdmin.authority()).didModel.did,
     manifest: provisionedContract.manifestUrl,
-    registration: config.get('issuanceRequestRegistration'),
+    registration: issuanceRequestRegistration,
   }
 
   // send it

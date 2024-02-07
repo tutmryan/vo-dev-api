@@ -1,11 +1,7 @@
 import type { ClientCredentialsConfig } from '@makerx/node-common'
 import { merge } from 'lodash'
-import type { Config } from '.'
-import config from '.'
-
-/**
- * This module exports fully expanded configs using home tenant / platform tenant configuration options
- */
+import type { Config } from './raw'
+import config from './raw'
 
 const platformTenantId = config.get('platformTenant.tenantId')
 const homeTenantId = config.get('homeTenant.tenantId')
@@ -13,6 +9,7 @@ const apiCredentials = config.get('apiClient.credentials')
 
 const internalScope = `${config.get('platformTenant.internalClientUri')}/.default`
 const platformTokenUrl = `https://login.microsoftonline.com/${platformTenantId}/oauth2/v2.0/token`
+const homeTenantTokenUrl = `https://login.microsoftonline.com/${homeTenantId}/oauth2/v2.0/token`
 
 // internal client credentials configs
 export const callbackAuth: ClientCredentialsConfig = {
@@ -27,12 +24,16 @@ export const limitedAccessAuth: ClientCredentialsConfig = {
 }
 
 // VID service client credentials config
-export const hasHomeTenantAuthority = config.has('homeTenant.authorityId')
-export const authorityId = hasHomeTenantAuthority ? config.get('homeTenant.authorityId') : config.get('platformTenant.authorityId')
-export const vidServiceAuth: Omit<ClientCredentialsConfig, 'scope'> = {
-  tokenUrl: hasHomeTenantAuthority ? `https://login.microsoftonline.com/${homeTenantId}/oauth2/v2.0/token` : platformTokenUrl,
-  ...(hasHomeTenantAuthority ? config.get('homeTenant.vidServiceCredentials') : apiCredentials),
-}
+export const hasHomeTenantAuthority = config.has('homeTenant.vidServiceCredentials.clientId')
+export const vidServiceAuth: Omit<ClientCredentialsConfig, 'scope'> = hasHomeTenantAuthority
+  ? {
+      tokenUrl: homeTenantTokenUrl,
+      ...config.get('homeTenant.vidServiceCredentials'),
+    }
+  : {
+      tokenUrl: platformTokenUrl,
+      ...apiCredentials,
+    }
 
 // auth configs
 export const bearer: Config['auth']['bearer'] = merge(

@@ -2,10 +2,9 @@ import { KeyvAdapter } from '@apollo/utils.keyvadapter'
 import type { RedisOptions } from 'bullmq'
 import { RedisPubSub } from 'graphql-redis-subscriptions'
 import Keyv from 'keyv'
-import config from './config'
+import { redis as redisConfig } from './config'
 import { Lazy } from './util/lazy'
 
-const redisConfig = config.has('redis') ? config.get('redis') : undefined
 const isRedisEnabled = !!redisConfig?.host
 const redisPort = 6380
 export const redisConnectionString = isRedisEnabled

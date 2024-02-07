@@ -1,6 +1,6 @@
 import { createHash } from 'crypto'
 import { newCacheSection } from '../../cache'
-import config from '../../config'
+import { limitedAccess } from '../../config'
 import type { AcquireLimitedAccessTokenInput } from '../../generated/graphql'
 
 export * from './shield-rules'
@@ -11,7 +11,7 @@ function createKey(token: string) {
   const hash = createHash('sha512')
   // add a secret suffix to make the key more opaque
   // limitedAccessSecret needs only be set in deployed environments
-  const keySuffix = config.has('limitedAccess.secret') ? config.get('limitedAccess.secret') : ''
+  const keySuffix = limitedAccess.secret ?? ''
   hash.update(token + keySuffix)
   return hash.digest('hex')
 }

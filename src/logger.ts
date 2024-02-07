@@ -3,7 +3,7 @@ import { createLogger } from '@makerx/node-winston'
 import { configs } from 'triple-beam'
 import type { LoggerOptions, QueryRunner, Logger as TypeOrmLoggerInterface } from 'typeorm'
 import * as winston from 'winston'
-import config from './config'
+import { logging } from './config'
 
 /**
  * set up 'audit' log level, replacing 'http' level
@@ -19,9 +19,9 @@ winston.addColors({ ...colorsRest, audit: httpColor as string })
 
 const baseLogger = createLogger({
   consoleFormat: isLocalDev ? 'pretty' : 'json',
-  consoleOptions: config.get('logging.consoleOptions'),
-  loggerOptions: { ...config.get('logging.loggerOptions'), levels },
-  omitPaths: config.get('logging.omitPaths'),
+  consoleOptions: logging.consoleOptions,
+  loggerOptions: { ...logging.loggerOptions, levels },
+  omitPaths: logging.omitPaths,
 }) as Logger
 
 /**

@@ -15,7 +15,14 @@ import cors from 'cors'
 import type { Express } from 'express'
 import express from 'express'
 import { clone, merge } from 'lodash'
-import config, { bearer, pkce } from './config'
+import {
+  bearer,
+  cookieSession as cookieSessionConfig,
+  cors as corsConfig,
+  issuanceCallbackRoute,
+  pkce,
+  presentationCallbackRoute,
+} from './config'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
 import { issuanceCallbackHandler } from './features/issuance/callback/issuance-callback-handler'
 import { presentationCallbackHandler } from './features/presentation/callback/presentation-callback-handler'
@@ -27,12 +34,10 @@ export const getExpressApp = (): Express => {
   app.disable('x-powered-by')
   app.set('trust proxy', true)
 
-  if (config.has('cors')) {
-    app.use(cors(config.get('cors')))
-  }
+  app.use(cors(corsConfig))
 
   if (pkce.enabled) {
-    app.use(cookieSession(clone(config.get('cookieSession'))))
+    app.use(cookieSession(clone(cookieSessionConfig)))
 
     app.get('/user', (req, res) => {
       if (!isAuthenticatedSession(req.session)) return res.status(400).send('Not logged in ¯\\_(ツ)_/¯').end()
@@ -99,11 +104,11 @@ export const getExpressApp = (): Express => {
   // add issuance and presentation callback routes
   const jsonParser = bodyParser.json()
 
-  app.post(config.get('issuanceCallbackRoute'), jsonParser, issuanceCallbackMiddleware(issuanceCallbackHandler))
-  logger.info(`Added POST ${config.get('issuanceCallbackRoute')}`)
+  app.post(issuanceCallbackRoute, jsonParser, issuanceCallbackMiddleware(issuanceCallbackHandler))
+  logger.info(`Added POST ${issuanceCallbackRoute}`)
 
-  app.post(config.get('presentationCallbackRoute'), jsonParser, presentationCallbackMiddleware(presentationCallbackHandler))
-  logger.info(`Added POST ${config.get('presentationCallbackRoute')}`)
+  app.post(presentationCallbackRoute, jsonParser, presentationCallbackMiddleware(presentationCallbackHandler))
+  logger.info(`Added POST ${presentationCallbackRoute}`)
 
   return app
 }

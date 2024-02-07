@@ -26,6 +26,8 @@ const config: EnvVarSubstitution<Config> = {
       silent: json('SILENT_CONSOLE'),
     },
   },
+  resourcePrefix: 'RESOURCE_PREFIX',
+  authorityId: 'VID_AUTHORITY_ID',
   database: {
     host: 'DATABASE_HOST',
     port: json('DATABASE_PORT'),
@@ -45,10 +47,13 @@ const config: EnvVarSubstitution<Config> = {
       clientId: 'HOME_TENANT_GRAPH_CLIENT_ID',
       clientSecret: 'HOME_TENANT_GRAPH_CLIENT_SECRET',
     },
+    vidServiceCredentials: {
+      clientId: 'HOME_TENANT_VID_SERVICE_CLIENT_ID',
+      clientSecret: 'HOME_TENANT_VID_SERVICE_CLIENT_SECRET',
+    },
   },
   platformTenant: {
     tenantId: 'PLATFORM_TENANT_ID',
-    authorityId: 'VERIFIED_ID_AUTHORITY_ID',
     internalClientUri: 'INTERNAL_CLIENT_URI',
   },
   apiClient: {
@@ -83,7 +88,6 @@ const config: EnvVarSubstitution<Config> = {
     ...json('IDENTITY_ISSUERS'),
   },
   platformConsumerApps: json('PLATFORM_CONSUMER_APPS'),
-  resourcePrefix: 'RESOURCE_PREFIX',
 }
 
 export default config
