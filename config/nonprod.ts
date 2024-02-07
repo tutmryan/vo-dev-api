@@ -5,7 +5,6 @@ const config: DeepPartial<Config> = {
   cors: {
     origin: true,
     credentials: true,
-    maxAge: 84000,
   },
 }
 

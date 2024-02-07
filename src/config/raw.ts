@@ -53,7 +53,7 @@ export type Config = {
     password?: string
   }
   redis: {
-    host: string
+    host?: string
     key: string
   }
   blobStorage: {
@@ -80,7 +80,7 @@ export type Config = {
   }
   limitedAccess: {
     credentials: ClientCredentials
-    secret: string
+    secret?: string
   }
   verifiedIdAdmin: {
     baseUrl: string

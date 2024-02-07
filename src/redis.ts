@@ -5,7 +5,7 @@ import Keyv from 'keyv'
 import { redis as redisConfig } from './config'
 import { Lazy } from './util/lazy'
 
-const isRedisEnabled = !!redisConfig?.host
+const isRedisEnabled = !!redisConfig.host
 const redisPort = 6380
 export const redisConnectionString = isRedisEnabled
   ? redisConfig.key
@@ -14,10 +14,9 @@ export const redisConnectionString = isRedisEnabled
   : undefined
 
 export const redisOptions: RedisOptions = {
-  host: redisConfig?.host,
+  host: redisConfig.host,
   port: redisPort,
-  password: redisConfig?.key,
-  tls: redisConfig?.key ? {} : undefined,
+  password: redisConfig.key,
 }
 
 const keyv = Lazy(() => new Keyv(redisConnectionString, { namespace: 'cache' }))
