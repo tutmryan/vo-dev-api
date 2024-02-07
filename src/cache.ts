@@ -2,12 +2,11 @@ import type { KeyValueCache } from '@apollo/utils.keyvaluecache'
 import { InMemoryLRUCache, PrefixingKeyValueCache } from '@apollo/utils.keyvaluecache'
 import { environment, isLocalDev } from '@makerx/node-common'
 import { PubSub } from 'graphql-subscriptions'
-import config from './config'
+import { redis } from './config'
 import { logger } from './logger'
 import { redisKeyVAdapter, redisPubsub } from './redis'
 
-const redisConfig = config.has('redis') ? config.get('redis') : undefined
-const isRedisEnabled = !!redisConfig?.host
+const isRedisEnabled = !!redis.host
 
 if (!isLocalDev && !isRedisEnabled) {
   if (environment !== 'test') logger.warn('Redis caching is not configured, falling back to in-memory cache')

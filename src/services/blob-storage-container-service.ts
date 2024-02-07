@@ -2,14 +2,14 @@ import { DefaultAzureCredential } from '@azure/identity'
 import type { BlockBlobParallelUploadOptions } from '@azure/storage-blob'
 import { ContainerClient, StorageSharedKeyCredential } from '@azure/storage-blob'
 import mime from 'mime-types'
-import config from '../config'
+import { blobStorage } from '../config'
 import { parseDataUrl } from '../util/data-url'
 import { Lazy } from '../util/lazy'
 
 export class BlobStorageContainerService {
   constructor({ containerName }: { containerName: string }) {
     this.containerClient = Lazy(() => {
-      const { url, credential } = config.get('blobStorage')
+      const { url, credential } = blobStorage
       const client = new ContainerClient(
         [url, containerName].join('/'),
         credential ? new StorageSharedKeyCredential(credential.accountName, credential.accountKey) : new DefaultAzureCredential(),

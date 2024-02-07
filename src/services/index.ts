@@ -1,6 +1,16 @@
 import type { HttpAuthFactory } from '@makerx/node-common'
 import { createClientCredentialsAuthFactory as clientCredentialsAuth } from '@makerx/node-common'
-import config from '../config'
+import {
+  authorityId,
+  blobStorage,
+  callbackAuth,
+  homeTenant,
+  issuanceCallbackRoute,
+  presentationCallbackRoute,
+  verifiedIdAdmin,
+  verifiedIdRequest,
+  vidServiceAuth,
+} from '../config'
 import type { BaseContext } from '../context'
 import { BlobStorageContainerService } from './blob-storage-container-service'
 import { GraphService } from './graph-service'
@@ -17,43 +27,48 @@ export interface Services {
 
 export const createServices = (context: BaseContext): Services => {
   return {
-    homeTenantGraph: new GraphService(config.get('homeTenantGraph')),
+    homeTenantGraph: createGraphService(),
     verifiedIdAdmin: createVerifiedIdAdminService(context.logger, context.requestInfo.correlationId),
     verifiedIdRequest: createVerifiedIdRequestService(context),
-    logoImages: new BlobStorageContainerService({ containerName: config.get('blobStorage.logoImagesContainer') }),
+    logoImages: new BlobStorageContainerService({ containerName: blobStorage.logoImagesContainer }),
   }
 }
 
+function createGraphService() {
+  const { name: tenantName, tenantId, graphCredentials } = homeTenant
+  return new GraphService({ tenantName, auth: { tenantId, ...graphCredentials } })
+}
+
 export function createVerifiedIdAdminService(logger: BaseContext['logger'], correlationId?: string) {
-  const { authorityId, baseUrl, auth } = config.get('integrations.verifiedIdAdmin')
+  const { baseUrl, scope } = verifiedIdAdmin
 
   return new VerifiedIdAdminService(
     {
       baseUrl,
       logger,
       correlationId,
-      authFactory: <HttpAuthFactory>clientCredentialsAuth(auth),
+      authFactory: <HttpAuthFactory>clientCredentialsAuth({ scope, ...vidServiceAuth }),
     },
     authorityId,
   )
 }
 
 function createVerifiedIdRequestService(context: BaseContext) {
-  const { baseUrl, auth } = config.get('integrations.verifiedIdRequest')
+  const { baseUrl, scope } = verifiedIdRequest
 
   const httpClientOptions = {
     baseUrl,
     requestContext: context,
     logger: context.logger,
     correlationId: context.requestInfo.correlationId,
-    authFactory: <HttpAuthFactory<BaseContext>>clientCredentialsAuth(auth),
+    authFactory: <HttpAuthFactory<BaseContext>>clientCredentialsAuth({ scope, ...vidServiceAuth }),
   }
 
   return new VerifiedIdRequestService({
     ...httpClientOptions,
-    issuanceCallbackUrl: `https://${context.requestInfo.host}${config.get('issuanceCallback.route')}`,
-    issuanceCallbackAuthConfig: config.get('issuanceCallback.auth'),
-    presentationCallbackUrl: `https://${context.requestInfo.host}${config.get('presentationCallback.route')}`,
-    presentationCallbackAuthConfig: config.get('presentationCallback.auth'),
+    issuanceCallbackUrl: `https://${context.requestInfo.host}${issuanceCallbackRoute}`,
+    issuanceCallbackAuthConfig: callbackAuth,
+    presentationCallbackUrl: `https://${context.requestInfo.host}${presentationCallbackRoute}`,
+    presentationCallbackAuthConfig: callbackAuth,
   })
 }

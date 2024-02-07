@@ -2,14 +2,14 @@ import { environment, isLocalDev } from '@makerx/node-common'
 import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 import type { SqlServerConnectionOptions } from 'typeorm/driver/sqlserver/SqlServerConnectionOptions'
-import config from '../config'
+import { database as databaseConfig } from '../config'
 import { AuditingEventSubscriber } from '../features/auditing/auditing-event-subscribers'
 import { TrackingEventSubscriber } from '../features/auditing/tracking-event-subscriber'
 import { LoggerForTypeOrm, logger } from '../logger'
 import type { VerifiedOrchestrationEntityManager } from './entity-manager'
 import { SnakeNamingStrategy } from './utils/snake-naming-strategy'
 
-const { logging, host, port, database } = config.get('database')
+const { logging, host, port, database } = databaseConfig
 
 const baseConfig: Pick<
   SqlServerConnectionOptions,
@@ -39,7 +39,7 @@ const baseConfig: Pick<
 }
 
 const usernamePasswordAuthConfig: () => SqlServerConnectionOptions = () => {
-  const { username, password } = config.get('database')
+  const { username, password } = databaseConfig
   return {
     ...baseConfig,
     username,

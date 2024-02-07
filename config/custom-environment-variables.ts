@@ -26,6 +26,8 @@ const config: EnvVarSubstitution<Config> = {
       silent: json('SILENT_CONSOLE'),
     },
   },
+  resourcePrefix: 'RESOURCE_PREFIX',
+  authorityId: 'VID_AUTHORITY_ID',
   database: {
     host: 'DATABASE_HOST',
     port: json('DATABASE_PORT'),
@@ -38,47 +40,54 @@ const config: EnvVarSubstitution<Config> = {
     host: 'REDIS_HOST',
     key: 'REDIS_KEY',
   },
-  homeTenantGraph: {
-    auth: {
-      clientSecret: 'HOME_TENANT_CLIENT_SECRET',
+  homeTenant: {
+    name: 'HOME_TENANT_NAME',
+    tenantId: 'HOME_TENANT_ID',
+    graphCredentials: {
+      clientId: 'HOME_TENANT_GRAPH_CLIENT_ID',
+      clientSecret: 'HOME_TENANT_GRAPH_CLIENT_SECRET',
     },
+    vidServiceCredentials: {
+      clientId: 'HOME_TENANT_VID_SERVICE_CLIENT_ID',
+      clientSecret: 'HOME_TENANT_VID_SERVICE_CLIENT_SECRET',
+    },
+  },
+  platformTenant: {
+    tenantId: 'PLATFORM_TENANT_ID',
+    internalClientUri: 'INTERNAL_CLIENT_URI',
+  },
+  apiClient: {
+    credentials: {
+      clientId: 'API_CLIENT_ID',
+      clientSecret: 'API_CLIENT_SECRET',
+    },
+    uri: 'API_CLIENT_URI',
   },
   auth: {
     pkce: {
       msalConfig: {
         auth: {
-          clientSecret: 'UI_CLIENT_SECRET',
+          clientSecret: 'API_CLIENT_SECRET',
         },
       },
     },
   },
-  limitedAccessClient: {
-    clientSecret: 'LIMITED_ACCESS_CLIENT_SECRET',
-  },
-  limitedAccessSecret: 'LIMITED_ACCESS_SECRET',
-  integrations: {
-    verifiedIdAdmin: {
-      authorityId: 'VERIFIED_ID_AUTHORITY_ID',
-      auth: {
-        clientSecret: 'API_CLIENT_SECRET',
-      },
+  limitedAccess: {
+    credentials: {
+      clientId: 'LIMITED_ACCESS_CLIENT_ID',
+      clientSecret: 'LIMITED_ACCESS_CLIENT_SECRET',
     },
-    verifiedIdRequest: {
-      auth: {
-        clientSecret: 'API_CLIENT_SECRET',
-      },
-    },
+    secret: 'LIMITED_ACCESS_SECRET',
   },
-  issuanceCallback: {
-    auth: {
-      clientSecret: 'VID_CALLBACK_CLIENT_SECRET',
-    },
+  callbackCredentials: {
+    clientId: 'VID_CALLBACK_CLIENT_ID',
+    clientSecret: 'VID_CALLBACK_CLIENT_SECRET',
   },
-  presentationCallback: {
-    auth: {
-      clientSecret: 'VID_CALLBACK_CLIENT_SECRET',
-    },
+  identityIssuers: {
+    tenantId: 'HOME_TENANT_NAME',
+    ...json('IDENTITY_ISSUERS'),
   },
+  platformConsumerApps: json('PLATFORM_CONSUMER_APPS'),
 }
 
 export default config

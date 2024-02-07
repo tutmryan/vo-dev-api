@@ -9,14 +9,31 @@ const config: DeepPartial<Config> = {
     password: '7o}R~=XA1jmz!-aHQ^pA',
     logging: false,
   },
-  homeTenantGraph: {},
-  issuanceCallback: {
-    auth: {},
+  // just enough config to support loadng of config under test
+  authorityId: 'TEST_AUTHORITY_ID',
+  server: {},
+  auth: {
+    bearer: {},
+    pkce: {},
   },
-  presentationCallback: {
-    auth: {},
+  redis: {},
+  homeTenant: {
+    tenantId: 'TEST_HOME_TENANT_ID',
+    graphCredentials: {},
+    vidServiceCredentials: {},
   },
-  limitedAccessClient: {},
+  platformTenant: {
+    tenantId: 'TEST_PLATFORM_TENANT_ID',
+    internalClientUri: 'TEST_INTERNAL_CLIENT_URI',
+  },
+  apiClient: {
+    credentials: {},
+    uri: 'TEST_API_CLIENT_URI',
+  },
+  callbackCredentials: {},
+  limitedAccess: {
+    credentials: {},
+  },
 }
 
 module.exports = config

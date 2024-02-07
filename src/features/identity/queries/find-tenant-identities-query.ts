@@ -1,4 +1,4 @@
-import config from '../../../config'
+import { homeTenant } from '../../../config'
 import type { QueryContext } from '../../../cqs'
 import type { TenantIdentity, TenantIdentityWhere } from '../../../generated/graphql'
 
@@ -12,7 +12,7 @@ export async function FindTenantIdentitiesQuery(
   return users.map(({ id, displayName, userType }) => ({
     id: id!,
     name: displayName!,
-    issuer: config.get('homeTenantGraph.auth.tenantId'),
+    issuer: homeTenant.tenantId,
     userType: userType!,
   }))
 }

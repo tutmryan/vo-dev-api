@@ -7,8 +7,9 @@ import config from 'config'
 import type { CorsOptions, CorsOptionsDelegate } from 'cors'
 import type { LoggerOptions } from 'typeorm'
 import type { ConsoleTransportOptions } from 'winston/lib/winston/transports'
-import type { GraphServiceConfig } from './services'
-import type { IssuanceRequestRegistration } from './services/verified-id'
+import type { IssuanceRequestRegistration } from '../services/verified-id'
+
+type ClientCredentials = Pick<ClientCredentialsConfig, 'clientId' | 'clientSecret'>
 
 export type Config = {
   cors: CorsOptions | CorsOptionsDelegate
@@ -29,22 +30,20 @@ export type Config = {
   auth: {
     bearer: BearerConfig
     pkce: {
+      credentials: ClientCredentials
       logoutUrl?: string
       scopes: string[]
       enabled: boolean
       msalConfig: MsalConfiguration
     }
   }
-  integrationTest: {
-    url: string
-    clientCredentials: ClientCredentialsConfig & { tenantId: string }
-    token: string
-  }
   events: {
     processingTimeoutSeconds: number
     pollingFrequencySeconds: number
     maxProcessingAttempts: number
   }
+  resourcePrefix: string
+  authorityId: string
   database: {
     host: string
     port: number
@@ -54,7 +53,7 @@ export type Config = {
     password?: string
   }
   redis: {
-    host: string
+    host?: string
     key: string
   }
   blobStorage: {
@@ -65,31 +64,40 @@ export type Config = {
     }
     logoImagesContainer: string
   }
-  homeTenantGraph: GraphServiceConfig
-  limitedAccessClient: ClientCredentialsConfig
-  limitedAccessSecret: string
-  integrations: {
-    verifiedIdAdmin: {
-      authorityId: string
-      baseUrl: string
-      auth: ClientCredentialsConfig
-    }
-    verifiedIdRequest: {
-      baseUrl: string
-      auth: ClientCredentialsConfig
-    }
+  homeTenant: {
+    name: string
+    tenantId: string
+    graphCredentials: ClientCredentials
+    vidServiceCredentials: ClientCredentials
   }
-  issuanceCallback: {
-    route: string
-    auth: ClientCredentialsConfig
+  platformTenant: {
+    tenantId: string
+    internalClientUri: string
   }
-  presentationCallback: {
-    route: string
-    auth: ClientCredentialsConfig
+  apiClient: {
+    credentials: ClientCredentials
+    uri: string
   }
+  limitedAccess: {
+    credentials: ClientCredentials
+    secret?: string
+  }
+  verifiedIdAdmin: {
+    baseUrl: string
+    scope: string
+  }
+  verifiedIdRequest: {
+    baseUrl: string
+    scope: string
+  }
+  callbackCredentials: ClientCredentials
+  issuanceCallbackRoute: string
+  presentationCallbackRoute: string
   issuanceRequestRegistration: IssuanceRequestRegistration
-  platformConsumerApps: Record<string, { name: string }>
-  identityIssuers: Record<string, { name: string }>
+  platformConsumerApps: Record<string, string>
+  identityIssuers: Record<string, string>
 }
 
-export default createTypedConfig<Config>(config)
+const typedConfig = createTypedConfig<Config>(config)
+export default typedConfig
+export * from './expanded'

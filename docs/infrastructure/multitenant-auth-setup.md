@@ -2,9 +2,9 @@
 
 ## Create an app registration for the Verified Orchestration
 
-A single app registration is created in each of the non prod and prod environments for all the customer facing components; (e.g.(API, Admin UI, and Docs site).
+A single app registration is created in each of the non prod and prod environments for all the customer facing components; (e.g. API, Admin UI, and Docs site).
 
-- creat app registration named `Verified Orchestration` (wth `(non prod)` suffix for the non prod environment)
+- create an app registration named `Verified Orchestration` (with `(non prod)` suffix for the non prod environment)
 - choose `(Any Microsoft Entra ID tenant - Multitenant)` option for `Supported account types`
 - add `Application ID URI` (e.g. `api://verified-orchestration-non-prod` for the non prod environment)
 - add a scope (e.g. `api://verified-orchestration-non-prod/platform` for the non prod environment)
@@ -12,10 +12,6 @@ A single app registration is created in each of the non prod and prod environmen
   - set it to expires in 24 months
   - store it in 1Password, `NonProd - Verified Orchestration -> API client secret` for the non prod environment
   - set `API_CLIENT_SECRET` variable in the relevant GitHub environment
-- create another client secret to be used for PKCE
-  - set it to expires in 24 months
-  - store it in 1Password, `NonProd - Verified Orchestration -> API PKCE client secret` for the non prod environment
-  - set `UI_CLIENT_SECRET` variable in the relevant GitHub environment
 - add the following application permissions from `Verifiable Credentials Service Admin` API
   - VerifiableCredential.Authority.ReadWrite
   - VerifiableCredential.Contract.ReadWrite
@@ -123,7 +119,7 @@ A single app registration is created in each of the non prod and prod environmen
 
 ## Create an app registration for acquiring limited access tokens
 
-- creat app registration named `Verified Orchestration Limited Access Client` (wth `(non prod)` suffix for the non prod environment)
+- creat app registration named `Verified Orchestration Limited Access Client` (with `(non prod)` suffix for the non prod environment)
 - choose `Single tenant` option for `Supported account types`
 - create a client secret for the Verified Orchestration API to generate a token
   - set it to expires in 24 months
@@ -135,7 +131,7 @@ A single app registration is created in each of the non prod and prod environmen
 
 ## Create an app registration for Verified ID callback token generation
 
-- creat app registration named `Verified Orchestration VID Callback` (wth `(non prod)` suffix for the non prod environment)
+- creat app registration named `Verified Orchestration VID Callback Client` (with `(non prod)` suffix for the non prod environment)
 - choose `Single tenant` option for `Supported account types`
 - create a client secret for the Verified Orchestration API to generate a callback token for the Verified ID
   - set it to expires in 24 months

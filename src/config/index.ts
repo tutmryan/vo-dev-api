@@ -1,0 +1,42 @@
+import { omit } from 'lodash'
+import config from './raw'
+
+/**
+ * WHAT is going on with config in this project ???
+ *
+ * The raw config does not express all fully built configurations,
+ * such as auth configs which have lots of strings that must be concatenated with tenant ids and scopes.
+ *
+ * We prefer *not* to build such config by hand, we prefer to configure the miniumum set of variables per instance.
+ *
+ * So instead of using the raw config throughout, we create and export fully built configs from ./expanded.ts.
+ *
+ * Thus, this project's config module exports:
+ * - fully expanded configs (which need to be built) from ./expanded.ts
+ * - all other top level config objects from the raw config (below)
+ *
+ * To ensure we only use expanded config, the raw config is not exported.
+ */
+
+// export the raw Config type
+export type { Config } from './raw'
+
+// export all expanded configs
+export * from './expanded'
+
+// export all other top level configs
+export const cors = config.get('cors')
+export const server = config.get('server')
+export const logging = config.get('logging')
+export const cookieSession = config.get('cookieSession')
+export const events = config.has('events') ? config.get('events') : undefined
+export const authorityId = config.get('authorityId')
+export const issuanceCallbackRoute = config.get('issuanceCallbackRoute')
+export const presentationCallbackRoute = config.get('presentationCallbackRoute')
+export const identityIssuers = config.get('identityIssuers')
+export const platformConsumerApps = config.get('platformConsumerApps')
+export const homeTenant = omit(config.get('homeTenant'), ['vidServiceCredentials'])
+export const issuanceRequestRegistration = config.get('issuanceRequestRegistration')
+export const limitedAccess = config.get('limitedAccess')
+export const verifiedIdAdmin = config.get('verifiedIdAdmin')
+export const verifiedIdRequest = config.get('verifiedIdRequest')
