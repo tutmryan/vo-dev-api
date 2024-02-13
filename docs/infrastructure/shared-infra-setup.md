@@ -143,6 +143,36 @@ If you have access, e.g. for non-prod, you can check the shared infrastructure d
 az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --template-file ./infrastructure/shared.bicep --parameters ./infrastructure/parameters/shared.nonprd.bicepparam
 ```
 
+## Create a resource group to hold Verified ID resources
+
+1. Navigate to the Azure Portal subscriptions blade: <https://portal.azure.com/#view/Microsoft_Azure_Billing/SubscriptionsBlade>.
+1. Select the relevant subscription.
+1. In the "Settings" section in the left menu, click on "Resource groups".
+1. Click on "+ Create"
+1. Pick a name (e.g. `vo-entra-verified-id-core`), select the appropriate region, and finalise the creation.
+
+## Create a key vault to hold signing keys used Verified ID authorities
+
+1. Navigate to the Azure Portal key vaults blade: https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.KeyVault%2Fvaults
+1. Click on "+ Create"
+1. Select the resource group created in the previous step (e.g. `vo-entra-verified-id-core`)
+1. Pick a name (e.g. `vo-vid-keys-nonprod` for non prod tenant), select the appropriate region, and click "Next" to configure access
+1. Choose `Vault access policy` options in `Permission model` section
+1. Click on "Review + create" and finalise the creation
+
+## Create access policies to grant Verified ID services access to the keys in the key vault
+
+1. Navigate to the key vault
+1. Click on "Access policies"
+1. Click on "+ Create"
+1. Select `Get` and `Sign` in "Key permissions" section
+1. Click on "Next" to select a principal
+1. Select `Verifiable Credentials Service` (bb2a64ee-5d29-4b07-a491-25806dc854d3) and finalise the creation
+1. Click on "+ Create" to create another access policy
+1. Select `Sign` in "Key permissions" section
+1. Click on "Next" to select a principal
+1. Select `Verifiable Credentials Service Request` (3db474b9-6a0c-4840-96ac-1fceb342124f) and finalise the creation
+
 ## Create and run the shared infrastructure pipeline
 
 You can now create a new workflow in the `.github/workflows` directory to call the `shared-infra` action for the hosting tenant.

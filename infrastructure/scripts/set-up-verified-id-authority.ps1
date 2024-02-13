@@ -185,11 +185,12 @@ if ($null -ne $authority) {
 
   Write-Output 'Verifying Verified ID Authority DID...'
 
-  az rest `
+  $verificationStatus = az rest `
     --method post `
     --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authorityId/validateWellKnownDidConfiguration `
     --resource $constants.didResourceId
 
+  $linkedDomainsVerified = $verificationStatus.validationSuccessful
   Write-Output 'Verified Verified ID Authority DID...'
 
   # log out the user session to prevent the CI/CD actions following this script from being executed in the user's context
