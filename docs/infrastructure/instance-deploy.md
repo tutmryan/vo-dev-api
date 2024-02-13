@@ -12,6 +12,7 @@ The name of the environment should be the short instance moniker e.g. `demo`.
 - HOME_TENANT_NAME
 - HOME_TENANT_ID
 - HOME_TENANT_GRAPH_CLIENT_ID (optional)
+- HOME_TENANT_AUTHORITY_ID (optional)
 
 ### Secrets
 
