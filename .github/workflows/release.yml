@@ -132,6 +132,9 @@ jobs:
           - instance: demo
             resourceGroup: vo-demo-instance
             resourcePrefix: vo-demo
+            organisation-name: 'Verified Orchestration Demo'
+            organisation-domain: 'demo.did.verifiedorchestration.com'
+            did-storage-account-name: 'vodemodid'
     environment:
       name: ${{ matrix.instance }}
       # url: ${{ matrix.instance }}.verifiedorchestration.com
@@ -180,6 +183,16 @@ jobs:
           azure-service-principal-object-id: ${{ vars.NON_PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
           resource-group-name: ${{ matrix.resourceGroup }}
           resource-prefix: ${{ matrix.resourcePrefix }}
+
+          key-vault-resource-group-name: ${{ vars.NON_PROD_KEY_VAULT_RESOURCE_GROUP_NAME }}
+          key-vault-name: ${{ vars.NON_PROD_KEY_VAULT_NAME }}
+          dns-api-key: ${{ secrets.NON_PROD_DNS_API_KEY }}
+          dns-api-secret: ${{ secrets.NON_PROD_DNS_API_SECRET }}
+
+          organisation-name: ${{ matrix.organisation-name }}
+          organisation-domain: ${{ matrix.organisation-domain }}
+          did-storage-account-name: ${{ matrix.did-storage-account-name }}
+
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
           redis-cache-sku: Standard
@@ -188,16 +201,14 @@ jobs:
           docs-site-artifact-name: docs-site-dev
           docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }} # TODO ???
           docs-site-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }} # TODO ???
+
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
           api-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.NON_PROD_VID_CALLBACK_CLIENT_SECRET }}
           limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}
           limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
+
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
           home-tenant-graph-client-id: ${{ vars.HOME_TENANT_GRAPH_CLIENT_ID }}
           home-tenant-graph-client-secret: ${{ secrets.HOME_TENANT_GRAPH_CLIENT_SECRET }}
-          # API instance vars and secrets
-          #TODO bobby: vid-authority-id: steps.something.outputs.authority-id
-          vid-authority-id: e8926a7e-77a4-4f6c-c931-23deceaa0496
-
