@@ -7,5 +7,5 @@
     "esModuleInterop": true,
     "noUncheckedIndexedAccess": true
   },
-  "include": ["src", "config", "test", "scripts", "migrate-db-function", "jest.*.ts"]
+  "include": ["src", "config", "test", "scripts", "migrate-db", "jest.*.ts"]
 }

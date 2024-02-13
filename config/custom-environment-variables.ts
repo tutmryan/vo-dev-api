@@ -40,6 +40,9 @@ const config: EnvVarSubstitution<Config> = {
     host: 'REDIS_HOST',
     key: 'REDIS_KEY',
   },
+  blobStorage: {
+    url: 'BLOB_STORAGE_URL',
+  },
   homeTenant: {
     name: 'HOME_TENANT_NAME',
     tenantId: 'HOME_TENANT_ID',

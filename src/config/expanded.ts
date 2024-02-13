@@ -1,4 +1,4 @@
-import { environment, isLocalDev, type ClientCredentialsConfig } from '@makerx/node-common'
+import { type ClientCredentialsConfig } from '@makerx/node-common'
 import { merge } from 'lodash'
 import type { Config } from './raw'
 import config from './raw'
@@ -60,16 +60,3 @@ export const pkce: Config['auth']['pkce'] = merge(
   },
   config.get('auth.pkce'),
 )
-
-// resource configs
-const resourcePrefix = config.has('resourcePrefix') ? config.get('resourcePrefix') : process.env.NODE_ENV
-export const database: Config['database'] = merge({ database: `${resourcePrefix}-database` }, config.get('database'))
-export const blobStorage: Config['blobStorage'] = merge(
-  {
-    url: `https://${resourcePrefix}.blob.core.windows.net`,
-  },
-  config.get('blobStorage'),
-)
-const isLocalDevOrUnderTest = isLocalDev || environment === 'test'
-const azureRedisHost = isLocalDevOrUnderTest ? undefined : `${resourcePrefix}.redis.cache.windows.net`
-export const redis: Config['redis'] = merge({ host: azureRedisHost }, config.get('redis'))

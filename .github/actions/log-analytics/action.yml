@@ -1,0 +1,49 @@
+name: Log analytics workspace
+description: Deploys a log analytics workspace
+
+inputs:
+  azure-client-id:
+    description: App ID of the deployment app registration
+    required: true
+  azure-tenant-id:
+    description: ID of the target Azure AD tenant
+    required: true
+  azure-subscription-id:
+    description: ID of the target Azure subscription
+    required: true
+  resource-group-name:
+    description: Name of the resource group to deploy resources to
+    required: true
+  resource-prefix:
+    description: Prefix to use for resource names
+    required: true
+
+outputs:
+  log-analytics-id:
+    description: ID of the deployed log analytics workspace
+    value: ${{ steps.deploy-log-analytics.outputs.logAnalyticsId }}
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Set current date as environment variable
+      run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Deploy log analytics workspace
+      id: deploy-log-analytics
+      uses: azure/arm-deploy@v1
+      with:
+        deploymentName: ${{env.NOW}}-log-analytics-github-actions
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/log-analytics.bicep
+        parameters: >-
+          resourcePrefix=${{ inputs.resource-prefix }}
+

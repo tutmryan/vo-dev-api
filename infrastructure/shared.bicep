@@ -1,10 +1,6 @@
-@description('Environment the resources are deployed in')
-@allowed([
-  'nonprd', 'prd'
-])
-param environment string
-
-var resourcePrefix = 'vo-${environment}-platform'
+@description('The resource prefix to use for all resources')
+@minLength(3)
+param resourcePrefix string
 
 param location string = resourceGroup().location
 
@@ -22,16 +18,28 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   }
 }
 
+resource sqlServerUserAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${resourcePrefix}-sql-server-identity'
+  location: location
+}
+
 @description('Name of the Azure SQL AAD administrator')
 param sqlServerAadAdministratorName string
 
 @description('Object ID of the Azure SQL AAD administrator')
 param sqlServerAadAdministratorObjectId string
 
-resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' = {
-  name: '${resourcePrefix}-sql-server'
+resource sqlServer1 'Microsoft.Sql/servers@2022-05-01-preview' = {
+  name: '${resourcePrefix}-sql-server-1'
   location: location
+  identity: {
+    userAssignedIdentities: {
+      '${sqlServerUserAssignedIdentity.id}': {}
+    }
+    type: 'UserAssigned'
+  }
   properties: {
+    primaryUserAssignedIdentityId: sqlServerUserAssignedIdentity.id
     administrators: {
       azureADOnlyAuthentication: true
       administratorType: 'ActiveDirectory'
@@ -44,7 +52,7 @@ resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' = {
 
 resource sqlServerAllowAzureWorkloadsFirewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
   name: 'AllowAllWindowsAzureIps'
-  parent: sqlServer
+  parent: sqlServer1
   properties: {
     startIpAddress: '0.0.0.0'
     endIpAddress: '0.0.0.0'
@@ -103,7 +111,7 @@ resource sqlServerElasticPool 'Microsoft.Sql/servers/elasticPools@2022-05-01-pre
     name: editionToSkuMap[elasticPoolEdition].name
     tier: editionToSkuMap[elasticPoolEdition].tier
   }
-  parent: sqlServer
+  parent: sqlServer1
   properties: {
     zoneRedundant: elasticPoolZoneRedundant
     maxSizeBytes: elasticPoolDBMaxSize
@@ -111,9 +119,7 @@ resource sqlServerElasticPool 'Microsoft.Sql/servers/elasticPools@2022-05-01-pre
   }
 }
 
-output sqlServerName string = sqlServer.name
-output elasticPoolName string = sqlServerElasticPool.name
-output elasticPoolId string = sqlServerElasticPool.id
+output sqlServer1Name string = sqlServer1.name
 
 @description('App Service Plan SKU')
 @allowed([
@@ -157,8 +163,8 @@ param appServicePlanSku string
 @description('App Service Plan Capacity (instances)')
 param appServicePlanCapacity int = 1
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
-  name: '${resourcePrefix}-app-service-plan'
+resource appServicePlan1 'Microsoft.Web/serverfarms@2022-03-01' = {
+  name: '${resourcePrefix}-app-service-plan-1'
   location: location
   sku: {
     name: appServicePlanSku
@@ -170,5 +176,4 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
   kind: 'linux'
 }
 
-output appServicePlanName string = appServicePlan.name
-output appServicePlanId string = appServicePlan.id
+output appServicePlan1Id string = appServicePlan1.id

@@ -52,7 +52,7 @@
         <mxCell id="GOTnc0u4wJtd5qTPpZ04-34" value="Customer Resource Group" style="fontStyle=0;verticalAlign=top;align=center;spacingTop=-2;fillColor=none;rounded=0;whiteSpace=wrap;html=1;strokeColor=#919191;strokeWidth=3;dashed=1;container=1;collapsible=0;expand=0;recursiveResize=0;" vertex="1" parent="GOTnc0u4wJtd5qTPpZ04-67">
           <mxGeometry x="135" y="470" width="760" height="540" as="geometry" />
         </mxCell>
-        <mxCell id="GOTnc0u4wJtd5qTPpZ04-29" value="DB Migrations Function" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/compute/Function_Apps.svg;" vertex="1" parent="GOTnc0u4wJtd5qTPpZ04-34">
+        <mxCell id="GOTnc0u4wJtd5qTPpZ04-29" value="DB Migrations Package" style="image;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/azure2/compute/Function_Apps.svg;" vertex="1" parent="GOTnc0u4wJtd5qTPpZ04-34">
           <mxGeometry x="80" y="380" width="68" height="60" as="geometry" />
         </mxCell>
         <mxCell id="GOTnc0u4wJtd5qTPpZ04-43" value="Public Facing Services" style="fontStyle=0;verticalAlign=top;align=center;spacingTop=-2;fillColor=none;rounded=0;whiteSpace=wrap;html=1;strokeColor=#919191;strokeWidth=1;dashed=1;container=1;collapsible=0;expand=0;recursiveResize=0;" vertex="1" parent="GOTnc0u4wJtd5qTPpZ04-34">

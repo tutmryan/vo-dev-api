@@ -10,6 +10,17 @@
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**", "node_modules/**"],
       "smartStep": true
+    },
+    {
+      "name": "Migrate DB package",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceRoot}/migrate-db",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "smartStep": true
     }
   ]
 }

@@ -1,0 +1,197 @@
+name: Deploy instance
+description: Deploys an instance to an environment
+
+inputs:
+  azure-client-id:
+    description: App ID of the deployment app registration
+    required: true
+  azure-tenant-id:
+    description: ID of the target Azure AD tenant
+    required: true
+  azure-subscription-id:
+    description: ID of the target Azure subscription
+    required: true
+  azure-service-principal-object-id:
+    description: Object ID of the deployment service principal
+    required: true
+  resource-prefix:
+    description: Prefix to use for resource names
+    required: true
+  resource-group-name:
+    description: Name of the resource group to deploy resources to
+    required: true
+
+  sql-server-name:
+    description: Name of the SQL Server the instance will connect to
+    required: true
+
+  redis-cache-sku:
+    description: SKU of the Azure Redis Cache
+    required: true
+  redis-cache-family:
+    description: Family of the Azure Redis Cache
+    required: true
+  redis-cache-capacity:
+    description: Capacity of the Azure Redis Cache
+    required: true
+
+  app-service-plan-id:
+    description: ID of the App Service Plan to use as the serverFarmId for the app service(s)
+    required: true
+  node-env:
+    description: NODE_ENV value to set for the running API instance
+    required: true
+
+  api-cookie-secret:
+    description: Cookie secret used by the cookie-session Express middleware
+    required: true
+  api-client-secret:
+    description: Client secret of the API app registration in Azure AD
+    required: true
+  vid-callback-client-secret:
+    description: Client secret of the VID callback app registration in Azure AD
+    required: true
+  limited-access-client-secret:
+    description: The client secret of the limited access client in Azure AD
+    required: true
+  limited-access-secret:
+    description: The secret for limited access client data keys
+    required: true
+  home-tenant-id:
+    description: The tenant ID of the home tenant
+    required: true
+  home-tenant-name:
+    description: The name of the home tenant
+    required: true
+  home-tenant-graph-client-id:
+    description: The client ID of the home tenant graph app registration
+    required: true
+  home-tenant-graph-client-secret:
+    description: The client secret of the home tenant graph app registration
+    required: true
+  vid-authority-id:
+    description: The VID authority ID
+    required: true
+
+  docs-site-artifact-name:
+    description: Environment specific artifact name for docs site
+    required: true
+  docs-site-client-id:
+    description: Client id of the docs site app registration in Azure AD
+    required: true
+  docs-site-client-secret:
+    description: Client secret of the docs site app registration in Azure AD
+    required: true
+
+outputs:
+  api-url:
+    description: URL of the deployed API
+    value: ${{ steps.deploy-api.outputs.webapp-url }}
+  api-principal-id:
+    description: Service principal ID of the API app service
+    value: ${{ steps.instance-infra.outputs.apiAppServicePrincipalId }}
+  api-app-service-name:
+    description: Name of the API app service
+    value: ${{ steps.instance-infra.outputs.apiAppServiceName }}
+  database-host:
+    description: Hostname of the deployed SQL database
+    value: ${{ steps.instance-infra.outputs.databaseHost }}
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Set current date as environment variable
+      run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Instance infrastructure
+      id: instance-infra
+      uses: azure/arm-deploy@v1
+      with:
+        deploymentName: ${{env.NOW}}-api-github-actions
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/instance.bicep
+        parameters: >-
+          resourcePrefix=${{ inputs.resource-prefix }}
+          servicePrincipalObjectId=${{ inputs.azure-service-principal-object-id }}
+          sqlServerName=${{ inputs.sql-server-name }}
+          redisCacheSKU=${{ inputs.redis-cache-sku }}
+          redisCacheFamily=${{ inputs.redis-cache-family }}
+          redisCacheCapacity=${{ inputs.redis-cache-capacity }}
+          docsSiteClientId=${{ inputs.docs-site-client-id }}
+          docsSiteClientSecret=${{ inputs.docs-site-client-secret }}
+          appServicePlanId=${{ inputs.app-service-plan-id }}
+          nodeEnv=${{ inputs.node-env }}
+          apiCookieSecret=${{ inputs.api-cookie-secret }}
+          apiClientSecret=${{ inputs.api-client-secret }}
+          vidCallbackClientSecret=${{ inputs.vid-callback-client-secret }}
+          limitedAccessClientSecret=${{ inputs.limited-access-client-secret }}
+          limitedAccessSecret=${{ inputs.limited-access-secret }}
+          homeTenantId=${{ inputs.home-tenant-id }}
+          homeTenantName=${{ inputs.home-tenant-name }}
+          homeTenantGraphClientId=${{ inputs.home-tenant-graph-client-id }}
+          homeTenantGraphClientSecret=${{ inputs.home-tenant-graph-client-secret }}
+          vidAuthorityId=${{ inputs.vid-authority-id }}
+
+    - name: Log in to Azure again after potential long deployment
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Unzip migrations package
+      shell: bash
+      run: |
+        unzip -qq migrations-package/migrations-package.zip -d ./migrations-package
+
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20.x
+
+    - name: Run database migrations + set up user
+      run: npm start
+      working-directory: ./migrations-package
+      shell: bash
+      env:
+        HOST: ${{ steps.instance-infra.outputs.databaseHost }}
+        DATABASE: ${{inputs.resource-prefix}}-sql-db
+        CREATE_EXTERNAL_USER: ${{ steps.instance-infra.outputs.apiAppServiceName }}
+
+    - name: Deploy API to App Service
+      id: deploy-api
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ steps.instance-infra.outputs.apiAppServiceName }}
+        package: api/api.zip
+
+    - name: Get Static Web Apps deployment token for docs-site
+      shell: bash
+      run: |
+        DOCS_SITE_WEB_APPS_TOKEN=$(az staticwebapp secrets list --name ${{ steps.instance-infra.outputs.docsSiteWebAppName }} --query "properties.apiKey" --output tsv)
+        echo "::add-mask::$DOCS_SITE_WEB_APPS_TOKEN"
+        echo DOCS_SITE_WEB_APPS_TOKEN=$DOCS_SITE_WEB_APPS_TOKEN >> $GITHUB_ENV
+
+    - name: Unzip docs site content
+      shell: bash
+      run: |
+        unzip -qq ./${{ inputs.docs-site-artifact-name }}/docs-site.zip -d ./${{ inputs.docs-site-artifact-name }}/build
+
+    - name: Deploy docs site
+      id: deploy-docs-site
+      uses: Azure/static-web-apps-deploy@v1
+      with:
+        action: upload
+        azure_static_web_apps_api_token: ${{ env.DOCS_SITE_WEB_APPS_TOKEN }}
+        skip_app_build: true
+        skip_api_build: true
+        output_location: ''
+        app_location: ./${{ inputs.docs-site-artifact-name }}/build

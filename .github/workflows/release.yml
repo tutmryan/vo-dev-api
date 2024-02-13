@@ -1,9 +1,11 @@
 name: Release
 
+# on:
+#   push:
+#     branches:
+#       - main
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -19,12 +21,12 @@ jobs:
       pre-test-script: npm run test:ci:start-db
       test-script: npm run test:ci
 
-  ci-migrations-function:
-    name: CI Migrations Function
+  ci-migrations-package:
+    name: CI Migrations Package
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
       node-version: 20.x
-      working-directory: ./migrate-db-function
+      working-directory: ./migrate-db
 
   ci-docs-site:
     name: CI Docs Site
@@ -42,15 +44,15 @@ jobs:
       node-version: 20.x
       artifact-name: api
 
-  build-migrations-function:
-    name: Build Migrations Function
+  build-migrations-package:
+    name: Build Migrations Package
     needs:
-      - ci-migrations-function
+      - ci-migrations-package
     uses: makerxstudio/shared-config/.github/workflows/node-build-zip.yml@main
     with:
       node-version: 20.x
-      working-directory: ./migrate-db-function
-      artifact-name: migrations-function
+      working-directory: ./migrate-db
+      artifact-name: migrations-package
 
   build-docs-site:
     name: Build Docs Site
@@ -93,7 +95,6 @@ jobs:
           path: ./docs-site/docs-site-dev/docs-site.zip
           if-no-files-found: error
 
-
   upload-other-artifacts:
     name: Upload other artifacts
     runs-on: ubuntu-latest
@@ -115,54 +116,88 @@ jobs:
           path: ./.github/actions
           if-no-files-found: error
 
-  deploy-to-dev:
-    name: Deploy to development environment
+  deploy-to-non-prod:
+    name: Deploy to non-production environment
     runs-on: ubuntu-latest
-    environment:
-      name: Development
-      url: ${{ steps.deploy.outputs.api-url }}
-    concurrency: deploy-to-dev
-    needs:
-      - build-api
-      - build-migrations-function
-      - build-docs-site
-      - upload-other-artifacts
     permissions:
       id-token: write
+    needs:
+      - build-api
+      - build-migrations-package
+      - build-docs-site
+      - upload-other-artifacts
+    strategy:
+      matrix:
+        include:
+          - instance: demo
+            resourceGroup: vo-demo-instance
+            resourcePrefix: vo-demo
+    environment:
+      name: ${{ matrix.instance }}
+      # url: ${{ matrix.instance }}.verifiedorchestration.com
+      url: ${{ steps.deploy-instance.outputs.webapp-url }}
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
-
-      - name: Deploy
-        id: deploy
-        uses: ./github-actions/deployment
+      - name: Instance resource group
+        id: instance-resource-group
+        uses: ./github-actions/resource-group
         with:
-          azure-client-id: ${{ vars.AZURE_CLIENT_ID }}
-          azure-service-principal-object-id: ${{ vars.AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
-          azure-tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          azure-subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-          environment: dev
-          resource-group-name: vo-dev-verified-orchestration
-          sql-instance-name: vo-dev-verified-orchestration-sql
-          sql-instance-aad-administrator-name: Verified Orchestration SQL Administrators (dev)
-          sql-instance-aad-administrator-object-id: cb26d064-654b-49d4-a96c-f296e3667a55
+          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ matrix.resourceGroup }}
+          resource-group-location: australiaeast
+      - name: Instance log analytics
+        id: instance-log-analytics
+        uses: ./github-actions/log-analytics
+        with:
+          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ matrix.resourceGroup }}
+          resource-prefix: ${{ matrix.resourcePrefix }}
+      - name: Instance SQL database
+        id: instance-sql-db
+        uses: ./github-actions/sql-db
+        with:
+          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: vo-nonprd-platform-shared-infra
+          resource-prefix: ${{ matrix.resourcePrefix }}
+          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           sql-database-sku: S1
-          redis-cache-name: vo-dev-verified-orchestration-redis
+          log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
+      - name: Deploy instance
+        id: deploy-instance
+        uses: ./github-actions/instance
+        with:
+          node-env: 'nonprod'
+          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          azure-service-principal-object-id: ${{ vars.NON_PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
+          resource-group-name: ${{ matrix.resourceGroup }}
+          resource-prefix: ${{ matrix.resourcePrefix }}
+          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
           redis-cache-sku: Standard
           redis-cache-family: C
           redis-cache-capacity: 1
-          app-service-plan-sku: P1V3
-          api-app-service-name: vo-dev-verified-orchestration-api
-          migrations-function-app-name: vo-dev-verified-orchestration-migrations
-          migrations-app-client-id: a705473f-45d1-498a-a9aa-c767c4d406b8
-          api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
-          api-client-secret: ${{ secrets.API_CLIENT_SECRET }}
-          ui-client-secret: ${{ secrets.UI_CLIENT_SECRET }}
-          vid-callback-client-secret: ${{ secrets.VID_CALLBACK_CLIENT_SECRET }}
-          limited-access-client-secret: ${{ secrets.LIMITED_ACCESS_CLIENT_SECRET }}
-          limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
-          # See https://docs.github.com/en/actions/learn-github-actions/contexts#github-context:~:text=artifacts%20are%20kept.-,github.run_id,-string
-          migrations-app-version: ${{ github.run_id }}.${{ github.run_number }}.${{ github.run_attempt }}
           docs-site-artifact-name: docs-site-dev
-          docs-site-client-id: ${{ vars.DOCS_SITE_CLIENT_ID }}
-          docs-site-client-secret: ${{ secrets.DOCS_SITE_CLIENT_SECRET }}
+          docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }} # TODO ???
+          docs-site-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }} # TODO ???
+          api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
+          api-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }}
+          vid-callback-client-secret: ${{ secrets.NON_PROD_VID_CALLBACK_CLIENT_SECRET }}
+          limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}
+          limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
+          home-tenant-id: ${{ vars.HOME_TENANT_ID }}
+          home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
+          home-tenant-graph-client-id: ${{ vars.HOME_TENANT_GRAPH_CLIENT_ID }}
+          home-tenant-graph-client-secret: ${{ secrets.HOME_TENANT_GRAPH_CLIENT_SECRET }}
+          # API instance vars and secrets
+          #TODO bobby: vid-authority-id: steps.something.outputs.authority-id
+          vid-authority-id: e8926a7e-77a4-4f6c-c931-23deceaa0496
+

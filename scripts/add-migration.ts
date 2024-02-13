@@ -1,5 +1,5 @@
-import { requestText, writeText } from './helpers'
 import { throwError } from '../src/util/throw-error'
+import { requestText, writeText } from './helpers'
 
 const { runChildProc } = require('./helpers')
 const subCommandName = process.argv[2] ?? throwError(new Error('Missing sub command. Expected generate or create'))
@@ -28,6 +28,6 @@ function addMigration(migrationSubCommandName: string, name: string) {
     '--',
     `migration:${migrationSubCommandName}`,
     ...additionalOptions,
-    `./migrate-db-function/migrations/${name}`,
+    `./migrate-db/migrations/${name}`,
   ])
 }

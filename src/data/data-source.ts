@@ -32,7 +32,7 @@ const baseConfig: Pick<
   synchronize: false,
   logger: new LoggerForTypeOrm(logging, logger),
   entities: ['src/**/entities/*{.ts,.js}'],
-  migrations: ['migrate-db-function/migrations/**/*{.ts,.js}'],
+  migrations: ['migrate-db/migrations/**/*{.ts,.js}'],
   migrationsTransactionMode: 'each',
   namingStrategy: new SnakeNamingStrategy(),
   subscribers: [TrackingEventSubscriber, AuditingEventSubscriber],

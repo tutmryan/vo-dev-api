@@ -1,33 +1,18 @@
-@description('Environment the resources are deployed in')
-@allowed([
-  'dev'
-])
-param environment string
-
 @description('Object ID of the service principal performing the deployment')
 param servicePrincipalObjectId string
 
-var resourcePrefix = 'vo'
-var appName = 'verified-orchestration'
+@description('The resource prefix to use for all resources')
+@minLength(3)
+param resourcePrefix string
 
 param location string = resourceGroup().location
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
-  name: '${resourcePrefix}-${environment}-${appName}-la'
-  location: location
-  properties: {
-    sku: {
-      name: 'PerGB2018'
-    }
-    retentionInDays: 180
-    features: {
-      enableDataExport: true
-    }
-  }
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' existing = {
+  name: '${resourcePrefix}-la'
 }
 
 resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: '${resourcePrefix}-${environment}-${appName}-api-ai'
+  name: '${resourcePrefix}-api-insights'
   location: location
   kind: 'web'
   properties: {
@@ -42,7 +27,7 @@ resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
 }
 
 resource eventHubNamespace 'Microsoft.EventHub/namespaces@2022-10-01-preview' = {
-  name: '${resourcePrefix}-${environment}-${appName}-eventhub-namespace'
+  name: '${resourcePrefix}-eventhub-namespace'
   location: location
   sku: {
     name: 'Standard'
@@ -57,7 +42,7 @@ resource eventHubNamespace 'Microsoft.EventHub/namespaces@2022-10-01-preview' = 
 }
 
 resource appTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-preview' = {
-  name: '${resourcePrefix}-${environment}-${appName}-eh-app-traces'
+  name: '${resourcePrefix}-eh-app-traces'
   parent: eventHubNamespace
   properties: {
     partitionCount: 4
@@ -69,7 +54,7 @@ resource appTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-p
 }
 
 resource appTracesEventHubRule 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-10-01-preview' = {
-  name: '${resourcePrefix}-${environment}-extract-app-traces-job-policy'
+  name: '${resourcePrefix}-extract-app-traces-job-policy'
   parent: appTracesEventHub
   properties: {
     rights: [
@@ -79,12 +64,12 @@ resource appTracesEventHubRule 'Microsoft.EventHub/namespaces/eventhubs/authoriz
 }
 
 resource appTracesEventHubConsumerGroups 'Microsoft.EventHub/namespaces/eventhubs/consumergroups@2022-10-01-preview' = {
-  name: '${resourcePrefix}-${environment}-extract-audit-traces-job-consumer-group'
+  name: '${resourcePrefix}-extract-audit-traces-job-consumer-group'
   parent: appTracesEventHub
 }
 
 resource appTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExports@2020-08-01' = {
-  name: '${resourcePrefix}-${environment}-${appName}-ehr-export-app-traces'
+  name: '${resourcePrefix}-ehr-export-app-traces'
   parent: logAnalytics
   properties: {
     destination: {
@@ -101,7 +86,7 @@ resource appTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExpor
 }
 
 resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-preview' = {
-  name: '${resourcePrefix}-${environment}-${appName}-eh-audit-traces'
+  name: '${resourcePrefix}-eh-audit-traces'
   parent: eventHubNamespace
   properties: {
     partitionCount: 2
@@ -113,7 +98,7 @@ resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01
 }
 
 resource auditTracesEventHubRule 'Microsoft.EventHub/namespaces/eventhubs/authorizationRules@2022-10-01-preview' = {
-  name: '${resourcePrefix}-${environment}-extract-audit-traces-job-policy'
+  name: '${resourcePrefix}-extract-audit-traces-job-policy'
   parent: auditTracesEventHub
   properties: {
     rights: [
@@ -124,7 +109,7 @@ resource auditTracesEventHubRule 'Microsoft.EventHub/namespaces/eventhubs/author
 }
 
 resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-01-preview' = {
-  name: '${resourcePrefix}-${environment}-${appName}-stream-job-extract-audit-traces'
+  name: '${resourcePrefix}-stream-job-extract-audit-traces'
   location: location
   properties: {
     sku: {
@@ -150,10 +135,10 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
             type: 'Microsoft.EventHub/EventHub'
             properties: {
               serviceBusNamespace: eventHubNamespace.name
-              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-app-traces-job-policy'
+              sharedAccessPolicyName: '${resourcePrefix}-extract-app-traces-job-policy'
               sharedAccessPolicyKey: appTracesEventHubRule.listKeys().primaryKey
               eventHubName: appTracesEventHub.name
-              consumerGroupName: '${resourcePrefix}-${environment}-extract-audit-traces-job-consumer-group'
+              consumerGroupName: '${resourcePrefix}-extract-audit-traces-job-consumer-group'
             }
           }
         }
@@ -173,7 +158,7 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
             type: 'Microsoft.EventHub/EventHub'
             properties: {
               serviceBusNamespace: eventHubNamespace.name
-              sharedAccessPolicyName: '${resourcePrefix}-${environment}-extract-audit-traces-job-policy'
+              sharedAccessPolicyName: '${resourcePrefix}-extract-audit-traces-job-policy'
               sharedAccessPolicyKey: auditTracesEventHubRule.listKeys().primaryKey
               eventHubName: auditTracesEventHub.name
               authenticationMode: 'ConnectionString'
@@ -224,7 +209,7 @@ resource extractAuditTracesJobDiagnostics 'Microsoft.Insights/diagnosticSettings
   }
 }
 
-var keyVaultName = '${resourcePrefix}-${environment}-vrfd-orchstn-kv'
+var keyVaultName = '${resourcePrefix}-kv'
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   name: keyVaultName
@@ -236,15 +221,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
       {
         tenantId: subscription().tenantId
         objectId: apiAppService.identity.principalId
-        permissions: {
-          secrets: [
-            'get'
-          ]
-        }
-      }
-      {
-        tenantId: subscription().tenantId
-        objectId: migrationsFunctionApp.identity.principalId
         permissions: {
           secrets: [
             'get'
@@ -330,21 +306,6 @@ resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
   }
 }
 
-@description('The client secret of the UI app registration in Azure AD')
-@secure()
-param uiClientSecret string
-
-resource uiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  name: 'UI-CLIENT-SECRET'
-  parent: keyVault
-  properties: {
-    attributes: {
-      enabled: true
-    }
-    value: uiClientSecret
-  }
-}
-
 @description('The client secret of the VID callback app registration in Azure AD')
 @secure()
 param vidCallbackClientSecret string
@@ -404,80 +365,27 @@ resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-0
   }
 }
 
-@description('Name of the Azure SQL AAD administrator')
-param sqlInstanceAadAdministratorName string
-
-@description('Object ID of the Azure SQL AAD administrator')
-param sqlInstanceAadAdministratorObjectId string
-
-resource sqlInstance 'Microsoft.Sql/servers@2022-05-01-preview' = {
-  name: '${resourcePrefix}-${environment}-${appName}-sql'
-  location: location
+@description('The ID of the VID authority')
+param vidAuthorityId string
+@description('The name of the home tenant')
+param homeTenantName string
+@description('The ID of the home tenant')
+param homeTenantId string
+@description('The client ID of the home tenant graph client (optional)')
+param homeTenantGraphClientId string
+@description('The client secret home tenant graph client (optional)')
+@secure()
+param homeTenantGraphClientSecret string
+resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'HOME-TENANT-GRAPH-CLIENT-SECRET'
+  parent: keyVault
   properties: {
-    administratorLogin: 'vo-admin'
-    administratorLoginPassword: guid(resourceGroup().id)
-    administrators: {
-      administratorType: 'ActiveDirectory'
-      login: sqlInstanceAadAdministratorName
-      sid: sqlInstanceAadAdministratorObjectId
-      tenantId: subscription().tenantId
+    attributes: {
+      enabled: true
     }
+    value: homeTenantGraphClientSecret
   }
 }
-
-resource sqlInstanceAllowAzureWorkloadsFirewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
-  name: 'AllowAllWindowsAzureIps'
-  parent: sqlInstance
-  properties: {
-    startIpAddress: '0.0.0.0'
-    endIpAddress: '0.0.0.0'
-  }
-}
-
-@description('Name of the Azure SQL database')
-param sqlDatabaseName string
-
-@description('Pricing tier of the Azure SQL database')
-param sqlDatabaseSku string
-
-resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
-  name: sqlDatabaseName
-  location: location
-  parent: sqlInstance
-  sku: {
-    name: sqlDatabaseSku
-  }
-}
-
-// https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/2021-05-01-preview/diagnosticsettings?pivots=deployment-language-bicep
-resource sqlDatabaseDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: 'diagnostics'
-  scope: sqlDatabase
-  properties: {
-    workspaceId: logAnalytics.id
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        timeGrain: null
-      }
-    ]
-    // https://docs.microsoft.com/en-us/azure/azure-monitor/essentials/resource-logs-categories#microsoftsqlserversdatabases
-    logs: [
-      {
-        category: 'SQLInsights'
-        enabled: true
-      }
-      {
-        category: 'Errors'
-        enabled: true
-      }
-    ]
-  }
-}
-
-@description('Specify the name of the Azure Redis Cache to create.')
-param redisCacheName string
 
 @description('Specify the pricing tier of the new Azure Redis Cache.')
 @allowed([
@@ -507,7 +415,7 @@ param redisCacheFamily string
 param redisCacheCapacity int
 
 resource redisCache 'Microsoft.Cache/Redis@2020-06-01' = {
-  name: redisCacheName
+  name: '${resourcePrefix}-redis'
   location: location
   properties: {
     enableNonSslPort: false
@@ -549,99 +457,10 @@ resource redisCacheDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01
   }
 }
 
-@description('App Service Plan SKU')
-@allowed([
-  'B1'
-  'B2'
-  'B3'
-  'D1'
-  'F1'
-  'FREE'
-  'I1'
-  'I1v2'
-  'I2'
-  'I2v2'
-  'I3'
-  'I3v2'
-  'I4v2'
-  'I5v2'
-  'I6v2'
-  'P0V3'
-  'P1MV3'
-  'P1V2'
-  'P1V3'
-  'P2MV3'
-  'P2V2'
-  'P2V3'
-  'P3MV3'
-  'P3V2'
-  'P3V3'
-  'P4MV3'
-  'P5MV3'
-  'S1'
-  'S2'
-  'S3'
-  'SHARED'
-  'WS1'
-  'WS2'
-  'WS3'
-])
-param appServicePlanSku string
-
-resource appServicePlan 'Microsoft.Web/serverfarms@2022-03-01' = {
-  name: '${resourcePrefix}-${environment}-${appName}-plan'
-  location: location
-  sku: {
-    name: appServicePlanSku
-    capacity: 2
-  }
-  properties: {
-    reserved: true
-  }
-}
-
-resource apiAppService 'Microsoft.Web/sites@2022-03-01' = {
-  name: '${resourcePrefix}-${environment}-${appName}-api'
-  location: location
-  kind: 'app,linux'
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {
-    serverFarmId: appServicePlan.id
-    httpsOnly: true
-    clientAffinityEnabled: false
-    siteConfig: {
-      alwaysOn: true
-      appCommandLine: 'pm2 start ./src/main.tracing.js -i max --no-daemon'
-      ftpsState: 'Disabled'
-      linuxFxVersion: 'NODE|20-lts'
-      minTlsVersion: '1.2'
-    }
-  }
-}
-
-resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
-  name: 'appsettings'
-  parent: apiAppService
-  properties: {
-    APPINSIGHTS_INSTRUMENTATION_KEY: apiAppInsights.properties.InstrumentationKey
-    APPLICATIONINSIGHTS_CONNECTION_STRING: apiAppInsights.properties.ConnectionString
-    COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${apiCookieSecretSecret.properties.secretUri})'
-    DATABASE_HOST: '${sqlInstance.name}${az.environment().suffixes.sqlServerHostname}'
-    NODE_ENV: environment
-    WEBSITE_RUN_FROM_PACKAGE: '1'
-    API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
-    UI_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${uiClientSecretSecret.properties.secretUri})'
-    VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
-    LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
-    LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessSecretSecret.properties.secretUri})'
-    REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
-  }
-}
+output databaseHost string = '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
 
 resource verifiedOrchestrationStorage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: '${resourcePrefix}${environment}vrfdorchstnst'
+  name: replace('${resourcePrefix}-storage', '-', '')
   location: location
   kind: 'StorageV2'
   sku: {
@@ -694,142 +513,80 @@ resource logoImageContainer 'Microsoft.Storage/storageAccounts/blobServices/cont
   }
 }
 
-// Instead of automating this, we will use the Azure portal to assign the role to the service principal
-// see ../docs/infrastructure/manual-steps.md
-// This approach avoids granting role assignment permissions to the deployment service principal
-//
-// @description('This is the built-in Storage Blob Data Contributor role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor')
-// resource storageBlobContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
-//   scope: subscription()
-//   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
-// }
+@description('This is the built-in Storage Blob Data Contributor role. See https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#storage-blob-data-contributor')
+resource storageBlobContributorRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
+}
 
-// resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-//   scope: logoImageContainer
-//   name: guid(logoImageContainer.id, apiAppService.id, storageBlobContributorRoleDefinition.id)
-//   properties: {
-//     roleDefinitionId: storageBlobContributorRoleDefinition.id
-//     principalId: apiAppService.identity.principalId
-//     principalType: 'ServicePrincipal'
-//   }
-// }
-
-resource migrationsStorageSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
-  name: 'MIGRATIONS-STORAGE-CONNECTION-STRING'
-  parent: keyVault
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: logoImageContainer
+  name: guid(logoImageContainer.id, apiAppService.id, storageBlobContributorRoleDefinition.id)
   properties: {
-    attributes: {
-      enabled: true
-    }
-    value: 'DefaultEndpointsProtocol=https;AccountName=${verifiedOrchestrationStorage.name};AccountKey=${verifiedOrchestrationStorage.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
+    roleDefinitionId: storageBlobContributorRoleDefinition.id
+    principalId: apiAppService.identity.principalId
+    principalType: 'ServicePrincipal'
   }
 }
 
-resource migrationsAppInsights 'Microsoft.Insights/components@2020-02-02' = {
-  name: '${resourcePrefix}-${environment}-${appName}-migrations-ai'
-  location: location
-  kind: 'web'
-  properties: {
-    Application_Type: 'web'
-    DisableIpMasking: false
-    Flow_Type: 'Bluefield'
-    Request_Source: 'rest'
-    RetentionInDays: 180
-    SamplingPercentage: 100
-    WorkspaceResourceId: logAnalytics.id
-  }
-}
+@description('The ID of the app service plan to host instance app services')
+param appServicePlanId string
 
-resource migrationsFunctionApp 'Microsoft.Web/sites@2022-03-01' = {
-  name: '${resourcePrefix}-${environment}-${appName}-migrations'
+resource apiAppService 'Microsoft.Web/sites@2022-03-01' = {
+  name: '${resourcePrefix}-api'
   location: location
-  kind: 'functionapp,linux'
+  kind: 'app,linux'
   identity: {
     type: 'SystemAssigned'
   }
   properties: {
-    serverFarmId: appServicePlan.id
+    serverFarmId: appServicePlanId
     httpsOnly: true
     clientAffinityEnabled: false
     siteConfig: {
       alwaysOn: true
+      appCommandLine: 'pm2 start ./src/main.tracing.js -i max --no-daemon'
       ftpsState: 'Disabled'
-      linuxFxVersion: 'Node|18'
+      linuxFxVersion: 'NODE|20-lts'
       minTlsVersion: '1.2'
     }
   }
 }
 
-@description('A unique version number that is returned by the GetVersion function of the migrations Function app')
-param migrationsAppVersion string
+output apiAppServicePrincipalId string = apiAppService.identity.principalId
+output apiAppServiceName string = apiAppService.name
 
-resource migrationsFunctionAppConfig 'Microsoft.Web/sites/config@2022-03-01' = {
+param sqlServerName string
+param nodeEnv string
+
+resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   name: 'appsettings'
-  parent: migrationsFunctionApp
+  parent: apiAppService
   properties: {
-    APPINSIGHTS_INSTRUMENTATION_KEY: migrationsAppInsights.properties.InstrumentationKey
-    APPLICATIONINSIGHTS_CONNECTION_STRING: migrationsAppInsights.properties.ConnectionString
-    AzureWebJobsStorage: '@Microsoft.KeyVault(SecretUri=${migrationsStorageSecret.properties.secretUri})'
-    FUNCTIONS_EXTENSION_VERSION: '~4'
-    FUNCTIONS_WORKER_RUNTIME: 'node'
+    NODE_ENV: nodeEnv
     WEBSITE_RUN_FROM_PACKAGE: '1'
-    NODE_ENV: environment
-    DATABASE_HOST: '${sqlInstance.name}${az.environment().suffixes.sqlServerHostname}'
-    DATABASE_PORT: '1433'
-    APP_VERSION: migrationsAppVersion
-  }
-}
-
-@description('The client ID of the migrations app registration in Azure AD')
-param migrationsAppClientId string
-
-@description('The client ID of the deployment app registration in Azure AD')
-param deploymentAppClientId string
-
-resource migrationsFunctionAppAuthConfig 'Microsoft.Web/sites/config@2022-03-01' = {
-  name: 'authsettingsV2'
-  parent: migrationsFunctionApp
-  properties: {
-    platform: {
-      enabled: true
-    }
-    globalValidation: {
-      requireAuthentication: true
-      unauthenticatedClientAction: 'Return401'
-    }
-    httpSettings: {
-      requireHttps: true
-    }
-    identityProviders: {
-      azureActiveDirectory: {
-        enabled: true
-        registration: {
-          clientId: migrationsAppClientId
-          #disable-next-line no-hardcoded-env-urls
-          openIdIssuer: 'https://login.microsoftonline.com/${subscription().tenantId}/v2.0/'
-        }
-        validation: {
-          defaultAuthorizationPolicy: {
-            allowedApplications: [
-              deploymentAppClientId
-            ]
-          }
-        }
-      }
-
-      apple: { enabled: false }
-      azureStaticWebApps: { enabled: false }
-      facebook: { enabled: false }
-      gitHub: { enabled: false }
-      google: { enabled: false }
-      legacyMicrosoftAccount: { enabled: false }
-      twitter: { enabled: false }
-    }
+    APPINSIGHTS_INSTRUMENTATION_KEY: apiAppInsights.properties.InstrumentationKey
+    APPLICATIONINSIGHTS_CONNECTION_STRING: apiAppInsights.properties.ConnectionString
+    COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${apiCookieSecretSecret.properties.secretUri})'
+    DATABASE_HOST: '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
+    DATABASE_NAME: '${resourcePrefix}-sql-db'
+    REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
+    REDIS_HOST: '${redisCache.name}.redis.cache.windows.net'
+    BLOB_STORAGE_URL: 'https://${verifiedOrchestrationStorage.name}.blob.${az.environment().suffixes.storage}'
+    API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
+    VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
+    LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
+    LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessSecretSecret.properties.secretUri})'
+    HOME_TENANT_NAME: homeTenantName
+    HOME_TENANT_ID: homeTenantId
+    HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId
+    HOME_TENANT_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantGraphClientSecretSecret.properties.secretUri})'
+    VID_AUTHORITY_ID: vidAuthorityId
   }
 }
 
 resource docsSiteWebApp 'Microsoft.Web/staticSites@2022-03-01' = {
-  name: '${resourcePrefix}-${environment}-${appName}-docs-site'
+  name: '${resourcePrefix}-docs-site'
   // Static Web Apps is a global service, but ARM only accepts a few locations
   // See https://learn.microsoft.com/en-us/azure/static-web-apps/faq#how-do-i-ensure-my-app-is-deployed-to-a-specific-azure-region-
   #disable-next-line no-hardcoded-location

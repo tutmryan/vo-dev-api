@@ -19,7 +19,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Deploy
+      - name: Shared infrastructure resource group
+        id: deploy-resource-group
+        uses: ./.github/actions/resource-group
+        with:
+          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: vo-nonprd-platform-shared-infra
+          resource-group-location: australiaeast
+      - name: Shared infrastructure
         id: deploy
         uses: ./.github/actions/shared-infra
         with:

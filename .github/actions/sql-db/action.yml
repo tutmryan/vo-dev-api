@@ -1,0 +1,56 @@
+name: SQL DB instance
+description: Deploys a SQL DB instance to the specified server
+
+inputs:
+  azure-client-id:
+    description: App ID of the deployment app registration
+    required: true
+  azure-tenant-id:
+    description: ID of the target Azure AD tenant
+    required: true
+  azure-subscription-id:
+    description: ID of the target Azure subscription
+    required: true
+  resource-group-name:
+    description: Name of the resource group to deploy resources to
+    required: true
+  resource-prefix:
+    description: Prefix to use for resource names
+    required: true
+  sql-server-name:
+    description: Name of the SQL Server to deploy the database to
+    required: true
+  sql-database-sku:
+    description: The SKU of the SQL Database
+    required: true
+  log-analytics-id:
+    description: ID of the log analytics workspace to send logs to
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
+    - name: Set current date as environment variable
+      run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Deploy SQL DB instance
+      id: deploy-sql-db
+      uses: azure/arm-deploy@v1
+      with:
+        deploymentName: ${{env.NOW}}-sql-db-github-actions
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/sql-db.bicep
+        parameters: >-
+          resourcePrefix=${{ inputs.resource-prefix }}
+          sqlServerName=${{ inputs.sql-server-name }}
+          sqlDatabaseSku=${{ inputs.sql-database-sku }}
+          logAnalyticsId=${{ inputs.log-analytics-id }}
+

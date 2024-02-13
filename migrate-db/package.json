@@ -1,10 +1,12 @@
 {
-  "name": "@makerx/migrate-db-function",
+  "name": "@makerx/migrate-db",
   "version": "1.0.0",
-  "description": "Run TypeORM migrations",
+  "description": "Runs TypeORM migrations",
   "author": "MakerX",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "cross-env HOST=localhost DATABASE=VerifiedOrchestration USER=api_user PASSWORD=7o}R~=XA1jmz!-aHQ^pA ts-node --transpile-only -r dotenv/config index",
     "check-types": "tsc --noEmit",
     "build": "npm run clean && tsc && npm run build:copy-files && npm run build:install && npm run build:post-build",
     "clean": "rimraf build",
@@ -14,17 +16,15 @@
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",
-    "@types/node": "^20.7.1",
+    "@types/node": "^20.11.17",
     "copyfiles": "^2.4.1",
+    "cross-env": "^7.0.3",
     "rimraf": "^5.0.5",
-    "typescript": "^5.2.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@azure/functions": "^4.0.1",
-    "mssql": "^9.3.2",
-    "typeorm": "^0.3.17"
-  },
-  "overrides": {
-    "semver": "^7.5.4"
+    "mssql": "^10.0.2",
+    "typeorm": "^0.3.20"
   }
 }
