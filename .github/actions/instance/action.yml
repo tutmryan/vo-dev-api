@@ -11,6 +11,7 @@ inputs:
   azure-subscription-id:
     description: ID of the target Azure subscription
     required: true
+
   azure-service-principal-object-id:
     description: Object ID of the deployment service principal
     required: true
@@ -19,6 +20,29 @@ inputs:
     required: true
   resource-group-name:
     description: Name of the resource group to deploy resources to
+    required: true
+
+  key-vault-resource-group-name:
+    description: The resource group which contains the shared key vault used by Verified ID
+    required: true
+  key-vault-name:
+    description: The name of the shared key vault used by Verified ID
+    required: true
+  dns-api-key:
+    description: The API key to make calls to the DNS provider's API
+    required: true
+  dns-api-secret:
+    description: The API secret to make calls to the DNS provider's API
+    required: true
+
+  organisation-name:
+    description: The organisation name for Verified ID authority
+    required: true
+  organisation-domain:
+    description: The domain linked to Verified ID authority
+    required: true
+  did-storage-account-name:
+    description: The name of the storage account which hosts the DID documents
     required: true
 
   sql-server-name:
@@ -69,9 +93,6 @@ inputs:
   home-tenant-graph-client-secret:
     description: The client secret of the home tenant graph app registration
     required: true
-  vid-authority-id:
-    description: The VID authority ID
-    required: true
 
   docs-site-artifact-name:
     description: Environment specific artifact name for docs site
@@ -111,6 +132,78 @@ runs:
       run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
       shell: bash
 
+    - name: Deploy storage account to host DID documents
+      id: deploy-did-storage-account
+      uses: azure/arm-deploy@v1
+      with:
+        deploymentName: ${{env.NOW}}-did-storage-github-actions
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/verified-id-domain-verification-storage.bicep
+        parameters: >-
+          storageAccountName=${{ inputs.did-storage-account-name }}
+
+    - name: Set up static website for hosting DID documents
+      id: set-up-did-static-website
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/set-up-did-static-website.ps1
+        -StorageAccountName '${{ inputs.did-storage-account-name }}'
+
+    - name: Set up CDN with a custom domain and azure managed certificate for DID static website
+      id: deploy-did-cdn
+      uses: azure/arm-deploy@v1
+      with:
+        deploymentName: ${{env.NOW}}-did-cdn-github-actions
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/verified-id-domain-verification-cdn.bicep
+        parameters: >-
+          resourcePrefix=${{ inputs.resource-prefix }}
+          storageAccountWebEndpointDomainName=${{ steps.set-up-did-static-website.outputs.storageAccountWebEndpointDomainName }}
+          customDomainName=${{ inputs.organisation-domain }}
+
+    - name: Set up CNAME record for DID documents host
+      id: set-up-did-cname-record
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/set-up-dns-record.ps1
+        -DnsApiKey '${{ inputs.dns-api-key }}'
+        -DnsApiSecret '${{ inputs.dns-api-secret }}'
+        -RecordType 'CNAME'
+        -RecordName '${{ inputs.organisation-domain }}'
+        -RecordValue '${{ steps.deploy-did-cdn.outputs.cdnEndpointHostName }}'
+
+    - name: Set up TXT record for DID documents host
+      id: set-up-did-txt-record
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/set-up-dns-record.ps1
+        -DnsApiKey '${{ inputs.dns-api-key }}'
+        -DnsApiSecret '${{ inputs.dns-api-secret }}'
+        -RecordType 'TXT'
+        -RecordName '${{ steps.deploy-did-cdn.outputs.customDomainValidationDnsTxtRecordName }}'
+        -RecordValue '${{ steps.deploy-did-cdn.outputs.customDomainValidationDnsTxtRecordValue }}'
+
+    - name: Create authority in Verified ID service for the instance
+      id: create-vid-authority
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/set-up-verified-id-authority.ps1
+        -TenantId '${{ inputs.azure-tenant-id }}'
+        -SubscriptionId '${{ inputs.azure-subscription-id }}'
+        -ResourceGroupName '${{ inputs.resource-group-name}}'
+        -KeyVaultResourceGroupName '${{ inputs.key-vault-resource-group-name }}'
+        -KeyVaultName '${{ inputs.key-vault-name }}'
+        -OrganisationName '${{ inputs.organisation-name }}'
+        -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
+        -StorageAccountName '${{ inputs.did-storage-account-name }}'
+
+    - name: Log back in to Azure as deployer after interactive login session for VID authority setup
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+
     - name: Instance infrastructure
       id: instance-infra
       uses: azure/arm-deploy@v1
@@ -138,7 +231,7 @@ runs:
           homeTenantName=${{ inputs.home-tenant-name }}
           homeTenantGraphClientId=${{ inputs.home-tenant-graph-client-id }}
           homeTenantGraphClientSecret=${{ inputs.home-tenant-graph-client-secret }}
-          vidAuthorityId=${{ inputs.vid-authority-id }}
+          vidAuthorityId=${{ steps.create-vid-authority.outputs.authorityId }}
 
     - name: Log in to Azure again after potential long deployment
       uses: azure/login@v1
