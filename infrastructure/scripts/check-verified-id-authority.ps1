@@ -20,28 +20,28 @@ $constants = @{
 $authorityExists = $false
 $linkedDomainsVerified = $false
 
-# if ('' -ne $HomeTenantAuthorityId) {
-#   $authorityExists = $true
-#   $linkedDomainsVerified = $true
+if ('' -ne $HomeTenantAuthorityId) {
+  $authorityExists = $true
+  $linkedDomainsVerified = $true
 
-# } else {
+} else {
 
-#   #
-#   # Check if the Verified ID service is already enabled
-#   #
+  #
+  # Check if the Verified ID service is already enabled
+  #
 
-#   $authorities = az rest `
-#     --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities `
-#     --resource $constants.didResourceId `
-#     --query 'value' | ConvertFrom-Json
+  $authorities = az rest `
+    --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities `
+    --resource $constants.didResourceId `
+    --query 'value' | ConvertFrom-Json
 
-#   $authority = $authorities | Where-Object -FilterScript { $_.didModel.linkedDomainUrls -eq $LinkedDomainUrl }[0]
+  $authority = $authorities | Where-Object -FilterScript { $_.didModel.linkedDomainUrls -eq $LinkedDomainUrl }[0]
 
-#   if ($null -ne $authority) {
-#     $authorityExists = $true
-#     $linkedDomainsVerified = $authority.linkedDomainsVerified
-#   }
-# }
+  if ($null -ne $authority) {
+    $authorityExists = $true
+    $linkedDomainsVerified = $authority.linkedDomainsVerified
+  }
+}
 
 Write-Output "authorityExists=$($authorityExists)" >> $Env:GITHUB_OUTPUT
 Write-Output "linkedDomainsVerified=$($linkedDomainsVerified)" >> $Env:GITHUB_OUTPUT
