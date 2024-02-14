@@ -373,9 +373,14 @@ param homeTenantName string
 param homeTenantId string
 @description('The client ID of the home tenant graph client (optional)')
 param homeTenantGraphClientId string
-@description('The client secret home tenant graph client (optional)')
+@description('The client secret of the home tenant graph client (optional)')
 @secure()
 param homeTenantGraphClientSecret string
+@description('The client ID of the home tenant VID service client (optional)')
+param homeTenantVidServiceClientId string
+@description('The client secret of the home tenant VID service client (optional)')
+@secure()
+param homeTenantVidServiceClientSecret string
 resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'HOME-TENANT-GRAPH-CLIENT-SECRET'
   parent: keyVault
@@ -384,6 +389,16 @@ resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@20
       enabled: true
     }
     value: homeTenantGraphClientSecret
+  }
+}
+resource homeTenantVidServiceClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'HOME-TENANT-VID-SERVICE-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: homeTenantVidServiceClientSecret
   }
 }
 
@@ -581,6 +596,8 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     HOME_TENANT_ID: homeTenantId
     HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId
     HOME_TENANT_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantGraphClientSecretSecret.properties.secretUri})'
+    HOME_TENANT_VID_SERVICE_CLIENT_ID: homeTenantVidServiceClientId
+    HOME_TENANT_VID_SERVICE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantVidServiceClientSecretSecret.properties.secretUri})'
     VID_AUTHORITY_ID: vidAuthorityId
   }
 }

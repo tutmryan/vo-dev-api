@@ -97,6 +97,12 @@ inputs:
     description: The authority ID of the Verified ID service hosted in home tenant
     required: false
     default: ''
+  home-tenant-vid-service-client-id:
+    description: The client ID of the home tenant VID service app registration
+    required: true
+  home-tenant-vid-service-client-secret:
+    description: The client secret of the home tenant VID service app registration
+    required: true
 
   docs-site-artifact-name:
     description: Environment specific artifact name for docs site
@@ -241,6 +247,8 @@ runs:
           homeTenantName=${{ inputs.home-tenant-name }}
           homeTenantGraphClientId=${{ inputs.home-tenant-graph-client-id }}
           homeTenantGraphClientSecret=${{ inputs.home-tenant-graph-client-secret }}
+          homeTenantVidServiceClientId=${{ inputs.home-tenant-vid-service-client-id }}
+          homeTenantVidServiceClientSecret=${{ inputs.home-tenant-vid-service-client-secret }}
           vidAuthorityId=${{ inputs.home-tenant-authority-id == '' && steps.create-vid-authority.outputs.authorityId || inputs.home-tenant-authority-id  }}
 
     - name: Log in to Azure again after potential long deployment
