@@ -142,10 +142,18 @@ runs:
       run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
       shell: bash
 
+    - name: Check for authority in Verified ID service
+      id: check-vid-authority
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/check-verified-id-authority.ps1
+        -HomeTenantAuthorityId '${{ inputs.home-tenant-authority-id }}'
+        -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
+
     - name: Deploy storage account to host DID documents
       id: deploy-did-storage-account
       uses: azure/arm-deploy@v1
-      if: ${{ inputs.home-tenant-authority-id == '' }}
+      if: ${{ !steps.check-vid-authority.outputs.authorityExists }}
       with:
         deploymentName: ${{env.NOW}}-did-storage-github-actions
         resourceGroupName: ${{ inputs.resource-group-name }}
@@ -156,7 +164,7 @@ runs:
     - name: Set up static website for hosting DID documents
       id: set-up-did-static-website
       shell: pwsh
-      if: ${{ inputs.home-tenant-authority-id == '' }}
+      if: ${{ !steps.check-vid-authority.outputs.authorityExists }}
       run: >-
         ./infrastructure/scripts/set-up-did-static-website.ps1
         -StorageAccountName '${{ inputs.did-storage-account-name }}'
@@ -164,7 +172,7 @@ runs:
     - name: Set up CDN with a custom domain and azure managed certificate for DID static website
       id: deploy-did-cdn
       uses: azure/arm-deploy@v1
-      if: ${{ inputs.home-tenant-authority-id == '' }}
+      if: ${{ !steps.check-vid-authority.outputs.authorityExists }}
       with:
         deploymentName: ${{env.NOW}}-did-cdn-github-actions
         resourceGroupName: ${{ inputs.resource-group-name }}
@@ -177,7 +185,7 @@ runs:
     - name: Set up CNAME record for DID documents host
       id: set-up-did-cname-record
       shell: pwsh
-      if: ${{ inputs.home-tenant-authority-id == '' }}
+      if: ${{ !steps.check-vid-authority.outputs.linkedDomainsVerified }}
       run: >-
         ./infrastructure/scripts/set-up-dns-record.ps1
         -DnsApiKey '${{ inputs.dns-api-key }}'
@@ -189,7 +197,7 @@ runs:
     - name: Set up TXT record for DID documents host
       id: set-up-did-txt-record
       shell: pwsh
-      if: ${{ inputs.home-tenant-authority-id == '' }}
+      if: ${{ !steps.check-vid-authority.outputs.linkedDomainsVerified }}
       run: >-
         ./infrastructure/scripts/set-up-dns-record.ps1
         -DnsApiKey '${{ inputs.dns-api-key }}'
@@ -201,7 +209,7 @@ runs:
     - name: Create authority in Verified ID service for the instance
       id: create-vid-authority
       shell: pwsh
-      if: ${{ inputs.home-tenant-authority-id == '' }}
+      if: ${{ !steps.check-vid-authority.outputs.linkedDomainsVerified }}
       run: >-
         ./infrastructure/scripts/set-up-verified-id-authority.ps1
         -TenantId '${{ inputs.azure-tenant-id }}'
