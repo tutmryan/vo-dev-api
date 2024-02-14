@@ -152,7 +152,7 @@ runs:
 
     - name: echo outputs
       shell: bash
-      run: echo "release candidate - ${{ steps.check-vid-authority.outputs.authorityExists }}
+      run: echo "release candidate - ${{ steps.check-vid-authority.outputs.authorityExists }}"
 
     - name: Deploy storage account to host DID documents
       id: deploy-did-storage-account
