@@ -260,7 +260,7 @@ runs:
           homeTenantGraphClientSecret=${{ inputs.home-tenant-graph-client-secret }}
           homeTenantVidServiceClientId=${{ inputs.home-tenant-vid-service-client-id }}
           homeTenantVidServiceClientSecret=${{ inputs.home-tenant-vid-service-client-secret }}
-          vidAuthorityId=${{ inputs.home-tenant-authority-id == '' && steps.create-vid-authority.outputs.authorityId || inputs.home-tenant-authority-id  }}
+          vidAuthorityId=${{ steps.check-vid-authority.outputs.authorityId }}
 
     - name: Log in to Azure again after potential long deployment
       uses: azure/login@v1

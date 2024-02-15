@@ -92,6 +92,7 @@ A single app registration is created in each of the non prod and prod environmen
 - add relevant redirect URIs (e.g. `http://localhost` for local dev)
 - add `Web` platform in `Authentication` -> `Platform configurations` section for PKCE
 - add relevant redirect URIs (e.g. `http://localhost/auth` for local dev)
+- in the "Manage" section, click on "Branding & properties", then "Update domain" next to "Publisher domain" to verify the publisher domain
 
 ## Create an app registration to hold the roles for internal applications
 
