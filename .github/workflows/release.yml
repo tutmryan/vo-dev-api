@@ -203,6 +203,7 @@ jobs:
           docs-site-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }} # TODO ???
 
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
+          api-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }}
           api-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.NON_PROD_VID_CALLBACK_CLIENT_SECRET }}
           limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}

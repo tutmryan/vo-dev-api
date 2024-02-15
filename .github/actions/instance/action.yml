@@ -69,6 +69,9 @@ inputs:
   api-cookie-secret:
     description: Cookie secret used by the cookie-session Express middleware
     required: true
+  api-client-id:
+    description: Client ID of the API app registration in Azure AD
+    required: true
   api-client-secret:
     description: Client secret of the API app registration in Azure AD
     required: true
@@ -291,6 +294,14 @@ runs:
       with:
         app-name: ${{ steps.instance-infra.outputs.apiAppServiceName }}
         package: api/api.zip
+
+    - name: Add API auth redirect URI
+      id: add-api-redirect-uri
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/add-redirect-uris-to-app-registration.ps1
+        -AppRegistrationId ${{ inputs.api-client-id }}
+        -WebRedirectUris ${{ steps.deploy-api.outputs.webapp-url }}/auth
 
     - name: Get Static Web Apps deployment token for docs-site
       shell: bash

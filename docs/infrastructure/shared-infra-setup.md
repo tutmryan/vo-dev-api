@@ -70,23 +70,42 @@ gh api \
 
 ## Configure organisation variables in GitHub
 
-Add organisation variables to GitHub using the output from the previous step.
+Add organisation variables and secrets to GitHub using the output from the previous steps and auth setup.
 
 Prefix the variable names with the hosting tenant name, e.g. `[NON_]PROD_AZURE_CLIENT_ID`.
 
-| Name                                | Value                                  |
-| ----------------------------------- | -------------------------------------- |
-| `AZURE_CLIENT_ID`                   | The client ID of the app registration  |
-| `AZURE_TENANT_ID`                   | The ID of the target tenant            |
-| `AZURE_SUBSCRIPTION_ID`             | The ID of the target subscription      |
-| `AZURE_SERVICE_PRINCIPAL_OBJECT_ID` | The object ID of the service principal |
-| `PLATFORM_TENANT_ID`                | The ID of the platform tenant          |
+| Name                                | Value                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| `API_CLIENT_ID`                     | The client ID of the enterprise app registration                               |
+| `API_CLIENT_SECRET`                 | The client secret of the enterprise app registration                           |
+| `AZURE_CLIENT_ID`                   | The client ID of the deployment app registration                               |
+| `AZURE_TENANT_ID`                   | The ID of the target tenant                                                    |
+| `AZURE_SUBSCRIPTION_ID`             | The ID of the target subscription                                              |
+| `AZURE_SERVICE_PRINCIPAL_OBJECT_ID` | The object ID of the service principal                                         |
+| `KEY_VAULT_NAME`                    | The name of the key vault to hold signing keys used by Verified ID authorities |
+| `KEY_VAULT_RESOURCE_GROUP_NAME`     | The name of the resource group to hold Verified ID resources                   |
+| `DNS_API_KEY`                       | The GoDaddy DNS API key                                                        |
+| `DNS_API_SECRET`                    | The GoDaddy DNS API secret                                                     |
+| `LIMITED_ACCESS_CLIENT_SECRET`      | The client secret for the limited access client                                |
+| `VID_CALLBACK_CLIENT_SECRET`        | The client secret for the VID callback client                                  |
 
 To do so:
 
 1. Navigate to the Organistation variables page at <https://github.com/organizations/VerifiedOrchestration/settings/variables/actions>.
 1. Click Create new organisation variable.
 1. Add the variables, ensuring you prefix them for the hosting tenant (`NON_PROD_` or `PROD_`).
+
+## Give the deployment service principal MS Graph access
+
+The deployment service principal needs to be able to read and write application registrations to add redirect URIs for deployed components.
+
+1. Navigate to the Azure Active Directory blade in the Azure Portal: <https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview>.
+1. In the "Manage" section, click on "App registrations".
+1. Find the deployment app registration by its name, then click on it.
+1. Click on "API permissions", then on "+ Add a permission".
+1. Select "Microsoft Graph", then "Application permissions".
+1. Search for "Application.ReadWrite.All", then click on "Add permissions".
+1. Click on "Grant admin consent for [tenant name]", then confirm the consent.
 
 ## Give the deployment service principal Contributor access to the Azure subscription to create resource groups + deploy resources
 
