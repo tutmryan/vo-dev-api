@@ -15,11 +15,13 @@ $PSNativeCommandUseErrorActionPreference = $true
 
 $constants = @{
   didResourceId = '6a8b4b39-c021-437c-b060-5a14a3fd65f3'
+  rootDomain    = 'verifiedorchestration.com'
 }
 
 $authorityId = $null
 $authorityExists = $false
 $linkedDomainsVerified = $false
+$isVoSubdomain = $LinkedDomainUrl -match ('.' + $constants.rootDomain)
 
 if ('' -ne $HomeTenantAuthorityId) {
   $authorityId = $HomeTenantAuthorityId
@@ -49,9 +51,11 @@ if ('' -ne $HomeTenantAuthorityId) {
 Write-Output "authorityId=$($authorityId)" >> $Env:GITHUB_OUTPUT
 Write-Output "authorityExists=$($authorityExists)" >> $Env:GITHUB_OUTPUT
 Write-Output "linkedDomainsVerified=$($linkedDomainsVerified)" >> $Env:GITHUB_OUTPUT
+Write-Output "isVoSubdomain=$($isVoSubdomain)" >> $Env:GITHUB_OUTPUT
 
 return @{
   authorityId           = $authorityId
   authorityExists       = $authorityExists
   linkedDomainsVerified = $linkedDomainsVerified
+  isVoSubdomain         = $isVoSubdomain
 }

@@ -10,10 +10,6 @@ param(
 
   [Parameter(Mandatory = $true)]
   [string]
-  $ResourceGroupName,
-
-  [Parameter(Mandatory = $true)]
-  [string]
   $KeyVaultResourceGroupName,
 
   [Parameter(Mandatory = $true)]
@@ -27,11 +23,7 @@ param(
   [Parameter(Mandatory = $true)]
   [ValidatePattern('^https://')]
   [string]
-  $LinkedDomainUrl,
-
-  [Parameter(Mandatory = $true)]
-  [string]
-  $StorageAccountName
+  $LinkedDomainUrl
 )
 
 $ErrorActionPreference = 'Stop'
@@ -62,23 +54,6 @@ $authority = $authorities | Where-Object -FilterScript { $_.didModel.linkedDomai
 if ($null -ne $authority) {
   $authorityId = $authority.id
   $linkedDomainsVerified = $authority.linkedDomainsVerified
-
-  if ($true -ne $linkedDomainsVerified) {
-    az login --tenant $TenantId --use-device-code
-
-    Write-Output 'Verifying Verified ID Authority DID...'
-
-    $verificationStatus = az rest `
-      --method post `
-      --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authorityId/validateWellKnownDidConfiguration `
-      --resource $constants.didResourceId | ConvertFrom-Json
-
-    $linkedDomainsVerified = $verificationStatus.validationSuccessful
-
-    Write-Output 'Verified Verified ID Authority DID...'
-
-    az logout
-  }
 
   Write-Output ('Verified ID Authority is already created')
   Write-Output ('Authority ID: {0}' -f $authorityId)
@@ -132,66 +107,6 @@ if ($null -ne $authority) {
 
   Write-Output 'Created Verified ID Authority...'
   Write-Output ('Authority ID: {0}' -f $authorityId)
-
-  Write-Output 'Generating Verified ID Authority DID Document...'
-
-  $didJson = New-TemporaryFile
-
-  az rest `
-    --method post `
-    --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authorityId/generateDidDocument `
-    --resource $constants.didResourceId > $didJson
-
-  Write-Output 'Generated Verified ID Authority DID Document...'
-
-  Write-Output 'Generating Verified ID Authority DID Configuration Document...'
-
-  $didConfigurationJson = New-TemporaryFile
-  az rest `
-    --method post `
-    --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authorityId/generateWellknownDidConfiguration `
-    --resource $constants.didResourceId > $didConfigurationJson
-
-  Write-Output 'Generated Verified ID Authority DID Configuration Document...'
-
-
-  Write-Output 'Uploading Verified ID Authority DID Documents...'
-
-  $storageAccountKeys = az storage account keys list `
-    --resource-group $ResourceGroupName `
-    --account-name $StorageAccountName | ConvertFrom-Json
-
-  az storage blob upload `
-    --account-key $storageAccountKeys[0].value `
-    --file $didJson `
-    --container-name $($constants.didContainerName) `
-    --name $($constants.didBlobName) `
-    --account-name $StorageAccountName `
-    --content-type $($constants.contentTypeJson) `
-    --overwrite `
-    --output none
-
-  az storage blob upload `
-    --account-key $storageAccountKeys[0].value `
-    --file $didConfigurationJson `
-    --container-name $($constants.didContainerName) `
-    --name $($constants.didConfigurationBlobName) `
-    --account-name $StorageAccountName `
-    --content-type $($constants.contentTypeJson) `
-    --overwrite `
-    --output none
-
-  Write-Output 'Uploaded Verified ID Authority DID Documents...'
-
-  Write-Output 'Verifying Verified ID Authority DID...'
-
-  $verificationStatus = az rest `
-    --method post `
-    --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authorityId/validateWellKnownDidConfiguration `
-    --resource $constants.didResourceId
-
-  $linkedDomainsVerified = $verificationStatus.validationSuccessful
-  Write-Output 'Verified Verified ID Authority DID...'
 
   # log out the user session to prevent the CI/CD actions following this script from being executed in the user's context
   az logout

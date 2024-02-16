@@ -191,7 +191,7 @@ runs:
     - name: Set up CNAME record for DID documents host
       id: set-up-did-cname-record
       shell: pwsh
-      if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
+      if: steps.check-vid-authority.outputs.isVoSubdomain == 'True' && steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       run: >-
         ./infrastructure/scripts/set-up-dns-record.ps1
         -DnsApiKey '${{ inputs.dns-api-key }}'
@@ -203,7 +203,7 @@ runs:
     - name: Set up TXT record for DID documents host
       id: set-up-did-txt-record
       shell: pwsh
-      if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
+      if: steps.check-vid-authority.outputs.isVoSubdomain == 'True' && steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       run: >-
         ./infrastructure/scripts/set-up-dns-record.ps1
         -DnsApiKey '${{ inputs.dns-api-key }}'
@@ -215,7 +215,7 @@ runs:
     - name: Create authority in Verified ID service for the instance
       id: create-vid-authority
       shell: pwsh
-      if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
+      if: steps.check-vid-authority.outputs.authorityExists != 'True'
       run: >-
         ./infrastructure/scripts/set-up-verified-id-authority.ps1
         -TenantId '${{ inputs.azure-tenant-id }}'
@@ -373,4 +373,16 @@ runs:
         skip_app_build: true
         skip_api_build: true
         app_location: docs-site/build
+
+    - name: Verify authority in Verified ID service for the instance
+      id: verify-vid-authority
+      shell: pwsh
+      if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
+      run: >-
+        ./infrastructure/scripts/verify-verified-id-authority.ps1
+        -TenantId '${{ inputs.azure-tenant-id }}'
+        -ResourceGroupName '${{ inputs.resource-group-name}}'
+        -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
+        -StorageAccountName '${{ inputs.did-storage-account-name }}'
+
 
