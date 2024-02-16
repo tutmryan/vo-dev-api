@@ -107,14 +107,17 @@ inputs:
     description: The client secret of the home tenant VID service app registration
     required: true
 
-  docs-site-artifact-name:
-    description: Environment specific artifact name for docs site
+  admin-url:
+    description: The URL of the admin site
     required: true
   docs-site-client-id:
     description: Client id of the docs site app registration in Azure AD
     required: true
   docs-site-client-secret:
     description: Client secret of the docs site app registration in Azure AD
+    required: true
+  docs-site-domain:
+    description: The custom domain name for the admin site
     required: true
 
 outputs:
@@ -269,6 +272,36 @@ runs:
         tenant-id: ${{ inputs.azure-tenant-id }}
         subscription-id: ${{ inputs.azure-subscription-id }}
 
+    - name: Set up CNAME record for docs site domain
+      id: set-up-docs-cname-record
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/set-up-dns-record.ps1
+        -DnsApiKey '${{ inputs.dns-api-key }}'
+        -DnsApiSecret '${{ inputs.dns-api-secret }}'
+        -RecordType 'CNAME'
+        -RecordName '${{ inputs.docs-site-domain }}'
+        -RecordValue '${{ steps.instance-infra.outputs.docsSiteDefaultHostname }}'
+
+    - name: Set up docs site domain
+      id: set-up-docs-domain
+      uses: azure/arm-deploy@v1
+      with:
+        deploymentName: ${{env.NOW}}-docs-domain-github-actions
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/static-site-custom-domain.bicep
+        parameters: >-
+          staticSiteName=${{ steps.instance-infra.outputs.docsSiteName }}
+          domain=${{ inputs.docs-site-domain }}
+
+    - name: Add docs site auth redirect URI
+      id: add-docs-redirect-uri
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/add-redirect-uris-to-app-registration.ps1
+        -AppRegistrationId ${{ inputs.api-client-id }}
+        -WebRedirectUris https://${{ inputs.docs-site-domain }}/.auth/login/aad/callback
+
     - name: Unzip migrations package
       shell: bash
       run: |
@@ -303,17 +336,33 @@ runs:
         -AppRegistrationId ${{ inputs.api-client-id }}
         -WebRedirectUris ${{ steps.deploy-api.outputs.webapp-url }}/auth
 
-    - name: Get Static Web Apps deployment token for docs-site
+    - name: Unzip docs site
       shell: bash
       run: |
-        DOCS_SITE_WEB_APPS_TOKEN=$(az staticwebapp secrets list --name ${{ steps.instance-infra.outputs.docsSiteWebAppName }} --query "properties.apiKey" --output tsv)
+        unzip -qq docs-site/docs-site.zip -d ./docs-site
+
+    - name: Install npm packages
+      shell: bash
+      run: npm ci
+      working-directory: docs-site
+
+    - name: Build docs site
+      shell: bash
+      env:
+        GRAPHQL_ENDPOINT: ${{ steps.deploy-api.outputs.webapp-url }}
+        ADMIN_URL: ${{ inputs.admin-url }}
+      run: |
+        npm run build
+        sed -i "s|TENANT_ID|${{ inputs.azure-tenant-id }}|g" ./build/staticwebapp.config.json
+      # ^^^ replace the TENANT_ID placeholder with the home tenant ID
+      working-directory: docs-site
+
+    - name: Get deployment token for docs site
+      shell: bash
+      run: |
+        DOCS_SITE_WEB_APPS_TOKEN=$(az staticwebapp secrets list --name ${{ steps.instance-infra.outputs.docsSiteName }} --query "properties.apiKey" --output tsv)
         echo "::add-mask::$DOCS_SITE_WEB_APPS_TOKEN"
         echo DOCS_SITE_WEB_APPS_TOKEN=$DOCS_SITE_WEB_APPS_TOKEN >> $GITHUB_ENV
-
-    - name: Unzip docs site content
-      shell: bash
-      run: |
-        unzip -qq ./${{ inputs.docs-site-artifact-name }}/docs-site.zip -d ./${{ inputs.docs-site-artifact-name }}/build
 
     - name: Deploy docs site
       id: deploy-docs-site
@@ -323,5 +372,5 @@ runs:
         azure_static_web_apps_api_token: ${{ env.DOCS_SITE_WEB_APPS_TOKEN }}
         skip_app_build: true
         skip_api_build: true
-        output_location: ''
-        app_location: ./${{ inputs.docs-site-artifact-name }}/build
+        app_location: docs-site/build
+

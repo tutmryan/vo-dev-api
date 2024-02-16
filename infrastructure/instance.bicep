@@ -229,7 +229,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
       }
       {
         tenantId: subscription().tenantId
-        objectId: docsSiteWebApp.identity.principalId
+        objectId: docsSite.identity.principalId
         permissions: {
           secrets: [
             'get'
@@ -602,7 +602,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   }
 }
 
-resource docsSiteWebApp 'Microsoft.Web/staticSites@2022-03-01' = {
+resource docsSite 'Microsoft.Web/staticSites@2022-03-01' = {
   name: '${resourcePrefix}-docs-site'
   // Static Web Apps is a global service, but ARM only accepts a few locations
   // See https://learn.microsoft.com/en-us/azure/static-web-apps/faq#how-do-i-ensure-my-app-is-deployed-to-a-specific-azure-region-
@@ -618,16 +618,17 @@ resource docsSiteWebApp 'Microsoft.Web/staticSites@2022-03-01' = {
   properties: {}
 }
 
+output docsSiteName string = docsSite.name
+output docsSiteDefaultHostname string = docsSite.properties.defaultHostname
+
 @description('The client ID of the docs site app registration in Azure AD')
 param docsSiteClientId string
-resource docsSiteWebAppAppSettings 'Microsoft.Web/staticSites/config@2022-09-01' = {
+resource docsSiteAppSettings 'Microsoft.Web/staticSites/config@2022-09-01' = {
   name: 'appsettings'
   kind: 'string'
-  parent: docsSiteWebApp
+  parent: docsSite
   properties: {
     AZURE_CLIENT_ID: docsSiteClientId
     AZURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${docsSiteClientSecretSecret.properties.secretUri})'
   }
 }
-
-output docsSiteWebAppName string = docsSiteWebApp.name
