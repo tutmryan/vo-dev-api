@@ -390,6 +390,8 @@ runs:
       shell: bash
       # if: steps.check-vid-authority.outputs.isVoSubdomain != 'True' && steps.check-vid-authority.outputs.authorityExists != 'True'
       run: |
+        echo ""
+        echo "--- DNS Records for Verified ID authority verification ---"
         echo "Type: CNAME"
         echo "Name: ${{ inputs.organisation-domain }}"
         echo "Data: ${{ steps.deploy-did-cdn.outputs.cdnEndpointHostName }}"
