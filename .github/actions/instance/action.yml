@@ -386,7 +386,7 @@ runs:
         -StorageAccountName '${{ inputs.did-storage-account-name }}'
 
     - name: Output DNS records to be set up
-      id: set-up-did-cname-record
+      id: output-did-dns-records
       shell: bash
       # if: steps.check-vid-authority.outputs.isVoSubdomain != 'True' && steps.check-vid-authority.outputs.authorityExists != 'True'
       run: |
