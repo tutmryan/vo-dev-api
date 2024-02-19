@@ -134,11 +134,9 @@ jobs:
             organisation-name: 'Verified Orchestration Demo'
             organisation-domain: 'demo.did.verifiedorchestration.com'
             did-storage-account-name: 'vodemodid'
-            docsSiteDomain: 'demo.docs.verifiedorchestration.com'
-            adminUrl: 'https://demo.verfiedorchestration.com'
     environment:
       name: ${{ matrix.instance }}
-      url: ${{ matrix.adminUrl }}
+      url: ${{ matrix.instance }}.verifiedorchestration.com
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -176,7 +174,9 @@ jobs:
         id: deploy-instance
         uses: ./github-actions/instance
         with:
+          instance: ${{ matrix.instance }}
           node-env: 'nonprod'
+
           azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
           azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
@@ -199,10 +199,8 @@ jobs:
           redis-cache-family: C
           redis-cache-capacity: 1
 
-          docs-site-domain: ${{ matrix.docsSiteDomain }}
           docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }} # TODO ???
           docs-site-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }} # TODO ???
-          admin-url: ${{ matrix.adminUrl }}
 
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
           api-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }}

@@ -45,6 +45,13 @@ inputs:
     description: The name of the storage account which hosts the DID documents
     required: true
 
+  instance:
+    description: The name of the instance
+    required: true
+  domain:
+    description: The domain of the instance
+    default: 'verifiedorchestration.com'
+
   sql-server-name:
     description: Name of the SQL Server the instance will connect to
     required: true
@@ -107,23 +114,17 @@ inputs:
     description: The client secret of the home tenant VID service app registration
     required: true
 
-  admin-url:
-    description: The URL of the admin site
-    required: true
   docs-site-client-id:
     description: Client id of the docs site app registration in Azure AD
     required: true
   docs-site-client-secret:
     description: Client secret of the docs site app registration in Azure AD
     required: true
-  docs-site-domain:
-    description: The custom domain name for the admin site
-    required: true
 
 outputs:
   api-url:
     description: URL of the deployed API
-    value: ${{ steps.deploy-api.outputs.webapp-url }}
+    value: https://${{ inputs.instance }}.api.${{ inputs.domain }}
   api-principal-id:
     description: Service principal ID of the API app service
     value: ${{ steps.instance-infra.outputs.apiAppServicePrincipalId }}
@@ -272,6 +273,39 @@ runs:
         tenant-id: ${{ inputs.azure-tenant-id }}
         subscription-id: ${{ inputs.azure-subscription-id }}
 
+    - name: Set up CNAME record for API domain
+      id: set-up-api-cname-record
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/set-up-dns-record.ps1
+        -DnsApiKey '${{ inputs.dns-api-key }}'
+        -DnsApiSecret '${{ inputs.dns-api-secret }}'
+        -RecordType 'CNAME'
+        -RecordName '${{ inputs.instance }}.api.${{ inputs.domain }}'
+        -RecordValue '${{ steps.instance-infra.outputs.apiAppServiceDefaultHostname }}'
+
+    - name: Set up TXT record for API domain
+      id: set-up-api-txt-record
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/set-up-dns-record.ps1
+        -DnsApiKey '${{ inputs.dns-api-key }}'
+        -DnsApiSecret '${{ inputs.dns-api-secret }}'
+        -RecordType 'TXT'
+        -RecordName 'ausid.${{ inputs.instance }}.api.${{ inputs.domain }}'
+        -RecordValue '${{ steps.instance-infra.outputs.apiAppServiceCustomDomainVerificationId }}'
+
+    - name: Set up API domain
+      id: set-up-api-domain
+      uses: azure/arm-deploy@v1
+      with:
+        deploymentName: ${{env.NOW}}-api-domain-github-actions
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/app-service-custom-domain.bicep
+        parameters: >-
+          appServiceName=${{ steps.instance-infra.outputs.apiAppServiceName }}
+          domain=${{ inputs.instance }}.api.${{ inputs.domain }}
+
     - name: Set up CNAME record for docs site domain
       id: set-up-docs-cname-record
       shell: pwsh
@@ -280,7 +314,7 @@ runs:
         -DnsApiKey '${{ inputs.dns-api-key }}'
         -DnsApiSecret '${{ inputs.dns-api-secret }}'
         -RecordType 'CNAME'
-        -RecordName '${{ inputs.docs-site-domain }}'
+        -RecordName '${{ inputs.instance }}.docs.${{ inputs.domain }}'
         -RecordValue '${{ steps.instance-infra.outputs.docsSiteDefaultHostname }}'
 
     - name: Set up docs site domain
@@ -292,15 +326,15 @@ runs:
         template: ./infrastructure/static-site-custom-domain.bicep
         parameters: >-
           staticSiteName=${{ steps.instance-infra.outputs.docsSiteName }}
-          domain=${{ inputs.docs-site-domain }}
+          domain=${{ inputs.instance }}.docs.${{ inputs.domain }}
 
-    - name: Add docs site auth redirect URI
-      id: add-docs-redirect-uri
+    - name: Add API and docs site auth redirect URIs
+      id: add-redirect-uris
       shell: pwsh
       run: >-
         ./infrastructure/scripts/add-redirect-uris-to-app-registration.ps1
         -AppRegistrationId ${{ inputs.api-client-id }}
-        -WebRedirectUris https://${{ inputs.docs-site-domain }}/.auth/login/aad/callback
+        -WebRedirectUris https://${{ inputs.instance }}.api.${{ inputs.domain }}/auth,https://${{ inputs.instance }}.docs.${{ inputs.domain }}/.auth/login/aad/callback
 
     - name: Unzip migrations package
       shell: bash
@@ -328,14 +362,6 @@ runs:
         app-name: ${{ steps.instance-infra.outputs.apiAppServiceName }}
         package: api/api.zip
 
-    - name: Add API auth redirect URI
-      id: add-api-redirect-uri
-      shell: pwsh
-      run: >-
-        ./infrastructure/scripts/add-redirect-uris-to-app-registration.ps1
-        -AppRegistrationId ${{ inputs.api-client-id }}
-        -WebRedirectUris ${{ steps.deploy-api.outputs.webapp-url }}/auth
-
     - name: Unzip docs site
       shell: bash
       run: |
@@ -349,8 +375,8 @@ runs:
     - name: Build docs site
       shell: bash
       env:
-        GRAPHQL_ENDPOINT: ${{ steps.deploy-api.outputs.webapp-url }}
-        ADMIN_URL: ${{ inputs.admin-url }}
+        GRAPHQL_ENDPOINT: https://${{ inputs.instance }}.api.${{ inputs.domain }}
+        ADMIN_URL: https://${{ inputs.instance }}.${{ inputs.domain }}
       run: |
         npm run build
         sed -i "s|TENANT_ID|${{ inputs.azure-tenant-id }}|g" ./build/staticwebapp.config.json

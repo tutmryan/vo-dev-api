@@ -570,6 +570,8 @@ resource apiAppService 'Microsoft.Web/sites@2022-03-01' = {
 
 output apiAppServicePrincipalId string = apiAppService.identity.principalId
 output apiAppServiceName string = apiAppService.name
+output apiAppServiceDefaultHostname string = apiAppService.properties.defaultHostName
+output apiAppServiceCustomDomainVerificationId string = apiAppService.properties.customDomainVerificationId
 
 param sqlServerName string
 param nodeEnv string

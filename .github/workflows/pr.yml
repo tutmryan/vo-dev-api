@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  checks: write
 
 jobs:
 
@@ -17,6 +18,7 @@ jobs:
       audit-script: npm run audit
       pre-test-script: npm run test:ci:start-db
       test-script: npm run test:ci
+      output-test-results: true
 
   ci-migrations-package:
     name: CI Migrations Package
