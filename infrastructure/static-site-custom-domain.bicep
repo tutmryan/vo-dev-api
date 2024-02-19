@@ -11,8 +11,4 @@ resource staticSite 'Microsoft.Web/staticSites@2022-03-01' existing = {
 resource appCustomDomain 'Microsoft.Web/staticSites/customDomains@2022-09-01' = {
   name: domain
   parent: staticSite
-  properties: {
-    #disable-next-line BCP037
-    isDefault: true
-  }
 }

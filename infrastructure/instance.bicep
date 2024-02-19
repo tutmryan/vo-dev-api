@@ -429,8 +429,10 @@ param redisCacheFamily string
 ])
 param redisCacheCapacity int
 
+var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
+
 resource redisCache 'Microsoft.Cache/Redis@2020-06-01' = {
-  name: '${resourcePrefix}-redis'
+  name: '${resourcePrefix}-redis-${uniqueSuffix}'
   location: location
   properties: {
     enableNonSslPort: false
@@ -475,7 +477,7 @@ resource redisCacheDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01
 output databaseHost string = '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
 
 resource verifiedOrchestrationStorage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: replace('${resourcePrefix}-storage', '-', '')
+  name: 'vo${uniqueSuffix}'
   location: location
   kind: 'StorageV2'
   sku: {
@@ -548,7 +550,7 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
 param appServicePlanId string
 
 resource apiAppService 'Microsoft.Web/sites@2022-03-01' = {
-  name: '${resourcePrefix}-api'
+  name: '${resourcePrefix}-api-${uniqueSuffix}'
   location: location
   kind: 'app,linux'
   identity: {

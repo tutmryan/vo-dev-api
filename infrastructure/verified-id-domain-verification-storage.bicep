@@ -1,10 +1,9 @@
-@description('The name of the storage account')
-param storageAccountName string
-
 param location string = resourceGroup().location
 
+var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
+
 resource verifiedIdDomainVerificationStorage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: storageAccountName
+  name: 'vodid${uniqueSuffix}'
   location: location
   kind: 'StorageV2'
   sku: {
@@ -36,3 +35,5 @@ resource verifiedIdDomainVerificationStorageBlobService 'Microsoft.Storage/stora
     isVersioningEnabled: true
   }
 }
+
+output storageAccountName string = verifiedIdDomainVerificationStorage.name

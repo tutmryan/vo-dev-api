@@ -133,7 +133,6 @@ jobs:
             resourcePrefix: vo-demo
             organisation-name: 'Verified Orchestration Demo'
             organisation-domain: 'demo.did.verifiedorchestration.com'
-            did-storage-account-name: 'vodemodid'
     environment:
       name: ${{ matrix.instance }}
       url: ${{ matrix.instance }}.verifiedorchestration.com
@@ -191,7 +190,6 @@ jobs:
 
           organisation-name: ${{ matrix.organisation-name }}
           organisation-domain: ${{ matrix.organisation-domain }}
-          did-storage-account-name: ${{ matrix.did-storage-account-name }}
 
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}

@@ -36,7 +36,7 @@ resource hostNameCertificate 'Microsoft.Web/certificates@2022-09-01' = {
 
 // we need to use a module to enable sni, as ARM forbids using resource with this same type-name combination twice in one deployment.
 module functionAppCustomHostEnable './app-service-custom-domain-enable-sni.bicep' = {
-  name: '${appService.name}-${domain}-sni-enable'
+  name: '${domain}-sni-enable'
   params: {
     name: '${appService.name}/${domain}'
     certificateThumbprint: hostNameCertificate.properties.thumbprint
