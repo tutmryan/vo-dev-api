@@ -171,6 +171,7 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
     transformation: {
       name: 'unwrap-traces-filter-audits'
       properties: {
+        streamingUnits: 3
         query: '''
         WITH logs AS (
           SELECT data.arrayvalue as log
