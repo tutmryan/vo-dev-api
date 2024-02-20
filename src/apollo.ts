@@ -87,7 +87,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
 
   app.use(
     '/graphql',
-    json(),
+    json({ limit: '1mb' }),
     expressMiddleware(server, {
       context: async ({ req }) => createContext({ req, claims: req.user }),
     }),
