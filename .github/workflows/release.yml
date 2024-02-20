@@ -193,9 +193,9 @@ jobs:
 
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
-          redis-cache-sku: Standard
+          redis-cache-sku: Basic
           redis-cache-family: C
-          redis-cache-capacity: 1
+          redis-cache-capacity: 0
 
           docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }} # TODO ???
           docs-site-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }} # TODO ???
