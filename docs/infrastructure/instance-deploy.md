@@ -13,12 +13,16 @@ The name of the environment should be the short instance moniker e.g. `demo`.
 - HOME_TENANT_ID
 - HOME_TENANT_GRAPH_CLIENT_ID (optional)
 - HOME_TENANT_AUTHORITY_ID (optional)
+- HOME_TENANT_VID_SERVICE_CLIENT_ID (optional)
+- VID_AUTHORITY_NAME (optional)
+- VID_AUTHORITY_DOMAIN (opitonal)
 
 ### Secrets
 
 - API-COOKIE-SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
 - LIMITED_ACCESS_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
 - HOME_TENANT_GRAPH_CLIENT_SECRET (optional)
+- HOME_TENANT_VID_SERVICE_CLIENT_SECRET (optional)
 
 ## Add to the deployment matrix
 

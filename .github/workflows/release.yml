@@ -131,8 +131,9 @@ jobs:
           - instance: demo
             resourceGroup: vo-demo-instance
             resourcePrefix: vo-demo
-            organisation-name: 'Verified Orchestration Demo'
-            organisation-domain: 'demo.did.verifiedorchestration.com'
+          - instance: dev
+            resourceGroup: vo-dev-instance
+            resourcePrefix: vo-dev
     environment:
       name: ${{ matrix.instance }}
       url: ${{ matrix.instance }}.verifiedorchestration.com
@@ -188,8 +189,8 @@ jobs:
           dns-api-key: ${{ secrets.NON_PROD_DNS_API_KEY }}
           dns-api-secret: ${{ secrets.NON_PROD_DNS_API_SECRET }}
 
-          organisation-name: ${{ matrix.organisation-name }}
-          organisation-domain: ${{ matrix.organisation-domain }}
+          organisation-name: ${{ vars.VID_AUTHORITY_NAME }}
+          organisation-domain: ${{ vars.VID_AUTHORITY_DOMAIN }}
 
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}

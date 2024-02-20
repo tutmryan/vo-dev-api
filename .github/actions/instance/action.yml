@@ -37,10 +37,8 @@ inputs:
 
   organisation-name:
     description: The organisation name for Verified ID authority
-    required: true
   organisation-domain:
     description: The domain linked to Verified ID authority
-    required: true
 
   instance:
     description: The name of the instance
@@ -157,7 +155,7 @@ runs:
     - name: Deploy storage account to host DID documents
       id: deploy-did-storage-account
       uses: azure/arm-deploy@v1
-      if: steps.check-vid-authority.outputs.authorityExists != 'True'
+      if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       with:
         deploymentName: ${{env.NOW}}-did-storage-github-actions
         resourceGroupName: ${{ inputs.resource-group-name }}
@@ -166,7 +164,7 @@ runs:
     - name: Set up static website for hosting DID documents
       id: set-up-did-static-website
       shell: pwsh
-      if: steps.check-vid-authority.outputs.authorityExists != 'True'
+      if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       run: >-
         ./infrastructure/scripts/set-up-did-static-website.ps1
         -StorageAccountName '${{ steps.deploy-did-storage-account.outputs.storageAccountName }}'
@@ -174,7 +172,7 @@ runs:
     - name: Set up CDN with a custom domain and azure managed certificate for DID static website
       id: deploy-did-cdn
       uses: azure/arm-deploy@v1
-      if: steps.check-vid-authority.outputs.authorityExists != 'True'
+      if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       with:
         deploymentName: ${{env.NOW}}-did-cdn-github-actions
         resourceGroupName: ${{ inputs.resource-group-name }}
@@ -216,12 +214,10 @@ runs:
         ./infrastructure/scripts/set-up-verified-id-authority.ps1
         -TenantId '${{ inputs.azure-tenant-id }}'
         -SubscriptionId '${{ inputs.azure-subscription-id }}'
-        -ResourceGroupName '${{ inputs.resource-group-name}}'
         -KeyVaultResourceGroupName '${{ inputs.key-vault-resource-group-name }}'
         -KeyVaultName '${{ inputs.key-vault-name }}'
         -OrganisationName '${{ inputs.organisation-name }}'
         -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
-        -StorageAccountName '${{ steps.deploy-did-storage-account.outputs.storageAccountName }}'
 
     - name: Log back in to Azure as deployer after interactive login session for VID authority setup
       uses: azure/login@v1
@@ -330,6 +326,7 @@ runs:
         ./infrastructure/scripts/add-redirect-uris-to-app-registration.ps1
         -AppRegistrationId ${{ inputs.api-client-id }}
         -WebRedirectUris https://${{ inputs.instance }}.api.${{ inputs.domain }}/auth,https://${{ inputs.instance }}.docs.${{ inputs.domain }}/.auth/login/aad/callback
+        -SpaRedirectUris https://${{ inputs.instance }}.${{ inputs.domain }}
 
     - name: Unzip migrations package
       shell: bash
@@ -395,21 +392,10 @@ runs:
         skip_api_build: true
         app_location: docs-site/build
 
-    - name: Verify authority in Verified ID service for the instance
-      id: verify-vid-authority
-      shell: pwsh
-      if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
-      run: >-
-        ./infrastructure/scripts/verify-verified-id-authority.ps1
-        -TenantId '${{ inputs.azure-tenant-id }}'
-        -ResourceGroupName '${{ inputs.resource-group-name}}'
-        -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
-        -StorageAccountName '${{ steps.deploy-did-storage-account.outputs.storageAccountName }}'
-
     - name: Output DNS records to be set up
       id: output-did-dns-records
       shell: bash
-      if: steps.check-vid-authority.outputs.isVoSubdomain != 'True' && steps.check-vid-authority.outputs.authorityExists != 'True'
+      if: steps.check-vid-authority.outputs.isVoSubdomain != 'True' && steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       run: |
         echo ""
         echo "--- DNS Records for Verified ID authority verification ---"
@@ -422,4 +408,15 @@ runs:
         echo "Name: ${{ steps.deploy-did-cdn.outputs.customDomainValidationDnsTxtRecordName }}"
         echo "Data: ${{ steps.deploy-did-cdn.outputs.customDomainValidationDnsTxtRecordValue }}"
         echo "TTL: 3600"
+
+    - name: Verify authority in Verified ID service for the instance
+      id: verify-vid-authority
+      shell: pwsh
+      if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
+      run: >-
+        ./infrastructure/scripts/verify-verified-id-authority.ps1
+        -TenantId '${{ inputs.azure-tenant-id }}'
+        -ResourceGroupName '${{ inputs.resource-group-name}}'
+        -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
+        -StorageAccountName '${{ steps.deploy-did-storage-account.outputs.storageAccountName }}'
 

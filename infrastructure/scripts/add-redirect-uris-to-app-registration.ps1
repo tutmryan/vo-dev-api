@@ -51,7 +51,7 @@ if ($SpaRedirectUris) {
   $spaRedirectUrisToSet = Get-RedirectUriUpdateUnion -Platform 'spa' -RedirectsToAdd $SpaRedirectUris
 }
 
-if ($webRedirectUrisToSet || $spaRedirectUrisToSet) {
+if (($null -ne $webRedirectUrisToSet) -or ($null -ne $spaRedirectUrisToSet)) {
   $patchBody = @{}
   if ($webRedirectUrisToSet) {
     Write-Output "Adding new web redirect URIs: $($webRedirectUrisToSet.ToAdd -join ',')"
