@@ -12,7 +12,7 @@ import type { IssuanceRequestRegistration } from '../services/verified-id'
 type ClientCredentials = Pick<ClientCredentialsConfig, 'clientId' | 'clientSecret'>
 
 export type Config = {
-  cors: Omit<CorsOptions, 'origin'> & { origin: true | string[] }
+  cors: Omit<CorsOptions, 'origin'> & { origin: true | string[] | undefined }
   server: {
     port?: number
   }
