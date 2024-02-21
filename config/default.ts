@@ -5,6 +5,7 @@ const config: DeepPartial<Config> = {
   cors: {
     maxAge: 84000,
     credentials: true,
+    origin: [],
   },
   logging: {
     userClaimsToLog: ['oid', 'aud', 'tid', 'azp', 'iss', 'scp', 'roles'],
