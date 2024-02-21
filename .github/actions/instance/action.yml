@@ -430,7 +430,7 @@ runs:
     - name: Set up audit log streaming
       id: audit-log-streaming
       uses: azure/arm-deploy@v1
-      if: ${{ inputs.enable-audit-log-streaming }} == 'true'
+      if: inputs.enable-audit-log-streaming == 'true'
       with:
         deploymentName: ${{env.NOW}}-audit-log-streaming
         resourceGroupName: ${{ inputs.resource-group-name }}
