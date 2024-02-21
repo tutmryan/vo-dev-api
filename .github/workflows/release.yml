@@ -201,6 +201,7 @@ jobs:
           docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }} # TODO ???
           docs-site-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }} # TODO ???
 
+          cors-origin: ${{ vars.CORS_ORIGIN }}
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
           api-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }}
           api-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }}

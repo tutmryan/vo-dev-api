@@ -16,6 +16,7 @@ The name of the environment should be the short instance moniker e.g. `demo`.
 - HOME_TENANT_VID_SERVICE_CLIENT_ID (optional)
 - VID_AUTHORITY_NAME (optional)
 - VID_AUTHORITY_DOMAIN (opitonal)
+- CORS_ORIGIN (optional JSON string: RegExp[] - an array of CORS origins - additional to the deployed Admin and API origins)
 
 ### Secrets
 

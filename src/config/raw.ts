@@ -4,7 +4,7 @@ import type { ClientCredentialsConfig } from '@makerx/node-common'
 import { createTypedConfig } from '@makerx/node-common'
 // eslint-disable-next-line no-restricted-imports
 import config from 'config'
-import type { CorsOptions, CorsOptionsDelegate } from 'cors'
+import type { CorsOptions } from 'cors'
 import type { LoggerOptions } from 'typeorm'
 import type { ConsoleTransportOptions } from 'winston/lib/winston/transports'
 import type { IssuanceRequestRegistration } from '../services/verified-id'
@@ -12,7 +12,7 @@ import type { IssuanceRequestRegistration } from '../services/verified-id'
 type ClientCredentials = Pick<ClientCredentialsConfig, 'clientId' | 'clientSecret'>
 
 export type Config = {
-  cors: CorsOptions | CorsOptionsDelegate
+  cors: Omit<CorsOptions, 'origin'> & { origin: true | string[] }
   server: {
     port?: number
   }
@@ -42,7 +42,10 @@ export type Config = {
     pollingFrequencySeconds: number
     maxProcessingAttempts: number
   }
-  resourcePrefix: string
+  /**
+   * The instance label, used to generate URLs according to convention
+   */
+  instance: string
   authorityId: string
   database: {
     host: string

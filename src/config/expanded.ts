@@ -1,4 +1,5 @@
 import { type ClientCredentialsConfig } from '@makerx/node-common'
+import type { CorsOptions } from 'cors'
 import { merge } from 'lodash'
 import type { Config } from './raw'
 import config from './raw'
@@ -10,6 +11,21 @@ const apiCredentials = config.get('apiClient.credentials')
 const internalScope = `${config.get('platformTenant.internalClientUri')}/.default`
 const platformTokenUrl = `https://login.microsoftonline.com/${platformTenantId}/oauth2/v2.0/token`
 const homeTenantTokenUrl = `https://login.microsoftonline.com/${homeTenantId}/oauth2/v2.0/token`
+
+// cors
+const rawCors = config.get('cors')
+const origin: CorsOptions['origin'] =
+  rawCors.origin === true
+    ? true
+    : [
+        ...rawCors.origin.map((origin) => new RegExp(origin)),
+        new RegExp(`^https://${config.get('instance')}.verifiedorchestration.com$`), // Admin site origin
+        new RegExp(`^https://${config.get('instance')}.api.verifiedorchestration.com$`), // API UI origin
+      ]
+export const cors: CorsOptions = {
+  ...rawCors,
+  origin,
+}
 
 // internal client credentials configs
 export const callbackAuth: ClientCredentialsConfig = {

@@ -2,6 +2,9 @@ import type { DeepPartial } from 'typeorm'
 import type { Config } from '../src/config'
 
 const config: DeepPartial<Config> = {
+  cors: {
+    origin: true,
+  },
   database: {
     database: 'VerifiedOrchestration_test',
     host: 'localhost',

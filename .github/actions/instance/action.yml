@@ -68,6 +68,8 @@ inputs:
     description: NODE_ENV value to set for the running API instance
     required: true
 
+  cors-origin:
+    description: The value to use for API cors.origin setting (RegExp string[] of additional origins)
   api-cookie-secret:
     description: Cookie secret used by the cookie-session Express middleware
     required: true
@@ -244,6 +246,8 @@ runs:
           docsSiteClientSecret=${{ inputs.docs-site-client-secret }}
           appServicePlanId=${{ inputs.app-service-plan-id }}
           nodeEnv=${{ inputs.node-env }}
+          instance=${{ inputs.instance }}
+          corsOrigin=${{ inputs.cors-origin }}
           apiCookieSecret=${{ inputs.api-cookie-secret }}
           apiClientSecret=${{ inputs.api-client-secret }}
           vidCallbackClientSecret=${{ inputs.vid-callback-client-secret }}

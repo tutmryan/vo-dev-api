@@ -366,6 +366,10 @@ resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-0
   }
 }
 
+@description('The instance, used to construct known URLs by convention')
+param instance string
+@description('The value to use for API cors.origin setting (RegExp string[] of additional origins)')
+param corsOrigin string
 @description('The ID of the VID authority')
 param vidAuthorityId string
 @description('The name of the home tenant')
@@ -587,6 +591,8 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     WEBSITE_RUN_FROM_PACKAGE: '1'
     APPINSIGHTS_INSTRUMENTATION_KEY: apiAppInsights.properties.InstrumentationKey
     APPLICATIONINSIGHTS_CONNECTION_STRING: apiAppInsights.properties.ConnectionString
+    INSTANCE: instance
+    CORS_ORIGIN: corsOrigin
     COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${apiCookieSecretSecret.properties.secretUri})'
     DATABASE_HOST: '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
     DATABASE_NAME: '${resourcePrefix}-sql-db'

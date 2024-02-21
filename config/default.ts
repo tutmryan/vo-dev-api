@@ -4,6 +4,7 @@ import type { DeepPartial } from '../src/util/type-helpers'
 const config: DeepPartial<Config> = {
   cors: {
     maxAge: 84000,
+    credentials: true,
   },
   logging: {
     userClaimsToLog: ['oid', 'aud', 'tid', 'azp', 'iss', 'scp', 'roles'],

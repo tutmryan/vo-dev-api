@@ -11,7 +11,6 @@ const config: DeepPartial<Config> = {
   },
   cors: {
     origin: true,
-    credentials: true,
   },
   cookieSession: {
     sameSite: 'lax',

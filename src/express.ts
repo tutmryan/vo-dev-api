@@ -35,6 +35,7 @@ export const getExpressApp = (): Express => {
   app.set('trust proxy', true)
 
   app.use(cors(corsConfig))
+  logger.info(`Using CORS origin: ${corsConfig.origin}`)
 
   if (pkce.enabled) {
     app.use(cookieSession(clone(cookieSessionConfig)))

@@ -15,6 +15,9 @@ const json = <T extends Uppercase<string>>(varName: T): { __name: T; __format: '
 })
 
 const config: EnvVarSubstitution<Config> = {
+  cors: {
+    origin: json('CORS_ORIGIN'),
+  },
   server: {
     port: json('PORT'),
   },
@@ -26,7 +29,7 @@ const config: EnvVarSubstitution<Config> = {
       silent: json('SILENT_CONSOLE'),
     },
   },
-  resourcePrefix: 'RESOURCE_PREFIX',
+  instance: 'INSTANCE',
   authorityId: 'VID_AUTHORITY_ID',
   database: {
     host: 'DATABASE_HOST',

@@ -25,7 +25,6 @@ export type { Config } from './raw'
 export * from './expanded'
 
 // export all other top level configs
-export const cors = config.get('cors')
 export const server = config.get('server')
 export const logging = config.get('logging')
 export const cookieSession = config.get('cookieSession')
