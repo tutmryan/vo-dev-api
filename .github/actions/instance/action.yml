@@ -46,6 +46,9 @@ inputs:
   domain:
     description: The domain of the instance
     default: 'verifiedorchestration.com'
+  enable-audit-log-streaming:
+    description: Whether to enable audit log streaming
+    default: 'false'
 
   sql-server-name:
     description: Name of the SQL Server the instance will connect to
@@ -423,4 +426,15 @@ runs:
         -ResourceGroupName '${{ inputs.resource-group-name}}'
         -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
         -StorageAccountName '${{ steps.deploy-did-storage-account.outputs.storageAccountName }}'
+
+    - name: Set up audit log streaming
+      id: audit-log-streaming
+      uses: azure/arm-deploy@v1
+      if: ${{ inputs.enable-audit-log-streaming }} == 'true'
+      with:
+        deploymentName: ${{env.NOW}}-audit-log-streaming
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/audit-log-streaming.bicep
+        parameters: >-
+          resourcePrefix=${{ inputs.resource-prefix }}
 

@@ -176,6 +176,7 @@ jobs:
         with:
           instance: ${{ matrix.instance }}
           node-env: 'nonprod'
+          enable-audit-log-streaming: ${{ vars.ENABLE_AUDIT_LOG_STREAMING }}
 
           azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
