@@ -14,10 +14,6 @@ const json = <T extends Uppercase<string>>(varName: T): { __name: T; __format: '
   __format: 'json',
 })
 
-const bool = <T extends Uppercase<string>>(varName: T): { __name: T; __format: 'boolean' } => ({
-  __name: varName,
-  __format: 'boolean',
-})
 const config: EnvVarSubstitution<Config> = {
   cors: {
     origin: json('CORS_ORIGIN'),
@@ -34,7 +30,7 @@ const config: EnvVarSubstitution<Config> = {
     },
   },
   instance: 'INSTANCE',
-  devToolsEnabled: bool('DEV_TOOLS_ENABLED'),
+  devToolsEnabled: json('DEV_TOOLS_ENABLED'),
   authorityId: 'VID_AUTHORITY_ID',
   database: {
     host: 'DATABASE_HOST',
