@@ -6,6 +6,11 @@ type Features {
   Indicates whether the API instance is configured to support finding home tenant identities via the findTenantIdentities query.
   """
   findTenantIdentities: Boolean!
+
+  """
+  Indicates whether the API dev tools (Apollo sandbox, introspection, PKCE) are available.
+  """
+  devToolsEnabled: Boolean!
 }
 
 """
