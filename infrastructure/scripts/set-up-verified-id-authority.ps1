@@ -71,7 +71,7 @@ if ($null -ne $authority) {
   # - generate DID document; POST /v1.0/verifiableCredentials/authorities/:authorityId/generateDidDocument
   # - generate well known DID configuration; POST /v1.0/verifiableCredentials/authorities/:authorityId/generateWellknownDidConfiguration
   # - validate well known DID configuratino; POST /v1.0/verifiableCredentials/authorities/:authorityId/validateWellKnownDidConfiguration
-  az login --tenant $TenantId --use-device-code
+  # az login --tenant $TenantId --use-device-code
 
   #
   # Enable Verified ID service
@@ -109,7 +109,7 @@ if ($null -ne $authority) {
   Write-Output ('Authority ID: {0}' -f $authorityId)
 
   # log out the user session to prevent the CI/CD actions following this script from being executed in the user's context
-  az logout
+  # az logout
 }
 
 Write-Output "authorityId=$($authorityId)" >> $Env:GITHUB_OUTPUT
