@@ -37,7 +37,6 @@ const config: DeepPartial<Config> = {
   auth: {
     pkce: {
       logoutUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/logout',
-      enabled: false,
       msalConfig: {
         system: {
           loggerOptions: {
