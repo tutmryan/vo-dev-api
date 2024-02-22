@@ -107,6 +107,18 @@ The deployment service principal needs to be able to read and write application 
 1. Search for "Application.ReadWrite.All", then click on "Add permissions".
 1. Click on "Grant admin consent for [tenant name]", then confirm the consent.
 
+## Give the deployment service principal Authority ReadWrite access
+
+The deployment service principal needs to be able to create and validate authorities.
+
+1. Navigate to the Azure Active Directory blade in the Azure Portal: <https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview>.
+1. In the "Manage" section, click on "App registrations".
+1. Find the deployment app registration by its name, then click on it.
+1. Click on "API permissions", then on "+ Add a permission".
+1. Select "APIs my organization uses", then "Verifiable Credentials Service Admin".
+1. Select "VerifiableCredential.Authority.ReadWrite", then click on "Add permissions".
+1. Click on "Grant admin consent for [tenant name]", then confirm the consent.
+
 ## Give the deployment service principal Contributor access to the Azure subscription to create resource groups + deploy resources
 
 1. Navigate to the Subscription.
@@ -184,7 +196,7 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 1. Navigate to the key vault
 1. Click on "Access policies"
 1. Click on "+ Create"
-1. Select `Get` and `Sign` in "Key permissions" section
+1. Select `Get`, `Sign` and `Create` in "Key permissions" section
 1. Click on "Next" to select a principal
 1. Select `Verifiable Credentials Service` (bb2a64ee-5d29-4b07-a491-25806dc854d3) and finalise the creation
 1. Click on "+ Create" to create another access policy
