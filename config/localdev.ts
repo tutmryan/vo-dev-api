@@ -40,7 +40,6 @@ const config: DeepPartial<Config> = {
       },
     },
     pkce: {
-      enabled: true,
       msalConfig: {
         system: {
           loggerOptions: {

@@ -1,11 +1,11 @@
 import type { ApolloServerPlugin } from '@apollo/server'
 import { ApolloServer } from '@apollo/server'
 import { expressMiddleware } from '@apollo/server/express4'
+import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled'
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace'
 import {
-  ApolloServerPluginLandingPageLocalDefault,
-  ApolloServerPluginLandingPageProductionDefault,
+  ApolloServerPluginLandingPageLocalDefault
 } from '@apollo/server/plugin/landingPage/default'
 import { verifyForHost } from '@makerx/express-bearer'
 import { graphqlOperationLoggingPlugin, introspectionControlPlugin } from '@makerx/graphql-apollo-server'
@@ -15,7 +15,7 @@ import type { Express } from 'express'
 import { json } from 'express'
 import type http from 'http'
 import { useBackgroundJob } from './background-jobs'
-import { bearer, logging } from './config'
+import { bearer, devToolsEnabled, logging } from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
 import type { Logger } from './logger'
@@ -46,11 +46,13 @@ const plugins = (httpServer: http.Server, serverCleanup?: () => Promise<void>): 
   if (!isProduction) {
     plugins.push(ApolloServerPluginInlineTrace())
   }
+
   plugins.push(
-    isProduction
-      ? ApolloServerPluginLandingPageProductionDefault()
-      : ApolloServerPluginLandingPageLocalDefault({ embed: true, includeCookies: true }),
+    devToolsEnabled
+      ? ApolloServerPluginLandingPageLocalDefault({ embed: true, includeCookies: true })
+      : ApolloServerPluginLandingPageDisabled(),
   )
+
   return plugins
 }
 
@@ -80,7 +82,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
     plugins: plugins(httpServer, async () => {
       await Promise.all([wsServerCleanup.dispose(), jobRunnerCleanup.dispose()])
     }),
-    introspection: true,
+    introspection: devToolsEnabled,
     csrfPrevention: true,
   })
   await server.start()

@@ -33,7 +33,6 @@ export type Config = {
       credentials: ClientCredentials
       logoutUrl?: string
       scopes: string[]
-      enabled: boolean
       msalConfig: MsalConfiguration
     }
   }
@@ -46,6 +45,7 @@ export type Config = {
    * The instance label, used to generate URLs according to convention
    */
   instance: string
+  devToolsEnabled: boolean
   authorityId: string
   database: {
     host: string
