@@ -5,8 +5,7 @@ import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/dis
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace'
 import {
-  ApolloServerPluginLandingPageLocalDefault,
-  ApolloServerPluginLandingPageProductionDefault,
+  ApolloServerPluginLandingPageLocalDefault
 } from '@apollo/server/plugin/landingPage/default'
 import { verifyForHost } from '@makerx/express-bearer'
 import { graphqlOperationLoggingPlugin, introspectionControlPlugin } from '@makerx/graphql-apollo-server'
@@ -47,15 +46,13 @@ const plugins = (httpServer: http.Server, serverCleanup?: () => Promise<void>): 
   if (!isProduction) {
     plugins.push(ApolloServerPluginInlineTrace())
   }
-  if (devToolsEnabled) {
-    plugins.push(
-      isProduction
-        ? ApolloServerPluginLandingPageProductionDefault()
-        : ApolloServerPluginLandingPageLocalDefault({ embed: true, includeCookies: true }),
-    )
-  } else {
-    plugins.push(ApolloServerPluginLandingPageDisabled())
-  }
+
+  plugins.push(
+    devToolsEnabled
+      ? ApolloServerPluginLandingPageLocalDefault({ embed: true, includeCookies: true })
+      : ApolloServerPluginLandingPageDisabled(),
+  )
+
   return plugins
 }
 
