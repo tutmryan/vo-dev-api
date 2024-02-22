@@ -2,9 +2,6 @@ import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 
 const config: DeepPartial<Config> = {
-  auth: {
-    pkce: { enabled: true },
-  },
   platformTenant: {
     tenantId: '5c14bb50-7602-4c0d-b785-5dee865e4665',
     internalClientUri: 'api://verified-orchestration-internal-non-prod',

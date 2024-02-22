@@ -33,7 +33,6 @@ export type Config = {
       credentials: ClientCredentials
       logoutUrl?: string
       scopes: string[]
-      enabled: boolean
       msalConfig: MsalConfiguration
     }
   }

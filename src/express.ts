@@ -39,7 +39,7 @@ export const getExpressApp = (): Express => {
   app.use(cors(corsConfig))
   logger.info(`Using CORS origin: ${corsConfig.origin}`)
 
-  if (pkce.enabled && devToolsEnabled) {
+  if (devToolsEnabled) {
     app.use(cookieSession(clone(cookieSessionConfig)))
 
     app.get('/user', (req, res) => {
