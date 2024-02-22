@@ -252,7 +252,7 @@ param redisCacheCapacity int
 
 var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
 
-resource redisCache 'Microsoft.Cache/Redis@2020-06-01' = {
+resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   name: '${resourcePrefix}-redis-${uniqueSuffix}'
   location: location
   properties: {
@@ -266,6 +266,14 @@ resource redisCache 'Microsoft.Cache/Redis@2020-06-01' = {
     redisConfiguration: {
       'maxmemory-policy': 'noeviction'
     }
+  }
+}
+
+module redisCacheFirewall './redis-firewall.bicep' = {
+  name: 'redis-firewall'
+  params: {
+    redisCacheName: redisCache.name
+    ipAddresses: split(apiAppService.properties.outboundIpAddresses, ',')
   }
 }
 
