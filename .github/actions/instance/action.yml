@@ -224,13 +224,6 @@ runs:
         -OrganisationName '${{ inputs.organisation-name }}'
         -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
 
-    - name: Log back in to Azure as deployer after interactive login session for VID authority setup
-      uses: azure/login@v1
-      with:
-        client-id: ${{ inputs.azure-client-id }}
-        tenant-id: ${{ inputs.azure-tenant-id }}
-        subscription-id: ${{ inputs.azure-subscription-id }}
-
     - name: Instance infrastructure
       id: instance-infra
       uses: azure/arm-deploy@v1
@@ -426,6 +419,14 @@ runs:
         -ResourceGroupName '${{ inputs.resource-group-name}}'
         -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
         -StorageAccountName '${{ steps.deploy-did-storage-account.outputs.storageAccountName }}'
+
+    - name: Log back in to Azure as deployer after interactive login session for VID verification
+      uses: azure/login@v1
+      if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
 
     - name: Set up audit log streaming
       id: audit-log-streaming
