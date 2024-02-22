@@ -68,6 +68,7 @@ const config: DeepPartial<Config> = {
   identityIssuers: {
     manual: 'Manually Issued',
   },
+  devToolsEnabled: true,
 }
 
 module.exports = config
