@@ -19,6 +19,7 @@ import {
   bearer,
   cookieSession as cookieSessionConfig,
   cors as corsConfig,
+  devToolsEnabled,
   issuanceCallbackRoute,
   pkce,
   presentationCallbackRoute,
@@ -38,7 +39,7 @@ export const getExpressApp = (): Express => {
   app.use(cors(corsConfig))
   logger.info(`Using CORS origin: ${corsConfig.origin}`)
 
-  if (pkce.enabled) {
+  if (pkce.enabled && devToolsEnabled) {
     app.use(cookieSession(clone(cookieSessionConfig)))
 
     app.get('/user', (req, res) => {

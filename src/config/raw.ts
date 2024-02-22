@@ -46,6 +46,7 @@ export type Config = {
    * The instance label, used to generate URLs according to convention
    */
   instance: string
+  devToolsEnabled: boolean
   authorityId: string
   database: {
     host: string
