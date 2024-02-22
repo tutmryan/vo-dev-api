@@ -17,12 +17,16 @@ function HomepageHeader() {
           <Link className="button button--secondary button--lg" to="/docs/">
             Documentation
           </Link>
-          <Link className="button button--secondary button--lg" to={siteConfig.customFields.GRAPHQL_ENDPOINT as string}>
-            Sandbox
-          </Link>
-          <Link className="button button--secondary button--lg" to={`${siteConfig.customFields.GRAPHQL_ENDPOINT}/voyager`}>
-            Voyager
-          </Link>
+          {siteConfig.customFields.DEV_TOOLS_ENABLED && (
+            <>
+              <Link className="button button--secondary button--lg" to={siteConfig.customFields.GRAPHQL_ENDPOINT as string}>
+                Sandbox
+              </Link>
+              <Link className="button button--secondary button--lg" to={`${siteConfig.customFields.GRAPHQL_ENDPOINT}/voyager`}>
+                Voyager
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
