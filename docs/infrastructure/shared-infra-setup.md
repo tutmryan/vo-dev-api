@@ -23,6 +23,7 @@ We need a service principal so that GitHub Actions can:
 1. Enter:
    - Subject identifier: `repo:VerifiedOrchestration/verified-orchestration-admin`
    - Name: `VerifiedOrchestration-verified-orchestration-admin`
+   - click "Add"
 
 Refer to [documentation here](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux)
 
@@ -32,13 +33,6 @@ Gather the following details:
 - Tenant ID
 - Subscription ID
 - Service principal object ID
-
-#### Non-prod app registration details
-
-- Client ID: `33bc2302-a407-4504-8b3a-e92add06cfc4`
-- Tenant ID: `5c14bb50-7602-4c0d-b785-5dee865e4665`
-- Subscription ID: `05c17245-e1b2-4870-96ff-0711f5eaa466`
-- Service principal object ID: `0c8ae26a-f0ad-418f-a0f6-7082b7b02f87`
 
 ## Configure GitHub repo OIDC subject claims
 
@@ -81,7 +75,7 @@ Prefix the variable names with the hosting tenant name, e.g. `[NON_]PROD_AZURE_C
 | `AZURE_CLIENT_ID`                   | The client ID of the deployment app registration                               |
 | `AZURE_TENANT_ID`                   | The ID of the target tenant                                                    |
 | `AZURE_SUBSCRIPTION_ID`             | The ID of the target subscription                                              |
-| `AZURE_SERVICE_PRINCIPAL_OBJECT_ID` | The object ID of the service principal                                         |
+| `AZURE_SERVICE_PRINCIPAL_OBJECT_ID` | The object ID of the deployment service principal                              |
 | `KEY_VAULT_NAME`                    | The name of the key vault to hold signing keys used by Verified ID authorities |
 | `KEY_VAULT_RESOURCE_GROUP_NAME`     | The name of the resource group to hold Verified ID resources                   |
 | `DNS_API_KEY`                       | The GoDaddy DNS API key                                                        |
@@ -149,13 +143,6 @@ This is required for setting up blob storage contributor access for the API mana
 1. Navigate to the Azure Active Directory blade in the Azure Portal: <https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview>.
 1. In the "Manage" section, click on "Groups", then on "New group".
 1. Enter a group name: 'Verified Orchestration SQL Admins ([non ]prod)', description: 'Administrators of the Verified Orchestration platform SQL infrastructure' select relevant members, and finalise the group creation.
-1. Refresh the page until the new group appears, and note down its object ID.
-
-### Non-prod object ID
-
-```
- 0239fa85-50e8-461d-921d-9bb2a5f896c7
-```
 
 ### Add the deployment service principal to the Azure SQL administrators group
 
@@ -217,3 +204,17 @@ After running the shared infrastructure pipeline, but before deploying any insta
 1. Find the "Directory Readers" role, select it, then click on "Add assignments".
 1. Search for the SQL Server user assigned identity by its name e.g. `vo-nonprd-platform-sql-server-identity`, then click on "Add".
 1. Click "Save".
+
+## Warning about changing shared infrastructure (App Service Plan)
+
+Documentation indicates outbound IPs of the App Service can change when the App Service Plan tier changes or when auto-scaling is enabled.
+
+> Because of autoscaling behaviors, the outbound IP can change at any time when running on a Consumption plan or in a Premium plan.
+
+https://learn.microsoft.com/en-us/azure/azure-functions/ip-addresses?tabs=portal#outbound-ip-address-changes
+
+Currently, the Redis firewall is created based on the outbound IPs of the App Service at the time of deployment.
+
+You must consider this situation when planning any change to the App Service plan tier or enabling auto-scaling.
+
+You might either re-deploy instances after updating the app service plan or use [Data center outbound IP addresses](https://learn.microsoft.com/en-us/azure/azure-functions/ip-addresses?tabs=portal#data-center-outbound-ip-addresses) for the Redis firewall instead.
