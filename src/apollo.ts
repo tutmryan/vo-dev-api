@@ -4,9 +4,7 @@ import { expressMiddleware } from '@apollo/server/express4'
 import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled'
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace'
-import {
-  ApolloServerPluginLandingPageLocalDefault
-} from '@apollo/server/plugin/landingPage/default'
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { verifyForHost } from '@makerx/express-bearer'
 import { graphqlOperationLoggingPlugin, introspectionControlPlugin } from '@makerx/graphql-apollo-server'
 import { useSubscriptionsServer } from '@makerx/graphql-core'

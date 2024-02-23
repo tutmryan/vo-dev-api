@@ -202,6 +202,8 @@ param homeTenantVidServiceClientId string
 @description('The client secret of the home tenant VID service client (optional)')
 @secure()
 param homeTenantVidServiceClientSecret string
+@description('The flag indicating whether the dev tools (i.e. Apollo Sandbox, .etc) are deployed')
+param devToolsEnabled string
 resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'HOME-TENANT-GRAPH-CLIENT-SECRET'
   parent: keyVault
@@ -434,6 +436,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     HOME_TENANT_VID_SERVICE_CLIENT_ID: homeTenantVidServiceClientId
     HOME_TENANT_VID_SERVICE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantVidServiceClientSecretSecret.properties.secretUri})'
     VID_AUTHORITY_ID: vidAuthorityId
+    DEV_TOOLS_ENABLED: devToolsEnabled
   }
 }
 

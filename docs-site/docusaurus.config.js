@@ -118,7 +118,7 @@ const config = {
   customFields: {
     GRAPHQL_ENDPOINT: process.env.GRAPHQL_ENDPOINT,
     ADMIN_URL: process.env.ADMIN_URL,
-    DEV_TOOLS_ENABLED: (process.env.DEV_TOOLS_ENABLED ?? 'true').toLowerCase() === 'true',
+    DEV_TOOLS_ENABLED: (process.env.DEV_TOOLS_ENABLED || 'true').toLowerCase() === 'true',
   },
 }
 

@@ -176,7 +176,7 @@ jobs:
         with:
           instance: ${{ matrix.instance }}
           node-env: 'nonprod'
-          enable-audit-log-streaming: ${{ vars.ENABLE_AUDIT_LOG_STREAMING }}
+          audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
 
           azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
@@ -217,3 +217,5 @@ jobs:
           home-tenant-authority-id: ${{ vars.HOME_TENANT_AUTHORITY_ID }}
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
+
+          dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
