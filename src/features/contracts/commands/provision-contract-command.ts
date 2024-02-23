@@ -40,6 +40,9 @@ function toCreateContractInput({
   return {
     name: name,
     availableInVcDirectory: isPublic,
+    // This field was introduced in the VID Service API AFTER Issuance.expirationDate, without documentation, as a breaking change.
+    // For now, using `true` here restores working use of Issuance.expirationDate as it was, prior to the breaking change.
+    allowOverrideValidityIntervalOnIssuance: true,
     rules: {
       validityInterval,
       vc: { type: credentialTypes },

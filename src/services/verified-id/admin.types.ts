@@ -6,6 +6,7 @@ export type Contract = {
   availableInVcDirectory: boolean
   rules: ContractRules
   displays: ContractDisplay[]
+  allowOverrideValidityIntervalOnIssuance: boolean
 }
 
 export type CreateContractInput = Omit<Contract, 'id' | 'status' | 'manifestUrl'>
