@@ -198,8 +198,8 @@ jobs:
           redis-cache-family: C
           redis-cache-capacity: 0
 
-          docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }} # TODO ???
-          docs-site-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }} # TODO ???
+          docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }}
+          docs-site-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }}
 
           cors-origin: ${{ vars.CORS_ORIGIN }}
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
@@ -300,8 +300,8 @@ jobs:
           redis-cache-family: C
           redis-cache-capacity: 0
 
-          docs-site-client-id: ${{ vars.SANDBOX_API_CLIENT_ID }} # TODO ???
-          docs-site-client-secret: ${{ secrets.SANDBOX_API_CLIENT_SECRET }} # TODO ???
+          docs-site-client-id: ${{ vars.SANDBOX_API_CLIENT_ID }}
+          docs-site-client-secret: ${{ secrets.SANDBOX_API_CLIENT_SECRET }}
 
           cors-origin: ${{ vars.CORS_ORIGIN }}
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
