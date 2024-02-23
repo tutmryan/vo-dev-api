@@ -266,7 +266,7 @@ jobs:
           azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
           azure-subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
-          resource-group-name: vo-nonprd-platform-shared-infra
+          resource-group-name: vo-platform-shared-infra
           resource-prefix: ${{ matrix.resourcePrefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           sql-database-sku: S1
@@ -276,7 +276,7 @@ jobs:
         uses: ./github-actions/instance
         with:
           instance: ${{ matrix.instance }}
-          node-env: 'nonprod'
+          node-env: 'sandbox'
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
 
           azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
