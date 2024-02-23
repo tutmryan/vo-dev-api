@@ -1,5 +1,6 @@
 import { ApiUrl } from '@site/src/components/api-url'
 import { AdminUrl } from '@site/src/components/admin-url'
+import { RenderIf } from '@site/src/components/render-if'
 
 # Application integration
 
@@ -18,6 +19,7 @@ If you're using a different development stack, our guides and examples can still
 
 All data and operations are accessible through the API, which presents a strongly typed, documented and discoverable schema.
 
+<RenderIf flag='DEV_TOOLS_ENABLED'>
 ### Apollo Sandbox UI
 
 Apollo Sandbox is a GraphQL IDE that enables you to explore the Verified Orchestration API. It's an ideal tool for delving into the schema, building and running queries, as well as referencing the documentation.
@@ -40,7 +42,7 @@ You will need to be [onboarded as a platform user](../onboarding-users.mdx) to a
 
 #### Subscriptions in Apollo Sandbox
 
-Query and Mutation operations work *out of the box* through cookie authentication (see the *Include cookies* setting in *Connection settings*).
+Query and Mutation operations work _out of the box_ through cookie authentication (see the _Include cookies_ setting in _Connection settings_).
 
 To use subscription connections, which do not include cookies, you need to provide an Authorization header for the subscription operation.
 
@@ -56,3 +58,4 @@ You can now subscribe to events and see event data. Typically, an access token i
 Voyager is a visualisation tool for GraphQL APIs, ideal for exploring the schema and discerning relationships between types.
 
 <ApiUrl path="/voyager">Access Voyager here</ApiUrl>
+</RenderIf>
