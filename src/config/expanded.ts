@@ -19,10 +19,10 @@ const origin: CorsOptions['origin'] =
   rawCors.origin === true
     ? true
     : [
-        ...(rawCors.origin ?? []).map((origin) => new RegExp(origin)),
-        new RegExp(`^https://${config.get('instance')}.verifiedorchestration.com$`), // Admin site origin
-        new RegExp(`^https://${config.get('instance')}.api.verifiedorchestration.com$`), // API UI origin
-      ]
+      ...(rawCors.origin ?? []).map((origin) => new RegExp(origin)),
+      new RegExp(`^https://${config.get('instance')}.verifiedorchestration.com$`), // Admin site origin
+      new RegExp(`^https://${config.get('instance')}.api.verifiedorchestration.com$`), // API UI origin
+    ]
 export const cors: CorsOptions = {
   ...rawCors,
   origin,
@@ -44,13 +44,13 @@ export const limitedAccessAuth: ClientCredentialsConfig = {
 export const hasHomeTenantAuthority = config.has('homeTenant.vidServiceCredentials.clientId')
 export const vidServiceAuth: Omit<ClientCredentialsConfig, 'scope'> = hasHomeTenantAuthority
   ? {
-    tokenUrl: homeTenantTokenUrl,
-    ...config.get('homeTenant.vidServiceCredentials'),
-  }
+      tokenUrl: homeTenantTokenUrl,
+      ...config.get('homeTenant.vidServiceCredentials'),
+    }
   : {
-    tokenUrl: platformTokenUrl,
-    ...internalClientCredentials,
-  }
+      tokenUrl: platformTokenUrl,
+      ...internalClientCredentials,
+    }
 
 // auth configs
 export const bearer: Config['auth']['bearer'] = merge(
