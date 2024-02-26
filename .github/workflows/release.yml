@@ -205,6 +205,7 @@ jobs:
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
           api-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }}
           api-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }}
+          internal-client-secret: ${{ secrets.NON_PROD_INTERNAL_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.NON_PROD_VID_CALLBACK_CLIENT_SECRET }}
           limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}
           limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
@@ -307,6 +308,7 @@ jobs:
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
           api-client-id: ${{ vars.SANDBOX_API_CLIENT_ID }}
           api-client-secret: ${{ secrets.SANDBOX_API_CLIENT_SECRET }}
+          internal-client-secret: ${{ secrets.PROD_INTERNAL_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.PROD_VID_CALLBACK_CLIENT_SECRET }}
           limited-access-client-secret: ${{ secrets.PROD_LIMITED_ACCESS_CLIENT_SECRET }}
           limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}

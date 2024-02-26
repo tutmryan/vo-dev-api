@@ -82,6 +82,9 @@ inputs:
   api-client-secret:
     description: Client secret of the API app registration in Azure AD
     required: true
+  internal-client-secret:
+    description: Client secret of the Internal app registration in Azure AD
+    required: true
   vid-callback-client-secret:
     description: Client secret of the VID callback app registration in Azure AD
     required: true
@@ -249,6 +252,7 @@ runs:
           corsOrigin=${{ inputs.cors-origin }}
           apiCookieSecret=${{ inputs.api-cookie-secret }}
           apiClientSecret=${{ inputs.api-client-secret }}
+          internalClientSecret=${{ inputs.internal-client-secret }}
           vidCallbackClientSecret=${{ inputs.vid-callback-client-secret }}
           limitedAccessClientSecret=${{ inputs.limited-access-client-secret }}
           limitedAccessSecret=${{ inputs.limited-access-secret }}

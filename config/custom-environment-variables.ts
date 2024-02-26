@@ -61,7 +61,6 @@ const config: EnvVarSubstitution<Config> = {
   },
   platformTenant: {
     tenantId: 'PLATFORM_TENANT_ID',
-    internalClientUri: 'INTERNAL_CLIENT_URI',
   },
   apiClient: {
     credentials: {
@@ -69,6 +68,13 @@ const config: EnvVarSubstitution<Config> = {
       clientSecret: 'API_CLIENT_SECRET',
     },
     uri: 'API_CLIENT_URI',
+  },
+  internalClient: {
+    credentials: {
+      clientId: 'INTERNAL_CLIENT_ID',
+      clientSecret: 'INTERNAL_CLIENT_SECRET',
+    },
+    uri: 'INTERNAL_CLIENT_URI',
   },
   auth: {
     pkce: {

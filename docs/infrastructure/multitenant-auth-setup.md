@@ -15,16 +15,7 @@ A single app registration is created in each of the non prod and prod environmen
 - create a client secret for the app registration to access the Verified ID API
   - set it to expires in 24 months
   - store it in 1Password as `API client secret`
-  - set `API_CLIENT_SECRET` secret in the relevant GitHub environment
-- add the following application permissions from `Verifiable Credentials Service Admin` API
-  - VerifiableCredential.Authority.ReadWrite
-  - VerifiableCredential.Contract.ReadWrite
-  - VerifiableCredential.Credential.Revoke
-  - VerifiableCredential.Credential.Search
-  - VerifiableCredential.Network.Read
-- add the following application permissions from `Verifiable Credentials Service Request` API
-  - VerifiableCredential.Create.All
-- grant admin consent for the added permissions
+  - set `[NON_PROD | SANDBOX | PROD]_API_CLIENT_SECRET` secret in the GitHub organisation
 - create the following Applications roles
 
   ```JSON
@@ -107,6 +98,19 @@ A single app registration is created in each of the non prod and prod environmen
 - add a scope (e.g. `api://verified-orchestration-internal-non-prod/platform` for the non prod environment)
   - Consent display name: `Verified Orchestration platform [INTERNAL API USE ONLY]`
   - Consent description: `Verified Orchestration platform [INTERNAL API USE ONLY]`
+- create a client secret for the app registration to access the Verified ID API
+  - set it to expires in 24 months
+  - store it in 1Password as `NonProd - Verified Orchestration -> Internal app client secret` for the non prod environment
+  - set `[NON_PROD | PROD]_INTERNAL_CLIENT_SECRET` secret in the GitHub organisation
+- add the following application permissions from `Verifiable Credentials Service Admin` API
+  - VerifiableCredential.Authority.ReadWrite
+  - VerifiableCredential.Contract.ReadWrite
+  - VerifiableCredential.Credential.Revoke
+  - VerifiableCredential.Credential.Search
+  - VerifiableCredential.Network.Read
+- add the following application permissions from `Verifiable Credentials Service Request` API
+  - VerifiableCredential.Create.All
+- grant admin consent for the added permissions
 - create the following Applications roles
 
   ```JSON
@@ -133,7 +137,7 @@ A single app registration is created in each of the non prod and prod environmen
 - create a client secret for the Verified Orchestration API to generate a token
   - set it to expires in 24 months
   - store it in 1Password, `NonProd - Verified Orchestration -> Limited access client secret` for the non prod environment
-  - set `LIMITED_ACCESS_CLIENT_SECRET` secret in the relevant GitHub environment
+  - set `[NON_PROD | PROD]_LIMITED_ACCESS_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.LimitedAccess
 - grant admin consent for the added permissions
@@ -146,7 +150,7 @@ A single app registration is created in each of the non prod and prod environmen
 - create a client secret for the Verified Orchestration API to generate a callback token for the Verified ID
   - set it to expires in 24 months
   - store it in 1Password, `NonProd - Verified Orchestration -> VID callback client secret` for the non prod environment
-  - set `VID_CALLBACK_CLIENT_SECRET` secret in the relevant GitHub environment
+  - set `[NON_PROD | PROD]_VID_CALLBACK_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.Request.Callback
 - grant admin consent for the added permissions

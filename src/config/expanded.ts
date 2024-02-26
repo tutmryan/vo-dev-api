@@ -7,8 +7,9 @@ import config from './raw'
 const platformTenantId = config.get('platformTenant.tenantId')
 const homeTenantId = config.get('homeTenant.tenantId')
 const apiCredentials = config.get('apiClient.credentials')
+const internalClientCredentials = config.get('internalClient.credentials')
 
-const internalScope = `${config.get('platformTenant.internalClientUri')}/.default`
+const internalScope = `${config.get('internalClient.uri')}/.default`
 const platformTokenUrl = `https://login.microsoftonline.com/${platformTenantId}/oauth2/v2.0/token`
 const homeTenantTokenUrl = `https://login.microsoftonline.com/${homeTenantId}/oauth2/v2.0/token`
 
@@ -43,13 +44,13 @@ export const limitedAccessAuth: ClientCredentialsConfig = {
 export const hasHomeTenantAuthority = config.has('homeTenant.vidServiceCredentials.clientId')
 export const vidServiceAuth: Omit<ClientCredentialsConfig, 'scope'> = hasHomeTenantAuthority
   ? {
-      tokenUrl: homeTenantTokenUrl,
-      ...config.get('homeTenant.vidServiceCredentials'),
-    }
+    tokenUrl: homeTenantTokenUrl,
+    ...config.get('homeTenant.vidServiceCredentials'),
+  }
   : {
-      tokenUrl: platformTokenUrl,
-      ...apiCredentials,
-    }
+    tokenUrl: platformTokenUrl,
+    ...internalClientCredentials,
+  }
 
 // auth configs
 export const bearer: Config['auth']['bearer'] = merge(
@@ -57,7 +58,7 @@ export const bearer: Config['auth']['bearer'] = merge(
     jwksUri: `https://login.microsoftonline.com/${homeTenantId}/discovery/v2.0/keys`,
     verifyOptions: {
       issuer: [`https://sts.windows.net/${homeTenantId}/`, `https://sts.windows.net/${platformTenantId}/`],
-      audience: [apiCredentials.clientId, config.get('platformTenant.internalClientUri')],
+      audience: [apiCredentials.clientId, config.get('internalClient.uri')],
     },
   },
   config.get('auth.bearer'),

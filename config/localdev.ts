@@ -3,7 +3,7 @@ import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 import * as nonprod from './nonprod'
 
-const { platformTenant, apiClient, callbackCredentials, limitedAccess } = nonprod as Config
+const { platformTenant, apiClient, internalClient, callbackCredentials, limitedAccess } = nonprod as Config
 
 const config: DeepPartial<Config> = {
   server: {
@@ -52,6 +52,7 @@ const config: DeepPartial<Config> = {
   },
   platformTenant,
   apiClient,
+  internalClient,
   callbackCredentials,
   limitedAccess,
 }
