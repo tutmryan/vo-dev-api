@@ -198,8 +198,8 @@ jobs:
           redis-cache-family: C
           redis-cache-capacity: 0
 
-          docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }} # TODO ???
-          docs-site-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }} # TODO ???
+          docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }}
+          docs-site-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }}
 
           cors-origin: ${{ vars.CORS_ORIGIN }}
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
@@ -207,6 +207,108 @@ jobs:
           api-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.NON_PROD_VID_CALLBACK_CLIENT_SECRET }}
           limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}
+          limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
+
+          home-tenant-id: ${{ vars.HOME_TENANT_ID }}
+          home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
+          home-tenant-graph-client-id: ${{ vars.HOME_TENANT_GRAPH_CLIENT_ID }}
+          home-tenant-graph-client-secret: ${{ secrets.HOME_TENANT_GRAPH_CLIENT_SECRET }}
+          home-tenant-authority-id: ${{ vars.HOME_TENANT_AUTHORITY_ID }}
+          home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
+          home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
+
+          dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
+
+  deploy-to-sandbox:
+    name: Deploy to sandbox environment
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    needs:
+      - build-api
+      - build-migrations-package
+      - prepare-docs-site
+      - upload-other-artifacts
+    strategy:
+      matrix:
+        include:
+          - instance: sandbox.pentest
+            resourceGroup: vo-sandbox-pentest-instance
+            resourcePrefix: vo-sandbox-pentest
+    environment:
+      name: ${{ matrix.instance }}
+      url: ${{ matrix.instance }}.verifiedorchestration.com
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+      - name: Instance resource group
+        id: instance-resource-group
+        uses: ./github-actions/resource-group
+        with:
+          azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ matrix.resourceGroup }}
+          resource-group-location: australiaeast
+      - name: Instance log analytics
+        id: instance-log-analytics
+        uses: ./github-actions/log-analytics
+        with:
+          azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: ${{ matrix.resourceGroup }}
+          resource-prefix: ${{ matrix.resourcePrefix }}
+      - name: Instance SQL database
+        id: instance-sql-db
+        uses: ./github-actions/sql-db
+        with:
+          azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: vo-platform-shared-infra
+          resource-prefix: ${{ matrix.resourcePrefix }}
+          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          sql-database-sku: S1
+          log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
+      - name: Deploy instance
+        id: deploy-instance
+        uses: ./github-actions/instance
+        with:
+          instance: ${{ matrix.instance }}
+          node-env: 'sandbox'
+          audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
+
+          azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
+          azure-service-principal-object-id: ${{ vars.PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
+          resource-group-name: ${{ matrix.resourceGroup }}
+          resource-prefix: ${{ matrix.resourcePrefix }}
+
+          key-vault-resource-group-name: ${{ vars.PROD_KEY_VAULT_RESOURCE_GROUP_NAME }}
+          key-vault-name: ${{ vars.PROD_KEY_VAULT_NAME }}
+          dns-api-key: ${{ secrets.PROD_DNS_API_KEY }}
+          dns-api-secret: ${{ secrets.PROD_DNS_API_SECRET }}
+
+          organisation-name: ${{ vars.VID_AUTHORITY_NAME }}
+          organisation-domain: ${{ vars.VID_AUTHORITY_DOMAIN }}
+
+          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
+          redis-cache-sku: Basic
+          redis-cache-family: C
+          redis-cache-capacity: 0
+
+          docs-site-client-id: ${{ vars.SANDBOX_API_CLIENT_ID }}
+          docs-site-client-secret: ${{ secrets.SANDBOX_API_CLIENT_SECRET }}
+
+          cors-origin: ${{ vars.CORS_ORIGIN }}
+          api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
+          api-client-id: ${{ vars.SANDBOX_API_CLIENT_ID }}
+          api-client-secret: ${{ secrets.SANDBOX_API_CLIENT_SECRET }}
+          vid-callback-client-secret: ${{ secrets.PROD_VID_CALLBACK_CLIENT_SECRET }}
+          limited-access-client-secret: ${{ secrets.PROD_LIMITED_ACCESS_CLIENT_SECRET }}
           limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
