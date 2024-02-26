@@ -27,11 +27,14 @@ const config: DeepPartial<Config> = {
   },
   platformTenant: {
     tenantId: 'TEST_PLATFORM_TENANT_ID',
-    internalClientUri: 'TEST_INTERNAL_CLIENT_URI',
   },
   apiClient: {
     credentials: {},
     uri: 'TEST_API_CLIENT_URI',
+  },
+  internalClient: {
+    credentials: {},
+    uri: 'TEST_INTERNAL_CLIENT_URI',
   },
   callbackCredentials: {},
   limitedAccess: {

@@ -4,12 +4,17 @@ import type { DeepPartial } from '../src/util/type-helpers'
 const config: DeepPartial<Config> = {
   platformTenant: {
     tenantId: '3d804793-53dd-40a2-9d8a-9f67a92fd349',
-    internalClientUri: 'api://verified-orchestration-internal',
   },
   apiClient: {
     uri: 'api://verified-orchestration-sandbox',
     credentials: {
       clientId: 'bbe9101e-a8f2-47f4-95d1-059d3834b910',
+    },
+  },
+  internalClient: {
+    uri: 'api://verified-orchestration-internal',
+    credentials: {
+      clientId: '527e0466-d47b-41ef-8c0a-db9a317eb77f',
     },
   },
   callbackCredentials: {

@@ -75,9 +75,12 @@ export type Config = {
   }
   platformTenant: {
     tenantId: string
-    internalClientUri: string
   }
   apiClient: {
+    credentials: ClientCredentials
+    uri: string
+  }
+  internalClient: {
     credentials: ClientCredentials
     uri: string
   }
