@@ -7,7 +7,7 @@ A single app registration is created in each of the non prod and prod environmen
 - create an app registration named `Verified Orchestration` (with `(non prod)` suffix for the non prod environment and `(sandbox)` suffix for the sandbox environment)
 - choose `(Any Microsoft Entra ID tenant - Multitenant)` option for `Supported account types`
 - Click "Register" to create the app registration
-- set the `API_CLIENT_ID` variable in the relevant GitHub environment
+- set the `[NON_PROD | SANDBOX | PROD]_API_CLIENT_ID` variable in the GitHub organisation
 - add `Application ID URI` (e.g. `api://verified-orchestration-non-prod` for the non prod environment and `api://verified-orchestration-sandbox` for the sandbox environment)
 - add a scope `platform` (e.g. `api://verified-orchestration-non-prod/platform` for the non prod environment)
   - Consent display name: `Access the Verified Orchestration platform`
