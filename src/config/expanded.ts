@@ -19,10 +19,10 @@ const origin: CorsOptions['origin'] =
   rawCors.origin === true
     ? true
     : [
-      ...(rawCors.origin ?? []).map((origin) => new RegExp(origin)),
-      new RegExp(`^https://${config.get('instance')}.verifiedorchestration.com$`), // Admin site origin
-      new RegExp(`^https://${config.get('instance')}.api.verifiedorchestration.com$`), // API UI origin
-    ]
+        ...(rawCors.origin ?? []).map((origin) => new RegExp(origin)),
+        new RegExp(`^https://${config.get('instance')}.verifiedorchestration.com$`), // Admin site origin
+        new RegExp(`^https://${config.get('instance')}.api.verifiedorchestration.com$`), // API UI origin
+      ]
 export const cors: CorsOptions = {
   ...rawCors,
   origin,
