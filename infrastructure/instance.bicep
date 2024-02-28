@@ -23,7 +23,7 @@ resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-var keyVaultName = '${resourcePrefix}-kv-${uniqueSuffix}'
+var keyVaultName = 'vo-kv-inst-${uniqueSuffix}'
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   name: keyVaultName
