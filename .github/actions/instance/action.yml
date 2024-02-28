@@ -377,7 +377,6 @@ runs:
       run: |
         npm run build
         sed -i "s|TENANT_ID|${{ inputs.azure-tenant-id }}|g" ./build/staticwebapp.config.json
-        cat ./build/staticwebapp.config.json
       # ^^^ replace the TENANT_ID placeholder with the home tenant ID
       working-directory: docs-site
 
