@@ -69,9 +69,6 @@ param elasticPoolCapacity int
 @description('Elastic Pool zone redundant')
 param elasticPoolZoneRedundant bool = false
 
-@description('Elastic Pool DB Max Size, in bytes')
-param elasticPoolDBMaxSize int = 5242880000
-
 @description('Elastic Pool - The minimum capacity any one database can consume, .')
 param elasticPoolPerDatabaseMinCapacity int = 0
 
