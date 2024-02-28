@@ -111,7 +111,6 @@ resource sqlServerElasticPool 'Microsoft.Sql/servers/elasticPools@2022-05-01-pre
   parent: sqlServer1
   properties: {
     zoneRedundant: elasticPoolZoneRedundant
-    maxSizeBytes: elasticPoolDBMaxSize
     perDatabaseSettings: union({ minCapacity: elasticPoolPerDatabaseMinCapacity }, elasticPoolPerDatabaseMaxCapacity > 0 ? { maxCapacity: elasticPoolPerDatabaseMaxCapacity } : {})
   }
 }
