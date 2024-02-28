@@ -171,7 +171,7 @@ runs:
     - name: 'Set up Migrations app service principal database roles'
       uses: azure/sql-action@v2.2.1
       with:
-        connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        connection-string: 'Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
         path: 'api-setup.sql'
 
     - name: Check for authority in Verified ID service
