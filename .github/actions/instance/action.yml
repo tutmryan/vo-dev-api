@@ -152,6 +152,28 @@ runs:
       run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
       shell: bash
 
+    - name: Add app registration for migration
+      id: add-migration-app-registration
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/create-migration-app-registration.ps1
+        -Name 'Verified Orchestration Migration (${{ inputs.instance }})'
+
+    # - name: 'Create database service principal setup scripts'
+    #   shell: bash
+    #   run: |
+    #     echo "CREATE USER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}] FROM EXTERNAL PROVIDER;" >> migrations-setup.sql
+    #     echo "ALTER ROLE [db_datareader] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+    #     echo "ALTER ROLE [db_datawriter] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+    #     echo "ALTER ROLE [db_ddladmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+    #     echo "ALTER ROLE [db_securityadmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+
+    # - name: 'Set up Migrations app service principal database roles'
+    #   uses: azure/sql-action@v2.2.1
+    #   with:
+    #     connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+    #     path: 'api-setup.sql'
+
     - name: Check for authority in Verified ID service
       id: check-vid-authority
       shell: pwsh
@@ -339,28 +361,6 @@ runs:
         ./infrastructure/scripts/add-redirect-uris-to-app-registration.ps1
         -AppRegistrationId ${{ inputs.docs-site-client-id }}
         -WebRedirectUris https://${{ inputs.instance }}.docs.${{ inputs.domain }}/.auth/login/aad/callback
-
-    - name: Add app registration for migration
-      id: add-migration-app-registration
-      shell: pwsh
-      run: >-
-        ./infrastructure/scripts/create-migration-app-registration.ps1
-        -Name 'Verified Orchestration Migration (${{ inputs.instance }})'
-
-    # - name: 'Create database service principal setup scripts'
-    #   shell: bash
-    #   run: |
-    #     echo "CREATE USER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}] FROM EXTERNAL PROVIDER;" >> migrations-setup.sql
-    #     echo "ALTER ROLE [db_datareader] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
-    #     echo "ALTER ROLE [db_datawriter] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
-    #     echo "ALTER ROLE [db_ddladmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
-    #     echo "ALTER ROLE [db_securityadmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
-
-    # - name: 'Set up Migrations app service principal database roles'
-    #   uses: azure/sql-action@v2.2.1
-    #   with:
-    #     connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
-    #     path: 'api-setup.sql'
 
     - name: Log in to Azure as migration app
       uses: azure/login@v1
