@@ -12,9 +12,6 @@ inputs:
     description: ID of the target Azure subscription
     required: true
 
-  azure-service-principal-object-id:
-    description: Object ID of the deployment service principal
-    required: true
   resource-prefix:
     description: Prefix to use for resource names
     required: true
@@ -239,7 +236,6 @@ runs:
         template: ./infrastructure/instance.bicep
         parameters: >-
           resourcePrefix=${{ inputs.resource-prefix }}
-          servicePrincipalObjectId=${{ inputs.azure-service-principal-object-id }}
           sqlServerName=${{ inputs.sql-server-name }}
           redisCacheSKU=${{ inputs.redis-cache-sku }}
           redisCacheFamily=${{ inputs.redis-cache-family }}
@@ -381,6 +377,7 @@ runs:
       run: |
         npm run build
         sed -i "s|TENANT_ID|${{ inputs.azure-tenant-id }}|g" ./build/staticwebapp.config.json
+        cat ./build/staticwebapp.config.json
       # ^^^ replace the TENANT_ID placeholder with the home tenant ID
       working-directory: docs-site
 

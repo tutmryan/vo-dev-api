@@ -191,6 +191,15 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 1. Click on "Next" to select a principal
 1. Select `Verifiable Credentials Service Request` (3db474b9-6a0c-4840-96ac-1fceb342124f) and finalise the creation
 
+## Apply firewall configuration to the key vault
+
+1. Navigate to the key vault
+1. Select "Networking" from "Settings" in the left menu
+1. Click on "Firewalls and virtual networks"
+1. Select "Allow public access from specific virtual networks and IP addresses"
+1. Select "Allow trusted Microsoft services to bypass this firewall"
+1. Click "Apply"
+
 ## Create and run the shared infrastructure pipeline
 
 You can now create a new workflow in the `.github/workflows` directory to call the `shared-infra` action for the hosting tenant.

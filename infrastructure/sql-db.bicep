@@ -5,11 +5,11 @@ param resourcePrefix string
 @description('The ID of the log analytics workspace to send diagnostics data to')
 param logAnalyticsId string
 
-@description('Pricing tier of the Azure SQL database')
-param sqlDatabaseSku string
-
 @description('The name of the SQL Server to create the database on')
 param sqlServerName string
+
+@description('The name of the elastic pool to add the database to')
+param elasticPoolName string
 
 param location string = resourceGroup().location
 
@@ -17,12 +17,17 @@ resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' existing = {
   name: sqlServerName
 }
 
+resource elasticPool 'Microsoft.Sql/servers/elasticPools@2022-05-01-preview' existing = {
+  parent: sqlServer
+  name: elasticPoolName
+}
+
 resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
   name: '${resourcePrefix}-sql-db'
   location: location
   parent: sqlServer
-  sku: {
-    name: sqlDatabaseSku
+  properties: {
+    elasticPoolId: elasticPool.id
   }
 }
 

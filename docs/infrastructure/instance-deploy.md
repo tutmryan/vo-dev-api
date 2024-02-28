@@ -9,6 +9,7 @@ The name of the environment should be the short instance moniker e.g. `demo`.
 
 - APP_SERVICE_PLAN_ID
 - SQL_SERVER_NAME
+- SQL_ELASTIC_POOL_NAME
 - HOME_TENANT_NAME
 - HOME_TENANT_ID
 - HOME_TENANT_GRAPH_CLIENT_ID (optional)

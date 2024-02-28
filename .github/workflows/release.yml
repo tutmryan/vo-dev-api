@@ -167,7 +167,7 @@ jobs:
           resource-group-name: vo-nonprd-platform-shared-infra
           resource-prefix: ${{ matrix.resourcePrefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
-          sql-database-sku: S1
+          elastic-pool-name: ${{ vars.SQL_ELASTIC_POOL_NAME }}
           log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
       - name: Deploy instance
         id: deploy-instance
@@ -180,7 +180,6 @@ jobs:
           azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
           azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
-          azure-service-principal-object-id: ${{ vars.NON_PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
           resource-group-name: ${{ matrix.resourceGroup }}
           resource-prefix: ${{ matrix.resourcePrefix }}
 
@@ -270,7 +269,7 @@ jobs:
           resource-group-name: vo-platform-shared-infra
           resource-prefix: ${{ matrix.resourcePrefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
-          sql-database-sku: S1
+          elastic-pool-name: ${{ vars.SQL_ELASTIC_POOL_NAME }}
           log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
       - name: Deploy instance
         id: deploy-instance
@@ -283,7 +282,6 @@ jobs:
           azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
           azure-subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
-          azure-service-principal-object-id: ${{ vars.PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
           resource-group-name: ${{ matrix.resourceGroup }}
           resource-prefix: ${{ matrix.resourcePrefix }}
 
@@ -373,7 +371,7 @@ jobs:
           resource-group-name: vo-platform-shared-infra
           resource-prefix: ${{ matrix.resourcePrefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
-          sql-database-sku: S1
+          elastic-pool-name: ${{ vars.SQL_ELASTIC_POOL_NAME }}
           log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
       - name: Deploy instance
         id: deploy-instance
@@ -386,7 +384,6 @@ jobs:
           azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
           azure-subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
-          azure-service-principal-object-id: ${{ vars.PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
           resource-group-name: ${{ matrix.resourceGroup }}
           resource-prefix: ${{ matrix.resourcePrefix }}
 

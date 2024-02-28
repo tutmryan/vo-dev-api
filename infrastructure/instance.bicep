@@ -1,6 +1,3 @@
-@description('Object ID of the service principal performing the deployment')
-param servicePrincipalObjectId string
-
 @description('The resource prefix to use for all resources')
 @minLength(3)
 param resourcePrefix string
@@ -26,7 +23,7 @@ resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-var keyVaultName = '${resourcePrefix}-kv'
+var keyVaultName = '${resourcePrefix}-kv-${uniqueSuffix}'
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   name: keyVaultName
@@ -50,17 +47,6 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
         permissions: {
           secrets: [
             'get'
-          ]
-        }
-      }
-      {
-        tenantId: subscription().tenantId
-        objectId: servicePrincipalObjectId
-        permissions: {
-          secrets: [
-            'get'
-            'set'
-            'list'
           ]
         }
       }
@@ -197,12 +183,24 @@ resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-0
   }
 }
 
+@description('The ID of the VID authority')
+@secure()
+param vidAuthorityId string
+resource vidAuthorityIdSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'VID-AUTHORITY-ID'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: vidAuthorityId
+  }
+}
+
 @description('The instance, used to construct known URLs by convention')
 param instance string
 @description('The value to use for API cors.origin setting (RegExp string[] of additional origins)')
 param corsOrigin string
-@description('The ID of the VID authority')
-param vidAuthorityId string
 @description('The name of the home tenant')
 param homeTenantName string
 @description('The ID of the home tenant')
@@ -451,7 +449,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     HOME_TENANT_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantGraphClientSecretSecret.properties.secretUri})'
     HOME_TENANT_VID_SERVICE_CLIENT_ID: homeTenantVidServiceClientId
     HOME_TENANT_VID_SERVICE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantVidServiceClientSecretSecret.properties.secretUri})'
-    VID_AUTHORITY_ID: vidAuthorityId
+    VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
     DEV_TOOLS_ENABLED: devToolsEnabled
   }
 }

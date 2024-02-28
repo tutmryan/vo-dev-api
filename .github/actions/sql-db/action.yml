@@ -20,8 +20,8 @@ inputs:
   sql-server-name:
     description: Name of the SQL Server to deploy the database to
     required: true
-  sql-database-sku:
-    description: The SKU of the SQL Database
+  elastic-pool-name:
+    description: Name of the elastic pool to deploy the database to
     required: true
   log-analytics-id:
     description: ID of the log analytics workspace to send logs to
@@ -51,6 +51,6 @@ runs:
         parameters: >-
           resourcePrefix=${{ inputs.resource-prefix }}
           sqlServerName=${{ inputs.sql-server-name }}
-          sqlDatabaseSku=${{ inputs.sql-database-sku }}
+          elasticPoolName=${{ inputs.elastic-pool-name }}
           logAnalyticsId=${{ inputs.log-analytics-id }}
 
