@@ -60,6 +60,7 @@ runs:
         echo "  CREATE USER [${{ inputs.deployment-app-name }}] FROM EXTERNAL PROVIDER;" >> api-setup.sql
         echo "  ALTER ROLE [dbmanager] ADD MEMBER [${{ inputs.deployment-app-name }}];" >> deployer-setup.sql
         echo "END" >> deployer-setup.sql
+        cat deployer-setup.sql
 
     - name: 'Set up deployer service principal database roles'
       uses: azure/sql-action@v2.2.1
