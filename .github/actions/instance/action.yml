@@ -350,17 +350,25 @@ runs:
     - name: 'Create database service principal setup scripts'
       shell: bash
       run: |
+        echo "CREATE USER [${{ steps.instance-infra.outputs.apiAppServiceName }}] FROM EXTERNAL PROVIDER;" >> api-setup.sql
+        echo "ALTER ROLE [db_datareader] ADD MEMBER [${{ steps.instance-infra.outputs.apiAppServiceName }}];" >> api-setup.sql
+        echo "ALTER ROLE [db_datawriter] ADD MEMBER [${{ steps.instance-infra.outputs.apiAppServiceName }}];" >> api-setup.sql
+
         echo "CREATE USER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}] FROM EXTERNAL PROVIDER;" >> migrations-setup.sql
-        echo "ALTER ROLE [db_owner] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
-        # echo "ALTER ROLE [db_datareader] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
-        # echo "ALTER ROLE [db_datawriter] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
-        # echo "ALTER ROLE [db_ddladmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
-        # echo "ALTER ROLE [db_securityadmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+        echo "ALTER ROLE [db_datareader] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+        echo "ALTER ROLE [db_datawriter] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+        echo "ALTER ROLE [db_ddladmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+
+    - name: 'Set up API service principal database roles'
+      uses: azure/sql-action@v2.2.1
+      with:
+        connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        path: 'api-setup.sql'
 
     - name: 'Set up Migrations app service principal database roles'
       uses: azure/sql-action@v2.2.1
       with:
-        connection-string: 'Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
+        connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         path: 'migrations-setup.sql'
 
     - name: Log in to Azure as migration app
@@ -387,7 +395,6 @@ runs:
       env:
         HOST: ${{ steps.instance-infra.outputs.databaseHost }}
         DATABASE: ${{inputs.resource-prefix}}-sql-db
-        CREATE_EXTERNAL_USER: ${{ steps.instance-infra.outputs.apiAppServiceName }}
 
     - name: Log in to Azure as deployer after migration
       uses: azure/login@v1
