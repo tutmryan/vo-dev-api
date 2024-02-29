@@ -64,7 +64,7 @@ runs:
     - name: 'Set up deployer service principal database roles'
       uses: azure/sql-action@v2.2.1
       with:
-        connection-string: Server=${{ steps.deploy-shared-infrastructure.outputs.sqlServer1Name }};Initial Catalog=master;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        connection-string: Server=${{ steps.deploy-shared-infrastructure.outputs.sqlServer1Name }}.database.windows.net;Initial Catalog=master;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         path: 'deployer-setup.sql'
 
     - name: Output ${{ inputs.infra-environment }} shared infra variable values
