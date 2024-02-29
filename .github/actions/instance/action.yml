@@ -351,10 +351,11 @@ runs:
       shell: bash
       run: |
         echo "CREATE USER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}] FROM EXTERNAL PROVIDER;" >> migrations-setup.sql
-        echo "ALTER ROLE [db_datareader] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
-        echo "ALTER ROLE [db_datawriter] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
-        echo "ALTER ROLE [db_ddladmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
-        echo "ALTER ROLE [db_securityadmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+        echo "ALTER ROLE [db_owner] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+        # echo "ALTER ROLE [db_datareader] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+        # echo "ALTER ROLE [db_datawriter] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+        # echo "ALTER ROLE [db_ddladmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+        # echo "ALTER ROLE [db_securityadmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
 
     - name: 'Set up Migrations app service principal database roles'
       uses: azure/sql-action@v2.2.1
