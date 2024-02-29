@@ -51,6 +51,8 @@ async function createExternalUser(user: string, roles: string[]) {
   const queryRunner = dataSource.createQueryRunner()
 
   const [{ count }] = await queryRunner.query(`SELECT COUNT(*) as count FROM sys.database_principals WHERE name = @0`, [user])
+  const [{ username }] = await queryRunner.query(`SELECT SUSER_NAME()`)
+  console.log('Current username', username)
   if (count > 0) {
     console.log(`External user ${user} already exists ✅`)
   } else {

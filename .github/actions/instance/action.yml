@@ -350,7 +350,6 @@ runs:
     - name: 'Create database service principal setup scripts'
       shell: bash
       run: |
-        echo  "Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
         echo "CREATE USER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}] FROM EXTERNAL PROVIDER;" >> migrations-setup.sql
         echo "ALTER ROLE [db_datareader] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
         echo "ALTER ROLE [db_datawriter] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
