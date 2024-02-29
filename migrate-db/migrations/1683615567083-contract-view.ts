@@ -40,10 +40,6 @@ export class ContractView1683615567083 implements MigrationInterface {
             left join [user] pu on c.provisioned_by_id = pu.id
             left join [user] lpu on c.last_provisioned_by_id = lpu.id
       `)
-
-    await queryRunner.query(`
-      GRANT SELECT ON contract_view TO report_data_viewer
-    `)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

@@ -32,10 +32,6 @@ export class TemplateView1683876731774 implements MigrationInterface {
           left join [user] ubu on t.updated_by_id = ubu.id
           left join template pt on t.parent_id = pt.id
       `)
-
-    await queryRunner.query(`
-      GRANT SELECT ON template_view TO report_data_viewer
-    `)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

@@ -20,10 +20,6 @@ export class PresentationView1683686278182 implements MigrationInterface {
             inner join [user] u on u.id = p.user_id
             left join [identity] id on id.id = p.identity_id
       `)
-
-    await queryRunner.query(`
-      GRANT SELECT ON presentation_view TO report_data_viewer
-    `)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

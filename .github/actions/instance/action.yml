@@ -152,6 +152,13 @@ runs:
       run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
       shell: bash
 
+    - name: Add app registration for migration
+      id: add-migration-app-registration
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/create-migration-app-registration.ps1
+        -Name 'Verified Orchestration Migration (${{ inputs.instance }})'
+
     - name: Check for authority in Verified ID service
       id: check-vid-authority
       shell: pwsh
@@ -340,6 +347,43 @@ runs:
         -AppRegistrationId ${{ inputs.docs-site-client-id }}
         -WebRedirectUris https://${{ inputs.instance }}.docs.${{ inputs.domain }}/.auth/login/aad/callback
 
+    - name: 'Create database service principal setup scripts'
+      shell: bash
+      run: |
+        echo "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE [name] = '${{ steps.instance-infra.outputs.apiAppServiceName }}')" >> api-setup.sql
+        echo "BEGIN" >> api-setup.sql
+        echo "  CREATE USER [${{ steps.instance-infra.outputs.apiAppServiceName }}] FROM EXTERNAL PROVIDER;" >> api-setup.sql
+        echo "  ALTER ROLE [db_datareader] ADD MEMBER [${{ steps.instance-infra.outputs.apiAppServiceName }}];" >> api-setup.sql
+        echo "  ALTER ROLE [db_datawriter] ADD MEMBER [${{ steps.instance-infra.outputs.apiAppServiceName }}];" >> api-setup.sql
+        echo "END" >> api-setup.sql
+
+        echo "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE [name] = '${{ steps.add-migration-app-registration.outputs.migrationAppName }}')" >> migrations-setup.sql
+        echo "BEGIN" >> migrations-setup.sql
+        echo "  CREATE USER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}] FROM EXTERNAL PROVIDER;" >> migrations-setup.sql
+        echo "  ALTER ROLE [db_datareader] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+        echo "  ALTER ROLE [db_datawriter] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+        echo "  ALTER ROLE [db_ddladmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
+        echo "END" >> migrations-setup.sql
+
+    - name: 'Set up API service principal database roles'
+      uses: azure/sql-action@v2.2.1
+      with:
+        connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        path: 'api-setup.sql'
+
+    - name: 'Set up Migrations app service principal database roles'
+      uses: azure/sql-action@v2.2.1
+      with:
+        connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        path: 'migrations-setup.sql'
+
+    - name: Log in to Azure as migration app
+      uses: azure/login@v1
+      with:
+        client-id: ${{ steps.add-migration-app-registration.outputs.migrationAppId }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        allow-no-subscriptions: true
+
     - name: Unzip migrations package
       shell: bash
       run: |
@@ -357,7 +401,13 @@ runs:
       env:
         HOST: ${{ steps.instance-infra.outputs.databaseHost }}
         DATABASE: ${{inputs.resource-prefix}}-sql-db
-        CREATE_EXTERNAL_USER: ${{ steps.instance-infra.outputs.apiAppServiceName }}
+
+    - name: Log in to Azure as deployer after migration
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
 
     - name: Deploy API to App Service
       id: deploy-api
