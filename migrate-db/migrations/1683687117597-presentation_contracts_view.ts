@@ -30,10 +30,6 @@ export class PresentationContractsView1683687117597 implements MigrationInterfac
             left join [identity] id on id.id = p.identity_id
             left join template t on t.id = c.template_id
       `)
-
-    await queryRunner.query(`
-      GRANT SELECT ON presentation_contracts_view TO report_data_viewer
-    `)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

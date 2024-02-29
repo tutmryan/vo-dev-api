@@ -27,10 +27,6 @@ export class IssuanceView1683616498232 implements MigrationInterface {
             inner join [identity] id on id.id = i.identity_id
             left join template t on t.id = c.template_id
       `)
-
-    await queryRunner.query(`
-      GRANT SELECT ON issuance_view TO report_data_viewer
-    `)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
