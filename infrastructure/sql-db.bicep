@@ -8,13 +8,27 @@ param logAnalyticsId string
 @description('The name of the SQL Server to create the database on')
 param sqlServerName string
 
+@description('The name of the elastic pool to add the database to')
+param elasticPoolName string
+
+param location string = resourceGroup().location
+
 resource sqlServer 'Microsoft.Sql/servers@2022-05-01-preview' existing = {
   name: sqlServerName
 }
 
-resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' existing = {
-  name: '${resourcePrefix}-sql-db'
+resource elasticPool 'Microsoft.Sql/servers/elasticPools@2022-05-01-preview' existing = {
   parent: sqlServer
+  name: elasticPoolName
+}
+
+resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' = {
+  name: '${resourcePrefix}-sql-db'
+  location: location
+  parent: sqlServer
+  properties: {
+    elasticPoolId: elasticPool.id
+  }
 }
 
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/2021-05-01-preview/diagnosticsettings?pivots=deployment-language-bicep

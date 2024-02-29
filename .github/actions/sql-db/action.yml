@@ -41,24 +41,6 @@ runs:
       run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
       shell: bash
 
-    - name: 'Set up database script'
-      shell: bash
-      run: |
-        echo "SELECT SYSTEM_USER" >> database-setup.sql
-        echo "SELECT SUSER_NAME()" >> database-setup.sql
-        echo "SELECT CURRENT_USER" >> database-setup.sql
-        echo "IF NOT EXISTS (SELECT * FROM sys.databases WHERE [name] = '${{ inputs.resource-prefix }}-sql-db')" >> database-setup.sql
-        echo "BEGIN" >> database-setup.sql
-        echo "  CREATE DATABASE [${{ inputs.resource-prefix }}-sql-db] ( SERVICE_OBJECTIVE = ELASTIC_POOL ( name = [${{ inputs.elastic-pool-name }}] ) ) ;" >> database-setup.sql
-        echo "END" >> database-setup.sql
-        cat database-setup.sql
-
-    - name: 'Create database'
-      uses: azure/sql-action@v2.2.1
-      with:
-        connection-string: Server=${{ inputs.sql-server-name }}.database.windows.net;Initial Catalog=master;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
-        path: 'database-setup.sql'
-
     - name: Deploy SQL DB instance
       id: deploy-sql-db
       uses: azure/arm-deploy@v1
@@ -69,5 +51,6 @@ runs:
         parameters: >-
           resourcePrefix=${{ inputs.resource-prefix }}
           sqlServerName=${{ inputs.sql-server-name }}
+          elasticPoolName=${{ inputs.elastic-pool-name }}
           logAnalyticsId=${{ inputs.log-analytics-id }}
 

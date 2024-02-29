@@ -55,7 +55,8 @@ runs:
         appName=`az ad app list --app-id ${{ inputs.azure-client-id }} --query [].displayName --output tsv`
         echo "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE [name] = '${appName}')" >> deployer-setup.sql
         echo "BEGIN" >> deployer-setup.sql
-        echo "  CREATE USER [${appName}] FROM EXTERNAL PROVIDER;" >> deployer-setup.sql
+        echo "  CREATE LOGIN [${appName}] FROM EXTERNAL PROVIDER;" >> deployer-setup.sql
+        echo "  CREATE USER [${appName}] FOR LOGIN [${appName}];" >> deployer-setup.sql
         echo "  ALTER ROLE [dbmanager] ADD MEMBER [${appName}];" >> deployer-setup.sql
         echo "END" >> deployer-setup.sql
 
