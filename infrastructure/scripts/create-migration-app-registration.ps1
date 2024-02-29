@@ -61,24 +61,6 @@ if ($null -ne $credential) {
   Write-Output ('Created a new federated credential named ''{0}''' -f $credentialDetails.name)
 }
 
-# $role = az role definition list --name $constants.roleName | ConvertFrom-Json
-# $assignedRoles = az role assignment list --assignee $appRegistrationAppId --all | ConvertFrom-Json -NoEnumerate
-# $assignedRole = $assignedRoles | Where-Object -FilterScript { $_.roleDefinitionId -eq $role.id }
-# if ($null -ne $assignedRole) {
-#   Write-Output ('Found an existing role assignment for ''{0}''' -f $constants.roleName)
-# } else {
-
-#   Write-Output ('Creating new role assignment for ''{0}''' -f $constants.roleName)
-
-#   az role assignment create --assignee $appRegistrationAppId `
-#     --role $role.name `
-#     --scope $role.id `
-#     --output none
-
-#   Write-Output ('Created new role assignment for ''{0}''' -f $constants.roleName)
-# }
-
-
 Write-Output "migrationAppName=$($Name)" >> $Env:GITHUB_OUTPUT
 Write-Output "migrationAppObjectId=$($appRegistrationObjectId)" >> $Env:GITHUB_OUTPUT
 Write-Output "migrationAppId=$($appRegistrationAppId)" >> $Env:GITHUB_OUTPUT
