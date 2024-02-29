@@ -198,7 +198,7 @@ jobs:
           redis-cache-capacity: 0
 
           docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }}
-          docs-site-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }}
+          docs-site-client-secret: ${{ secrets.NON_PROD_STATIC_SITE_CLIENT_SECRET }}
 
           cors-origin: ${{ vars.CORS_ORIGIN }}
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
@@ -300,7 +300,7 @@ jobs:
           redis-cache-capacity: 0
 
           docs-site-client-id: ${{ vars.SANDBOX_API_CLIENT_ID }}
-          docs-site-client-secret: ${{ secrets.SANDBOX_API_CLIENT_SECRET }}
+          docs-site-client-secret: ${{ secrets.SANDBOX_STATIC_SITE_CLIENT_SECRET }}
 
           cors-origin: ${{ vars.CORS_ORIGIN }}
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
@@ -402,7 +402,7 @@ jobs:
           redis-cache-capacity: 0
 
           docs-site-client-id: ${{ vars.PROD_API_CLIENT_ID }}
-          docs-site-client-secret: ${{ secrets.PROD_API_CLIENT_SECRET }}
+          docs-site-client-secret: ${{ secrets.PROD_STATIC_SITE_CLIENT_SECRET }}
 
           cors-origin: ${{ vars.CORS_ORIGIN }}
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}

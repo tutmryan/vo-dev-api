@@ -23,24 +23,49 @@ resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-var keyVaultName = 'vo-kv-inst-${uniqueSuffix}'
+var keyVaultProperties = {
+  enabledForTemplateDeployment: true
+  tenantId: subscription().tenantId
+  accessPolicies: [
+    {
+      tenantId: subscription().tenantId
+      objectId: apiAppService.identity.principalId
+      permissions: {
+        secrets: [
+          'get'
+        ]
+      }
+    }
+  ]
+  sku: {
+    name: 'standard'
+    family: 'A'
+  }
+}
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
-  name: keyVaultName
+  name: 'vo-kv-inst-${uniqueSuffix}'
+  location: location
+  properties: keyVaultProperties
+}
+
+module keyVaultFirewall './keyvault-firewall.bicep' = {
+  name: 'keyvault-firewall'
+  params: {
+    keyVaultName: keyVault.name
+    keyVaultProperties: keyVaultProperties
+    location: location
+    ipAddresses: split(apiAppService.properties.outboundIpAddresses, ',')
+  }
+}
+
+resource staticSiteKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
+  name: 'vo-kv-stat-${uniqueSuffix}'
   location: location
   properties: {
     enabledForTemplateDeployment: true
     tenantId: subscription().tenantId
     accessPolicies: [
-      {
-        tenantId: subscription().tenantId
-        objectId: apiAppService.identity.principalId
-        permissions: {
-          secrets: [
-            'get'
-          ]
-        }
-      }
       {
         tenantId: subscription().tenantId
         objectId: docsSite.identity.principalId
@@ -174,7 +199,7 @@ resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01
 param docsSiteClientSecret string
 resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'DOCS-SITE-CLIENT-SECRET'
-  parent: keyVault
+  parent: staticSiteKeyVault
   properties: {
     attributes: {
       enabled: true

@@ -44,3 +44,13 @@ This model is also available for the apps which can securely store a secret such
   Credential presentation
 
 Either or both of those permissions can be granted to the App registration depending on the requirements of the consumer app.
+
+## CORS origins
+
+If you are accessing the Verified Orchestration API from a web application, CORS origins will need to be configured against each instance (sandbox and production).
+
+You may want to match subdomains via regex expressions to reduce the configuration required, e.g. `^https://([a-z0-9]+[.])+yourcompany.com$`
+
+For your sandbox, you may want to allow local development origins e.g. `^http://localhost:\d+$`
+
+Send the list of origins for sandbox and production instances to the Verified Orchestration team.

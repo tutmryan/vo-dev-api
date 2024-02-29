@@ -323,14 +323,22 @@ runs:
           staticSiteName=${{ steps.instance-infra.outputs.docsSiteName }}
           domain=${{ inputs.instance }}.docs.${{ inputs.domain }}
 
-    - name: Add API and docs site auth redirect URIs
-      id: add-redirect-uris
+    - name: Add API auth redirect URIs
+      id: add-api-redirect-uris
       shell: pwsh
       run: >-
         ./infrastructure/scripts/add-redirect-uris-to-app-registration.ps1
         -AppRegistrationId ${{ inputs.api-client-id }}
-        -WebRedirectUris https://${{ inputs.instance }}.api.${{ inputs.domain }}/auth,https://${{ inputs.instance }}.docs.${{ inputs.domain }}/.auth/login/aad/callback
+        -WebRedirectUris https://${{ inputs.instance }}.api.${{ inputs.domain }}/auth
         -SpaRedirectUris https://${{ inputs.instance }}.${{ inputs.domain }}
+
+    - name: Add docs site auth redirect URI
+      id: add-docs-redirect-uris
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/add-redirect-uris-to-app-registration.ps1
+        -AppRegistrationId ${{ inputs.docs-site-client-id }}
+        -WebRedirectUris https://${{ inputs.instance }}.docs.${{ inputs.domain }}/.auth/login/aad/callback
 
     - name: Unzip migrations package
       shell: bash
