@@ -62,14 +62,13 @@ if ($null -ne $credential) {
 }
 
 $role = az role definition list --name $constants.roleName | ConvertFrom-Json
-$assignedRoles = az role assignment list --assignee $appRegistrationAppId | ConvertFrom-Json -NoEnumerate
-$assignedRole = $assignedRoles | Where-Object -FilterScript { $_.name -eq $role.name }
+$assignedRoles = az role assignment list --assignee $appRegistrationAppId --all | ConvertFrom-Json -NoEnumerate
+$assignedRole = $assignedRoles | Where-Object -FilterScript { $_.roleDefinitionId -eq $role.id }
 if ($null -ne $assignedRole) {
   Write-Output ('Found an existing role assignment for ''{0}''' -f $constants.roleName)
 } else {
 
   Write-Output ('Creating new role assignment for ''{0}''' -f $constants.roleName)
-
 
   az role assignment create --assignee $appRegistrationAppId `
     --role $role.name `
