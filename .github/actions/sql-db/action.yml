@@ -48,6 +48,7 @@ runs:
         echo "BEGIN" >> database-setup.sql
         echo "  CREATE DATABASE ${{ inputs.resource-prefix }}-sql-db ( SERVICE_OBJECTIVE = ELASTIC_POOL ( name = ${{ inputs.elastic-pool-name }} ) ) ;" >> database-setup.sql
         echo "END" >> database-setup.sql
+        cat database-setup.sql
 
     - name: 'Create database'
       uses: azure/sql-action@v2.2.1
