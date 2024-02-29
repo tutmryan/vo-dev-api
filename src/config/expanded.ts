@@ -77,3 +77,6 @@ export const pkce: Config['auth']['pkce'] = merge(
   },
   config.get('auth.pkce'),
 )
+
+// add default home tenant mapping with configured identityIssuers
+export const identityIssuers = { [config.get('homeTenant.tenantId')]: config.get('homeTenant.name'), ...config.get('identityIssuers') }
