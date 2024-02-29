@@ -44,6 +44,9 @@ runs:
     - name: 'Set up database script'
       shell: bash
       run: |
+        echo "SELECT SYSTEM_USER" >> database-setup.sql
+        echo "SELECT SUSER_NAME()" >> database-setup.sql
+        echo "SELECT CURRENT_USER" >> database-setup.sql
         echo "IF NOT EXISTS (SELECT * FROM sys.databases WHERE [name] = '${{ inputs.resource-prefix }}-sql-db')" >> database-setup.sql
         echo "BEGIN" >> database-setup.sql
         echo "  CREATE DATABASE [${{ inputs.resource-prefix }}-sql-db] ( SERVICE_OBJECTIVE = ELASTIC_POOL ( name = [${{ inputs.elastic-pool-name }}] ) ) ;" >> database-setup.sql
