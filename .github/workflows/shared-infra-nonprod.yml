@@ -37,4 +37,3 @@ jobs:
           azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
           infra-environment: nonprd
           resource-group-name: vo-nonprd-platform-shared-infra
-          deployment-app-name: 'Verified Orchestration Deployment (non prod)'
