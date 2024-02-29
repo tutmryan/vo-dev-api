@@ -80,12 +80,12 @@ if ($null -ne $assignedRole) {
 }
 
 
-Write-Output "migrationAppName=$($credentialDetails.name)" >> $Env:GITHUB_OUTPUT
+Write-Output "migrationAppName=$($Name)" >> $Env:GITHUB_OUTPUT
 Write-Output "migrationAppObjectId=$($appRegistrationObjectId)" >> $Env:GITHUB_OUTPUT
 Write-Output "migrationAppId=$($appRegistrationAppId)" >> $Env:GITHUB_OUTPUT
 
 return @{
-  migrationAppName     = $credentialDetails.name
+  migrationAppName     = $Name
   migrationAppObjectId = $appRegistrationObjectId
   migrationAppId       = $appRegistrationAppId
 }
