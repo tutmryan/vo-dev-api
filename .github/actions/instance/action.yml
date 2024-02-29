@@ -361,7 +361,7 @@ runs:
       uses: azure/sql-action@v2.2.1
       with:
         connection-string: 'Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;'
-        path: 'api-setup.sql'
+        path: 'migrations-setup.sql'
 
     - name: Log in to Azure as migration app
       uses: azure/login@v1
