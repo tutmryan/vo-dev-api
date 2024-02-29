@@ -55,7 +55,7 @@ runs:
     - name: 'Create database service principal setup scripts'
       shell: bash
       run: |
-        echo "IF IS_MEMBER('dbmanager') = 0" >> deployer-setup.sql
+        echo "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE [name] = '${{ inputs.deployment-app-name }}')" >> deployer-setup.sql
         echo "BEGIN" >> deployer-setup.sql
         echo "  CREATE USER [${{ inputs.deployment-app-name }}] FROM EXTERNAL PROVIDER;" >> api-setup.sql
         echo "  ALTER ROLE [dbmanager] ADD MEMBER [${{ inputs.deployment-app-name }}];" >> deployer-setup.sql
