@@ -382,7 +382,7 @@ runs:
       with:
         client-id: ${{ steps.add-migration-app-registration.outputs.migrationAppId }}
         tenant-id: ${{ inputs.azure-tenant-id }}
-        subscription-id: ${{ inputs.azure-subscription-id }}
+        allow-no-subscriptions: true
 
     - name: Unzip migrations package
       shell: bash
