@@ -50,28 +50,6 @@ resource sqlServer1 'Microsoft.Sql/servers@2022-05-01-preview' = {
   }
 }
 
-resource sqlServer2 'Microsoft.Sql/servers@2022-05-01-preview' = {
-  name: '${resourcePrefix}-sql-server-2'
-  location: location
-  identity: {
-    userAssignedIdentities: {
-      '${sqlServerUserAssignedIdentity.id}': {}
-    }
-    type: 'UserAssigned'
-  }
-  properties: {
-    administratorLogin: 'vo-server-admin'
-    primaryUserAssignedIdentityId: sqlServerUserAssignedIdentity.id
-    administrators: {
-      azureADOnlyAuthentication: true
-      administratorType: 'ActiveDirectory'
-      login: sqlServerAadAdministratorName
-      sid: sqlServerAadAdministratorObjectId
-      tenantId: subscription().tenantId
-    }
-  }
-}
-
 resource sqlServerAllowAzureWorkloadsFirewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
   name: 'AllowAllWindowsAzureIps'
   parent: sqlServer1
