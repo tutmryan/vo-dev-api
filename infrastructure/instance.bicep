@@ -226,6 +226,10 @@ resource vidAuthorityIdSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
 param instance string
 @description('The value to use for API cors.origin setting (RegExp string[] of additional origins)')
 param corsOrigin string
+@description('Mapping of identity issuer identifiers to labels (JSON Record<string, string>)')
+param identityIssuers string
+@description('Mapping of app user OIDs to labels (JSON Record<string, string>)')
+param platformConsumerApps string
 @description('The name of the home tenant')
 param homeTenantName string
 @description('The ID of the home tenant')
@@ -476,6 +480,8 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     HOME_TENANT_VID_SERVICE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantVidServiceClientSecretSecret.properties.secretUri})'
     VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
     DEV_TOOLS_ENABLED: devToolsEnabled
+    IDENTITY_ISSUERS: identityIssuers
+    PLATFORM_CONSUMER_APPS: platformConsumerApps
   }
 }
 

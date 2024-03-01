@@ -176,6 +176,9 @@ jobs:
           instance: ${{ matrix.instance }}
           node-env: 'nonprod'
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
+          dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
+          identity-issuers: ${{ vars.IDENTITY_ISSUERS }}
+          platform-consumer-apps: ${{ vars.PLATFORM_CONSUMER_APPS }}
 
           azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
@@ -216,8 +219,6 @@ jobs:
           home-tenant-authority-id: ${{ vars.HOME_TENANT_AUTHORITY_ID }}
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
-
-          dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
 
   deploy-to-sandbox:
     name: Deploy to sandbox environment
@@ -278,6 +279,9 @@ jobs:
           instance: ${{ matrix.instance }}
           node-env: 'sandbox'
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
+          dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
+          identity-issuers: ${{ vars.IDENTITY_ISSUERS }}
+          platform-consumer-apps: ${{ vars.PLATFORM_CONSUMER_APPS }}
 
           azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
@@ -318,8 +322,6 @@ jobs:
           home-tenant-authority-id: ${{ vars.HOME_TENANT_AUTHORITY_ID }}
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
-
-          dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
 
   deploy-to-prod:
     name: Deploy to prod environment
@@ -380,6 +382,9 @@ jobs:
           instance: ${{ matrix.instance }}
           node-env: 'production'
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
+          dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
+          identity-issuers: ${{ vars.IDENTITY_ISSUERS }}
+          platform-consumer-apps: ${{ vars.PLATFORM_CONSUMER_APPS }}
 
           azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
@@ -420,5 +425,3 @@ jobs:
           home-tenant-authority-id: ${{ vars.HOME_TENANT_AUTHORITY_ID }}
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
-
-          dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}

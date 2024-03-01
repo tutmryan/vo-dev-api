@@ -1,0 +1,43 @@
+---
+sidebar_position: 0
+---
+
+# Instance configuration
+
+The following configuration settings can be administered for each instance of the Verified Orchestration platform.
+
+Send your configuration values to the Verified Orchestration team.
+
+## CORS origins
+
+If you are accessing the Verified Orchestration API from a web application, CORS origins will need to be configured against each instance (sandbox and production).
+
+- Subdomains can be matched using a regular expression; e.g. `^https://([a-z0-9]+[.])+yourcompany.com$`
+- For your sandbox, you may want to allow local development origins e.g. `^http://localhost:\d+$`
+
+## Application labels
+
+As you onboard applications, you can supply user-friendly labels, helping users to understand which apps are issuing or requesting presentation of credentials.
+
+To supply a label for an app, provide the app's object ID from the [Enterprise Apps list in the Azure Portal](https://portal.azure.com/#view/Microsoft_AAD_IAM/StartboardApplicationsMenuBlade/~/AppAppsPreview), along with the label.
+
+Example application label mapping:
+
+| App object ID (OID)                  | Label         |
+| ------------------------------------ | ------------- |
+| 00000000-0000-0000-0000-000000000000 | Your app name |
+
+## Identity issuer labels
+
+You may integrate several identity providers as a source of issuee identity data. Identities are uniquely identified by the `issuer` and `identifier` fields. We recommend you standardise use of the `issuer` field across different applications to avoid duplicate representations of the same identity. We recommend using the tenant ID or `iss` (issuer) claim from JWTs for the `issuer` field.
+
+To supply a label for an identity issuer, provide the issuer's identifier along with the label.
+
+Note: your home tenant is automatically labelled.
+
+Example issuer label mapping:
+
+| Issuer                                                                       | Label        |
+| ---------------------------------------------------------------------------- | ------------ |
+| 00000000-0000-0000-0000-000000000000                                         | Tenant label |
+| `https://b2cinstanceb2clogin.com/00000000-0000-0000-0000-000000000000/v2.0/` | B2C label    |

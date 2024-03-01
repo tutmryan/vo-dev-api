@@ -16,10 +16,18 @@ The name of the environment should be the short instance moniker e.g. `demo`.
 - HOME_TENANT_AUTHORITY_ID (optional)
 - HOME_TENANT_VID_SERVICE_CLIENT_ID (optional)
 - VID_AUTHORITY_NAME (optional)
-- VID_AUTHORITY_DOMAIN (opitonal)
-- CORS_ORIGIN (optional JSON string: RegExp[] - an array of CORS origins - additional to the deployed Admin and API origins, e.g. ['^https://([a-z0-9]+[.])+company.com$'])
+- VID_AUTHORITY_DOMAIN (optional)
+
+#### Feature flag variables
+
 - AUDIT_LOG_STREAMING_ENABLED (optional feature, use a value of `true` to enable provisioning of the Event Hubs and Stream Analytics job)
 - DEV_TOOLS_ENABLED (optional, default to true if not provided)
+
+#### Instance configuration variables
+
+- CORS_ORIGIN (optional JSON string: RegExp[] - an array of CORS origins - additional to the deployed Admin and API origins, e.g. ['^https://([a-z0-9]+[.])+company.com$'])
+- IDENTITY_ISSUERS (optional JSON Record<string, string> - a map of identity issuer values and their labels; the home tenant is automatically mapped)
+- PLATFORM_CONSUMER_APPS (optional JSON Record<string, string> - a map of app OIDs and their labels)
 
 ### Secrets
 

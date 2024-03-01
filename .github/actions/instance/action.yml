@@ -46,6 +46,12 @@ inputs:
   audit-log-streaming-enabled:
     description: Whether to enable audit log streaming
     default: 'false'
+  dev-tools-enabled:
+    description: The flag indicating whether the dev tools (i.e. Apollo Sandbox, .etc) are deployed
+  identity-issuers:
+    description: Mapping of identity issuer identifiers to labels (JSON Record<string, string>)
+  platform-consumer-apps:
+    description: Mapping of app user OIDs to labels (JSON Record<string, string>)
 
   sql-server-name:
     description: Name of the SQL Server the instance will connect to
@@ -120,9 +126,6 @@ inputs:
   docs-site-client-secret:
     description: Client secret of the docs site app registration in Azure AD
     required: true
-
-  dev-tools-enabled:
-    description: The flag indicating whether the dev tools (i.e. Apollo Sandbox, .etc) are deployed
 
 outputs:
   api-url:
@@ -267,6 +270,8 @@ runs:
           homeTenantVidServiceClientSecret=${{ inputs.home-tenant-vid-service-client-secret }}
           vidAuthorityId=${{ steps.create-vid-authority.outputs.authorityId != '' && steps.create-vid-authority.outputs.authorityId || steps.check-vid-authority.outputs.authorityId}}
           devToolsEnabled=${{ inputs.dev-tools-enabled }}
+          identityIssuers=${{ inputs.identity-issuers }}
+          platformConsumerApps=${{ inputs.platform-consumer-apps }}
 
     - name: Log in to Azure again after potential long deployment
       uses: azure/login@v1
