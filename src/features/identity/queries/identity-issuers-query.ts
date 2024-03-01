@@ -9,7 +9,12 @@ export async function IdentityIssuersQuery(this: QueryContext) {
     .select('issuer')
     .distinct(true)
     .getRawMany()
-  return data.map(
-    ({ issuer }) => identityIssuers[issuer] ?? issuer, // return the mapped value if configured
-  )
+
+  return data.map(({ issuer }) => {
+    const label = identityIssuers[issuer]
+    return {
+      id: issuer,
+      label: label,
+    }
+  })
 }

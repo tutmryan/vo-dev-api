@@ -21,6 +21,7 @@ const config: DeepPartial<Config> = {
   },
   redis: {},
   homeTenant: {
+    name: 'TEST_HOME_TENANT_NAME',
     tenantId: 'TEST_HOME_TENANT_ID',
     graphCredentials: {},
     vidServiceCredentials: {},

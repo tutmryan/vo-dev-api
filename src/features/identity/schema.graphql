@@ -11,12 +11,14 @@ type Identity {
   The issuer of the identity
   """
   issuer: String!
-
+  """
+  The optional user-facing label of the identity issuer
+  """
+  issuerLabel: String
   """
   The unique identifier of the identity in the issuing tenant
   """
   identifier: String!
-
   """
   The name of the identity
   """
@@ -129,6 +131,21 @@ enum IdentityOrderBy {
   identifier
 }
 
+"""
+The identity issuer, referenced by ID, optionally having a user-facing label
+"""
+type IdentityIssuer {
+  """
+  The id of the identity issuer
+  """
+  id: ID!
+
+  """
+  The label of the identity
+  """
+  label: String
+}
+
 # eslint-disable-next-line @graphql-eslint/require-description
 type Query {
   """
@@ -152,5 +169,5 @@ type Query {
   """
   Returns the distinct set of issuers from all identities
   """
-  identityIssuers: [String!]!
+  identityIssuers: [IdentityIssuer!]!
 }

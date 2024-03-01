@@ -691,6 +691,8 @@ export type Discovery = {
 /** Specifies which features are enabled for this API instance. */
 export type Features = {
   __typename?: 'Features';
+  /** Indicates whether the API dev tools (Apollo sandbox, introspection, PKCE) are available. */
+  devToolsEnabled: Scalars['Boolean']['output'];
   /** Indicates whether the API instance is configured to support finding home tenant identities via the findTenantIdentities query. */
   findTenantIdentities: Scalars['Boolean']['output'];
 };
@@ -712,6 +714,8 @@ export type Identity = {
   issuances: Array<Issuance>;
   /** The issuer of the identity */
   issuer: Scalars['String']['output'];
+  /** The optional user-facing label of the identity issuer */
+  issuerLabel?: Maybe<Scalars['String']['output']>;
   /** The name of the identity */
   name: Scalars['String']['output'];
   /** Returns the successful credential presentations for this identity. */
@@ -772,6 +776,15 @@ export type IdentityIssuanceWhere = {
   status?: InputMaybe<IssuanceStatus>;
   /** The end of the issuedAt period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+/** The identity issuer, referenced by ID, optionally having a user-facing label */
+export type IdentityIssuer = {
+  __typename?: 'IdentityIssuer';
+  /** The id of the identity issuer */
+  id: Scalars['ID']['output'];
+  /** The label of the identity */
+  label?: Maybe<Scalars['String']['output']>;
 };
 
 /** Columns that can be used for sorting identities. */
@@ -1543,7 +1556,7 @@ export type Query = {
   /** Returns an identity by ID */
   identity: Identity;
   /** Returns the distinct set of issuers from all identities */
-  identityIssuers: Array<Scalars['String']['output']>;
+  identityIssuers: Array<IdentityIssuer>;
   /** Returns an issuance by ID */
   issuance: Issuance;
   /** Returns the issuance count, optionally matching the specified criteria. */
@@ -2489,6 +2502,7 @@ export type ResolversTypes = {
   Identity: ResolverTypeWrapper<IdentityEntity>;
   IdentityInput: IdentityInput;
   IdentityIssuanceWhere: IdentityIssuanceWhere;
+  IdentityIssuer: ResolverTypeWrapper<IdentityIssuer>;
   IdentityOrderBy: IdentityOrderBy;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
@@ -2618,6 +2632,7 @@ export type ResolversParentTypes = {
   Identity: IdentityEntity;
   IdentityInput: IdentityInput;
   IdentityIssuanceWhere: IdentityIssuanceWhere;
+  IdentityIssuer: IdentityIssuer;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
   Issuance: IssuanceEntity;
@@ -2833,6 +2848,7 @@ export interface EmailAddressScalarConfig extends GraphQLScalarTypeConfig<Resolv
 }
 
 export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Features'] = ResolversParentTypes['Features']> = {
+  devToolsEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   findTenantIdentities?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -2849,10 +2865,17 @@ export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends R
   issuanceCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<IdentityIssuancesArgs>>;
   issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  issuerLabel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<IdentityPresentationsArgs>>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type IdentityIssuerResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IdentityIssuer'] = ResolversParentTypes['IdentityIssuer']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -3043,7 +3066,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryFindUsersArgs, 'limit'>>;
   healthcheck?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityArgs, 'id'>>;
-  identityIssuers?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  identityIssuers?: Resolver<Array<ResolversTypes['IdentityIssuer']>, ParentType, ContextType>;
   issuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<QueryIssuanceArgs, 'id'>>;
   issuanceCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryIssuanceCountArgs>>;
   issuanceCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByContractArgs>>;
@@ -3240,6 +3263,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   Features?: FeaturesResolvers<ContextType>;
   HexColorCode?: GraphQLScalarType;
   Identity?: IdentityResolvers<ContextType>;
+  IdentityIssuer?: IdentityIssuerResolvers<ContextType>;
   Issuance?: IssuanceResolvers<ContextType>;
   IssuanceCallbackEvent?: IssuanceCallbackEventResolvers<ContextType>;
   IssuanceEventData?: IssuanceEventDataResolvers<ContextType>;

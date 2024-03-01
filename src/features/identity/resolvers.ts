@@ -1,7 +1,7 @@
 import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { CreateOrUpdateIdentityCommand } from './commands/create-or-update-identity'
-import { resolveIssuer } from './issuer-resolver'
+import { resolveIssuerLabel } from './issuer-label-resolver'
 import { FindIdentitiesQuery } from './queries/find-identities-query'
 import { FindTenantIdentitiesQuery } from './queries/find-tenant-identities-query'
 import { IdentityIssuersQuery } from './queries/identity-issuers-query'
@@ -18,7 +18,7 @@ export const resolvers: Resolvers = {
     identityIssuers: (_, __, context) => query(context, IdentityIssuersQuery),
   },
   Identity: {
-    issuer: resolveIssuer,
+    issuerLabel: resolveIssuerLabel,
   },
   Issuance: {
     identity: ({ identityId }, _, { dataLoaders: { identities } }) => identities.load(identityId),
