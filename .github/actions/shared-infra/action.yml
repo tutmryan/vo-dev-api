@@ -53,6 +53,7 @@ runs:
       shell: bash
       run: |
         appName=`az ad app list --app-id ${{ inputs.azure-client-id }} --query [].displayName --output tsv`
+        newPwd=`uuidgen`
         echo "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE [name] = '${appName}')" >> user-setup.sql
         echo "BEGIN" >> user-setup.sql
         echo "  CREATE LOGIN [${appName}] FROM EXTERNAL PROVIDER;" >> user-setup.sql
@@ -61,7 +62,7 @@ runs:
         echo "END" >> user-setup.sql
         echo "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE [name] = 'DisabledLogin')" >> user-setup.sql
         echo "BEGIN" >> user-setup.sql
-        echo "  CREATE LOGIN [DisabledLogin] WITH PASSWORD NEWID();" >> user-setup.sql
+        echo "  CREATE LOGIN [DisabledLogin] WITH PASSWORD '${newPwd}';" >> user-setup.sql
         echo "  ALTER LOGIN [DisabledLogin] DISABLE;" >> user-setup.sql
         echo "END" >> user-setup.sql
 
