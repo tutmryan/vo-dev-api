@@ -372,8 +372,9 @@ runs:
 
         echo "IF IS_MEMBER('db_owner') = 1" >> switch-db-owner.sql
         echo "BEGIN" >> switch-db-owner.sql
-        echo "  ALTER AUTHORIZATION ON DATABASE::${{inputs.resource-prefix}}-sql-db TO [DisabledLogin];" >> switch-db-owner.sql
+        echo "  ALTER AUTHORIZATION ON DATABASE::[${{inputs.resource-prefix}}-sql-db] TO [DisabledLogin];" >> switch-db-owner.sql
         echo "END" >> switch-db-owner.sql
+        cat switch-db-owner.sql
 
     - name: 'Set up API service principal database roles'
       uses: azure/sql-action@v2.2.1
