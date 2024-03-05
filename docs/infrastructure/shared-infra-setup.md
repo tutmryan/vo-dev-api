@@ -151,9 +151,9 @@ This is required for setting up blob storage contributor access for the API mana
 1. Click on "Members", then on "+ Add members".
 1. Search for the deployment service principal by its name, then click on "Select".
 
-_NOTE:_ the deployment service principal needs to be removed from the Azure SQL administrators group after the shared infra pipleine is run successfully for the first time. Further deployments of the shared infra pipeline or the deployments of instance release pipelines do not need the deployment service principal to be the server admin.
+_NOTE:_ the deployment service principal needs to be removed from the Azure SQL administrators group after the shared infra pipeline is run successfully for the first time and has created and set up the SQL server instance(s). Further deployments of the shared infra pipeline or the deployments of instance release pipelines do not need the deployment service principal to be the server admin.
 
-When the shared infra pipeline is first run, it
+When the shared infra pipeline is first run, after creating the SQL server(s), it
 
 - creates a server login for the deployment service principal
 - creates a sql user for the login in the master database
