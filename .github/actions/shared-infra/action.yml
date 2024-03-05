@@ -49,6 +49,29 @@ runs:
         template: ./infrastructure/shared.bicep
         parameters: ./infrastructure/parameters/shared.${{ inputs.infra-environment }}.bicepparam
 
+    - name: 'Create database service principal setup scripts'
+      shell: bash
+      run: |
+        appName=`az ad app list --app-id ${{ inputs.azure-client-id }} --query [].displayName --output tsv`
+        newPwd=`uuidgen`
+        echo "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE [name] = '${appName}')" >> user-setup.sql
+        echo "BEGIN" >> user-setup.sql
+        echo "  CREATE LOGIN [${appName}] FROM EXTERNAL PROVIDER;" >> user-setup.sql
+        echo "  CREATE USER [${appName}] FOR LOGIN [${appName}];" >> user-setup.sql
+        echo "  ALTER ROLE [dbmanager] ADD MEMBER [${appName}];" >> user-setup.sql
+        echo "END" >> user-setup.sql
+        echo "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE [name] = 'DisabledLogin')" >> user-setup.sql
+        echo "BEGIN" >> user-setup.sql
+        echo "  CREATE LOGIN [DisabledLogin] WITH PASSWORD = '${newPwd}';" >> user-setup.sql
+        echo "  ALTER LOGIN [DisabledLogin] DISABLE;" >> user-setup.sql
+        echo "END" >> user-setup.sql
+
+    - name: 'Set up deployer service principal database roles'
+      uses: azure/sql-action@v2.2.1
+      with:
+        connection-string: Server=${{ steps.deploy-shared-infrastructure.outputs.sqlServer1Name }}.database.windows.net;Initial Catalog=master;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        path: 'user-setup.sql'
+
     - name: Output ${{ inputs.infra-environment }} shared infra variable values
       shell: bash
       run: |
