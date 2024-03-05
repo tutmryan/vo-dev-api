@@ -357,6 +357,7 @@ runs:
       run: |
         echo "SELECT BASE64_ENCODE(CAST(SYSTEM_USER AS VARBINARY))" >> api-setup.sql
         echo "SELECT BASE64_ENCODE(CAST(SUSER_NAME() AS VARBINARY))" >> api-setup.sql
+        echo "SELECT BASE64_ENCODE(CAST(ORIGINAL_LOGIN() AS VARBINARY))" >> api-setup.sql
         echo "SELECT CURRENT_USER" >> api-setup.sql
         echo "SELECT * FROM fn_my_permissions(NULL, 'Database')" >> api-setup.sql
         echo "SELECT * FROM fn_my_permissions(NULL, 'Server')" >> api-setup.sql
