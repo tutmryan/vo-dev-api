@@ -355,19 +355,12 @@ runs:
     - name: 'Create database service principal setup scripts'
       shell: bash
       run: |
-        echo "SELECT BASE64_ENCODE(CAST(SYSTEM_USER AS VARBINARY(MAX)))" >> api-setup.sql
-        echo "SELECT BASE64_ENCODE(CAST(SUSER_NAME() AS VARBINARY(MAX)))" >> api-setup.sql
-        echo "SELECT BASE64_ENCODE(CAST(ORIGINAL_LOGIN() AS VARBINARY(MAX)))" >> api-setup.sql
-        echo "SELECT CURRENT_USER" >> api-setup.sql
-        echo "SELECT * FROM fn_my_permissions(NULL, 'Database')" >> api-setup.sql
-        echo "SELECT * FROM fn_my_permissions(NULL, 'Server')" >> api-setup.sql
         echo "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE [name] = '${{ steps.instance-infra.outputs.apiAppServiceName }}')" >> api-setup.sql
         echo "BEGIN" >> api-setup.sql
         echo "  CREATE USER [${{ steps.instance-infra.outputs.apiAppServiceName }}] FROM EXTERNAL PROVIDER;" >> api-setup.sql
         echo "  ALTER ROLE [db_datareader] ADD MEMBER [${{ steps.instance-infra.outputs.apiAppServiceName }}];" >> api-setup.sql
         echo "  ALTER ROLE [db_datawriter] ADD MEMBER [${{ steps.instance-infra.outputs.apiAppServiceName }}];" >> api-setup.sql
         echo "END" >> api-setup.sql
-        cat api-setup.sql
 
         echo "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE [name] = '${{ steps.add-migration-app-registration.outputs.migrationAppName }}')" >> migrations-setup.sql
         echo "BEGIN" >> migrations-setup.sql
@@ -377,14 +370,12 @@ runs:
         echo "  ALTER ROLE [db_ddladmin] ADD MEMBER [${{ steps.add-migration-app-registration.outputs.migrationAppName }}];" >> migrations-setup.sql
         echo "END" >> migrations-setup.sql
 
+        appName=`az ad app list --app-id ${{ inputs.azure-client-id }} --query [].displayName --output tsv`
         echo "IF IS_MEMBER('db_owner') = 1" >> switch-db-owner.sql
         echo "BEGIN" >> switch-db-owner.sql
         echo "  ALTER AUTHORIZATION ON DATABASE::[${{inputs.resource-prefix}}-sql-db] TO [DisabledLogin];" >> switch-db-owner.sql
+        echo "  DROP USER IF EXISTS [${appName}];" >> switch-db-owner.sql
         echo "END" >> switch-db-owner.sql
-
-        appName=`az ad app list --app-id ${{ inputs.azure-client-id }} --query [].displayName --output tsv`
-        echo "DROP USER IF EXISTS [${appName}]" >> drop-db-user.sql
-        cat drop-db-user.sql
 
     - name: 'Set up API service principal database roles'
       uses: azure/sql-action@v2.2.1
@@ -406,13 +397,6 @@ runs:
       with:
         connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         path: 'switch-db-owner.sql'
-
-    - name: 'Drop database user of the deployer to stop further connections'
-      uses: azure/sql-action@v2.2.1
-      continue-on-error: true
-      with:
-        connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
-        path: 'drop-db-user.sql'
 
     - name: Log in to Azure as migration app
       uses: azure/login@v1
