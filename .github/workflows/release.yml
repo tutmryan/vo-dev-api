@@ -174,11 +174,11 @@ jobs:
         uses: ./github-actions/instance
         with:
           instance: ${{ matrix.instance }}
-          node-env: 'nonprod'
+          node-env: nonprod
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
-          identity-issuers: ${{ vars.IDENTITY_ISSUERS }}
-          platform-consumer-apps: ${{ vars.PLATFORM_CONSUMER_APPS }}
+          identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
+          platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 
           azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
@@ -203,7 +203,7 @@ jobs:
           docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }}
           docs-site-client-secret: ${{ secrets.NON_PROD_STATIC_SITE_CLIENT_SECRET }}
 
-          cors-origin: ${{ vars.CORS_ORIGIN }}
+          cors-origin: "${{ vars.CORS_ORIGIN }}"
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
           api-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }}
           api-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }}
@@ -277,11 +277,11 @@ jobs:
         uses: ./github-actions/instance
         with:
           instance: ${{ matrix.instance }}
-          node-env: 'sandbox'
+          node-env: sandbox
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
-          identity-issuers: ${{ vars.IDENTITY_ISSUERS }}
-          platform-consumer-apps: ${{ vars.PLATFORM_CONSUMER_APPS }}
+          identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
+          platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 
           azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
@@ -306,7 +306,7 @@ jobs:
           docs-site-client-id: ${{ vars.SANDBOX_API_CLIENT_ID }}
           docs-site-client-secret: ${{ secrets.SANDBOX_STATIC_SITE_CLIENT_SECRET }}
 
-          cors-origin: ${{ vars.CORS_ORIGIN }}
+          cors-origin: "${{ vars.CORS_ORIGIN }}"
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
           api-client-id: ${{ vars.SANDBOX_API_CLIENT_ID }}
           api-client-secret: ${{ secrets.SANDBOX_API_CLIENT_SECRET }}
@@ -380,11 +380,11 @@ jobs:
         uses: ./github-actions/instance
         with:
           instance: ${{ matrix.instance }}
-          node-env: 'production'
+          node-env: production
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
-          identity-issuers: ${{ vars.IDENTITY_ISSUERS }}
-          platform-consumer-apps: ${{ vars.PLATFORM_CONSUMER_APPS }}
+          identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
+          platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 
           azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
@@ -409,7 +409,7 @@ jobs:
           docs-site-client-id: ${{ vars.PROD_API_CLIENT_ID }}
           docs-site-client-secret: ${{ secrets.PROD_STATIC_SITE_CLIENT_SECRET }}
 
-          cors-origin: ${{ vars.CORS_ORIGIN }}
+          cors-origin: "${{ vars.CORS_ORIGIN }}"
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
           api-client-id: ${{ vars.PROD_API_CLIENT_ID }}
           api-client-secret: ${{ secrets.PROD_API_CLIENT_SECRET }}

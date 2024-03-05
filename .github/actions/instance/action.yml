@@ -255,7 +255,7 @@ runs:
           appServicePlanId=${{ inputs.app-service-plan-id }}
           nodeEnv=${{ inputs.node-env }}
           instance=${{ inputs.instance }}
-          corsOrigin=${{ inputs.cors-origin }}
+          corsOrigin="${{ inputs.cors-origin }}"
           apiCookieSecret=${{ inputs.api-cookie-secret }}
           apiClientSecret=${{ inputs.api-client-secret }}
           internalClientSecret=${{ inputs.internal-client-secret }}
@@ -270,8 +270,8 @@ runs:
           homeTenantVidServiceClientSecret=${{ inputs.home-tenant-vid-service-client-secret }}
           vidAuthorityId=${{ steps.create-vid-authority.outputs.authorityId != '' && steps.create-vid-authority.outputs.authorityId || steps.check-vid-authority.outputs.authorityId}}
           devToolsEnabled=${{ inputs.dev-tools-enabled }}
-          identityIssuers=${{ inputs.identity-issuers }}
-          platformConsumerApps=${{ inputs.platform-consumer-apps }}
+          identityIssuers="${{ inputs.identity-issuers }}"
+          platformConsumerApps="${{ inputs.platform-consumer-apps }}"
 
     - name: Log in to Azure again after potential long deployment
       uses: azure/login@v1
