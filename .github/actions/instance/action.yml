@@ -355,8 +355,8 @@ runs:
     - name: 'Create database service principal setup scripts'
       shell: bash
       run: |
-        echo "SELECT CAST(SYSTEM_USER AS VARBINARY)" >> api-setup.sql
-        echo "SELECT CAST(SUSER_NAME() AS VARBINARY)" >> api-setup.sql
+        echo "SELECT BASE64_ENCODE(CAST(SYSTEM_USER AS VARBINARY))" >> api-setup.sql
+        echo "SELECT BASE64_ENCODE(CAST(SUSER_NAME() AS VARBINARY))" >> api-setup.sql
         echo "SELECT CURRENT_USER" >> api-setup.sql
         echo "SELECT * FROM fn_my_permissions(NULL, 'Database')" >> api-setup.sql
         echo "SELECT * FROM fn_my_permissions(NULL, 'Server')" >> api-setup.sql
