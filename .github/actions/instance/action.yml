@@ -388,24 +388,28 @@ runs:
 
     - name: 'Set up API service principal database roles'
       uses: azure/sql-action@v2.2.1
+      continue-on-error: true
       with:
         connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         path: 'api-setup.sql'
 
     - name: 'Set up Migrations app service principal database roles'
       uses: azure/sql-action@v2.2.1
+      continue-on-error: true
       with:
         connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         path: 'migrations-setup.sql'
 
     - name: 'Switch database owner from deployer to a disabled login'
       uses: azure/sql-action@v2.2.1
+      continue-on-error: true
       with:
         connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         path: 'switch-db-owner.sql'
 
     - name: 'Drop database user of the deployer to stop further connections'
       uses: azure/sql-action@v2.2.1
+      continue-on-error: true
       with:
         connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         path: 'drop-db-user.sql'
