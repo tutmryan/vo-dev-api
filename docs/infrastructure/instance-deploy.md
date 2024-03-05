@@ -59,6 +59,23 @@ The issue is documented [here](https://drive.google.com/file/d/1FDK2dLGKu8Uc_J3F
 
 Once the DID configuration is verified for the authority, the subsequent deployments would not prompt for the user login.
 
+## Notes on the instance Database setup
+
+The instance database is created by the deployment service principal who is a member of `dbmanager` role. After creation of the instance database, the deployment service principal creates two SQL users in the instance database and grant them necessary permmissions for API and migration scripts. After that, the deployment service princpal transfers the ownership to a disabled SQL login called `DisabledLogin` as recommend by [this article](https://learn.microsoft.com/en-us/sql/t-sql/statements/alter-authorization-transact-sql?view=sql-server-ver16#best-practice). Once that is done, the deployment service principal will no longer be able to connect to the instance database. If the deployment service principal needs to connect to the instance database in the future, the deployment service principal will need to be added to the Azure SQL administrators group to grant it the server admin permissions.
+
+When setting up an instance database for the first time, the release pipeline would
+
+- creates an instance database in the elastic pool using t-sql as the deployment service principal so that it becomes `db_owner` of the newly created database
+- creates an app registration (e.g. "Verified Orchestration Migration (dev)") in Microsoft Entra specifically for the instance to run migration scripts
+- sets up federated credential in the migration app for GitHub OIDC connection
+- sets up the migration app service principal as a user in the instance database with `db_datareader`, `db_datawriter`, and `db_ddladmin` role memberships
+- sets up the API service principal as a user in the instance database with `db_datareader` and `db_datawriter` role memberships
+- replaces db_owner of the instance database with `DisabledLogin`; (_Note_: )
+- logs in as the migration app service principal
+- runs migration scripts
+- logs back in as the deployer service principal
+- continues with provisioning other resources
+
 ## Tear down an instance
 
 1. Deprecate all contracts which would revoke all issuances as the Verified ID authority cannot be deleted
