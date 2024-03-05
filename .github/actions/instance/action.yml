@@ -355,8 +355,8 @@ runs:
     - name: 'Create database service principal setup scripts'
       shell: bash
       run: |
-        echo "SELECT SYSTEM_USER" >> api-setup.sql
-        echo "SELECT SUSER_NAME()" >> api-setup.sql
+        echo "SELECT CAST(SYSTEM_USER AS VARBINARY)" >> api-setup.sql
+        echo "SELECT CAST(SUSER_NAME() AS VARBINARY)" >> api-setup.sql
         echo "SELECT CURRENT_USER" >> api-setup.sql
         echo "SELECT * FROM fn_my_permissions(NULL, 'Database')" >> api-setup.sql
         echo "IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE [name] = '${{ steps.instance-infra.outputs.apiAppServiceName }}')" >> api-setup.sql
