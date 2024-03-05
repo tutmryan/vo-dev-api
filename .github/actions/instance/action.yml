@@ -381,6 +381,10 @@ runs:
         echo "  ALTER AUTHORIZATION ON DATABASE::[${{inputs.resource-prefix}}-sql-db] TO [DisabledLogin];" >> switch-db-owner.sql
         echo "END" >> switch-db-owner.sql
 
+        appName=`az ad app list --app-id ${{ inputs.azure-client-id }} --query [].displayName --output tsv`
+        echo "DROP USER IF EXISTS [${appName}]" >> drop-db-user.sql
+        cat drop-db-user.sql
+
     - name: 'Set up API service principal database roles'
       uses: azure/sql-action@v2.2.1
       with:
@@ -398,6 +402,12 @@ runs:
       with:
         connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         path: 'switch-db-owner.sql'
+
+    - name: 'Drop database user of the deployer to stop further connections'
+      uses: azure/sql-action@v2.2.1
+      with:
+        connection-string: Server=${{ steps.instance-infra.outputs.databaseHost }};Initial Catalog=${{inputs.resource-prefix}}-sql-db;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
+        path: 'drop-db-user.sql'
 
     - name: Log in to Azure as migration app
       uses: azure/login@v1
