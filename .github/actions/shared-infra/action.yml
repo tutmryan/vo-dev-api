@@ -17,6 +17,9 @@ inputs:
   resource-group-name:
     description: Name of the resource group to deploy resources to
     required: true
+  partner-id:
+    description: Microsoft partner network ID to be set as Azure partner admin link
+    required: true
 
 outputs:
   sql-server-1-name:
@@ -35,10 +38,17 @@ runs:
         client-id: ${{ inputs.azure-client-id }}
         tenant-id: ${{ inputs.azure-tenant-id }}
         subscription-id: ${{ inputs.azure-subscription-id }}
+        enable-AzPSSession: true
 
     - name: Set current date as environment variable
       run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
       shell: bash
+
+    - name: Set Azure partner admin link
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/create-partner-admin-link.ps1
+        -PartnerId ${{ inputs.partner-id }}
 
     - name: Shared infrastructure
       id: deploy-shared-infrastructure
