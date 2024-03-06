@@ -8,7 +8,7 @@ param sqlServerName string
 param rulePrefix string = 'Allow'
 
 var entries = [for i in range(0, length(ipAddresses)): {
-  name: '${rulePrefix}_${replace(ipAddresses[i], '.', '_')}'
+  name: '${rulePrefix}_${replace(ipAddresses[i], '.', '-')}'
   startIP: '${ipAddresses[i]}'
   endIP: '${ipAddresses[i]}'
 }]

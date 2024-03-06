@@ -11,12 +11,12 @@ param(
 
   [Parameter(Mandatory = $true)]
   [string]
-  $FirewallRuleName
+  $RuleName
 )
 
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
-Write-Host "Removing firewall rule '$FirewallRuleName' from SQL server '$SqlServerName'"
+Write-Host "Removing firewall rule '$RuleName' from SQL server '$SqlServerName'"
 
-Remove-AzSqlServerFirewallRule -FirewallRuleName $FirewallRuleName -ResourceGroupName $ResourceGroupName -ServerName $SqlServerName -Confirm:$false -Force | Out-Null
+Remove-AzSqlServerFirewallRule -FirewallRuleName $RuleName -ResourceGroupName $ResourceGroupName -ServerName $SqlServerName -Confirm:$false -Force | Out-Null

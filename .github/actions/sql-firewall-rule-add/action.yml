@@ -1,0 +1,56 @@
+name: Add SQL firewall rule
+description: Adds a SQL firewall rule
+
+inputs:
+  azure-client-id:
+    description: App ID of the deployment app registration
+    required: true
+  azure-tenant-id:
+    description: ID of the target Azure AD tenant
+    required: true
+  azure-subscription-id:
+    description: ID of the target Azure subscription
+    required: true
+  resource-group-name:
+    description: Name of the resource group
+    required: true
+  sql-server-name:
+    description: Name of the SQL Server
+    required: true
+  ip-address:
+    description: Optional IP address of the firewall rule (defaults to the current process IP address)
+    required: false
+  rule-name-prefix:
+    description: Optional prefix for the firewall rule name (defaults to "GitHubActions")
+    default: GitHubActions
+    required: false
+outputs:
+  rule-name:
+    description: Name of the created firewall rule
+    value: ${{ steps.add-sql-firewall-rule.outputs.ruleName }}
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+        enable-AzPSSession: true
+
+    - name: Set current date as environment variable
+      run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Add SQL firewall rule
+      id: add-sql-firewall-rule
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/sql-firewall-rule-add.ps1
+        -SqlServerName '${{ inputs.sql-server-name }}'
+        -ResourceGroupName '${{ inputs.resource-group-name }}'
+        -RuleNamePrefix '${{ inputs.rule-name-prefix }}'
+        -IpAddress '${{ inputs.ip-address }}'
+

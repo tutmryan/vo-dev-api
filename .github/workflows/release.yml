@@ -157,6 +157,15 @@ jobs:
           azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
           resource-group-name: ${{ matrix.resourceGroup }}
           resource-prefix: ${{ matrix.resourcePrefix }}
+      - name: Add temporary SQL firewall rule
+        id: add-temporary-sql-firewall-rule
+        uses: ./github-actions/sql-firewall-rule-add
+        with:
+          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: vo-nonprd-platform-shared-infra
+          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
       - name: Instance SQL database
         id: instance-sql-db
         uses: ./github-actions/sql-db
@@ -220,6 +229,17 @@ jobs:
           home-tenant-authority-id: ${{ vars.HOME_TENANT_AUTHORITY_ID }}
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
+      - name: Remove temporary SQL firewall rule
+        id: remove-temporary-sql-firewall-rule
+        if: steps.add-temporary-sql-firewall-rule.outcome == 'success'
+        uses: ./github-actions/sql-firewall-rule-remove
+        with:
+          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: vo-nonprd-platform-shared-infra
+          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          rule-name: ${{ steps.add-temporary-sql-firewall-rule.outputs.rule-name }}
 
   deploy-to-sandbox:
     name: Deploy to sandbox environment
