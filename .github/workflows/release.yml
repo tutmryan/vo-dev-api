@@ -195,6 +195,7 @@ jobs:
           organisation-domain: ${{ vars.VID_AUTHORITY_DOMAIN }}
 
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          shared-resource-group-name: vo-nonprd-platform-shared-infra
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
           redis-cache-sku: Basic
           redis-cache-family: C
@@ -298,6 +299,7 @@ jobs:
           organisation-domain: ${{ vars.VID_AUTHORITY_DOMAIN }}
 
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          shared-resource-group-name: vo-platform-shared-infra
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
           redis-cache-sku: Basic
           redis-cache-family: C
@@ -401,6 +403,7 @@ jobs:
           organisation-domain: ${{ vars.VID_AUTHORITY_DOMAIN }}
 
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          shared-resource-group-name: vo-platform-shared-infra
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
           redis-cache-sku: Basic
           redis-cache-family: C

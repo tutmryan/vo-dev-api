@@ -485,6 +485,18 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   }
 }
 
+param sharedResourceGroupName string
+
+module sqlServerFirewall './sql-firewall.bicep' = {
+  name: 'sql-firewall'
+  scope: resourceGroup(sharedResourceGroupName)
+  params: {
+    sqlServerName: sqlServerName
+    ipAddresses: split(apiAppService.properties.outboundIpAddresses, ',')
+    rulePrefix: replace(instance, '.', '_')
+  }
+}
+
 resource docsSite 'Microsoft.Web/staticSites@2022-03-01' = {
   name: '${resourcePrefix}-docs-site'
   // Static Web Apps is a global service, but ARM only accepts a few locations

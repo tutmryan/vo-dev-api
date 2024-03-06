@@ -50,15 +50,6 @@ resource sqlServer1 'Microsoft.Sql/servers@2022-05-01-preview' = {
   }
 }
 
-resource sqlServerAllowAzureWorkloadsFirewallRule 'Microsoft.Sql/servers/firewallRules@2022-05-01-preview' = {
-  name: 'AllowAllWindowsAzureIps'
-  parent: sqlServer1
-  properties: {
-    startIpAddress: '0.0.0.0'
-    endIpAddress: '0.0.0.0'
-  }
-}
-
 @description('Elastic Pool edition')
 @allowed([ 'Basic', 'Standard', 'Premium', 'GP_Gen5', 'BC_Gen5' ])
 param elasticPoolEdition string = 'Basic'

@@ -18,6 +18,9 @@ inputs:
   resource-group-name:
     description: Name of the resource group to deploy resources to
     required: true
+  shared-resource-group-name:
+    description: Name of the shared resource group
+    required: true
 
   key-vault-resource-group-name:
     description: The resource group which contains the shared key vault used by Verified ID
@@ -247,6 +250,7 @@ runs:
         parameters: >-
           resourcePrefix=${{ inputs.resource-prefix }}
           sqlServerName=${{ inputs.sql-server-name }}
+          sharedResourceGroupName=${{ inputs.shared-resource-group-name }}
           redisCacheSKU=${{ inputs.redis-cache-sku }}
           redisCacheFamily=${{ inputs.redis-cache-family }}
           redisCacheCapacity=${{ inputs.redis-cache-capacity }}
@@ -279,6 +283,7 @@ runs:
         client-id: ${{ inputs.azure-client-id }}
         tenant-id: ${{ inputs.azure-tenant-id }}
         subscription-id: ${{ inputs.azure-subscription-id }}
+        enable-AzPSSession: true
 
     - name: Set up CNAME record for API domain
       id: set-up-api-cname-record
@@ -352,6 +357,15 @@ runs:
         -AppRegistrationId ${{ inputs.docs-site-client-id }}
         -WebRedirectUris https://${{ inputs.instance }}.docs.${{ inputs.domain }}/.auth/login/aad/callback
 
+    - name: Add temporary database firewall access
+      id: add-temporary-database-firewall-access
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/add-sql-firewall-rule.ps1
+        -SqlServerName '${{ inputs.sql-server-name }}'
+        -ResourceGroupName '${{ inputs.shared-resource-group-name }}'
+        -FirewallRuleName 'GitHub Actions'
+
     - name: 'Create database service principal setup scripts'
       shell: bash
       run: |
@@ -415,7 +429,7 @@ runs:
       with:
         node-version: 20.x
 
-    - name: Run database migrations + set up user
+    - name: Run database migrations
       run: npm start
       working-directory: ./migrations-package
       shell: bash
@@ -423,12 +437,23 @@ runs:
         HOST: ${{ steps.instance-infra.outputs.databaseHost }}
         DATABASE: ${{inputs.resource-prefix}}-sql-db
 
-    - name: Log in to Azure as deployer after migration
+    - name: Log back in to Azure as deployer after migration
       uses: azure/login@v1
       with:
         client-id: ${{ inputs.azure-client-id }}
         tenant-id: ${{ inputs.azure-tenant-id }}
         subscription-id: ${{ inputs.azure-subscription-id }}
+        enable-AzPSSession: true
+
+    - name: Remove temporary database firewall access
+      id: remove-temporary-database-firewall-access
+      shell: pwsh
+      if: always()
+      run: >-
+        ./infrastructure/scripts/remove-sql-firewall-rule.ps1
+        -SqlServerName '${{ inputs.sql-server-name }}'
+        -ResourceGroupName '${{ inputs.shared-resource-group-name }}'
+        -FirewallRuleName 'GitHub Actions'
 
     - name: Deploy API to App Service
       id: deploy-api
