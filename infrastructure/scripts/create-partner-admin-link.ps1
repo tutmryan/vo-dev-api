@@ -33,8 +33,8 @@ try {
     Write-Host "✅  Azure PAL Id is alredy set to ${$PartnerId}. Exiting..."
     break
   } else {
-    Write-Host "Setting Azure Partner Admin Link to ${$PartnerId}."
-    New-AzManagementPartner -PartnerId $PartnerId -ErrorAction SilentlyContinue
+    Write-Host "Setting Azure Partner Admin Link to:" $PartnerId
+    New-AzManagementPartner -PartnerId $PartnerId
   }
 } catch {
   Write-Exception $_
