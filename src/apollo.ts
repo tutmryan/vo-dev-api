@@ -7,7 +7,7 @@ import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { verifyForHost } from '@makerx/express-bearer'
 import { graphqlOperationLoggingPlugin, introspectionControlPlugin } from '@makerx/graphql-apollo-server'
-import { useSubscriptionsServer } from '@makerx/graphql-core'
+import { useSubscriptionsServer } from '@makerx/graphql-core/subscriptions'
 import { isProduction } from '@makerx/node-common'
 import type { Express } from 'express'
 import { json } from 'express'

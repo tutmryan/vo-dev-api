@@ -1,5 +1,6 @@
 import type { GraphQLContext as GraphQLContextBase, RequestInfo } from '@makerx/graphql-core'
-import { createContextFactory, createSubscriptionContextFactory, extractTokenFromConnectionParams } from '@makerx/graphql-core'
+import { createContextFactory } from '@makerx/graphql-core'
+import { createSubscriptionContextFactory, extractTokenFromConnectionParams } from '@makerx/graphql-core/subscriptions'
 import type { JwtPayload } from 'jsonwebtoken'
 import type { DataSource } from 'typeorm'
 import { logging, platformConsumerApps } from './config'

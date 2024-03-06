@@ -1,2 +1,2 @@
-import './tracing'
 import './main.api'
+import './tracing'

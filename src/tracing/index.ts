@@ -1,22 +1,16 @@
-import { BullMQInstrumentation } from '@jenniferplusplus/opentelemetry-instrumentation-bullmq'
 import type { ProxyTracerProvider } from '@opentelemetry/api'
 import { trace } from '@opentelemetry/api'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
-import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express'
-import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
-import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis'
-import { TediousInstrumentation } from '@opentelemetry/instrumentation-tedious'
-import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston'
 import { Resource } from '@opentelemetry/resources'
 import type { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_NAMESPACE } from '@opentelemetry/semantic-conventions'
 import type { AzureMonitorOpenTelemetryOptions } from 'applicationinsights'
 import { useAzureMonitor } from 'applicationinsights'
-import { WSInstrumentation } from 'opentelemetry-instrumentation-ws'
+import { instrumentations } from './instrumentations'
 
 const resource = Resource.EMPTY as any as Required<AzureMonitorOpenTelemetryOptions>['resource'] // type conflict between @opentelemetry/resources and @azure/monitor-opentelemetry
-resource.attributes[SemanticResourceAttributes.SERVICE_NAME] = 'VerifiableOrchestration'
-resource.attributes[SemanticResourceAttributes.SERVICE_NAMESPACE] = 'verifiable-orchestration-api'
+resource.attributes[SEMRESATTRS_SERVICE_NAME] = 'VerifiableOrchestration'
+resource.attributes[SEMRESATTRS_SERVICE_NAMESPACE] = 'verifiable-orchestration-api'
 
 useAzureMonitor({
   resource,
@@ -39,13 +33,5 @@ const tracerProvider = (trace.getTracerProvider() as ProxyTracerProvider).getDel
 
 registerInstrumentations({
   tracerProvider,
-  instrumentations: [
-    new ExpressInstrumentation(),
-    new WinstonInstrumentation(),
-    new GraphQLInstrumentation(),
-    new WSInstrumentation(),
-    new TediousInstrumentation(),
-    new IORedisInstrumentation(),
-    new BullMQInstrumentation(),
-  ],
+  instrumentations,
 })
