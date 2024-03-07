@@ -47,6 +47,7 @@ const config: DeepPartial<Config> = {
       },
     },
     bearer: {},
+    additionalAuthTenantIds: [],
   },
   verifiedIdAdmin: {
     baseUrl: 'https://verifiedid.did.msidentity.com/v1.0/',

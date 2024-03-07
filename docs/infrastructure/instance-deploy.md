@@ -17,6 +17,7 @@ The name of the environment should be the short instance moniker e.g. `demo`.
 - HOME_TENANT_VID_SERVICE_CLIENT_ID (optional)
 - VID_AUTHORITY_NAME (optional)
 - VID_AUTHORITY_DOMAIN (optional)
+- ADDITIONAL_AUTH_TENANT_IDS (optional)
 
 #### Feature flag variables
 

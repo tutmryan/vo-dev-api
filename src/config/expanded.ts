@@ -53,11 +53,12 @@ export const vidServiceAuth: Omit<ClientCredentialsConfig, 'scope'> = hasHomeTen
     }
 
 // auth configs
+const authTenantIds = [...config.get('auth.additionalAuthTenantIds'), homeTenantId, platformTenantId]
 export const bearer: Config['auth']['bearer'] = merge(
   {
     jwksUri: `https://login.microsoftonline.com/${homeTenantId}/discovery/v2.0/keys`,
     verifyOptions: {
-      issuer: [`https://sts.windows.net/${homeTenantId}/`, `https://sts.windows.net/${platformTenantId}/`],
+      issuer: authTenantIds.map((tenantId) => `https://sts.windows.net/${tenantId}/`),
       audience: [apiCredentials.clientId, config.get('internalClient.uri')],
     },
   },
