@@ -15,6 +15,10 @@ If you are accessing the Verified Orchestration API from a web application, CORS
 - Subdomains can be matched using a regular expression; e.g. `^https://([a-z0-9]+[.])+yourcompany.com$`
 - For your sandbox, you may want to allow local development origins e.g. `^http://localhost:\d+$`
 
+## Additional tenant IDs
+
+If you want to allow the users from the tenants other than your home tenant to access the Verified Orchestration API, those tenant IDs will need to be configured against each instance (sandbox and production).
+
 ## Application labels
 
 As you onboard applications, you can supply user-friendly labels, helping users to understand which apps are issuing or requesting presentation of credentials.

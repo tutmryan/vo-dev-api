@@ -130,6 +130,8 @@ inputs:
     description: Client secret of the docs site app registration in Azure AD
     required: true
 
+  additional-auth-tenant-ids:
+    description: JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant
 outputs:
   api-url:
     description: URL of the deployed API
@@ -276,6 +278,7 @@ runs:
           devToolsEnabled=${{ inputs.dev-tools-enabled }}
           identityIssuers="${{ inputs.identity-issuers }}"
           platformConsumerApps="${{ inputs.platform-consumer-apps }}"
+          additionalAuthTenantIds="${{ inputs.additional-auth-tenant-ids }}"
 
     - name: Log in to Azure again after potential long deployment
       uses: azure/login@v1

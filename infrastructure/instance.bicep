@@ -246,6 +246,9 @@ param homeTenantVidServiceClientId string
 param homeTenantVidServiceClientSecret string
 @description('The flag indicating whether the dev tools (i.e. Apollo Sandbox, .etc) are deployed')
 param devToolsEnabled string
+@description('JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant')
+param additionalAuthTenantIds string
+
 resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'HOME-TENANT-GRAPH-CLIENT-SECRET'
   parent: keyVault
@@ -482,6 +485,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     DEV_TOOLS_ENABLED: devToolsEnabled
     IDENTITY_ISSUERS: identityIssuers
     PLATFORM_CONSUMER_APPS: platformConsumerApps
+    ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds
   }
 }
 
