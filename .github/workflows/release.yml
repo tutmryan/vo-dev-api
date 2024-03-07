@@ -224,6 +224,7 @@ jobs:
           home-tenant-authority-id: ${{ vars.HOME_TENANT_AUTHORITY_ID }}
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
+          additional-auth-tenant-ids: "${{ vars.ADDITIONAL_AUTH_TENANT_IDS }}"
       - name: Remove temporary SQL firewall rule
         id: remove-temporary-sql-firewall-rule
         if: steps.add-temporary-sql-firewall-rule.outcome == 'success'

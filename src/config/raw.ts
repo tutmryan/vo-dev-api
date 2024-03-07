@@ -35,6 +35,7 @@ export type Config = {
       scopes: string[]
       msalConfig: MsalConfiguration
     }
+    additionalAuthTenantIds: string[]
   }
   events: {
     processingTimeoutSeconds: number

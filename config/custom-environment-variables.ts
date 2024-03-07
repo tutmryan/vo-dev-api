@@ -84,6 +84,7 @@ const config: EnvVarSubstitution<Config> = {
         },
       },
     },
+    additionalAuthTenantIds: json('ADDITIONAL_AUTH_TENANT_IDS'),
   },
   limitedAccess: {
     credentials: {
