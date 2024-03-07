@@ -139,40 +139,35 @@ jobs:
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
       - name: Instance resource group
         id: instance-resource-group
         uses: ./github-actions/resource-group
         with:
-          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
-          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
-          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
           resource-group-name: ${{ matrix.resourceGroup }}
           resource-group-location: australiaeast
       - name: Instance log analytics
         id: instance-log-analytics
         uses: ./github-actions/log-analytics
         with:
-          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
-          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
-          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
           resource-group-name: ${{ matrix.resourceGroup }}
           resource-prefix: ${{ matrix.resourcePrefix }}
       - name: Add temporary SQL firewall rule
         id: add-temporary-sql-firewall-rule
         uses: ./github-actions/sql-firewall-rule-add
         with:
-          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
-          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
-          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
           resource-group-name: vo-nonprd-platform-shared-infra
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
       - name: Instance SQL database
         id: instance-sql-db
         uses: ./github-actions/sql-db
         with:
-          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
-          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
-          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
           resource-group-name: vo-nonprd-platform-shared-infra
           resource-prefix: ${{ matrix.resourcePrefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
@@ -234,9 +229,6 @@ jobs:
         if: steps.add-temporary-sql-firewall-rule.outcome == 'success'
         uses: ./github-actions/sql-firewall-rule-remove
         with:
-          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
-          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
-          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
           resource-group-name: vo-nonprd-platform-shared-infra
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           rule-name: ${{ steps.add-temporary-sql-firewall-rule.outputs.rule-name }}

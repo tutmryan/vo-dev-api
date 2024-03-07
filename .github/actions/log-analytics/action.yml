@@ -2,15 +2,6 @@ name: Log analytics workspace
 description: Deploys a log analytics workspace
 
 inputs:
-  azure-client-id:
-    description: App ID of the deployment app registration
-    required: true
-  azure-tenant-id:
-    description: ID of the target Azure AD tenant
-    required: true
-  azure-subscription-id:
-    description: ID of the target Azure subscription
-    required: true
   resource-group-name:
     description: Name of the resource group to deploy resources to
     required: true
@@ -26,13 +17,6 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Log in to Azure
-      uses: azure/login@v1
-      with:
-        client-id: ${{ inputs.azure-client-id }}
-        tenant-id: ${{ inputs.azure-tenant-id }}
-        subscription-id: ${{ inputs.azure-subscription-id }}
-
     - name: Set current date as environment variable
       run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
       shell: bash
