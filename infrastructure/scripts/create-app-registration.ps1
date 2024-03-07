@@ -58,8 +58,7 @@ Write-Output 'Setting identifier URI, and app roles...'
 az ad app update `
   --id $appRegistrationClientId `
   --identifier-uris $IdentifierUri `
-  --app-roles ('@{0}' -f $constants.appRolesFile) `
-  --output none
+  --app-roles ('@{0}' -f $constants.appRolesFile)
 
 Write-Output 'Set identifier URI, and app roles'
 
