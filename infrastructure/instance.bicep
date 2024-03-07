@@ -493,7 +493,7 @@ module sqlServerFirewall './sql-firewall.bicep' = {
   params: {
     sqlServerName: sqlServerName
     ipAddresses: split(apiAppService.properties.outboundIpAddresses, ',')
-    rulePrefix: replace(instance, '.', '_')
+    rulePrefix: 'AppService'
   }
 }
 
