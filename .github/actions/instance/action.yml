@@ -164,7 +164,7 @@ runs:
       id: add-instance-app-registration
       shell: pwsh
       run: >-
-        ./infrastructure/scripts/create-migration-app-registration.ps1
+        ./infrastructure/scripts/create-app-registration.ps1
         -Name 'Verified Orchestration (${{ inputs.instance }})'
         -IdentifierUri 'https://${{ inputs.instance }}.api.${{ inputs.domain }}'
 
