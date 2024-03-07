@@ -1,0 +1,11 @@
+{
+  "adminConsentDescription": "Allows the user to access the verified orchestration platform",
+  "adminConsentDisplayName": "Verified orchestration platform",
+  "isEnabled": true,
+  "lang": null,
+  "origin": "Application",
+  "type": "Admin",
+  "userConsentDescription": null,
+  "userConsentDisplayName": null,
+  "value": "platform"
+}

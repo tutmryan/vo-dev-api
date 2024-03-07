@@ -21,7 +21,7 @@ A single app registration is created in each of the non prod and prod environmen
   ```JSON
   {
     value: "VerifiableCredential.AcquireLimitedAccessToken.ListContracts",
-    description: "Provides access to acquire limited access tokens for listing contracts via the acquireLimitedAccessToken mutation"
+    description: "Provides access to acquire limited access tokens for listing contracts via the acquireLimitedAccessToken mutation",
     displayName: "Acquire limited access token: list contracts",
   }
   ```
@@ -47,6 +47,7 @@ A single app registration is created in each of the non prod and prod environmen
     value: "VerifiableCredential.AcquireLimitedAccessToken.Present",
     description: "Provides access to acquire limited access tokens for presentation operations via the acquireLimitedAccessToken mutation",
     displayName: "Acquire limited access token: present",
+  }
   ```
 
 - create the following Users/Groups roles

@@ -18,16 +18,16 @@ $credentialDetails = Get-Content $constants.credentialFile | ConvertFrom-Json
 #
 $appRegistration = az ad app list --display-name $Name --output tsv
 if ($appRegistration) {
-  Write-Output ('API app registration ''{0}'' already exists' -f $Name)
+  Write-Output ('Migration app registration ''{0}'' already exists' -f $Name)
 } else {
-  Write-Output ('Creating API app registration ''{0}''...' -f $Name)
+  Write-Output ('Creating Migration app registration ''{0}''...' -f $Name)
 
   az ad app create `
     --display-name $Name `
     --sign-in-audience AzureADMyOrg `
     --output none
 
-  Write-Output ('Created API app registration ''{0}''' -f $Name)
+  Write-Output ('Created Migration app registration ''{0}''' -f $Name)
 }
 
 $appRegistration = az ad app list --display-name $Name | ConvertFrom-Json

@@ -1,0 +1,66 @@
+[
+  {
+    "allowedMemberTypes": ["Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to acquire limited access tokens for listing contracts via the acquireLimitedAccessToken mutation",
+    "displayName": "Acquire limited access token: list contracts",
+    "value": "VerifiableCredential.AcquireLimitedAccessToken.ListContracts"
+  },
+  {
+    "allowedMemberTypes": ["Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to acquire limited access tokens for anonymous presentations via the acquireLimitedAccessToken mutation",
+    "displayName": "Acquire limited access token: anonymous presentations",
+    "value": "VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations"
+  },
+  {
+    "allowedMemberTypes": ["Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to acquire limited access tokens for issuance operations via the acquireLimitedAccessToken mutation",
+    "displayName": "Acquire limited access token: issue",
+    "value": "VerifiableCredential.AcquireLimitedAccessToken.Issue"
+  },
+  {
+    "allowedMemberTypes": ["Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to acquire limited access tokens for presentation operations via the acquireLimitedAccessToken mutation",
+    "displayName": "Acquire limited access token: present",
+    "value": "VerifiableCredential.AcquireLimitedAccessToken.Present"
+  },
+  {
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides read access to templates, contracts, issuances, presentations, etc.",
+    "displayName": "Reader",
+    "value": "VerifiableCredential.Reader"
+  },
+  {
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to manual issuance of credentials; includes Reader access",
+    "displayName": "Issuer",
+    "value": "VerifiableCredential.Issuer"
+  },
+  {
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to administer contracts and templates, and revoke issuances; includes Reader access",
+    "displayName": "Credential admin",
+    "value": "VerifiableCredential.CredentialAdmin"
+  },
+  {
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provide access to administer partners; includes Reader access",
+    "displayName": "Partner admin",
+    "value": "VerifiableCredential.PartnerAdmin"
+  }
+]

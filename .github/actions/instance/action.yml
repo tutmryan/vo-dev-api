@@ -160,6 +160,14 @@ runs:
       run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
       shell: bash
 
+    - name: Add instance app registration
+      id: add-instance-app-registration
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/create-migration-app-registration.ps1
+        -Name 'Verified Orchestration (${{ inputs.instance }})'
+        -IdentifierUri 'https://${{ inputs.instance }}.api.${{ inputs.domain }}'
+
     - name: Add app registration for migration
       id: add-migration-app-registration
       shell: pwsh
