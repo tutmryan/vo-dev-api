@@ -15,7 +15,6 @@ $PSNativeCommandUseErrorActionPreference = $true
 $constants = @{
   appRolesFile         = Join-Path -Path $PSScriptRoot -ChildPath 'app-roles.json'
   scopesFile           = Join-Path -Path $PSScriptRoot -ChildPath 'app-scopes.json'
-  optionalClaimsFile   = Join-Path -Path $PSScriptRoot -ChildPath 'app-optional-claims.json'
   apiSecretName        = 'Secret for API to call VID'
   staticSiteSecretName = 'Secret for static site AUTH'
 }
@@ -64,7 +63,7 @@ az ad app update `
   --id $appRegistrationObjectId `
   --identifier-uris $IdentifierUri `
   --app-roles ('@{0}' -f $constants.appRolesFile) `
-  --optional-claims ('@{0}' -f $constants.optionalClaimsFile)
+  --set oauth2AllowIdTokenImplicitFlow=$true
 
 Write-Output 'Set identifier URI, and app roles'
 
