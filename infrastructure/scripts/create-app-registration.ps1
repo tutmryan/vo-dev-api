@@ -13,10 +13,11 @@ $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
 $constants = @{
-  appRolesFile         = Join-Path -Path $PSScriptRoot -ChildPath 'app-roles.json'
-  scopesFile           = Join-Path -Path $PSScriptRoot -ChildPath 'app-scopes.json'
-  apiSecretName        = 'Secret for API to call VID'
-  staticSiteSecretName = 'Secret for static site AUTH'
+  appRolesFile                = Join-Path -Path $PSScriptRoot -ChildPath 'app-roles.json'
+  scopesFile                  = Join-Path -Path $PSScriptRoot -ChildPath 'app-scopes.json'
+  requestedResourceAccessFile = Join-Path -Path $PSScriptRoot -ChildPath 'app-requested-resource-accesses.json'
+  apiSecretName               = 'Secret for API to call VID'
+  staticSiteSecretName        = 'Secret for static site AUTH'
 }
 
 #
@@ -62,6 +63,7 @@ Write-Output 'Setting identifier URI, and app roles...'
 az ad app update `
   --id $appRegistrationObjectId `
   --identifier-uris $IdentifierUri `
+  --required-resource-accesses ('@{0}' -f $constants.requestedResourceAccessFile)`
   --app-roles ('@{0}' -f $constants.appRolesFile)
 
 Write-Output 'Set identifier URI, and app roles'
