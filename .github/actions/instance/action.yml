@@ -157,6 +157,15 @@ runs:
         -Name 'Verified Orchestration (${{ inputs.instance }})'
         -IdentifierUri 'api://verifiedorchestration-api-${{ inputs.instance }}'
 
+    - name: Check instace app registration outputs
+      shell: bash
+      run: |
+        echo "apiSecret: '${{ steps.add-instance-app-registration.outputs.apiSecret }}'" >> outputs.txt
+        echo "staticSiteSecret: '${{ steps.add-instance-app-registration.outputs.staticSiteSecret }}'" >> outputs.txt
+        echo "instanceAppId: '${{ steps.add-instance-app-registration.outputs.instanceAppId }}'" >> outputs.txt
+        echo "instanceAppIdentifierUri: '${{ steps.add-instance-app-registration.outputs.instanceAppIdentifierUri }}'" >> outputs.txt
+        cat outputs.txt
+
     - name: Add app registration for migration
       id: add-migration-app-registration
       shell: pwsh
