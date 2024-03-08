@@ -13,8 +13,10 @@ $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
 $constants = @{
-  appRolesFile = Join-Path -Path $PSScriptRoot -ChildPath 'app-roles.json'
-  scopesFile   = Join-Path -Path $PSScriptRoot -ChildPath 'app-scopes.json'
+  appRolesFile         = Join-Path -Path $PSScriptRoot -ChildPath 'app-roles.json'
+  scopesFile           = Join-Path -Path $PSScriptRoot -ChildPath 'app-scopes.json'
+  apiSecretName        = 'Secret for API to call VID'
+  staticSiteSecretName = 'Secret for static site AUTH'
 }
 
 #
@@ -34,7 +36,9 @@ if ($appRegistration) {
   Write-Output ('Created API app registration ''{0}''' -f $Name)
 }
 
-$appRegistrationClientId = az ad app list --query ("[?displayName=='{0}'].id" -f $Name) --output tsv
+$appRegistration = az ad app list --display-name $Name | ConvertFrom-Json
+$appRegistrationObjectId = $appRegistration.id
+$appRegistrationAppId = $appRegistration.appId
 
 #
 # Service principal
@@ -45,7 +49,7 @@ if ($null -ne $servicePrincipal) {
 } else {
   Write-Output ('Creating a new service principal named ''{0}''...' -f $Name)
 
-  az ad sp create --id $appRegistrationClientId --output none
+  az ad sp create --id $appRegistrationObjectId --output none
 
   Write-Output ('Created a new service principal named ''{0}''' -f $Name)
 }
@@ -56,7 +60,7 @@ if ($null -ne $servicePrincipal) {
 Write-Output 'Setting identifier URI, and app roles...'
 
 az ad app update `
-  --id $appRegistrationClientId `
+  --id $appRegistrationObjectId `
   --identifier-uris $IdentifierUri `
   --app-roles ('@{0}' -f $constants.appRolesFile)
 
@@ -87,22 +91,65 @@ Write-Output 'Setting scopes...'
 az rest `
   --method patch `
   --headers Content-Type=application/json `
-  --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationClientId) `
+  --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationObjectId) `
   --body $setScopesPayloadJson
 
 Write-Output 'Set scopes'
 
 
-$setVerifiedPublisherPayload = @{
-  verifiedPublisherId = "6659076"
+
+$apiSecret = az ad app credential list `
+  --id $appRegistrationObjectId | `
+  ConvertFrom-Json | `
+  Where-Object -FilterScript { $_.displayName -eq $constants.apiSecretName }[0]
+
+if ($null -ne $apiSecret) {
+  Write-Output ('Found an existing API secret expiring on {0}' -f $apiSecret.endDateTime)
+} else {
+  Write-Output ('Creating a new API secret')
+
+  $newApiSecret = az ad app credential reset `
+    --append `
+    --id $appRegistrationObjectId `
+    --display-name $constants.apiSecretName `
+    --years 2
+
+  Write-Output ('Created a new API secret')
+  Write-Output "apiSecret=$($newApiSecret.password)" >> $Env:GITHUB_OUTPUT
 }
-$setVerifiedPublisherPayloadJson = ($setVerifiedPublisherPayload | ConvertTo-Json -Depth 10 -Compress)
-Write-Output 'Setting verified publisher ID...'
 
-az rest `
-  --method post `
-  --headers Content-Type=application/json `
-  --url ('https://graph.microsoft.com/beta/applications/{0}/setVerifiedPublisher' -f $appRegistrationClientId) `
-  --body $setVerifiedPublisherPayloadJson
 
-Write-Output 'Set verified publisher ID'
+$staticStiteSecret = az ad app credential list `
+  --id $appRegistrationObjectId | `
+  ConvertFrom-Json | `
+  Where-Object -FilterScript { $_.displayName -eq $constants.staticSiteSecretName }[0]
+if ($null -ne $staticStiteSecret) {
+  Write-Output ('Found an existing static site AUTH secret expiring on {0}' -f $staticStiteSecret.endDateTime)
+} else {
+  Write-Output ('Creating a new static site AUTH secret')
+  $newStaticSiteSecret = az ad app credential reset `
+    --append `
+    --id $appRegistrationObjectId `
+    --display-name $constants.staticSiteSecretName `
+    --years 2
+
+  Write-Output ('Created a new static site AUTH secret')
+  Write-Output "staticSiteSecret=$($newStaticSiteSecret.password)" >> $Env:GITHUB_OUTPUT
+}
+
+# $setVerifiedPublisherPayload = @{
+#   verifiedPublisherId = "6659076"
+# }
+# $setVerifiedPublisherPayloadJson = ($setVerifiedPublisherPayload | ConvertTo-Json -Depth 10 -Compress)
+# Write-Output 'Setting verified publisher ID...'
+
+# az rest `
+#   --method post `
+#   --headers Content-Type=application/json `
+#   --url ('https://graph.microsoft.com/v1.0/applications/{0}/setVerifiedPublisher' -f $appRegistrationObjectId) `
+#   --body $setVerifiedPublisherPayloadJson
+
+# Write-Output 'Set verified publisher ID'
+
+Write-Output "instanceAppId=$($appRegistrationAppId)" >> $Env:GITHUB_OUTPUT
+Write-Output "instanceAppIdentifierUri=$($IdentifierUri)" >> $Env:GITHUB_OUTPUT
