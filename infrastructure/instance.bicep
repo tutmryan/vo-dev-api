@@ -134,6 +134,11 @@ resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
   }
 }
 
+resource apiClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(apiClientSecret)) {
+  name: 'API-CLIENT-SECRET'
+  parent: keyVault
+}
+
 @description('The client secret of the Internal app registration in Azure AD')
 @secure()
 param internalClientSecret string
@@ -206,6 +211,11 @@ resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-0
     }
     value: docsSiteClientSecret
   }
+}
+
+resource docsSiteClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(docsSiteClientSecret)) {
+  name: 'DOCS-SITE-CLIENT-SECRET'
+  parent: staticSiteKeyVault
 }
 
 @description('The ID of the VID authority')
@@ -473,7 +483,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     REDIS_HOST: '${redisCache.name}.redis.cache.windows.net'
     BLOB_STORAGE_URL: 'https://${verifiedOrchestrationStorage.name}.blob.${az.environment().suffixes.storage}'
     API_CLIENT_ID: apiClientId
-    API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
+    API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiClientSecret) ? apiClientSecretSecretExisting : apiClientSecretSecret).properties.secretUri})'
     API_CLIENT_URI: apiClientUri
     INTERNAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${internalClientSecretSecret.properties.secretUri})'
     VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
@@ -532,6 +542,6 @@ resource docsSiteAppSettings 'Microsoft.Web/staticSites/config@2022-09-01' = {
   parent: docsSite
   properties: {
     AZURE_CLIENT_ID: docsSiteClientId
-    AZURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${docsSiteClientSecretSecret.properties.secretUri})'
+    AZURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(docsSiteClientSecret) ? docsSiteClientSecretSecretExisting : docsSiteClientSecretSecret).properties.secretUri})'
   }
 }
