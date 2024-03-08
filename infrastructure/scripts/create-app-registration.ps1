@@ -112,7 +112,7 @@ if ($null -ne $apiSecret) {
     --append `
     --id $appRegistrationObjectId `
     --display-name $constants.apiSecretName `
-    --years 2
+    --years 2 | ConvertFrom-Json
 
   Write-Output ('Created a new API secret')
   Write-Output "apiSecret=$($newApiSecret.password)" >> $Env:GITHUB_OUTPUT
@@ -131,7 +131,7 @@ if ($null -ne $staticStiteSecret) {
     --append `
     --id $appRegistrationObjectId `
     --display-name $constants.staticSiteSecretName `
-    --years 2
+    --years 2 |  ConvertFrom-Json
 
   Write-Output ('Created a new static site AUTH secret')
   Write-Output "staticSiteSecret=$($newStaticSiteSecret.password)" >> $Env:GITHUB_OUTPUT
