@@ -62,8 +62,7 @@ Write-Output 'Setting identifier URI, and app roles...'
 az ad app update `
   --id $appRegistrationObjectId `
   --identifier-uris $IdentifierUri `
-  --app-roles ('@{0}' -f $constants.appRolesFile) `
-  --set oauth2AllowIdTokenImplicitFlow=$true
+  --app-roles ('@{0}' -f $constants.appRolesFile)
 
 Write-Output 'Set identifier URI, and app roles'
 
@@ -82,6 +81,11 @@ $scopes = ConvertFrom-Json -InputObject $scopesFileContent -Depth 10 -NoEnumerat
 $setScopesPayload = @{
   api = @{
     oauth2PermissionScopes = $scopes
+  }
+  web = @{
+    implicitGrantSettings = @{
+      enableIdTokenIssuance = $true
+    }
   }
 }
 
