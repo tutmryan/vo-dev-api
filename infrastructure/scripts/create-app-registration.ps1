@@ -60,6 +60,7 @@ az ad app update `
   --identifier-uris $IdentifierUri `
   --app-roles ('@{0}' -f $constants.appRolesFile)
 
+
 Write-Output 'Set identifier URI, and app roles'
 
 #
@@ -80,14 +81,28 @@ $setScopesPayload = @{
   }
 }
 
-$setScopesPayloadJson = ($setScopesPayload | ConvertTo-Json -Depth 10 -Compress) -replace '"', '\"'
-
+$setScopesPayloadJson = ($setScopesPayload | ConvertTo-Json -Depth 10 -Compress)
 Write-Output 'Setting scopes...'
 
 az rest `
   --method patch `
+  --headers Content-Type=application/json `
   --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationClientId) `
-  --body $setScopesPayloadJson `
-  --output none
+  --body $setScopesPayloadJson
 
 Write-Output 'Set scopes'
+
+
+$setVerifiedPublisherPayload = @{
+  verifiedPublisherId = "6659076"
+}
+$setVerifiedPublisherPayloadJson = ($setVerifiedPublisherPayload | ConvertTo-Json -Depth 10 -Compress)
+Write-Output 'Setting verified publisher ID...'
+
+az rest `
+  --method post `
+  --headers Content-Type=application/json `
+  --url ('https://graph.microsoft.com/beta/applications/{0}/setVerifiedPublisher' -f $appRegistrationClientId) `
+  --body $setVerifiedPublisherPayloadJson
+
+Write-Output 'Set verified publisher ID'

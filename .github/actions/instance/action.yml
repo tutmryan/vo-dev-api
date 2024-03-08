@@ -166,7 +166,7 @@ runs:
       run: >-
         ./infrastructure/scripts/create-app-registration.ps1
         -Name 'Verified Orchestration (${{ inputs.instance }})'
-        -IdentifierUri 'https://${{ inputs.instance }}.api.${{ inputs.domain }}'
+        -IdentifierUri 'api://verifiedorchestration-api-${{ inputs.instance }}'
 
     - name: Add app registration for migration
       id: add-migration-app-registration
