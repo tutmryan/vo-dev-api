@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, RelationId } from 'typeorm'
+import { Column, CreateDateColumn, Entity, Index, ManyToOne, RelationId } from 'typeorm'
 import { IssuanceStatus } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
@@ -7,6 +7,7 @@ import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('issuance')
+@Index(['contractId', 'issuedAt'])
 export class IssuanceEntity extends AuditedAndTrackedEntity {
   constructor(args?: Pick<IssuanceEntity, 'id' | 'requestId' | 'contractId' | 'identityId' | 'issuedById' | 'expiresAt'>) {
     super()
