@@ -1,0 +1,6 @@
+traces
+| where customDimensions.logLevel == 'error'
+| project message
+| summarize count() by message
+| order by count_
+| take 10

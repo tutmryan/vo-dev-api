@@ -1,0 +1,10 @@
+traces
+| where isnotnull(customDimensions.presentation)
+| extend Service = customDimensions.service
+| extend Presentation = todynamic(tostring(customDimensions.presentation))
+| extend RequestedCredentials = Presentation.requestedCredentialsJson
+| extend PresentedCredentials = Presentation.presentedCredentialsJson
+| extend Id = Presentation.id
+| extend IdentityId = Presentation.identityId
+| extend IssuanceIds = Presentation.issuanceIds
+| project timestamp, message, Id, IdentityId, IssuanceIds, RequestedCredentials, PresentedCredentials, Presentation, customDimensions

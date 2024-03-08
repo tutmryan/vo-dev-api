@@ -1,0 +1,9 @@
+traces
+| where isnotnull(customDimensions.issuance)
+| extend Service = customDimensions.service
+| extend Issuance = todynamic(tostring(customDimensions.issuance))
+| extend Id = Issuance.id
+| extend IdentityId = Issuance.identityId
+| extend ContractId = Issuance.contractId
+| extend IssuedById = Issuance.issuedById
+| project timestamp, message, Id, IdentityId, ContractId, IssuedById, Issuance, customDimensions

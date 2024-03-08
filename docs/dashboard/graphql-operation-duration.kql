@@ -1,0 +1,8 @@
+traces
+| where message == 'GraphQL operation'
+| extend query = extract('(query|mutation) (\\w*)', 2, tostring(customDimensions.query), typeof(string))
+| extend duration = toint(customDimensions.duration)
+| where query != ''
+| summarize count(), round(avg(duration)), percentiles(duration, 50, 95, 99) by query
+| order by percentile_duration_99 desc
+

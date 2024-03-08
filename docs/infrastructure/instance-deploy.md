@@ -2,8 +2,22 @@
 
 ## Configure environment
 
-Create a new environment in the GitHub repository at <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>
-The name of the environment should be the short instance moniker e.g. `demo`.
+Create a new environment in the API and Admin GitHub repositories at:
+
+- <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>
+- <https://github.com/VerifiedOrchestration/verified-orchestration-admin/settings/environments>
+
+The name of the environment should be the instance name e.g. `demo`.
+
+### Configure Admin environment
+
+The admin environment should have the following variables:
+
+- APP_INSIGHTS_CONNECTION_STRING (obtain from the resource group app insights)
+- AZURE_AUTHORITY_URL: `https://login.microsoftonline.com/${home tenant id}`
+- VID_AUTHORITY_DOMAIN: `${instance name}.did.verifiedorchestration.com` (or from API instance deploy output)
+
+The rest of the variables and secrets are for the API environment.
 
 ### Variables
 

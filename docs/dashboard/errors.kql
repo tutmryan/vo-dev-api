@@ -1,0 +1,10 @@
+traces
+| where customDimensions.logLevel == 'error'
+| project
+    timestamp,
+    message,
+    customDimensions
+// | where message == 'db query error'
+// | where message == 'Bearer token verification failed'
+// | where message == 'HTTP request failed'
+// | where message == 'Background worker failed'

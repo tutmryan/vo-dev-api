@@ -1,0 +1,7 @@
+dependencies
+| where type == 'SQL'
+| extend query = extract('/\\* (.+?) \\*/', 1, data, typeof(string))
+| where query != ''
+| summarize count(), round(avg(duration)), percentiles(round(duration), 50, 95, 99) by query
+| order by percentile_duration_99
+
