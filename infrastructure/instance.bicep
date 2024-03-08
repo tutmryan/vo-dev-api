@@ -123,7 +123,7 @@ resource apiCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
 @secure()
 param apiClientSecret string
 
-resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(apiClientSecret)) {
   name: 'API-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -197,7 +197,7 @@ resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01
 @description('The client secret of the docs site app registration in Azure AD')
 @secure()
 param docsSiteClientSecret string
-resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(docsSiteClientSecret)) {
   name: 'DOCS-SITE-CLIENT-SECRET'
   parent: staticSiteKeyVault
   properties: {
