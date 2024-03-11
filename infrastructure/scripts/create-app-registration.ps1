@@ -80,27 +80,27 @@ Write-Output 'Set identifier URI, and app roles'
 #
 # $scopesFileContent = Get-Content -Path $constants.scopesFile -Raw
 # $scopes = ConvertFrom-Json -InputObject $scopesFileContent -Depth 10 -NoEnumerate
-# $setScopesPayload = @{
-#   api = @{
-#     oauth2PermissionScopes = $scopes
-#   }
-#   web = @{
-#     implicitGrantSettings = @{
-#       enableIdTokenIssuance = $true
-#     }
-#   }
-# }
+$setScopesPayload = @{
+  # api = @{
+  #   oauth2PermissionScopes = $scopes
+  # }
+  web = @{
+    implicitGrantSettings = @{
+      enableIdTokenIssuance = $true
+    }
+  }
+}
 
-# $setScopesPayloadJson = ($setScopesPayload | ConvertTo-Json -Depth 10 -Compress)
-# Write-Output 'Setting scopes...'
+$setScopesPayloadJson = ($setScopesPayload | ConvertTo-Json -Depth 10 -Compress)
+Write-Output 'Setting scopes...'
 
-# az rest `
-#   --method patch `
-#   --headers Content-Type=application/json `
-#   --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationObjectId) `
-#   --body $setScopesPayloadJson
+az rest `
+  --method patch `
+  --headers Content-Type=application/json `
+  --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationObjectId) `
+  --body $setScopesPayloadJson
 
-# Write-Output 'Set scopes'
+Write-Output 'Set scopes'
 
 
 
