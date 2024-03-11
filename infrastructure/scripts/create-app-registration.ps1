@@ -27,6 +27,7 @@ if ($appRegistration) {
   az ad app create `
     --display-name $Name `
     --sign-in-audience AzureADMultipleOrgs `
+    --web-home-page-url 'https://verifiedorchestration.com/' `
     --output none
 
   Write-Output ('Created API app registration ''{0}''' -f $Name)
