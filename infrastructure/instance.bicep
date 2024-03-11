@@ -464,7 +464,6 @@ output apiAppServiceCustomDomainVerificationId string = apiAppService.properties
 param sqlServerName string
 param nodeEnv string
 param apiClientId string
-param apiClientUri string
 
 resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   name: 'appsettings'
@@ -484,7 +483,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     BLOB_STORAGE_URL: 'https://${verifiedOrchestrationStorage.name}.blob.${az.environment().suffixes.storage}'
     API_CLIENT_ID: apiClientId
     API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiClientSecret) ? apiClientSecretSecretExisting : apiClientSecretSecret).properties.secretUri})'
-    API_CLIENT_URI: apiClientUri
+    API_CLIENT_URI: apiClientId
     INTERNAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${internalClientSecretSecret.properties.secretUri})'
     VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
     LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'

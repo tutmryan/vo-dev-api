@@ -158,4 +158,4 @@ if ($null -ne $staticStiteSecret) {
 # Write-Output 'Set verified publisher ID'
 
 Write-Output "instanceAppId=$($appRegistrationAppId)" >> $Env:GITHUB_OUTPUT
-Write-Output "instanceAppIdentifierUri=$($IdentifierUri)" >> $Env:GITHUB_OUTPUT
+# Write-Output "instanceAppIdentifierUri=$($IdentifierUri)" >> $Env:GITHUB_OUTPUT

@@ -262,7 +262,6 @@ runs:
           apiCookieSecret=${{ inputs.api-cookie-secret }}
           apiClientId=${{ steps.add-instance-app-registration.outputs.instanceAppId }}
           apiClientSecret=${{ steps.add-instance-app-registration.outputs.apiSecret }}
-          apiClientUri=${{ steps.add-instance-app-registration.outputs.instanceAppIdentifierUri }}
           internalClientSecret=${{ inputs.internal-client-secret }}
           vidCallbackClientSecret=${{ inputs.vid-callback-client-secret }}
           limitedAccessClientSecret=${{ inputs.limited-access-client-secret }}
