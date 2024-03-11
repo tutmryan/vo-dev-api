@@ -463,7 +463,7 @@ runs:
         DEV_TOOLS_ENABLED: ${{ inputs.dev-tools-enabled }}
       run: |
         npm run build
-        sed -i "s|TENANT_ID|${{ inputs.azure-tenant-id }}|g" ./build/staticwebapp.config.json
+        sed -i "s|TENANT_ID|${{ inputs.home-tenant-id }}|g" ./build/staticwebapp.config.json
       # ^^^ replace the TENANT_ID placeholder with the home tenant ID
       working-directory: docs-site
 
