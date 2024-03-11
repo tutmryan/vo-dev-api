@@ -62,9 +62,9 @@ Write-Output 'Setting identifier URI, and app roles...'
 
 az ad app update `
   --id $appRegistrationObjectId `
-  --identifier-uris $IdentifierUri `
   --required-resource-accesses ('@{0}' -f $constants.requestedResourceAccessFile)`
   --app-roles ('@{0}' -f $constants.appRolesFile)
+# --identifier-uris $IdentifierUri
 
 Write-Output 'Set identifier URI, and app roles'
 
@@ -78,29 +78,29 @@ Write-Output 'Set identifier URI, and app roles'
 # -NoEnumerate prevents ConvertFrom-Json from transforming an array with a single element into an object
 # See https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertfrom-json?view=powershell-7.3#example-5-round-trip-a-single-element-array
 #
-$scopesFileContent = Get-Content -Path $constants.scopesFile -Raw
-$scopes = ConvertFrom-Json -InputObject $scopesFileContent -Depth 10 -NoEnumerate
-$setScopesPayload = @{
-  api = @{
-    oauth2PermissionScopes = $scopes
-  }
-  web = @{
-    implicitGrantSettings = @{
-      enableIdTokenIssuance = $true
-    }
-  }
-}
+# $scopesFileContent = Get-Content -Path $constants.scopesFile -Raw
+# $scopes = ConvertFrom-Json -InputObject $scopesFileContent -Depth 10 -NoEnumerate
+# $setScopesPayload = @{
+#   api = @{
+#     oauth2PermissionScopes = $scopes
+#   }
+#   web = @{
+#     implicitGrantSettings = @{
+#       enableIdTokenIssuance = $true
+#     }
+#   }
+# }
 
-$setScopesPayloadJson = ($setScopesPayload | ConvertTo-Json -Depth 10 -Compress)
-Write-Output 'Setting scopes...'
+# $setScopesPayloadJson = ($setScopesPayload | ConvertTo-Json -Depth 10 -Compress)
+# Write-Output 'Setting scopes...'
 
-az rest `
-  --method patch `
-  --headers Content-Type=application/json `
-  --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationObjectId) `
-  --body $setScopesPayloadJson
+# az rest `
+#   --method patch `
+#   --headers Content-Type=application/json `
+#   --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationObjectId) `
+#   --body $setScopesPayloadJson
 
-Write-Output 'Set scopes'
+# Write-Output 'Set scopes'
 
 
 
