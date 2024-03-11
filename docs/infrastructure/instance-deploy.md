@@ -102,3 +102,6 @@ When setting up an instance database for the first time, the release pipeline:
    - you must purge the deleted keyvault - re-creating the same keyvault name will fail
    - you must delete the sql DB external login for the API identity - re-using the login between same named API identity will fail (TODO ?? confirm)
    - you must invoke Verified ID admin API endpoint to verify well known DID configuration which should invalidate previously verified linked domain. The CI/CD pipeline would detect the unverified status and start the process to get the authority verified.
+1. Delete all the instance app registrations:
+   - `Verified Orchestration (<instance>)`
+   - `Verified Orchestration Migration (<instance>)`
