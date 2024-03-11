@@ -70,14 +70,5 @@
     "description": "Provide access to administer partners; includes Reader access",
     "displayName": "Partner admin",
     "value": "VerifiableCredential.PartnerAdmin"
-  },
-  {
-    "id": "1956e830-a3a3-41cf-aff8-5dcbad3f4586",
-    "allowedMemberTypes": ["User"],
-    "isEnabled": true,
-    "origin": "Application",
-    "description": "Provide access to read documentation",
-    "displayName": "Documentation reader",
-    "value": "DocsSite_Reader"
   }
 ]
