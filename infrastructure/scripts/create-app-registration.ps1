@@ -2,11 +2,7 @@
 param (
   [Parameter(Mandatory = $true)]
   [string]
-  $Name,
-
-  [Parameter(Mandatory = $true)]
-  [string]
-  $IdentifierUri
+  $Name
 )
 
 $ErrorActionPreference = 'Stop'
@@ -14,7 +10,6 @@ $PSNativeCommandUseErrorActionPreference = $true
 
 $constants = @{
   appRolesFile                = Join-Path -Path $PSScriptRoot -ChildPath 'app-roles.json'
-  scopesFile                  = Join-Path -Path $PSScriptRoot -ChildPath 'app-scopes.json'
   requestedResourceAccessFile = Join-Path -Path $PSScriptRoot -ChildPath 'app-requested-resource-accesses.json'
   apiSecretName               = 'Secret for API to call VID'
   staticSiteSecretName        = 'Secret for static site AUTH'
@@ -58,50 +53,15 @@ if ($null -ne $servicePrincipal) {
 #
 # Set properties
 #
-Write-Output 'Setting identifier URI, and app roles...'
+Write-Output 'Setting app roles and enabling id token issuance...'
 
 az ad app update `
   --id $appRegistrationObjectId `
   --required-resource-accesses ('@{0}' -f $constants.requestedResourceAccessFile)`
-  --app-roles ('@{0}' -f $constants.appRolesFile)
-# --identifier-uris $IdentifierUri
+  --app-roles ('@{0}' -f $constants.appRolesFile) `
+  --enable-id-token-issuance $true
 
-Write-Output 'Set identifier URI, and app roles'
-
-#
-# Nothing built in for scopes, and az ad app update doesn't work
-# See:
-#   - https://github.com/Azure/azure-cli/issues/23444#issuecomment-1205987288
-#   - https://github.com/Azure/azure-cli/issues/22580
-#   - https://learn.microsoft.com/en-us/graph/api/application-update?view=graph-rest-1.0&tabs=http#request-body
-#
-# -NoEnumerate prevents ConvertFrom-Json from transforming an array with a single element into an object
-# See https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/convertfrom-json?view=powershell-7.3#example-5-round-trip-a-single-element-array
-#
-# $scopesFileContent = Get-Content -Path $constants.scopesFile -Raw
-# $scopes = ConvertFrom-Json -InputObject $scopesFileContent -Depth 10 -NoEnumerate
-$setScopesPayload = @{
-  # api = @{
-  #   oauth2PermissionScopes = $scopes
-  # }
-  web = @{
-    implicitGrantSettings = @{
-      enableIdTokenIssuance = $true
-    }
-  }
-}
-
-$setScopesPayloadJson = ($setScopesPayload | ConvertTo-Json -Depth 10 -Compress)
-Write-Output 'Setting scopes...'
-
-az rest `
-  --method patch `
-  --headers Content-Type=application/json `
-  --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationObjectId) `
-  --body $setScopesPayloadJson
-
-Write-Output 'Set scopes'
-
+Write-Output 'Set app roles and enabling id token issuance...'
 
 
 $apiSecret = az ad app credential list `
@@ -158,4 +118,3 @@ if ($null -ne $staticStiteSecret) {
 # Write-Output 'Set verified publisher ID'
 
 Write-Output "instanceAppId=$($appRegistrationAppId)" >> $Env:GITHUB_OUTPUT
-# Write-Output "instanceAppIdentifierUri=$($IdentifierUri)" >> $Env:GITHUB_OUTPUT
