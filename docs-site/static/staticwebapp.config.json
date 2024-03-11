@@ -2,7 +2,7 @@
   "routes": [
     {
       "route": "/*",
-      "allowedRoles": ["VerifiableCredential.Reader"]
+      "allowedRoles": ["DocsSite_Reader"]
     }
   ],
   "responseOverrides": {
