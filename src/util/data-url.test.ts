@@ -20,7 +20,7 @@ describe('parseDataUrl', () => {
 describe('downloadToDataUrl', () => {
   it('downloads the data URL', async () => {
     const output = await downloadToDataUrl(
-      'https://vodevvrfdorchstnst.blob.core.windows.net/logo-images/AA7ED447-232D-400A-9D96-BD0C9F4E108D.png',
+      'https://vop75jthqbydqt2.blob.core.windows.net/logo-images/89706F2E-6499-4361-AB97-3A8751810A74.png',
     )
     expect(output.startsWith('data:image/png;base64,iVBORw0K')).toBe(true)
   })
