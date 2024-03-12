@@ -86,12 +86,12 @@ if ($null -ne $apiSecret) {
 }
 
 
-$staticStiteSecret = az ad app credential list `
+$staticSiteSecret = az ad app credential list `
   --id $appRegistrationObjectId | `
   ConvertFrom-Json | `
   Where-Object -FilterScript { $_.displayName -eq $constants.staticSiteSecretName }[0]
-if ($null -ne $staticStiteSecret) {
-  Write-Output ('Found an existing static site AUTH secret expiring on {0}' -f $staticStiteSecret.endDateTime)
+if ($null -ne $staticSiteSecret) {
+  Write-Output ('Found an existing static site AUTH secret expiring on {0}' -f $staticSiteSecret.endDateTime)
 } else {
   Write-Output ('Creating a new static site AUTH secret')
   $newStaticSiteSecret = az ad app credential reset `
@@ -104,6 +104,9 @@ if ($null -ne $staticStiteSecret) {
   Write-Output "staticSiteSecret=$($newStaticSiteSecret.password)" >> $Env:GITHUB_OUTPUT
 }
 
+# Setting verified publisher needs to be done manually via the Azure Portal.
+# Token received by the Azure CLI, `az login`, does not seem to have necessary scopes to call `setVerifiedPublisher` endpoint.
+# The call fails with `Forbidden` error message.
 # $setVerifiedPublisherPayload = @{
 #   verifiedPublisherId = "6659076"
 # }
