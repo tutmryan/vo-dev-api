@@ -122,3 +122,9 @@ if ($null -ne $staticSiteSecret) {
 # Write-Output 'Set verified publisher ID'
 
 Write-Output "instanceAppId=$($appRegistrationAppId)" >> $Env:GITHUB_OUTPUT
+
+return @{
+  instanceAppName     = $Name
+  instanceAppObjectId = $appRegistrationObjectId
+  instanceAppId       = $appRegistrationAppId
+}

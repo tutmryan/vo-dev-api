@@ -122,6 +122,9 @@ inputs:
   additional-auth-tenant-ids:
     description: JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant
 outputs:
+  instance-app-client-id:
+    description: Client Id of the dedicated app registration for the instance
+    value: ${{ steps.add-instance-app-registration.outputs.instanceAppId }}
   api-url:
     description: URL of the deployed API
     value: https://${{ inputs.instance }}.api.${{ inputs.domain }}

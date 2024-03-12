@@ -36,6 +36,7 @@ jobs:
         id: deploy
         uses: ./.github/actions/shared-infra
         with:
+          azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
           infra-environment: prd
           resource-group-name: vo-platform-shared-infra
           partner-id: ${{ vars.PROD_PARTNER_ID }}
