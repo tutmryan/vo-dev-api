@@ -205,13 +205,9 @@ jobs:
           redis-cache-family: C
           redis-cache-capacity: 0
 
-          docs-site-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }}
-          docs-site-client-secret: ${{ secrets.NON_PROD_STATIC_SITE_CLIENT_SECRET }}
-
           cors-origin: "${{ vars.CORS_ORIGIN }}"
           api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
-          api-client-id: ${{ vars.NON_PROD_API_CLIENT_ID }}
-          api-client-secret: ${{ secrets.NON_PROD_API_CLIENT_SECRET }}
+
           internal-client-secret: ${{ secrets.NON_PROD_INTERNAL_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.NON_PROD_VID_CALLBACK_CLIENT_SECRET }}
           limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}
@@ -225,6 +221,7 @@ jobs:
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
           additional-auth-tenant-ids: "${{ vars.ADDITIONAL_AUTH_TENANT_IDS }}"
+
       - name: Remove temporary SQL firewall rule
         id: remove-temporary-sql-firewall-rule
         if: steps.add-temporary-sql-firewall-rule.outcome == 'success'

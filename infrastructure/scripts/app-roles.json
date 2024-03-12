@@ -1,0 +1,74 @@
+[
+  {
+    "id": "a945f817-0bf2-4057-8902-6387916e2baa",
+    "allowedMemberTypes": ["Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to acquire limited access tokens for listing contracts via the acquireLimitedAccessToken mutation",
+    "displayName": "Acquire limited access token: list contracts",
+    "value": "VerifiableCredential.AcquireLimitedAccessToken.ListContracts"
+  },
+  {
+    "id": "30016342-8ab0-41c6-9b59-c67204d74d50",
+    "allowedMemberTypes": ["Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to acquire limited access tokens for anonymous presentations via the acquireLimitedAccessToken mutation",
+    "displayName": "Acquire limited access token: anonymous presentations",
+    "value": "VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations"
+  },
+  {
+    "id": "be821c79-09d2-4967-ba70-d85639982c82",
+    "allowedMemberTypes": ["Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to acquire limited access tokens for issuance operations via the acquireLimitedAccessToken mutation",
+    "displayName": "Acquire limited access token: issue",
+    "value": "VerifiableCredential.AcquireLimitedAccessToken.Issue"
+  },
+  {
+    "id": "29b920ab-ae50-4b24-87b2-d2d35617750b",
+    "allowedMemberTypes": ["Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to acquire limited access tokens for presentation operations via the acquireLimitedAccessToken mutation",
+    "displayName": "Acquire limited access token: present",
+    "value": "VerifiableCredential.AcquireLimitedAccessToken.Present"
+  },
+  {
+    "id": "db1fb18e-e4d8-4798-9330-2e28175d2cdd",
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides read access to templates, contracts, issuances, presentations, etc.",
+    "displayName": "Reader",
+    "value": "VerifiableCredential.Reader"
+  },
+  {
+    "id": "a63b9452-8854-48a4-9a67-73d64edcc325",
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to manual issuance of credentials; includes Reader access",
+    "displayName": "Issuer",
+    "value": "VerifiableCredential.Issuer"
+  },
+  {
+    "id": "8998562a-ab60-4af4-89fb-d2455bd8d4b5",
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to administer contracts and templates, and revoke issuances; includes Reader access",
+    "displayName": "Credential admin",
+    "value": "VerifiableCredential.CredentialAdmin"
+  },
+  {
+    "id": "3f36f954-ec66-4fe9-89ed-25038be51bc5",
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provide access to administer partners; includes Reader access",
+    "displayName": "Partner admin",
+    "value": "VerifiableCredential.PartnerAdmin"
+  }
+]

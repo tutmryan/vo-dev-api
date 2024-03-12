@@ -123,7 +123,7 @@ resource apiCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
 @secure()
 param apiClientSecret string
 
-resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(apiClientSecret)) {
   name: 'API-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -132,6 +132,11 @@ resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
     }
     value: apiClientSecret
   }
+}
+
+resource apiClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(apiClientSecret)) {
+  name: 'API-CLIENT-SECRET'
+  parent: keyVault
 }
 
 @description('The client secret of the Internal app registration in Azure AD')
@@ -197,7 +202,7 @@ resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01
 @description('The client secret of the docs site app registration in Azure AD')
 @secure()
 param docsSiteClientSecret string
-resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(docsSiteClientSecret)) {
   name: 'DOCS-SITE-CLIENT-SECRET'
   parent: staticSiteKeyVault
   properties: {
@@ -206,6 +211,11 @@ resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-0
     }
     value: docsSiteClientSecret
   }
+}
+
+resource docsSiteClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(docsSiteClientSecret)) {
+  name: 'DOCS-SITE-CLIENT-SECRET'
+  parent: staticSiteKeyVault
 }
 
 @description('The ID of the VID authority')
@@ -453,6 +463,7 @@ output apiAppServiceCustomDomainVerificationId string = apiAppService.properties
 
 param sqlServerName string
 param nodeEnv string
+param apiClientId string
 
 resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
   name: 'appsettings'
@@ -470,7 +481,9 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
     REDIS_HOST: '${redisCache.name}.redis.cache.windows.net'
     BLOB_STORAGE_URL: 'https://${verifiedOrchestrationStorage.name}.blob.${az.environment().suffixes.storage}'
-    API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${apiClientSecretSecret.properties.secretUri})'
+    API_CLIENT_ID: apiClientId
+    API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiClientSecret) ? apiClientSecretSecretExisting : apiClientSecretSecret).properties.secretUri})'
+    API_CLIENT_URI: apiClientId
     INTERNAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${internalClientSecretSecret.properties.secretUri})'
     VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
     LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
@@ -528,6 +541,6 @@ resource docsSiteAppSettings 'Microsoft.Web/staticSites/config@2022-09-01' = {
   parent: docsSite
   properties: {
     AZURE_CLIENT_ID: docsSiteClientId
-    AZURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${docsSiteClientSecretSecret.properties.secretUri})'
+    AZURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(docsSiteClientSecret) ? docsSiteClientSecretSecretExisting : docsSiteClientSecretSecret).properties.secretUri})'
   }
 }

@@ -82,12 +82,7 @@ inputs:
   api-cookie-secret:
     description: Cookie secret used by the cookie-session Express middleware
     required: true
-  api-client-id:
-    description: Client ID of the API app registration in Azure AD
-    required: true
-  api-client-secret:
-    description: Client secret of the API app registration in Azure AD
-    required: true
+
   internal-client-secret:
     description: Client secret of the Internal app registration in Azure AD
     required: true
@@ -123,12 +118,6 @@ inputs:
     description: The client secret of the home tenant VID service app registration
     required: true
 
-  docs-site-client-id:
-    description: Client id of the docs site app registration in Azure AD
-    required: true
-  docs-site-client-secret:
-    description: Client secret of the docs site app registration in Azure AD
-    required: true
 
   additional-auth-tenant-ids:
     description: JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant
@@ -159,6 +148,13 @@ runs:
     - name: Set current date as environment variable
       run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
       shell: bash
+
+    - name: Add instance app registration
+      id: add-instance-app-registration
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/create-app-registration.ps1
+        -Name 'Verified Orchestration (${{ inputs.instance }})'
 
     - name: Add app registration for migration
       id: add-migration-app-registration
@@ -256,14 +252,15 @@ runs:
           redisCacheSKU=${{ inputs.redis-cache-sku }}
           redisCacheFamily=${{ inputs.redis-cache-family }}
           redisCacheCapacity=${{ inputs.redis-cache-capacity }}
-          docsSiteClientId=${{ inputs.docs-site-client-id }}
-          docsSiteClientSecret=${{ inputs.docs-site-client-secret }}
+          docsSiteClientId=${{ steps.add-instance-app-registration.outputs.instanceAppId }}
+          docsSiteClientSecret=${{ steps.add-instance-app-registration.outputs.staticSiteSecret }}
           appServicePlanId=${{ inputs.app-service-plan-id }}
           nodeEnv=${{ inputs.node-env }}
           instance=${{ inputs.instance }}
           corsOrigin="${{ inputs.cors-origin }}"
           apiCookieSecret=${{ inputs.api-cookie-secret }}
-          apiClientSecret=${{ inputs.api-client-secret }}
+          apiClientId=${{ steps.add-instance-app-registration.outputs.instanceAppId }}
+          apiClientSecret=${{ steps.add-instance-app-registration.outputs.apiSecret }}
           internalClientSecret=${{ inputs.internal-client-secret }}
           vidCallbackClientSecret=${{ inputs.vid-callback-client-secret }}
           limitedAccessClientSecret=${{ inputs.limited-access-client-secret }}
@@ -348,7 +345,7 @@ runs:
       shell: pwsh
       run: >-
         ./infrastructure/scripts/add-redirect-uris-to-app-registration.ps1
-        -AppRegistrationId ${{ inputs.api-client-id }}
+        -AppRegistrationId ${{ steps.add-instance-app-registration.outputs.instanceAppId }}
         -WebRedirectUris https://${{ inputs.instance }}.api.${{ inputs.domain }}/auth
         -SpaRedirectUris https://${{ inputs.instance }}.${{ inputs.domain }}
 
@@ -357,7 +354,7 @@ runs:
       shell: pwsh
       run: >-
         ./infrastructure/scripts/add-redirect-uris-to-app-registration.ps1
-        -AppRegistrationId ${{ inputs.docs-site-client-id }}
+        -AppRegistrationId ${{ steps.add-instance-app-registration.outputs.instanceAppId }}
         -WebRedirectUris https://${{ inputs.instance }}.docs.${{ inputs.domain }}/.auth/login/aad/callback
 
     - name: 'Create database service principal setup scripts'
@@ -464,7 +461,7 @@ runs:
         DEV_TOOLS_ENABLED: ${{ inputs.dev-tools-enabled }}
       run: |
         npm run build
-        sed -i "s|TENANT_ID|${{ inputs.azure-tenant-id }}|g" ./build/staticwebapp.config.json
+        sed -i "s|TENANT_ID|${{ inputs.home-tenant-id }}|g" ./build/staticwebapp.config.json
       # ^^^ replace the TENANT_ID placeholder with the home tenant ID
       working-directory: docs-site
 

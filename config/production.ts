@@ -5,12 +5,6 @@ const config: DeepPartial<Config> = {
   platformTenant: {
     tenantId: '3d804793-53dd-40a2-9d8a-9f67a92fd349',
   },
-  apiClient: {
-    uri: 'api://verified-orchestration',
-    credentials: {
-      clientId: '78a8e778-b379-4b99-b236-90c920f3a83f',
-    },
-  },
   internalClient: {
     uri: 'api://verified-orchestration-internal',
     credentials: {

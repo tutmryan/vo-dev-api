@@ -91,6 +91,18 @@ When setting up an instance database for the first time, the release pipeline:
 - logs back in as the deployer service principal
 - continues with provisioning other resources
 
+## Manual steps to be performed after the first deployment run
+
+The app registration created for the instance would need a logo and the publisher verification so that it is presented as a verified app from "Verified Orchestration Pty Ltd" when the customer installs it into their tenant and grants admin consent.
+
+1. Navigate to the Azure Active Directory blade in the Azure Portal: <https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview>.
+1. In the "Manage" section, click on "App registrations".
+1. Find the app registration for the instance, (i.e. "Verified Orchestration (<instance name>)"), then click on it.
+1. In the "Manage" section, click on "Branding & properties".
+1. Upload the [Verified Orchestration logo](https://github.com/VerifiedOrchestration/verified-orchestration-admin/blob/main/public/icons/favicon-310x310.png) as a new logo.
+1. In the "Publisher verificatin" section, click on "Add MPN ID to verify publisher".
+1. Provide the partner ID of Verified Orchestration Pty Ltd, "6659076", as MPN ID, then click on "Verify and save". (_Note:_ this step needs to be performed by a global administrator of the Entra tenant).
+
 ## Tear down an instance
 
 1. Deprecate all contracts which would revoke all issuances as the Verified ID authority cannot be deleted
@@ -102,3 +114,6 @@ When setting up an instance database for the first time, the release pipeline:
    - you must purge the deleted keyvault - re-creating the same keyvault name will fail
    - you must delete the sql DB external login for the API identity - re-using the login between same named API identity will fail (TODO ?? confirm)
    - you must invoke Verified ID admin API endpoint to verify well known DID configuration which should invalidate previously verified linked domain. The CI/CD pipeline would detect the unverified status and start the process to get the authority verified.
+1. Delete all the instance app registrations:
+   - `Verified Orchestration (<instance>)`
+   - `Verified Orchestration Migration (<instance>)`
