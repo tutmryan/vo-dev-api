@@ -2,6 +2,9 @@ name: Shared infrastructure
 description: Deploys shared infrastructure
 
 inputs:
+  azure-client-id:
+    description: App ID of the deployment app registration
+    required: true
   infra-environment:
     description: The hosting environment, either 'nonprd' or 'prd'
     required: true
