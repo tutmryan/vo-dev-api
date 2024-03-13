@@ -282,7 +282,7 @@ jobs:
         with:
           resource-group-name: vo-platform-shared-infra
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
-          rule-name-prefix: '${{ matrix.resourcePrefix }}-${{ github.run_number }}'
+          rule-name-prefix: '${{ matrix.resourcePrefix }}-${{ github.run_id }}'
       - name: Instance SQL database
         id: instance-sql-db
         uses: ./github-actions/sql-db
