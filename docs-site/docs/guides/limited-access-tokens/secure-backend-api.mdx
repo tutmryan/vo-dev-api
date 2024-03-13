@@ -76,7 +76,7 @@ const getAccessTokenToCallPlatformService = async () => {
   // <client secret> provided during onboarding of the app; retrieved from a secure storage such as Azure Key Vault
   const clientSecret = '<client secret>'
   // <scope> to be provided by an administrator of Verified Orchestration platform;
-  // e.g. 'api://verified-orchestration-api-dev/.default'
+  // e.g. 'api://<instance app id>/.default'
   const scope = '<scope>'
 
   const msalClientApplication = new ConfidentialClientApplication({
