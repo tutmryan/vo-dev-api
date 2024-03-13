@@ -32,7 +32,6 @@ Gather the following details:
 - Client ID
 - Tenant ID
 - Subscription ID
-- Service principal object ID
 
 ## Configure GitHub repo OIDC subject claims
 
@@ -68,20 +67,17 @@ Add organisation variables and secrets to GitHub using the output from the previ
 
 Prefix the variable names with the hosting tenant name, e.g. `[NON_]PROD_AZURE_CLIENT_ID`.
 
-| Name                                | Value                                                                          |
-| ----------------------------------- | ------------------------------------------------------------------------------ |
-| `API_CLIENT_ID`                     | The client ID of the enterprise app registration                               |
-| `API_CLIENT_SECRET`                 | The client secret of the enterprise app registration                           |
-| `AZURE_CLIENT_ID`                   | The client ID of the deployment app registration                               |
-| `AZURE_TENANT_ID`                   | The ID of the target tenant                                                    |
-| `AZURE_SUBSCRIPTION_ID`             | The ID of the target subscription                                              |
-| `AZURE_SERVICE_PRINCIPAL_OBJECT_ID` | The object ID of the deployment service principal                              |
-| `KEY_VAULT_NAME`                    | The name of the key vault to hold signing keys used by Verified ID authorities |
-| `KEY_VAULT_RESOURCE_GROUP_NAME`     | The name of the resource group to hold Verified ID resources                   |
-| `DNS_API_KEY`                       | The GoDaddy DNS API key                                                        |
-| `DNS_API_SECRET`                    | The GoDaddy DNS API secret                                                     |
-| `LIMITED_ACCESS_CLIENT_SECRET`      | The client secret for the limited access client                                |
-| `VID_CALLBACK_CLIENT_SECRET`        | The client secret for the VID callback client                                  |
+| Name                            | Value                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------ |
+| `AZURE_CLIENT_ID`               | The client ID of the deployment app registration                               |
+| `AZURE_TENANT_ID`               | The ID of the target tenant                                                    |
+| `AZURE_SUBSCRIPTION_ID`         | The ID of the target subscription                                              |
+| `KEY_VAULT_NAME`                | The name of the key vault to hold signing keys used by Verified ID authorities |
+| `KEY_VAULT_RESOURCE_GROUP_NAME` | The name of the resource group to hold Verified ID resources                   |
+| `DNS_API_KEY`                   | The GoDaddy DNS API key                                                        |
+| `DNS_API_SECRET`                | The GoDaddy DNS API secret                                                     |
+| `LIMITED_ACCESS_CLIENT_SECRET`  | The client secret for the limited access client                                |
+| `VID_CALLBACK_CLIENT_SECRET`    | The client secret for the VID callback client                                  |
 
 To do so:
 
@@ -144,14 +140,14 @@ This is required for setting up blob storage contributor access for the API mana
 1. In the "Manage" section, click on "Groups", then on "New group".
 1. Enter a group name: 'Verified Orchestration SQL Admins ([non ]prod)', description: 'Administrators of the Verified Orchestration platform SQL infrastructure' select relevant members, and finalise the group creation.
 
-### Add the deployment service principal to the Azure SQL administrators group
+### Temporarily add the deployment service principal to the Azure SQL administrators group
 
 1. Navigate to the Azure Active Directory blade in the Azure Portal: <https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview>.
 1. In the "Manage" section, click on "Groups", then on the group you created in the previous step.
 1. Click on "Members", then on "+ Add members".
 1. Search for the deployment service principal by its name, then click on "Select".
 
-_NOTE:_ the deployment service principal needs to be removed from the Azure SQL administrators group after the shared infra pipeline is run successfully for the first time and has created and set up the SQL server instance(s). Further deployments of the shared infra pipeline or the deployments of instance release pipelines do not need the deployment service principal to be the server admin.
+_NOTE:_ the deployment service principal needs to be removed manually from the Azure SQL administrators group after the shared infra pipeline is run successfully for the first time and has created and set up the SQL server instance(s). Further deployments of the shared infra pipeline or the deployments of instance release pipelines do not need the deployment service principal to be the server admin.
 
 When the shared infra pipeline is first run, after creating the SQL server(s), it
 
@@ -187,6 +183,7 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 1. Pick a name (e.g. `vo-vid-keys-nonprod` for non prod tenant), select the appropriate region, and click "Next" to configure access
 1. Choose `Vault access policy` options in `Permission model` section
 1. Click on "Review + create" and finalise the creation
+1. Once the key vault is created, browse to it in the portal and delete default access policy created for the current login user
 
 ## Create access policies to grant Verified ID services access to the keys in the key vault
 
@@ -222,7 +219,10 @@ After running the shared infrastructure pipeline, but before deploying any insta
 1. In the "Manage" section, click on "Roles and administrators".
 1. Find the "Directory Readers" role, select it, then click on "Add assignments".
 1. Search for the SQL Server user assigned identity by its name e.g. `vo-nonprd-platform-sql-server-identity`, then click on "Add".
-1. Click "Save".
+
+## Remove the deployment service principal from the Azure SQL administrators group
+
+The deployment service principal needs to be removed from the Azure SQL administrators group so that it is no longer a server administrator. If it remains a server administrator, the deployment service principal can connect to any instance databases in the server.
 
 ## Warning about changing shared infrastructure (App Service Plan)
 

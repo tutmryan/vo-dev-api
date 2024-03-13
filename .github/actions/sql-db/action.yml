@@ -39,6 +39,8 @@ runs:
         connection-string: Server=${{ inputs.sql-server-name }}.database.windows.net;Initial Catalog=master;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         path: 'database-setup.sql'
 
+    # This step could throw a transient error saying it cannot find the sql database created in the step above.
+    # It can be resolved by running the pipeline again.
     - name: Deploy SQL DB instance
       id: deploy-sql-db
       uses: azure/arm-deploy@v1

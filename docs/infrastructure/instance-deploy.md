@@ -2,22 +2,13 @@
 
 ## Configure environment
 
-Create a new environment in the API and Admin GitHub repositories at:
+Create a new environment in the API GitHub repositories at:
 
 - <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>
-- <https://github.com/VerifiedOrchestration/verified-orchestration-admin/settings/environments>
 
 The name of the environment should be the instance name e.g. `demo`.
 
-### Configure Admin environment
-
-The admin environment should have the following variables:
-
-- APP_INSIGHTS_CONNECTION_STRING (obtain from the resource group app insights)
-- AZURE_AUTHORITY_URL: `https://login.microsoftonline.com/${home tenant id}`
-- VID_AUTHORITY_DOMAIN: `${instance name}.did.verifiedorchestration.com` (or from API instance deploy output)
-
-The rest of the variables and secrets are for the API environment.
+## Configure API environment
 
 ### Variables
 
@@ -59,7 +50,6 @@ Add the new environment to the deployment matrix in `.github/workflows/release.y
 
 A user access token is requried to call the following Verified ID admin API endpoints. The pipeline would pause with a message like this `To sign in, use a web browser to open the page <login_url> and enter the code <device_code> to authenticate.` until the user logs in.
 
-- create authority; POST /v1.0/verifiableCredentials/authorities
 - generate DID document; POST /v1.0/verifiableCredentials/authorities/:authorityId/generateDidDocument
 - generate well known DID configuration; POST /v1.0/verifiableCredentials/authorities/:authorityId/generateWellknownDidConfiguration
 - validate well known DID configuration; POST /v1.0/verifiableCredentials/authorities/:authorityId/validateWellKnownDidConfiguration
@@ -103,6 +93,10 @@ The app registration created for the instance would need a logo and the publishe
 1. In the "Publisher verificatin" section, click on "Add MPN ID to verify publisher".
 1. Provide the partner ID of Verified Orchestration Pty Ltd, "6659076", as MPN ID, then click on "Verify and save". (_Note:_ this step needs to be performed by a global administrator of the Entra tenant).
 
+## Manual steps to be performed once the VID authority is verified
+
+- Delete the access policy from the by the Verified ID service keyvault for the interative user.
+
 ## Tear down an instance
 
 1. Deprecate all contracts which would revoke all issuances as the Verified ID authority cannot be deleted
@@ -117,3 +111,17 @@ The app registration created for the instance would need a logo and the publishe
 1. Delete all the instance app registrations:
    - `Verified Orchestration (<instance>)`
    - `Verified Orchestration Migration (<instance>)`
+
+## Deploy the admin site for the instance
+
+Refer to the "Setting up a new instance" section in [Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-admin/blob/main/README.md#setting-up-a-new-instance)
+
+## Troubleshooting
+
+- `Deploy SQL DB instance` step in `Instance SQL database job` failed
+
+  > "message":"The Resource 'Microsoft.Sql/servers/vo-platform-sql-server-1/databases/vo-\<instance\>-sql-db' under resource group 'vo-platform-shared-infra' was not found.
+
+  This step could throw a transient error above as it can take sometime for the sql database created in the step preceeding it to become available in some cases.
+
+  It can be resolved by running the pipeline again.
