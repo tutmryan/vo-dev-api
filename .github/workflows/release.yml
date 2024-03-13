@@ -164,6 +164,7 @@ jobs:
         with:
           resource-group-name: vo-nonprd-platform-shared-infra
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          rule-name-prefix: '${{ matrix.resourcePrefix}}-${{ github.run_id }}'
       - name: Instance SQL database
         id: instance-sql-db
         uses: ./github-actions/sql-db
@@ -224,7 +225,7 @@ jobs:
 
       - name: Remove temporary SQL firewall rule
         id: remove-temporary-sql-firewall-rule
-        if: steps.add-temporary-sql-firewall-rule.outcome == 'success'
+        if: always()
         uses: ./github-actions/sql-firewall-rule-remove
         with:
           resource-group-name: vo-nonprd-platform-shared-infra
@@ -281,6 +282,7 @@ jobs:
         with:
           resource-group-name: vo-platform-shared-infra
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          rule-name-prefix: '${{ matrix.resourcePrefix }}-${{ github.run_number }}'
       - name: Instance SQL database
         id: instance-sql-db
         uses: ./github-actions/sql-db
@@ -341,7 +343,7 @@ jobs:
 
       - name: Remove temporary SQL firewall rule
         id: remove-temporary-sql-firewall-rule
-        if: steps.add-temporary-sql-firewall-rule.outcome == 'success'
+        if: always()
         uses: ./github-actions/sql-firewall-rule-remove
         with:
           resource-group-name: vo-platform-shared-infra
