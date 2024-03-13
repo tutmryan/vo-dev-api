@@ -21,6 +21,7 @@ runs:
 
     - name: Remove SQL firewall rule
       id: remove-sql-firewall-rule
+      if: ${{ inputs.rule-name != '' }}
       shell: pwsh
       run: >-
         ./infrastructure/scripts/sql-firewall-rule-remove.ps1
