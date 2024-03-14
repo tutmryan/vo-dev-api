@@ -1,5 +1,5 @@
 import type { ClientCredentialsConfig, HttpClientOptions } from '@makerx/node-common'
-import { HttpClient, HttpResponseError, getClientCredentialsToken } from '@makerx/node-common'
+import { HttpClient, getClientCredentialsToken } from '@makerx/node-common'
 import { REQUEST_CACHE_TTL, requestCallbackCache } from '../../cache'
 import type { BaseContext } from '../../context'
 import type {
@@ -12,6 +12,7 @@ import type {
   PresentationResponse,
   RequestErrorResponse,
 } from '../../generated/graphql'
+import { throwBestResponseErrorInfo } from './utils'
 
 type RequestServiceOptions = HttpClientOptions<BaseContext> & {
   issuanceCallbackUrl: string
@@ -88,11 +89,10 @@ export class VerifiedIdRequestService extends HttpClient<BaseContext> {
       if (request.callback) await requestCallbackCache.set(response.requestId, JSON.stringify(request.callback), { ttl: REQUEST_CACHE_TTL })
       else this.options.logger?.warn('No callback provided for issuance request')
       return response
-    } catch (error) {
-      // RequestErrorResponse is returned via a 400 + JSON body
-      if (error instanceof HttpResponseError && error.responseInfo.responseJson)
-        return error.responseInfo.responseJson as RequestErrorResponse
-      throw error
+    } catch (error: any) {
+      const { message, ...rest } = error
+      this.options.logger?.error('Error creating issuance request', { message, ...rest })
+      throwBestResponseErrorInfo(error)
     }
   }
 
@@ -121,11 +121,10 @@ export class VerifiedIdRequestService extends HttpClient<BaseContext> {
       if (request.callback) await requestCallbackCache.set(response.requestId, JSON.stringify(request.callback), { ttl: REQUEST_CACHE_TTL })
       else this.options.logger?.warn('No callback provided for presentation request')
       return response
-    } catch (error) {
-      // RequestErrorResponse is returned via a 400 + JSON body
-      if (error instanceof HttpResponseError && error.responseInfo.responseJson)
-        return error.responseInfo.responseJson as RequestErrorResponse
-      throw error
+    } catch (error: any) {
+      const { message, ...rest } = error
+      this.options.logger?.error('Error creating presentation request', { message, ...rest })
+      throwBestResponseErrorInfo(error)
     }
   }
 }

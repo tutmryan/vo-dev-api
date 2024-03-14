@@ -1,9 +1,10 @@
 import type { HttpClientOptions } from '@makerx/node-common'
-import { HttpClient, HttpResponseError } from '@makerx/node-common'
+import { HttpClient } from '@makerx/node-common'
 import { createHash } from 'crypto'
 import type { Authority, NetworkContract, NetworkIssuer, NetworkIssuersWhere } from '../../generated/graphql'
 import { Lazy } from '../../util/lazy'
 import type { Contract, CreateContractInput, Credential, UpdateContractInput } from './admin.types'
+import { throwBestResponseErrorInfo } from './utils'
 
 interface Value<T> {
   value: T
@@ -22,7 +23,7 @@ export class VerifiedIdAdminService extends HttpClient {
     } catch (error: any) {
       const { message, ...rest } = error
       this.options.logger?.error('Error creating contract', { message, ...rest })
-      this.throwBestResponseErrorInfo(error)
+      throwBestResponseErrorInfo(error)
     }
   }
 
@@ -36,7 +37,7 @@ export class VerifiedIdAdminService extends HttpClient {
     } catch (error: any) {
       const { message, ...rest } = error
       this.options.logger?.error('Error updating contract', { message, ...rest })
-      this.throwBestResponseErrorInfo(error)
+      throwBestResponseErrorInfo(error)
     }
   }
 
@@ -87,13 +88,7 @@ export class VerifiedIdAdminService extends HttpClient {
     } catch (error: any) {
       const { message, ...rest } = error
       this.options.logger?.error('Error revoking credential', { message, ...rest })
-      this.throwBestResponseErrorInfo(error)
+      throwBestResponseErrorInfo(error)
     }
-  }
-
-  private throwBestResponseErrorInfo(error: HttpResponseError): never {
-    if (error instanceof HttpResponseError && error.responseInfo.responseJson)
-      throw (error.responseInfo.responseJson as any).error ?? error.responseInfo.responseJson
-    throw error
   }
 }
