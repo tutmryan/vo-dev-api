@@ -9,7 +9,13 @@ import { WSInstrumentation } from 'opentelemetry-instrumentation-ws'
 export const instrumentations = [
   new ExpressInstrumentation(),
   new WinstonInstrumentation(),
-  new GraphQLInstrumentation(),
+  new GraphQLInstrumentation({
+    // Don't create spans for the execution of the default resolver on object properties.
+    ignoreTrivialResolveSpans: true,
+    // Merge list items into a single element.
+    // Example: `users.*.name` instead of `users.0.name`, `users.1.name`
+    mergeItems: true,
+  }),
   new WSInstrumentation(),
   new TediousInstrumentation(),
   new IORedisInstrumentation(),

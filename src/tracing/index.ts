@@ -2,11 +2,12 @@ import type { ProxyTracerProvider } from '@opentelemetry/api'
 import { trace } from '@opentelemetry/api'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { Resource } from '@opentelemetry/resources'
-import type { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
+import type { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_NAMESPACE } from '@opentelemetry/semantic-conventions'
 import type { AzureMonitorOpenTelemetryOptions } from 'applicationinsights'
 import { useAzureMonitor } from 'applicationinsights'
 import { instrumentations } from './instrumentations'
+import { RemoveSelect1SpansSampler } from './remove-select1-spans-sampler'
 
 const resource = Resource.EMPTY as any as Required<AzureMonitorOpenTelemetryOptions>['resource'] // type conflict between @opentelemetry/resources and @azure/monitor-opentelemetry
 resource.attributes[SEMRESATTRS_SERVICE_NAME] = 'VerifiableOrchestration'
@@ -30,6 +31,10 @@ useAzureMonitor({
 })
 
 const tracerProvider = (trace.getTracerProvider() as ProxyTracerProvider).getDelegate() as NodeTracerProvider
+
+// use RemoveSelect1SpansSampler
+const config = (tracerProvider as any)._config as NodeTracerConfig
+config.sampler = new RemoveSelect1SpansSampler(config.sampler!)
 
 registerInstrumentations({
   tracerProvider,
