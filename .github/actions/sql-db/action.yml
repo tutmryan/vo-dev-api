@@ -45,7 +45,7 @@ runs:
       id: deploy-sql-db
       uses: azure/arm-deploy@v1
       with:
-        deploymentName: ${{env.NOW}}-sql-db-github-actions
+        deploymentName: ${{env.NOW}}-sql-db-${{inputs.resource-prefix}}-github-actions
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/sql-db.bicep
         parameters: >-
