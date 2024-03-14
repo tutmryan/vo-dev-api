@@ -13,6 +13,8 @@ $constants = @{
   requestedResourceAccessFile = Join-Path -Path $PSScriptRoot -ChildPath 'app-requested-resource-accesses.json'
   apiSecretName               = 'Secret for API to call VID'
   staticSiteSecretName        = 'Secret for static site AUTH'
+  privacyStatementUrl         = 'https://verifiedorchestration.com/privacy-policy/'
+  termsOfServiceUrl           = 'https://verifiedorchestration.com/terms-and-conditions/'
 }
 
 #
@@ -103,6 +105,23 @@ if ($null -ne $staticSiteSecret) {
   Write-Output ('Created a new static site AUTH secret')
   Write-Output "staticSiteSecret=$($newStaticSiteSecret.password)" >> $Env:GITHUB_OUTPUT
 }
+
+$setInformationalUrlsPayload = @{
+  info = @{
+    privacyStatementUrl = $constants.privacyStatementUrl
+    termsOfServiceUrl   = $constants.termsOfServiceUrl
+  }
+}
+$setInformationalUrlsPayloadJson = ($setInformationalUrlsPayload  | ConvertTo-Json -Depth 10 -Compress)
+Write-Output 'Setting privacy statement and terms of service urls...'
+
+az rest `
+  --method patch `
+  --headers Content-Type=application/json `
+  --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationObjectId) `
+  --body $setInformationalUrlsPayloadJson
+
+Write-Output 'Set privacy statement and terms of service urls...'
 
 # Setting verified publisher needs to be done manually via the Azure Portal.
 # Token received by the Azure CLI, `az login`, does not seem to have necessary scopes to call `setVerifiedPublisher` endpoint.
