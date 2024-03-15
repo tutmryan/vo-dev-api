@@ -16,13 +16,13 @@ Provides information about the requested approval.
 """
 input RequestedApproval {
   """
-  Any additional data that is required for / relevent to the approval; the schema of which would vary by type.
+  Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type.
   """
   data: JSON
   """
   The presentation request definition for this approval.
   """
-  presentationRequestInput: PresentationRequestInput
+  presentationRequestInput: PresentationRequestInput!
 }
 
 """
