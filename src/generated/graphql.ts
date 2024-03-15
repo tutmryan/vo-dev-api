@@ -92,6 +92,37 @@ export type AcquireLimitedAccessTokenInput = {
   requestableCredentials?: InputMaybe<Array<RequestedCredentialSpecificationInput>>;
 };
 
+/** An instance of an approval. */
+export type Approval = {
+  __typename?: 'Approval';
+  /** When the approval was actioned. */
+  actionedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The platform user (application or person) that actioned the approval. */
+  actionedBy?: Maybe<User>;
+  /** When the approval expires; presentations cannot be made for an expired approval. */
+  expiresAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  /** Indicates whether the approval has been granted. */
+  isApproved?: Maybe<Scalars['Boolean']['output']>;
+  /** The presentation that was provided to satisfy approval requirement */
+  presentation: Presentation;
+  /** The details of the approval */
+  requestedApproval: RequestedApproval;
+  requestedAt: Scalars['DateTime']['output'];
+  /** The platform user (application or person) that requested the approval. */
+  requestedBy: User;
+  /** The approval status. */
+  status: ApprovalStatus;
+};
+
+/** The status of the approval. */
+export enum ApprovalStatus {
+  Active = 'active',
+  Approved = 'approved',
+  Expired = 'expired',
+  Rejected = 'rejected'
+}
+
 /** A configured authority or verifiable credential service instance */
 export type Authority = {
   __typename?: 'Authority';
@@ -1817,6 +1848,11 @@ export type RequestInnerError = {
   target?: Maybe<Scalars['String']['output']>;
 };
 
+/** Provides information about the requested approval. */
+export type RequestedApproval = {
+  presentationRequestInput?: InputMaybe<PresentationRequestInput>;
+};
+
 /** The configuration information used on the presentation request */
 export type RequestedConfiguration = {
   __typename?: 'RequestedConfiguration';
@@ -2453,6 +2489,8 @@ export type ResolversTypes = {
   AcquireLimitedAccessTokenInput: AcquireLimitedAccessTokenInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  Approval: ResolverTypeWrapper<Omit<Approval, 'actionedBy' | 'presentation' | 'requestedBy'> & { actionedBy?: Maybe<ResolversTypes['User']>, presentation: ResolversTypes['Presentation'], requestedBy: ResolversTypes['User'] }>;
+  ApprovalStatus: ApprovalStatus;
   Authority: ResolverTypeWrapper<Authority>;
   BackgroundJobActiveEvent: ResolverTypeWrapper<BackgroundJobActiveEvent>;
   BackgroundJobCompletedEvent: ResolverTypeWrapper<BackgroundJobCompletedEvent>;
@@ -2553,6 +2591,7 @@ export type ResolversTypes = {
   RequestErrorResponse: ResolverTypeWrapper<RequestErrorResponse>;
   RequestErrorWithInner: ResolverTypeWrapper<RequestErrorWithInner>;
   RequestInnerError: ResolverTypeWrapper<RequestInnerError>;
+  RequestedApproval: RequestedApproval;
   RequestedConfiguration: ResolverTypeWrapper<RequestedConfiguration>;
   RequestedCredential: ResolverTypeWrapper<RequestedCredential>;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
@@ -2587,6 +2626,7 @@ export type ResolversParentTypes = {
   AcquireLimitedAccessTokenInput: AcquireLimitedAccessTokenInput;
   Boolean: Scalars['Boolean']['output'];
   ID: Scalars['ID']['output'];
+  Approval: Omit<Approval, 'actionedBy' | 'presentation' | 'requestedBy'> & { actionedBy?: Maybe<ResolversParentTypes['User']>, presentation: ResolversParentTypes['Presentation'], requestedBy: ResolversParentTypes['User'] };
   Authority: Authority;
   BackgroundJobActiveEvent: BackgroundJobActiveEvent;
   BackgroundJobCompletedEvent: BackgroundJobCompletedEvent;
@@ -2675,6 +2715,7 @@ export type ResolversParentTypes = {
   RequestErrorResponse: RequestErrorResponse;
   RequestErrorWithInner: RequestErrorWithInner;
   RequestInnerError: RequestInnerError;
+  RequestedApproval: RequestedApproval;
   RequestedConfiguration: RequestedConfiguration;
   RequestedCredential: RequestedCredential;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
@@ -2712,6 +2753,20 @@ export type CacheControlDirectiveResolver<Result, Parent, ContextType = GraphQLC
 export type AccessTokenResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AccessTokenResponse'] = ResolversParentTypes['AccessTokenResponse']> = {
   expires?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ApprovalResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Approval'] = ResolversParentTypes['Approval']> = {
+  actionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  actionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  expiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isApproved?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  presentation?: Resolver<ResolversTypes['Presentation'], ParentType, ContextType>;
+  requestedApproval?: Resolver<ResolversTypes['RequestedApproval'], ParentType, ContextType>;
+  requestedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  requestedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['ApprovalStatus'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -3243,6 +3298,7 @@ export type WebDidModelResolvers<ContextType = GraphQLContext, ParentType extend
 
 export type Resolvers<ContextType = GraphQLContext> = {
   AccessTokenResponse?: AccessTokenResponseResolvers<ContextType>;
+  Approval?: ApprovalResolvers<ContextType>;
   Authority?: AuthorityResolvers<ContextType>;
   BackgroundJobActiveEvent?: BackgroundJobActiveEventResolvers<ContextType>;
   BackgroundJobCompletedEvent?: BackgroundJobCompletedEventResolvers<ContextType>;

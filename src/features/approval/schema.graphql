@@ -1,0 +1,62 @@
+# eslint-disable @graphql-eslint/strict-id-in-types
+# eslint-disable @graphql-eslint/naming-convention
+
+"""
+The status of the approval.
+"""
+enum ApprovalStatus {
+  active
+  expired
+  approved
+  rejected
+}
+
+"""
+Provides information about the requested approval.
+"""
+input RequestedApproval {
+  presentationRequestInput: PresentationRequestInput
+}
+
+"""
+An instance of an approval.
+"""
+type Approval {
+  id: ID!
+
+  requestedAt: DateTime!
+
+  """
+  The platform user (application or person) that requested the approval.
+  """
+  requestedBy: User!
+  """
+  The presentation that was provided to satisfy approval requirement
+  """
+  presentation: Presentation!
+  """
+  When the approval expires; presentations cannot be made for an expired approval.
+  """
+  expiresAt: DateTime!
+  """
+  Indicates whether the approval has been granted.
+  """
+  isApproved: Boolean
+  """
+  The platform user (application or person) that actioned the approval.
+  """
+  actionedBy: User
+  """
+  When the approval was actioned.
+  """
+  actionedAt: DateTime
+  """
+  The approval status.
+  """
+  status: ApprovalStatus!
+
+  """
+  The details of the approval
+  """
+  requestedApproval: RequestedApproval!
+}
