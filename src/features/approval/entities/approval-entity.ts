@@ -28,6 +28,9 @@ export class ApprovalEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'bit', nullable: true })
   isApproved!: boolean | null
 
+  @Column({ type: 'nvarchar', nullable: true })
+  approvalReason!: string | null
+
   @ManyToOne(() => UserEntity, { nullable: true })
   actionedBy!: Promise<UserEntity | null>
 
@@ -36,6 +39,15 @@ export class ApprovalEntity extends AuditedAndTrackedEntity {
 
   @Column({ type: 'datetimeoffset', nullable: true })
   actionedAt!: Date | null
+
+  @Column({ type: 'nvarchar' })
+  type!: string
+
+  @Column({ type: 'nvarchar', nullable: true })
+  requestedReason!: string | null
+
+  @Column({ type: 'nvarchar', nullable: true })
+  url!: string | null
 
   @Column({ type: 'nvarchar', length: 'MAX' })
   requestedApprovalJson!: string

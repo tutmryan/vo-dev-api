@@ -15,6 +15,13 @@ enum ApprovalStatus {
 Provides information about the requested approval.
 """
 input RequestedApproval {
+  """
+  Any additional data that is required for / relevent to the approval; the schema of which would vary by type.
+  """
+  data: JSON
+  """
+  The presentation request definition for this approval.
+  """
   presentationRequestInput: PresentationRequestInput
 }
 
@@ -43,6 +50,10 @@ type Approval {
   """
   isApproved: Boolean
   """
+  Optional reason for / context around approving or rejecting the approval.
+  """
+  approvalReason: String
+  """
   The platform user (application or person) that actioned the approval.
   """
   actionedBy: User
@@ -54,6 +65,18 @@ type Approval {
   The approval status.
   """
   status: ApprovalStatus!
+  """
+  The type of approval, useful for partioning and filtering approvals.
+  """
+  type: String!
+  """
+  Optional URL to the artifact for approval.
+  """
+  url: String
+  """
+  Optional reason for / context around requesting this approval.
+  """
+  requestedReason: String
 
   """
   The details of the approval
