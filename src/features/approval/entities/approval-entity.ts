@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, ManyToOne, RelationId } from 'typeorm'
-import type { RequestedApproval } from '../../../generated/graphql'
+import type { PresentationRequestInput } from '../../../generated/graphql'
 import { ApprovalStatus } from '../../../generated/graphql'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { PresentationEntity } from '../../presentation/entities/presentation-entity'
@@ -43,6 +43,9 @@ export class ApprovalEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'nvarchar' })
   type!: string
 
+  @Column({ type: 'nvarchar' })
+  requestedForId!: string
+
   @Column({ type: 'nvarchar', nullable: true })
   requestedReason!: string | null
 
@@ -50,10 +53,17 @@ export class ApprovalEntity extends AuditedAndTrackedEntity {
   url!: string | null
 
   @Column({ type: 'nvarchar', length: 'MAX' })
-  requestedApprovalJson!: string
+  requestedForDataJson!: string | null
 
-  get requestedApproval(): RequestedApproval {
-    return JSON.parse(this.requestedApprovalJson)
+  get requestedForData(): any | null {
+    return this.requestedForDataJson ? JSON.parse(this.requestedForDataJson) : null
+  }
+
+  @Column({ type: 'nvarchar', length: 'MAX' })
+  presentationRequestInputJson!: string
+
+  get presentationRequestInput(): PresentationRequestInput {
+    return JSON.parse(this.presentationRequestInputJson)
   }
 
   get status(): ApprovalStatus {
