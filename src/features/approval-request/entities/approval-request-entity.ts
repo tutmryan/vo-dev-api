@@ -30,7 +30,7 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'nvarchar' })
   requestType!: string
 
-  @Column({ type: 'nvarchar' })
+  @Column({ type: 'nvarchar', nullable: true })
   correlationId!: string | null
 
   @Column({ type: 'nvarchar', nullable: true })
@@ -39,14 +39,14 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'nvarchar', nullable: true })
   purpose!: string | null
 
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
   requestDataJson!: string | null
 
   get requestData(): any | null {
     return this.requestDataJson ? JSON.parse(this.requestDataJson) : null
   }
 
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
   callbackJson!: string | null
 
   get callback(): any | null {
@@ -71,7 +71,7 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => PresentationEntity)
   presentation!: Promise<PresentationEntity>
 
-  @Column()
+  @Column({ type: 'uniqueidentifier', nullable: true })
   presentationId!: string
 
   @Column({ type: 'bit', nullable: true })
