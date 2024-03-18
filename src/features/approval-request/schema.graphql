@@ -11,6 +11,9 @@ enum ApprovalRequestStatus {
   rejected
 }
 
+"""
+The input for creating a new approval request.
+"""
 input ApprovalRequestInput {
   """
   When the approval expires; presentations cannot be made for an expired approval.
