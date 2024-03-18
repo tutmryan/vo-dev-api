@@ -14,7 +14,7 @@ enum ApprovalStatus {
 """
 An instance of an approval.
 """
-type Approval {
+type ApprovalRequest {
   id: ID!
 
   requestedAt: DateTime!
@@ -26,7 +26,7 @@ type Approval {
   """
   The presentation that was provided to satisfy approval requirement
   """
-  presentation: Presentation!
+  presentation: Presentation
   """
   When the approval expires; presentations cannot be made for an expired approval.
   """
@@ -36,44 +36,40 @@ type Approval {
   """
   isApproved: Boolean
   """
-  Optional reason for / context around approving or rejecting the approval.
+  Optional comment on approval or rejection of this request.
   """
-  approvalReason: String
-  """
-  The platform user (application or person) that actioned the approval.
-  """
-  actionedBy: User
-  """
-  When the approval was actioned.
-  """
-  actionedAt: DateTime
+  actionedComment: String
   """
   The approval status.
   """
   status: ApprovalStatus!
   """
-  The type of approval, useful for partioning and filtering approvals.
+  The type of approval request, useful for partioning and filtering different types of approval requests.
   """
-  type: String!
+  requestType: String!
   """
-  The identifier of the artifact for approval.
+  The optional originating source entity ID of the artifact requiring approval.
   """
-  requestedForId: ID!
+  correlationId: ID
   """
   Optional URL to the artifact for approval.
   """
-  url: String
+  referenceUrl: String
   """
-  Optional reason for / context around requesting this approval.
+  Optional purpose for requesting approval.
   """
-  requestedReason: String
+  purpose: String
   """
   Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type.
   """
-  requestedForData: JSON
+  requestData: JSON
 
   """
   The presentation request definition for this approval.
   """
   presentationRequestInput: PresentationRequestInput!
+  """
+  Callback will be invoked when the approval request is actioned.
+  """
+  callback: Callback
 }
