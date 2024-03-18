@@ -114,4 +114,12 @@ type ApprovalRequest {
   The approval status.
   """
   status: ApprovalRequestStatus!
+  """
+  The user who last updated the approval request.
+  """
+  updatedBy: User
+  """
+  When the approval request was last updated.
+  """
+  updatedAt: DateTime
 }

@@ -1,10 +1,9 @@
-import { Column, CreateDateColumn, Entity, ManyToOne } from 'typeorm'
+import { Column, Entity, ManyToOne } from 'typeorm'
 import type { Callback, PresentationRequestInput } from '../../../generated/graphql'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { PresentationEntity } from '../../presentation/entities/presentation-entity'
-import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('approval_request')
 export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
@@ -12,7 +11,6 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
     args?: Pick<
       ApprovalRequestEntity,
       | 'expiresAt'
-      | 'requestedById'
       | 'requestType'
       | 'correlationId'
       | 'referenceUrl'
@@ -26,17 +24,8 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
     if (args) typeSafeAssign(this, args)
   }
 
-  @CreateDateColumn({ type: 'datetimeoffset' })
-  requestedAt!: Date
-
   @Column({ type: 'datetimeoffset' })
   expiresAt!: Date
-
-  @ManyToOne(() => UserEntity)
-  requestedBy!: Promise<UserEntity>
-
-  @Column()
-  requestedById!: string
 
   @Column({ type: 'nvarchar' })
   requestType!: string

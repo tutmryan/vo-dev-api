@@ -98,6 +98,8 @@ export type ApprovalRequest = {
   __typename?: 'ApprovalRequest';
   /** Optional comment on approval or rejection of this request. */
   actionedComment?: Maybe<Scalars['String']['output']>;
+  /** Callback will be invoked when the approval request is actioned. */
+  callback?: Maybe<Scalars['JSONObject']['output']>;
   /** The optional originating source entity ID of the artifact requiring approval. */
   correlationId?: Maybe<Scalars['ID']['output']>;
   /** When the approval expires; presentations cannot be made for an expired approval. */
@@ -107,6 +109,8 @@ export type ApprovalRequest = {
   isApproved?: Maybe<Scalars['Boolean']['output']>;
   /** The presentation that was provided to satisfy approval requirement */
   presentation?: Maybe<Presentation>;
+  /** The presentation request definition for this approval. */
+  presentationRequest: Scalars['JSONObject']['output'];
   /** Optional purpose for requesting approval. */
   purpose?: Maybe<Scalars['String']['output']>;
   /** Optional URL to the artifact for approval. */
@@ -120,6 +124,10 @@ export type ApprovalRequest = {
   requestedBy: User;
   /** The approval status. */
   status: ApprovalRequestStatus;
+  /** When the approval request was last updated. */
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The user who last updated the approval request. */
+  updatedBy?: Maybe<User>;
 };
 
 export type ApprovalRequestInput = {
@@ -2786,11 +2794,13 @@ export type AccessTokenResponseResolvers<ContextType = GraphQLContext, ParentTyp
 
 export type ApprovalRequestResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApprovalRequest'] = ResolversParentTypes['ApprovalRequest']> = {
   actionedComment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  callback?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   correlationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   expiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isApproved?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   presentation?: Resolver<Maybe<ResolversTypes['Presentation']>, ParentType, ContextType>;
+  presentationRequest?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
   purpose?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   referenceUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   requestData?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
@@ -2798,6 +2808,8 @@ export type ApprovalRequestResolvers<ContextType = GraphQLContext, ParentType ex
   requestedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   requestedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['ApprovalRequestStatus'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

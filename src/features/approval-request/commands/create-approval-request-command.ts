@@ -14,7 +14,6 @@ export async function CreateApprovalRequestCommand(this: CommandContext, input: 
     correlationId: input.correlationId ?? null,
     referenceUrl: input.referenceUrl ?? null,
     purpose: input.purpose ?? null,
-    requestedById: user.id,
     presentationRequestJson: JSON.stringify(input.presentationRequestInput),
     requestDataJson: JSON.stringify(input.requestData),
     callbackJson: JSON.stringify(input.callback),

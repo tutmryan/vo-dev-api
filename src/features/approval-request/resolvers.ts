@@ -6,5 +6,7 @@ export const resolvers: Resolvers = {
   Mutation: {
     createApprovalRequest: (_, { request }, context) => dispatch(context, CreateApprovalRequestCommand, request),
   },
-  ApprovalRequest: {},
+  ApprovalRequest: {
+    requestedAt: ({ createdAt }) => createdAt,
+  },
 }

@@ -44,6 +44,7 @@ export const resolvers: Resolvers = {
     ...createdByUpdatedBy,
   },
   ApprovalRequest: {
-    requestedBy: ({ requestedById }: ApprovalRequestEntity, _, { dataLoaders: { users } }) => users.load(requestedById),
+    requestedBy: ({ createdById }: ApprovalRequestEntity, _, { dataLoaders: { users } }) => users.load(createdById),
+    updatedBy: ({ updatedById }, _, { dataLoaders: { users } }) => (updatedById ? users.load(updatedById) : null),
   },
 }
