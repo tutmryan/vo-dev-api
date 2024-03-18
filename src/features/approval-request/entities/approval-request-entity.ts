@@ -1,0 +1,100 @@
+import { Column, CreateDateColumn, Entity, ManyToOne } from 'typeorm'
+import type { Callback, PresentationRequestInput } from '../../../generated/graphql'
+import { ApprovalRequestStatus } from '../../../generated/graphql'
+import { typeSafeAssign } from '../../../util/type-safe-assign'
+import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
+import { PresentationEntity } from '../../presentation/entities/presentation-entity'
+import { UserEntity } from '../../users/entities/user-entity'
+
+@Entity('approval_request')
+export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
+  constructor(
+    args?: Pick<
+      ApprovalRequestEntity,
+      | 'expiresAt'
+      | 'requestedById'
+      | 'requestType'
+      | 'correlationId'
+      | 'referenceUrl'
+      | 'purpose'
+      | 'requestDataJson'
+      | 'callbackJson'
+      | 'presentationRequestJson'
+    >,
+  ) {
+    super()
+    if (args) typeSafeAssign(this, args)
+  }
+
+  @CreateDateColumn({ type: 'datetimeoffset' })
+  requestedAt!: Date
+
+  @Column({ type: 'datetimeoffset' })
+  expiresAt!: Date
+
+  @ManyToOne(() => UserEntity)
+  requestedBy!: Promise<UserEntity>
+
+  @Column()
+  requestedById!: string
+
+  @Column({ type: 'nvarchar' })
+  requestType!: string
+
+  @Column({ type: 'nvarchar' })
+  correlationId!: string | null
+
+  @Column({ type: 'nvarchar', nullable: true })
+  referenceUrl!: string | null
+
+  @Column({ type: 'nvarchar', nullable: true })
+  purpose!: string | null
+
+  @Column({ type: 'nvarchar', length: 'MAX' })
+  requestDataJson!: string | null
+
+  get requestData(): any | null {
+    return this.requestDataJson ? JSON.parse(this.requestDataJson) : null
+  }
+
+  @Column({ type: 'nvarchar', length: 'MAX' })
+  callbackJson!: string | null
+
+  get callback(): any | null {
+    return this.callbackJson ? JSON.parse(this.callbackJson) : null
+  }
+
+  get callbackInput(): Callback | null {
+    return this.callbackJson ? JSON.parse(this.callbackJson) : null
+  }
+
+  @Column({ type: 'nvarchar', length: 'MAX' })
+  presentationRequestJson!: string
+
+  get presentationRequest(): any | null {
+    return this.presentationRequestJson ? JSON.parse(this.presentationRequestJson) : null
+  }
+
+  get presentationRequestInput(): PresentationRequestInput | null {
+    return this.presentationRequestJson ? JSON.parse(this.presentationRequestJson) : null
+  }
+
+  @ManyToOne(() => PresentationEntity)
+  presentation!: Promise<PresentationEntity>
+
+  @Column()
+  presentationId!: string
+
+  @Column({ type: 'bit', nullable: true })
+  isApproved!: boolean | null
+
+  @Column({ type: 'nvarchar', nullable: true })
+  actionedComment!: string | null
+
+  get status(): ApprovalRequestStatus {
+    if (this.isApproved) return ApprovalRequestStatus.Approved
+    if (this.isApproved === false) return ApprovalRequestStatus.Rejected
+    if (this.expiresAt.getTime() < Date.now()) return ApprovalRequestStatus.Expired
+    return ApprovalRequestStatus.Active
+  }
+}

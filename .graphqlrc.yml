@@ -23,6 +23,7 @@ extensions:
                 Presentation: ../features/presentation/entities/presentation-entity#PresentationEntity
                 Identity: ../features/identity/entities/identity-entity#IdentityEntity
                 Partner: ../features/network/entities/partner-entity#PartnerEntity
+                ApprovalRequest: ../features/approval-request/entities/approval-request-entity#ApprovalRequestEntity
         config:
           strictScalars: true
           scalars:

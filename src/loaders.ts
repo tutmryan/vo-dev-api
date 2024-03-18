@@ -2,6 +2,7 @@ import { contractLoader } from './features/contracts/loaders'
 import { identityLoader } from './features/identity/loaders'
 import { issuanceCountByContractLoader, issuanceCountByIdentityLoader, issuanceLoader } from './features/issuance/loaders'
 import { partnerLoader } from './features/network/loaders'
+import { presentationLoader } from './features/presentation/loaders'
 import { templateLoader } from './features/templates/loaders'
 import { userLoader } from './features/users/loaders'
 
@@ -16,4 +17,5 @@ export const createDataLoaders = () => ({
   issuanceCountByIdentity: issuanceCountByIdentityLoader(),
   issuanceCountByContract: issuanceCountByContractLoader(),
   partners: partnerLoader(),
+  presentations: presentationLoader(),
 })

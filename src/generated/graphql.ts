@@ -7,6 +7,7 @@ import { IssuanceEntity } from '../features/issuance/entities/issuance-entity';
 import { PresentationEntity } from '../features/presentation/entities/presentation-entity';
 import { IdentityEntity } from '../features/identity/entities/identity-entity';
 import { PartnerEntity } from '../features/network/entities/partner-entity';
+import { ApprovalRequestEntity } from '../features/approval-request/entities/approval-request-entity';
 import { GraphQLContext } from '../context';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
@@ -93,30 +94,55 @@ export type AcquireLimitedAccessTokenInput = {
 };
 
 /** An instance of an approval. */
-export type Approval = {
-  __typename?: 'Approval';
-  /** When the approval was actioned. */
-  actionedAt?: Maybe<Scalars['DateTime']['output']>;
-  /** The platform user (application or person) that actioned the approval. */
-  actionedBy?: Maybe<User>;
+export type ApprovalRequest = {
+  __typename?: 'ApprovalRequest';
+  /** Optional comment on approval or rejection of this request. */
+  actionedComment?: Maybe<Scalars['String']['output']>;
+  /** The optional originating source entity ID of the artifact requiring approval. */
+  correlationId?: Maybe<Scalars['ID']['output']>;
   /** When the approval expires; presentations cannot be made for an expired approval. */
   expiresAt: Scalars['DateTime']['output'];
   id: Scalars['ID']['output'];
   /** Indicates whether the approval has been granted. */
   isApproved?: Maybe<Scalars['Boolean']['output']>;
   /** The presentation that was provided to satisfy approval requirement */
-  presentation: Presentation;
-  /** The details of the approval */
-  requestedApproval: RequestedApproval;
+  presentation?: Maybe<Presentation>;
+  /** Optional purpose for requesting approval. */
+  purpose?: Maybe<Scalars['String']['output']>;
+  /** Optional URL to the artifact for approval. */
+  referenceUrl?: Maybe<Scalars['String']['output']>;
+  /** Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type. */
+  requestData?: Maybe<Scalars['JSONObject']['output']>;
+  /** The type of approval request, useful for partioning and filtering different types of approval requests. */
+  requestType: Scalars['String']['output'];
   requestedAt: Scalars['DateTime']['output'];
   /** The platform user (application or person) that requested the approval. */
   requestedBy: User;
   /** The approval status. */
-  status: ApprovalStatus;
+  status: ApprovalRequestStatus;
+};
+
+export type ApprovalRequestInput = {
+  /** Callback will be invoked when the approval request is actioned. */
+  callback?: InputMaybe<Callback>;
+  /** The optional originating source entity ID of the artifact requiring approval. */
+  correlationId?: InputMaybe<Scalars['ID']['input']>;
+  /** When the approval expires; presentations cannot be made for an expired approval. */
+  expiresAt: Scalars['DateTime']['input'];
+  /** The presentation request definition for this approval. */
+  presentationRequestInput: PresentationRequestInput;
+  /** Optional purpose for requesting approval. */
+  purpose?: InputMaybe<Scalars['String']['input']>;
+  /** Optional URL to the artifact for approval. */
+  referenceUrl?: InputMaybe<Scalars['String']['input']>;
+  /** Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type. */
+  requestData?: InputMaybe<Scalars['JSONObject']['input']>;
+  /** The type of approval request, useful for partioning and filtering different types of approval requests. */
+  requestType: Scalars['String']['input'];
 };
 
 /** The status of the approval. */
-export enum ApprovalStatus {
+export enum ApprovalRequestStatus {
   Active = 'active',
   Approved = 'approved',
   Expired = 'expired',
@@ -1082,6 +1108,8 @@ export type Mutation = {
    * - Issuance and presentation data can be queried, but only for the specified identity.
    */
   acquireLimitedAccessToken: AccessTokenResponse;
+  /** Creates a new approval request. */
+  createApprovalRequest: ApprovalRequest;
   /** Creates a new contract */
   createContract: Contract;
   /** The result of this request returns a QR code with a link to start the issuance process, or an error */
@@ -1123,6 +1151,11 @@ export type Mutation = {
 
 export type MutationAcquireLimitedAccessTokenArgs = {
   input: AcquireLimitedAccessTokenInput;
+};
+
+
+export type MutationCreateApprovalRequestArgs = {
+  request: ApprovalRequestInput;
 };
 
 
@@ -1848,11 +1881,6 @@ export type RequestInnerError = {
   target?: Maybe<Scalars['String']['output']>;
 };
 
-/** Provides information about the requested approval. */
-export type RequestedApproval = {
-  presentationRequestInput?: InputMaybe<PresentationRequestInput>;
-};
-
 /** The configuration information used on the presentation request */
 export type RequestedConfiguration = {
   __typename?: 'RequestedConfiguration';
@@ -2489,8 +2517,9 @@ export type ResolversTypes = {
   AcquireLimitedAccessTokenInput: AcquireLimitedAccessTokenInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
-  Approval: ResolverTypeWrapper<Omit<Approval, 'actionedBy' | 'presentation' | 'requestedBy'> & { actionedBy?: Maybe<ResolversTypes['User']>, presentation: ResolversTypes['Presentation'], requestedBy: ResolversTypes['User'] }>;
-  ApprovalStatus: ApprovalStatus;
+  ApprovalRequest: ResolverTypeWrapper<ApprovalRequestEntity>;
+  ApprovalRequestInput: ApprovalRequestInput;
+  ApprovalRequestStatus: ApprovalRequestStatus;
   Authority: ResolverTypeWrapper<Authority>;
   BackgroundJobActiveEvent: ResolverTypeWrapper<BackgroundJobActiveEvent>;
   BackgroundJobCompletedEvent: ResolverTypeWrapper<BackgroundJobCompletedEvent>;
@@ -2591,7 +2620,6 @@ export type ResolversTypes = {
   RequestErrorResponse: ResolverTypeWrapper<RequestErrorResponse>;
   RequestErrorWithInner: ResolverTypeWrapper<RequestErrorWithInner>;
   RequestInnerError: ResolverTypeWrapper<RequestInnerError>;
-  RequestedApproval: RequestedApproval;
   RequestedConfiguration: ResolverTypeWrapper<RequestedConfiguration>;
   RequestedCredential: ResolverTypeWrapper<RequestedCredential>;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
@@ -2626,7 +2654,8 @@ export type ResolversParentTypes = {
   AcquireLimitedAccessTokenInput: AcquireLimitedAccessTokenInput;
   Boolean: Scalars['Boolean']['output'];
   ID: Scalars['ID']['output'];
-  Approval: Omit<Approval, 'actionedBy' | 'presentation' | 'requestedBy'> & { actionedBy?: Maybe<ResolversParentTypes['User']>, presentation: ResolversParentTypes['Presentation'], requestedBy: ResolversParentTypes['User'] };
+  ApprovalRequest: ApprovalRequestEntity;
+  ApprovalRequestInput: ApprovalRequestInput;
   Authority: Authority;
   BackgroundJobActiveEvent: BackgroundJobActiveEvent;
   BackgroundJobCompletedEvent: BackgroundJobCompletedEvent;
@@ -2715,7 +2744,6 @@ export type ResolversParentTypes = {
   RequestErrorResponse: RequestErrorResponse;
   RequestErrorWithInner: RequestErrorWithInner;
   RequestInnerError: RequestInnerError;
-  RequestedApproval: RequestedApproval;
   RequestedConfiguration: RequestedConfiguration;
   RequestedCredential: RequestedCredential;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
@@ -2756,17 +2784,20 @@ export type AccessTokenResponseResolvers<ContextType = GraphQLContext, ParentTyp
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type ApprovalResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Approval'] = ResolversParentTypes['Approval']> = {
-  actionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  actionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+export type ApprovalRequestResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApprovalRequest'] = ResolversParentTypes['ApprovalRequest']> = {
+  actionedComment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  correlationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   expiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isApproved?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  presentation?: Resolver<ResolversTypes['Presentation'], ParentType, ContextType>;
-  requestedApproval?: Resolver<ResolversTypes['RequestedApproval'], ParentType, ContextType>;
+  presentation?: Resolver<Maybe<ResolversTypes['Presentation']>, ParentType, ContextType>;
+  purpose?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  referenceUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  requestData?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  requestType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   requestedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   requestedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  status?: Resolver<ResolversTypes['ApprovalStatus'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['ApprovalRequestStatus'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2986,6 +3017,7 @@ export interface LocaleScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
 
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   acquireLimitedAccessToken?: Resolver<ResolversTypes['AccessTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireLimitedAccessTokenArgs, 'input'>>;
+  createApprovalRequest?: Resolver<ResolversTypes['ApprovalRequest'], ParentType, ContextType, RequireFields<MutationCreateApprovalRequestArgs, 'request'>>;
   createContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationCreateContractArgs, 'input'>>;
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
   createPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationCreatePartnerArgs, 'input'>>;
@@ -3298,7 +3330,7 @@ export type WebDidModelResolvers<ContextType = GraphQLContext, ParentType extend
 
 export type Resolvers<ContextType = GraphQLContext> = {
   AccessTokenResponse?: AccessTokenResponseResolvers<ContextType>;
-  Approval?: ApprovalResolvers<ContextType>;
+  ApprovalRequest?: ApprovalRequestResolvers<ContextType>;
   Authority?: AuthorityResolvers<ContextType>;
   BackgroundJobActiveEvent?: BackgroundJobActiveEventResolvers<ContextType>;
   BackgroundJobCompletedEvent?: BackgroundJobCompletedEventResolvers<ContextType>;
