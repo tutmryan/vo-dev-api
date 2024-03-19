@@ -1,0 +1,27 @@
+"""
+Input for acquiring a limited token for approval.
+"""
+input AcquireLimitedApprovalTokenInput {
+  """
+  The ID of the approval request to which access will be limited.
+  """
+  approvalRequestId: ID!
+}
+
+"""
+A limited approval token response.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type ApprovalTokenResponse {
+  token: String!
+  expires: DateTime!
+}
+
+extend type Mutation {
+  """
+  Acquire a limited approval token that can be used to:
+  - create presentation request anonymously
+  - fetch details of the approval request
+  - approve or reject the approval request
+  """
+  acquireLimitedApprovalToken(input: AcquireLimitedApprovalTokenInput!): ApprovalTokenResponse!
+}

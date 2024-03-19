@@ -1,44 +1,7 @@
-import { addDays, startOfToday } from 'date-fns'
-import { graphql } from '../../../generated'
-import type { PresentationRequestInput } from '../../../generated/graphql'
+import { ApprovalRequestStatus, type PresentationRequestInput } from '../../../generated/graphql'
 import { AppRoles } from '../../../shield'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsApp, expectUnauthorizedError } from '../../../test'
-
-export const createApprovalRequestMutation = graphql(
-  `
-  mutation CreateApprovalRequest($input: ApprovalRequestInput!) {
-    createApprovalRequest(request: $input) {
-      id
-      expiresAt
-      requestType
-      correlationId
-      referenceUrl
-      purpose
-      presentationRequest
-      requestData
-      callback
-      requestedAt
-    }
-  }
-` as const,
-)
-
-const sampleInput = {
-  expiresAt: addDays(startOfToday(), 5),
-  requestType: 'test',
-  presentationRequestInput: {
-    requestedCredentials: [
-      {
-        type: 'verifiedContractor',
-        acceptedIssuers: ['did:example:123'],
-      },
-    ],
-    registration: {
-      clientName: 'Approval App',
-      purpose: 'Approve a change',
-    },
-  },
-}
+import { createApprovalRequestMutation, getDefaultApprovalRequestInput } from './create-approval-request'
 
 describe('create approval request mutation', () => {
   beforeAfterAll()
@@ -48,7 +11,7 @@ describe('create approval request mutation', () => {
     const { errors } = await executeOperationAnonymous({
       query: createApprovalRequestMutation,
       variables: {
-        input: sampleInput,
+        input: getDefaultApprovalRequestInput(),
       },
     })
 
@@ -63,7 +26,7 @@ describe('create approval request mutation', () => {
       {
         query: createApprovalRequestMutation,
         variables: {
-          input: sampleInput,
+          input: getDefaultApprovalRequestInput(),
         },
       },
       AppRoles.issue,
@@ -75,6 +38,9 @@ describe('create approval request mutation', () => {
   })
 
   it('creates the approval request successfully', async () => {
+    // Arrange
+    const sampleInput = getDefaultApprovalRequestInput()
+
     // Act
     const { data, errors } = await executeOperationAsApp(
       {
@@ -94,5 +60,6 @@ describe('create approval request mutation', () => {
     expect((data?.createApprovalRequest.presentationRequest as PresentationRequestInput).requestedCredentials[0]?.type).toEqual(
       'verifiedContractor',
     )
+    expect(data?.createApprovalRequest.status).toEqual(ApprovalRequestStatus.Pending)
   })
 })

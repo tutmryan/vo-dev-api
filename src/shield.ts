@@ -73,6 +73,7 @@ export const rules: ShieldSchema<Resolvers> = {
   Mutation: {
     '*': isCredentialAdminUser,
     acquireLimitedAccessToken: and(hasTokenAcquisitionRole, isValidAcquireLimitedAccessTokenRequest),
+    acquireLimitedApprovalToken: allow,
     createIssuanceRequest: isAllowedToIssue,
     createPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedPresentationRequest),
     saveIdentity: or(
@@ -117,6 +118,9 @@ export const rules: ShieldSchema<Resolvers> = {
   },
   ApprovalRequest: {
     '*': or(isApprovalRequestApp, isApprovalRequestAdminUser),
+  },
+  ApprovalTokenResponse: {
+    '*': allow,
   },
 }
 export const permissions = wrappedShield(rules)

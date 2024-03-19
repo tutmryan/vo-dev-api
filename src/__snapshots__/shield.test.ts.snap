@@ -184,6 +184,9 @@ exports[`shield rules are setup correctly 1`] = `
         }
       ]
     },
+    "acquireLimitedApprovalToken": {
+      "rules": []
+    },
     "createIssuanceRequest": {
       "rulesOr": [
         {
@@ -501,6 +504,11 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual"
         }
       ]
+    }
+  },
+  "ApprovalTokenResponse": {
+    "*": {
+      "rules": []
     }
   }
 }"
