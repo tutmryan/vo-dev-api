@@ -1,5 +1,23 @@
 [
   {
+    "allowedMemberTypes": ["Application"],
+    "description": "Provides access to credential issuance, contract and identity operations.",
+    "displayName": "Credential issuance",
+    "id": "92c3bee4-22bf-4929-89f2-053974df3a24",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "VerifiableCredential.Issue"
+  },
+  {
+    "allowedMemberTypes": ["Application"],
+    "description": "Provides access to credential presentation, contract and identity read operations.",
+    "displayName": "Credential presentation",
+    "id": "cc555251-1030-4b4f-84b9-6c102dd9445d",
+    "isEnabled": true,
+    "origin": "Application",
+    "value": "VerifiableCredential.Present"
+  },
+  {
     "id": "a945f817-0bf2-4057-8902-6387916e2baa",
     "allowedMemberTypes": ["Application"],
     "isEnabled": true,
