@@ -28,6 +28,13 @@ export enum UserRoles {
   issuer = 'VerifiableCredential.Issuer',
   credentialAdmin = 'VerifiableCredential.CredentialAdmin',
   partnerAdmin = 'VerifiableCredential.PartnerAdmin',
+  approvalRequestAdmin = 'VerifiableCredential.ApprovalRequestAdmin',
+}
+
+export enum AppRoles {
+  issue = 'VerifiableCredential.Issue',
+  present = 'VerifiableCredential.Present',
+  requestApproval = 'VerifiableCredential.RequestApproval',
 }
 
 const isUserWithReadPermissions = hasAnyRoleRuleWithName('isUserWithReadPermissions', ...Object.values(UserRoles))
@@ -35,10 +42,14 @@ const isUserWithReadPermissions = hasAnyRoleRuleWithName('isUserWithReadPermissi
 const isIssuerUser = hasRoleRule(UserRoles.issuer)
 const isCredentialAdminUser = hasRoleRule(UserRoles.credentialAdmin)
 const isPartnerAdminUser = hasRoleRule(UserRoles.partnerAdmin)
+const isApprovalRequestAdminUser = hasRoleRule(UserRoles.approvalRequestAdmin)
 
 // general app roles for Issue & Present
-const isIssuanceApp = hasRoleRule('VerifiableCredential.Issue', 'isIssuanceApp')
-const isPresentationApp = hasRoleRule('VerifiableCredential.Present', 'isPresentationApp')
+const isIssuanceApp = hasRoleRule(AppRoles.issue, 'isIssuanceApp')
+const isPresentationApp = hasRoleRule(AppRoles.present, 'isPresentationApp')
+
+// approval request integration app
+const isApprovalRequestApp = hasRoleRule(AppRoles.requestApproval, 'isApprovalRequestApp')
 
 const isAllowedToIssue = or(isIssuerUser, isIssuanceApp, isValidLimitedIssuanceRequest)
 
@@ -73,6 +84,7 @@ export const rules: ShieldSchema<Resolvers> = {
     ),
     createPartner: isPartnerAdminUser,
     updatePartner: isPartnerAdminUser,
+    createApprovalRequest: isApprovalRequestApp,
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
   Subscription: {
@@ -102,6 +114,9 @@ export const rules: ShieldSchema<Resolvers> = {
   },
   AccessTokenResponse: {
     '*': hasTokenAcquisitionRole,
+  },
+  ApprovalRequest: {
+    '*': or(isApprovalRequestApp, isApprovalRequestAdminUser),
   },
 }
 export const permissions = wrappedShield(rules)

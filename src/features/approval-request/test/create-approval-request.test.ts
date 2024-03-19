@@ -1,7 +1,8 @@
 import { addDays, startOfToday } from 'date-fns'
 import { graphql } from '../../../generated'
 import type { PresentationRequestInput } from '../../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../../test'
+import { AppRoles } from '../../../shield'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsApp, expectUnauthorizedError } from '../../../test'
 
 export const createApprovalRequestMutation = graphql(
   `
@@ -42,7 +43,7 @@ const sampleInput = {
 describe('create approval request mutation', () => {
   beforeAfterAll()
 
-  it('returns an errors when in an anonymous context', async () => {
+  it('returns an error when in an anonymous context', async () => {
     // Act
     const { errors } = await executeOperationAnonymous({
       query: createApprovalRequestMutation,
@@ -56,14 +57,34 @@ describe('create approval request mutation', () => {
     expectUnauthorizedError(errors)
   })
 
+  it('returns an error when using the wrong role', async () => {
+    // Act
+    const { errors } = await executeOperationAsApp(
+      {
+        query: createApprovalRequestMutation,
+        variables: {
+          input: sampleInput,
+        },
+      },
+      AppRoles.issue,
+    )
+
+    // Assert
+    expect(errors).toBeDefined()
+    expectUnauthorizedError(errors)
+  })
+
   it('creates the approval request successfully', async () => {
     // Act
-    const { data, errors } = await executeOperationAsCredentialAdmin({
-      query: createApprovalRequestMutation,
-      variables: {
-        input: sampleInput,
+    const { data, errors } = await executeOperationAsApp(
+      {
+        query: createApprovalRequestMutation,
+        variables: {
+          input: sampleInput,
+        },
       },
-    })
+      AppRoles.requestApproval,
+    )
 
     // Assert
     expect(errors).toBeUndefined()

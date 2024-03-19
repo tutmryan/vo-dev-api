@@ -287,6 +287,10 @@ exports[`shield rules are setup correctly 1`] = `
     "updatePartner": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
       "cache": "contextual"
+    },
+    "createApprovalRequest": {
+      "name": "isApprovalRequestApp",
+      "cache": "contextual"
     }
   },
   "Subscription": {
@@ -483,6 +487,20 @@ exports[`shield rules are setup correctly 1`] = `
     "*": {
       "name": "hasLimitedAccessTokenAcquisitionRole",
       "cache": "contextual"
+    }
+  },
+  "ApprovalRequest": {
+    "*": {
+      "rulesOr": [
+        {
+          "name": "isApprovalRequestApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
+          "cache": "contextual"
+        }
+      ]
     }
   }
 }"

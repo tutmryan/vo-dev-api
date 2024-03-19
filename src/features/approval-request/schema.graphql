@@ -58,7 +58,7 @@ type Mutation {
 }
 
 """
-An instance of an approval.
+An instance of an approval request.
 """
 type ApprovalRequest {
   id: ID!
