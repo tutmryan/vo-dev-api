@@ -55,7 +55,7 @@ export async function createApprovalRequest(input: ApprovalRequestInput) {
   )
 
   if (errors) {
-    throw new Error(`Error while creating a contract: ${JSON.stringify(errors)}`)
+    throw new Error(`Error while creating an approval request: ${JSON.stringify(errors)}`)
   }
 
   return data!.createApprovalRequest
