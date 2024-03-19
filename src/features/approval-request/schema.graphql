@@ -5,7 +5,7 @@
 The status of the approval.
 """
 enum ApprovalRequestStatus {
-  active
+  pending
   expired
   approved
   rejected

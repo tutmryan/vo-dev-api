@@ -84,6 +84,6 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
     if (this.isApproved) return ApprovalRequestStatus.Approved
     if (this.isApproved === false) return ApprovalRequestStatus.Rejected
     if (this.expiresAt.getTime() < Date.now()) return ApprovalRequestStatus.Expired
-    return ApprovalRequestStatus.Active
+    return ApprovalRequestStatus.Pending
   }
 }
