@@ -39,7 +39,7 @@ const sampleInput = {
   },
 }
 
-describe('provisionContract mutation', () => {
+describe('create approval request mutation', () => {
   beforeAfterAll()
 
   it('returns an errors when in an anonymous context', async () => {
@@ -56,7 +56,7 @@ describe('provisionContract mutation', () => {
     expectUnauthorizedError(errors)
   })
 
-  it('updates the contract with external id when provisioning for first time', async () => {
+  it('creates the approval request successfully', async () => {
     // Act
     const { data, errors } = await executeOperationAsCredentialAdmin({
       query: createApprovalRequestMutation,
