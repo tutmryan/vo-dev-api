@@ -1,6 +1,7 @@
 import type { GraphQLContext } from '../../context'
 import { query } from '../../cqs/dispatcher'
 import type { Resolver, Resolvers, ResolversTypes } from '../../generated/graphql'
+import type { ApprovalRequestEntity } from '../approval-request/entities/approval-request-entity'
 import { FindUsersQuery } from './queries/find-users-query'
 
 type CreatedByUpdatedByResolvers = {
@@ -41,5 +42,9 @@ export const resolvers: Resolvers = {
   },
   Partner: {
     ...createdByUpdatedBy,
+  },
+  ApprovalRequest: {
+    requestedBy: ({ createdById }: ApprovalRequestEntity, _, { dataLoaders: { users } }) => users.load(createdById),
+    updatedBy: ({ updatedById }, _, { dataLoaders: { users } }) => (updatedById ? users.load(updatedById) : null),
   },
 }

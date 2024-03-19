@@ -1,0 +1,128 @@
+# eslint-disable @graphql-eslint/strict-id-in-types
+# eslint-disable @graphql-eslint/naming-convention
+
+"""
+The status of the approval.
+"""
+enum ApprovalRequestStatus {
+  active
+  expired
+  approved
+  rejected
+}
+
+"""
+The input for creating a new approval request.
+"""
+input ApprovalRequestInput {
+  """
+  When the approval expires; presentations cannot be made for an expired approval.
+  """
+  expiresAt: DateTime!
+  """
+  The type of approval request, useful for partioning and filtering different types of approval requests.
+  """
+  requestType: String!
+  """
+  The optional originating source entity ID of the artifact requiring approval.
+  """
+  correlationId: ID
+  """
+  Optional URL to the artifact for approval.
+  """
+  referenceUrl: String
+  """
+  Optional purpose for requesting approval.
+  """
+  purpose: String
+  """
+  Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type.
+  """
+  requestData: JSONObject
+  """
+  The presentation request definition for this approval.
+  """
+  presentationRequestInput: PresentationRequestInput!
+  """
+  Callback will be invoked when the approval request is actioned.
+  """
+  callback: Callback
+}
+
+# eslint-disable-next-line @graphql-eslint/require-description
+type Mutation {
+  """
+  Creates a new approval request.
+  """
+  createApprovalRequest(request: ApprovalRequestInput!): ApprovalRequest!
+}
+
+"""
+An instance of an approval.
+"""
+type ApprovalRequest {
+  id: ID!
+
+  requestedAt: DateTime!
+
+  """
+  The platform user (application or person) that requested the approval.
+  """
+  requestedBy: User!
+  """
+  When the approval expires; presentations cannot be made for an expired approval.
+  """
+  expiresAt: DateTime!
+  """
+  The type of approval request, useful for partioning and filtering different types of approval requests.
+  """
+  requestType: String!
+  """
+  The optional originating source entity ID of the artifact requiring approval.
+  """
+  correlationId: ID
+  """
+  Optional URL to the artifact for approval.
+  """
+  referenceUrl: String
+  """
+  Optional purpose for requesting approval.
+  """
+  purpose: String
+  """
+  Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type.
+  """
+  requestData: JSONObject
+  """
+  The presentation request definition for this approval.
+  """
+  presentationRequest: JSONObject!
+  """
+  Callback will be invoked when the approval request is actioned.
+  """
+  callback: JSONObject
+  """
+  The presentation that was provided to satisfy approval requirement
+  """
+  presentation: Presentation
+  """
+  Indicates whether the approval has been granted.
+  """
+  isApproved: Boolean
+  """
+  Optional comment on approval or rejection of this request.
+  """
+  actionedComment: String
+  """
+  The approval status.
+  """
+  status: ApprovalRequestStatus!
+  """
+  The user who last updated the approval request.
+  """
+  updatedBy: User
+  """
+  When the approval request was last updated.
+  """
+  updatedAt: DateTime
+}
