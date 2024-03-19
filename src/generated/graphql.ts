@@ -99,7 +99,7 @@ export type AcquireLimitedApprovalTokenInput = {
   approvalRequestId: Scalars['ID']['input'];
 };
 
-/** An instance of an approval. */
+/** An instance of an approval request. */
 export type ApprovalRequest = {
   __typename?: 'ApprovalRequest';
   /** Optional comment on approval or rejection of this request. */

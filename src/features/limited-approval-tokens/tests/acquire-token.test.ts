@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto'
 import { startOfToday } from 'date-fns'
+import { getLimitedApprovalData } from '..'
 import { graphql } from '../../../generated'
 import type { ApprovalTokenResponse } from '../../../generated/graphql'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
@@ -70,6 +71,10 @@ describe('limited approval token acquisition', () => {
 
     // Assert
     expect(errors).toBeUndefined()
+    expect(data?.acquireLimitedApprovalToken.token).toBeTruthy()
     expectApprovalToken(data?.acquireLimitedApprovalToken)
+
+    const tokenData = await getLimitedApprovalData(data!.acquireLimitedApprovalToken.token)
+    expect(tokenData.userId).toBeTruthy()
   })
 })

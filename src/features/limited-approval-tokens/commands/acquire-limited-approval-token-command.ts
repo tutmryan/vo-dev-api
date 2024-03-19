@@ -22,7 +22,7 @@ export async function AcquireLimitedApprovalTokenCommand(
 
   const token = await getClientCredentialsToken(limitedAccessAuth)
 
-  await setLimitedApprovalData(token.access_token, input)
+  await setLimitedApprovalData(token.access_token, { ...input, userId: approvalRequest.createdById })
 
   return {
     token: token.access_token,

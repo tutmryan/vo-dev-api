@@ -4,7 +4,7 @@ import { createKey } from '../../util/token'
 
 const limitedApprovalCache = newCacheSection('limitedApproval')
 
-export type LimitedApprovalData = AcquireLimitedApprovalTokenInput
+export type LimitedApprovalData = AcquireLimitedApprovalTokenInput & { userId: string; presentationId?: string }
 
 export async function getLimitedApprovalData(token: string): Promise<LimitedApprovalData> {
   const key = createKey(token)
