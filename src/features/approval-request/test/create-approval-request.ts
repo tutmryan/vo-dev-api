@@ -9,16 +9,7 @@ export const createApprovalRequestMutation = graphql(
   mutation CreateApprovalRequest($input: ApprovalRequestInput!) {
     createApprovalRequest(request: $input) {
       id
-      expiresAt
-      requestType
-      correlationId
-      referenceUrl
-      purpose
-      presentationRequest
-      requestData
-      callback
-      requestedAt
-      status
+      portalUrl
     }
   }
 ` as const,

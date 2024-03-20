@@ -13,7 +13,7 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
-    "\n  mutation CreateApprovalRequest($input: ApprovalRequestInput!) {\n    createApprovalRequest(request: $input) {\n      id\n      expiresAt\n      requestType\n      correlationId\n      referenceUrl\n      purpose\n      presentationRequest\n      requestData\n      callback\n      requestedAt\n      status\n    }\n  }\n": types.CreateApprovalRequestDocument,
+    "\n  mutation CreateApprovalRequest($input: ApprovalRequestInput!) {\n    createApprovalRequest(request: $input) {\n      id\n      portalUrl\n    }\n  }\n": types.CreateApprovalRequestDocument,
     "\n  query ApprovalRequest($approvalRequestId: ID!) {\n    approvalRequest(id: $approvalRequestId) {\n      id\n      requestedAt\n      expiresAt\n      requestType\n      correlationId\n      referenceUrl\n      purpose\n      requestData\n      actionedComment\n      status\n    }\n  }\n": types.ApprovalRequestDocument,
     "\n  fragment ContractFragment on Contract {\n    id\n    name\n    description\n    template {\n      id\n      name\n      description\n      isPublic\n      validityIntervalInSeconds\n    }\n    credentialTypes\n    display {\n      locale\n      card {\n        title\n        issuedBy\n        backgroundColor\n        textColor\n        description\n        logo {\n          uri\n          description\n        }\n      }\n      consent {\n        title\n        instructions\n      }\n      claims {\n        label\n        claim\n        type\n        description\n        value\n      }\n    }\n    isPublic\n    validityIntervalInSeconds\n  }\n": types.ContractFragmentFragmentDoc,
     "\n  mutation CreateContract($input: ContractInput!) {\n    createContract(input: $input) {\n      ...ContractFragment\n    }\n  }\n": types.CreateContractDocument,
@@ -60,7 +60,7 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation CreateApprovalRequest($input: ApprovalRequestInput!) {\n    createApprovalRequest(request: $input) {\n      id\n      expiresAt\n      requestType\n      correlationId\n      referenceUrl\n      purpose\n      presentationRequest\n      requestData\n      callback\n      requestedAt\n      status\n    }\n  }\n"): (typeof documents)["\n  mutation CreateApprovalRequest($input: ApprovalRequestInput!) {\n    createApprovalRequest(request: $input) {\n      id\n      expiresAt\n      requestType\n      correlationId\n      referenceUrl\n      purpose\n      presentationRequest\n      requestData\n      callback\n      requestedAt\n      status\n    }\n  }\n"];
+export function graphql(source: "\n  mutation CreateApprovalRequest($input: ApprovalRequestInput!) {\n    createApprovalRequest(request: $input) {\n      id\n      portalUrl\n    }\n  }\n"): (typeof documents)["\n  mutation CreateApprovalRequest($input: ApprovalRequestInput!) {\n    createApprovalRequest(request: $input) {\n      id\n      portalUrl\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
