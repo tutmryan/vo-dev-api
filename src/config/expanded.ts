@@ -39,6 +39,11 @@ export const limitedAccessAuth: ClientCredentialsConfig = {
   tokenUrl: platformTokenUrl,
   ...config.get('limitedAccess.credentials'),
 }
+export const limitedApprovalAuth: ClientCredentialsConfig = {
+  scope: internalScope,
+  tokenUrl: platformTokenUrl,
+  ...config.get('limitedApproval.credentials'),
+}
 
 // VID service client credentials config
 export const hasHomeTenantAuthority = config.has('homeTenant.vidServiceCredentials.clientId')

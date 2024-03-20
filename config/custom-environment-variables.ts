@@ -93,6 +93,13 @@ const config: EnvVarSubstitution<Config> = {
     },
     secret: 'LIMITED_ACCESS_SECRET',
   },
+  limitedApproval: {
+    credentials: {
+      clientId: 'LIMITED_APPROVAL_CLIENT_ID',
+      clientSecret: 'LIMITED_APPROVAL_CLIENT_SECRET',
+    },
+    secret: 'LIMITED_APPROVAL_SECRET',
+  },
   callbackCredentials: {
     clientId: 'VID_CALLBACK_CLIENT_ID',
     clientSecret: 'VID_CALLBACK_CLIENT_SECRET',
