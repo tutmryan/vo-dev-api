@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne } from 'typeorm'
 import type { Callback, PresentationRequestInput } from '../../../generated/graphql'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
+import { invariant } from '../../../util/invariant'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { PresentationEntity } from '../../presentation/entities/presentation-entity'
@@ -85,5 +86,11 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
     if (this.isApproved === false) return ApprovalRequestStatus.Rejected
     if (this.expiresAt.getTime() < Date.now()) return ApprovalRequestStatus.Expired
     return ApprovalRequestStatus.Pending
+  }
+
+  action(isApproved: boolean, actionedComment: any) {
+    invariant(this.status === ApprovalRequestStatus.Pending, `Cannot action an approval request that is ${this.status}`)
+    this.isApproved = isApproved
+    this.actionedComment = actionedComment
   }
 }

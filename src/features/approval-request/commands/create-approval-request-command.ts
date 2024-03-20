@@ -1,3 +1,4 @@
+import { addDays } from 'date-fns'
 import { portalUrl } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import type { ApprovalRequestInput, ApprovalRequestResponse } from '../../../generated/graphql'
@@ -10,7 +11,7 @@ export async function CreateApprovalRequestCommand(this: CommandContext, input: 
   userInvariant(user)
 
   const approvalRequest = new ApprovalRequestEntity({
-    expiresAt: input.expiresAt,
+    expiresAt: input.expiresAt ?? addDays(Date.now(), 7),
     requestType: input.requestType,
     correlationId: input.correlationId ?? null,
     referenceUrl: input.referenceUrl ?? null,

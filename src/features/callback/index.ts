@@ -4,6 +4,7 @@ import { capitalize } from 'lodash'
 import { requestCallbackCache } from '../../cache'
 import type { Callback, IssuanceCallbackEvent, PresentationCallbackEvent } from '../../generated/graphql'
 import { logger } from '../../logger'
+import { InternalRoles } from '../../roles'
 
 export type IssuanceCallbackHandler = (event: IssuanceCallbackEvent) => Promise<void>
 export type PresentationCallbackHandler = (event: PresentationCallbackEvent) => Promise<void>
@@ -25,7 +26,7 @@ function requestCallbackMiddleware(type: 'issuance' | 'presentation', handler?: 
       res.status(401).send('Unauthorized').end()
       return
     }
-    const isAuthorised = Array.isArray(req.user.roles) && req.user.roles.includes('VerifiableCredential.Request.Callback')
+    const isAuthorised = Array.isArray(req.user.roles) && req.user.roles.includes(InternalRoles.callback)
     if (!isAuthorised) {
       logger.error(`Invalid ${type} callback request: Forbidden`)
       res.status(403).send('Forbidden').end()

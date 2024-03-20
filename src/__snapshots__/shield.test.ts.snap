@@ -314,6 +314,18 @@ exports[`shield rules are setup correctly 1`] = `
     "createApprovalRequest": {
       "name": "isApprovalRequestApp",
       "cache": "contextual"
+    },
+    "actionApprovalRequest": {
+      "rulesAnd": [
+        {
+          "name": "isLimitedApprovalApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "hasApprovalRequestPresentationAndMatchesApprovalRequestId",
+          "cache": "strict"
+        }
+      ]
     }
   },
   "Subscription": {

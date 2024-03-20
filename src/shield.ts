@@ -76,6 +76,7 @@ export const rules: ShieldSchema<Resolvers> = {
     createPartner: isPartnerAdminUser,
     updatePartner: isPartnerAdminUser,
     createApprovalRequest: isApprovalRequestApp,
+    actionApprovalRequest: and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId),
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
   Subscription: {
@@ -124,10 +125,7 @@ function wrappedShield(x: ShieldSchema<Resolvers>) {
     debug: isLocalDev || isDev, // [doc](https://the-guild.dev/graphql/shield/docs/shield) says: _Toggle debug mode._ (???)
     allowExternalErrors: true, // we don't want shield to catch and convert all errors to: Not Authorised!
     fallbackError: new GraphQLError('Not Authorized!', {
-      extensions: {
-        code: 'FORBIDDEN',
-        status: 403,
-      },
+      extensions: { code: 'FORBIDDEN', http: { status: 403 } },
     }),
   })
 }

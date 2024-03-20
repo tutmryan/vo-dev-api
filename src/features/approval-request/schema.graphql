@@ -17,8 +17,9 @@ The input for creating a new approval request.
 input ApprovalRequestInput {
   """
   When the approval expires; presentations cannot be made for an expired approval.
+  Defaults to 7 days from the current date.
   """
-  expiresAt: DateTime!
+  expiresAt: DateTime
   """
   The type of approval request, useful for partioning and filtering different types of approval requests.
   """
@@ -51,7 +52,7 @@ input ApprovalRequestInput {
 
 """
 A response for a newly created approval request.
-""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+"""
 type ApprovalRequestResponse {
   """
   The ID of the newly created approval request.
@@ -63,12 +64,18 @@ type ApprovalRequestResponse {
   portalUrl: String!
 }
 
-# eslint-disable-next-line @graphql-eslint/require-description
-type Mutation {
+"""
+Input for actioning an approval request.
+"""
+input ActionApprovalRequestInput {
   """
-  Creates a new approval request.
+  Indicates whether the approval has been granted.
   """
-  createApprovalRequest(request: ApprovalRequestInput!): ApprovalRequestResponse!
+  isApproved: Boolean!
+  """
+  Optional comment on approval or rejection of this request.
+  """
+  actionedComment: String
 }
 
 """
@@ -135,6 +142,17 @@ type ApprovalRequest {
   When the approval request was last updated.
   """
   updatedAt: DateTime
+}
+
+extend type Mutation {
+  """
+  Creates a new approval request.
+  """
+  createApprovalRequest(request: ApprovalRequestInput!): ApprovalRequestResponse!
+  """
+  Actions an approval request.
+  """
+  actionApprovalRequest(id: ID!, input: ActionApprovalRequestInput!): ApprovalRequest!
 }
 
 extend type Query {
