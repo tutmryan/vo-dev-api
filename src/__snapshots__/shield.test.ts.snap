@@ -516,10 +516,6 @@ exports[`shield rules are setup correctly 1`] = `
     "*": {
       "rulesOr": [
         {
-          "name": "isApprovalRequestApp",
-          "cache": "contextual"
-        },
-        {
           "name": "isLimitedApprovalApp",
           "cache": "contextual"
         },
