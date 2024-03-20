@@ -39,6 +39,7 @@ The name of the environment should be the instance name e.g. `demo`.
 
 - API-COOKIE-SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
 - LIMITED_ACCESS_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
+- LIMITED_APPROVAL_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
 - HOME_TENANT_GRAPH_CLIENT_SECRET (optional)
 - HOME_TENANT_VID_SERVICE_CLIENT_SECRET (optional)
 

@@ -214,6 +214,9 @@ jobs:
           limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}
           limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
 
+          limited-approval-client-secret: ${{ secrets.NON_PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
+          limited-approval-secret: ${{ secrets.LIMITED_APPROVAL_SECRET }}
+
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
           home-tenant-graph-client-id: ${{ vars.HOME_TENANT_GRAPH_CLIENT_ID }}
@@ -331,6 +334,9 @@ jobs:
           vid-callback-client-secret: ${{ secrets.PROD_VID_CALLBACK_CLIENT_SECRET }}
           limited-access-client-secret: ${{ secrets.PROD_LIMITED_ACCESS_CLIENT_SECRET }}
           limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
+
+          limited-approval-client-secret: ${{ secrets.PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
+          limited-approval-secret: ${{ secrets.LIMITED_APPROVAL_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}

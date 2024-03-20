@@ -41,6 +41,9 @@ const config: DeepPartial<Config> = {
   limitedAccess: {
     credentials: {},
   },
+  limitedApproval: {
+    credentials: {},
+  },
 }
 
 module.exports = config

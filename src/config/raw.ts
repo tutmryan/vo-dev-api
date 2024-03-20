@@ -89,6 +89,10 @@ export type Config = {
     credentials: ClientCredentials
     secret?: string
   }
+  limitedApproval: {
+    credentials: ClientCredentials
+    secret?: string
+  }
   verifiedIdAdmin: {
     baseUrl: string
     scope: string

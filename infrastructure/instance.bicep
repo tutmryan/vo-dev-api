@@ -123,21 +123,23 @@ resource apiCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
 @secure()
 param apiClientSecret string
 
-resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(apiClientSecret)) {
-  name: 'API-CLIENT-SECRET'
-  parent: keyVault
-  properties: {
-    attributes: {
-      enabled: true
+resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =
+  if (!empty(apiClientSecret)) {
+    name: 'API-CLIENT-SECRET'
+    parent: keyVault
+    properties: {
+      attributes: {
+        enabled: true
+      }
+      value: apiClientSecret
     }
-    value: apiClientSecret
   }
-}
 
-resource apiClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(apiClientSecret)) {
-  name: 'API-CLIENT-SECRET'
-  parent: keyVault
-}
+resource apiClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing =
+  if (empty(apiClientSecret)) {
+    name: 'API-CLIENT-SECRET'
+    parent: keyVault
+  }
 
 @description('The client secret of the Internal app registration in Azure AD')
 @secure()
@@ -199,24 +201,56 @@ resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01
   }
 }
 
-@description('The client secret of the docs site app registration in Azure AD')
+@description('The client secret of the limited approval client')
 @secure()
-param docsSiteClientSecret string
-resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(docsSiteClientSecret)) {
-  name: 'DOCS-SITE-CLIENT-SECRET'
-  parent: staticSiteKeyVault
+param limitedApprovalClientSecret string
+
+resource limitedApprovalClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-APPROVAL-CLIENT-SECRET'
+  parent: keyVault
   properties: {
     attributes: {
       enabled: true
     }
-    value: docsSiteClientSecret
+    value: limitedApprovalClientSecret
   }
 }
 
-resource docsSiteClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(docsSiteClientSecret)) {
-  name: 'DOCS-SITE-CLIENT-SECRET'
-  parent: staticSiteKeyVault
+@description('The secret for limited approval client data keys')
+@secure()
+param limitedApprovalSecret string
+
+resource limitedApprovalSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-APPROVAL-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedApprovalSecret
+  }
 }
+
+@description('The client secret of the docs site app registration in Azure AD')
+@secure()
+param docsSiteClientSecret string
+resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =
+  if (!empty(docsSiteClientSecret)) {
+    name: 'DOCS-SITE-CLIENT-SECRET'
+    parent: staticSiteKeyVault
+    properties: {
+      attributes: {
+        enabled: true
+      }
+      value: docsSiteClientSecret
+    }
+  }
+
+resource docsSiteClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing =
+  if (empty(docsSiteClientSecret)) {
+    name: 'DOCS-SITE-CLIENT-SECRET'
+    parent: staticSiteKeyVault
+  }
 
 @description('The ID of the VID authority')
 @secure()
@@ -488,6 +522,8 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
     LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
     LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessSecretSecret.properties.secretUri})'
+    LIMITED_APPROVAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedApprovalClientSecretSecret.properties.secretUri})'
+    LIMITED_APPROVAL_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedApprovalSecretSecret.properties.secretUri})'
     HOME_TENANT_NAME: homeTenantName
     HOME_TENANT_ID: homeTenantId
     HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId

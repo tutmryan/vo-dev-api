@@ -1,5 +1,5 @@
 import { getClientCredentialsToken } from '@makerx/node-common'
-import { limitedAccessAuth } from '../../../config'
+import { limitedApprovalAuth } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import type { AcquireLimitedApprovalTokenInput, ApprovalTokenResponse } from '../../../generated/graphql'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
@@ -20,7 +20,7 @@ export async function AcquireLimitedApprovalTokenCommand(
     throw new Error(`Approval request is at ${approvalRequest.status} and is no longer pending`)
   }
 
-  const token = await getClientCredentialsToken(limitedAccessAuth)
+  const token = await getClientCredentialsToken(limitedApprovalAuth)
 
   await setLimitedApprovalData(token.access_token, { ...input, userId: approvalRequest.createdById })
 
