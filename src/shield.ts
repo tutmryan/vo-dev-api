@@ -107,7 +107,7 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': hasTokenAcquisitionRole,
   },
   ApprovalRequest: {
-    '*': or(isApprovalRequestApp, isLimitedApprovalApp, isApprovalRequestAdminUser),
+    '*': or(isLimitedApprovalApp, isApprovalRequestAdminUser),
   },
   ApprovalRequestResponse: {
     '*': isApprovalRequestApp,
