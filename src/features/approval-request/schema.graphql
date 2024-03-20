@@ -49,12 +49,26 @@ input ApprovalRequestInput {
   callback: Callback
 }
 
+"""
+A response for a newly created approval request.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type ApprovalRequestResponse {
+  """
+  The ID of the newly created approval request.
+  """
+  id: ID!
+  """
+  The URL to the newly created approval request in the portal
+  """
+  portalUrl: String!
+}
+
 # eslint-disable-next-line @graphql-eslint/require-description
 type Mutation {
   """
   Creates a new approval request.
   """
-  createApprovalRequest(request: ApprovalRequestInput!): ApprovalRequest!
+  createApprovalRequest(request: ApprovalRequestInput!): ApprovalRequestResponse!
 }
 
 """
@@ -97,10 +111,6 @@ type ApprovalRequest {
   The presentation request definition for this approval.
   """
   presentationRequest: JSONObject!
-  """
-  Callback will be invoked when the approval request is actioned.
-  """
-  callback: JSONObject
   """
   The presentation that was provided to satisfy approval requirement
   """

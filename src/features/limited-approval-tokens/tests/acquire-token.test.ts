@@ -3,7 +3,6 @@ import { startOfToday } from 'date-fns'
 import { getLimitedApprovalData } from '..'
 import { graphql } from '../../../generated'
 import type { ApprovalTokenResponse } from '../../../generated/graphql'
-import { ApprovalRequestStatus } from '../../../generated/graphql'
 import { beforeAfterAll, executeOperationAnonymous } from '../../../test'
 import { createApprovalRequest, getDefaultApprovalRequestInput } from '../../approval-request/test/create-approval-request'
 
@@ -45,8 +44,7 @@ describe('limited approval token acquisition', () => {
   it('fails when approval request is no longer pending', async () => {
     // Arrange
     const approvalRequestInput = getDefaultApprovalRequestInput()
-    const request = await createApprovalRequest({ ...approvalRequestInput, expiresAt: startOfToday() })
-    expect(request.status).toEqual(ApprovalRequestStatus.Expired)
+    await createApprovalRequest({ ...approvalRequestInput, expiresAt: startOfToday() })
 
     // Act
     const { errors } = await executeOperationAnonymous({

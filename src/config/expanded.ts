@@ -22,6 +22,7 @@ const origin: CorsOptions['origin'] =
         ...(rawCors.origin ?? []).map((origin) => new RegExp(origin)),
         new RegExp(`^https://${config.get('instance')}.verifiedorchestration.com$`), // Admin site origin
         new RegExp(`^https://${config.get('instance')}.api.verifiedorchestration.com$`), // API UI origin
+        new RegExp(`^https://${config.get('instance')}.portal.verifiedorchestration.com$`), // Portal site origin
       ]
 export const cors: CorsOptions = {
   ...rawCors,
@@ -86,3 +87,4 @@ export const pkce: Config['auth']['pkce'] = merge(
 
 // add default home tenant mapping with configured identityIssuers
 export const identityIssuers = { [config.get('homeTenant.tenantId')]: config.get('homeTenant.name'), ...config.get('identityIssuers') }
+export const portalUrl = `https://${config.get('instance')}.portal.verifiedorchestration.com`

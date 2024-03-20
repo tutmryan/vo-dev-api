@@ -1,9 +1,10 @@
+import { portalUrl } from '../../../config'
 import type { CommandContext } from '../../../cqs'
-import type { ApprovalRequestInput } from '../../../generated/graphql'
+import type { ApprovalRequestInput, ApprovalRequestResponse } from '../../../generated/graphql'
 import { userInvariant } from '../../../util/user-invariant'
 import { ApprovalRequestEntity } from '../entities/approval-request-entity'
 
-export async function CreateApprovalRequestCommand(this: CommandContext, input: ApprovalRequestInput) {
+export async function CreateApprovalRequestCommand(this: CommandContext, input: ApprovalRequestInput): Promise<ApprovalRequestResponse> {
   const { user, entityManager } = this
 
   userInvariant(user)
@@ -19,5 +20,9 @@ export async function CreateApprovalRequestCommand(this: CommandContext, input: 
     callbackJson: JSON.stringify(input.callback),
   })
 
-  return await entityManager.getRepository(ApprovalRequestEntity).save(approvalRequest)
+  const newApprovalRequest = await entityManager.getRepository(ApprovalRequestEntity).save(approvalRequest)
+  return {
+    id: newApprovalRequest.id,
+    portalUrl: `${portalUrl}/approval-request/${newApprovalRequest.id}`,
+  }
 }

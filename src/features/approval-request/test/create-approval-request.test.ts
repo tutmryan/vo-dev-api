@@ -56,10 +56,6 @@ describe('create approval request mutation', () => {
     expect(errors).toBeUndefined()
     expect(data).not.toBeNull()
     expect(data?.createApprovalRequest.id).not.toBeNull()
-    expect(data?.createApprovalRequest.expiresAt).toEqual(sampleInput.expiresAt)
-    expect((data?.createApprovalRequest.presentationRequest as PresentationRequestInput).requestedCredentials[0]?.type).toEqual(
-      'verifiedContractor',
-    )
-    expect(data?.createApprovalRequest.status).toEqual(ApprovalRequestStatus.Pending)
+    expect(data?.createApprovalRequest.portalUrl).toContain(data?.createApprovalRequest.id)
   })
 })

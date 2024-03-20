@@ -516,10 +516,6 @@ exports[`shield rules are setup correctly 1`] = `
     "*": {
       "rulesOr": [
         {
-          "name": "isApprovalRequestApp",
-          "cache": "contextual"
-        },
-        {
           "name": "isLimitedApprovalApp",
           "cache": "contextual"
         },
@@ -528,6 +524,12 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual"
         }
       ]
+    }
+  },
+  "ApprovalRequestResponse": {
+    "*": {
+      "name": "isApprovalRequestApp",
+      "cache": "contextual"
     }
   },
   "ApprovalTokenResponse": {
