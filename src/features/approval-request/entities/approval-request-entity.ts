@@ -61,12 +61,12 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'nvarchar', length: 'MAX' })
   presentationRequestJson!: string
 
-  get presentationRequest(): any | null {
-    return this.presentationRequestJson ? JSON.parse(this.presentationRequestJson) : null
+  get presentationRequest(): any {
+    return JSON.parse(this.presentationRequestJson)
   }
 
-  get presentationRequestInput(): PresentationRequestInput | null {
-    return this.presentationRequestJson ? JSON.parse(this.presentationRequestJson) : null
+  get presentationRequestInput(): PresentationRequestInput {
+    return JSON.parse(this.presentationRequestJson)
   }
 
   @ManyToOne(() => PresentationEntity)

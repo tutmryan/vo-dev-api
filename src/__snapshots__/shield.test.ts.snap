@@ -326,6 +326,18 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "strict"
         }
       ]
+    },
+"createPresentationRequestForApproval": {
+      "rulesAnd": [
+        {
+          "name": "isLimitedApprovalApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "isValidLimitedPresentationRequestForApproval",
+          "cache": "strict"
+        }
+      ]
     }
   },
   "Subscription": {
