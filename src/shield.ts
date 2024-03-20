@@ -20,22 +20,14 @@ import {
   isValidLimitedPresentationRequest,
   requestIdFilterDefined,
 } from './features/limited-access-tokens'
+import {
+  hasApprovalRequestPresentationAndMatchesApprovalRequestId,
+  isApprovalRequestApp,
+  isLimitedApprovalApp,
+} from './features/limited-approval-tokens/shield-rules'
 import type { Resolvers } from './generated/graphql'
+import { AppRoles, UserRoles } from './roles'
 import { hasAnyRoleRuleWithName, hasRoleRule } from './util/shield-utils'
-
-export enum UserRoles {
-  reader = 'VerifiableCredential.Reader',
-  issuer = 'VerifiableCredential.Issuer',
-  credentialAdmin = 'VerifiableCredential.CredentialAdmin',
-  partnerAdmin = 'VerifiableCredential.PartnerAdmin',
-  approvalRequestAdmin = 'VerifiableCredential.ApprovalRequestAdmin',
-}
-
-export enum AppRoles {
-  issue = 'VerifiableCredential.Issue',
-  present = 'VerifiableCredential.Present',
-  requestApproval = 'VerifiableCredential.RequestApproval',
-}
 
 const isUserWithReadPermissions = hasAnyRoleRuleWithName('isUserWithReadPermissions', ...Object.values(UserRoles))
 
@@ -47,9 +39,6 @@ const isApprovalRequestAdminUser = hasRoleRule(UserRoles.approvalRequestAdmin)
 // general app roles for Issue & Present
 const isIssuanceApp = hasRoleRule(AppRoles.issue, 'isIssuanceApp')
 const isPresentationApp = hasRoleRule(AppRoles.present, 'isPresentationApp')
-
-// approval request integration app
-const isApprovalRequestApp = hasRoleRule(AppRoles.requestApproval, 'isApprovalRequestApp')
 
 const isAllowedToIssue = or(isIssuerUser, isIssuanceApp, isValidLimitedIssuanceRequest)
 
@@ -69,6 +58,7 @@ export const rules: ShieldSchema<Resolvers> = {
     findPresentations: isAllowedToViewPresentations,
     findNetworkIssuers: isPartnerAdminUser,
     networkContracts: isPartnerAdminUser,
+    approvalRequest: or(isApprovalRequestAdminUser, and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId)),
   },
   Mutation: {
     '*': isCredentialAdminUser,
@@ -117,7 +107,7 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': hasTokenAcquisitionRole,
   },
   ApprovalRequest: {
-    '*': or(isApprovalRequestApp, isApprovalRequestAdminUser),
+    '*': or(isApprovalRequestApp, isLimitedApprovalApp, isApprovalRequestAdminUser),
   },
   ApprovalTokenResponse: {
     '*': allow,

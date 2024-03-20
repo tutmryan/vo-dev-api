@@ -19,7 +19,7 @@ jest.mock('@makerx/node-common', () => {
 })
 
 export const acquireLimitedApprovalTokenMutation = graphql(`
-  mutation Mutation($input: AcquireLimitedApprovalTokenInput!) {
+  mutation AcquireLimitedApprovalToken($input: AcquireLimitedApprovalTokenInput!) {
     acquireLimitedApprovalToken(input: $input) {
       token
       expires

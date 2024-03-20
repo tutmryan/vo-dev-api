@@ -8,10 +8,9 @@ import type {
   QueryContractArgs,
   QueryIdentityArgs,
 } from '../../generated/graphql'
+import { InternalRoles } from '../../roles'
 import { invariant } from '../../util/invariant'
 import { hasAnyRoleRuleWithName, hasRoleRule } from '../../util/shield-utils'
-
-export const limitedAccessRole = 'VerifiableCredential.LimitedAccess'
 
 export enum LimitedAccessTokenAcquisitionRoles {
   issuance = 'VerifiableCredential.AcquireLimitedAccessToken.Issue',
@@ -64,7 +63,7 @@ export const isValidAcquireLimitedAccessTokenRequest = rule('isValidAcquireLimit
 )
 
 // limited access app variants
-export const isLimitedAccessApp = hasRoleRule(limitedAccessRole, 'isLimitedAccessApp')
+export const isLimitedAccessApp = hasRoleRule(InternalRoles.limitedAccess, 'isLimitedAccessApp')
 export const isLimitedAnonymousPresentationApp = and(
   isLimitedAccessApp,
   hasLimitedAccessDataRule('allowAnonymousPresentation', ({ allowAnonymousPresentation }) => allowAnonymousPresentation === true),

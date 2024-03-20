@@ -1,7 +1,7 @@
 import { addDays, startOfToday } from 'date-fns'
 import { graphql } from '../../../generated'
 import type { ApprovalRequestInput } from '../../../generated/graphql'
-import { AppRoles } from '../../../shield'
+import { AppRoles } from '../../../roles'
 import { executeOperationAsApp } from '../../../test'
 
 export const createApprovalRequestMutation = graphql(

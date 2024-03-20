@@ -165,6 +165,26 @@ exports[`shield rules are setup correctly 1`] = `
     "networkContracts": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
       "cache": "contextual"
+    },
+    "approvalRequest": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "hasApprovalRequestPresentationAndMatchesApprovalRequestId",
+              "cache": "strict"
+            }
+          ]
+        }
+      ]
     }
   },
   "Mutation": {
@@ -497,6 +517,10 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isApprovalRequestApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "isLimitedApprovalApp",
           "cache": "contextual"
         },
         {

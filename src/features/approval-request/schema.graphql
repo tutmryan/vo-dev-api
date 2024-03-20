@@ -126,3 +126,10 @@ type ApprovalRequest {
   """
   updatedAt: DateTime
 }
+
+extend type Query {
+  """
+  Returns an approval request by ID.
+  """
+  approvalRequest(id: ID!): ApprovalRequest!
+}

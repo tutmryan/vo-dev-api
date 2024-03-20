@@ -6,10 +6,13 @@ import type { GraphQLContext } from '../context'
 import { findUpdateOrCreateUser } from '../context'
 import { dataSource } from '../data'
 import { setLimitedAccessData } from '../features/limited-access-tokens'
+import type { LimitedApprovalData } from '../features/limited-approval-tokens'
+import { setLimitedApprovalData } from '../features/limited-approval-tokens'
 import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
 import { createDataLoaders } from '../loaders'
 import { logger } from '../logger'
 import { createServices } from '../services'
+import type { PartialBy } from '../util/partial-by'
 import { userInvariant } from '../util/user-invariant'
 
 const requestInfo: RequestInfo = {
@@ -46,18 +49,25 @@ export const buildJwt = ({
   roles,
 })
 
+export type LimitedApprovalOperationInput = PartialBy<LimitedApprovalData, 'userId'>
+
 export const createContext = async (
   jwtPayload?: JwtPayload,
-  limitedAccessData?: AcquireLimitedAccessTokenInput,
+  limitedAccessInput?: AcquireLimitedAccessTokenInput,
+  limitedApprovalInput?: LimitedApprovalOperationInput,
 ): Promise<GraphQLContext> => {
+  // create a user
   const token = randomUUID()
-  if (limitedAccessData) {
-    // we need to set up a user for the limited access token before we can set up the limited access user context
+
+  // limited access and limited approval data injection
+  if (limitedAccessInput || limitedApprovalInput) {
     const user = await findUpdateOrCreateUser(omit(jwtPayload, 'roles'), token)
     userInvariant(user)
-    // now we can prepare the limited access data, before properly setting up the limited access user context
-    await setLimitedAccessData(token, { ...limitedAccessData, userId: user.userEntity.id })
+    if (limitedAccessInput) await setLimitedAccessData(token, Object.assign({ userId: user.userEntity.id }, limitedAccessInput))
+    if (limitedApprovalInput) await setLimitedApprovalData(token, Object.assign({ userId: user.userEntity.id }, limitedApprovalInput))
   }
+
+  // create the context
   const user = await findUpdateOrCreateUser(jwtPayload, token)
   const context = { user, logger, requestInfo, started: Date.now(), dataSource }
   return { ...context, services: createServices(context), dataLoaders: createDataLoaders() }

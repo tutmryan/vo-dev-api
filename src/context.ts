@@ -7,13 +7,15 @@ import { logging, platformConsumerApps } from './config'
 import type { DispatchContext } from './cqs'
 import { dispatch } from './cqs'
 import { dataSource } from './data'
-import { getLimitedAccessData, limitedAccessRole } from './features/limited-access-tokens'
+import { getLimitedAccessData } from './features/limited-access-tokens'
+import { getLimitedApprovalData } from './features/limited-approval-tokens'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
 import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or-create-user'
 import { UserEntity } from './features/users/entities/user-entity'
 import type { DataLoaders } from './loaders'
 import { createDataLoaders } from './loaders'
 import { logger } from './logger'
+import { InternalRoles } from './roles'
 import type { Services } from './services'
 import { createServices } from './services'
 import { User } from './user'
@@ -34,15 +36,24 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
   invariant(claims.oid, '`oid` claim is required')
   invariant(claims.sub, '`sub` claim is required')
 
-  const isLimitedAccessClient = Array.isArray(claims.roles) && claims.roles.includes(limitedAccessRole)
-
   // Special case: when called with a limited access token:
   // - load the limited access data associated with the token
   // - load the user that acquired token
+  const isLimitedAccessClient = Array.isArray(claims.roles) && claims.roles.includes(InternalRoles.limitedAccess)
   if (isLimitedAccessClient) {
     const limitedAccessData = await getLimitedAccessData(token)
     const userEntity = await dataSource.getRepository(UserEntity).findOneOrFail({ where: { id: limitedAccessData.userId } })
     return new User(claims, token, userEntity, limitedAccessData)
+  }
+
+  // Special case: when called with a limited approval token:
+  // - load the limited approval data associated with the token
+  // - load the user that acquired token
+  const isApprovalRequestApp = Array.isArray(claims.roles) && claims.roles.includes(InternalRoles.limitedApproval)
+  if (isApprovalRequestApp) {
+    const limitedApprovalData = await getLimitedApprovalData(token)
+    const userEntity = await dataSource.getRepository(UserEntity).findOneOrFail({ where: { id: limitedApprovalData.userId } })
+    return new User(claims, token, userEntity, undefined, limitedApprovalData)
   }
 
   /**

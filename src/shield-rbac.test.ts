@@ -2,7 +2,7 @@ import { buildContractInput } from './features/contracts/test/create-contract'
 import { updateContractMutation } from './features/contracts/test/update-contract'
 import { graphql } from './generated'
 import type { AcquireLimitedAccessTokenInput, CreatePartnerInput, IssuanceRequestInput } from './generated/graphql'
-import { UserRoles } from './shield'
+import { UserRoles } from './roles'
 import { beforeAfterAll, buildJwt, executeOperationAs, executeOperationAsCredentialAdmin, expectUnauthorizedError } from './test'
 
 const createIssuanceRequestMutation = graphql(

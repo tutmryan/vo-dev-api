@@ -4,11 +4,11 @@ import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
 import type { JwtPayload } from '@makerx/graphql-core'
 import type { DocumentNode, FormattedExecutionResult } from 'graphql'
 import type { GraphQLContext } from '../context'
-import { limitedAccessRole } from '../features/limited-access-tokens'
 import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
+import type { AppRoles } from '../roles'
+import { InternalRoles, UserRoles } from '../roles'
 import schema from '../schema'
-import type { AppRoles } from '../shield'
-import { UserRoles } from '../shield'
+import type { LimitedApprovalOperationInput } from './context'
 import { buildJwt, createContext } from './context'
 
 export const server = new ApolloServer<GraphQLContext>({
@@ -23,9 +23,10 @@ const executeOperation = async <TData = Record<string, unknown>, TVariables exte
   },
   jwtPayload?: JwtPayload,
   limitedAccessData?: AcquireLimitedAccessTokenInput,
+  limitedApprovalData?: LimitedApprovalOperationInput,
 ): Promise<FormattedExecutionResult<TData>> => {
   const response = await server.executeOperation(request, {
-    contextValue: await createContext(jwtPayload, limitedAccessData),
+    contextValue: await createContext(jwtPayload, limitedAccessData, limitedApprovalData),
   })
   if (response.body.kind !== 'single') throw new Error('Invalid response body kind')
   return response.body.singleResult as FormattedExecutionResult<TData>
@@ -37,7 +38,8 @@ export const executeOperationAs = async <TData = Record<string, unknown>, TVaria
   },
   jwtPayload: JwtPayload,
   limitedAccessData?: AcquireLimitedAccessTokenInput,
-): Promise<FormattedExecutionResult<TData>> => executeOperation(request, jwtPayload, limitedAccessData)
+  limitedApprovalData?: LimitedApprovalOperationInput,
+): Promise<FormattedExecutionResult<TData>> => executeOperation(request, jwtPayload, limitedAccessData, limitedApprovalData)
 
 export const executeOperationAnonymous = async <TData = Record<string, unknown>, TVariables extends VariableValues = VariableValues>(
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
@@ -78,7 +80,19 @@ export const executeOperationAsLimitedAccessClient = async <
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
   limitedAccessData?: AcquireLimitedAccessTokenInput,
-): Promise<FormattedExecutionResult<TData>> => executeOperation(request, buildJwt({ roles: [limitedAccessRole] }), limitedAccessData)
+): Promise<FormattedExecutionResult<TData>> =>
+  executeOperation(request, buildJwt({ roles: [InternalRoles.limitedAccess] }), limitedAccessData)
+
+export const executeOperationAsLimitedApprovalClient = async <
+  TData = Record<string, unknown>,
+  TVariables extends VariableValues = VariableValues,
+>(
+  request: Omit<GraphQLRequest<TVariables>, 'query'> & {
+    query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
+  },
+  limitedApprovalData?: LimitedApprovalOperationInput,
+): Promise<FormattedExecutionResult<TData>> =>
+  executeOperation(request, buildJwt({ roles: [InternalRoles.limitedApproval] }), undefined, limitedApprovalData)
 
 export const executeOperationAsApp = async <TData = Record<string, unknown>, TVariables extends VariableValues = VariableValues>(
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
