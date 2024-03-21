@@ -99,7 +99,7 @@
     "value": "VerifiableCredential.PartnerAdmin"
   },
   {
-    "id": "db1fb18e-e4d8-4798-9330-2e28175d2cdd",
+    "id": "41d281b4-0328-4741-88fa-8aae49e1550e",
     "allowedMemberTypes": ["User"],
     "isEnabled": true,
     "origin": "Application",
