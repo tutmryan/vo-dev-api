@@ -171,7 +171,7 @@ export type ApprovalRequestInput = {
    */
   expiresAt?: InputMaybe<Scalars['DateTime']['input']>;
   /** The presentation request definition for this approval. */
-  presentationRequestInput: PresentationRequestInput;
+  presentationRequestInput: ApprovalRequestPresentationInput;
   /** Optional purpose for requesting approval. */
   purpose?: InputMaybe<Scalars['String']['input']>;
   /** Optional URL to the artifact for approval. */
@@ -180,6 +180,14 @@ export type ApprovalRequestInput = {
   requestData?: InputMaybe<Scalars['JSONObject']['input']>;
   /** The type of approval request, useful for partioning and filtering different types of approval requests. */
   requestType: Scalars['String']['input'];
+};
+
+/** Defines the approval request's verifiable credentials presentation request. */
+export type ApprovalRequestPresentationInput = {
+  /** Provides information about the verifier. */
+  registration: PresentationRequestRegistration;
+  /** A collection of RequestCredential objects representing the credentials the user needs to provide. */
+  requestedCredentials: Array<RequestCredential>;
 };
 
 /** A response for a newly created approval request. */
@@ -697,6 +705,18 @@ export type CreatePartnerInput = {
   name: Scalars['String']['input'];
   /** The Azure AD tenant identifier if the partner is on Entra network */
   tenantId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** Input for creating approval presentation requests */
+export type CreatePresentationRequestForApprovalInput = {
+  /**
+   * Determines whether a QR code is included in the response of this request
+   * Present the QR code and ask the user to scan it.
+   * Scanning the QR code launches the authenticator app with this issuance request.
+   * Possible values are true (default) or false.
+   * When you set the value to false, use the return url property to render a deep link.
+   */
+  includeQRCode?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Defines a claim included in a verifiable credential */
@@ -1260,6 +1280,7 @@ export type MutationCreatePresentationRequestArgs = {
 
 export type MutationCreatePresentationRequestForApprovalArgs = {
   approvalRequestId: Scalars['ID']['input'];
+  input?: InputMaybe<CreatePresentationRequestForApprovalInput>;
 };
 
 
@@ -2646,6 +2667,7 @@ export type ResolversTypes = {
   ActionedApprovalCallbackData: ResolverTypeWrapper<ActionedApprovalCallbackData>;
   ApprovalRequest: ResolverTypeWrapper<ApprovalRequestEntity>;
   ApprovalRequestInput: ApprovalRequestInput;
+  ApprovalRequestPresentationInput: ApprovalRequestPresentationInput;
   ApprovalRequestResponse: ResolverTypeWrapper<ApprovalRequestResponse>;
   ApprovalRequestStatus: ApprovalRequestStatus;
   ApprovalTokenResponse: ResolverTypeWrapper<ApprovalTokenResponse>;
@@ -2683,6 +2705,7 @@ export type ResolversTypes = {
   ContractPresentationWhere: ContractPresentationWhere;
   ContractWhere: ContractWhere;
   CreatePartnerInput: CreatePartnerInput;
+  CreatePresentationRequestForApprovalInput: CreatePresentationRequestForApprovalInput;
   CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
   CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
@@ -2788,6 +2811,7 @@ export type ResolversParentTypes = {
   ActionedApprovalCallbackData: ActionedApprovalCallbackData;
   ApprovalRequest: ApprovalRequestEntity;
   ApprovalRequestInput: ApprovalRequestInput;
+  ApprovalRequestPresentationInput: ApprovalRequestPresentationInput;
   ApprovalRequestResponse: ApprovalRequestResponse;
   ApprovalTokenResponse: ApprovalTokenResponse;
   Authority: Authority;
@@ -2821,6 +2845,7 @@ export type ResolversParentTypes = {
   ContractPresentationWhere: ContractPresentationWhere;
   ContractWhere: ContractWhere;
   CreatePartnerInput: CreatePartnerInput;
+  CreatePresentationRequestForApprovalInput: CreatePresentationRequestForApprovalInput;
   CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
   CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;

@@ -43,11 +43,25 @@ input ApprovalRequestInput {
   """
   The presentation request definition for this approval.
   """
-  presentationRequestInput: PresentationRequestInput!
+  presentationRequestInput: ApprovalRequestPresentationInput!
   """
   Callback will be invoked when the approval request is actioned.
   """
   callback: Callback
+}
+
+"""
+Defines the approval request's verifiable credentials presentation request.
+"""
+input ApprovalRequestPresentationInput {
+  """
+  Provides information about the verifier.
+  """
+  registration: PresentationRequestRegistration!
+  """
+  A collection of RequestCredential objects representing the credentials the user needs to provide.
+  """
+  requestedCredentials: [RequestCredential!]!
 }
 
 """
@@ -174,6 +188,20 @@ type ActionedApprovalCallbackData {
   actionedComment: String
 }
 
+"""
+Input for creating approval presentation requests
+"""
+input CreatePresentationRequestForApprovalInput {
+  """
+  Determines whether a QR code is included in the response of this request
+  Present the QR code and ask the user to scan it.
+  Scanning the QR code launches the authenticator app with this issuance request.
+  Possible values are true (default) or false.
+  When you set the value to false, use the return url property to render a deep link.
+  """
+  includeQRCode: Boolean
+}
+
 extend type Mutation {
   """
   Creates a new approval request.
@@ -182,7 +210,10 @@ extend type Mutation {
   """
   The result of this request returns a QR code with a link to start the presentation process, or an error
   """
-  createPresentationRequestForApproval(approvalRequestId: ID!): PresentationRequestResponse!
+  createPresentationRequestForApproval(
+    approvalRequestId: ID!
+    input: CreatePresentationRequestForApprovalInput
+  ): PresentationRequestResponse!
   """
   Actions an approval request.
   """

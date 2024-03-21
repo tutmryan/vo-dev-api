@@ -1,4 +1,3 @@
-import { ApprovalRequestStatus, type PresentationRequestInput } from '../../../generated/graphql'
 import { AppRoles } from '../../../roles'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsApp, expectUnauthorizedError } from '../../../test'
 import { createApprovalRequestMutation, getDefaultApprovalRequestInput } from './create-approval-request'
