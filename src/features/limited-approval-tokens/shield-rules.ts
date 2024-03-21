@@ -7,6 +7,7 @@ import type {
 } from '../../generated/graphql'
 import { AppRoles, InternalRoles } from '../../roles'
 import { hasRoleRule } from '../../util/shield-utils'
+import { requestIdFilterDefined } from '../limited-access-tokens/shield-rules'
 
 export const isApprovalRequestApp = hasRoleRule(AppRoles.requestApproval, 'isApprovalRequestApp')
 export const isLimitedApprovalApp = hasRoleRule(InternalRoles.limitedApproval, 'isLimitedApprovalApp')
@@ -27,3 +28,5 @@ export const isValidLimitedPresentationRequestForApproval = and(
     },
   ),
 )
+
+export const isValidLimitedApprovalPresentationFilter = and(isLimitedApprovalApp, requestIdFilterDefined)

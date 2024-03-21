@@ -24,6 +24,7 @@ import {
   hasApprovalRequestPresentationAndMatchesApprovalRequestId,
   isApprovalRequestApp,
   isLimitedApprovalApp,
+  isValidLimitedApprovalPresentationFilter,
   isValidLimitedPresentationRequestForApproval,
 } from './features/limited-approval-tokens/shield-rules'
 import type { Resolvers } from './generated/graphql'
@@ -47,7 +48,12 @@ const fallbackRule = or(isUserWithReadPermissions, isIssuanceApp, isPresentation
 
 // issuance and presentation access rules
 const isAllowedToViewIssuances = or(isUserWithReadPermissions, isIssuanceApp, isValidLimitedAccessIssuanceFilter)
-const isAllowedToViewPresentations = or(isUserWithReadPermissions, isPresentationApp, isValidLimitedAccessPresentationFilter)
+const isAllowedToViewPresentations = or(
+  isUserWithReadPermissions,
+  isPresentationApp,
+  isValidLimitedAccessPresentationFilter,
+  isValidLimitedApprovalPresentationFilter,
+)
 export const rules: ShieldSchema<Resolvers> = {
   Query: {
     '*': isUserWithReadPermissions,
@@ -88,7 +94,7 @@ export const rules: ShieldSchema<Resolvers> = {
       isCredentialAdminUser,
       and(
         requestIdFilterDefined,
-        or(isUserWithReadPermissions, isPresentationApp, isLimitedPresentationApp, isLimitedAnonymousPresentationApp),
+        or(isUserWithReadPermissions, isPresentationApp, isLimitedPresentationApp, isLimitedAnonymousPresentationApp, isLimitedApprovalApp),
       ),
     ),
     issuanceEvent: or(isIssuerUser, isCredentialAdminUser, and(requestIdFilterDefined, or(isIssuanceApp, isLimitedIssuanceApp))),
