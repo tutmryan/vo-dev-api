@@ -144,6 +144,36 @@ type ApprovalRequest {
   updatedAt: DateTime
 }
 
+"""
+Callback will be invoked when the approval request is actioned with this data.
+""" # eslint-disable-next-line @graphql-eslint/no-unreachable-types
+type ActionedApprovalCallbackData {
+  """
+  The ID of the approval request that was actioned.
+  """
+  approvalRequestId: ID!
+  """
+  The optional originating source entity ID of the artifact requiring approval.
+  """
+  correlationId: ID
+  """
+  Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type.
+  """
+  requestData: JSONObject
+  """
+  Arbitrary state value which was optionally included in the approval request callback definition.
+  """
+  state: String
+  """
+  Indicates whether the approval has been granted.
+  """
+  isApproved: Boolean!
+  """
+  Optional comment on approval or rejection of this request.
+  """
+  actionedComment: String
+}
+
 extend type Mutation {
   """
   Creates a new approval request.

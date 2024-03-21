@@ -107,6 +107,23 @@ export type ActionApprovalRequestInput = {
   isApproved: Scalars['Boolean']['input'];
 };
 
+/** Callback will be invoked when the approval request is actioned with this data. */
+export type ActionedApprovalCallbackData = {
+  __typename?: 'ActionedApprovalCallbackData';
+  /** Optional comment on approval or rejection of this request. */
+  actionedComment?: Maybe<Scalars['String']['output']>;
+  /** The ID of the approval request that was actioned. */
+  approvalRequestId: Scalars['ID']['output'];
+  /** The optional originating source entity ID of the artifact requiring approval. */
+  correlationId?: Maybe<Scalars['ID']['output']>;
+  /** Indicates whether the approval has been granted. */
+  isApproved: Scalars['Boolean']['output'];
+  /** Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type. */
+  requestData?: Maybe<Scalars['JSONObject']['output']>;
+  /** Arbitrary state value which was optionally included in the approval request callback definition. */
+  state?: Maybe<Scalars['String']['output']>;
+};
+
 /** An instance of an approval request. */
 export type ApprovalRequest = {
   __typename?: 'ApprovalRequest';
@@ -2626,6 +2643,7 @@ export type ResolversTypes = {
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   AcquireLimitedApprovalTokenInput: AcquireLimitedApprovalTokenInput;
   ActionApprovalRequestInput: ActionApprovalRequestInput;
+  ActionedApprovalCallbackData: ResolverTypeWrapper<ActionedApprovalCallbackData>;
   ApprovalRequest: ResolverTypeWrapper<ApprovalRequestEntity>;
   ApprovalRequestInput: ApprovalRequestInput;
   ApprovalRequestResponse: ResolverTypeWrapper<ApprovalRequestResponse>;
@@ -2767,6 +2785,7 @@ export type ResolversParentTypes = {
   ID: Scalars['ID']['output'];
   AcquireLimitedApprovalTokenInput: AcquireLimitedApprovalTokenInput;
   ActionApprovalRequestInput: ActionApprovalRequestInput;
+  ActionedApprovalCallbackData: ActionedApprovalCallbackData;
   ApprovalRequest: ApprovalRequestEntity;
   ApprovalRequestInput: ApprovalRequestInput;
   ApprovalRequestResponse: ApprovalRequestResponse;
@@ -2896,6 +2915,16 @@ export type CacheControlDirectiveResolver<Result, Parent, ContextType = GraphQLC
 export type AccessTokenResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AccessTokenResponse'] = ResolversParentTypes['AccessTokenResponse']> = {
   expires?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ActionedApprovalCallbackDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ActionedApprovalCallbackData'] = ResolversParentTypes['ActionedApprovalCallbackData']> = {
+  actionedComment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  approvalRequestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  correlationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  isApproved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  requestData?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -3464,6 +3493,7 @@ export type WebDidModelResolvers<ContextType = GraphQLContext, ParentType extend
 
 export type Resolvers<ContextType = GraphQLContext> = {
   AccessTokenResponse?: AccessTokenResponseResolvers<ContextType>;
+  ActionedApprovalCallbackData?: ActionedApprovalCallbackDataResolvers<ContextType>;
   ApprovalRequest?: ApprovalRequestResolvers<ContextType>;
   ApprovalRequestResponse?: ApprovalRequestResponseResolvers<ContextType>;
   ApprovalTokenResponse?: ApprovalTokenResponseResolvers<ContextType>;

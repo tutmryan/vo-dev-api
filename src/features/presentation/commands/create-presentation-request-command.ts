@@ -10,11 +10,14 @@ import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { PartnerEntity } from '../../network/entities/partner-entity'
 import type { PresentationEntity } from '../entities/presentation-entity'
 
-export type PresentationRequestDetails = Pick<PresentationEntity, 'requestedById' | 'identityId' | 'requestedCredentials'>
+export type PresentationRequestDetails = Pick<PresentationEntity, 'requestedById' | 'identityId' | 'requestedCredentials'> & {
+  limitedApprovalKey?: string
+}
 
 export async function CreatePresentationRequestCommand(
   this: CommandContext,
   { identityId, identity: identityInput, ...presentationRequest }: PresentationRequestInput,
+  limitedApprovalKey?: string,
 ) {
   const {
     user,
@@ -74,6 +77,7 @@ export async function CreatePresentationRequestCommand(
     requestedById: user.userEntity.id.toUpperCase(),
     identityId: identity?.id.toUpperCase() ?? null,
     requestedCredentials: presentationRequest.requestedCredentials,
+    limitedApprovalKey,
   }
   await requestDetailsCache.set(response.requestId, JSON.stringify(requestDetails), {
     ttl: REQUEST_CACHE_TTL,

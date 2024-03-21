@@ -87,4 +87,6 @@ export const pkce: Config['auth']['pkce'] = merge(
 
 // add default home tenant mapping with configured identityIssuers
 export const identityIssuers = { [config.get('homeTenant.tenantId')]: config.get('homeTenant.name'), ...config.get('identityIssuers') }
-export const portalUrl = `https://${config.get('instance')}.portal.verifiedorchestration.com`
+export const portalUrl = config.has('instance')
+  ? `https://${config.get('instance')}.portal.verifiedorchestration.com`
+  : 'http://localhost:5173'

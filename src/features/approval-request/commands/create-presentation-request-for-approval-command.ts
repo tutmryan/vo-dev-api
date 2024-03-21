@@ -2,6 +2,7 @@ import { type CommandContext } from '../../../cqs'
 import type { PresentationRequestResponse } from '../../../generated/graphql'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
 import { userInvariant } from '../../../util/user-invariant'
+import { getLimitedApprovalKey } from '../../limited-approval-tokens'
 import { CreatePresentationRequestCommand } from '../../presentation/commands/create-presentation-request-command'
 import { ApprovalRequestEntity } from '../entities/approval-request-entity'
 
@@ -18,5 +19,5 @@ export async function CreatePresentationRequestForApprovalCommand(
     throw new Error(`Approval request is at ${approvalRequest.status} and is no longer pending`)
   }
 
-  return await CreatePresentationRequestCommand.apply(this, [approvalRequest.presentationRequestInput])
+  return await CreatePresentationRequestCommand.apply(this, [approvalRequest.presentationRequestInput, getLimitedApprovalKey(user.token)])
 }

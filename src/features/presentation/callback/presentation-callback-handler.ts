@@ -8,6 +8,7 @@ import { invariant } from '../../../util/invariant'
 import type { PresentationCallbackHandler } from '../../callback'
 import { StandardClaims } from '../../contracts/claims'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
+import { getLimitedApprovalDataByKey, setLimitedApprovalDataByKey } from '../../limited-approval-tokens'
 import { PartnerEntity } from '../../network/entities/partner-entity'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import type { PresentedData } from '../entities/presentation-entity'
@@ -22,7 +23,7 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     return
   }
 
-  const presentationRequestDetails = JSON.parse(requestDetails) as PresentationRequestDetails
+  const { limitedApprovalKey, ...presentationRequestDetails } = JSON.parse(requestDetails) as PresentationRequestDetails
 
   // presentation event data will contain everything, including claims
   const topicData: PresentationTopicData = { ...presentationRequestDetails, event }
@@ -86,6 +87,13 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     presentedCredentialsCache.set(event.requestId, JSON.stringify(event.verifiedCredentialsData || []), {
       ttl: PRESENTED_CREDENTIALS_TTL,
     })
+
+    // if this presentation is for a limited approval flow, save the presentation ID to the limited approval data
+    if (limitedApprovalKey) {
+      const limitedApprovalData = await getLimitedApprovalDataByKey(limitedApprovalKey)
+      await setLimitedApprovalDataByKey(limitedApprovalKey, { ...limitedApprovalData, presentationId: id })
+    }
+
     logger.audit('Presentation complete', { presentation: presentationEntity })
   } else logger.audit('Presentation retrieved', { event: omit(event, 'state') })
 
