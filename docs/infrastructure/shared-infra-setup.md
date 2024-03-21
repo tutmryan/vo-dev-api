@@ -24,6 +24,11 @@ We need a service principal so that GitHub Actions can:
    - Subject identifier: `repo:VerifiedOrchestration/verified-orchestration-admin`
    - Name: `VerifiedOrchestration-verified-orchestration-admin`
    - click "Add"
+1. Add a third federated credential:
+1. Enter:
+   - Subject identifier: `repo:VerifiedOrchestration/verified-orchestration-portal`
+   - Name: `VerifiedOrchestration-verified-orchestration-portal`
+   - click "Add"
 
 Refer to [documentation here](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux)
 
