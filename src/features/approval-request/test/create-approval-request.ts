@@ -19,6 +19,7 @@ export function getDefaultApprovalRequestInput(): ApprovalRequestInput {
   return {
     expiresAt: addDays(startOfToday(), 5),
     requestType: 'test',
+    purpose: 'Approve a change',
     presentationRequestInput: {
       requestedCredentials: [
         {

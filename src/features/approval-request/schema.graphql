@@ -123,7 +123,7 @@ type ApprovalRequest {
   """
   Optional purpose for requesting approval.
   """
-  purpose: String
+  purpose: String!
   """
   Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type.
   """
