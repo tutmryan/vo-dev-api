@@ -315,6 +315,18 @@ exports[`shield rules are setup correctly 1`] = `
       "name": "isApprovalRequestApp",
       "cache": "contextual"
     },
+    "createPresentationRequestForApproval": {
+      "rulesAnd": [
+        {
+          "name": "isLimitedApprovalApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "isValidLimitedPresentationRequestForApproval",
+          "cache": "strict"
+        }
+      ]
+    },
     "actionApprovalRequest": {
       "rulesAnd": [
         {
@@ -323,18 +335,6 @@ exports[`shield rules are setup correctly 1`] = `
         },
         {
           "name": "hasApprovalRequestPresentationAndMatchesApprovalRequestId",
-          "cache": "strict"
-        }
-      ]
-    },
-"createPresentationRequestForApproval": {
-      "rulesAnd": [
-        {
-          "name": "isLimitedApprovalApp",
-          "cache": "contextual"
-        },
-        {
-          "name": "isValidLimitedPresentationRequestForApproval",
           "cache": "strict"
         }
       ]
