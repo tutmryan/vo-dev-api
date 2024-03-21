@@ -7,8 +7,8 @@ import { CreatePresentationRequestForApprovalCommand } from './commands/create-p
 export const resolvers: Resolvers = {
   Mutation: {
     createApprovalRequest: (_, { request }, context) => dispatch(context, CreateApprovalRequestCommand, request),
-    createPresentationRequestForApproval: (_, { request }, context) =>
-      dispatch(context, CreatePresentationRequestForApprovalCommand, request),
+    createPresentationRequestForApproval: (_, { approvalRequestId }, context) =>
+      dispatch(context, CreatePresentationRequestForApprovalCommand, approvalRequestId),
     actionApprovalRequest: (_, { id, input }, context) => dispatch(context, ActionApprovalRequestCommand, id, input),
   },
   Query: {

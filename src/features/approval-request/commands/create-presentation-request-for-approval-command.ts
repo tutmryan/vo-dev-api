@@ -1,5 +1,5 @@
 import { type CommandContext } from '../../../cqs'
-import type { PresentationRequestForApprovalInput, PresentationRequestResponse } from '../../../generated/graphql'
+import type { PresentationRequestResponse } from '../../../generated/graphql'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
 import { userInvariant } from '../../../util/user-invariant'
 import { CreatePresentationRequestCommand } from '../../presentation/commands/create-presentation-request-command'
@@ -7,12 +7,12 @@ import { ApprovalRequestEntity } from '../entities/approval-request-entity'
 
 export async function CreatePresentationRequestForApprovalCommand(
   this: CommandContext,
-  input: PresentationRequestForApprovalInput,
+  approvalRequestId: string,
 ): Promise<PresentationRequestResponse> {
   const { user, entityManager } = this
 
   userInvariant(user)
-  const approvalRequest = await entityManager.getRepository(ApprovalRequestEntity).findOneOrFail({ where: { id: input.approvalRequestId } })
+  const approvalRequest = await entityManager.getRepository(ApprovalRequestEntity).findOneOrFail({ where: { id: approvalRequestId } })
 
   if (approvalRequest.status !== ApprovalRequestStatus.Pending) {
     throw new Error(`Approval request is at ${approvalRequest.status} and is no longer pending`)

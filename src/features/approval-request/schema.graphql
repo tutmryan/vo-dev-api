@@ -79,16 +79,6 @@ input ActionApprovalRequestInput {
 }
 
 """
-The input for creating a presentation request for an approval request.
-"""
-input PresentationRequestForApprovalInput {
-  """
-  The ID of the approval request.
-  """
-  approvalRequestId: ID!
-}
-
-"""
 An instance of an approval request.
 """
 type ApprovalRequest {
@@ -162,7 +152,7 @@ extend type Mutation {
   """
   The result of this request returns a QR code with a link to start the presentation process, or an error
   """
-  createPresentationRequestForApproval(request: PresentationRequestForApprovalInput!): PresentationRequestResponse!
+  createPresentationRequestForApproval(approvalRequestId: ID!): PresentationRequestResponse!
   """
   Actions an approval request.
   """

@@ -1242,7 +1242,7 @@ export type MutationCreatePresentationRequestArgs = {
 
 
 export type MutationCreatePresentationRequestForApprovalArgs = {
-  request: PresentationRequestForApprovalInput;
+  approvalRequestId: Scalars['ID']['input'];
 };
 
 
@@ -1548,12 +1548,6 @@ export enum PresentationOrderBy {
   /** The name of the user (Person or Application) that requested & received the presentation data. */
   RequestedByName = 'requestedByName'
 }
-
-/** The input for creating a presentation request for an approval request. */
-export type PresentationRequestForApprovalInput = {
-  /** The ID of the approval request. */
-  approvalRequestId: Scalars['ID']['input'];
-};
 
 /** The presentation request payload contains information about your verifiable credentials presentation request. */
 export type PresentationRequestInput = {
@@ -2722,7 +2716,6 @@ export type ResolversTypes = {
   PresentationEventData: ResolverTypeWrapper<Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversTypes['Presentation']> }>;
   PresentationEventWhere: PresentationEventWhere;
   PresentationOrderBy: PresentationOrderBy;
-  PresentationRequestForApprovalInput: PresentationRequestForApprovalInput;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
   PresentationRequestResponse: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['PresentationRequestResponse']>;
@@ -2852,7 +2845,6 @@ export type ResolversParentTypes = {
   PresentationEvent: PresentationEvent;
   PresentationEventData: Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversParentTypes['Presentation']> };
   PresentationEventWhere: PresentationEventWhere;
-  PresentationRequestForApprovalInput: PresentationRequestForApprovalInput;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
   PresentationRequestResponse: ResolversUnionTypes<ResolversParentTypes>['PresentationRequestResponse'];
@@ -3162,7 +3154,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
   createPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationCreatePartnerArgs, 'input'>>;
   createPresentationRequest?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestArgs, 'request'>>;
-  createPresentationRequestForApproval?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestForApprovalArgs, 'request'>>;
+  createPresentationRequestForApproval?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestForApprovalArgs, 'approvalRequestId'>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;

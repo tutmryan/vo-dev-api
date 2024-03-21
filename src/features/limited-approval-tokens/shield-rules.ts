@@ -1,6 +1,10 @@
 import { and, rule } from 'graphql-shield'
 import type { GraphQLContext } from '../../context'
-import type { MutationCreatePresentationRequestForApprovalArgs, MutationActionApprovalRequestArgs, QueryApprovalRequestArgs } from '../../generated/graphql'
+import type {
+  MutationActionApprovalRequestArgs,
+  MutationCreatePresentationRequestForApprovalArgs,
+  QueryApprovalRequestArgs,
+} from '../../generated/graphql'
 import { AppRoles, InternalRoles } from '../../roles'
 import { hasRoleRule } from '../../util/shield-utils'
 
@@ -17,7 +21,7 @@ export const hasApprovalRequestPresentationAndMatchesApprovalRequestId = rule('h
 export const isValidLimitedPresentationRequestForApproval = and(
   isLimitedApprovalApp,
   rule('isValidLimitedPresentationRequestForApproval', { cache: 'strict' })(
-    (_, { request: { approvalRequestId } }: MutationCreatePresentationRequestForApprovalArgs, { user }: GraphQLContext) => {
+    (_, { approvalRequestId }: MutationCreatePresentationRequestForApprovalArgs, { user }: GraphQLContext) => {
       if (!user?.limitedApprovalData?.approvalRequestId) return false
       return user.limitedApprovalData.approvalRequestId === approvalRequestId
     },
