@@ -150,6 +150,10 @@ extend type Mutation {
   """
   createApprovalRequest(request: ApprovalRequestInput!): ApprovalRequestResponse!
   """
+  The result of this request returns a QR code with a link to start the presentation process, or an error
+  """
+  createPresentationRequestForApproval(approvalRequestId: ID!): PresentationRequestResponse!
+  """
   Actions an approval request.
   """
   actionApprovalRequest(id: ID!, input: ActionApprovalRequestInput!): ApprovalRequest!

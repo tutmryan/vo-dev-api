@@ -1167,6 +1167,8 @@ export type Mutation = {
   createPartner: Partner;
   /** The result of this request returns a QR code with a link to start the presentation process, or an error */
   createPresentationRequest: PresentationRequestResponse;
+  /** The result of this request returns a QR code with a link to start the presentation process, or an error */
+  createPresentationRequestForApproval: PresentationRequestResponse;
   /** Creates a new template */
   createTemplate: Template;
   /** Deletes an existing contract. Only possible when the contract has not yet been provisioned. */
@@ -1236,6 +1238,11 @@ export type MutationCreatePartnerArgs = {
 
 export type MutationCreatePresentationRequestArgs = {
   request: PresentationRequestInput;
+};
+
+
+export type MutationCreatePresentationRequestForApprovalArgs = {
+  approvalRequestId: Scalars['ID']['input'];
 };
 
 
@@ -3147,6 +3154,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
   createPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationCreatePartnerArgs, 'input'>>;
   createPresentationRequest?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestArgs, 'request'>>;
+  createPresentationRequestForApproval?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestForApprovalArgs, 'approvalRequestId'>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;
