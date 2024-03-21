@@ -141,7 +141,7 @@ export type ApprovalRequest = {
   /** The presentation request definition for this approval. */
   presentationRequest: Scalars['JSONObject']['output'];
   /** Optional purpose for requesting approval. */
-  purpose?: Maybe<Scalars['String']['output']>;
+  purpose: Scalars['String']['output'];
   /** Optional URL to the artifact for approval. */
   referenceUrl?: Maybe<Scalars['String']['output']>;
   /** Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type. */
@@ -2388,7 +2388,7 @@ export type ApprovalRequestQueryVariables = Exact<{
 }>;
 
 
-export type ApprovalRequestQuery = { __typename?: 'Query', approvalRequest: { __typename?: 'ApprovalRequest', id: string, requestedAt: Date, expiresAt: Date, requestType: string, correlationId?: string | null, referenceUrl?: string | null, purpose?: string | null, requestData?: Record<string, unknown> | null, actionedComment?: string | null, status: ApprovalRequestStatus } };
+export type ApprovalRequestQuery = { __typename?: 'Query', approvalRequest: { __typename?: 'ApprovalRequest', id: string, requestedAt: Date, expiresAt: Date, requestType: string, correlationId?: string | null, referenceUrl?: string | null, purpose: string, requestData?: Record<string, unknown> | null, actionedComment?: string | null, status: ApprovalRequestStatus } };
 
 export type ContractFragmentFragment = { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> } };
 
@@ -2961,7 +2961,7 @@ export type ApprovalRequestResolvers<ContextType = GraphQLContext, ParentType ex
   isApproved?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   presentation?: Resolver<Maybe<ResolversTypes['Presentation']>, ParentType, ContextType>;
   presentationRequest?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
-  purpose?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  purpose?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   referenceUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   requestData?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   requestType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
