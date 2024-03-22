@@ -1,8 +1,18 @@
+import casual from 'casual'
+import { randomUUID } from 'crypto'
 import { addDays, startOfToday } from 'date-fns'
+import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { graphql } from '../../../generated'
 import type { ApprovalRequestInput } from '../../../generated/graphql'
 import { AppRoles } from '../../../roles'
-import { executeOperationAsApp } from '../../../test'
+import type { LimitedApprovalOperationInput } from '../../../test'
+import { executeOperationAsApp, executeOperationAsLimitedApprovalClient } from '../../../test'
+import { addUserToManager } from '../../auditing/user-context-helper'
+import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
+import { createIdentity } from '../../identity/create-update-identity.test'
+import { PresentationEntity } from '../../presentation/entities/presentation-entity'
+import { UserEntity } from '../../users/entities/user-entity'
+import { ApprovalRequestEntity } from '../entities/approval-request-entity'
 
 export const createApprovalRequestMutation = graphql(
   `
@@ -14,6 +24,19 @@ export const createApprovalRequestMutation = graphql(
     }
   }
 ` as const,
+)
+
+export const actionApprovalRequestMutation = graphql(
+  `
+    mutation ActionApprovalRequest($id: ID!, $input: ActionApprovalRequestInput!) {
+      actionApprovalRequest(id: $id, input: $input) {
+        id
+        status
+        isApproved
+        actionedComment
+      }
+    }
+  ` as const,
 )
 
 export function getDefaultApprovalRequestInput(): ApprovalRequestInput {
@@ -48,4 +71,64 @@ export async function createApprovalRequest(input: ApprovalRequestInput) {
   }
 
   return data!.createApprovalRequest
+}
+
+async function createPresentationForApprovalRequest(approvalRequestId: string) {
+  const identity = await createIdentity()
+  const contract = await createContract(getDefaultContractInput())
+  const { presentation } = await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
+    const requestedBy = await entityManager
+      .getRepository(UserEntity)
+      .save(new UserEntity({ email: casual.email, isApp: true, name: 'Test', oid: randomUUID(), tenantId: randomUUID() }))
+    addUserToManager(entityManager, requestedBy.id)
+    const presentation = await entityManager.getRepository(PresentationEntity).save(
+      new PresentationEntity({
+        requestId: randomUUID(),
+        identityId: identity.id,
+        requestedById: requestedBy.id,
+        requestedCredentials: [],
+        presentedCredentials: [],
+        partnerIds: [],
+        issuanceIds: [],
+      }),
+    )
+    const approvalRequestRepo = entityManager.getRepository(ApprovalRequestEntity)
+    const approvalRequest = await approvalRequestRepo.findOneByOrFail({ id: approvalRequestId })
+    approvalRequest.presentationId = presentation.id
+    await approvalRequestRepo.save(approvalRequest)
+    return { presentation }
+  })
+
+  return { identity, contract, presentation }
+}
+
+export async function createApprovalRequestWithPresentation(input: ApprovalRequestInput) {
+  const approvalRequest = await createApprovalRequest(input)
+  const { presentation, identity } = await createPresentationForApprovalRequest(approvalRequest.id)
+
+  return { approvalRequest, presentation, identity }
+}
+
+export async function createActionedApprovalRequest(input: ApprovalRequestInput, isApproved: boolean, actionedComment: string) {
+  const { presentation, identity, approvalRequest } = await createApprovalRequestWithPresentation(input)
+  const limitedApprovalInput: LimitedApprovalOperationInput = {
+    approvalRequestId: approvalRequest.id,
+    presentationId: presentation.id,
+  }
+  // Act
+  const { data, errors } = await executeOperationAsLimitedApprovalClient(
+    {
+      query: actionApprovalRequestMutation,
+      variables: { id: approvalRequest.id, input: { isApproved, actionedComment } },
+    },
+    limitedApprovalInput,
+  )
+
+  return {
+    approvalRequest,
+    presentation,
+    identity,
+    actionedApprovalData: data?.actionApprovalRequest,
+    errors,
+  }
 }

@@ -197,6 +197,18 @@ exports[`shield rules are setup correctly 1`] = `
           ]
         }
       ]
+    },
+    "actionedApprovalData": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isApprovalRequestApp",
+          "cache": "contextual"
+        }
+      ]
     }
   },
   "Mutation": {
@@ -587,6 +599,34 @@ exports[`shield rules are setup correctly 1`] = `
   "ApprovalTokenResponse": {
     "*": {
       "rules": []
+    }
+  },
+  "ActionedApprovalData": {
+    "*": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isApprovalRequestApp",
+          "cache": "contextual"
+        }
+      ]
+    }
+  },
+  "ActionedBy": {
+    "*": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isApprovalRequestApp",
+          "cache": "contextual"
+        }
+      ]
     }
   }
 }"

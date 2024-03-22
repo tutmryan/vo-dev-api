@@ -1,58 +1,13 @@
-import casual from 'casual'
-import { randomUUID } from 'crypto'
 import { addDays } from 'date-fns'
-import { ISOLATION_LEVEL, dataSource } from '../../../data'
-import { graphql } from '../../../generated'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
 import type { LimitedApprovalOperationInput } from '../../../test'
 import { beforeAfterAll, executeOperationAsLimitedApprovalClient, expectToBeDefined, expectUnauthorizedError } from '../../../test'
-import { addUserToManager } from '../../auditing/user-context-helper'
-import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
-import { createIdentity } from '../../identity/create-update-identity.test'
-import { PresentationEntity } from '../../presentation/entities/presentation-entity'
-import { UserEntity } from '../../users/entities/user-entity'
-import { ApprovalRequestEntity } from '../entities/approval-request-entity'
-import { createApprovalRequest, getDefaultApprovalRequestInput } from './create-approval-request'
-
-const actionApprovalRequestMutation = graphql(`
-  mutation ActionApprovalRequest($id: ID!, $input: ActionApprovalRequestInput!) {
-    actionApprovalRequest(id: $id, input: $input) {
-      id
-      status
-      isApproved
-      actionedComment
-    }
-  }
-`)
-
-async function createPresentationForApprovalRequest(approvalRequestId: string) {
-  const identity = await createIdentity()
-  const contract = await createContract(getDefaultContractInput())
-  const { presentation } = await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
-    const requestedBy = await entityManager
-      .getRepository(UserEntity)
-      .save(new UserEntity({ email: casual.email, isApp: true, name: 'Test', oid: randomUUID(), tenantId: randomUUID() }))
-    addUserToManager(entityManager, requestedBy.id)
-    const presentation = await entityManager.getRepository(PresentationEntity).save(
-      new PresentationEntity({
-        requestId: randomUUID(),
-        identityId: identity.id,
-        requestedById: requestedBy.id,
-        requestedCredentials: [],
-        presentedCredentials: [],
-        partnerIds: [],
-        issuanceIds: [],
-      }),
-    )
-    const approvalRequestRepo = entityManager.getRepository(ApprovalRequestEntity)
-    const approvalRequest = await approvalRequestRepo.findOneByOrFail({ id: approvalRequestId })
-    approvalRequest.presentationId = presentation.id
-    await approvalRequestRepo.save(approvalRequest)
-    return { presentation }
-  })
-
-  return { identity, contract, presentation }
-}
+import {
+  actionApprovalRequestMutation,
+  createApprovalRequest,
+  createApprovalRequestWithPresentation,
+  getDefaultApprovalRequestInput,
+} from './create-approval-request'
 
 describe('action approval request', () => {
   beforeAfterAll()
@@ -60,8 +15,7 @@ describe('action approval request', () => {
   it('can be approved', async () => {
     // Arrange
     const approvalRequestInput = getDefaultApprovalRequestInput()
-    const approvalRequest = await createApprovalRequest(approvalRequestInput)
-    const { presentation } = await createPresentationForApprovalRequest(approvalRequest.id)
+    const { presentation, approvalRequest } = await createApprovalRequestWithPresentation(approvalRequestInput)
     const limitedApprovalInput: LimitedApprovalOperationInput = {
       approvalRequestId: approvalRequest.id,
       presentationId: presentation.id,
@@ -86,8 +40,7 @@ describe('action approval request', () => {
   it('can be rejected', async () => {
     // Arrange
     const approvalRequestInput = getDefaultApprovalRequestInput()
-    const approvalRequest = await createApprovalRequest(approvalRequestInput)
-    const { presentation } = await createPresentationForApprovalRequest(approvalRequest.id)
+    const { presentation, approvalRequest } = await createApprovalRequestWithPresentation(approvalRequestInput)
     const limitedApprovalInput: LimitedApprovalOperationInput = {
       approvalRequestId: approvalRequest.id,
       presentationId: presentation.id,
@@ -131,8 +84,7 @@ describe('action approval request', () => {
   it('returns an error when request is not pending', async () => {
     // Arrange
     const approvalRequestInput = getDefaultApprovalRequestInput()
-    const approvalRequest = await createApprovalRequest(approvalRequestInput)
-    const { presentation } = await createPresentationForApprovalRequest(approvalRequest.id)
+    const { presentation, approvalRequest } = await createApprovalRequestWithPresentation(approvalRequestInput)
     const limitedApprovalInput: LimitedApprovalOperationInput = {
       approvalRequestId: approvalRequest.id,
       presentationId: presentation.id,
@@ -162,8 +114,7 @@ describe('action approval request', () => {
     // Arrange
     const approvalRequestInput = getDefaultApprovalRequestInput()
     approvalRequestInput.expiresAt = addDays(new Date(), -1)
-    const approvalRequest = await createApprovalRequest(approvalRequestInput)
-    const { presentation } = await createPresentationForApprovalRequest(approvalRequest.id)
+    const { presentation, approvalRequest } = await createApprovalRequestWithPresentation(approvalRequestInput)
     const limitedApprovalInput: LimitedApprovalOperationInput = {
       approvalRequestId: approvalRequest.id,
       presentationId: presentation.id,

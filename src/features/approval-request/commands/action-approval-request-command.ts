@@ -9,7 +9,7 @@ export async function ActionApprovalRequestCommand(this: CommandContext, id: str
   userInvariant(user)
 
   const repo = entityManager.getRepository(ApprovalRequestEntity)
-  const approvalRequest = await entityManager.getRepository(ApprovalRequestEntity).findOneByOrFail({ id })
+  const approvalRequest = await repo.findOneByOrFail({ id })
 
   approvalRequest.action(input.isApproved, input.actionedComment)
   const approvedRequest = await repo.save(approvalRequest)

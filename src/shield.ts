@@ -66,6 +66,7 @@ export const rules: ShieldSchema<Resolvers> = {
     findNetworkIssuers: isPartnerAdminUser,
     networkContracts: isPartnerAdminUser,
     approvalRequest: or(isApprovalRequestAdminUser, and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId)),
+    actionedApprovalData: or(isApprovalRequestAdminUser, isApprovalRequestApp),
   },
   Mutation: {
     '*': isCredentialAdminUser,
@@ -123,6 +124,12 @@ export const rules: ShieldSchema<Resolvers> = {
   },
   ApprovalTokenResponse: {
     '*': allow,
+  },
+  ActionedApprovalData: {
+    '*': or(isApprovalRequestAdminUser, isApprovalRequestApp),
+  },
+  ActionedBy: {
+    '*': or(isApprovalRequestAdminUser, isApprovalRequestApp),
   },
 }
 export const permissions = wrappedShield(rules)

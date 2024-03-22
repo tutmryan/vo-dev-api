@@ -251,4 +251,8 @@ extend type Query {
   Returns an approval request by ID.
   """
   approvalRequest(id: ID!): ApprovalRequest!
+  """
+  Returns details of the action taken on the approval request.
+  """
+  actionedApprovalData(id: ID!): ActionedApprovalData
 }

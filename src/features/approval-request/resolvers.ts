@@ -1,8 +1,9 @@
-import { dispatch } from '../../cqs/dispatcher'
+import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { ActionApprovalRequestCommand } from './commands/action-approval-request-command'
 import { CreateApprovalRequestCommand } from './commands/create-approval-request-command'
 import { CreatePresentationRequestForApprovalCommand } from './commands/create-presentation-request-for-approval-command'
+import { FindActionedApprovalDataQuery } from './queries/find-actioned-approval-data-query'
 
 export const resolvers: Resolvers = {
   Mutation: {
@@ -13,6 +14,7 @@ export const resolvers: Resolvers = {
   },
   Query: {
     approvalRequest: (_, { id }, { dataLoaders: { approvalRequests } }) => approvalRequests.load(id),
+    actionedApprovalData: (_, { id }, context) => query(context, FindActionedApprovalDataQuery, id),
   },
   ApprovalRequest: {
     requestedAt: ({ createdAt }) => createdAt,
