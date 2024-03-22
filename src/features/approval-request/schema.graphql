@@ -72,6 +72,10 @@ type ApprovalRequestResponse {
   The URL to the newly created approval request in the portal
   """
   portalUrl: String!
+  """
+  A unique secret that can be used to verify the authenticity of the callback.
+  """
+  callbackSecret: String!
 }
 
 """

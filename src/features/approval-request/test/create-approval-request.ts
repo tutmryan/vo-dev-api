@@ -10,6 +10,7 @@ export const createApprovalRequestMutation = graphql(
     createApprovalRequest(request: $input) {
       id
       portalUrl
+      callbackSecret
     }
   }
 ` as const,
