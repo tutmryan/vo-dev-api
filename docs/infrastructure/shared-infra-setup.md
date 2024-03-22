@@ -66,6 +66,16 @@ gh api \
   -f "include_claim_keys[]=repo"
 ```
 
+```bash
+gh api \
+  --method PUT \
+  -H "Accept: application/vnd.github+json" \
+  -H "X-GitHub-Api-Version: 2022-11-28" \
+  /repos/VerifiedOrchestration/verified-orchestration-portal/actions/oidc/customization/sub \
+  -F use_default=false \
+  -f "include_claim_keys[]=repo"
+```
+
 ## Configure organisation variables in GitHub
 
 Add organisation variables and secrets to GitHub using the output from the previous steps and auth setup.
