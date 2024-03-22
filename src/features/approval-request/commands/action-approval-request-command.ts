@@ -1,6 +1,6 @@
 import { extractErrorResponseInfo } from '@makerx/node-common'
 import type { CommandContext } from '../../../cqs'
-import type { ActionApprovalRequestInput, ActionedApprovalCallbackData } from '../../../generated/graphql'
+import type { ActionApprovalRequestInput, ActionedApprovalData } from '../../../generated/graphql'
 import { userInvariant } from '../../../util/user-invariant'
 import { ApprovalRequestEntity } from '../entities/approval-request-entity'
 
@@ -14,15 +14,20 @@ export async function ActionApprovalRequestCommand(this: CommandContext, id: str
   approvalRequest.action(input.isApproved, input.actionedComment)
   const approvedRequest = await repo.save(approvalRequest)
 
+  const presentation = await approvedRequest.presentation
+  const identity = (await presentation.identity)!
   // invoke the callback
   if (approvedRequest.callbackInput) {
-    const data: ActionedApprovalCallbackData = {
+    const data: ActionedApprovalData = {
       approvalRequestId: approvedRequest.id,
       correlationId: approvedRequest.correlationId,
       requestData: approvedRequest.requestData,
       state: approvedRequest.callbackInput.state,
       isApproved: input.isApproved,
       actionedComment: input.actionedComment,
+      actionedAt: approvalRequest.updatedAt!,
+      actionedBy: { id: identity.id, name: identity.name },
+      callbackSecret: approvedRequest.callbackSecret,
     }
 
     const request: RequestInit = {

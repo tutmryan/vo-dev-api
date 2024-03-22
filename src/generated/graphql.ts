@@ -109,13 +109,19 @@ export type ActionApprovalRequestInput = {
   isApproved: Scalars['Boolean']['input'];
 };
 
-/** Callback will be invoked when the approval request is actioned with this data. */
-export type ActionedApprovalCallbackData = {
-  __typename?: 'ActionedApprovalCallbackData';
+/** Details of the action taken on the approval request. */
+export type ActionedApprovalData = {
+  __typename?: 'ActionedApprovalData';
+  /** When the approval request was actioned. */
+  actionedAt: Scalars['DateTime']['output'];
+  /** The person who actioned the approval request. */
+  actionedBy: ActionedBy;
   /** Optional comment on approval or rejection of this request. */
   actionedComment?: Maybe<Scalars['String']['output']>;
   /** The ID of the approval request that was actioned. */
   approvalRequestId: Scalars['ID']['output'];
+  /** A unique secret that can be used to verify the authenticity of the callback. */
+  callbackSecret: Scalars['String']['output'];
   /** The optional originating source entity ID of the artifact requiring approval. */
   correlationId?: Maybe<Scalars['ID']['output']>;
   /** Indicates whether the approval has been granted. */
@@ -124,6 +130,15 @@ export type ActionedApprovalCallbackData = {
   requestData?: Maybe<Scalars['JSONObject']['output']>;
   /** Arbitrary state value which was optionally included in the approval request callback definition. */
   state?: Maybe<Scalars['String']['output']>;
+};
+
+/** The details of the person who actioned the approval request */
+export type ActionedBy = {
+  __typename?: 'ActionedBy';
+  /** The id of this identity */
+  id: Scalars['ID']['output'];
+  /** The name of the identity */
+  name: Scalars['String']['output'];
 };
 
 /** An instance of an approval request. */
@@ -2666,7 +2681,8 @@ export type ResolversTypes = {
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   AcquireLimitedApprovalTokenInput: AcquireLimitedApprovalTokenInput;
   ActionApprovalRequestInput: ActionApprovalRequestInput;
-  ActionedApprovalCallbackData: ResolverTypeWrapper<ActionedApprovalCallbackData>;
+  ActionedApprovalData: ResolverTypeWrapper<ActionedApprovalData>;
+  ActionedBy: ResolverTypeWrapper<ActionedBy>;
   ApprovalRequest: ResolverTypeWrapper<ApprovalRequestEntity>;
   ApprovalRequestInput: ApprovalRequestInput;
   ApprovalRequestPresentationInput: ApprovalRequestPresentationInput;
@@ -2811,7 +2827,8 @@ export type ResolversParentTypes = {
   ID: Scalars['ID']['output'];
   AcquireLimitedApprovalTokenInput: AcquireLimitedApprovalTokenInput;
   ActionApprovalRequestInput: ActionApprovalRequestInput;
-  ActionedApprovalCallbackData: ActionedApprovalCallbackData;
+  ActionedApprovalData: ActionedApprovalData;
+  ActionedBy: ActionedBy;
   ApprovalRequest: ApprovalRequestEntity;
   ApprovalRequestInput: ApprovalRequestInput;
   ApprovalRequestPresentationInput: ApprovalRequestPresentationInput;
@@ -2947,13 +2964,22 @@ export type AccessTokenResponseResolvers<ContextType = GraphQLContext, ParentTyp
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type ActionedApprovalCallbackDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ActionedApprovalCallbackData'] = ResolversParentTypes['ActionedApprovalCallbackData']> = {
+export type ActionedApprovalDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ActionedApprovalData'] = ResolversParentTypes['ActionedApprovalData']> = {
+  actionedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  actionedBy?: Resolver<ResolversTypes['ActionedBy'], ParentType, ContextType>;
   actionedComment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   approvalRequestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  callbackSecret?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   correlationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   isApproved?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   requestData?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ActionedByResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ActionedBy'] = ResolversParentTypes['ActionedBy']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -3527,7 +3553,8 @@ export type WebDidModelResolvers<ContextType = GraphQLContext, ParentType extend
 
 export type Resolvers<ContextType = GraphQLContext> = {
   AccessTokenResponse?: AccessTokenResponseResolvers<ContextType>;
-  ActionedApprovalCallbackData?: ActionedApprovalCallbackDataResolvers<ContextType>;
+  ActionedApprovalData?: ActionedApprovalDataResolvers<ContextType>;
+  ActionedBy?: ActionedByResolvers<ContextType>;
   ApprovalRequest?: ApprovalRequestResolvers<ContextType>;
   ApprovalRequestResponse?: ApprovalRequestResponseResolvers<ContextType>;
   ApprovalTokenResponse?: ApprovalTokenResponseResolvers<ContextType>;
