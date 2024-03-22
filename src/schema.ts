@@ -21,6 +21,7 @@ const usedScalars = pick(
   'Void',
   'JSONObject',
   'EmailAddress',
+  'UUID',
 )
 
 export default function () {

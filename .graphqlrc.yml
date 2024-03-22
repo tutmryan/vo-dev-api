@@ -36,3 +36,4 @@ extensions:
             Void: null | undefined | void
             JSONObject: Record<string, unknown>
             EmailAddress: string
+            UUID: string

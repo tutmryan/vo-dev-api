@@ -42,6 +42,8 @@ export type Scalars = {
   PositiveInt: { input: number; output: number; }
   /** A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt. */
   URL: { input: string; output: string; }
+  /** A field whose value is a generic Universally Unique Identifier: https://en.wikipedia.org/wiki/Universally_unique_identifier. */
+  UUID: { input: string; output: string; }
   /** Represents NULL values */
   Void: { input: null | undefined | void; output: null | undefined | void; }
 };
@@ -96,7 +98,7 @@ export type AcquireLimitedAccessTokenInput = {
 /** Input for acquiring a limited token for approval. */
 export type AcquireLimitedApprovalTokenInput = {
   /** The ID of the approval request to which access will be limited. */
-  approvalRequestId: Scalars['ID']['input'];
+  approvalRequestId: Scalars['UUID']['input'];
 };
 
 /** Input for actioning an approval request. */
@@ -2788,6 +2790,7 @@ export type ResolversTypes = {
   TenantIdentity: ResolverTypeWrapper<TenantIdentity>;
   TenantIdentityWhere: TenantIdentityWhere;
   URL: ResolverTypeWrapper<Scalars['URL']['output']>;
+  UUID: ResolverTypeWrapper<Scalars['UUID']['output']>;
   UpdatePartnerInput: UpdatePartnerInput;
   User: ResolverTypeWrapper<UserEntity>;
   UserCount: ResolverTypeWrapper<Omit<UserCount, 'user'> & { user: ResolversTypes['User'] }>;
@@ -2919,6 +2922,7 @@ export type ResolversParentTypes = {
   TenantIdentity: TenantIdentity;
   TenantIdentityWhere: TenantIdentityWhere;
   URL: Scalars['URL']['output'];
+  UUID: Scalars['UUID']['output'];
   UpdatePartnerInput: UpdatePartnerInput;
   User: UserEntity;
   UserCount: Omit<UserCount, 'user'> & { user: ResolversParentTypes['User'] };
@@ -3489,6 +3493,10 @@ export interface UrlScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes[
   name: 'URL';
 }
 
+export interface UuidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['UUID'], any> {
+  name: 'UUID';
+}
+
 export type UserResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -3581,6 +3589,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   TemplateParentData?: TemplateParentDataResolvers<ContextType>;
   TenantIdentity?: TenantIdentityResolvers<ContextType>;
   URL?: GraphQLScalarType;
+  UUID?: GraphQLScalarType;
   User?: UserResolvers<ContextType>;
   UserCount?: UserCountResolvers<ContextType>;
   Void?: GraphQLScalarType;
