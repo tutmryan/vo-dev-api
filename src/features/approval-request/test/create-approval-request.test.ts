@@ -56,5 +56,6 @@ describe('create approval request mutation', () => {
     expect(data).not.toBeNull()
     expect(data?.createApprovalRequest.id).not.toBeNull()
     expect(data?.createApprovalRequest.portalUrl).toContain(data?.createApprovalRequest.id)
+    expect(data?.createApprovalRequest.callbackSecret).toBeTruthy()
   })
 })

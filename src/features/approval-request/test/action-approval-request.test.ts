@@ -1,21 +1,13 @@
-import { randomUUID } from 'crypto'
 import { addDays } from 'date-fns'
-import { graphql } from '../../../generated'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
 import type { LimitedApprovalOperationInput } from '../../../test'
 import { beforeAfterAll, executeOperationAsLimitedApprovalClient, expectToBeDefined, expectUnauthorizedError } from '../../../test'
-import { createApprovalRequest, getDefaultApprovalRequestInput } from './create-approval-request'
-
-const actionApprovalRequestMutation = graphql(`
-  mutation ActionApprovalRequest($id: ID!, $input: ActionApprovalRequestInput!) {
-    actionApprovalRequest(id: $id, input: $input) {
-      id
-      status
-      isApproved
-      actionedComment
-    }
-  }
-`)
+import {
+  actionApprovalRequestMutation,
+  createApprovalRequest,
+  createApprovalRequestWithPresentation,
+  getDefaultApprovalRequestInput,
+} from './create-approval-request'
 
 describe('action approval request', () => {
   beforeAfterAll()
@@ -23,10 +15,10 @@ describe('action approval request', () => {
   it('can be approved', async () => {
     // Arrange
     const approvalRequestInput = getDefaultApprovalRequestInput()
-    const approvalRequest = await createApprovalRequest(approvalRequestInput)
+    const { presentation, approvalRequest } = await createApprovalRequestWithPresentation(approvalRequestInput)
     const limitedApprovalInput: LimitedApprovalOperationInput = {
       approvalRequestId: approvalRequest.id,
-      presentationId: randomUUID(),
+      presentationId: presentation.id,
     }
     // Act
     const { data, errors } = await executeOperationAsLimitedApprovalClient(
@@ -48,10 +40,10 @@ describe('action approval request', () => {
   it('can be rejected', async () => {
     // Arrange
     const approvalRequestInput = getDefaultApprovalRequestInput()
-    const approvalRequest = await createApprovalRequest(approvalRequestInput)
+    const { presentation, approvalRequest } = await createApprovalRequestWithPresentation(approvalRequestInput)
     const limitedApprovalInput: LimitedApprovalOperationInput = {
       approvalRequestId: approvalRequest.id,
-      presentationId: randomUUID(),
+      presentationId: presentation.id,
     }
     // Act
     const { data, errors } = await executeOperationAsLimitedApprovalClient(
@@ -92,10 +84,10 @@ describe('action approval request', () => {
   it('returns an error when request is not pending', async () => {
     // Arrange
     const approvalRequestInput = getDefaultApprovalRequestInput()
-    const approvalRequest = await createApprovalRequest(approvalRequestInput)
+    const { presentation, approvalRequest } = await createApprovalRequestWithPresentation(approvalRequestInput)
     const limitedApprovalInput: LimitedApprovalOperationInput = {
       approvalRequestId: approvalRequest.id,
-      presentationId: randomUUID(),
+      presentationId: presentation.id,
     }
     await executeOperationAsLimitedApprovalClient(
       {
@@ -122,10 +114,10 @@ describe('action approval request', () => {
     // Arrange
     const approvalRequestInput = getDefaultApprovalRequestInput()
     approvalRequestInput.expiresAt = addDays(new Date(), -1)
-    const approvalRequest = await createApprovalRequest(approvalRequestInput)
+    const { presentation, approvalRequest } = await createApprovalRequestWithPresentation(approvalRequestInput)
     const limitedApprovalInput: LimitedApprovalOperationInput = {
       approvalRequestId: approvalRequest.id,
-      presentationId: randomUUID(),
+      presentationId: presentation.id,
     }
     // Act
     const { errors } = await executeOperationAsLimitedApprovalClient(

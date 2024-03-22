@@ -18,6 +18,7 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
       | 'purpose'
       | 'requestDataJson'
       | 'callbackJson'
+      | 'callbackSecret'
       | 'presentationRequestJson'
     >,
   ) {
@@ -57,6 +58,9 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
   get callbackInput(): Callback | null {
     return this.callbackJson ? JSON.parse(this.callbackJson) : null
   }
+
+  @Column({ type: 'uniqueidentifier' })
+  callbackSecret!: string
 
   @Column({ type: 'nvarchar', length: 'MAX' })
   presentationRequestJson!: string

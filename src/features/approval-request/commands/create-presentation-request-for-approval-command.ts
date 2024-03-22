@@ -27,6 +27,9 @@ export async function CreatePresentationRequestForApprovalCommand(
   const presentationRequestInput: PresentationRequestInput = {
     ...approvalRequest.presentationRequestInput,
     includeQRCode: input?.includeQRCode,
+    registration: {
+      clientName: 'Verified Orchestration Approvals',
+    },
   }
 
   return await CreatePresentationRequestCommand.apply(this, [presentationRequestInput, getLimitedApprovalKey(user.token)])

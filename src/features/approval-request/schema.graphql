@@ -55,10 +55,6 @@ Defines the approval request's verifiable credentials presentation request.
 """
 input ApprovalRequestPresentationInput {
   """
-  Provides information about the verifier.
-  """
-  registration: PresentationRequestRegistration!
-  """
   A collection of RequestCredential objects representing the credentials the user needs to provide.
   """
   requestedCredentials: [RequestCredential!]!
@@ -76,6 +72,10 @@ type ApprovalRequestResponse {
   The URL to the newly created approval request in the portal
   """
   portalUrl: String!
+  """
+  A unique secret that can be used to verify the authenticity of the callback.
+  """
+  callbackSecret: String!
 }
 
 """
@@ -159,9 +159,23 @@ type ApprovalRequest {
 }
 
 """
-Callback will be invoked when the approval request is actioned with this data.
+The details of the person who actioned the approval request
 """ # eslint-disable-next-line @graphql-eslint/no-unreachable-types
-type ActionedApprovalCallbackData {
+type ActionedBy {
+  """
+  The id of this identity
+  """
+  id: ID!
+  """
+  The name of the identity
+  """
+  name: String!
+}
+
+"""
+Details of the action taken on the approval request.
+""" # eslint-disable-next-line @graphql-eslint/no-unreachable-types
+type ActionedApprovalData {
   """
   The ID of the approval request that was actioned.
   """
@@ -186,6 +200,18 @@ type ActionedApprovalCallbackData {
   Optional comment on approval or rejection of this request.
   """
   actionedComment: String
+  """
+  The person who actioned the approval request.
+  """
+  actionedBy: ActionedBy!
+  """
+  When the approval request was actioned.
+  """
+  actionedAt: DateTime!
+  """
+  A unique secret that can be used to verify the authenticity of the callback.
+  """
+  callbackSecret: String!
 }
 
 """
@@ -225,4 +251,8 @@ extend type Query {
   Returns an approval request by ID.
   """
   approvalRequest(id: ID!): ApprovalRequest!
+  """
+  Returns details of the action taken on the approval request.
+  """
+  actionedApprovalData(id: ID!): ActionedApprovalData
 }

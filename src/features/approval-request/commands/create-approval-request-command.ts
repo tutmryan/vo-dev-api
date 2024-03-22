@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { addDays } from 'date-fns'
 import { portalUrl } from '../../../config'
 import type { CommandContext } from '../../../cqs'
@@ -19,11 +20,13 @@ export async function CreateApprovalRequestCommand(this: CommandContext, input: 
     presentationRequestJson: JSON.stringify(input.presentationRequestInput),
     requestDataJson: JSON.stringify(input.requestData),
     callbackJson: JSON.stringify(input.callback),
+    callbackSecret: randomUUID(),
   })
 
   const newApprovalRequest = await entityManager.getRepository(ApprovalRequestEntity).save(approvalRequest)
   return {
     id: newApprovalRequest.id,
     portalUrl: `${portalUrl}/approval-request/${newApprovalRequest.id}`,
+    callbackSecret: newApprovalRequest.callbackSecret,
   }
 }
