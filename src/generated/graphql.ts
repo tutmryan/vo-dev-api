@@ -186,8 +186,6 @@ export type ApprovalRequestInput = {
 
 /** Defines the approval request's verifiable credentials presentation request. */
 export type ApprovalRequestPresentationInput = {
-  /** Provides information about the verifier. */
-  registration: PresentationRequestRegistration;
   /** A collection of RequestCredential objects representing the credentials the user needs to provide. */
   requestedCredentials: Array<RequestCredential>;
 };

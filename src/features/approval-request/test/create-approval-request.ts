@@ -27,10 +27,6 @@ export function getDefaultApprovalRequestInput(): ApprovalRequestInput {
           acceptedIssuers: ['did:example:123'],
         },
       ],
-      registration: {
-        clientName: 'Approval App',
-        purpose: 'Approve a change',
-      },
     },
   }
 }
