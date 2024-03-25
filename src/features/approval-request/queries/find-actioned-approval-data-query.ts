@@ -14,7 +14,7 @@ export async function FindActionedApprovalDataQuery(this: QueryContext, id: stri
   }
 
   const presentation = await approvalRequest.presentation
-  const identity = (await presentation.identity)!
+  const identity = await presentation.identity
 
   return {
     approvalRequestId: approvalRequest.id,
@@ -24,7 +24,7 @@ export async function FindActionedApprovalDataQuery(this: QueryContext, id: stri
     isApproved: approvalRequest.isApproved!,
     actionedComment: approvalRequest.actionedComment,
     actionedAt: approvalRequest.updatedAt!,
-    actionedBy: { id: identity.id, name: identity.name },
+    actionedBy: identity ? { id: identity.id, name: identity.name } : null,
     callbackSecret: approvalRequest.callbackSecret,
   }
 }

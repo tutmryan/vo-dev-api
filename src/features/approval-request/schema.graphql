@@ -160,7 +160,7 @@ type ApprovalRequest {
 
 """
 The details of the person who actioned the approval request
-""" # eslint-disable-next-line @graphql-eslint/no-unreachable-types
+"""
 type ActionedBy {
   """
   The id of this identity
@@ -201,9 +201,9 @@ type ActionedApprovalData {
   """
   actionedComment: String
   """
-  The person who actioned the approval request.
+  The person who actioned the approval request, if known.
   """
-  actionedBy: ActionedBy!
+  actionedBy: ActionedBy
   """
   When the approval request was actioned.
   """

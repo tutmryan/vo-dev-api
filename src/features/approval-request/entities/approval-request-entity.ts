@@ -92,9 +92,10 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
     return ApprovalRequestStatus.Pending
   }
 
-  action(isApproved: boolean, actionedComment: any) {
+  action(presentationId: string, isApproved: boolean, actionedComment?: string | null) {
     invariant(this.status === ApprovalRequestStatus.Pending, `Cannot action an approval request that is ${this.status}`)
+    this.presentationId = presentationId
     this.isApproved = isApproved
-    this.actionedComment = actionedComment
+    this.actionedComment = actionedComment ?? null
   }
 }

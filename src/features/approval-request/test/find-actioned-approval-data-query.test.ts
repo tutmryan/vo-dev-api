@@ -72,6 +72,6 @@ describe('find actioned approval data', () => {
     expect(data?.actionedApprovalData).not.toBeNull()
     expect(data?.actionedApprovalData?.approvalRequestId).toEqual(approvalRequest.id.toUpperCase())
     expect(data?.actionedApprovalData?.isApproved).toEqual(true)
-    expect(data?.actionedApprovalData?.actionedBy.id).toEqual(identity.id.toUpperCase())
+    expect(data?.actionedApprovalData?.actionedBy?.id).toEqual(identity.id.toUpperCase())
   })
 })

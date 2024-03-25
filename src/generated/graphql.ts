@@ -114,8 +114,8 @@ export type ActionedApprovalData = {
   __typename?: 'ActionedApprovalData';
   /** When the approval request was actioned. */
   actionedAt: Scalars['DateTime']['output'];
-  /** The person who actioned the approval request. */
-  actionedBy: ActionedBy;
+  /** The person who actioned the approval request, if known. */
+  actionedBy?: Maybe<ActionedBy>;
   /** Optional comment on approval or rejection of this request. */
   actionedComment?: Maybe<Scalars['String']['output']>;
   /** The ID of the approval request that was actioned. */
@@ -2412,7 +2412,7 @@ export type FindActionedApprovalDataQueryVariables = Exact<{
 }>;
 
 
-export type FindActionedApprovalDataQuery = { __typename?: 'Query', actionedApprovalData?: { __typename?: 'ActionedApprovalData', approvalRequestId: string, correlationId?: string | null, requestData?: Record<string, unknown> | null, state?: string | null, isApproved: boolean, actionedComment?: string | null, actionedAt: Date, callbackSecret: string, actionedBy: { __typename?: 'ActionedBy', id: string, name: string } } | null };
+export type FindActionedApprovalDataQuery = { __typename?: 'Query', actionedApprovalData?: { __typename?: 'ActionedApprovalData', approvalRequestId: string, correlationId?: string | null, requestData?: Record<string, unknown> | null, state?: string | null, isApproved: boolean, actionedComment?: string | null, actionedAt: Date, callbackSecret: string, actionedBy?: { __typename?: 'ActionedBy', id: string, name: string } | null } | null };
 
 export type ApprovalRequestQueryVariables = Exact<{
   approvalRequestId: Scalars['ID']['input'];
@@ -2981,7 +2981,7 @@ export type AccessTokenResponseResolvers<ContextType = GraphQLContext, ParentTyp
 
 export type ActionedApprovalDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ActionedApprovalData'] = ResolversParentTypes['ActionedApprovalData']> = {
   actionedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  actionedBy?: Resolver<ResolversTypes['ActionedBy'], ParentType, ContextType>;
+  actionedBy?: Resolver<Maybe<ResolversTypes['ActionedBy']>, ParentType, ContextType>;
   actionedComment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   approvalRequestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   callbackSecret?: Resolver<ResolversTypes['String'], ParentType, ContextType>;

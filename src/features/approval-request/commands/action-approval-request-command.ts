@@ -1,7 +1,9 @@
 import { extractErrorResponseInfo } from '@makerx/node-common'
 import type { CommandContext } from '../../../cqs'
 import type { ActionApprovalRequestInput, ActionedApprovalData } from '../../../generated/graphql'
+import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
+import { getLimitedApprovalData } from '../../limited-approval-tokens'
 import { ApprovalRequestEntity } from '../entities/approval-request-entity'
 
 export async function ActionApprovalRequestCommand(this: CommandContext, id: string, input: ActionApprovalRequestInput) {
@@ -11,12 +13,15 @@ export async function ActionApprovalRequestCommand(this: CommandContext, id: str
   const repo = entityManager.getRepository(ApprovalRequestEntity)
   const approvalRequest = await repo.findOneByOrFail({ id })
 
-  approvalRequest.action(input.isApproved, input.actionedComment)
+  const approvalData = await getLimitedApprovalData(user.token)
+  invariant(approvalData.presentationId, 'This approval request does not have an associated presentation')
+
+  approvalRequest.action(approvalData.presentationId, input.isApproved, input.actionedComment)
   const approvedRequest = await repo.save(approvalRequest)
 
   const presentation = await approvedRequest.presentation
-  const identity = (await presentation.identity)!
-  // invoke the callback
+  const identity = await presentation.identity
+
   if (approvedRequest.callbackInput) {
     const data: ActionedApprovalData = {
       approvalRequestId: approvedRequest.id,
@@ -26,7 +31,7 @@ export async function ActionApprovalRequestCommand(this: CommandContext, id: str
       isApproved: input.isApproved,
       actionedComment: input.actionedComment,
       actionedAt: approvalRequest.updatedAt!,
-      actionedBy: { id: identity.id, name: identity.name },
+      actionedBy: identity ? { id: identity.id, name: identity.name } : null,
       callbackSecret: approvedRequest.callbackSecret,
     }
 
