@@ -38,7 +38,7 @@ export async function ActionApprovalRequestCommand(this: CommandContext, id: str
     const request: RequestInit = {
       method: 'POST',
       body: JSON.stringify(data),
-      headers: approvedRequest.callbackInput.headers as { [key: string]: string } | undefined,
+      headers: { contentType: 'application/json', ...approvedRequest.callbackInput.headers } as HeadersInit,
     }
 
     try {

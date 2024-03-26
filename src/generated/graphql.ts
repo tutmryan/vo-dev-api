@@ -157,7 +157,7 @@ export type ApprovalRequest = {
   presentation?: Maybe<Presentation>;
   /** The presentation request definition for this approval. */
   presentationRequest: Scalars['JSONObject']['output'];
-  /** Optional purpose for requesting approval. */
+  /** Purpose for requesting approval. */
   purpose: Scalars['String']['output'];
   /** Optional URL to the artifact for approval. */
   referenceUrl?: Maybe<Scalars['String']['output']>;
@@ -189,8 +189,8 @@ export type ApprovalRequestInput = {
   expiresAt?: InputMaybe<Scalars['DateTime']['input']>;
   /** The presentation request definition for this approval. */
   presentationRequestInput: ApprovalRequestPresentationInput;
-  /** Optional purpose for requesting approval. */
-  purpose?: InputMaybe<Scalars['String']['input']>;
+  /** Purpose for requesting approval. */
+  purpose: Scalars['String']['input'];
   /** Optional URL to the artifact for approval. */
   referenceUrl?: InputMaybe<Scalars['String']['input']>;
   /** Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type. */
