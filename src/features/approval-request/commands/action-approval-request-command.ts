@@ -24,7 +24,7 @@ export async function ActionApprovalRequestCommand(this: CommandContext, id: str
 
   if (approvedRequest.callbackInput) {
     const data: ActionedApprovalData = {
-      approvalRequestId: approvedRequest.id,
+      approvalRequestId: approvedRequest.id.toLowerCase(),
       correlationId: approvedRequest.correlationId,
       requestData: approvedRequest.requestData,
       state: approvedRequest.callbackInput.state,
