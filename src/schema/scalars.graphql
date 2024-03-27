@@ -128,10 +128,10 @@ scalar NonNegativeInt
 # """
 # scalar PhoneNumber
 
-# """
-# Floats that will have a value greater than 0.
-# """
-# scalar PositiveFloat
+"""
+Floats that will have a value greater than 0.
+"""
+scalar PositiveFloat
 
 """
 Integers that will have a value greater than 0.

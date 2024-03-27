@@ -1,6 +1,7 @@
 import { compact, flatten, isEqual, merge, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
 import type {
+  FaceCheckPhotoSupport,
   Maybe,
   TemplateDisplayClaim,
   TemplateDisplayCredential,
@@ -23,7 +24,10 @@ type PersistedTemplateDisplayModel = Maybe<Omit<TemplateDisplayModel, 'card'>> &
 @Entity('template', { orderBy: { createdAt: 'ASC' } })
 export class TemplateEntity extends AuditedAndTrackedEntity {
   constructor(
-    args?: Pick<TemplateEntity, 'id' | 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'credentialTypes' | 'display'> & {
+    args?: Pick<
+      TemplateEntity,
+      'id' | 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'credentialTypes' | 'display' | 'faceCheckSupport'
+    > & {
       parent: TemplateEntity | null
     },
   ) {
@@ -74,6 +78,9 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
       this.credentialTypesJson = JSON.stringify(credentialTypes)
     } else this.credentialTypesJson = null
   }
+
+  @Column({ type: 'nvarchar', nullable: true })
+  faceCheckSupport!: FaceCheckPhotoSupport | null
 
   private getAncestors: () => Promise<TemplateEntity[]> = Lazy(async () => {
     let parent = await this.parent
@@ -135,7 +142,7 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
   }
 
   async update(
-    input: Pick<TemplateEntity, 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes'> & {
+    input: Pick<TemplateEntity, 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes' | 'faceCheckSupport'> & {
       parent: TemplateEntity | null
     },
   ) {

@@ -38,6 +38,8 @@ export type Scalars = {
   Locale: { input: string; output: string; }
   /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: number; output: number; }
+  /** Floats that will have a value greater than 0. */
+  PositiveFloat: { input: number; output: number; }
   /** Integers that will have a value greater than 0. */
   PositiveInt: { input: number; output: number; }
   /** A field whose value conforms to the standard URL format as specified in RFC3986: https://www.ietf.org/rfc/rfc3986.txt. */
@@ -346,6 +348,11 @@ export type Callback = {
 export type ConfigurationValidation = {
   /** Determines if a revoked credential should be accepted. Default is false (it shouldn't be accepted). */
   allowRevoked?: InputMaybe<Scalars['Boolean']['input']>;
+  /**
+   * Determines whether face check validation should be performed for this credential and provides optional settings.
+   * If wish to perform face check validation using default settings, set this field to an empty object.
+   */
+  faceCheck?: InputMaybe<FaceCheckValidationInput>;
   /** Determines if the linked domain should be validated. Default is false. Setting this flag to false means you as a Relying Party application accept credentials from unverified linked domain. Setting this flag to true means the linked domain will be validated and only verified domains will be accepted. */
   validateLinkedDomain?: InputMaybe<Scalars['Boolean']['input']>;
 };
@@ -378,6 +385,8 @@ export type Contract = {
    * This only has a value when the contract has been provisioned.
    */
   externalId?: Maybe<Scalars['String']['output']>;
+  /** The type of face check photo support */
+  faceCheckSupport: FaceCheckPhotoSupport;
   /** The unique identifier for the contract */
   id: Scalars['ID']['output'];
   /** Defines whether the contract is deprecated, if so no new issuance can be requested for it */
@@ -601,6 +610,8 @@ export type ContractInput = {
   credentialTypes: Array<Scalars['String']['input']>;
   /** The credential display definition defined by this contract. */
   display: ContractDisplayModelInput;
+  /** The type of face check photo support */
+  faceCheckSupport?: InputMaybe<FaceCheckPhotoSupport>;
   /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
   isPublic: Scalars['Boolean']['input'];
   /** The name of the template */
@@ -839,6 +850,36 @@ export type Discovery = {
   features: Features;
 };
 
+/** The type of face check photo support */
+export enum FaceCheckPhotoSupport {
+  /** A face check photo cannot be provided when issuing a credential with this contract */
+  None = 'none',
+  /** A face check photo can optionally be provided when issuing a credential with this contract */
+  Optional = 'optional',
+  /** A face check photo must be provided when issuing a credential with this contract */
+  Required = 'required'
+}
+
+/** Face check result information included in the PresentedCredential. */
+export type FaceCheckResult = {
+  __typename?: 'FaceCheckResult';
+  matchConfidenceScore: Scalars['PositiveFloat']['output'];
+  sourcePhotoQuality: Scalars['String']['output'];
+};
+
+/** Face check validation settings */
+export type FaceCheckValidation = {
+  __typename?: 'FaceCheckValidation';
+  /** Optional confidence threshold between 50-100. The default is 70. */
+  matchConfidenceThreshold?: Maybe<Scalars['PositiveInt']['output']>;
+};
+
+/** Face check validation settings */
+export type FaceCheckValidationInput = {
+  /** Optional confidence threshold between 50-100. The default is 70. */
+  matchConfidenceThreshold?: InputMaybe<Scalars['PositiveInt']['input']>;
+};
+
 /** Specifies which features are enabled for this API instance. */
 export type Features = {
   __typename?: 'Features';
@@ -1017,7 +1058,7 @@ export type IssuancePresentationsArgs = {
 /** The callback endpoint is called when a user scans the QR code, uses the deep link the authenticator app, or finishes the issuance process. */
 export type IssuanceCallbackEvent = {
   __typename?: 'IssuanceCallbackEvent';
-  /** When the code property value is issuance_error, this property contains information about the error. */
+  /** When the requestStatus property value is issuance_error, this property contains information about the error. */
   error?: Maybe<RequestError>;
   /** Mapped to the original request when the payload was posted to the Verifiable Credentials service. */
   requestId: Scalars['ID']['output'];
@@ -1091,8 +1132,8 @@ export type IssuancePresentationWhere = {
 export type IssuanceRequestInput = {
   callback?: InputMaybe<Callback>;
   /**
-   * Used for the ID token hint flow to include a collection of assertions made about the subject in the verifiable credential.
-   * For PIN code flow, it's important that you provide the user's first name and last name.
+   * A collection of assertions made about the subject in the verifiable credential.
+   * Must fulfill the contract claims definition.
    */
   claims?: InputMaybe<Scalars['JSONObject']['input']>;
   /** The ID of the contract you wish to issue */
@@ -1102,6 +1143,12 @@ export type IssuanceRequestInput = {
    * Please note that the date should be in ISO format.
    */
   expirationDate?: InputMaybe<Scalars['DateTime']['input']>;
+  /**
+   * The issuee's photo for the purpose of face check presentation verification, also displayed via the authenticator app.
+   * The image content type and encoding must be: `image/jpg;base64url`.
+   * For more info on the photo requirements, see the [Face Check documentation](https://learn.microsoft.com/en-us/entra/verified-id/using-facecheck#what-are-the-requirements-for-the-photo-in-the-verified-id)
+   */
+  faceCheckPhoto?: InputMaybe<Scalars['String']['input']>;
   /**
    * The identity you wish to issue to (alternatively use the identityId property, if known)
    *
@@ -1122,6 +1169,7 @@ export type IssuanceRequestInput = {
    * When you set the value to false, use the return url property to render a deep link.
    */
   includeQRCode?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Optional PIN code required for the issuance. */
   pin?: InputMaybe<Pin>;
 };
 
@@ -1537,6 +1585,8 @@ export type Presentation = {
 /** The callback endpoint is called when a user scans the QR code, uses the deep link the authenticator app, or finishes the presentation process. */
 export type PresentationCallbackEvent = {
   __typename?: 'PresentationCallbackEvent';
+  /** When the requestStatus property value is presentation_error, this property contains information about the error. */
+  error?: Maybe<RequestError>;
   /**
    * The receipt contains the original payload sent from the wallet to the Verifiable Credentials service.
    * The receipt should be used for troubleshooting/debugging only.
@@ -1651,6 +1701,8 @@ export type PresentationRequestResponse = PresentationResponse | RequestErrorRes
 
 /** The status returned for the request. */
 export enum PresentationRequestStatus {
+  /** The verifiable credential presentation failed, refer to the error property for details. */
+  PresentationError = 'presentation_error',
   /** The verifiable credential validation completed successfully. */
   PresentationVerified = 'presentation_verified',
   /** The user scanned the QR code or selected the link that starts the presentation flow. */
@@ -1700,6 +1752,7 @@ export type PresentedCredential = {
   claims: Scalars['JSONObject']['output'];
   credentialState: Scalars['JSONObject']['output'];
   domainValidation?: Maybe<Scalars['JSONObject']['output']>;
+  faceCheck?: Maybe<FaceCheckResult>;
   issuer: Scalars['String']['output'];
   type: Array<Scalars['String']['output']>;
 };
@@ -1952,6 +2005,11 @@ export type RequestConfigurationValidation = {
   __typename?: 'RequestConfigurationValidation';
   /** Determines if a revoked credential should be accepted. Default is false (it shouldn't be accepted). */
   allowRevoked?: Maybe<Scalars['Boolean']['output']>;
+  /**
+   * Determines whether face check validation should be performed for this credential and provides optional settings.
+   * If wish to perform face check validation using default settings, set this field to an empty object.
+   */
+  faceCheck?: Maybe<FaceCheckValidation>;
   /** Determines if the linked domain should be validated. Default is false. Setting this flag to false means you as a Relying Party application accept credentials from unverified linked domain. Setting this flag to true means the linked domain will be validated and only verified domains will be accepted. */
   validateLinkedDomain?: Maybe<Scalars['Boolean']['output']>;
 };
@@ -2095,6 +2153,8 @@ export type Template = {
   description: Scalars['String']['output'];
   /** The full or partial credential display definition defined by this template, if any. */
   display?: Maybe<TemplateDisplayModel>;
+  /** The type of face check photo support */
+  faceCheckSupport: FaceCheckPhotoSupport;
   /** The unique identifier for the template */
   id: Scalars['ID']['output'];
   /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
@@ -2195,6 +2255,8 @@ export type TemplateInput = {
   credentialTypes?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The full or partial credential display definition defined by this template, if any. */
   display?: InputMaybe<CreateUpdateTemplateDisplayModelInput>;
+  /** The type of face check photo support */
+  faceCheckSupport?: InputMaybe<FaceCheckPhotoSupport>;
   /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   /** The name of the template */
@@ -2749,6 +2811,10 @@ export type ResolversTypes = {
   DidDocumentStatus: DidDocumentStatus;
   Discovery: ResolverTypeWrapper<Discovery>;
   EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']['output']>;
+  FaceCheckPhotoSupport: FaceCheckPhotoSupport;
+  FaceCheckResult: ResolverTypeWrapper<FaceCheckResult>;
+  FaceCheckValidation: ResolverTypeWrapper<FaceCheckValidation>;
+  FaceCheckValidationInput: FaceCheckValidationInput;
   Features: ResolverTypeWrapper<Features>;
   HexColorCode: ResolverTypeWrapper<Scalars['HexColorCode']['output']>;
   Identity: ResolverTypeWrapper<IdentityEntity>;
@@ -2783,6 +2849,7 @@ export type ResolversTypes = {
   PartnerPresentationWhere: PartnerPresentationWhere;
   PartnerWhere: PartnerWhere;
   Pin: Pin;
+  PositiveFloat: ResolverTypeWrapper<Scalars['PositiveFloat']['output']>;
   PositiveInt: ResolverTypeWrapper<Scalars['PositiveInt']['output']>;
   Presentation: ResolverTypeWrapper<PresentationEntity>;
   PresentationCallbackEvent: ResolverTypeWrapper<PresentationCallbackEvent>;
@@ -2890,6 +2957,9 @@ export type ResolversParentTypes = {
   DateTime: Scalars['DateTime']['output'];
   Discovery: Discovery;
   EmailAddress: Scalars['EmailAddress']['output'];
+  FaceCheckResult: FaceCheckResult;
+  FaceCheckValidation: FaceCheckValidation;
+  FaceCheckValidationInput: FaceCheckValidationInput;
   Features: Features;
   HexColorCode: Scalars['HexColorCode']['output'];
   Identity: IdentityEntity;
@@ -2918,6 +2988,7 @@ export type ResolversParentTypes = {
   PartnerPresentationWhere: PartnerPresentationWhere;
   PartnerWhere: PartnerWhere;
   Pin: Pin;
+  PositiveFloat: Scalars['PositiveFloat']['output'];
   PositiveInt: Scalars['PositiveInt']['output'];
   Presentation: PresentationEntity;
   PresentationCallbackEvent: PresentationCallbackEvent;
@@ -3083,6 +3154,7 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   display?: Resolver<ResolversTypes['ContractDisplayModel'], ParentType, ContextType>;
   externalId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  faceCheckSupport?: Resolver<ResolversTypes['FaceCheckPhotoSupport'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isDeprecated?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -3162,6 +3234,17 @@ export type DiscoveryResolvers<ContextType = GraphQLContext, ParentType extends 
 export interface EmailAddressScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['EmailAddress'], any> {
   name: 'EmailAddress';
 }
+
+export type FaceCheckResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['FaceCheckResult'] = ResolversParentTypes['FaceCheckResult']> = {
+  matchConfidenceScore?: Resolver<ResolversTypes['PositiveFloat'], ParentType, ContextType>;
+  sourcePhotoQuality?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type FaceCheckValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['FaceCheckValidation'] = ResolversParentTypes['FaceCheckValidation']> = {
+  matchConfidenceThreshold?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 
 export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Features'] = ResolversParentTypes['Features']> = {
   devToolsEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -3308,6 +3391,10 @@ export type PartnerResolvers<ContextType = GraphQLContext, ParentType extends Re
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export interface PositiveFloatScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['PositiveFloat'], any> {
+  name: 'PositiveFloat';
+}
+
 export interface PositiveIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['PositiveInt'], any> {
   name: 'PositiveInt';
 }
@@ -3325,6 +3412,7 @@ export type PresentationResolvers<ContextType = GraphQLContext, ParentType exten
 };
 
 export type PresentationCallbackEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationCallbackEvent'] = ResolversParentTypes['PresentationCallbackEvent']> = {
+  error?: Resolver<Maybe<ResolversTypes['RequestError']>, ParentType, ContextType>;
   receipt?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   requestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   requestStatus?: Resolver<ResolversTypes['PresentationRequestStatus'], ParentType, ContextType>;
@@ -3365,6 +3453,7 @@ export type PresentedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
   claims?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
   credentialState?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
   domainValidation?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  faceCheck?: Resolver<Maybe<ResolversTypes['FaceCheckResult']>, ParentType, ContextType>;
   issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   type?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -3405,6 +3494,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
 
 export type RequestConfigurationValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestConfigurationValidation'] = ResolversParentTypes['RequestConfigurationValidation']> = {
   allowRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  faceCheck?: Resolver<Maybe<ResolversTypes['FaceCheckValidation']>, ParentType, ContextType>;
   validateLinkedDomain?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -3465,6 +3555,7 @@ export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends R
   credentialTypes?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   display?: Resolver<Maybe<ResolversTypes['TemplateDisplayModel']>, ParentType, ContextType>;
+  faceCheckSupport?: Resolver<ResolversTypes['FaceCheckPhotoSupport'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isPublic?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -3591,6 +3682,8 @@ export type Resolvers<ContextType = GraphQLContext> = {
   DateTime?: GraphQLScalarType;
   Discovery?: DiscoveryResolvers<ContextType>;
   EmailAddress?: GraphQLScalarType;
+  FaceCheckResult?: FaceCheckResultResolvers<ContextType>;
+  FaceCheckValidation?: FaceCheckValidationResolvers<ContextType>;
   Features?: FeaturesResolvers<ContextType>;
   HexColorCode?: GraphQLScalarType;
   Identity?: IdentityResolvers<ContextType>;
@@ -3607,6 +3700,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   NetworkIssuer?: NetworkIssuerResolvers<ContextType>;
   NonNegativeInt?: GraphQLScalarType;
   Partner?: PartnerResolvers<ContextType>;
+  PositiveFloat?: GraphQLScalarType;
   PositiveInt?: GraphQLScalarType;
   Presentation?: PresentationResolvers<ContextType>;
   PresentationCallbackEvent?: PresentationCallbackEventResolvers<ContextType>;

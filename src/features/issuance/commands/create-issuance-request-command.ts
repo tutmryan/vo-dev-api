@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
 import { issuanceRequestRegistration } from '../../../config'
 import type { CommandContext } from '../../../cqs'
-import type { IssuanceRequestInput } from '../../../generated/graphql'
+import { FaceCheckPhotoSupport, type IssuanceRequestInput } from '../../../generated/graphql'
 import type { IssuanceRequest } from '../../../services/verified-id'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
@@ -20,7 +20,7 @@ type StandardClaimsData = Record<StandardClaims, string>
 
 export async function CreateIssuanceRequestCommand(
   this: CommandContext,
-  { contractId, identityId, identity: identityInput, claims: claimsInput, ...rest }: IssuanceRequestInput,
+  { contractId, identityId, identity: identityInput, claims: claimsInput, faceCheckPhoto, ...rest }: IssuanceRequestInput,
 ) {
   const {
     user,
@@ -41,6 +41,10 @@ export async function CreateIssuanceRequestCommand(
   const provisionedContract = await verifiedIdAdmin.contract(contract.externalId)
   invariant(provisionedContract, 'Published contract could not be found')
 
+  // validate the face check photo input
+  if (contract.faceCheckSupport === FaceCheckPhotoSupport.Required)
+    invariant(faceCheckPhoto, 'Face check photo is required for issuance of this contract')
+
   // find or create the identity
   let identity: IdentityEntity
   if (user.limitedAccessData?.identityId)
@@ -53,6 +57,8 @@ export async function CreateIssuanceRequestCommand(
   let claims: Record<string, any> = contract.display.claims.filter(({ value }) => !!value).map(({ claim, value }) => ({ [claim]: value }))
   // add issuance request claims input, overriding any contract-defined claim values
   if (claimsInput) Object.entries(claimsInput).forEach(([claim, value]) => (claims[claim] = value))
+  // add face check photo claim, if supplied & allowed by the contract
+  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None) claims['photo'] = faceCheckPhoto
   // add standard claims
   const standardClaims: StandardClaimsData = {
     issuanceId: randomUUID(),

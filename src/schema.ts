@@ -14,6 +14,7 @@ const usedScalars = pick(
   scalarResolvers,
   'PositiveInt',
   'NonNegativeInt',
+  'PositiveFloat',
   'URL',
   'DateTime',
   'Locale',

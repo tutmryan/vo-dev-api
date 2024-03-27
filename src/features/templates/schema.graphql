@@ -89,6 +89,11 @@ type Template {
   credentialTypes: [String!]
 
   """
+  The type of face check photo support
+  """
+  faceCheckSupport: FaceCheckPhotoSupport!
+
+  """
   The template contracts, if any
   """
   contracts: [Contract!]!
@@ -166,6 +171,11 @@ input TemplateInput {
   The type(s) of the contract / credential
   """
   credentialTypes: [String!]
+
+  """
+  The type of face check photo support
+  """
+  faceCheckSupport: FaceCheckPhotoSupport
 }
 
 """

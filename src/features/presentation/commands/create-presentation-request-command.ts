@@ -1,10 +1,11 @@
-import { flatten } from 'lodash'
+import { flatten, set } from 'lodash'
 import { In } from 'typeorm'
 import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
 import type { CommandContext } from '../../../cqs'
 import type { PresentationRequestInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
+import { faceCheckPhotoClaimAttestation } from '../../contracts/claims'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { PartnerEntity } from '../../network/entities/partner-entity'
@@ -68,6 +69,14 @@ export async function CreatePresentationRequestCommand(
     : identityInput
     ? await createOrUpdateIdentity(entityManager, identityInput)
     : undefined
+
+  // set the sourcePhotoClaimName field on any requested credential where faceCheck is specified
+  // using `set` is a cheat to avoid creating several new types
+  // for the VID service representation of RequestedCredential > Configuration > Validation chain of types
+  presentationRequest.requestedCredentials.forEach(({ configuration }) => {
+    if (configuration?.validation?.faceCheck)
+      set(configuration.validation.faceCheck, 'sourcePhotoClaimName', faceCheckPhotoClaimAttestation.outputClaim)
+  })
 
   // send it
   const response = await verifiedIdRequest.createPresentationRequest({ ...presentationRequest, authority: platformIssuerDid })

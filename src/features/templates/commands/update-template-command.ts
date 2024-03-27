@@ -34,6 +34,7 @@ export async function UpdateTemplateCommand(this: CommandContext, id: string, in
     credentialTypes: input.credentialTypes ?? null,
     display: toPersistedDisplayModel(input.display, displayLogoUri),
     parent,
+    faceCheckSupport: input.faceCheckSupport ?? null,
   })
 
   return await repository.save(template)

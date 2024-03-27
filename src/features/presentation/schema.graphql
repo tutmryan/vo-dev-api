@@ -70,6 +70,26 @@ type RequestedConfiguration {
 }
 
 """
+Face check validation settings
+"""
+input FaceCheckValidationInput {
+  """
+  Optional confidence threshold between 50-100. The default is 70.
+  """
+  matchConfidenceThreshold: PositiveInt
+}
+
+"""
+Face check validation settings
+"""
+type FaceCheckValidation {
+  """
+  Optional confidence threshold between 50-100. The default is 70.
+  """
+  matchConfidenceThreshold: PositiveInt
+}
+
+"""
 Provides information about the presented credentials should be validated
 """
 input ConfigurationValidation {
@@ -81,6 +101,11 @@ input ConfigurationValidation {
   Determines if the linked domain should be validated. Default is false. Setting this flag to false means you as a Relying Party application accept credentials from unverified linked domain. Setting this flag to true means the linked domain will be validated and only verified domains will be accepted.
   """
   validateLinkedDomain: Boolean
+  """
+  Determines whether face check validation should be performed for this credential and provides optional settings.
+  If wish to perform face check validation using default settings, set this field to an empty object.
+  """
+  faceCheck: FaceCheckValidationInput
 }
 
 """
@@ -95,6 +120,11 @@ type RequestConfigurationValidation {
   Determines if the linked domain should be validated. Default is false. Setting this flag to false means you as a Relying Party application accept credentials from unverified linked domain. Setting this flag to true means the linked domain will be validated and only verified domains will be accepted.
   """
   validateLinkedDomain: Boolean
+  """
+  Determines whether face check validation should be performed for this credential and provides optional settings.
+  If wish to perform face check validation using default settings, set this field to an empty object.
+  """
+  faceCheck: FaceCheckValidation
 }
 
 """
@@ -177,6 +207,14 @@ type Mutation {
   createPresentationRequest(request: PresentationRequestInput!): PresentationRequestResponse!
 }
 
+"""
+Face check result information included in the PresentedCredential.
+"""
+type FaceCheckResult {
+  matchConfidenceScore: PositiveFloat!
+  sourcePhotoQuality: String!
+}
+
 # The rest of this schema is for the callbacks, not GraphQL API
 """
 Loosely typed representation based on documentation / example event here: https://docs.microsoft.com/en-us/azure/active-directory/verifiable-credentials/presentation-request-api#callback-events
@@ -187,6 +225,7 @@ type PresentedCredential {
   claims: JSONObject!
   credentialState: JSONObject!
   domainValidation: JSONObject
+  faceCheck: FaceCheckResult
 }
 
 """
@@ -213,6 +252,10 @@ type PresentationCallbackEvent {
   The format in the receipt isn't fix and can change based on the wallet and version used.
   """
   receipt: JSONObject
+  """
+  When the requestStatus property value is presentation_error, this property contains information about the error.
+  """
+  error: RequestError
 }
 
 """
@@ -227,6 +270,10 @@ enum PresentationRequestStatus {
   The verifiable credential validation completed successfully.
   """
   presentation_verified
+  """
+  The verifiable credential presentation failed, refer to the error property for details.
+  """
+  presentation_error
 }
 
 """

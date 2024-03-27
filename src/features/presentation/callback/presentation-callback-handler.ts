@@ -95,7 +95,9 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     }
 
     logger.audit('Presentation complete', { presentation: presentationEntity })
-  } else logger.audit('Presentation retrieved', { event: omit(event, 'state') })
+  } else if (event.requestStatus === PresentationRequestStatus.PresentationError)
+    logger.audit('Presentation error', { event: omit(event, 'state') })
+  else logger.audit('Presentation retrieved', { event: omit(event, 'state') })
 
   await publishPresentationEvent(topicData)
 }

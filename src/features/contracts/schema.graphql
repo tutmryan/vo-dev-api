@@ -62,6 +62,24 @@ type Mutation {
 }
 
 """
+The type of face check photo support
+"""
+enum FaceCheckPhotoSupport {
+  """
+  A face check photo cannot be provided when issuing a credential with this contract
+  """
+  none
+  """
+  A face check photo can optionally be provided when issuing a credential with this contract
+  """
+  optional
+  """
+  A face check photo must be provided when issuing a credential with this contract
+  """
+  required
+}
+
+"""
 Defines a contract that can be used to issue credentials
 """
 type Contract {
@@ -107,6 +125,11 @@ type Contract {
   Requires at least one type, and cannot have duplicate types
   """
   credentialTypes: [String!]!
+
+  """
+  The type of face check photo support
+  """
+  faceCheckSupport: FaceCheckPhotoSupport!
 
   """
   The user who created the contract.
@@ -193,6 +216,11 @@ input ContractInput {
   Requires at least one type, and cannot have duplicate types
   """
   credentialTypes: [String!]!
+
+  """
+  The type of face check photo support
+  """
+  faceCheckSupport: FaceCheckPhotoSupport
 }
 
 """

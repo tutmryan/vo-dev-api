@@ -33,10 +33,21 @@ input IssuanceRequestInput {
   includeQRCode: Boolean
   callback: Callback
   """
-  Used for the ID token hint flow to include a collection of assertions made about the subject in the verifiable credential.
-  For PIN code flow, it's important that you provide the user's first name and last name.
+  A collection of assertions made about the subject in the verifiable credential.
+  Must fulfill the contract claims definition.
   """
   claims: JSONObject
+
+  """
+  The issuee's photo for the purpose of face check presentation verification, also displayed via the authenticator app.
+  The image content type and encoding must be: `image/jpg;base64url`.
+  For more info on the photo requirements, see the [Face Check documentation](https://learn.microsoft.com/en-us/entra/verified-id/using-facecheck#what-are-the-requirements-for-the-photo-in-the-verified-id)
+  """
+  faceCheckPhoto: String
+
+  """
+  Optional PIN code required for the issuance.
+  """
   pin: Pin
 
   """
@@ -651,7 +662,7 @@ type IssuanceCallbackEvent {
   """
   state: String
   """
-  When the code property value is issuance_error, this property contains information about the error.
+  When the requestStatus property value is issuance_error, this property contains information about the error.
   """
   error: RequestError
 }

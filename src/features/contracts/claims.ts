@@ -4,6 +4,21 @@ import type { AttestationClaimMapping, DisplayClaim } from '../../services/verif
 export const displayClaimPrefix = 'vc.credentialSubject.'
 export const claimTypeString = 'String'
 
+export const faceCheckPhotoClaimAttestation: Omit<AttestationClaimMapping, 'required'> = {
+  inputClaim: 'photo',
+  outputClaim: 'photo',
+  type: claimTypeString,
+  indexed: false,
+}
+
+export const faceCheckPhotoClaimLabel = 'Photo'
+
+export const faceCheckPhotoDisplayClaim: DisplayClaim = {
+  claim: `${displayClaimPrefix}photo`,
+  label: faceCheckPhotoClaimLabel,
+  type: 'image/jpg;base64url',
+}
+
 export enum StandardClaims {
   issuanceId = 'issuanceId',
   name = 'name',

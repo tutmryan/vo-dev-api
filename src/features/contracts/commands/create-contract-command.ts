@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import type { CommandContext } from '../../../cqs'
-import type { ContractInput } from '../../../generated/graphql'
+import { FaceCheckPhotoSupport, type ContractInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { TemplateEntity } from '../../templates/entities/template-entity'
 import { ContractEntity } from '../entities/contract-entity'
@@ -8,7 +8,7 @@ import { ensureNoOverridingTemplateData, toPersistedDisplayModel } from '../mapp
 import { LogoImageOrUriRequiredError, validateContractInput, validateDisplayLogo } from '../validation'
 
 export async function CreateContractCommand(this: CommandContext, input: ContractInput) {
-  const { templateId, display: displayInput, ...rest } = input
+  const { templateId, display: displayInput, faceCheckSupport, ...rest } = input
 
   validateContractInput(input)
 
@@ -37,6 +37,7 @@ export async function CreateContractCommand(this: CommandContext, input: Contrac
     display: toPersistedDisplayModel(displayInput, displayLogoUri),
     id: contractId,
     template,
+    faceCheckSupport: faceCheckSupport ?? FaceCheckPhotoSupport.None,
   })
 
   return await this.entityManager.getRepository(ContractEntity).save(contract)

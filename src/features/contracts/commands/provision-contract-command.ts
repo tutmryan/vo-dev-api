@@ -1,7 +1,14 @@
 import { omit } from 'lodash'
 import type { CommandContext } from '../../../cqs'
+import { FaceCheckPhotoSupport } from '../../../generated/graphql'
 import type { Contract, CreateContractInput, UpdateContractInput } from '../../../services/verified-id'
-import { displayClaimPrefix, standardClaimAttestations, standardContractDislayClaims } from '../claims'
+import {
+  displayClaimPrefix,
+  faceCheckPhotoClaimAttestation,
+  faceCheckPhotoDisplayClaim,
+  standardClaimAttestations,
+  standardContractDislayClaims,
+} from '../claims'
 import { ContractEntity } from '../entities/contract-entity'
 
 export async function ProvisionContractCommand(this: CommandContext, id: string) {
@@ -35,6 +42,7 @@ function toCreateContractInput({
   isPublic,
   validityIntervalInSeconds: validityInterval,
   credentialTypes,
+  faceCheckSupport,
   display: { card, claims, consent, locale },
 }: ContractEntity): CreateContractInput {
   return {
@@ -52,6 +60,9 @@ function toCreateContractInput({
             required: true,
             mapping: [
               ...standardClaimAttestations,
+              ...(faceCheckSupport === FaceCheckPhotoSupport.None
+                ? []
+                : [{ ...faceCheckPhotoClaimAttestation, required: faceCheckSupport === FaceCheckPhotoSupport.Required }]),
               ...claims.map(({ type, claim }) => ({
                 type: type,
                 required: true,
@@ -76,6 +87,7 @@ function toCreateContractInput({
             type,
             description,
           })),
+          ...(faceCheckSupport === FaceCheckPhotoSupport.None ? [] : [faceCheckPhotoDisplayClaim]),
           ...standardContractDislayClaims,
         ],
       },

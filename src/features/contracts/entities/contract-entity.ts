@@ -2,6 +2,7 @@ import { differenceInSeconds } from 'date-fns'
 import { isEqual, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm'
 import type { ContractDisplayCredential, ContractDisplayCredentialLogo, ContractDisplayModel } from '../../../generated/graphql'
+import { FaceCheckPhotoSupport } from '../../../generated/graphql'
 import { domainInvariant } from '../../../util/domain-invariant'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
@@ -16,7 +17,10 @@ export type PersistedContractDisplayModel = Omit<ContractDisplayModel, 'card'> &
 @Entity('contract', { orderBy: { createdAt: 'ASC' } })
 export class ContractEntity extends AuditedAndTrackedEntity {
   constructor(
-    args?: Pick<ContractEntity, 'id' | 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'credentialTypes' | 'display'> & {
+    args?: Pick<
+      ContractEntity,
+      'id' | 'name' | 'isPublic' | 'validityIntervalInSeconds' | 'credentialTypes' | 'display' | 'faceCheckSupport'
+    > & {
       template: TemplateEntity | null
     },
   ) {
@@ -99,8 +103,14 @@ export class ContractEntity extends AuditedAndTrackedEntity {
     this.credentialTypesJson = JSON.stringify(credentialTypes)
   }
 
+  @Column({ type: 'nvarchar', default: FaceCheckPhotoSupport.None })
+  faceCheckSupport!: FaceCheckPhotoSupport
+
   async update(
-    input: Pick<ContractEntity, 'name' | 'credentialTypes' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'templateId'>,
+    input: Pick<
+      ContractEntity,
+      'name' | 'credentialTypes' | 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'templateId' | 'faceCheckSupport'
+    >,
   ) {
     typeSafeAssign(this, input)
   }

@@ -1,6 +1,6 @@
 import { basename } from 'path'
 import type { CommandContext } from '../../../cqs'
-import type { ContractInput } from '../../../generated/graphql'
+import { FaceCheckPhotoSupport, type ContractInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { ContractEntity } from '../entities/contract-entity'
 import { ensureNoOverridingTemplateData, toPersistedDisplayModel } from '../mapping'
@@ -36,6 +36,7 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
     validityIntervalInSeconds: input.validityIntervalInSeconds,
     display: toPersistedDisplayModel(input.display, displayLogoUri),
     templateId: template?.id ?? null,
+    faceCheckSupport: input.faceCheckSupport ?? FaceCheckPhotoSupport.None,
   })
 
   return await repository.save(contract)

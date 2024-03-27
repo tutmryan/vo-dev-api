@@ -67,7 +67,7 @@ function requestCallbackMiddleware(type: 'issuance' | 'presentation', handler?: 
     const request: RequestInit = {
       method: 'POST',
       body: JSON.stringify(event),
-      headers: headers as { [key: string]: string } | undefined,
+      headers: { ['Content-Type']: 'application/json', ...headers } as HeadersInit,
     }
 
     // invoke the upstream callback, log the outcome, return the response

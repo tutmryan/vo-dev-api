@@ -107,7 +107,7 @@ export const getExpressApp = (): Express => {
   app.use(rateLimiterMiddleware)
 
   // add issuance and presentation callback routes
-  const jsonParser = bodyParser.json()
+  const jsonParser = bodyParser.json({ limit: '1mb' })
 
   app.post(issuanceCallbackRoute, jsonParser, issuanceCallbackMiddleware(issuanceCallbackHandler))
   logger.info(`Added POST ${issuanceCallbackRoute}`)

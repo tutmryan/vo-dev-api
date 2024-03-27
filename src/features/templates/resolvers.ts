@@ -1,5 +1,5 @@
 import { dispatch, query } from '../../cqs/dispatcher'
-import type { Resolvers } from '../../generated/graphql'
+import { type Resolvers } from '../../generated/graphql'
 import { downloadToDataUrl } from '../../util/data-url'
 import { resolveUpdatedAt } from '../auditing/updated-at-resolver'
 import { CreateTemplateCommand } from './commands/create-template-command'

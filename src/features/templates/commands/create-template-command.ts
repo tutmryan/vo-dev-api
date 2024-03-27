@@ -35,6 +35,7 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
     credentialTypes: input.credentialTypes ?? null,
     parent,
     display: toPersistedDisplayModel(input.display, displayLogoUri),
+    faceCheckSupport: input.faceCheckSupport ?? null,
   })
 
   return await repository.save(template)
