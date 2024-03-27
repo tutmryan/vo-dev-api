@@ -91,7 +91,7 @@ type Template {
   """
   The type of face check photo support
   """
-  faceCheckSupport: FaceCheckPhotoSupport!
+  faceCheckSupport: FaceCheckPhotoSupport
 
   """
   The template contracts, if any
@@ -138,6 +138,10 @@ type TemplateParentData {
   The type(s) of the contract / credential
   """
   credentialTypes: [String!]
+  """
+  The type of face check photo support
+  """
+  faceCheckSupport: FaceCheckPhotoSupport
 }
 
 """
