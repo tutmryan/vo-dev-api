@@ -31,8 +31,8 @@ export async function ActionApprovalRequestCommand(this: CommandContext, id: str
       isApproved: input.isApproved,
       actionedComment: input.actionedComment,
       actionedAt: approvalRequest.updatedAt!,
-      actionedBy: identity ? { id: identity.id, name: identity.name } : null,
-      callbackSecret: approvedRequest.callbackSecret,
+      actionedBy: identity ? { id: identity.id.toLowerCase(), name: identity.name } : null,
+      callbackSecret: approvedRequest.callbackSecret.toLowerCase(),
     }
 
     const request: RequestInit = {
