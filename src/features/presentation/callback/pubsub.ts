@@ -9,6 +9,7 @@ import type {
   SubscriptionPresentationEventArgs,
   SubscriptionSubscribeFn,
 } from '../../../generated/graphql'
+import { PresentationRequestStatus } from '../../../generated/graphql'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import { PresentationEntity } from '../entities/presentation-entity'
 import { getPresentationDataFromCache } from './cache'
@@ -31,7 +32,7 @@ export const subscribeToPresentationEvents = (args?: SubscriptionPresentationEve
     next: async () => {
       if (!args?.where?.requestId) return iterator.next()
       const data = await getPresentationDataFromCache(args.where.requestId)
-      if (!data) return iterator.next()
+      if (!data || data.event.requestStatus === PresentationRequestStatus.RequestRetrieved) return iterator.next()
       return Promise.resolve({ done: count++ === 1, value: data })
     },
     return: iterator.return,

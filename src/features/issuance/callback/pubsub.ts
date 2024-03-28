@@ -2,11 +2,12 @@ import type { GraphQLContext } from '@makerx/graphql-core'
 import { withFilter } from 'graphql-subscriptions'
 import { pubsub } from '../../../cache'
 import { entityManager } from '../../../data'
-import type {
-  IssuanceCallbackEvent,
-  IssuanceEventData,
-  SubscriptionIssuanceEventArgs,
-  SubscriptionSubscribeFn,
+import {
+  IssuanceRequestStatus,
+  type IssuanceCallbackEvent,
+  type IssuanceEventData,
+  type SubscriptionIssuanceEventArgs,
+  type SubscriptionSubscribeFn,
 } from '../../../generated/graphql'
 import type { IssuanceRequestDetails } from '../commands/create-issuance-request-command'
 import { IssuanceEntity } from '../entities/issuance-entity'
@@ -30,7 +31,7 @@ export const subscribeToIssuanceEvents = (args?: SubscriptionIssuanceEventArgs) 
     next: async () => {
       if (!args?.where?.requestId) return iterator.next()
       const data = await getIssuanceDataFromCache(args.where.requestId)
-      if (!data) return iterator.next()
+      if (!data || data.event.requestStatus === IssuanceRequestStatus.RequestRetrieved) return iterator.next()
       return Promise.resolve({ done: count++ === 1, value: data })
     },
     return: iterator.return,
