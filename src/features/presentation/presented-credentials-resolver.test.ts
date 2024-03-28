@@ -1,18 +1,14 @@
-import { PRESENTED_CREDENTIALS_TTL } from '../../cache'
 import type { User } from '../../user'
+import { PRESENTATION_DATA_TTL } from './callback/cache'
 import type { PresentationEntity } from './entities/presentation-entity'
 import { resolvePresentedCredentials } from './presented-credentials-resolver'
 
-const mockPresentedCredentialsCacheGet = jest.fn()
-jest.mock('../../cache', () => {
-  const originalModule = jest.requireActual('../../cache')
+const mockPresentationCacheGet = jest.fn()
+jest.mock('./callback/cache', () => {
+  const originalModule = jest.requireActual('./callback/cache')
   return {
     ...originalModule,
-    get presentedCredentialsCache() {
-      return {
-        get: mockPresentedCredentialsCacheGet,
-      }
-    },
+    getPresentationDataFromCache: (args: any) => mockPresentationCacheGet(args),
   }
 })
 
@@ -20,7 +16,7 @@ describe('presentedCredentialsResolver', () => {
   const currentUserId = 'user-1'
   it('does not load from cache if TTL has expired', () => {
     // Arrange
-    const presentedAt = new Date(Date.now() - (PRESENTED_CREDENTIALS_TTL + 10) * 1000)
+    const presentedAt = new Date(Date.now() - (PRESENTATION_DATA_TTL + 10) * 1000)
     const entity = givenAPresentationEntity({ presentedAt: presentedAt, requestedById: currentUserId })
     const currentUser = givenAUser(currentUserId)
 
@@ -28,12 +24,12 @@ describe('presentedCredentialsResolver', () => {
     resolvePresentedCredentials(entity, currentUser)
 
     // Assert
-    expect(mockPresentedCredentialsCacheGet).not.toHaveBeenCalled()
+    expect(mockPresentationCacheGet).not.toHaveBeenCalled()
   })
 
   it('does not load from cache if TTL has just reached', () => {
     // Arrange
-    const presentedAt = new Date(Date.now() - PRESENTED_CREDENTIALS_TTL * 1000)
+    const presentedAt = new Date(Date.now() - PRESENTATION_DATA_TTL * 1000)
     const entity = givenAPresentationEntity({ presentedAt: presentedAt, requestedById: currentUserId })
     const currentUser = givenAUser(currentUserId)
 
@@ -41,12 +37,12 @@ describe('presentedCredentialsResolver', () => {
     resolvePresentedCredentials(entity, currentUser)
 
     // Assert
-    expect(mockPresentedCredentialsCacheGet).not.toHaveBeenCalled()
+    expect(mockPresentationCacheGet).not.toHaveBeenCalled()
   })
 
   it('does not load from cache if current user did not make the presentation request', () => {
     // Arrange
-    const presentedAt = new Date(Date.now() - (PRESENTED_CREDENTIALS_TTL - 10) * 1000)
+    const presentedAt = new Date(Date.now() - (PRESENTATION_DATA_TTL - 10) * 1000)
     const entity = givenAPresentationEntity({ presentedAt: presentedAt, requestedById: 'user-2' })
     const currentUser = givenAUser(currentUserId)
 
@@ -54,12 +50,12 @@ describe('presentedCredentialsResolver', () => {
     resolvePresentedCredentials(entity, currentUser)
 
     // Assert
-    expect(mockPresentedCredentialsCacheGet).not.toHaveBeenCalled()
+    expect(mockPresentationCacheGet).not.toHaveBeenCalled()
   })
 
   it('load from cache if TTL has not yet expired', () => {
     // Arrange
-    const presentedAt = new Date(Date.now() - (PRESENTED_CREDENTIALS_TTL - 10) * 1000)
+    const presentedAt = new Date(Date.now() - (PRESENTATION_DATA_TTL - 10) * 1000)
     const entity = givenAPresentationEntity({ presentedAt: presentedAt, requestedById: currentUserId })
     const currentUser = givenAUser(currentUserId)
 
@@ -67,7 +63,7 @@ describe('presentedCredentialsResolver', () => {
     resolvePresentedCredentials(entity, currentUser)
 
     // Assert
-    expect(mockPresentedCredentialsCacheGet).toHaveBeenCalled()
+    expect(mockPresentationCacheGet).toHaveBeenCalled()
   })
 })
 

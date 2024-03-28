@@ -11,6 +11,7 @@ import type {
 } from '../../../generated/graphql'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import { PresentationEntity } from '../entities/presentation-entity'
+import { getPresentationDataFromCache } from './cache'
 
 const PRESENTATION_TOPIC = 'presentation'
 
@@ -23,8 +24,20 @@ export const publishPresentationEvent = async (data: PresentationTopicData): Pro
   pubsub.publish(PRESENTATION_TOPIC, data)
 }
 
-export const subscribeToPresentationEvents = (_args?: SubscriptionPresentationEventArgs) =>
-  pubsub.asyncIterator<PresentationTopicData>(PRESENTATION_TOPIC)
+export const subscribeToPresentationEvents = (args?: SubscriptionPresentationEventArgs) => {
+  let count = 0
+  const iterator = pubsub.asyncIterator<PresentationTopicData>(PRESENTATION_TOPIC)
+  return {
+    next: async () => {
+      if (!args?.where?.requestId) return iterator.next()
+      const data = await getPresentationDataFromCache(args.where.requestId)
+      if (!data) return iterator.next()
+      return Promise.resolve({ done: count++ === 1, value: data })
+    },
+    return: iterator.return,
+    throw: iterator.throw,
+  }
+}
 
 export const subscribeToPresentationEventsWithFilter = withFilter(
   (_, args: SubscriptionPresentationEventArgs) => subscribeToPresentationEvents(args),

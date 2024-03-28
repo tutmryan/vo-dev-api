@@ -11,6 +11,7 @@ import type { IssuanceCallbackHandler } from '../../callback'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import type { IssuanceRequestDetails } from '../commands/create-issuance-request-command'
 import { IssuanceEntity } from '../entities/issuance-entity'
+import { addIssuanceDataToCache } from './cache'
 import type { IssuanceTopicData } from './pubsub'
 import { publishIssuanceEvent } from './pubsub'
 
@@ -54,5 +55,6 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
     logger.audit('Issuance retrieved', { event: omit(event, 'state') })
   else logger.audit('Issuance error', { event: omit(event, 'state') })
 
+  await addIssuanceDataToCache(topicData)
   await publishIssuanceEvent(topicData)
 }

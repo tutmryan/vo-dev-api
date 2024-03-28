@@ -1,6 +1,6 @@
 import { omit } from 'lodash'
 import { In } from 'typeorm'
-import { PRESENTED_CREDENTIALS_TTL, presentedCredentialsCache, requestDetailsCache } from '../../../cache'
+import { requestDetailsCache } from '../../../cache'
 import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
@@ -13,6 +13,7 @@ import { PartnerEntity } from '../../network/entities/partner-entity'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import type { PresentedData } from '../entities/presentation-entity'
 import { PresentationEntity } from '../entities/presentation-entity'
+import { addPresentationDataToCache } from './cache'
 import type { PresentationTopicData } from './pubsub'
 import { publishPresentationEvent } from './pubsub'
 
@@ -84,9 +85,7 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     const { id } = await entityManager.getRepository(PresentationEntity).save(presentationEntity)
     topicData.presentationId = id
 
-    presentedCredentialsCache.set(event.requestId, JSON.stringify(event.verifiedCredentialsData || []), {
-      ttl: PRESENTED_CREDENTIALS_TTL,
-    })
+    await addPresentationDataToCache(topicData)
 
     // if this presentation is for a limited approval flow, save the presentation ID to the limited approval data
     if (limitedApprovalKey) {

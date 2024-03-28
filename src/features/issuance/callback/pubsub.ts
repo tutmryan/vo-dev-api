@@ -10,6 +10,7 @@ import type {
 } from '../../../generated/graphql'
 import type { IssuanceRequestDetails } from '../commands/create-issuance-request-command'
 import { IssuanceEntity } from '../entities/issuance-entity'
+import { getIssuanceDataFromCache } from './cache'
 
 const ISSUANCE_TOPIC = 'issuance'
 
@@ -22,7 +23,20 @@ export const publishIssuanceEvent = async (data: IssuanceTopicData): Promise<voi
   pubsub.publish(ISSUANCE_TOPIC, data)
 }
 
-export const subscribeToIssuanceEvents = (_args?: SubscriptionIssuanceEventArgs) => pubsub.asyncIterator<IssuanceTopicData>(ISSUANCE_TOPIC)
+export const subscribeToIssuanceEvents = (args?: SubscriptionIssuanceEventArgs) => {
+  let count = 0
+  const iterator = pubsub.asyncIterator<IssuanceTopicData>(ISSUANCE_TOPIC)
+  return {
+    next: async () => {
+      if (!args?.where?.requestId) return iterator.next()
+      const data = await getIssuanceDataFromCache(args.where.requestId)
+      if (!data) return iterator.next()
+      return Promise.resolve({ done: count++ === 1, value: data })
+    },
+    return: iterator.return,
+    throw: iterator.throw,
+  }
+}
 
 export const subscribeToIssuanceEventsWithFilter = withFilter(
   (_, args: SubscriptionIssuanceEventArgs) => subscribeToIssuanceEvents(args),
