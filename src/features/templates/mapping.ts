@@ -23,7 +23,7 @@ export function toDisplayModel(input?: Omit<CreateUpdateTemplateDisplayModelInpu
 export function toTemplateParentData(
   input: Pick<TemplateParentData, 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes'>,
 ): TemplateParentData {
-  return omitBy(pick(input, ['isPublic', 'validityIntervalInSeconds', 'display', 'credentialTypes', 'facecheckSupport']), isNil)
+  return omitBy(pick(input, ['isPublic', 'validityIntervalInSeconds', 'display', 'credentialTypes', 'faceCheckSupport']), isNil)
 }
 
 type Claims = CreateUpdateTemplateDisplayClaimInput[]
