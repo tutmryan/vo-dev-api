@@ -2154,7 +2154,7 @@ export type Template = {
   /** The full or partial credential display definition defined by this template, if any. */
   display?: Maybe<TemplateDisplayModel>;
   /** The type of face check photo support */
-  faceCheckSupport: FaceCheckPhotoSupport;
+  faceCheckSupport?: Maybe<FaceCheckPhotoSupport>;
   /** The unique identifier for the template */
   id: Scalars['ID']['output'];
   /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
@@ -2274,6 +2274,8 @@ export type TemplateParentData = {
   credentialTypes?: Maybe<Array<Scalars['String']['output']>>;
   /** The full or partial credential display definition defined by this template, if any. */
   display?: Maybe<TemplateDisplayModel>;
+  /** The type of face check photo support */
+  faceCheckSupport?: Maybe<FaceCheckPhotoSupport>;
   /** Defines whether the contracts created from this template will be published in the Verified Credentials Network */
   isPublic?: Maybe<Scalars['Boolean']['output']>;
   /** The lifespan of the credential expressed in seconds */
@@ -3555,7 +3557,7 @@ export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends R
   credentialTypes?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   display?: Resolver<Maybe<ResolversTypes['TemplateDisplayModel']>, ParentType, ContextType>;
-  faceCheckSupport?: Resolver<ResolversTypes['FaceCheckPhotoSupport'], ParentType, ContextType>;
+  faceCheckSupport?: Resolver<Maybe<ResolversTypes['FaceCheckPhotoSupport']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isPublic?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -3610,6 +3612,7 @@ export type TemplateDisplayModelResolvers<ContextType = GraphQLContext, ParentTy
 export type TemplateParentDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateParentData'] = ResolversParentTypes['TemplateParentData']> = {
   credentialTypes?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   display?: Resolver<Maybe<ResolversTypes['TemplateDisplayModel']>, ParentType, ContextType>;
+  faceCheckSupport?: Resolver<Maybe<ResolversTypes['FaceCheckPhotoSupport']>, ParentType, ContextType>;
   isPublic?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   validityIntervalInSeconds?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
