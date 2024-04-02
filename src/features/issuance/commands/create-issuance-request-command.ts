@@ -4,6 +4,7 @@ import { issuanceRequestRegistration } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import { FaceCheckPhotoSupport, type IssuanceRequestInput } from '../../../generated/graphql'
 import type { IssuanceRequest } from '../../../services/verified-id'
+import { toBase64UrlWithoutMimeType } from '../../../util/data-url'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import type { StandardClaims } from '../../contracts/claims'
@@ -60,8 +61,6 @@ export async function CreateIssuanceRequestCommand(
   // add face check photo claim, if supplied & allowed by the contract
   if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None)
     claims['photo'] = toBase64UrlWithoutMimeType(faceCheckPhoto)
-
-  console.log('photo', claims['photo'])
   // add standard claims
   const standardClaims: StandardClaimsData = {
     issuanceId: randomUUID(),
@@ -95,14 +94,4 @@ export async function CreateIssuanceRequestCommand(
   })
 
   return response
-}
-
-function toBase64UrlWithoutMimeType(base64Image: string) {
-  let base64Data = base64Image
-  const components = base64Image.split(',')
-  if (components.length > 1 && components[1]) {
-    base64Data = components[1]
-  }
-  const buffer = Buffer.from(base64Data!, 'base64')
-  return buffer.toString('base64url')
 }
