@@ -197,8 +197,8 @@ describe('limited access token acquisition for anonymous presentations', () => {
     expectUnauthorizedError(errors)
   })
 
-  it('cannot acquire an anonymous presentations token with issuers specified', async () => {
-    const { errors } = await executeOperationAs(
+  it('can acquire an anonymous presentations token with issuers specified', async () => {
+    const { data, errors } = await executeOperationAs(
       {
         query: acquireLimitedAccessTokenMutation,
         variables: {
@@ -210,7 +210,8 @@ describe('limited access token acquisition for anonymous presentations', () => {
       },
       buildJwt({ roles: [LimitedAccessTokenAcquisitionRoles.anonymousPresentations] }),
     )
-    expectUnauthorizedError(errors)
+    expect(errors).toBeUndefined()
+    expectAccessToken(data?.acquireLimitedAccessToken)
   })
 
   it('cannot acquire an anonymous presentations token with issuableContractIds input', async () => {

@@ -41,10 +41,6 @@ export const isValidAcquireLimitedAccessTokenRequest = rule('isValidAcquireLimit
         input.requestableCredentials && input.requestableCredentials.length > 0,
         'requestableCredentials are required for limited presentation access',
       )
-      invariant(
-        input.requestableCredentials.every(({ acceptedIssuers }) => !acceptedIssuers || acceptedIssuers.length === 0),
-        'acceptedIssuers must be empty for limited anonymous presentations',
-      )
       invariant(Object.keys(input).length === 2, 'allowAnonymousPresentation can only be used with requestableCredentials input')
     }
     if (input.issuableContractIds && input.issuableContractIds.length > 0) {
@@ -123,10 +119,9 @@ export const isValidLimitedPresentationRequest = and(
       })
       if (!issuersMatch) return false
 
-      // if (external) issuers are used, we need identityId on the request to link issuance to the identity (we can't use standard claims from externally issued creds)
+      // if (external) issuers are used and identityId is specified, we need identityId on the request to match the identity id in the limited access token
       const hasIssuersSpecified = requestedCredentials.some(({ acceptedIssuers }) => !!acceptedIssuers && acceptedIssuers.length > 0)
       if (hasIssuersSpecified) {
-        if (!identityId) return false
         if (identityId !== user.limitedAccessData.identityId) return false
       }
 

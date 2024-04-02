@@ -4,7 +4,6 @@ import { requestDetailsCache } from '../../../cache'
 import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
-import { invariant } from '../../../util/invariant'
 import type { PresentationCallbackHandler } from '../../callback'
 import { StandardClaims } from '../../contracts/claims'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
@@ -59,11 +58,8 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
           )}`,
         )
     } else {
-      if (issuances.length === 0)
-        throw new Error('No identityId or issuanceIds found in presentation request or presented credential claims')
-      identityId = issuances[0]!.identityId
+      if (issuances.length > 0) identityId = issuances[0]!.identityId
     }
-    invariant(identityId, 'identityId could not be determined')
 
     // save presented credential data minus the claims, which is probably PII
     const presentedCredentials: PresentedData[] = event.verifiedCredentialsData
