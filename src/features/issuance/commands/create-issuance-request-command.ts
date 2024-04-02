@@ -58,7 +58,10 @@ export async function CreateIssuanceRequestCommand(
   // add issuance request claims input, overriding any contract-defined claim values
   if (claimsInput) Object.entries(claimsInput).forEach(([claim, value]) => (claims[claim] = value))
   // add face check photo claim, if supplied & allowed by the contract
-  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None) claims['photo'] = faceCheckPhoto
+  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None)
+    claims['photo'] = toBase64UrlWithoutMimeType(faceCheckPhoto)
+
+  console.log('photo', claims['photo'])
   // add standard claims
   const standardClaims: StandardClaimsData = {
     issuanceId: randomUUID(),
@@ -92,4 +95,14 @@ export async function CreateIssuanceRequestCommand(
   })
 
   return response
+}
+
+function toBase64UrlWithoutMimeType(base64Image: string) {
+  let base64Data = base64Image
+  const components = base64Image.split(',')
+  if (components.length > 1 && components[1]) {
+    base64Data = components[1]
+  }
+  const buffer = Buffer.from(base64Data!, 'base64')
+  return buffer.toString('base64url')
 }
