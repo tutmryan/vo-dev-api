@@ -28,3 +28,13 @@ export async function downloadToDataUrl(url: string) {
 export function toDataUrl(buffer: Buffer, mimeType: string, encoding: BufferEncoding = 'base64') {
   return `data:${mimeType};${encoding},${buffer.toString(encoding)}`
 }
+
+export function toBase64UrlWithoutMimeType(base64Image: string) {
+  let base64Data = base64Image
+  const components = base64Image.split(',')
+  if (components.length > 1 && components[1]) {
+    base64Data = components[1]
+  }
+  const buffer = Buffer.from(base64Data!, 'base64')
+  return buffer.toString('base64url')
+}
