@@ -43,12 +43,6 @@ export async function CreatePresentationRequestCommand(
     presentationRequest.requestedCredentials.map((c) => c.acceptedIssuers!.map((i) => ({ issuer: i, type: c.type }))),
   )
 
-  const hasInternallyIssuedTypes = requestedIssuersAndTypes.some(({ issuer }) => issuer === platformIssuerDid)
-  if (!hasInternallyIssuedTypes && !identityId && !identityInput)
-    throw new Error(
-      'Either identityId or identity info must be provided for presentations where all requested credentials are issued by external partners.',
-    )
-
   const doesIncludeExternalIssuer = requestedIssuersAndTypes.some(({ issuer }) => issuer && issuer !== platformIssuerDid)
   if (doesIncludeExternalIssuer) {
     const partners = await entityManager
@@ -67,8 +61,8 @@ export async function CreatePresentationRequestCommand(
   const identity = identityId
     ? await entityManager.getRepository(IdentityEntity).findOneByOrFail({ id: identityId })
     : identityInput
-    ? await createOrUpdateIdentity(entityManager, identityInput)
-    : undefined
+      ? await createOrUpdateIdentity(entityManager, identityInput)
+      : undefined
 
   // set the sourcePhotoClaimName field on any requested credential where faceCheck is specified
   // using `set` is a cheat to avoid creating several new types
