@@ -1,7 +1,7 @@
 import type { Job } from 'bullmq'
 import { omit } from 'lodash'
 import type { FindOptionsWhere } from 'typeorm'
-import type { WorkerContext } from '../../../background-jobs/worker'
+import type { WorkerContext } from '../../../background-jobs/jobs'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { IssuanceStatus } from '../../../generated/graphql'
 import type { logger } from '../../../logger'

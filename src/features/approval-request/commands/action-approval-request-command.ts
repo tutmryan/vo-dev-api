@@ -1,13 +1,13 @@
-import { extractErrorResponseInfo } from '@makerx/node-common'
+import { addToJobQueue } from '../../../background-jobs/queue'
 import type { CommandContext } from '../../../cqs'
-import type { ActionApprovalRequestInput, ActionedApprovalData } from '../../../generated/graphql'
+import type { ActionApprovalRequestInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { getLimitedApprovalData } from '../../limited-approval-tokens'
 import { ApprovalRequestEntity } from '../entities/approval-request-entity'
 
 export async function ActionApprovalRequestCommand(this: CommandContext, id: string, input: ActionApprovalRequestInput) {
-  const { user, entityManager, logger } = this
+  const { user, entityManager } = this
   userInvariant(user)
 
   const repo = entityManager.getRepository(ApprovalRequestEntity)
@@ -19,47 +19,8 @@ export async function ActionApprovalRequestCommand(this: CommandContext, id: str
   approvalRequest.action(approvalData.presentationId, input.isApproved, input.actionedComment)
   const approvedRequest = await repo.save(approvalRequest)
 
-  const presentation = await approvedRequest.presentation
-  const identity = await presentation.identity
-
-  if (approvedRequest.callbackInput) {
-    const data: ActionedApprovalData = {
-      approvalRequestId: approvedRequest.id.toLowerCase(),
-      correlationId: approvedRequest.correlationId,
-      requestData: approvedRequest.requestData,
-      state: approvedRequest.callbackInput.state,
-      isApproved: input.isApproved,
-      actionedComment: input.actionedComment,
-      actionedAt: approvalRequest.updatedAt!,
-      actionedBy: identity ? { id: identity.id.toLowerCase(), name: identity.name } : null,
-      callbackSecret: approvedRequest.callbackSecret.toLowerCase(),
-    }
-
-    const request: RequestInit = {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: { ['Content-Type']: 'application/json', ...approvedRequest.callbackInput.headers } as HeadersInit,
-    }
-
-    try {
-      const response = await fetch(approvedRequest.callbackInput.url, request)
-
-      if (response.ok) {
-        logger.info('Actioned approval callback complete', {
-          approvalRequestId: approvedRequest.id,
-          responseStatus: response.status,
-        })
-      } else {
-        const responseInfo = await extractErrorResponseInfo(response)
-        logger.error(`Actioned approval callback returned non-200 response`, {
-          approvalRequestId: approvedRequest.id,
-          response: responseInfo,
-        })
-      }
-    } catch (error) {
-      logger.error(`Actioned approval callback failed`, { approvalRequestId: approvedRequest.id, error })
-    }
-  }
+  if (approvedRequest.callbackInput)
+    await addToJobQueue({ name: 'invokeApprovalCallback', payload: { userId: user.userEntity.id, approvedRequestId: approvedRequest.id } })
 
   return approvedRequest
 }

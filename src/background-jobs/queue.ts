@@ -3,7 +3,8 @@ import { randomUUID } from 'crypto'
 import { logger } from '../logger'
 import { redisOptions } from '../redis'
 import { Lazy } from '../util/lazy'
-import type { JobTypes } from './worker'
+import type { JobTypes } from './jobs'
+import { jobOptions } from './jobs'
 
 export const JobQueueName = 'jobQueue'
 export const MAX_RETRY = 3
@@ -45,6 +46,7 @@ export const jobQueueEvents = Lazy(() => {
 
 export const addToJobQueue = async (jobType: JobTypes): Promise<string> => {
   const jobId = randomUUID()
-  await jobQueue().add(jobType.name, jobType.payload, { jobId, removeOnComplete: true, removeDependencyOnFailure: true })
+  const options = jobOptions[jobType.name]
+  await jobQueue().add(jobType.name, jobType.payload, { jobId, removeOnComplete: true, removeDependencyOnFailure: true, ...options })
   return jobId
 }

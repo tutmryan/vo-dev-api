@@ -1,46 +1,18 @@
 import type { Job } from 'bullmq'
 import { Worker } from 'bullmq'
 import { dataSource } from '../data'
-import type { RevokeContractIssuancesJobName, RevokeContractIssuancesJobType } from '../features/issuance/jobs/revoke-contract-issuances'
-import { revokeContractIssuancesJobHandler } from '../features/issuance/jobs/revoke-contract-issuances'
-import type { RevokeIdentityIssuancesJobName, RevokeIdentityIssuancesJobType } from '../features/issuance/jobs/revoke-identity-issuances'
-import { revokeIdentityIssuancesJobHandler } from '../features/issuance/jobs/revoke-identity-issuances'
-import type { RevokeIssuancesJobName, RevokeIssuancesJobType } from '../features/issuance/jobs/revoke-issuances'
-import { revokeIssuancesJobHandler } from '../features/issuance/jobs/revoke-issuances'
-import {
-  revokeUserIssuancesJobHandler,
-  type RevokeUserIssuancesJobName,
-  type RevokeUserIssuancesJobType,
-} from '../features/issuance/jobs/revoke-user-issuances'
 import { UserEntity } from '../features/users/entities/user-entity'
 import { BackgroundJobStatus } from '../generated/graphql'
 import { logger } from '../logger'
 import { redisOptions } from '../redis'
 import { createVerifiedIdAdminService } from '../services'
-import type { VerifiedIdAdminService } from '../services/verified-id'
 import { Lazy } from '../util/lazy'
+import type { JobPayload } from './jobs'
+import { handlers, type JobNames, type WorkerContext } from './jobs'
 import { publishBackgroundJobEvent } from './pubsub'
 import { JobQueueName, MAX_RETRY } from './queue'
 
-export type JobNames = RevokeIssuancesJobName | RevokeContractIssuancesJobName | RevokeIdentityIssuancesJobName | RevokeUserIssuancesJobName
-export type JobTypes = RevokeIssuancesJobType | RevokeContractIssuancesJobType | RevokeIdentityIssuancesJobType | RevokeUserIssuancesJobType
-
-type BackgroundJob = Job<{ userId: string; requestId?: string }>
-export type WorkerContext = {
-  logger: typeof logger
-  verifiedIdAdminService: VerifiedIdAdminService
-  user: UserEntity
-}
-type HandlerMap<T extends { name: JobNames }> = {
-  [J in T as J['name']]?: (context: WorkerContext, job: Job) => Promise<void>
-}
-
-const handlers: HandlerMap<JobTypes> = {
-  revokeIssuances: revokeIssuancesJobHandler,
-  revokeContractIssuances: revokeContractIssuancesJobHandler,
-  revokeIdentityIssuances: revokeIdentityIssuancesJobHandler,
-  revokeUserIssuances: revokeUserIssuancesJobHandler,
-}
+type BackgroundJob = Job<JobPayload>
 
 const createWorkerContext = async (userId: string): Promise<WorkerContext> => ({
   logger,
