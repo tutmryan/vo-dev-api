@@ -11,6 +11,7 @@ import { useSubscriptionsServer } from '@makerx/graphql-core/subscriptions'
 import { isProduction } from '@makerx/node-common'
 import type { Express } from 'express'
 import { json } from 'express'
+import { createApollo4QueryValidationPlugin } from 'graphql-constraint-directive/apollo4'
 import type http from 'http'
 import { useBackgroundJob } from './background-jobs'
 import { bearer, devToolsEnabled, logging } from './config'
@@ -51,6 +52,7 @@ const plugins = (httpServer: http.Server, serverCleanup?: () => Promise<void>): 
       : ApolloServerPluginLandingPageDisabled(),
   )
 
+  plugins.push(createApollo4QueryValidationPlugin())
   return plugins
 }
 

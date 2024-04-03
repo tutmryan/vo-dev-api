@@ -76,7 +76,7 @@ input FaceCheckValidationInput {
   """
   Optional confidence threshold between 50-100. The default is 70.
   """
-  matchConfidenceThreshold: PositiveInt
+  matchConfidenceThreshold: Int @constraint(min: 50, max: 100)
 }
 
 """

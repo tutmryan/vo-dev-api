@@ -877,7 +877,7 @@ export type FaceCheckValidation = {
 /** Face check validation settings */
 export type FaceCheckValidationInput = {
   /** Optional confidence threshold between 50-100. The default is 70. */
-  matchConfidenceThreshold?: InputMaybe<Scalars['PositiveInt']['input']>;
+  matchConfidenceThreshold?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** Specifies which features are enabled for this API instance. */
@@ -3046,6 +3046,25 @@ export type CacheControlDirectiveArgs = {
 
 export type CacheControlDirectiveResolver<Result, Parent, ContextType = GraphQLContext, Args = CacheControlDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
 
+export type ConstraintDirectiveArgs = {
+  contains?: Maybe<Scalars['String']['input']>;
+  endsWith?: Maybe<Scalars['String']['input']>;
+  exclusiveMax?: Maybe<Scalars['Float']['input']>;
+  exclusiveMin?: Maybe<Scalars['Float']['input']>;
+  format?: Maybe<Scalars['String']['input']>;
+  max?: Maybe<Scalars['Float']['input']>;
+  maxLength?: Maybe<Scalars['Int']['input']>;
+  min?: Maybe<Scalars['Float']['input']>;
+  minLength?: Maybe<Scalars['Int']['input']>;
+  multipleOf?: Maybe<Scalars['Float']['input']>;
+  notContains?: Maybe<Scalars['String']['input']>;
+  pattern?: Maybe<Scalars['String']['input']>;
+  startsWith?: Maybe<Scalars['String']['input']>;
+  uniqueTypeName?: Maybe<Scalars['String']['input']>;
+};
+
+export type ConstraintDirectiveResolver<Result, Parent, ContextType = GraphQLContext, Args = ConstraintDirectiveArgs> = DirectiveResolverFn<Result, Parent, ContextType, Args>;
+
 export type AccessTokenResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AccessTokenResponse'] = ResolversParentTypes['AccessTokenResponse']> = {
   expires?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -3739,4 +3758,5 @@ export type Resolvers<ContextType = GraphQLContext> = {
 
 export type DirectiveResolvers<ContextType = GraphQLContext> = {
   cacheControl?: CacheControlDirectiveResolver<any, any, ContextType>;
+  constraint?: ConstraintDirectiveResolver<any, any, ContextType>;
 };
