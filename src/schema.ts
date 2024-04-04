@@ -3,6 +3,7 @@ import { mergeResolvers } from '@graphql-tools/merge'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import type { GraphQLSchema } from 'graphql'
 import { GraphQLScalarType } from 'graphql'
+import { constraintDirectiveDocumentation, constraintDirectiveTypeDefs } from 'graphql-constraint-directive'
 import { applyMiddleware } from 'graphql-middleware'
 import { resolvers as scalarResolvers } from 'graphql-scalars'
 import { identityFunc } from 'graphql/jsutils/identityFunc'
@@ -37,9 +38,11 @@ export default function () {
   ])
 
   let schema = makeExecutableSchema({
-    typeDefs,
+    typeDefs: [constraintDirectiveTypeDefs, typeDefs],
     resolvers: mergeResolvers([usedScalars, ...resolvers]),
   })
+
+  schema = constraintDirectiveDocumentation({})(schema)
 
   requireExplicitResolversForScalars(schema)
 
