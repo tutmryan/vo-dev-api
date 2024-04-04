@@ -1,6 +1,6 @@
 import { extractErrorResponseInfo } from '@makerx/node-common'
 import type { RequestHandler } from 'express'
-import { capitalize } from 'lodash'
+import { capitalize, pick } from 'lodash'
 import { requestCallbackCache } from '../../cache'
 import type { Callback, IssuanceCallbackEvent, PresentationCallbackEvent } from '../../generated/graphql'
 import { logger } from '../../logger'
@@ -33,34 +33,36 @@ function requestCallbackMiddleware(type: 'issuance' | 'presentation', handler?: 
       return
     }
 
-    // check the request body contains an event
     const event = req.body as IssuanceCallbackEvent | PresentationCallbackEvent
+    const loggableEventData = pick(event, ['requestId', 'requestStatus', 'error'])
+
+    // check the request body contains an event
     if (!event.requestId) {
-      logger.error(`Invalid ${type} callback request`, { event, type })
+      logger.error(`Invalid ${type} callback request`, { event: loggableEventData, type })
       res.status(400).end()
       return
     }
-    logger.info(`${capitalize(type)} callback received`, { event, type })
+    logger.info(`${capitalize(type)} callback received`, { event: loggableEventData, type })
 
     // invoke our handler
     if (handler) {
       try {
         await handler(event)
-        logger.info(`${capitalize(type)} callback handler invoked`, { event, type })
+        logger.info(`${capitalize(type)} callback handler invoked`, { event: loggableEventData, type })
       } catch (error) {
-        logger.error(`${capitalize(type)} callback handler failed`, { event, type, error })
+        logger.error(`${capitalize(type)} callback handler failed`, { event: loggableEventData, type, error })
       }
     }
 
-    // find the upstream callback for this event
+    // find the consumer callback for this event
     const callback = await requestCallbackCache.get(event.requestId)
     if (!callback) {
-      logger.warn(`Failed to locate a matching upstream ${type} callback`, { requestId: event.requestId })
+      logger.warn(`Failed to locate a matching consumer ${type} callback`, { requestId: event.requestId })
       res.status(204).end()
       return
     }
 
-    // prepare to invoke the upstream callback
+    // prepare to invoke the consumer callback
     const callbackData = JSON.parse(callback) as Callback
     const { url, headers } = callbackData
     if (url.includes(req.hostname)) throw new Error(`Callback url ${url} must not be this host`)
@@ -70,20 +72,22 @@ function requestCallbackMiddleware(type: 'issuance' | 'presentation', handler?: 
       headers: { ['Content-Type']: 'application/json', ...headers } as HeadersInit,
     }
 
-    // invoke the upstream callback, log the outcome, return the response
+    // invoke the consumer callback, log the outcome, return the response
     fetch(url, request)
       .then((response) => {
         if (response.ok) {
-          logger.info(`Upstream ${type} callback complete`, {
-            event,
+          logger.info(`Consumer ${type} callback complete`, {
+            url,
+            event: loggableEventData,
             type,
             responseStatus: response.status,
           })
           res.status(204).end()
         } else {
           extractErrorResponseInfo(response).then((responseInfo) => {
-            logger.error(`Upstream ${type} callback failed`, {
-              event,
+            logger.error(`Consumer ${type} callback failed`, {
+              url,
+              event: loggableEventData,
               type,
               response: responseInfo,
             })
@@ -92,7 +96,7 @@ function requestCallbackMiddleware(type: 'issuance' | 'presentation', handler?: 
         }
       })
       .catch((error) => {
-        logger.error(`Upstream ${type} callback failed`, { error, event, type })
+        logger.error(`Consumer ${type} callback failed`, { url, error, event: loggableEventData, type })
         res.status(500).end()
       })
   }
