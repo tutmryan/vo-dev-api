@@ -31,7 +31,7 @@ The name of the environment should be the instance name e.g. `demo`.
 
 #### Instance configuration variables
 
-- CORS_ORIGIN (optional JSON string: RegExp[] - an array of CORS origins - additional to the deployed Admin and API origins, e.g. ['^https://([a-z0-9]+[.])+company.com$'])
+- CORS_ORIGIN (optional JSON string: RegExp[] - an array of CORS origins - additional to the deployed Admin and API origins, e.g. ['^https://([a-z0-9]+[.])+company\\.com$']) (**Note**: ensure the `.` is escaped so it will be matched as a literal value in the regular expression.)
 - IDENTITY_ISSUERS (optional JSON Record<string, string> - a map of identity issuer values and their labels; the home tenant is automatically mapped)
 - PLATFORM_CONSUMER_APPS (optional JSON Record<string, string> - a map of app OIDs and their labels)
 
