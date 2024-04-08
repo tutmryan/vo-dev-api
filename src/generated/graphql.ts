@@ -1145,7 +1145,7 @@ export type IssuanceRequestInput = {
   expirationDate?: InputMaybe<Scalars['DateTime']['input']>;
   /**
    * The issuee's photo for the purpose of face check presentation verification, also displayed via the authenticator app.
-   * The image content type and encoding must be: `image/jpg;base64url`.
+   * The image content type and encoding must be: `image/jpg;base64`.
    * For more info on the photo requirements, see the [Face Check documentation](https://learn.microsoft.com/en-us/entra/verified-id/using-facecheck#what-are-the-requirements-for-the-photo-in-the-verified-id)
    */
   faceCheckPhoto?: InputMaybe<Scalars['String']['input']>;
