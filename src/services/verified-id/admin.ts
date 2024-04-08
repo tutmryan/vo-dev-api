@@ -11,7 +11,10 @@ interface Value<T> {
 }
 
 export class VerifiedIdAdminService extends HttpClient {
-  constructor(options: HttpClientOptions, private authorityId: string) {
+  constructor(
+    options: HttpClientOptions,
+    private authorityId: string,
+  ) {
     super(options)
   }
 

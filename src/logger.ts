@@ -40,7 +40,10 @@ export const logger = Object.create(baseLogger, {
 })
 
 export class LoggerForTypeOrm implements TypeOrmLoggerInterface {
-  constructor(private options: LoggerOptions, private logger: Logger) {}
+  constructor(
+    private options: LoggerOptions,
+    private logger: Logger,
+  ) {}
 
   private shouldLog(logType: 'query' | 'schema' | 'error' | 'warn' | 'info' | 'log' | 'migration') {
     return this.options === true || this.options === 'all' || (Array.isArray(this.options) && this.options.includes(logType))

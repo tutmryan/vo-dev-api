@@ -32,31 +32,33 @@ export const hasTokenAcquisitionRoleRequiringIdentityAccess = hasAnyRoleRuleWith
 )
 
 // validate input to acquire limited access token
-export const isValidAcquireLimitedAccessTokenRequest = rule('isValidAcquireLimitedAccessTokenRequest', { cache: 'strict' })(
-  async (_, { input }: MutationAcquireLimitedAccessTokenArgs, { user }) => {
-    if (!user) return false
-    if (input.allowAnonymousPresentation) {
-      if (!user.roles.includes(LimitedAccessTokenAcquisitionRoles.anonymousPresentations)) return false
-      invariant(
-        input.requestableCredentials && input.requestableCredentials.length > 0,
-        'requestableCredentials are required for limited presentation access',
-      )
-      invariant(Object.keys(input).length === 2, 'allowAnonymousPresentation can only be used with requestableCredentials input')
-    }
-    if (input.issuableContractIds && input.issuableContractIds.length > 0) {
-      if (!user.roles.includes(LimitedAccessTokenAcquisitionRoles.issuance)) return false
-      invariant(input.identityId, 'identityId is required for limited issuance tokens')
-    }
-    if (input.requestableCredentials && input.requestableCredentials.length > 0) {
-      if (!input.allowAnonymousPresentation && !user.roles.includes(LimitedAccessTokenAcquisitionRoles.presentation)) return false
-      invariant(input.allowAnonymousPresentation || input.identityId, 'identityId is required for limited presentation tokens')
-    }
-    if (input.listContracts) {
-      if (!user.roles.includes(LimitedAccessTokenAcquisitionRoles.listContracts)) return false
-    }
-    return true
-  },
-)
+export const isValidAcquireLimitedAccessTokenRequest = rule('isValidAcquireLimitedAccessTokenRequest', { cache: 'strict' })(async (
+  _,
+  { input }: MutationAcquireLimitedAccessTokenArgs,
+  { user },
+) => {
+  if (!user) return false
+  if (input.allowAnonymousPresentation) {
+    if (!user.roles.includes(LimitedAccessTokenAcquisitionRoles.anonymousPresentations)) return false
+    invariant(
+      input.requestableCredentials && input.requestableCredentials.length > 0,
+      'requestableCredentials are required for limited presentation access',
+    )
+    invariant(Object.keys(input).length === 2, 'allowAnonymousPresentation can only be used with requestableCredentials input')
+  }
+  if (input.issuableContractIds && input.issuableContractIds.length > 0) {
+    if (!user.roles.includes(LimitedAccessTokenAcquisitionRoles.issuance)) return false
+    invariant(input.identityId, 'identityId is required for limited issuance tokens')
+  }
+  if (input.requestableCredentials && input.requestableCredentials.length > 0) {
+    if (!input.allowAnonymousPresentation && !user.roles.includes(LimitedAccessTokenAcquisitionRoles.presentation)) return false
+    invariant(input.allowAnonymousPresentation || input.identityId, 'identityId is required for limited presentation tokens')
+  }
+  if (input.listContracts) {
+    if (!user.roles.includes(LimitedAccessTokenAcquisitionRoles.listContracts)) return false
+  }
+  return true
+})
 
 // limited access app variants
 export const isLimitedAccessApp = hasRoleRule(InternalRoles.limitedAccess, 'isLimitedAccessApp')

@@ -1,15 +1,16 @@
+import type { InstrumentationOptions as OpenTelemetryInstrumentationOptions } from '@azure/monitor-opentelemetry'
 import type { ProxyTracerProvider } from '@opentelemetry/api'
 import { trace } from '@opentelemetry/api'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { Resource } from '@opentelemetry/resources'
 import type { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_NAMESPACE } from '@opentelemetry/semantic-conventions'
-import type { AzureMonitorOpenTelemetryOptions } from 'applicationinsights'
 import { useAzureMonitor } from 'applicationinsights'
+import type { InstrumentationOptions as ApplicationInsightsInstrumentationOptions } from 'applicationinsights/out/src/types'
 import { instrumentations } from './instrumentations'
 import { RemoveSelect1SpansSampler } from './remove-select1-spans-sampler'
 
-const resource = Resource.EMPTY as any as Required<AzureMonitorOpenTelemetryOptions>['resource'] // type conflict between @opentelemetry/resources and @azure/monitor-opentelemetry
+const resource = Resource.EMPTY
 resource.attributes[SEMRESATTRS_SERVICE_NAME] = 'VerifiableOrchestration'
 resource.attributes[SEMRESATTRS_SERVICE_NAMESPACE] = 'verifiable-orchestration-api'
 
@@ -17,17 +18,17 @@ useAzureMonitor({
   resource,
   instrumentationOptions: {
     azureSdk: { enabled: false },
-    http: { enabled: true },
-
     mongoDb: { enabled: false },
     mySql: { enabled: false },
     postgreSql: { enabled: false },
     redis: { enabled: false },
     redis4: { enabled: false },
-  },
-  logInstrumentationOptions: {
+    console: { enabled: false },
+    bunyan: { enabled: false },
+
+    http: { enabled: true },
     winston: { enabled: true },
-  },
+  } satisfies ApplicationInsightsInstrumentationOptions as unknown as OpenTelemetryInstrumentationOptions, // https://github.com/microsoft/ApplicationInsights-node.js/issues/1269
 })
 
 const tracerProvider = (trace.getTracerProvider() as ProxyTracerProvider).getDelegate() as NodeTracerProvider

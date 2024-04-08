@@ -7,10 +7,10 @@ export const resolvers: Resolvers = {
       'error' in response
         ? 'BackgroundJobErrorEvent'
         : 'progress' in response
-        ? 'BackgroundJobProgressEvent'
-        : 'result' in response
-        ? 'BackgroundJobCompletedEvent'
-        : 'BackgroundJobActiveEvent',
+          ? 'BackgroundJobProgressEvent'
+          : 'result' in response
+            ? 'BackgroundJobCompletedEvent'
+            : 'BackgroundJobActiveEvent',
   },
   Subscription: {
     backgroundJobEvent: {

@@ -22,8 +22,8 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
     const { issuanceIds, partnerIds, ...rest } = args
     typeSafeAssign(this, {
       ...rest,
-      issuances: Promise.resolve(issuanceIds.map((id) => ({ id } as IssuanceEntity))),
-      partners: Promise.resolve(partnerIds.map((id) => ({ id } as PartnerEntity))),
+      issuances: Promise.resolve(issuanceIds.map((id) => ({ id }) as IssuanceEntity)),
+      partners: Promise.resolve(partnerIds.map((id) => ({ id }) as PartnerEntity)),
     })
   }
 

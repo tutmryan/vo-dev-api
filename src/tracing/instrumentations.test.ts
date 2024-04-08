@@ -1,3 +1,4 @@
+import { InstrumentationBase } from '@opentelemetry/instrumentation'
 import type { InstrumentationNodeModuleDefinition } from '@opentelemetry/instrumentation/build/src/instrumentationNodeModuleDefinition'
 import { groupBy } from 'lodash'
 import { existsSync } from 'node:fs'
@@ -10,7 +11,12 @@ describe('OpenTelemetry instrumentations', () => {
   it(`are compatible with the installed version of the packages they instrument`, () => {
     const applicableInstrumentationDefinitions = instrumentations
       // They can expose several module definitions; redis does: one for @redis/client, one for @node-redis/client
-      .flatMap((x) => (x as any).init() as InstrumentationNodeModuleDefinition<unknown> | InstrumentationNodeModuleDefinition<unknown>[])
+      .flatMap(
+        (x) =>
+          (x as { init: InstrumentationBase['init'] }).init() as
+            | InstrumentationNodeModuleDefinition<unknown>
+            | InstrumentationNodeModuleDefinition<unknown>[],
+      )
       // Only get the ones that apply to us
       .filter(({ name }) => existsSync(getPackageNodeModulesDirectory(name)))
 

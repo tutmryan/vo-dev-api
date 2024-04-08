@@ -8,7 +8,7 @@ jest.mock('./callback/cache', () => {
   const originalModule = jest.requireActual('./callback/cache')
   return {
     ...originalModule,
-    getPresentationDataFromCache: (args: any) => mockPresentationCacheGet(args),
+    getPresentationDataFromCache: (requestId: string) => mockPresentationCacheGet(requestId),
   }
 })
 
@@ -79,4 +79,4 @@ const givenAPresentationEntity = (args: Partial<PresentationEntity>) => {
   } as PresentationEntity
 }
 
-const givenAUser = (userId: string): User => ({ userEntity: { id: userId } } as User)
+const givenAUser = (userId: string): User => ({ userEntity: { id: userId } }) as User

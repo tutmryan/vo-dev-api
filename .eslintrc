@@ -17,7 +17,10 @@
       "files": ["*.ts"],
       "excludedFiles": ["src/**/testing.ts", "src/**/*.test.ts", "src/**/test.ts"],
       "rules": {
-        "@typescript-eslint/no-unnecessary-condition": "error"
+        "@typescript-eslint/no-unnecessary-condition": "error",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "@typescript-eslint/consistent-type-imports": "error"
       },
       "parserOptions": {
         "project": ["./tsconfig.json"]
@@ -25,9 +28,6 @@
     }
   ],
   "rules": {
-    "@typescript-eslint/no-explicit-any": "off",
-    "@typescript-eslint/no-non-null-assertion": "off",
-    "@typescript-eslint/consistent-type-imports": "error",
     "no-restricted-imports": [
       "error",
       {
