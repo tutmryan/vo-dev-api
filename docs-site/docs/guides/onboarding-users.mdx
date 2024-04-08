@@ -7,16 +7,15 @@ import { ApiUrl } from '@site/src/components/api-url'
 
 # Onboarding a user
 
-The individuals who would like to access <AdminUrl path='/'>Admin UI</AdminUrl> or <ApiUrl path='/'>GraphQL API</ApiUrl> will need to be onboarded to Microsoft Entra ID tenant of Verified Orchestration platform and added to one or more of the following Microsoft Entra ID groups depending on the tasks they would like to carry out on the platform.
+Individuals who would like to access the <AdminUrl path='/'>Admin UI</AdminUrl> or <ApiUrl path='/'>GraphQL API</ApiUrl> will need to be granted Verified Orchestration enterprise application user-role access. We suggest creating Microsoft Entra groups mapped to each Verified Orchestration  user role. Users can then be added to one or more groups depending on the tasks they would like to carry out on the platform.
 
 - [Reader](#reader)
 - [Issuer](#issuer)
 - [Credential admin](#credential-admin)
 - [Partner admin](#partner-admin)
+- [Approval request admin](#approval-request-admin)
 
-Each of the above Microsoft Entra ID groups is mapped to the equivalent App role of the Verified Orchestration API App registration.
-
-An administrator of Verified Orchestration platform would be able to help with onboarding an individual and adding him/her to the groups in Microsoft Azure Portal [[doc](https://learn.microsoft.com/en-us/azure/active-directory/fundamentals/how-to-create-delete-users)].
+A tenant administrator can set up the the group to role mapping and add/remove users from the groups.
 
 ## Reader
 
@@ -79,3 +78,14 @@ Permissions:
 - find contracts / credentials in verifiable credentials network
 - add partner
 - edit partner
+
+## Approval request admin
+
+Microsoft Entra ID Group: `Verified Orchestration Approval Request Admin`
+
+App role value: `VerifiableCredential.ApprovalRequestAdmin`
+
+Permissions:
+
+- view approval requests
+- view actioned approval data

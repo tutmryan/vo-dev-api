@@ -1,0 +1,145 @@
+---
+sidebar_position: 7
+---
+
+# Approvals
+
+The Verified Orchestration platform supports presentation of credentials to approve (or reject) a request. This feature can be used to facilitate workflows that require approval from a human via presentation of credentials.
+
+## Example Scenario
+
+In our ficticious organisation, Acme Software, deployments of software to production require approval from the change management team. The change management team is responsible for ensuring that the deployment is scheduled at an appropriate time, and that the deployment does not conflict with other planned changes.
+
+Each of the change management team holds a credential of type `ChangeManager` which can be used to approve the deployment.
+
+### Implementation
+
+Our ficticuous organisation, Acme Software, uses GitHub to run their software deployments. A GitHub application is set up to listen for deployment events, and when a deployment is triggered, the application will request approval from the change management team.
+
+#### Step 1. Request approval
+
+The GitHub application requests approval of the deployment by calling the `CreateApprovalRequest` mutation.
+
+```graphql title="CreateApprovalRequest mutation: will return the approval request ID and URL to action the approval"
+mutation CreateApprovalRequest($request: ApprovalRequestInput!) {
+  createApprovalRequest(request: $request) {
+    id
+    portalUrl
+    callbackSecret
+  }
+}
+```
+
+```json title="Example variables for CreateApprovalRequest mutation"
+{
+  "request": {
+    "callback": {
+      "url": "https://github.acmesoftware.net/deployment-approval-callback"
+    },
+    "purpose": "Please provide ChangeManager approval for deployment to Production in repo api",
+    "referenceUrl": "https://github.com/AcmeSoftware/api/actions/runs/8595211647",
+    "requestType": "GitHubApprovalRequest",
+    "presentationRequestInput": {
+      "requestedCredentials": [
+        {
+          "type": "ChangeManager"
+        }
+      ]
+    }
+  }
+}
+```
+
+```json title="Example response from CreateApprovalRequest mutation"
+{
+  "data": {
+    "createApprovalRequest": {
+      "id": "a4207da5-3009-4e64-bdd4-cb046f5ffb46",
+      "portalUrl": "https://instance.portal.verifiedorchestration.com/approval-request/a4207da5-3009-4e64-bdd4-cb046f5ffb46",
+      "callbackSecret": "9456443c-4b74-4233-b8df-24670548e140"
+    }
+  }
+}
+```
+
+:::tip
+Additional contextual data for the approval request can be included via the [ApprovalRequestInput](/docs/reference/inputs/approval-request-input) `correlationId` and `requestData` fields.
+:::
+
+#### Step 2. Action approval
+
+The change management team receives a notification that an approval is required. They click on the approval request URL to action the request.
+
+1. The approval request URL will open the Verified Orchestration portal in the browser (desktop or mobile).
+1. The change management team member will be prompted to present their `ChangeManager` credential.
+1. The approval request will be displayed, and the change management team member can approve or reject the request with an optional comment.
+
+#### Step 3. Callback
+
+When the approval request is approved or rejected, the GitHub application will receive a callback to the URL provided in the `callback.url` field of the `CreateApprovalRequest` mutation. Refer to the [ActionedApprovalData](/docs/reference/objects/actioned-approval-data) for the complete definition.
+
+The GitHub application can then allow the deployment to proceed or cancel the deployment based on the approval status.
+
+```json title="Example callback payload"
+{
+  "approvalRequestId": "27091231-af65-42a9-a4c1-97604e04d018",
+  "isApproved": true,
+  "actionedComment": "LGTM 👍",
+  "actionedAt": "2024-04-04T02:20:15.856Z",
+  "actionedBy": {
+    "id": "b3a7f625-20d9-4fe7-9c23-5ddcb836a9b9",
+    "name": "Jane Citizen"
+  },
+  "callbackSecret": "a3ed82cf-af21-40cc-bf7a-8a5369786777"
+}
+```
+
+:::tip
+The `callbackSecret` is a shared secret between the GitHub application and the Verified Orchestration platform. It is returned from the approval request creation and can be used to verify the authenticity of the callback.
+
+Additionally, the GitHub application can query the actioned approval data via `approvalRequestId` via the [actionedApprovalData](/docs/reference/queries/actioned-approval-data) query.
+:::
+
+:::note
+Callbacks will be re-tried in case of error until a 200 response is received, with an exponential backoff allowing a maximum of 3 days for the final retry.
+:::
+
+### Callback or polling
+
+As an alternative to receiving a callback, applications coordinating approvals can poll for actioned approvals using the [actionedApprovalData](/docs/reference/queries/actioned-approval-data) query, using the `approvalRequestId`. This query returns the same [ActionedApprovalData](/docs/reference/objects/actioned-approval-data) as the callback payload.
+
+```graphql title="Example query to retrieve actioned approval data"
+query ActionedApprovalData($approvalRequestId: ID!) {
+  actionedApprovalData(id: $approvalRequestId) {
+    isApproved
+    actionedComment
+    actionedBy {
+      id
+      name
+    }
+    actionedAt
+  }
+}
+```
+
+```json title="Example variables for actionedApprovalData query"
+{
+  "approvalRequestId": "27091231-af65-42a9-a4c1-97604e04d018"
+}
+```
+
+## Authorization
+
+Access to create approval requests and read approval data can be controlled by application and user roles.
+
+### Approval applications
+
+Applications can be authorized to create approval requests, receive callbacks and poll for actioned approval data via the `VerifiableCredential.RequestApproval` application role.
+
+Refer to [Onboarding an app](/docs/guides/onboarding-apps) for more information on how to onboard an app.
+
+### Approval admin users
+
+Admin users can be authorized to view approval requests, via the `VerifiableCredential.ApprovalRequestAdmin` user role.
+
+Refer to [Onboarding users](/docs/guides/onboarding-users) for more information on how to onboard a user.

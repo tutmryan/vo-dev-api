@@ -4,16 +4,9 @@ sidebar_position: 2
 
 # Onboarding an app
 
-For the consumer apps to be able to integrate with Verified Orchestartion platform, they will need to be onboarded as App registrations in Microsoft Entra ID tenant of Verified Orchestration platform.
+For apps to be able to integrate with Verified Orchestartion platform, they will need to be granted access to Verified Orchestration enterprise application roles.
 
-An administrator of Verified Orchestration platform can help onboarding an app in Microsoft Azure Portal [[doc](https://learn.microsoft.com/en-us/azure/healthcare-apis/register-application)].
-
-The following outlines the steps needed to create a new App registration in Microsoft Azure Portal.
-
-1. provide the name and leave other options as per default
-1. create a client secret with appropriate expiry
-1. add relevant API permissions according to the [access model](#access-models) required by the app
-1. securely communicate the Application (client) ID and the client secret to the consumer app team
+A tenant administrator can help onboarding an app in Microsoft Azure Portal [[doc](https://learn.microsoft.com/en-us/azure/healthcare-apis/register-application)].
 
 ## Access models
 
@@ -42,8 +35,10 @@ This model is also available for the apps which can securely store a secret such
   Credential issuance
 - **VerifiableCredential.Present**<br/>
   Credential presentation
+- **VerifiableCredential.RequestApproval**<br/>
+  Create approval requests and read actioned approval data
 
-Either or both of those permissions can be granted to the App registration depending on the requirements of the consumer app.
+These permissions can be granted to the App registration depending on the requirements of the consumer app.
 
 ## Instance configuration
 
