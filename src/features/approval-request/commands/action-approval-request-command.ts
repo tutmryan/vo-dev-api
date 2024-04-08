@@ -1,3 +1,4 @@
+import { IsNull } from 'typeorm'
 import { addToJobQueue } from '../../../background-jobs/queue'
 import type { CommandContext } from '../../../cqs'
 import type { ActionApprovalRequestInput } from '../../../generated/graphql'
@@ -16,9 +17,12 @@ export async function ActionApprovalRequestCommand(this: CommandContext, id: str
   const approvalData = await getLimitedApprovalData(user.token)
   invariant(approvalData.presentationId, 'This approval request does not have an associated presentation')
 
-  approvalRequest.action(approvalData.presentationId, input.isApproved, input.actionedComment)
-  const approvedRequest = await repo.save(approvalRequest)
+  // special update handling to avoid overwriting an already-actioned approval request
+  const updatedPartial = approvalRequest.action(approvalData.presentationId, input.isApproved, input.actionedComment)
+  const updateResult = await repo.update({ id, isApproved: IsNull() }, updatedPartial)
+  invariant(updateResult.affected === 1, 'Approval request has already been actioned')
 
+  const approvedRequest = await repo.findOneByOrFail({ id })
   if (approvedRequest.callbackInput)
     await addToJobQueue({ name: 'invokeApprovalCallback', payload: { userId: user.userEntity.id, approvedRequestId: approvedRequest.id } })
 

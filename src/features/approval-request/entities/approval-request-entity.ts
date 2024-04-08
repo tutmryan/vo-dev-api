@@ -1,3 +1,4 @@
+import { pick } from 'lodash'
 import { Column, Entity, ManyToOne } from 'typeorm'
 import type { Callback, PresentationRequestInput } from '../../../generated/graphql'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
@@ -92,10 +93,17 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
     return ApprovalRequestStatus.Pending
   }
 
+  /**
+   * Actions the approval request and returns the updated fields
+   * @returns A partial object containing just the updated fields
+   */
   action(presentationId: string, isApproved: boolean, actionedComment?: string | null) {
     invariant(this.status === ApprovalRequestStatus.Pending, `Cannot action an approval request that is ${this.status}`)
+
     this.presentationId = presentationId
     this.isApproved = isApproved
     this.actionedComment = actionedComment ?? null
+
+    return pick(this, ['presentationId', 'isApproved', 'actionedComment'])
   }
 }
