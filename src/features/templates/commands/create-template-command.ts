@@ -22,7 +22,7 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
   const templateId = randomUUID().toUpperCase()
 
   if (input.display?.card?.logo?.image) {
-    await validateDisplayLogoImage(input.display.card.logo.image)
+    validateDisplayLogoImage(input.display.card.logo.image)
   }
 
   const displayLogoUri = input.display?.card?.logo?.image

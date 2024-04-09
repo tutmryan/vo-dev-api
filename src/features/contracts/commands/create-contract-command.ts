@@ -10,7 +10,7 @@ import { LogoImageOrUriRequiredError, validateContractInput, validateDisplayLogo
 export async function CreateContractCommand(this: CommandContext, input: ContractInput) {
   const { templateId, display: displayInput, faceCheckSupport, ...rest } = input
 
-  await validateContractInput(input)
+  validateContractInput(input)
 
   const template = input.templateId
     ? await this.entityManager.getRepository(TemplateEntity).findOneByOrFail({ id: input.templateId })

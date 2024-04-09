@@ -6,16 +6,16 @@ import { validateContractClaims } from './claims'
 
 export const LogoImageOrUriRequiredError = 'Either display.card.logo.uri or display.card.logo.image must be provided'
 
-export async function validateContractInput(input: ContractInput) {
+export function validateContractInput(input: ContractInput) {
   validateContractClaims(input.display.claims)
   invariant(input.display.card.logo.image || input.display.card.logo.uri, LogoImageOrUriRequiredError)
   if (input.display.card.logo.image) {
-    await validateDisplayLogoImage(input.display.card.logo.image)
+    validateDisplayLogoImage(input.display.card.logo.image)
   }
 }
 
-export async function validateDisplayLogoImage(displayLogoImage: string) {
-  const isValid = await isValidImageDataUrl(displayLogoImage)
+export function validateDisplayLogoImage(displayLogoImage: string) {
+  const isValid = isValidImageDataUrl(displayLogoImage, ['png', 'jpeg', 'jpg'])
   if (!isValid) throw new Error('Invalid logo image')
 }
 

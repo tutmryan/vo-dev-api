@@ -22,7 +22,7 @@ export async function UpdateTemplateCommand(this: CommandContext, id: string, in
     await this.services.logoImages.deleteIfExists(decodeURIComponent(basename(template.display.card.logo.uri)))
 
   if (input.display?.card?.logo?.image) {
-    await validateDisplayLogoImage(input.display.card.logo.image)
+    validateDisplayLogoImage(input.display.card.logo.image)
   }
 
   const displayLogoUri = input.display?.card?.logo?.image
