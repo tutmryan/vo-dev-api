@@ -9,11 +9,13 @@ import {
   pkceAuthenticationMiddleware,
   toNpmLogLevel,
 } from '@makerx/express-msal'
+import { isLocalDev } from '@makerx/node-common'
 import bodyParser from 'body-parser'
 import cookieSession from 'cookie-session'
 import cors from 'cors'
 import type { Express } from 'express'
 import express from 'express'
+import helmet from 'helmet'
 import { clone, merge } from 'lodash'
 import {
   bearer,
@@ -33,8 +35,9 @@ import { addVoyager } from './voyager'
 
 export const getExpressApp = (): Express => {
   const app = express()
-  app.disable('x-powered-by')
   app.set('trust proxy', true)
+
+  app.use(helmet({ strictTransportSecurity: !isLocalDev, contentSecurityPolicy: false }))
 
   app.use(cors(corsConfig))
   logger.info(`Using CORS origin: ${corsConfig.origin}`)
