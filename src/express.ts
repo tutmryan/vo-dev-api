@@ -37,7 +37,23 @@ export const getExpressApp = (): Express => {
   const app = express()
   app.set('trust proxy', true)
 
-  app.use(helmet({ strictTransportSecurity: !isLocalDev, contentSecurityPolicy: false }))
+  app.use(
+    helmet({
+      strictTransportSecurity: !isLocalDev,
+      contentSecurityPolicy: devToolsEnabled
+        ? {
+            // override helmet defaults with apollo sandbox + voyager config
+            directives: {
+              imgSrc: [`'self'`, 'data:', 'apollo-server-landing-page.cdn.apollographql.com'],
+              scriptSrc: [`'self'`, `https: 'unsafe-inline'`, `https: 'unsafe-eval'`], // voyager needs unsafe-eval
+              manifestSrc: [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
+              frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
+              workerSrc: [`'self'`, 'blob:'], // voyager needs blob:
+            },
+          }
+        : undefined, // undefined means use default helmet CSP
+    }),
+  )
 
   app.use(cors(corsConfig))
   logger.info(`Using CORS origin: ${corsConfig.origin}`)
