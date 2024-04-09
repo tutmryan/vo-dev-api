@@ -20,8 +20,8 @@ const FeatureList: FeatureItem[] = [
     Svg: require('@site/static/img/rocket.svg').default,
     description: (
       <>
-        The articles in the <Link to="/docs/guides">Guides</Link> section will get you started on issuing and presenting verifiable
-        credentials virtually friction free.
+        The articles in the <Link to="/docs/guides">Guides</Link> section will get you started issuing and presenting verifiable credentials
+        quickly.
       </>
     ),
   },
