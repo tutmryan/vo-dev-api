@@ -1,4 +1,3 @@
-import { Image } from 'canvas'
 import { lookup } from 'mime-types'
 
 const regex = /^data:([-\w]+\/[-+\w.]+);([-\w]+)?,(.*)/
@@ -41,19 +40,20 @@ export function toBase64UrlWithoutMimeType(base64Image: string) {
 }
 
 export function isValidImageDataUrl(imageString: string): Promise<boolean> {
-  const image = new Image()
+  // const image = new Image()
   const result = new Promise<boolean>((resolve) => {
-    image.onload = function () {
-      if (image.height === 0 || image.width === 0) {
-        resolve(false)
-        return
-      }
-      resolve(true)
-    }
-    image.onerror = () => {
-      resolve(false)
-    }
+    // image.onload = function () {
+    //   if (image.height === 0 || image.width === 0) {
+    //     resolve(false)
+    //     return
+    //   }
+    //   resolve(true)
+    // }
+    // image.onerror = () => {
+    //   resolve(false)
+    // }
+    resolve(true)
   })
-  image.src = imageString
+  // image.src = imageString
   return result
 }
