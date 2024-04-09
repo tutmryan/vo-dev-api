@@ -2,7 +2,7 @@ import { basename } from 'path'
 import type { CommandContext } from '../../../cqs'
 import type { TemplateInput } from '../../../generated/graphql'
 import { validateContractClaims } from '../../contracts/claims'
-import { validateDisplayLogo } from '../../contracts/validation'
+import { validateDisplayLogoImage, validateDisplayLogoUri } from '../../contracts/validation'
 import { TemplateEntity } from '../entities/template-entity'
 import { ensureNoIntersectingTemplateData, toPersistedDisplayModel, toTemplateParentData } from '../mapping'
 
@@ -21,11 +21,15 @@ export async function UpdateTemplateCommand(this: CommandContext, id: string, in
   if (template.display?.card?.logo?.uri)
     await this.services.logoImages.deleteIfExists(decodeURIComponent(basename(template.display.card.logo.uri)))
 
+  if (input.display?.card?.logo?.image) {
+    await validateDisplayLogoImage(input.display.card.logo.image)
+  }
+
   const displayLogoUri = input.display?.card?.logo?.image
     ? await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image, { appendExtension: true })
     : input.display?.card?.logo?.uri?.toString() ?? null
 
-  if (displayLogoUri) validateDisplayLogo(displayLogoUri)
+  if (displayLogoUri) validateDisplayLogoUri(displayLogoUri)
 
   await template.update({
     name: input.name,

@@ -3,7 +3,7 @@ import { merge } from 'lodash'
 import type { CommandContext } from '../../../cqs'
 import type { TemplateInput } from '../../../generated/graphql'
 import { validateContractClaims } from '../../contracts/claims'
-import { validateDisplayLogo } from '../../contracts/validation'
+import { validateDisplayLogoImage, validateDisplayLogoUri } from '../../contracts/validation'
 import { TemplateEntity } from '../entities/template-entity'
 import { ensureNoIntersectingTemplateData, toPersistedDisplayModel, toTemplateParentData } from '../mapping'
 
@@ -21,11 +21,15 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
 
   const templateId = randomUUID().toUpperCase()
 
+  if (input.display?.card?.logo?.image) {
+    await validateDisplayLogoImage(input.display.card.logo.image)
+  }
+
   const displayLogoUri = input.display?.card?.logo?.image
     ? await this.services.logoImages.uploadDataUrl(templateId, input.display.card.logo.image, { appendExtension: true })
     : input.display?.card?.logo?.uri?.toString() ?? null
 
-  if (displayLogoUri) validateDisplayLogo(displayLogoUri)
+  if (displayLogoUri) validateDisplayLogoUri(displayLogoUri)
 
   const template = new TemplateEntity({
     id: templateId,

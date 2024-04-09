@@ -4,7 +4,7 @@ import { issuanceRequestRegistration } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import { FaceCheckPhotoSupport, type IssuanceRequestInput } from '../../../generated/graphql'
 import type { IssuanceRequest } from '../../../services/verified-id'
-import { toBase64UrlWithoutMimeType } from '../../../util/data-url'
+import { isValidImageDataUrl, toBase64UrlWithoutMimeType } from '../../../util/data-url'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import type { StandardClaims } from '../../contracts/claims'
@@ -59,8 +59,11 @@ export async function CreateIssuanceRequestCommand(
   // add issuance request claims input, overriding any contract-defined claim values
   if (claimsInput) Object.entries(claimsInput).forEach(([claim, value]) => (claims[claim] = value))
   // add face check photo claim, if supplied & allowed by the contract
-  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None)
+  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None) {
+    const isValid = await isValidImageDataUrl(faceCheckPhoto)
+    if (!isValid) throw new Error('Invalid face check photo')
     claims['photo'] = toBase64UrlWithoutMimeType(faceCheckPhoto)
+  }
   // add standard claims
   const standardClaims: StandardClaimsData = {
     issuanceId: randomUUID(),

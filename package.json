@@ -8,8 +8,8 @@
   },
   "scripts": {
     "postinstall": "patch-package",
-    "start": "ts-node --transpile-only -r dotenv/config ./src/main",
-    "debug": "ts-node-dev --transpile-only --watch ./src/**/*.graphql,.env -r dotenv/config ./src/main",
+    "start": "cross-env NODE_EXTRA_CA_CERTS=./local-cert/127.0.0.1.pem ts-node --transpile-only -r dotenv/config ./src/main",
+    "debug": "cross-env NODE_EXTRA_CA_CERTS=./local-cert/127.0.0.1.pem ts-node-dev --transpile-only --watch ./src/**/*.graphql,.env -r dotenv/config ./src/main",
     "typeorm": "dotenv -e .env -- ts-node ./node_modules/typeorm/cli.js",
     "db:init-localdev": "dotenv -e .env -- ts-node --transpile-only ./scripts/localdev-database-setup",
     "db:start": "dotenv -e .env -- docker-compose up -d --wait && npm run db:init-localdev",
@@ -117,6 +117,7 @@
     "applicationinsights": "^3.0.0-beta.12",
     "body-parser": "^1.20.2",
     "bullmq": "^5.5.4",
+    "canvas": "^2.11.2",
     "config": "^3.3.11",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
