@@ -4,12 +4,12 @@ import { FaceCheckPhotoSupport, type ContractInput } from '../../../generated/gr
 import { invariant } from '../../../util/invariant'
 import { ContractEntity } from '../entities/contract-entity'
 import { ensureNoOverridingTemplateData, toPersistedDisplayModel } from '../mapping'
-import { LogoImageOrUriRequiredError, validateContractInput } from '../validation'
+import { LogoImageOrUriRequiredError, validateContractInput, validateDisplayLogoUri } from '../validation'
 
 export async function UpdateContractCommand(this: CommandContext, id: string, input: ContractInput) {
   const repository = this.entityManager.getRepository(ContractEntity)
 
-  validateContractInput(input)
+  await validateContractInput(input)
 
   const contract = await repository.findOneByOrFail({ id })
   if (contract.isDeprecated) throw new Error('Contract has been deprecated, it cannot be updated')
@@ -28,6 +28,8 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
     : input.display.card.logo.uri?.toString() ?? undefined
 
   invariant(displayLogoUri, LogoImageOrUriRequiredError)
+
+  validateDisplayLogoUri(displayLogoUri)
 
   await contract.update({
     name: input.name,

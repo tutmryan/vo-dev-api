@@ -27,7 +27,7 @@ const config: DeepPartial<Config> = {
   database: { logging: true, database: 'VerifiedOrchestration' },
   redis: { host: 'localhost' },
   blobStorage: {
-    url: 'http://127.0.0.1:10000/devstoreaccount1',
+    url: 'https://127.0.0.1:10000/devstoreaccount1',
     credential: {
       accountName: 'devstoreaccount1',
       accountKey: 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==',

@@ -16,3 +16,7 @@ The verified orchestration platform GraphQL API backend repository.
 - F5
 
 **Tip:** If you are getting `Not Authorised!` error when browsing to `http://localhost:4000` and running any query for the first time, then turn on `Include cookies` setting in `Connection settings` dialog of Apollo sandbox.
+
+**Tip:** When the local cert used for azurite https setup expires, you can use the following command to create a new pair.
+
+`openssl req -newkey rsa:2048 -x509 -nodes -keyout ./local-cert/127.0.0.1-key.pem -new -out ./local-cert/127.0.0.1.pem -sha256 -days 365 -addext "subjectAltName=IP:127.0.0.1" -subj "/C=CO/ST=ST/L=LO/O=OR/OU=OU/CN=CN"`

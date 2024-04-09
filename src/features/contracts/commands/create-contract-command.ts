@@ -5,12 +5,12 @@ import { invariant } from '../../../util/invariant'
 import { TemplateEntity } from '../../templates/entities/template-entity'
 import { ContractEntity } from '../entities/contract-entity'
 import { ensureNoOverridingTemplateData, toPersistedDisplayModel } from '../mapping'
-import { LogoImageOrUriRequiredError, validateContractInput, validateDisplayLogo } from '../validation'
+import { LogoImageOrUriRequiredError, validateContractInput, validateDisplayLogoUri } from '../validation'
 
 export async function CreateContractCommand(this: CommandContext, input: ContractInput) {
   const { templateId, display: displayInput, faceCheckSupport, ...rest } = input
 
-  validateContractInput(input)
+  await validateContractInput(input)
 
   const template = input.templateId
     ? await this.entityManager.getRepository(TemplateEntity).findOneByOrFail({ id: input.templateId })
@@ -30,7 +30,7 @@ export async function CreateContractCommand(this: CommandContext, input: Contrac
 
   invariant(displayLogoUri, LogoImageOrUriRequiredError)
 
-  validateDisplayLogo(displayLogoUri)
+  validateDisplayLogoUri(displayLogoUri)
 
   const contract = new ContractEntity({
     ...rest,

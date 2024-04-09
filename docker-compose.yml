@@ -19,7 +19,9 @@ services:
     image: mcr.microsoft.com/azure-storage/azurite
     container_name: azurite
     # just run the blob service for now
-    command: "azurite-blob --blobHost 0.0.0.0 --blobPort 10000"
+    command: "azurite-blob --blobHost 0.0.0.0 --blobPort 10000 --cert /workspace/127.0.0.1.pem --key /workspace/127.0.0.1-key.pem"
+    volumes:
+      - ./local-cert:/workspace
     restart: always
     ports:
       - 10000:10000
