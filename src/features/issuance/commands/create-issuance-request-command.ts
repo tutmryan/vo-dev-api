@@ -60,7 +60,7 @@ export async function CreateIssuanceRequestCommand(
   if (claimsInput) Object.entries(claimsInput).forEach(([claim, value]) => (claims[claim] = value))
   // add face check photo claim, if supplied & allowed by the contract
   if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None) {
-    const isValid = await isValidImageDataUrl(faceCheckPhoto)
+    const isValid = isValidImageDataUrl(faceCheckPhoto, ['jpeg', 'jpg'])
     if (!isValid) throw new Error('Invalid face check photo')
     claims['photo'] = toBase64UrlWithoutMimeType(faceCheckPhoto)
   }

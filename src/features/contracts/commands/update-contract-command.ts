@@ -9,7 +9,7 @@ import { LogoImageOrUriRequiredError, validateContractInput, validateDisplayLogo
 export async function UpdateContractCommand(this: CommandContext, id: string, input: ContractInput) {
   const repository = this.entityManager.getRepository(ContractEntity)
 
-  await validateContractInput(input)
+  validateContractInput(input)
 
   const contract = await repository.findOneByOrFail({ id })
   if (contract.isDeprecated) throw new Error('Contract has been deprecated, it cannot be updated')

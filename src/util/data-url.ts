@@ -39,21 +39,8 @@ export function toBase64UrlWithoutMimeType(base64Image: string) {
   return buffer.toString('base64url')
 }
 
-export function isValidImageDataUrl(imageString: string): Promise<boolean> {
-  // const image = new Image()
-  const result = new Promise<boolean>((resolve) => {
-    // image.onload = function () {
-    //   if (image.height === 0 || image.width === 0) {
-    //     resolve(false)
-    //     return
-    //   }
-    //   resolve(true)
-    // }
-    // image.onerror = () => {
-    //   resolve(false)
-    // }
-    resolve(true)
-  })
-  // image.src = imageString
-  return result
+// https://stackoverflow.com/a/61629933
+export function isValidImageDataUrl(imageString: string, validTypes: string[]): boolean {
+  const regex = new RegExp(`^data:image/(?:${validTypes.join('|')})(?:;charset=utf-8)?;base64,(?:[A-Za-z0-9]|[+/])+={0,2}`)
+  return regex.test(imageString)
 }

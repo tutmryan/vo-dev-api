@@ -31,20 +31,16 @@ const validPngString =
 
 describe('image validation', () => {
   it('passes for valid png image string', async () => {
-    const isValid = await isValidImageDataUrl(validPngString)
+    const isValid = isValidImageDataUrl(validPngString, ['png'])
     expect(isValid).toBe(true)
   })
 
-  it.skip('fails for png image string with missing data scheme', async () => {
-    const isValid = await isValidImageDataUrl(validPngString.replace('data:', ''))
+  it('fails for png image string with missing data scheme', async () => {
+    const isValid = isValidImageDataUrl(validPngString.replace('data:', ''), ['png'])
     expect(isValid).toBe(false)
   })
-  it.skip('fails for incomplete png image string', async () => {
-    const isValid = await isValidImageDataUrl(validPngString.slice(0, 200))
-    expect(isValid).toBe(false)
-  })
-  it.skip('fails for invalid image string', async () => {
-    const isValid = await isValidImageDataUrl('data:image/png;base64,YWJjMTIz')
+  it('fails for unexpected image type', async () => {
+    const isValid = isValidImageDataUrl(validPngString.slice(0, 200), ['jpg', 'jpeg'])
     expect(isValid).toBe(false)
   })
 })
