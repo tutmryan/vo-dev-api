@@ -3,6 +3,7 @@ title: Secure backend API
 ---
 
 import ThemedImage from '@theme/ThemedImage'
+import { ApiScope } from '@site/src/components/api-scope'
 
 # Secure backend API for limited access tokens
 
@@ -69,14 +70,14 @@ This example shows how to get an access token to call the Verification Orchestra
 
 ```ts title="Get access token to call Verification Orchestration platform using the client secret."
 const getAccessTokenToCallPlatformService = async () => {
-  // <tenant ID> to be provided by an administrator of Verified Orchestration platform
+  // <tenant ID> to be provided by your tenant administrator
   const authority = 'https://login.microsoftonline.com/<tenant ID>'
   // <client ID> provided during onboarding of the app
   const clientId = '<client ID>'
   // <client secret> provided during onboarding of the app; retrieved from a secure storage such as Azure Key Vault
   const clientSecret = '<client secret>'
-  // <scope> to be provided by an administrator of Verified Orchestration platform;
-  // e.g. 'api://<instance app id>/.default'
+  // <scope> see tip below for the scope for this Verified Orchestration platform instance
+  // e.g. '<instance app id>/.default'
   const scope = '<scope>'
 
   const msalClientApplication = new ConfidentialClientApplication({
@@ -93,6 +94,10 @@ const getAccessTokenToCallPlatformService = async () => {
   return clientCredentialTokenResponse.accessToken
 }
 ```
+
+:::tip
+The scope for this Verified Orchestration platform instance is: **<ApiScope />**
+:::
 
 ### Save identity information
 

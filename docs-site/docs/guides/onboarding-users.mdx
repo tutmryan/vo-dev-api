@@ -4,10 +4,17 @@ sidebar_position: 1
 
 import { AdminUrl } from '@site/src/components/admin-url'
 import { ApiUrl } from '@site/src/components/api-url'
+import { Instance } from '@site/src/components/instance'
 
 # Onboarding a user
 
-Individuals who would like to access the <AdminUrl path='/'>Admin UI</AdminUrl> or <ApiUrl path='/'>GraphQL API</ApiUrl> will need to be granted Verified Orchestration enterprise application user-role access. We suggest creating Microsoft Entra groups mapped to each Verified Orchestration  user role. Users can then be added to one or more groups depending on the tasks they would like to carry out on the platform.
+Individuals who would like to access the <AdminUrl path='/'>Admin UI</AdminUrl> or <ApiUrl path='/'>GraphQL API</ApiUrl> will need to be granted access via Verified Orchestration enterprise application user roles.
+
+:::tip
+The name of the Verified Orchestration platform application in Azure AD is: **Verified Orchestration (<Instance />)**
+:::
+
+We recommend creating Microsoft Entra groups mapped to each Verified Orchestration user role. Users can then be added to one or more groups, according to the tasks they would like to carry out on the platform.
 
 - [Reader](#reader)
 - [Issuer](#issuer)
@@ -18,8 +25,6 @@ Individuals who would like to access the <AdminUrl path='/'>Admin UI</AdminUrl> 
 A tenant administrator can set up the the group to role mapping and add/remove users from the groups.
 
 ## Reader
-
-Microsoft Entra ID Group: `Verified Orchestration Reader`
 
 App role value: `VerifiableCredential.Reader`
 
@@ -33,8 +38,6 @@ Permissions:
 
 ## Issuer
 
-Microsoft Entra ID Group: `Verified Orchestration Issuer`
-
 App role value: `VerifiableCredential.Issuer`
 
 Permissions:
@@ -45,8 +48,6 @@ Permissions:
 - issue credential
 
 ## Credential admin
-
-Microsoft Entra ID Group: `Verified Orchestration Credential Admin`
 
 App role value: `VerifiableCredential.CredentialAdmin`
 
@@ -67,8 +68,6 @@ Permissions:
 
 ## Partner admin
 
-Microsoft Entra ID Group: `Verified Orchestration Partner Admin`
-
 App role value: `VerifiableCredential.PartnerAdmin`
 
 Permissions:
@@ -80,8 +79,6 @@ Permissions:
 - edit partner
 
 ## Approval request admin
-
-Microsoft Entra ID Group: `Verified Orchestration Approval Request Admin`
 
 App role value: `VerifiableCredential.ApprovalRequestAdmin`
 
