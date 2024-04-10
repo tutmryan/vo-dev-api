@@ -1,9 +1,8 @@
 import type { InstrumentationOptions as OpenTelemetryInstrumentationOptions } from '@azure/monitor-opentelemetry'
-import type { ProxyTracerProvider } from '@opentelemetry/api'
 import { trace } from '@opentelemetry/api'
 import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { Resource } from '@opentelemetry/resources'
-import type { NodeTracerConfig, NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
+import type { NodeTracerConfig } from '@opentelemetry/sdk-trace-node'
 import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_NAMESPACE } from '@opentelemetry/semantic-conventions'
 import { useAzureMonitor } from 'applicationinsights'
 import type { InstrumentationOptions as ApplicationInsightsInstrumentationOptions } from 'applicationinsights/out/src/types'
@@ -31,7 +30,7 @@ useAzureMonitor({
   } satisfies ApplicationInsightsInstrumentationOptions as unknown as OpenTelemetryInstrumentationOptions, // https://github.com/microsoft/ApplicationInsights-node.js/issues/1269
 })
 
-const tracerProvider = (trace.getTracerProvider() as ProxyTracerProvider).getDelegate() as NodeTracerProvider
+const tracerProvider = trace.getTracerProvider()
 
 // use RemoveSelect1SpansSampler
 const config = (tracerProvider as any)._config as NodeTracerConfig
