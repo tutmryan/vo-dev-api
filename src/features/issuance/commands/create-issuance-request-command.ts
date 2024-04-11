@@ -4,7 +4,7 @@ import { issuanceRequestRegistration } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import { FaceCheckPhotoSupport, type IssuanceRequestInput } from '../../../generated/graphql'
 import type { IssuanceRequest } from '../../../services/verified-id'
-import { isValidImageDataUrl, toBase64UrlWithoutMimeType } from '../../../util/data-url'
+import { parseDataUrl } from '../../../util/data-url'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import type { StandardClaims } from '../../contracts/claims'
@@ -59,11 +59,8 @@ export async function CreateIssuanceRequestCommand(
   // add issuance request claims input, overriding any contract-defined claim values
   if (claimsInput) Object.entries(claimsInput).forEach(([claim, value]) => (claims[claim] = value))
   // add face check photo claim, if supplied & allowed by the contract
-  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None) {
-    const isValid = isValidImageDataUrl(faceCheckPhoto, ['jpeg', 'jpg'])
-    if (!isValid) throw new Error('Invalid face check photo')
-    claims['photo'] = toBase64UrlWithoutMimeType(faceCheckPhoto)
-  }
+  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None) claims['photo'] = getFaceCheckClaimData(faceCheckPhoto)
+
   // add standard claims
   const standardClaims: StandardClaimsData = {
     issuanceId: randomUUID(),
@@ -97,4 +94,18 @@ export async function CreateIssuanceRequestCommand(
   })
 
   return response
+}
+
+// validates face check photo input and returns base64url encoded image data
+function getFaceCheckClaimData(faceCheckPhoto: string) {
+  try {
+    const { encoding, data } = parseDataUrl(faceCheckPhoto, {
+      validMimeTypes: ['image/jpeg'],
+      validEncodings: ['base64'],
+    })
+    const buffer = Buffer.from(data, encoding)
+    return buffer.toString('base64url')
+  } catch (error) {
+    throw new Error('Face check photo must be a valid image/jpeg data URL with base64 encoding')
+  }
 }

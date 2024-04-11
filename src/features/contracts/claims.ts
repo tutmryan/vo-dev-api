@@ -16,7 +16,7 @@ export const faceCheckPhotoClaimLabel = 'Photo'
 export const faceCheckPhotoDisplayClaim: DisplayClaim = {
   claim: `${displayClaimPrefix}photo`,
   label: faceCheckPhotoClaimLabel,
-  type: 'image/jpg;base64url',
+  type: 'image/jpeg;base64url',
 }
 
 export enum StandardClaims {

@@ -1,4 +1,5 @@
 import { lookup } from 'mime-types'
+import { invariant } from './invariant'
 
 const regex = /^data:([-\w]+\/[-+\w.]+);([-\w]+)?,(.*)/
 
@@ -6,9 +7,24 @@ const regex = /^data:([-\w]+\/[-+\w.]+);([-\w]+)?,(.*)/
  * Parses a data URL into its components
  * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs
  */
-export function parseDataUrl(dataUrl: string) {
+export function parseDataUrl(
+  dataUrl: string,
+  { validMimeTypes, validEncodings }: { validMimeTypes?: string[]; validEncodings?: BufferEncoding[] } = {},
+) {
+  // test
   if (!regex.test(dataUrl)) throw new Error('Invalid data URL')
+
+  // parse
   const [, mimeType, encoding, data] = regex.exec(dataUrl)!
+  invariant(!!mimeType && !!encoding && !!data, 'Invalid data URL')
+
+  // validate
+  if (validMimeTypes && !validMimeTypes.includes(mimeType))
+    throw new Error(`Invalid data URL MIME type, received ${mimeType}, expected ${validMimeTypes.join(' or ')}`)
+  if (validEncodings && !validEncodings.includes(encoding as BufferEncoding))
+    throw new Error(`Invalid data URL encoding, received ${encoding}, expected ${validEncodings.join(' or ')}`)
+
+  // return the components
   return { mimeType: mimeType as string, encoding: encoding as BufferEncoding, data: data as string }
 }
 
@@ -16,8 +32,8 @@ export function parseDataUrl(dataUrl: string) {
  * Downloads a URL and returns it as a data URL
  * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs
  */
-export async function downloadToDataUrl(url: string) {
-  const response = await fetch(url)
+export async function downloadToDataUrl(url: string, init?: RequestInit) {
+  const response = await fetch(url, init)
   return toDataUrl(Buffer.from(await response.arrayBuffer()), lookup(url) || 'application/octet-stream')
 }
 
@@ -27,20 +43,4 @@ export async function downloadToDataUrl(url: string) {
  */
 export function toDataUrl(buffer: Buffer, mimeType: string, encoding: BufferEncoding = 'base64') {
   return `data:${mimeType};${encoding},${buffer.toString(encoding)}`
-}
-
-export function toBase64UrlWithoutMimeType(base64Image: string) {
-  let base64Data = base64Image
-  const components = base64Image.split(',')
-  if (components.length > 1 && components[1]) {
-    base64Data = components[1]
-  }
-  const buffer = Buffer.from(base64Data!, 'base64')
-  return buffer.toString('base64url')
-}
-
-// https://stackoverflow.com/a/61629933
-export function isValidImageDataUrl(imageString: string, validTypes: string[]): boolean {
-  const regex = new RegExp(`^data:image/(?:${validTypes.join('|')})(?:;charset=utf-8)?;base64,(?:[A-Za-z0-9]|[+/])+={0,2}`)
-  return regex.test(imageString)
 }

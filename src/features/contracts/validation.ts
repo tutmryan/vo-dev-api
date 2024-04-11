@@ -1,6 +1,6 @@
 import { lookup } from 'mime-types'
 import type { ContractInput } from '../../generated/graphql'
-import { isValidImageDataUrl } from '../../util/data-url'
+import { parseDataUrl } from '../../util/data-url'
 import { invariant } from '../../util/invariant'
 import { validateContractClaims } from './claims'
 
@@ -15,8 +15,11 @@ export function validateContractInput(input: ContractInput) {
 }
 
 export function validateDisplayLogoImage(displayLogoImage: string) {
-  const isValid = isValidImageDataUrl(displayLogoImage, ['png', 'jpeg', 'jpg'])
-  if (!isValid) throw new Error('Invalid logo image')
+  try {
+    parseDataUrl(displayLogoImage, { validMimeTypes: ['image/png', 'image/jpeg'], validEncodings: ['base64'] })
+  } catch (error) {
+    throw new Error('Logo image must be a valid image/png or image/jpeg data URL with base64 encoding')
+  }
 }
 
 export function validateDisplayLogoUri(displayLogoUri: string) {

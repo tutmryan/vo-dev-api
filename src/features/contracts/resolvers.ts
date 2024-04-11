@@ -36,6 +36,6 @@ export const resolvers: Resolvers = {
     contract: ({ contractId }, _, { dataLoaders: { contracts } }) => contracts.load(contractId),
   },
   ContractDisplayCredentialLogo: {
-    image: ({ uri }) => downloadToDataUrl(uri),
+    image: ({ uri }) => downloadToDataUrl(uri, { redirect: 'error' }),
   },
 }

@@ -26,6 +26,6 @@ export const resolvers: Resolvers = {
     updatedAt: resolveUpdatedAt,
   },
   TemplateDisplayCredentialLogo: {
-    image: ({ uri }) => (uri ? downloadToDataUrl(uri) : null),
+    image: ({ uri }) => (uri ? downloadToDataUrl(uri, { redirect: 'error' }) : null),
   },
 }
