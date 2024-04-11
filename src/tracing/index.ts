@@ -25,8 +25,8 @@ useAzureMonitor({
     redis4: { enabled: false },
     console: { enabled: false },
     bunyan: { enabled: false },
+    http: { enabled: false },
 
-    http: { enabled: true },
     winston: { enabled: true },
   } satisfies ApplicationInsightsInstrumentationOptions as unknown as OpenTelemetryInstrumentationOptions, // https://github.com/microsoft/ApplicationInsights-node.js/issues/1269
 })

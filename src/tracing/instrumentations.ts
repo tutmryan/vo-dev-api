@@ -5,6 +5,7 @@ import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis'
 import TediousInstrumentation from '@opentelemetry/instrumentation-tedious'
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston'
 import { WSInstrumentation } from 'opentelemetry-instrumentation-ws'
+import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici'
 
 export const instrumentations = [
   new ExpressInstrumentation(),
@@ -20,4 +21,5 @@ export const instrumentations = [
   new TediousInstrumentation(),
   new IORedisInstrumentation(),
   new BullMQInstrumentation(),
+  new UndiciInstrumentation(),
 ]

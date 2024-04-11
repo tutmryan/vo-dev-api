@@ -17,6 +17,7 @@ describe('OpenTelemetry instrumentations', () => {
             | InstrumentationNodeModuleDefinition<unknown>
             | InstrumentationNodeModuleDefinition<unknown>[],
       )
+      .filter(Boolean)
       // Only get the ones that apply to us
       .filter(({ name }) => existsSync(getPackageNodeModulesDirectory(name)))
 
