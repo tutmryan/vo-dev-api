@@ -10,6 +10,8 @@ The name of the environment should be the instance name e.g. `demo`.
 
 ## Configure API environment
 
+The environment should have protection rules applied.
+
 ### Variables
 
 - APP_SERVICE_PLAN_ID
@@ -113,9 +115,10 @@ The app registration created for the instance would need a logo and the publishe
    - `Verified Orchestration (<instance>)`
    - `Verified Orchestration Migration (<instance>)`
 
-## Deploy the admin site for the instance
+## Deploy the admin site and portal site for the instance
 
-Refer to the "Setting up a new instance" section in [Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-admin/blob/main/README.md#setting-up-a-new-instance)
+1. Refer to the "Setting up a new instance" section in [Admin Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-admin/blob/main/README.md#setting-up-a-new-instance)
+1. Refer to the "Setting up a new instance" section in [Portal Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-portal/blob/main/README.md#setting-up-a-new-instance)
 
 ## Troubleshooting
 

@@ -254,6 +254,9 @@ jobs:
           - instance: pentest
             resourceGroup: vo-pentest-instance
             resourcePrefix: vo-pentest
+          - instance: sandbox.dribl
+            resourceGroup: vo-sandbox-dribl-instance
+            resourcePrefix: vo-sandbox-dribl
     environment:
       name: ${{ matrix.instance }}
       url: ${{ matrix.instance }}.verifiedorchestration.com
