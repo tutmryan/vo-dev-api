@@ -196,7 +196,7 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 1. Navigate to the Azure Portal key vaults blade: https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.KeyVault%2Fvaults
 1. Click on "+ Create"
 1. Select the resource group created in the previous step (e.g. `vo-entra-verified-id-core`)
-1. Pick a name (e.g. `vo-vid-keys-nonprod` for non prod tenant), select the appropriate region, and click "Next" to configure access
+1. Pick a name (e.g. `vo-vid-keys-nonprod` for non prod tenant), select the appropriate region, enable purge protection and click "Next" to configure access
 1. Choose `Vault access policy` options in `Permission model` section
 1. Click on "Review + create" and finalise the creation
 1. Once the key vault is created, browse to it in the portal and delete default access policy created for the current login user
