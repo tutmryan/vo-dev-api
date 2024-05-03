@@ -50,8 +50,23 @@ resource sqlServer1 'Microsoft.Sql/servers@2022-05-01-preview' = {
   }
 }
 
+resource sqlServer1AuditingSettings 'Microsoft.Sql/servers/auditingSettings@2023-05-01-preview' = {
+  name: 'default'
+  parent: sqlServer1
+  properties: {
+    auditActionsAndGroups: [
+      'BATCH_COMPLETED_GROUP'
+      'SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP'
+      'FAILED_DATABASE_AUTHENTICATION_GROUP'
+    ]
+    isAzureMonitorTargetEnabled: true
+    isDevopsAuditEnabled: true
+    state: 'Enabled'
+  }
+}
+
 @description('Elastic Pool edition')
-@allowed([ 'Basic', 'Standard', 'Premium', 'GP_Gen5', 'BC_Gen5' ])
+@allowed(['Basic', 'Standard', 'Premium', 'GP_Gen5', 'BC_Gen5'])
 param elasticPoolEdition string = 'Basic'
 
 @description('Elastic Pool Capacity (vCores or DTU, depends on tier, please refer to docs)')
@@ -102,7 +117,10 @@ resource sqlServerElasticPool 'Microsoft.Sql/servers/elasticPools@2022-05-01-pre
   parent: sqlServer1
   properties: {
     zoneRedundant: elasticPoolZoneRedundant
-    perDatabaseSettings: union({ minCapacity: elasticPoolPerDatabaseMinCapacity }, elasticPoolPerDatabaseMaxCapacity > 0 ? { maxCapacity: elasticPoolPerDatabaseMaxCapacity } : {})
+    perDatabaseSettings: union(
+      { minCapacity: elasticPoolPerDatabaseMinCapacity },
+      elasticPoolPerDatabaseMaxCapacity > 0 ? { maxCapacity: elasticPoolPerDatabaseMaxCapacity } : {}
+    )
   }
 }
 
