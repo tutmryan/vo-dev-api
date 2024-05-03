@@ -17,6 +17,20 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' existi
   parent: sqlServer
 }
 
+resource sqlServerAuditingSettings 'Microsoft.Sql/servers/databases/auditingSettings@2023-05-01-preview' = {
+  name: 'default'
+  parent: sqlDatabase
+  properties: {
+    auditActionsAndGroups: [
+      'BATCH_COMPLETED_GROUP'
+      'SUCCESSFUL_DATABASE_AUTHENTICATION_GROUP'
+      'FAILED_DATABASE_AUTHENTICATION_GROUP'
+    ]
+    isAzureMonitorTargetEnabled: true
+    state: 'Enabled'
+  }
+}
+
 // https://docs.microsoft.com/en-us/azure/templates/microsoft.insights/2021-05-01-preview/diagnosticsettings?pivots=deployment-language-bicep
 resource sqlDatabaseDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: 'diagnostics'

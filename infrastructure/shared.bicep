@@ -65,6 +65,29 @@ resource sqlServer1AuditingSettings 'Microsoft.Sql/servers/auditingSettings@2023
   }
 }
 
+resource sqlServer1Master 'Microsoft.Sql/servers/databases@2020-08-01-preview' existing = {
+  name: 'master'
+  parent: sqlServer1
+}
+
+resource sqlServer1MasterDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  scope: sqlServer1Master
+  name: 'diagnostics'
+  properties: {
+    workspaceId: logAnalytics.id
+    logs: [
+      {
+        category: 'SQLSecurityAuditEvents'
+        enabled: true
+      }
+      {
+        category: 'DevOpsOperationsAudit'
+        enabled: true
+      }
+    ]
+  }
+}
+
 @description('Elastic Pool edition')
 @allowed(['Basic', 'Standard', 'Premium', 'GP_Gen5', 'BC_Gen5'])
 param elasticPoolEdition string = 'Basic'
