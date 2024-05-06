@@ -20,10 +20,10 @@ The environment should have protection rules applied.
 - HOME_TENANT_NAME
 - HOME_TENANT_ID
 - HOME_TENANT_GRAPH_CLIENT_ID (optional)
-- HOME_TENANT_AUTHORITY_ID (optional)
-- HOME_TENANT_VID_SERVICE_CLIENT_ID (optional)
-- VID_AUTHORITY_NAME (optional)
-- VID_AUTHORITY_DOMAIN (optional)
+- HOME_TENANT_AUTHORITY_ID (optional, only required for customer hosted authorities)
+- HOME_TENANT_VID_SERVICE_CLIENT_ID (optional, only required for customer hosted authorities)
+- VID_AUTHORITY_NAME (optional, only required for VO hosted authorities)
+- VID_AUTHORITY_DOMAIN (optional, only required for VO hosted authorities)
 - ADDITIONAL_AUTH_TENANT_IDS (optional)
 
 #### Feature flag variables
@@ -39,11 +39,11 @@ The environment should have protection rules applied.
 
 ### Secrets
 
-- API-COOKIE-SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
+- API_COOKIE_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
 - LIMITED_ACCESS_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
 - LIMITED_APPROVAL_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
 - HOME_TENANT_GRAPH_CLIENT_SECRET (optional)
-- HOME_TENANT_VID_SERVICE_CLIENT_SECRET (optional)
+- HOME_TENANT_VID_SERVICE_CLIENT_SECRET (optional, only required for customer hosted authorities)
 
 ## Add to the deployment matrix
 

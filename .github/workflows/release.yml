@@ -257,6 +257,10 @@ jobs:
           - instance: sandbox.dribl
             resourceGroup: vo-sandbox-dribl-instance
             resourcePrefix: vo-sandbox-dribl
+          - instance: sandbox.barhead
+            resourceGroup: vo-sandbox-barhead-instance
+            resourcePrefix: vo-sandbox-barhead
+
     environment:
       name: ${{ matrix.instance }}
       url: ${{ matrix.instance }}.verifiedorchestration.com
