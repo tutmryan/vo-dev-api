@@ -1,4 +1,5 @@
 export * from './apollo'
 export * from './context'
+export * from './data-url'
 export * from './database'
 export * from './expect'

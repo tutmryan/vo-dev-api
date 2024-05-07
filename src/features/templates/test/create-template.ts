@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { graphql } from '../../../generated'
 import type { TemplateInput } from '../../../generated/graphql'
-import { executeOperationAsCredentialAdmin } from '../../../test'
+import { executeOperationAsCredentialAdmin, fakeJpegDataURL } from '../../../test'
 
 export const TemplateFragment = graphql(
   `
@@ -26,6 +26,7 @@ export const TemplateFragment = graphql(
         description
         logo {
           uri
+          image
           description
         }
       }
@@ -90,7 +91,7 @@ export function buildTemplateInput(args: Partial<TemplateInput>): TemplateInput 
       card: {
         title: 'Card title',
         logo: {
-          uri: 'https://image.com/image.png',
+          image: fakeJpegDataURL(),
           ...args.display?.card?.logo,
         },
         ...args.display?.card,

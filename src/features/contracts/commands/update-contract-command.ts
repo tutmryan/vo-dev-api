@@ -1,10 +1,9 @@
 import { basename } from 'path'
 import type { CommandContext } from '../../../cqs'
 import { FaceCheckPhotoSupport, type ContractInput } from '../../../generated/graphql'
-import { invariant } from '../../../util/invariant'
 import { ContractEntity } from '../entities/contract-entity'
 import { ensureNoOverridingTemplateData, toPersistedDisplayModel } from '../mapping'
-import { LogoImageOrUriRequiredError, validateContractInput, validateDisplayLogoUri } from '../validation'
+import { validateContractInput } from '../validation'
 
 export async function UpdateContractCommand(this: CommandContext, id: string, input: ContractInput) {
   const repository = this.entityManager.getRepository(ContractEntity)
@@ -15,21 +14,12 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
   if (contract.isDeprecated) throw new Error('Contract has been deprecated, it cannot be updated')
 
   const template = input.templateId ? await this.dataLoaders.templates.load(input.templateId) : undefined
-  if (template) {
-    ensureNoOverridingTemplateData(input, await template.combinedData())
-  }
+  if (template) await ensureNoOverridingTemplateData(input, await template.combinedData())
 
   await this.services.logoImages.deleteIfExists(decodeURIComponent(basename(contract.display.card.logo.uri)))
-
-  const displayLogoUri = input.display.card.logo.image
-    ? await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image, {
-        appendExtension: true,
-      })
-    : input.display.card.logo.uri?.toString() ?? undefined
-
-  invariant(displayLogoUri, LogoImageOrUriRequiredError)
-
-  validateDisplayLogoUri(displayLogoUri)
+  const displayLogoUri = await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image, {
+    appendExtension: true,
+  })
 
   await contract.update({
     name: input.name,

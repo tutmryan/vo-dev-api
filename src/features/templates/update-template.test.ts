@@ -1,6 +1,14 @@
 import { randomUUID } from 'crypto'
+import { omit } from 'lodash'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
+import {
+  beforeAfterAll,
+  executeOperationAnonymous,
+  executeOperationAsCredentialAdmin,
+  expectUnauthorizedError,
+  fakeJpegDataURL,
+  fakePngDataURL,
+} from '../../test'
 import { createTemplate, getEmptyTemplateInput } from './test/create-template'
 import { getTemplate } from './test/get-template'
 import { getUpdateTemplateInput, updateTemplateMutation } from './test/update-template'
@@ -17,7 +25,7 @@ describe('updateTemplate mutation', () => {
         display: {
           card: {
             backgroundColor: '#222222',
-            logo: { uri: 'https://parent-image.com/logo.png' },
+            logo: { image: fakeJpegDataURL() },
           },
           consent: { title: 'Parent template consent title' },
           claims: [{ claim: 'parent_claim', label: 'Parent claim', type: 'String', value: 'value' }],
@@ -98,7 +106,7 @@ describe('updateTemplate mutation', () => {
               textColor: '#123123',
               backgroundColor: '#321321',
               logo: {
-                uri: 'https://image.which/will-cause-an-error.png',
+                image: fakePngDataURL(), // This will cause an error
                 description: 'Fresh logo description, no worries',
               },
             },
@@ -118,7 +126,7 @@ describe('updateTemplate mutation', () => {
     // Assert
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toMatchInlineSnapshot(
-      `"The template overrides the following properties from its parent: display.card.backgroundColor, display.card.logo.uri, display.consent.title, display.claims[parent_claim], credentialTypes[ParentType]"`,
+      `"The template overrides the following properties from its parent: display.card.backgroundColor, display.consent.title, display.card.logo.image, display.claims[parent_claim], credentialTypes[ParentType]"`,
     )
   })
 
@@ -140,7 +148,7 @@ describe('updateTemplate mutation', () => {
             locale: 'en-AU',
             card: {
               textColor: '#123123',
-              logo: { uri: 'https://template.com/image.png' },
+              logo: { image: fakePngDataURL() },
             },
             claims: [{ claim: 'claim', label: 'Claim', type: 'String', value: 'Claim' }],
             consent: { title: 'Consent title' },
@@ -153,20 +161,44 @@ describe('updateTemplate mutation', () => {
     expect(errors).toBeUndefined()
 
     const updatedTemplate = await getTemplate(template.id)
-    expect(updatedTemplate).toMatchObject({
-      ...getUpdateTemplateInput(template),
-      name: 'Updated SUT template',
-      isPublic: true,
-      validityIntervalInSeconds: 1_000,
-      display: {
-        locale: 'en-AU',
-        card: {
-          textColor: '#123123',
-          logo: { uri: 'https://template.com/image.png' },
+    expect(updatedTemplate.id).toBe(template.id)
+    expect(omit(updatedTemplate, 'id')).toMatchInlineSnapshot(`
+      {
+        "credentialTypes": null,
+        "description": "",
+        "display": {
+          "card": {
+            "backgroundColor": null,
+            "description": null,
+            "issuedBy": null,
+            "logo": {
+              "description": null,
+              "image": "data:image/png;base64,png123==",
+              "uri": "https://mock.blob.net/png123==.png",
+            },
+            "textColor": "#123123",
+            "title": null,
+          },
+          "claims": [
+            {
+              "claim": "claim",
+              "description": null,
+              "label": "Claim",
+              "type": "String",
+              "value": "Claim",
+            },
+          ],
+          "consent": {
+            "instructions": null,
+            "title": "Consent title",
+          },
+          "locale": "en-AU",
         },
-        claims: [{ claim: 'claim', label: 'Claim', type: 'String', value: 'Claim' }],
-        consent: { title: 'Consent title' },
-      },
-    })
+        "isPublic": true,
+        "name": "Updated SUT template",
+        "parent": null,
+        "validityIntervalInSeconds": 1000,
+      }
+    `)
   })
 })

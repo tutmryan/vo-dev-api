@@ -289,11 +289,7 @@ See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credenti
 """
 input CreateUpdateTemplateDisplayCredentialLogoInput {
   """
-  URI of the logo (optional if image is specified)
-  """
-  uri: URL
-  """
-  The base-64 encoded logo (optional if url is specified) in [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) format
+  The base-64 encoded logo in [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) format
   """
   image: String
   """

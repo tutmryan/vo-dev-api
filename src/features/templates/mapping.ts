@@ -5,6 +5,7 @@ import type {
   TemplateDisplayModel,
   TemplateParentData,
 } from '../../generated/graphql'
+import { downloadToDataUrl } from '../../util/data-url'
 import { findKeysIntersection } from '../../util/intersection'
 import { pruneNil } from '../../util/prune-nil'
 import type { TemplateEntity } from './entities/template-entity'
@@ -33,12 +34,19 @@ const TYPES_KEY = 'credentialTypes'
  * Recursively finds intersecting keys between two TemplateParentData objects
  * For claims, only considers claims with values
  */
-export function findTemplateIntersectingProps(a: TemplateParentData, b: TemplateParentData): string[] {
+export async function findTemplateIntersectingProps(a: TemplateParentData, b: TemplateParentData): Promise<string[]> {
   const [claimsA, claimsB] = [get(a, CLAIMS_KEY, []) as Claims, get(b, CLAIMS_KEY, []) as Claims]
   const [typesA, typesB] = [get(a, TYPES_KEY, [] as string[]), get(b, TYPES_KEY, [] as string[])]
   const intersectingPropsWithoutClaims = findKeysIntersection(omit(a, CLAIMS_KEY, TYPES_KEY), omit(b, CLAIMS_KEY, TYPES_KEY), {
     ignoreNulls: true,
   })
+  const logoImageA = a.display?.card?.logo?.image
+  if (logoImageA && b.display?.card?.logo?.uri) {
+    const logoImageB = await downloadToDataUrl(b.display.card.logo.uri, { redirect: 'error' })
+    if (logoImageA !== logoImageB) {
+      intersectingPropsWithoutClaims.push('display.card.logo.image')
+    }
+  }
   const intersectingClaimsWithValues = intersection(
     claimsA.filter((c) => !!c.value).map((c) => c.claim),
     claimsB.filter((c) => !!c.value).map((c) => c.claim),
@@ -50,8 +58,8 @@ export function findTemplateIntersectingProps(a: TemplateParentData, b: Template
 /**
  * Throws an error if there are intersecting keys between two TemplateParentData objects
  */
-export function ensureNoIntersectingTemplateData(a: TemplateParentData, b: TemplateParentData) {
-  const intersectingProps = findTemplateIntersectingProps(a, b)
+export async function ensureNoIntersectingTemplateData(a: TemplateParentData, b: TemplateParentData) {
+  const intersectingProps = await findTemplateIntersectingProps(a, b)
   if (intersectingProps.length > 0) {
     throw new Error(`The template overrides the following properties from its parent: ${intersectingProps.join(', ')}`)
   }

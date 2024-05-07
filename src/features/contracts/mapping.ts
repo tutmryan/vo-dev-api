@@ -6,6 +6,7 @@ import type {
   TemplateDisplayClaim,
   TemplateParentData,
 } from '../../generated/graphql'
+import { downloadToDataUrl } from '../../util/data-url'
 import { findKeysOverriding } from '../../util/intersection'
 import type { ContractEntity } from './entities/contract-entity'
 
@@ -13,13 +14,21 @@ import type { ContractEntity } from './entities/contract-entity'
  * Recursively finds properties from ContractInput overriding its TemplateParentData counterpart
  * For claims, only considers claims with values
  */
-export function findContractOverridingTemplateProps(a: ContractInput, b: TemplateParentData): string[] {
+export async function findContractOverridingTemplateProps(a: ContractInput, b: TemplateParentData): Promise<string[]> {
   const [claimsA, claimsB] = [
     get(a, 'display.claims', []) as ContractDisplayClaimInput[],
     get(b, 'display.claims', []) as TemplateDisplayClaim[],
   ]
 
   const overriddenPropsWithoutClaims = findKeysOverriding(omit(a, 'display.claims'), omit(b, 'display.claims'), { ignoreNulls: true })
+
+  const logoImageA = a.display.card.logo.image
+  if (b.display?.card?.logo?.uri) {
+    const logoImageB = await downloadToDataUrl(b.display.card.logo.uri, { redirect: 'error' })
+    if (logoImageA !== logoImageB) {
+      overriddenPropsWithoutClaims.push('display.card.logo.image')
+    }
+  }
 
   const overriddenClaims = intersection(
     claimsA.filter((c) => !!c.value).map((c) => c.claim),
@@ -39,8 +48,8 @@ export function findContractOverridingTemplateProps(a: ContractInput, b: Templat
 /**
  * Throws an error if the contract overrides the template's data
  */
-export function ensureNoOverridingTemplateData(a: ContractInput, b: TemplateParentData) {
-  const overriddenProps = findContractOverridingTemplateProps(a, b)
+export async function ensureNoOverridingTemplateData(a: ContractInput, b: TemplateParentData) {
+  const overriddenProps = await findContractOverridingTemplateProps(a, b)
   if (overriddenProps.length > 0) {
     throw new Error(`The contract overrides the following properties from its template: ${overriddenProps.join(', ')}`)
   }

@@ -1,5 +1,5 @@
 import { graphql } from '../../generated'
-import { beforeAfterAll, executeOperationAsCredentialAdmin } from '../../test'
+import { beforeAfterAll, executeOperationAsCredentialAdmin, fakeJpegDataURL } from '../../test'
 import { createTemplate, getEmptyTemplateInput } from './test/create-template'
 
 graphql(
@@ -82,7 +82,7 @@ describe('template.parentData field', () => {
         card: {
           issuedBy: 'Parent template',
           logo: {
-            uri: 'https://parent-template.com/image.png',
+            image: fakeJpegDataURL(),
           },
         },
       },
@@ -102,21 +102,43 @@ describe('template.parentData field', () => {
     })
 
     // Assert
-    expect(data!.template.parentData).toMatchObject({
-      validityIntervalInSeconds: 1_000,
-      credentialTypes: ['CredentialType', 'AnotherType'],
-      display: {
-        locale: 'en-AU',
-        consent: { instructions: 'Parent consent instructions' },
-        claims: [{ claim: 'parent_claim', label: 'Parent claim', type: 'String' }],
-        card: {
-          issuedBy: 'Parent template',
-          logo: {
-            uri: 'https://parent-template.com/image.png',
+    expect(data!.template.parentData).toMatchInlineSnapshot(`
+      {
+        "credentialTypes": [
+          "CredentialType",
+          "AnotherType",
+        ],
+        "display": {
+          "card": {
+            "backgroundColor": null,
+            "description": null,
+            "issuedBy": "Parent template",
+            "logo": {
+              "description": null,
+              "uri": "https://mock.blob.net/jpeg123==.jpeg",
+            },
+            "textColor": null,
+            "title": null,
           },
+          "claims": [
+            {
+              "claim": "parent_claim",
+              "description": null,
+              "label": "Parent claim",
+              "type": "String",
+              "value": null,
+            },
+          ],
+          "consent": {
+            "instructions": "Parent consent instructions",
+            "title": null,
+          },
+          "locale": "en-AU",
         },
-      },
-    })
+        "isPublic": null,
+        "validityIntervalInSeconds": 1000,
+      }
+    `)
   })
 
   it(`returns the merged representation of data when there are multiple levels of hierarchy`, async () => {
@@ -152,7 +174,7 @@ describe('template.parentData field', () => {
         card: {
           backgroundColor: '#321321',
           title: 'Parent template card title',
-          logo: { uri: 'https://parent-template.com/image.png' },
+          logo: { image: fakeJpegDataURL() },
         },
       },
     })
@@ -171,27 +193,49 @@ describe('template.parentData field', () => {
     })
 
     // Assert
-    expect(data!.template.parentData).toMatchObject({
-      validityIntervalInSeconds: 1_440,
-      credentialTypes: ['RootType', 'ParentType'],
-      isPublic: false,
-      display: {
-        consent: {
-          instructions: 'Root template consent instructions',
-          title: 'Parent template consent title',
-        },
-        claims: [
-          { claim: 'parent_template_claim', label: 'Parent template claim', type: 'String' },
-          { claim: 'standard_claim', label: 'Standard claim', type: 'String', value: 'Standard claim value' },
+    expect(data!.template.parentData).toMatchInlineSnapshot(`
+      {
+        "credentialTypes": [
+          "RootType",
+          "ParentType",
         ],
-        card: {
-          issuedBy: 'Root template Pty Ltd',
-          textColor: '#112233',
-          backgroundColor: '#321321',
-          title: 'Parent template card title',
-          logo: { uri: 'https://parent-template.com/image.png' },
+        "display": {
+          "card": {
+            "backgroundColor": "#321321",
+            "description": null,
+            "issuedBy": "Root template Pty Ltd",
+            "logo": {
+              "description": null,
+              "uri": "https://mock.blob.net/jpeg123==.jpeg",
+            },
+            "textColor": "#112233",
+            "title": "Parent template card title",
+          },
+          "claims": [
+            {
+              "claim": "parent_template_claim",
+              "description": null,
+              "label": "Parent template claim",
+              "type": "String",
+              "value": null,
+            },
+            {
+              "claim": "standard_claim",
+              "description": null,
+              "label": "Standard claim",
+              "type": "String",
+              "value": "Standard claim value",
+            },
+          ],
+          "consent": {
+            "instructions": "Root template consent instructions",
+            "title": "Parent template consent title",
+          },
+          "locale": null,
         },
-      },
-    })
+        "isPublic": false,
+        "validityIntervalInSeconds": 1440,
+      }
+    `)
   })
 })

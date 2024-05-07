@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { graphql } from '../../../generated'
 import type { ContractInput } from '../../../generated/graphql'
-import { executeOperationAsCredentialAdmin } from '../../../test'
+import { executeOperationAsCredentialAdmin, fakeJpegDataURL } from '../../../test'
 
 export const ContractFragment = graphql(
   `
@@ -27,6 +27,7 @@ export const ContractFragment = graphql(
         description
         logo {
           uri
+          image
           description
         }
       }
@@ -70,7 +71,7 @@ export function getDefaultContractInput(): ContractInput {
         title: 'Credential title',
         description: 'Credential description',
         issuedBy: 'Credential issuer',
-        logo: { description: 'Logo description', uri: 'https://makerx.com.au/credential.png' },
+        logo: { description: 'Logo description', image: fakeJpegDataURL() },
         textColor: '#ffffff',
         backgroundColor: '#000000',
       },
@@ -114,7 +115,7 @@ export function buildContractInput(args: Partial<ContractInput>): ContractInput 
         issuedBy: 'Card issuer',
         ...args.display?.card,
         logo: {
-          uri: 'https://image.com/image.png',
+          image: fakeJpegDataURL(),
           description: 'Logo description',
           ...args.display?.card.logo,
         },

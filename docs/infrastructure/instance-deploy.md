@@ -10,7 +10,7 @@ The name of the environment should be the instance name e.g. `demo`.
 
 ## Configure API environment
 
-The environment should have protection rules applied.
+The environment should have deployment protection rules applied.
 
 ### Variables
 

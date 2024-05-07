@@ -1,4 +1,4 @@
-import { downloadToDataUrl, parseDataUrl } from './data-url'
+import { parseDataUrl } from './data-url'
 
 describe('parseDataUrl', () => {
   it('returns the mimeType, encoding and data', () => {
@@ -14,15 +14,6 @@ describe('parseDataUrl', () => {
 
   it('throws an error when the data URL is invalid', () => {
     expect(() => parseDataUrl('image/png;base64,SGVsbG8sIFdvcmxkIQ==')).toThrowErrorMatchingInlineSnapshot(`"Invalid data URL"`)
-  })
-})
-
-describe('downloadToDataUrl', () => {
-  it('downloads the data URL', async () => {
-    const output = await downloadToDataUrl(
-      'https://vop75jthqbydqt2.blob.core.windows.net/logo-images/89706F2E-6499-4361-AB97-3A8751810A74.png',
-    )
-    expect(output.startsWith('data:image/png;base64,iVBORw0K')).toBe(true)
   })
 })
 

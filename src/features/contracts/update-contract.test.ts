@@ -1,9 +1,15 @@
 import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
 import type { TemplateFragmentFragment } from '../../generated/graphql'
-import { mock as BlobStorageContainerService } from '../../services/__mocks__/blob-storage-container-service'
-import { mock as AdminService, mockCreateContract } from '../../services/__mocks__/verified-id'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
+import {
+  beforeAfterAll,
+  executeOperationAnonymous,
+  executeOperationAsCredentialAdmin,
+  expectUnauthorizedError,
+  fakeJpegDataURL,
+  fakePngDataURL,
+} from '../../test'
+import { MockAdminService, mockCreateContract } from '../../test/mock-services'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
@@ -11,14 +17,10 @@ import { getContract } from './test/get-contract'
 import { provisionContractMutation } from './test/provision-contract'
 import { getUpdateContractInput, updateContractMutation } from './test/update-contract'
 
-jest.mock('../../services/verified-id')
-jest.mock('../../services/blob-storage-container-service')
-
 describe('updateContract mutation', () => {
   beforeAfterAll()
   beforeEach(() => {
-    AdminService.clearAllMocks()
-    BlobStorageContainerService.clearAllMocks()
+    MockAdminService.clearAllMocks()
   })
 
   async function givenContract({ withTemplate = false }: { withTemplate?: boolean }) {
@@ -63,7 +65,7 @@ describe('updateContract mutation', () => {
     input.isPublic = false
     input.display.locale = 'fr-FR'
     input.display.card.title = 'Updated card title'
-    input.display.card.logo.uri = 'https://updated-image.com/updated-image.png'
+    input.display.card.logo.image = fakePngDataURL()
     input.display.consent.title = 'Updated consent title'
     input.display.claims[1]!.value = 'Updated Claim 2'
 
@@ -78,7 +80,7 @@ describe('updateContract mutation', () => {
     // Assert
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toMatchInlineSnapshot(
-      `"The contract overrides the following properties from its template: display.locale, display.card.title, display.card.logo.uri, display.consent.title, isPublic, display.claims[claim_two]"`,
+      `"The contract overrides the following properties from its template: display.locale, display.card.title, display.consent.title, isPublic, display.card.logo.image, display.claims[claim_two]"`,
     )
   })
 
@@ -93,7 +95,7 @@ describe('updateContract mutation', () => {
     input.validityIntervalInSeconds = 500
     input.display.locale = 'en-GB'
     input.display.card.textColor = '#123123'
-    input.display.card.logo.uri = 'https://template.com/image.png'
+    input.display.card.logo.image = fakeJpegDataURL()
     input.display.claims = [{ claim: 'claim_name', label: 'Claim', type: 'String', value: 'Updated claim value' }]
     input.display.consent.title = 'Updated consent title'
 
@@ -108,8 +110,8 @@ describe('updateContract mutation', () => {
     // Assert
     expect(errors).toBeUndefined()
 
-    const updatedTemplate = await getContract(contract.id)
-    expect(updatedTemplate).toMatchObject(input)
+    const updatedContract = await getContract(contract.id)
+    expect(updatedContract).toMatchObject(input)
   })
 
   it('updates the contract when there are no errors (with template)', async () => {
@@ -135,8 +137,8 @@ describe('updateContract mutation', () => {
     // Assert
     expect(errors).toBeUndefined()
 
-    const updatedTemplate = await getContract(contract.id)
-    expect(updatedTemplate).toMatchObject(omit(input, 'templateId'))
+    const updatedContract = await getContract(contract.id)
+    expect(updatedContract).toMatchObject(omit(input, 'templateId'))
   })
 
   it('throws error when updating the deprecated contract', async () => {

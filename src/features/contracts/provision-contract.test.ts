@@ -1,15 +1,13 @@
 import { randomUUID } from 'crypto'
-import { mock as AdminService, mockCreateContract, mockUpdateContract } from '../../services/__mocks__/verified-id'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
+import { MockAdminService, mockCreateContract, mockUpdateContract } from '../../test/mock-services'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
 import { provisionContractMutation } from './test/provision-contract'
 
-jest.mock('../../services/verified-id')
-
 describe('provisionContract mutation', () => {
   beforeAfterAll()
-  beforeEach(() => AdminService.clearAllMocks())
+  beforeEach(() => MockAdminService.clearAllMocks())
 
   async function givenContract() {
     const contract = await createContract(buildContractInput({}))

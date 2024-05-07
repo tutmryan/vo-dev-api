@@ -1,6 +1,13 @@
 import { randomUUID } from 'crypto'
 import type { TemplateInput } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
+import {
+  beforeAfterAll,
+  executeOperationAnonymous,
+  executeOperationAsCredentialAdmin,
+  expectUnauthorizedError,
+  fakeJpegDataURL,
+  fakePngDataURL,
+} from '../../test'
 import { buildTemplateInput, createTemplate, createTemplateMutation, getEmptyTemplateInput } from './test/create-template'
 
 describe('createTemplate mutation', () => {
@@ -53,7 +60,7 @@ describe('createTemplate mutation', () => {
         card: {
           issuedBy: 'Parent template',
           logo: {
-            uri: 'https://parent-template.com/image.png',
+            image: fakeJpegDataURL(),
           },
         },
       },
@@ -79,7 +86,7 @@ describe('createTemplate mutation', () => {
               backgroundColor: '#222333',
               issuedBy: 'Overridden issuedBy which will cause an error',
               logo: {
-                uri: 'https://overridden-image.which/will-cause-an-error.png',
+                image: fakePngDataURL(), // overridden
                 description: 'Fresh logo description, no worries',
               },
             },
@@ -91,7 +98,7 @@ describe('createTemplate mutation', () => {
     // Assert
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toMatchInlineSnapshot(
-      `"The template overrides the following properties from its parent: validityIntervalInSeconds, display.card.issuedBy, display.card.logo.uri, display.consent.instructions, display.claims[other_parent_claim]"`,
+      `"The template overrides the following properties from its parent: validityIntervalInSeconds, display.card.issuedBy, display.consent.instructions, display.card.logo.image, display.claims[other_parent_claim]"`,
     )
   })
 
@@ -112,7 +119,7 @@ describe('createTemplate mutation', () => {
           backgroundColor: '#321321',
           logo: {
             description: 'Logo description',
-            uri: 'https://makerx.com.au/credential.png',
+            image: fakeJpegDataURL(),
           },
         },
         claims: [

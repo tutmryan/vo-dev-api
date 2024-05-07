@@ -5,8 +5,6 @@ import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
 import { provisionContractMutation } from './test/provision-contract'
 
-jest.mock('../../services/verified-id')
-
 describe('deprecateContract mutation', () => {
   beforeAfterAll()
   beforeEach(() => AdminService.clearAllMocks())
