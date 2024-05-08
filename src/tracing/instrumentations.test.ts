@@ -14,8 +14,8 @@ describe('OpenTelemetry instrumentations', () => {
       .flatMap(
         (x) =>
           (x as { init: InstrumentationBase['init'] }).init() as
-            | InstrumentationNodeModuleDefinition
-            | InstrumentationNodeModuleDefinition[],
+            | InstrumentationNodeModuleDefinition<unknown>
+            | InstrumentationNodeModuleDefinition<unknown>[],
       )
       .filter(Boolean)
       // Only get the ones that apply to us
