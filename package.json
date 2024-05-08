@@ -8,7 +8,7 @@
   },
   "scripts": {
     "postinstall": "patch-package",
-    "start": "cross-env NODE_EXTRA_CA_CERTS=./local-cert/127.0.0.1.pem ts-node --transpile-only -r dotenv/config ./src/main",
+    "start": "cross-env NODE_EXTRA_CA_CERTS=./local-cert/127.0.0.1.pem ts-node --transpile-only -r dotenv/config ./src/main.tracing",
     "debug": "cross-env NODE_EXTRA_CA_CERTS=./local-cert/127.0.0.1.pem ts-node-dev --transpile-only --watch ./src/**/*.graphql,.env -r dotenv/config ./src/main",
     "typeorm": "dotenv -e .env -- ts-node ./node_modules/typeorm/cli.js",
     "db:init-localdev": "dotenv -e .env -- ts-node --transpile-only ./scripts/localdev-database-setup",
@@ -115,7 +115,7 @@
     "@opentelemetry/sdk-trace-node": "^1.24.0",
     "@opentelemetry/semantic-conventions": "^1.24.0",
     "@opentelemetry/winston-transport": "^0.3.0",
-    "applicationinsights": "3.0.1",
+    "applicationinsights": "3.0.0-beta.11",
     "body-parser": "^1.20.2",
     "bullmq": "^5.7.8",
     "config": "^3.3.11",
