@@ -260,6 +260,9 @@ jobs:
           - instance: sandbox.barhead
             resourceGroup: vo-sandbox-barhead-instance
             resourcePrefix: vo-sandbox-barhead
+          - instance: sandbox.thoughtworksau
+            resourceGroup: vo-sandbox-thoughtworksau-instance
+            resourcePrefix: vo-sandbox-thoughtworksau
 
     environment:
       name: ${{ matrix.instance }}
