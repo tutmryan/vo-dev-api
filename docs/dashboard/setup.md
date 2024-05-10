@@ -30,6 +30,8 @@ To begin, navigate to the instance app insights resource in the Azure portal.
 
 ### Add custom queries
 
+_Note: Custom queries cannot be pinned to the dashboard as tiles until data is returned. This step cannot be performed until the instance has some use and data is available._
+
 - Go to the Logs section in the app insights resource
 - For each of the `.kql` query files in the `docs/dashboard` directory:
   - Open the file and copy the query into a new query in the Logs section

@@ -6,11 +6,11 @@ Create a new environment in the API GitHub repositories at:
 
 - <https://github.com/VerifiedOrchestration/verified-orchestration-api/settings/environments>
 
-The name of the environment should be the instance name e.g. `demo`.
+The name of the environment should be the instance name e.g. `demo` or `sandbox.demo`.
 
 ## Configure API environment
 
-The environment should have deployment protection rules applied.
+The environment should have deployment protection rules applied (required reviewers bobblat cuzzlor).
 
 ### Variables
 
@@ -19,7 +19,7 @@ The environment should have deployment protection rules applied.
 - SQL_ELASTIC_POOL_NAME
 - HOME_TENANT_NAME
 - HOME_TENANT_ID
-- HOME_TENANT_GRAPH_CLIENT_ID (optional)
+- HOME_TENANT_GRAPH_CLIENT_ID (optional, only required for MS Graph integration)
 - HOME_TENANT_AUTHORITY_ID (optional, only required for customer hosted authorities)
 - HOME_TENANT_VID_SERVICE_CLIENT_ID (optional, only required for customer hosted authorities)
 - VID_AUTHORITY_NAME (optional, only required for VO hosted authorities)
@@ -29,7 +29,7 @@ The environment should have deployment protection rules applied.
 #### Feature flag variables
 
 - AUDIT_LOG_STREAMING_ENABLED (optional feature, use a value of `true` to enable provisioning of the Event Hubs and Stream Analytics job)
-- DEV_TOOLS_ENABLED (optional, default to true if not provided)
+- DEV_TOOLS_ENABLED (optional, use `false` to disable developer tools e.g. in production instances, defaults to `true` if not provided)
 
 #### Instance configuration variables
 
@@ -42,12 +42,20 @@ The environment should have deployment protection rules applied.
 - API_COOKIE_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
 - LIMITED_ACCESS_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
 - LIMITED_APPROVAL_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
-- HOME_TENANT_GRAPH_CLIENT_SECRET (optional)
+- HOME_TENANT_GRAPH_CLIENT_SECRET (optional, only required for MS Graph integration)
 - HOME_TENANT_VID_SERVICE_CLIENT_SECRET (optional, only required for customer hosted authorities)
 
 ## Add to the deployment matrix
 
 Add the new environment to the deployment matrix in `.github/workflows/release.yml`.
+
+- Make sure you choose the production deployment matrix for customer instances.
+- The 3 matrix entries are:
+  - `instance`: the instance name (must match environment name exactly, this is the domain prefix)
+  - `resourceGroup`: the azure resource group name, follow the pattern, use hyphens e.g. `vo-{instance}-instance`
+  - `resourcePrefix`: the prefix for azure resource names, follow the pattern, use hyphens e.g. `vo-{instance}`
+- Create a branch and PR for the changes to the deployment matrix.
+- Once the PR is merged, the new environment will be available for deployment.
 
 ## Log in with an user account during the initial deployment to setup Verified ID authority
 
@@ -92,11 +100,32 @@ The app registration created for the instance would need a logo and the publishe
 1. In the "Manage" section, click on "App registrations".
 1. Find the app registration for the instance, (i.e. "Verified Orchestration (<instance name>)"), then click on it.
 1. In the "Manage" section, click on "Branding & properties".
-1. Upload the [Verified Orchestration logo](https://github.com/VerifiedOrchestration/verified-orchestration-admin/blob/main/public/icons/favicon-310x310.png) as a new logo.
-1. In the "Publisher verificatin" section, click on "Add MPN ID to verify publisher".
+1. Upload the [Verified Orchestration logo](https://github.com/VerifiedOrchestration/verified-orchestration-admin/blob/main/public/icons/favicon-310x310.png) as a new logo. Click "Save".
+1. In the "Publisher verification" section, click on "Add MPN ID to verify publisher".
 1. Provide the partner ID of Verified Orchestration Pty Ltd, "6659076", as MPN ID, then click on "Verify and save". (_Note:_ this step needs to be performed by a global administrator of the Entra tenant).
 
-## Manual steps to be performed once the VID authority is verified
+## Deploy the admin site and portal site for the instance
+
+1. Refer to the "Setting up a new instance" section in [Admin Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-admin/blob/main/README.md#setting-up-a-new-instance)
+1. Refer to the "Setting up a new instance" section in [Portal Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-portal/blob/main/README.md#setting-up-a-new-instance)
+
+## Configure the application instance Dashboad in Application Insights
+
+Follow the [dashboard setup instructions](../dashboard/setup.md).
+
+## Troubleshooting
+
+- `Deploy SQL DB instance` step in `Instance SQL database job` failed
+
+  > "message":"The Resource 'Microsoft.Sql/servers/vo-platform-sql-server-1/databases/vo-\<instance\>-sql-db' under resource group 'vo-platform-shared-infra' was not found.
+
+  This step could throw a transient error above as it can take sometime for the sql database created in the step preceeding it to become available in some cases.
+
+  It can be resolved by running the pipeline again.
+
+## Revert temporary permissions for authority verification
+
+If you wish to revert temporary permissions granted to interactive users for authority verification, you can follow these steps:
 
 - Delete the access policy from the by the Verified ID service keyvault for the interative user.
 
@@ -114,18 +143,3 @@ The app registration created for the instance would need a logo and the publishe
 1. Delete all the instance app registrations:
    - `Verified Orchestration (<instance>)`
    - `Verified Orchestration Migration (<instance>)`
-
-## Deploy the admin site and portal site for the instance
-
-1. Refer to the "Setting up a new instance" section in [Admin Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-admin/blob/main/README.md#setting-up-a-new-instance)
-1. Refer to the "Setting up a new instance" section in [Portal Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-portal/blob/main/README.md#setting-up-a-new-instance)
-
-## Troubleshooting
-
-- `Deploy SQL DB instance` step in `Instance SQL database job` failed
-
-  > "message":"The Resource 'Microsoft.Sql/servers/vo-platform-sql-server-1/databases/vo-\<instance\>-sql-db' under resource group 'vo-platform-shared-infra' was not found.
-
-  This step could throw a transient error above as it can take sometime for the sql database created in the step preceeding it to become available in some cases.
-
-  It can be resolved by running the pipeline again.
