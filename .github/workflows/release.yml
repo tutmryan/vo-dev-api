@@ -257,6 +257,9 @@ jobs:
           - instance: sandbox.dribl
             resourceGroup: vo-sandbox-dribl-instance
             resourcePrefix: vo-sandbox-dribl
+          - instance: barhead
+            resourceGroup: vo-barhead-instance
+            resourcePrefix: vo-barhead
           - instance: sandbox.barhead
             resourceGroup: vo-sandbox-barhead-instance
             resourcePrefix: vo-sandbox-barhead
