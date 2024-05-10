@@ -25,16 +25,17 @@ const baseLogger = createLogger({
 }) as Logger
 
 /**
- * When records are sent to app insights, the level is converted to the AppInsights severity level, so we lose the original log level fidelity.
+ * When records are sent to Azure Monitor, the level is converted to the Azure Monitor severity level, so we lose the original log level fidelity.
  * To work around this, add a `logLevel` property to the record and set it to the same value as the `level` property.
+ * Azure Monitor won't handle the custom 'audit' log level, so we map it to 'info'.
  * We can then filter logs using the `logLevel` property instead.
  * Implementation as per logger.child() winston/lib/winston/logger.js
  */
 export const logger = Object.create(baseLogger, {
   write: {
-    value: function (info: { level: any }) {
+    value: function ({ level, ...rest }: { level: any }) {
       const transform = baseLogger as any
-      transform.write(Object.assign({}, { logLevel: info.level }, info))
+      transform.write(Object.assign({}, { logLevel: level, level: level === 'audit' ? 'info' : level }, rest))
     },
   },
 })

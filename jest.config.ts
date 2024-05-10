@@ -6,6 +6,7 @@ const config: Config.InitialOptions = {
   globalSetup: '<rootDir>/../jest.setup.ts',
   globalTeardown: '<rootDir>/../jest.teardown.ts',
   setupFilesAfterEnv: ['<rootDir>/../jest.setup-after-env.ts'],
+  prettierPath: require.resolve('prettier-2'),
 }
 
 export default config

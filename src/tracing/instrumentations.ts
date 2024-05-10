@@ -3,13 +3,21 @@ import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express'
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
 import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis'
 import TediousInstrumentation from '@opentelemetry/instrumentation-tedious'
+import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici'
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston'
 import { WSInstrumentation } from 'opentelemetry-instrumentation-ws'
-import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici'
 
 export const instrumentations = [
   new ExpressInstrumentation(),
-  new WinstonInstrumentation(),
+  new WinstonInstrumentation({
+    logHook: (span, record) => {
+      // Remove injected fields we don't need
+      // See https://github.com/open-telemetry/opentelemetry-js-contrib/blob/2d36152d66adc4e2436994becb3247ec8c4d3b92/plugins/node/opentelemetry-instrumentation-winston/src/instrumentation.ts#L207-L211
+      delete record.trace_id
+      delete record.span_id
+      delete record.trace_flags
+    },
+  }),
   new GraphQLInstrumentation({
     // Don't create spans for the execution of the default resolver on object properties.
     ignoreTrivialResolveSpans: true,
