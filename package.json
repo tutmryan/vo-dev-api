@@ -88,7 +88,7 @@
     "@apollo/utils.keyvadapter": "^3.1.0",
     "@apollo/utils.keyvaluecache": "^3.1.0",
     "@azure/identity": "^4.2.0",
-    "@azure/monitor-opentelemetry": "^1.4.1-alpha.20240507.1",
+    "@azure/monitor-opentelemetry": "^1.5.0",
     "@azure/msal-node": "^2.8.0",
     "@azure/storage-blob": "^12.17.0",
     "@graphql-codegen/client-preset": "^4.2.5",
