@@ -251,6 +251,9 @@ jobs:
           - instance: sandbox.partner
             resourceGroup: vo-sandbox-partner-instance
             resourcePrefix: vo-sandbox-partner
+          - instance: partner
+            resourceGroup: vo-partner-instance
+            resourcePrefix: vo-partner
           - instance: sandbox.pentest
             resourceGroup: vo-sandbox-pentest-instance
             resourcePrefix: vo-sandbox-pentest
