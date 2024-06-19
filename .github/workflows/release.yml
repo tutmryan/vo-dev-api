@@ -272,6 +272,18 @@ jobs:
           - instance: sandbox.thoughtworksau
             resourceGroup: vo-sandbox-thoughtworksau-instance
             resourcePrefix: vo-sandbox-thoughtworksau
+          - instance: sandbox.mantel
+            resourceGroup: vo-sandbox-mantel-instance
+            resourcePrefix: vo-sandbox-mantel
+          - instance: sandbox.alyve
+            resourceGroup: vo-sandbox-alyve-instance
+            resourcePrefix: vo-sandbox-alyve
+          - instance: sandbox.anz
+            resourceGroup: vo-sandbox-anz-instance
+            resourcePrefix: vo-sandbox-anz
+          - instance: sandbox.scw
+            resourceGroup: vo-sandbox-scw-instance
+            resourcePrefix: vo-sandbox-scw
 
     environment:
       name: ${{ matrix.instance }}
