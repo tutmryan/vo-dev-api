@@ -284,6 +284,9 @@ jobs:
           - instance: sandbox.scw
             resourceGroup: vo-sandbox-scw-instance
             resourcePrefix: vo-sandbox-scw
+          - instance: sandbox.cybernexus
+            resourceGroup: vo-sandbox-cybernexus-instance
+            resourcePrefix: vo-sandbox-cybernexus
 
     environment:
       name: ${{ matrix.instance }}
