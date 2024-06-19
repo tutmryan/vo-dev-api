@@ -8,6 +8,7 @@
     "start": "node index.js",
     "dev": "cross-env HOST=localhost DATABASE=VerifiedOrchestration USER=api_user PASSWORD=7o}R~=XA1jmz!-aHQ^pA ts-node --transpile-only -r dotenv/config index",
     "check-types": "tsc --noEmit",
+    "audit": "npx --yes better-npm-audit audit",
     "build": "npm run clean && tsc && npm run build:copy-files && npm run build:install && npm run build:post-build",
     "clean": "rimraf build",
     "build:copy-files": "copyfiles \"package*.json\" host.json build",

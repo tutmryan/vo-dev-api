@@ -1,0 +1,14 @@
+{
+  "advisories": {
+    "GHSA-grv7-fg5c-xmjg": {
+      "path": "braces",
+      "expires": "2024-07-19T23:59:59Z",
+      "reason": "Will be addressed in the next round of security patches"
+    },
+    "GHSA-3h5v-q93c-6h6q": {
+      "path": "ws",
+      "expires": "2024-07-19T23:59:59Z",
+      "reason": "Will be addressed in the next round of security patches"
+    }
+  }
+}
