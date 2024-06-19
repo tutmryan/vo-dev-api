@@ -13,6 +13,7 @@
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids",
+    "audit": "npx --yes better-npm-audit audit",
     "check-types": "tsc",
     "generate-graphql-docs": "rimraf ./docs/reference/default.md && docusaurus graphql-to-doc && rimraf ./docs/reference/generated.md && git checkout -- ./docs/reference/sidebar-schema.js",
     "delete-graphql-docs": "git clean -fdx -- ./docs/reference && git checkout -- ./docs/reference/default.md",
