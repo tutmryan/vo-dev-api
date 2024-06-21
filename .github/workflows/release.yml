@@ -127,6 +127,7 @@ jobs:
       - prepare-docs-site
       - upload-other-artifacts
     strategy:
+      fail-fast: false
       matrix:
         include:
           - instance: demo
@@ -248,6 +249,7 @@ jobs:
       - prepare-docs-site
       - upload-other-artifacts
     strategy:
+      fail-fast: false
       matrix:
         include:
           - instance: sandbox.partner
