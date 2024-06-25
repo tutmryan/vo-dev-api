@@ -1,5 +1,5 @@
-name: SQL DB instance
-description: Deploys a SQL DB instance to the specified server
+name: SQL DB Audit
+description: Configures audit and diagnostic settings for the SQL DB instance
 
 inputs:
   resource-group-name:
