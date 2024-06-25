@@ -172,11 +172,9 @@ jobs:
         id: instance-sql-db
         uses: ./github-actions/sql-db
         with:
-          resource-group-name: vo-nonprd-platform-shared-infra
           resource-prefix: ${{ matrix.resourcePrefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           elastic-pool-name: ${{ vars.SQL_ELASTIC_POOL_NAME }}
-          log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
       - name: Deploy instance
         id: deploy-instance
         uses: ./github-actions/instance
@@ -232,7 +230,7 @@ jobs:
         id: instance-sql-db-audit
         uses: ./github-actions/sql-db-audit
         with:
-          resource-group-name: vo-platform-shared-infra
+          resource-group-name: vo-nonprd-platform-shared-infra
           resource-prefix: ${{ matrix.resourcePrefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
