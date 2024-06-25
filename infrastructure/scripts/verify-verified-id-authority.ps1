@@ -11,11 +11,11 @@ param(
   [Parameter(Mandatory = $true)]
   [ValidatePattern('^https://')]
   [string]
-  $LinkedDomainUrl
+  $LinkedDomainUrl,
 
-  # [Parameter(Mandatory = $true)]
-  # [string]
-  # $StorageAccountName
+  [Parameter(Mandatory = $true)]
+  [string]
+  $StorageAccountName
 )
 
 $ErrorActionPreference = 'Stop'
@@ -47,84 +47,69 @@ if ($null -ne $authority) {
   $authorityId = $authority.id
   $linkedDomainsVerified = $authority.linkedDomainsVerified
 
-  # if ($true -ne $linkedDomainsVerified) {
+  if ($true -ne $linkedDomainsVerified) {
 
-  # a user access token is requried to call the following endpoints
-  # the user would need to have
-  #   - at least the authentication policy administrator Entra role assigned,
-  #   - enough permissions to upload DID files to the storage account, and
-  #   - Get, List, Create, Delete, Sign key permissions in the keyvault used by the Verified ID service
-  # the issue is documented [here](https://drive.google.com/file/d/1FDK2dLGKu8Uc_J3FxvIOYTXGmrMmQpUF/view?usp=drive_link)
-  #
-  # - create authority; POST /v1.0/verifiableCredentials/authorities
-  # - generate DID document; POST /v1.0/verifiableCredentials/authorities/:authorityId/generateDidDocument
-  # - generate well known DID configuration; POST /v1.0/verifiableCredentials/authorities/:authorityId/generateWellknownDidConfiguration
-  # - validate well known DID configuratino; POST /v1.0/verifiableCredentials/authorities/:authorityId/validateWellKnownDidConfiguration
-  # az login --tenant $TenantId --use-device-code
+    Write-Output 'Generating Verified ID Authority DID Document...'
 
-  Write-Output 'Generating Verified ID Authority DID Document...'
+    $didJson = New-TemporaryFile
 
-  $didJson = New-TemporaryFile
+    az rest `
+      --method post `
+      --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authorityId/generateDidDocument `
+      --resource $constants.didResourceId > $didJson
 
-  az rest `
-    --method post `
-    --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authorityId/generateDidDocument `
-    --resource $constants.didResourceId > $didJson
+    Write-Output 'Generated Verified ID Authority DID Document...'
 
-  Write-Output 'Generated Verified ID Authority DID Document...'
+    Write-Output 'Generating Verified ID Authority DID Configuration Document...'
 
-  Write-Output 'Generating Verified ID Authority DID Configuration Document...'
+    $didConfigurationJson = New-TemporaryFile
+    az rest `
+      --method post `
+      --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authorityId/generateWellknownDidConfiguration `
+      --resource $constants.didResourceId > $didConfigurationJson
 
-  $didConfigurationJson = New-TemporaryFile
-  az rest `
-    --method post `
-    --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authorityId/generateWellknownDidConfiguration `
-    --resource $constants.didResourceId > $didConfigurationJson
-
-  Write-Output 'Generated Verified ID Authority DID Configuration Document...'
+    Write-Output 'Generated Verified ID Authority DID Configuration Document...'
 
 
-  # Write-Output 'Uploading Verified ID Authority DID Documents...'
+    Write-Output 'Uploading Verified ID Authority DID Documents...'
 
-  # $storageAccountKeys = az storage account keys list `
-  #   --resource-group $ResourceGroupName `
-  #   --account-name $StorageAccountName | ConvertFrom-Json
+    $storageAccountKeys = az storage account keys list `
+      --resource-group $ResourceGroupName `
+      --account-name $StorageAccountName | ConvertFrom-Json
 
-  # az storage blob upload `
-  #   --account-key $storageAccountKeys[0].value `
-  #   --file $didJson `
-  #   --container-name $($constants.didContainerName) `
-  #   --name $($constants.didBlobName) `
-  #   --account-name $StorageAccountName `
-  #   --content-type $($constants.contentTypeJson) `
-  #   --overwrite `
-  #   --output none
+    az storage blob upload `
+      --account-key $storageAccountKeys[0].value `
+      --file $didJson `
+      --container-name $($constants.didContainerName) `
+      --name $($constants.didBlobName) `
+      --account-name $StorageAccountName `
+      --content-type $($constants.contentTypeJson) `
+      --overwrite `
+      --output none
 
-  # az storage blob upload `
-  #   --account-key $storageAccountKeys[0].value `
-  #   --file $didConfigurationJson `
-  #   --container-name $($constants.didContainerName) `
-  #   --name $($constants.didConfigurationBlobName) `
-  #   --account-name $StorageAccountName `
-  #   --content-type $($constants.contentTypeJson) `
-  #   --overwrite `
-  #   --output none
+    az storage blob upload `
+      --account-key $storageAccountKeys[0].value `
+      --file $didConfigurationJson `
+      --container-name $($constants.didContainerName) `
+      --name $($constants.didConfigurationBlobName) `
+      --account-name $StorageAccountName `
+      --content-type $($constants.contentTypeJson) `
+      --overwrite `
+      --output none
 
-  # Write-Output 'Uploaded Verified ID Authority DID Documents...'
+    Write-Output 'Uploaded Verified ID Authority DID Documents...'
 
-  Write-Output 'Verifying Verified ID Authority DID...'
+    Write-Output 'Verifying Verified ID Authority DID...'
 
-  $verificationStatus = az rest `
-    --method post `
-    --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authorityId/validateWellKnownDidConfiguration `
-    --resource $constants.didResourceId
+    $verificationStatus = az rest `
+      --method post `
+      --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authorityId/validateWellKnownDidConfiguration `
+      --resource $constants.didResourceId
 
-  $linkedDomainsVerified = $verificationStatus.validationSuccessful
-  Write-Output 'Verified Verified ID Authority DID...'
+    $linkedDomainsVerified = $verificationStatus.validationSuccessful
+    Write-Output 'Verified Verified ID Authority DID...'
 
-  # log out the user session to prevent the CI/CD actions following this script from being executed in the user's context
-  # az logout
-  # }
+  }
 }
 
 Write-Output "authorityId=$($authorityId)" >> $Env:GITHUB_OUTPUT

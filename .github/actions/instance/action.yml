@@ -515,23 +515,13 @@ runs:
     - name: Verify authority in Verified ID service for the instance
       id: verify-vid-authority
       shell: pwsh
-      # if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
+      if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       run: >-
         ./infrastructure/scripts/verify-verified-id-authority.ps1
         -TenantId '${{ inputs.azure-tenant-id }}'
         -ResourceGroupName '${{ inputs.resource-group-name}}'
         -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
-
-    # -StorageAccountName '${{ steps.deploy-did-storage-account.outputs.storageAccountName }}'
-
-    # - name: Log back in to Azure as deployer after interactive login session for VID verification
-    #   uses: azure/login@hf_447_release # Change back to azure/login@v1 after stable release https://github.com/Azure/login/issues/447
-    #   if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
-    #   with:
-    #     client-id: ${{ inputs.azure-client-id }}
-    #     tenant-id: ${{ inputs.azure-tenant-id }}
-    #     subscription-id: ${{ inputs.azure-subscription-id }}
-    #     enable-AzPSSession: true
+        -StorageAccountName '${{ steps.deploy-did-storage-account.outputs.storageAccountName }}'
 
     - name: Set up audit log streaming
       id: audit-log-streaming
