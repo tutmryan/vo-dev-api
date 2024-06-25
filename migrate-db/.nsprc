@@ -1,9 +1,1 @@
-{
-  "advisories": {
-    "GHSA-m5vv-6r4h-3vj9": {
-      "path": "@azure/identity",
-      "expires": "2024-07-19T23:59:59Z",
-      "reason": "Will be addressed in the next round of security patches"
-    }
-  }
-}
+{}

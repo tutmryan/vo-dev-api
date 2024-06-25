@@ -16,16 +16,19 @@
     "build:post-build": "rimraf build/package-lock.json"
   },
   "devDependencies": {
-    "@tsconfig/node18": "^18.2.2",
-    "@types/node": "^20.11.17",
+    "@tsconfig/node20": "^20.1.4",
+    "@types/node": "^20.14.8",
     "copyfiles": "^2.4.1",
     "cross-env": "^7.0.3",
-    "rimraf": "^5.0.5",
+    "rimraf": "^5.0.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.5.2"
   },
   "dependencies": {
-    "mssql": "^10.0.2",
+    "mssql": "^9.3.2",
     "typeorm": "^0.3.20"
+  },
+  "overrides": {
+    "@azure/identity": "^4.3.0"
   }
 }
