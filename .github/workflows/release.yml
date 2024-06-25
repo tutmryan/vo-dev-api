@@ -228,7 +228,14 @@ jobs:
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
           additional-auth-tenant-ids: "${{ vars.ADDITIONAL_AUTH_TENANT_IDS }}"
-
+      - name: Instance SQL database audit
+        id: instance-sql-db-audit
+        uses: ./github-actions/sql-db-audit
+        with:
+          resource-group-name: vo-platform-shared-infra
+          resource-prefix: ${{ matrix.resourcePrefix }}
+          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
       - name: Remove temporary SQL firewall rule
         id: remove-temporary-sql-firewall-rule
         if: always()
@@ -385,7 +392,6 @@ jobs:
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
           additional-auth-tenant-ids: "${{ vars.ADDITIONAL_AUTH_TENANT_IDS }}"
-
       - name: Instance SQL database audit
         id: instance-sql-db-audit
         uses: ./github-actions/sql-db-audit
@@ -394,7 +400,6 @@ jobs:
           resource-prefix: ${{ matrix.resourcePrefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
-
       - name: Remove temporary SQL firewall rule
         id: remove-temporary-sql-firewall-rule
         if: always()
