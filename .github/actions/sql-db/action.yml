@@ -2,9 +2,6 @@ name: SQL DB instance
 description: Deploys a SQL DB instance to the specified server
 
 inputs:
-  resource-group-name:
-    description: Name of the resource group to deploy resources to
-    required: true
   resource-prefix:
     description: Prefix to use for resource names
     required: true
@@ -13,9 +10,6 @@ inputs:
     required: true
   elastic-pool-name:
     description: Name of the elastic pool to deploy the database to
-    required: true
-  log-analytics-id:
-    description: ID of the log analytics workspace to send logs to
     required: true
 
 runs:
@@ -39,17 +33,4 @@ runs:
         connection-string: Server=${{ inputs.sql-server-name }}.database.windows.net;Initial Catalog=master;Authentication=Active Directory Default; Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;
         path: 'database-setup.sql'
 
-    # This step could throw a transient error saying it cannot find the sql database created in the step above.
-    # It can be resolved by running the pipeline again.
-    - name: Deploy SQL DB instance
-      id: deploy-sql-db
-      uses: azure/arm-deploy@v1
-      with:
-        deploymentName: ${{env.NOW}}-sql-db-${{inputs.resource-prefix}}-github-actions
-        resourceGroupName: ${{ inputs.resource-group-name }}
-        template: ./infrastructure/sql-db.bicep
-        parameters: >-
-          resourcePrefix=${{ inputs.resource-prefix }}
-          sqlServerName=${{ inputs.sql-server-name }}
-          logAnalyticsId=${{ inputs.log-analytics-id }}
 
