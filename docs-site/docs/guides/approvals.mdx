@@ -63,7 +63,7 @@ mutation CreateApprovalRequest($request: ApprovalRequestInput!) {
 ```
 
 :::tip
-Additional contextual data for the approval request can be included via the [ApprovalRequestInput](/docs/reference/inputs/approval-request-input) `correlationId` and `requestData` fields.
+Additional contextual data for the approval request can be included via the [ApprovalRequestInput](/docs/reference/types/inputs/approval-request-input) `correlationId` and `requestData` fields.
 :::
 
 #### Step 2. Action approval
@@ -76,7 +76,7 @@ The change management team receives a notification that an approval is required.
 
 #### Step 3. Callback
 
-When the approval request is approved or rejected, the GitHub application will receive a callback to the URL provided in the `callback.url` field of the `CreateApprovalRequest` mutation. Refer to the [ActionedApprovalData](/docs/reference/objects/actioned-approval-data) for the complete definition.
+When the approval request is approved or rejected, the GitHub application will receive a callback to the URL provided in the `callback.url` field of the `CreateApprovalRequest` mutation. Refer to the [ActionedApprovalData](/docs/reference/types/objects/actioned-approval-data) for the complete definition.
 
 The GitHub application can then allow the deployment to proceed or cancel the deployment based on the approval status.
 
@@ -97,7 +97,7 @@ The GitHub application can then allow the deployment to proceed or cancel the de
 :::tip
 The `callbackSecret` is a shared secret between the GitHub application and the Verified Orchestration platform. It is returned from the approval request creation and can be used to verify the authenticity of the callback.
 
-Additionally, the GitHub application can query the actioned approval data via `approvalRequestId` via the [actionedApprovalData](/docs/reference/queries/actioned-approval-data) query.
+Additionally, the GitHub application can query the actioned approval data via `approvalRequestId` via the [actionedApprovalData](/docs/reference/api/queries/actioned-approval-data) query.
 :::
 
 :::note
@@ -106,7 +106,7 @@ Callbacks will be re-tried in case of error until a 200 response is received, wi
 
 ### Callback or polling
 
-As an alternative to receiving a callback, applications coordinating approvals can poll for actioned approvals using the [actionedApprovalData](/docs/reference/queries/actioned-approval-data) query, using the `approvalRequestId`. This query returns the same [ActionedApprovalData](/docs/reference/objects/actioned-approval-data) as the callback payload.
+As an alternative to receiving a callback, applications coordinating approvals can poll for actioned approvals using the [actionedApprovalData](/docs/reference/api/queries/actioned-approval-data) query, using the `approvalRequestId`. This query returns the same [ActionedApprovalData](/docs/reference/types/objects/actioned-approval-data) as the callback payload.
 
 ```graphql title="Example query to retrieve actioned approval data"
 query ActionedApprovalData($approvalRequestId: ID!) {

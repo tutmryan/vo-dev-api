@@ -101,7 +101,7 @@ The scope for this Verified Orchestration platform instance is: **<ApiScope />**
 
 ### Save identity information
 
-This example shows how to save an identity reference via the [`saveIdentity` mutation](/docs/reference/mutations/save-identity), so that limited access tokens work (only) for the logged-in user identity.
+This example shows how to save an identity reference via the [`saveIdentity` mutation](/docs/reference/api/mutations/save-identity), so that limited access tokens work (only) for the logged-in user identity.
 
 ```ts title="Save identity information (unless limited access token is requested for anonymous presentations)."
 type Identity = {
@@ -136,7 +136,7 @@ const saveIdentity = async (user: JwtPayload | undefined) => {
 
 ### Get limited access token from the Verified Orchestration platform
 
-This example illustrates how to invoke the [`AcquireLimitedAccessToken` mutation](/docs/reference/mutations/acquire-limited-access-token) with appropriate inputs to obtain limited access tokens for client applications to use.
+This example illustrates how to invoke the [`AcquireLimitedAccessToken` mutation](/docs/reference/api/mutations/acquire-limited-access-token) with appropriate inputs to obtain limited access tokens for client applications to use.
 
 ```ts title="Invoke the AcquireLimitedAccessToken mutation with appropriate inputs."
 type AcquireLimitedAccessTokenInput = {

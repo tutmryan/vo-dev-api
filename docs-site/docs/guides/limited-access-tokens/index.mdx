@@ -35,7 +35,7 @@ For detailed info on onboarding your secure backend API, refer to the [Onboardin
 
 ## Acquiring a limited access token
 
-The [acquireLimitedAccessToken](/docs/reference/mutations/acquire-limited-access-token) mutation returns an access token with specific capabilities according to the [AcquireLimitedAccessTokenInput](/docs/reference/inputs/acquire-limited-access-token-input):
+The [acquireLimitedAccessToken](/docs/reference/api/mutations/acquire-limited-access-token) mutation returns an access token with specific capabilities according to the [AcquireLimitedAccessTokenInput](/docs/reference/types/inputs/acquire-limited-access-token-input):
 
 ### Issuance tokens
 
@@ -132,11 +132,11 @@ public async saveIdentity(user: User) {
 
 Limited access tokens can be used to query data related to the issuance or presentation and identity, however other data is not accessible.
 
-- Issuance and presentations can be queried via [findIssuances](/docs/reference/queries/find-issuances) and [findPresentations](/docs/reference/queries/find-presentations) for the specified identity by `identityId`
-- Issuance and presentation events can be subscribed to via [issuanceEvent](/docs/reference/subscriptions/issuance-event) and [presentationEvent](/docs/reference/subscriptions/presentation-event), using the `requestId` of the issuance or presentation request
-- Issuance and presentations can be queried via [findIssuances](/docs/reference/queries/find-issuances) and [findPresentations](/docs/reference/queries/find-presentations), using the `requestId` of the issuance or presentation request
-- The [contract](/docs/reference/objects/contract) field of the [issuance](/docs/reference/objects/issuance) and [presentation](/docs/reference/objects/presentation) can be queried
-- Contracts can be listed via [findContracts](/docs/reference/queries/find-contracts) with issuance and presentation data for the specified identity if the limited access token allows it
+- Issuance and presentations can be queried via [findIssuances](/docs/reference/api/queries/find-issuances) and [findPresentations](/docs/reference/api/queries/find-presentations) for the specified identity by `identityId`
+- Issuance and presentation events can be subscribed to via [issuanceEvent](/docs/reference/api/subscriptions/issuance-event) and [presentationEvent](/docs/reference/api/subscriptions/presentation-event), using the `requestId` of the issuance or presentation request
+- Issuance and presentations can be queried via [findIssuances](/docs/reference/api/queries/find-issuances) and [findPresentations](/docs/reference/api/queries/find-presentations), using the `requestId` of the issuance or presentation request
+- The [contract](/docs/reference/types/objects/contract) field of the [issuance](/docs/reference/types/objects/issuance) and [presentation](/docs/reference/types/objects/presentation) can be queried
+- Contracts can be listed via [findContracts](/docs/reference/api/queries/find-contracts) with issuance and presentation data for the specified identity if the limited access token allows it
 
 ```graphql title="Subscribe to issuance event using the requestId of the issuance request"
 subscription IssuanceEvent($requestId: ID!) {
