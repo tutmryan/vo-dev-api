@@ -1,0 +1,36 @@
+name: SQL DB Audit
+description: Configures audit and diagnostic settings for the SQL DB instance
+
+inputs:
+  resource-group-name:
+    description: Name of the resource group to deploy resources to
+    required: true
+  resource-prefix:
+    description: Prefix to use for resource names
+    required: true
+  sql-server-name:
+    description: Name of the SQL Server to deploy the database to
+    required: true
+  log-analytics-id:
+    description: ID of the log analytics workspace to send logs to
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set current date as environment variable
+      run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Deploy SQL DB instance
+      id: deploy-sql-db
+      uses: azure/arm-deploy@v1
+      with:
+        deploymentName: ${{env.NOW}}-sql-db-${{inputs.resource-prefix}}-github-actions
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/sql-db-audit.bicep
+        parameters: >-
+          resourcePrefix=${{ inputs.resource-prefix }}
+          sqlServerName=${{ inputs.sql-server-name }}
+          logAnalyticsId=${{ inputs.log-analytics-id }}
+
