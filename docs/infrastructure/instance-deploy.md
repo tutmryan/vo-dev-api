@@ -57,24 +57,6 @@ Add the new environment to the deployment matrix in `.github/workflows/release.y
 - Create a branch and PR for the changes to the deployment matrix.
 - Once the PR is merged, the new environment will be available for deployment.
 
-## Log in with an user account during the initial deployment to setup Verified ID authority
-
-A user access token is requried to call the following Verified ID admin API endpoints. The pipeline would pause with a message like this `To sign in, use a web browser to open the page <login_url> and enter the code <device_code> to authenticate.` until the user logs in.
-
-- generate DID document; POST /v1.0/verifiableCredentials/authorities/:authorityId/generateDidDocument
-- generate well known DID configuration; POST /v1.0/verifiableCredentials/authorities/:authorityId/generateWellknownDidConfiguration
-- validate well known DID configuration; POST /v1.0/verifiableCredentials/authorities/:authorityId/validateWellKnownDidConfiguration
-
-The user would need to have
-
-- at least the authentication policy administrator Entra role assigned,
-- enough permissions to upload DID files to the storage account, and
-- Get, List, Create, Delete, Sign key permissions in the keyvault used by the Verified ID service
-
-The issue is documented [here](https://drive.google.com/file/d/1FDK2dLGKu8Uc_J3FxvIOYTXGmrMmQpUF/view?usp=drive_link).
-
-Once the DID configuration is verified for the authority, the subsequent deployments would not prompt for the user login.
-
 ## Notes on the instance Database setup
 
 The instance database is created by the deployment service principal who is a member of `dbmanager` role. After creation of the instance database, the deployment service principal creates two SQL users in the instance database and grant them necessary permmissions for API and migration scripts. After that, the deployment service princpal transfers the ownership to a disabled SQL login called `DisabledLogin` as recommend by [this article](https://learn.microsoft.com/en-us/sql/t-sql/statements/alter-authorization-transact-sql?view=sql-server-ver16#best-practice). Once that is done, the deployment service principal will no longer be able to connect to the instance database. If the deployment service principal needs to connect to the instance database in the future, the deployment service principal will need to be added to the Azure SQL administrators group to grant it the server admin permissions.
