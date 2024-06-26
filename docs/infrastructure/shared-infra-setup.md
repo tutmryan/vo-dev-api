@@ -206,7 +206,7 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 1. Navigate to the key vault
 1. Click on "Access policies"
 1. Click on "+ Create"
-1. Select `Get`, `Sign` and `Create` in "Key permissions" section
+1. Select `Get`, `Sign`, `Create` and `List` in "Key permissions" section
 1. Click on "Next" to select a principal
 1. Select `Verifiable Credentials Service` (bb2a64ee-5d29-4b07-a491-25806dc854d3) and finalise the creation
 1. Click on "+ Create" to create another access policy

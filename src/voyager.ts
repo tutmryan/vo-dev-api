@@ -1,5 +1,5 @@
 import type { Express } from 'express'
-import { express as voyagerMiddleware } from 'graphql-voyager/middleware'
+import { express as voyagerMiddleware } from 'graphql-voyager-1/middleware'
 
 export const addVoyager = (app: Express, route = '/voyager'): void => {
   app.get(route, (req, res) => {
