@@ -1233,8 +1233,8 @@ export type IssuanceWhere = {
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
-/** Input type for finding identity by issuer name and identifier */
-export type IssuerIdentifierFilter = {
+/** Input type for finding identity by issuer and identifier */
+export type IssuerIdentifierInput = {
   /** The unique identifier of the identity in the issuer */
   identifier: Scalars['String']['input'];
   /** The issuer of the identity */
@@ -1936,7 +1936,7 @@ export type QueryIdentitiesArgs = {
 
 
 export type QueryIdentitiesByIdentifiersArgs = {
-  filters?: InputMaybe<Array<IssuerIdentifierFilter>>;
+  filters?: InputMaybe<Array<IssuerIdentifierInput>>;
 };
 
 
@@ -2762,7 +2762,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 ) => TResult | Promise<TResult>;
 
 /** Mapping of union types */
-export type ResolversUnionTypes<RefType extends Record<string, unknown>> = {
+export type ResolversUnionTypes<_RefType extends Record<string, unknown>> = {
   BackgroundJobEvent: ( BackgroundJobActiveEvent ) | ( BackgroundJobCompletedEvent ) | ( BackgroundJobErrorEvent ) | ( BackgroundJobProgressEvent );
   IssuanceRequestResponse: ( IssuanceResponse ) | ( RequestErrorResponse );
   PresentationRequestResponse: ( PresentationResponse ) | ( RequestErrorResponse );
@@ -2856,7 +2856,7 @@ export type ResolversTypes = {
   IssuanceResponse: ResolverTypeWrapper<IssuanceResponse>;
   IssuanceStatus: IssuanceStatus;
   IssuanceWhere: IssuanceWhere;
-  IssuerIdentifierFilter: IssuerIdentifierFilter;
+  IssuerIdentifierInput: IssuerIdentifierInput;
   JSONObject: ResolverTypeWrapper<Scalars['JSONObject']['output']>;
   Locale: ResolverTypeWrapper<Scalars['Locale']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -2998,7 +2998,7 @@ export type ResolversParentTypes = {
   IssuanceRequestResponse: ResolversUnionTypes<ResolversParentTypes>['IssuanceRequestResponse'];
   IssuanceResponse: IssuanceResponse;
   IssuanceWhere: IssuanceWhere;
-  IssuerIdentifierFilter: IssuerIdentifierFilter;
+  IssuerIdentifierInput: IssuerIdentifierInput;
   JSONObject: Scalars['JSONObject']['output'];
   Locale: Scalars['Locale']['output'];
   Mutation: {};

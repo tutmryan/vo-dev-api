@@ -64,9 +64,9 @@ input IdentityInput {
 }
 
 """
-Input type for finding identity by issuer name and identifier
+Input type for finding identity by issuer and identifier
 """
-input IssuerIdentifierFilter {
+input IssuerIdentifierInput {
   """
   The issuer of the identity
   """
@@ -174,7 +174,7 @@ type Query {
   """
   Returns a list of identities for the given issuer identifiers
   """
-  identitiesByIdentifiers(filters: [IssuerIdentifierFilter!]): [Identity]!
+  identitiesByIdentifiers(filters: [IssuerIdentifierInput!]): [Identity]!
   """
   Returns identites, optionally matching the specified criteria
   """
