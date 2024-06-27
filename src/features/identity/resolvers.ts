@@ -4,6 +4,8 @@ import { CreateOrUpdateIdentityCommand } from './commands/create-or-update-ident
 import { resolveIssuerLabel } from './issuer-label-resolver'
 import { FindIdentitiesQuery } from './queries/find-identities-query'
 import { FindTenantIdentitiesQuery } from './queries/find-tenant-identities-query'
+import { IdentitiesByIdentifiersQuery } from './queries/identities-by-identifiers-query'
+import { IdentitiesByIdsQuery } from './queries/identities-by-ids-query'
 import { IdentityIssuersQuery } from './queries/identity-issuers-query'
 
 export const resolvers: Resolvers = {
@@ -12,6 +14,8 @@ export const resolvers: Resolvers = {
   },
   Query: {
     identity: (_, { id }, { dataLoaders: { identities } }) => identities.load(id),
+    identities: (_, { ids }, context) => query(context, IdentitiesByIdsQuery, ids),
+    identitiesByIdentifiers: (_, { filters }, context) => query(context, IdentitiesByIdentifiersQuery, filters),
     findIdentities: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindIdentitiesQuery, where, offset, limit, orderBy, orderDirection),
     findTenantIdentities: (_, { where, limit }, context) => query(context, FindTenantIdentitiesQuery, where, limit),

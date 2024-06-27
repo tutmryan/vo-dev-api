@@ -64,6 +64,21 @@ input IdentityInput {
 }
 
 """
+Input type for finding identity by issuer and identifier
+"""
+input IssuerIdentifierInput {
+  """
+  The issuer of the identity
+  """
+  issuer: String!
+
+  """
+  The unique identifier of the identity in the issuer
+  """
+  identifier: String!
+}
+
+"""
 Defines the searchable fields usable to find identities
 """
 input IdentityWhere {
@@ -152,6 +167,14 @@ type Query {
   Returns an identity by ID
   """
   identity(id: ID!): Identity!
+  """
+  Returns a list of identities for the given IDs
+  """
+  identities(ids: [ID!]): [Identity]!
+  """
+  Returns a list of identities for the given issuer identifiers
+  """
+  identitiesByIdentifiers(filters: [IssuerIdentifierInput!]): [Identity]!
   """
   Returns identites, optionally matching the specified criteria
   """

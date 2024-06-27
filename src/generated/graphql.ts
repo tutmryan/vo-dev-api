@@ -1233,6 +1233,14 @@ export type IssuanceWhere = {
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
+/** Input type for finding identity by issuer and identifier */
+export type IssuerIdentifierInput = {
+  /** The unique identifier of the identity in the issuer */
+  identifier: Scalars['String']['input'];
+  /** The issuer of the identity */
+  issuer: Scalars['String']['input'];
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   /**
@@ -1792,6 +1800,10 @@ export type Query = {
   findUsers: Array<User>;
   /** No-op query to test if the server is up and running. */
   healthcheck?: Maybe<Scalars['Void']['output']>;
+  /** Returns a list of identities for the given IDs */
+  identities: Array<Maybe<Identity>>;
+  /** Returns a list of identities for the given issuer identifiers */
+  identitiesByIdentifiers: Array<Maybe<Identity>>;
   /** Returns an identity by ID */
   identity: Identity;
   /** Returns the distinct set of issuers from all identities */
@@ -1915,6 +1927,16 @@ export type QueryFindUsersArgs = {
   orderBy?: InputMaybe<UserOrderBy>;
   orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<UserWhere>;
+};
+
+
+export type QueryIdentitiesArgs = {
+  ids?: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
+
+export type QueryIdentitiesByIdentifiersArgs = {
+  filters?: InputMaybe<Array<IssuerIdentifierInput>>;
 };
 
 
@@ -2740,7 +2762,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 ) => TResult | Promise<TResult>;
 
 /** Mapping of union types */
-export type ResolversUnionTypes<RefType extends Record<string, unknown>> = {
+export type ResolversUnionTypes<_RefType extends Record<string, unknown>> = {
   BackgroundJobEvent: ( BackgroundJobActiveEvent ) | ( BackgroundJobCompletedEvent ) | ( BackgroundJobErrorEvent ) | ( BackgroundJobProgressEvent );
   IssuanceRequestResponse: ( IssuanceResponse ) | ( RequestErrorResponse );
   PresentationRequestResponse: ( PresentationResponse ) | ( RequestErrorResponse );
@@ -2834,6 +2856,7 @@ export type ResolversTypes = {
   IssuanceResponse: ResolverTypeWrapper<IssuanceResponse>;
   IssuanceStatus: IssuanceStatus;
   IssuanceWhere: IssuanceWhere;
+  IssuerIdentifierInput: IssuerIdentifierInput;
   JSONObject: ResolverTypeWrapper<Scalars['JSONObject']['output']>;
   Locale: ResolverTypeWrapper<Scalars['Locale']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -2975,6 +2998,7 @@ export type ResolversParentTypes = {
   IssuanceRequestResponse: ResolversUnionTypes<ResolversParentTypes>['IssuanceRequestResponse'];
   IssuanceResponse: IssuanceResponse;
   IssuanceWhere: IssuanceWhere;
+  IssuerIdentifierInput: IssuerIdentifierInput;
   JSONObject: Scalars['JSONObject']['output'];
   Locale: Scalars['Locale']['output'];
   Mutation: {};
@@ -3493,6 +3517,8 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findTenantIdentities?: Resolver<Array<ResolversTypes['TenantIdentity']>, ParentType, ContextType, RequireFields<QueryFindTenantIdentitiesArgs, 'limit' | 'where'>>;
   findUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryFindUsersArgs, 'limit'>>;
   healthcheck?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
+  identities?: Resolver<Array<Maybe<ResolversTypes['Identity']>>, ParentType, ContextType, Partial<QueryIdentitiesArgs>>;
+  identitiesByIdentifiers?: Resolver<Array<Maybe<ResolversTypes['Identity']>>, ParentType, ContextType, Partial<QueryIdentitiesByIdentifiersArgs>>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityArgs, 'id'>>;
   identityIssuers?: Resolver<Array<ResolversTypes['IdentityIssuer']>, ParentType, ContextType>;
   issuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<QueryIssuanceArgs, 'id'>>;
