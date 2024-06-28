@@ -4,6 +4,8 @@ import { requestDetailsCache } from '../../../cache'
 import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
+import { createVerifiedIdAdminService } from '../../../services'
+import { Lazy } from '../../../util/lazy'
 import type { PresentationCallbackHandler } from '../../callback'
 import { StandardClaims } from '../../contracts/claims'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
@@ -15,6 +17,12 @@ import { PresentationEntity } from '../entities/presentation-entity'
 import { addPresentationDataToCache } from './cache'
 import type { PresentationTopicData } from './pubsub'
 import { publishPresentationEvent } from './pubsub'
+
+const getPlatformIssuerDid = Lazy(async () => {
+  const admin = createVerifiedIdAdminService(logger)
+  const authority = await admin.authority()
+  return authority.didModel.did
+})
 
 export const presentationCallbackHandler: PresentationCallbackHandler = async (event) => {
   const requestDetails = await requestDetailsCache.get(event.requestId)
@@ -31,10 +39,13 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
   if (event.requestStatus === PresentationRequestStatus.PresentationVerified) {
     const entityManager = dataSource.createEntityManager()
 
-    // grab all the issuance IDs from the presented credential claims
+    const platformIssuerDid = await getPlatformIssuerDid()
+
+    // grab all the issuance IDs from the presented credential claims if it was issued by the platform instance
     const issuanceIds =
       event.verifiedCredentialsData?.reduce<string[]>((acc, credential) => {
-        if (credential.claims[StandardClaims.issuanceId]) acc.push((credential.claims[StandardClaims.issuanceId] as string).toUpperCase())
+        if (credential.claims[StandardClaims.issuanceId] && credential.issuer === platformIssuerDid)
+          acc.push((credential.claims[StandardClaims.issuanceId] as string).toUpperCase())
         return acc
       }, []) ?? []
 

@@ -43,10 +43,10 @@ export const subscribeToBackgroundJobEvents = (args?: SubscriptionBackgroundJobE
   return {
     next: async () => {
       const cachedEvent = await getJobFinishedEventFromCache(args?.where?.jobId)
-      return cachedEvent ? Promise.resolve({ done: count++ === 1, value: cachedEvent }) : pubsubIterator.next()
+      return cachedEvent ? { done: count++ === 1, value: cachedEvent } : pubsubIterator.next.call(pubsubIterator)
     },
-    return: pubsubIterator.return,
-    throw: pubsubIterator.throw,
+    return: pubsubIterator.return!.bind(pubsubIterator),
+    throw: pubsubIterator.throw!.bind(pubsubIterator),
   }
 }
 

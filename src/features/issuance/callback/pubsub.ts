@@ -29,13 +29,13 @@ export const subscribeToIssuanceEvents = (args?: SubscriptionIssuanceEventArgs) 
   const iterator = pubsub.asyncIterator<IssuanceTopicData>(ISSUANCE_TOPIC)
   return {
     next: async () => {
-      if (!args?.where?.requestId) return iterator.next()
+      if (!args?.where?.requestId) return iterator.next.call(iterator)
       const data = await getIssuanceDataFromCache(args.where.requestId)
-      if (!data || data.event.requestStatus === IssuanceRequestStatus.RequestRetrieved) return iterator.next()
-      return Promise.resolve({ done: count++ === 1, value: data })
+      if (!data || data.event.requestStatus === IssuanceRequestStatus.RequestRetrieved) return iterator.next.call(iterator)
+      return { done: count++ === 1, value: data }
     },
-    return: iterator.return,
-    throw: iterator.throw,
+    return: iterator.return!.bind(iterator),
+    throw: iterator.throw!.bind(iterator),
   }
 }
 
