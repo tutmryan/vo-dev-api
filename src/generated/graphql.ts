@@ -60,33 +60,35 @@ export type AccessTokenResponse = {
 /** Input for acquiring a limited access token. */
 export type AcquireLimitedAccessTokenInput = {
   /**
-   * If true, the limited access token can be used to request presentations of internally-issued credentials from any identity.
+   * If true, the limited access token can be used to request presentations of credentials from any identity (`identityId` is not required).
    *
    *   - The app acquiring the token must be granted the `VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations` role
    */
   allowAnonymousPresentation?: InputMaybe<Scalars['Boolean']['input']>;
   /**
-   * The ID of the identity to which access will be limited.
+   * The ID of the (issuee) identity to which access will be limited.
    *
-   * This must match the identity in:
-   * - issuance requests, if specified (identity info is not required when issuing using a limited access token)
-   * - presented credentials (if credentials are presented from other identities, the entire presentation will be rejected)
-   * - presentation requests for external-issuer presentations
-   * - identity query, issuance and presentation criteria
+   * The ID is required in all limited access scenarios except anonymous presentations (`allowAnonymousPresentation`).
+   *
+   * The ID, if supplied:
+   * - will be used for issuance requests: limited access tokens can only be used to issue credentials to a fixed single identity specified at token acquisition time
+   * - must match the identity ID in presented credentials
+   * - will be saved as the identity of the presentation of partner credentials (useful when the presenter identity is known via authentication or other means)
+   * - must match that used in criteria when quering presentation, issuance or identity data; or when subscribing to issuance or presentation events
    */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /**
    * The ID(s) of the contract(s) that can be issued.
    *
    *   - The app acquiring the token must be granted the `VerifiableCredential.AcquireLimitedAccessToken.Issue` role
-   *   - identityId must also be specified (i.e. the token can only be used to issue credentials to one identity)
+   *   - `identityId` must also be specified (limited access tokens can only be used to issue credentials to a fixed single identity)
    */
   issuableContractIds?: InputMaybe<Array<Scalars['String']['input']>>;
   /**
    * If true, the limited access token can be used to list contracts via Query.findContracts
    *
    *   - The app acquiring the token must be granted the `VerifiableCredential.AcquireLimitedAccessToken.ListContracts` role
-   *   - issuances and presentations of contracts can be queried if `identityId` is also supplied as criteria
+   *   - Note: issuances and presentations of the contracts can be queried if a matching `identityId` is also supplied as criteria
    */
   listContracts?: InputMaybe<Scalars['Boolean']['input']>;
   /**
@@ -1244,13 +1246,13 @@ export type IssuerIdentifierInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   /**
-   * Acquire a limited access token that can be used to:
-   * - issue one or more credentials to a specified identity
-   * - request and receive presentations of one or more credential types from a specified identity (this supports both internally-issued and externally-issued credentials)
-   * - request and receive presentations of internally-issued credential types from any identity (anonymous presentations)
+   * Acquire a limited access token, suitable for use in a client application, which can be used:
+   * - to issue one or more credentials to a specified identity
+   * - for presentations of one or more credentials from the specified identity (for scenarios where the identity is known via authentication or other means)
+   * - for presentations of credentials from any identity (anonymous presentations)
    *
    * The following restrictions apply:
-   * - For issuance and presentation operations, requestId is the only supported method to subscribe to issuance and presentation events.
+   * - For issuance and presentation operations, `requestId` is the only supported method to subscribe to issuance and presentation events.
    * - Issuance and presentation data can be queried, but only for the specified identity.
    */
   acquireLimitedAccessToken: AccessTokenResponse;
