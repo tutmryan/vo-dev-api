@@ -123,23 +123,21 @@ resource apiCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
 @secure()
 param apiClientSecret string
 
-resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =
-  if (!empty(apiClientSecret)) {
-    name: 'API-CLIENT-SECRET'
-    parent: keyVault
-    properties: {
-      attributes: {
-        enabled: true
-      }
-      value: apiClientSecret
+resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(apiClientSecret)) {
+  name: 'API-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
     }
+    value: apiClientSecret
   }
+}
 
-resource apiClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing =
-  if (empty(apiClientSecret)) {
-    name: 'API-CLIENT-SECRET'
-    parent: keyVault
-  }
+resource apiClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(apiClientSecret)) {
+  name: 'API-CLIENT-SECRET'
+  parent: keyVault
+}
 
 @description('The client secret of the Internal app registration in Azure AD')
 @secure()
@@ -234,23 +232,21 @@ resource limitedApprovalSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-
 @description('The client secret of the docs site app registration in Azure AD')
 @secure()
 param docsSiteClientSecret string
-resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' =
-  if (!empty(docsSiteClientSecret)) {
-    name: 'DOCS-SITE-CLIENT-SECRET'
-    parent: staticSiteKeyVault
-    properties: {
-      attributes: {
-        enabled: true
-      }
-      value: docsSiteClientSecret
+resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(docsSiteClientSecret)) {
+  name: 'DOCS-SITE-CLIENT-SECRET'
+  parent: staticSiteKeyVault
+  properties: {
+    attributes: {
+      enabled: true
     }
+    value: docsSiteClientSecret
   }
+}
 
-resource docsSiteClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing =
-  if (empty(docsSiteClientSecret)) {
-    name: 'DOCS-SITE-CLIENT-SECRET'
-    parent: staticSiteKeyVault
-  }
+resource docsSiteClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(docsSiteClientSecret)) {
+  name: 'DOCS-SITE-CLIENT-SECRET'
+  parent: staticSiteKeyVault
+}
 
 @description('The ID of the VID authority')
 @secure()
@@ -578,5 +574,32 @@ resource docsSiteAppSettings 'Microsoft.Web/staticSites/config@2022-09-01' = {
   properties: {
     AZURE_CLIENT_ID: docsSiteClientId
     AZURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(docsSiteClientSecret) ? docsSiteClientSecretSecretExisting : docsSiteClientSecretSecret).properties.secretUri})'
+  }
+}
+
+var rawWorkBookData = string(loadJsonContent('./workbook.json'))
+var serialisedWorkBookData = replace(
+  replace(
+    replace(
+      replace(rawWorkBookData, '<appInsightsResourceId>', apiAppInsights.id),
+      '<appInsightsResourceName>',
+      apiAppInsights.name
+    ),
+    '<redisCacheResourceId>',
+    redisCache.id
+  ),
+  '<redisCacheResourceName>',
+  redisCache.name
+)
+
+resource workbook 'Microsoft.Insights/workbooks@2023-06-01' = {
+  location: location
+  name: guid(resourceGroup().id, '${resourcePrefix}-api-workbook')
+  kind: 'shared'
+  properties: {
+    displayName: '${resourcePrefix}-api-workbook'
+    category: 'workbook'
+    serializedData: serialisedWorkBookData
+    sourceId: apiAppInsights.id
   }
 }

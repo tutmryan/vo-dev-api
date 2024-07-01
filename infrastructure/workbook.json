@@ -1,0 +1,829 @@
+{
+  "version": "Notebook/1.0",
+  "items": [
+    {
+      "type": 11,
+      "content": {
+        "version": "LinkItem/1.0",
+        "style": "nav",
+        "links": [
+          {
+            "id": "3dd97197-4fd9-4843-9a25-3cb2e396cec6",
+            "cellValue": "<appInsightsResourceId>",
+            "linkTarget": "Resource",
+            "linkLabel": "App Insights Overview",
+            "subTarget": "overview",
+            "style": "link"
+          },
+          {
+            "id": "ae4bfc02-1657-4ed0-8c9d-57dc0b258b8c",
+            "cellValue": "<appInsightsResourceId>",
+            "linkTarget": "Resource",
+            "linkLabel": "Live metric",
+            "subTarget": "quickPulse",
+            "style": "link",
+            "icon": "Discovery"
+          },
+          {
+            "id": "74139df3-7a2e-46d1-a08f-3bd463650592",
+            "cellValue": "<appInsightsResourceId>",
+            "linkTarget": "Resource",
+            "linkLabel": "Availability",
+            "subTarget": "availability",
+            "style": "link"
+          },
+          {
+            "id": "f6486fea-ca93-4cf4-9337-862b61620212",
+            "cellValue": "<appInsightsResourceId>",
+            "linkTarget": "Resource",
+            "linkLabel": "Application map",
+            "subTarget": "applicationMap",
+            "style": "link",
+            "icon": "Discovery"
+          }
+        ]
+      },
+      "name": "Links"
+    },
+    {
+      "type": 9,
+      "content": {
+        "version": "KqlParameterItem/1.0",
+        "parameters": [
+          {
+            "id": "f1f750a1-e403-4450-8920-e9addea29c75",
+            "version": "KqlParameterItem/1.0",
+            "name": "Timerange",
+            "label": "Time range",
+            "type": 4,
+            "isGlobal": true,
+            "typeSettings": {
+              "selectableValues": [
+                {
+                  "durationMs": 300000
+                },
+                {
+                  "durationMs": 900000
+                },
+                {
+                  "durationMs": 1800000
+                },
+                {
+                  "durationMs": 3600000
+                },
+                {
+                  "durationMs": 14400000
+                },
+                {
+                  "durationMs": 43200000
+                },
+                {
+                  "durationMs": 86400000
+                },
+                {
+                  "durationMs": 172800000
+                },
+                {
+                  "durationMs": 259200000
+                },
+                {
+                  "durationMs": 604800000
+                },
+                {
+                  "durationMs": 1209600000
+                },
+                {
+                  "durationMs": 2419200000
+                },
+                {
+                  "durationMs": 2592000000
+                },
+                {
+                  "durationMs": 5184000000
+                },
+                {
+                  "durationMs": 7776000000
+                }
+              ],
+              "allowCustom": true
+            },
+            "timeContext": {
+              "durationMs": 86400000
+            },
+            "value": {
+              "durationMs": 3600000
+            }
+          },
+          {
+            "id": "03440f4b-b331-4202-a236-cdfc166ca936",
+            "version": "KqlParameterItem/1.0",
+            "name": "AppInsightsResource",
+            "label": "App insights resource",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "isHiddenWhenLocked": true,
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "showDefault": false
+            },
+            "jsonData": "[\n {\n \"value\": \"<appInsightsResourceId>\",\n \"label\": \"<appInsightsResourceName>\",\n \"selected\": true\n }\n]"
+          },
+          {
+            "id": "6b2de158-e36c-46a6-bc94-d6ede02e732f",
+            "version": "KqlParameterItem/1.0",
+            "name": "RedisCacheResource",
+            "label": "Redis cache resource",
+            "type": 5,
+            "isRequired": true,
+            "multiSelect": true,
+            "quote": "'",
+            "delimiter": ",",
+            "isHiddenWhenLocked": true,
+            "typeSettings": {
+              "additionalResourceOptions": [],
+              "showDefault": false
+            },
+            "jsonData": "[\n {\n \"value\": \"<redisCacheResourceId>\",\n \"label\": \"<redisCacheResourceName>\",\n \"selected\": true\n }\n]"
+          }
+        ],
+        "style": "pills",
+        "queryType": 0,
+        "resourceType": "microsoft.insights/components"
+      },
+      "name": "Parameters"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "Application Insights",
+        "expandable": true,
+        "expanded": true,
+        "items": [
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbookb2584ee0-6b2d-40ce-82bb-fab7dd0acf8a",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Usage-sessions/count",
+                  "aggregation": 5
+                },
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Usage-users/count",
+                  "aggregation": 5
+                }
+              ],
+              "title": "Unique sessions and users",
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Unique sessions and users"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbook58ea94f7-31ce-4b69-ab29-d5cb3c6b5fc3",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 3,
+              "color": "pink",
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components",
+                  "metric": "microsoft.insights/components-Failure-requests/failed",
+                  "aggregation": 7,
+                  "columnName": ""
+                }
+              ],
+              "title": "Failed requests",
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Failed requests"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbook0c1fd65a-9964-4ffc-b5f9-ba55023798e6",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Server-requests/duration",
+                  "aggregation": 4
+                }
+              ],
+              "title": "Server response time",
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Server response time"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbook4c816cbe-1566-4cee-8b49-d641035b064f",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Browser-browserTimings/networkDuration",
+                  "aggregation": 4
+                },
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Browser-browserTimings/processingDuration",
+                  "aggregation": 4
+                },
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Browser-browserTimings/sendDuration",
+                  "aggregation": 4
+                },
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Browser-browserTimings/receiveDuration",
+                  "aggregation": 4
+                }
+              ],
+              "title": "Average page load time breakdown",
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Average page load time breakdown"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbook9da6c435-1ee9-4c02-b336-1a7cfa432d00",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Availability-availabilityResults/availabilityPercentage",
+                  "aggregation": 4
+                }
+              ],
+              "title": "Average availability",
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Average availability"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbook02cdb1af-ef8a-4710-b4e7-641f6c2c5fbf",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components",
+                  "metric": "microsoft.insights/components-Failure-exceptions/server",
+                  "aggregation": 7
+                },
+                {
+                  "namespace": "microsoft.insights/components",
+                  "metric": "microsoft.insights/components-Failure-dependencies/failed",
+                  "aggregation": 7,
+                  "columnName": "Dependency failures"
+                }
+              ],
+              "title": "Server exceptions and Dependency failures",
+              "gridFormatType": 1,
+              "tileSettings": {
+                "showBorder": false,
+                "titleContent": {
+                  "columnMatch": "Name",
+                  "formatter": 13
+                },
+                "leftContent": {
+                  "columnMatch": "Value",
+                  "formatter": 12,
+                  "formatOptions": {
+                    "palette": "auto"
+                  },
+                  "numberFormat": {
+                    "unit": 17,
+                    "options": {
+                      "maximumSignificantDigits": 3,
+                      "maximumFractionDigits": 2
+                    }
+                  }
+                }
+              },
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Server exceptions and Dependency failures"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbook885050bc-8492-47ec-bb11-2bef38ac5910",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Performance Counters-performanceCounters/processorCpuPercentage",
+                  "aggregation": 4
+                },
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Performance Counters-performanceCounters/processCpuPercentage",
+                  "aggregation": 4
+                }
+              ],
+              "title": "Average processor and process CPU utilisation",
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Average processor and process CPU utilisation"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbook274a890d-cd06-4bdc-bed3-52cf1e724b2c",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components",
+                  "metric": "microsoft.insights/components-Failure-exceptions/browser",
+                  "aggregation": 7
+                }
+              ],
+              "title": "Browser exceptions",
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Browser exceptions"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbook54e53d93-138a-47ce-b015-e2a46743674c",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components",
+                  "metric": "microsoft.insights/components-Availability-availabilityResults/count",
+                  "aggregation": 7,
+                  "columnName": "Availability test results count"
+                }
+              ],
+              "title": "Availability test results count",
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Availability test results count"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbook997da245-cbe3-461c-8993-09b83eacba98",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Performance Counters-performanceCounters/processIOBytesPerSecond",
+                  "aggregation": 4
+                }
+              ],
+              "title": "Average process I/O rate",
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Average process I/O rate"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbook7d91adb6-a3ed-4474-b252-df4c5787ec34",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components/kusto",
+                  "metric": "microsoft.insights/components/kusto-Performance Counters-performanceCounters/memoryAvailableBytes",
+                  "aggregation": 4
+                }
+              ],
+              "title": "Average available memory",
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Average available memory"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "workbook6d267f3f-767d-41e2-971e-462c9f54d4b7",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.insights/components",
+              "metricScope": 0,
+              "resourceParameter": "AppInsightsResource",
+              "resourceIds": ["{AppInsightsResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.insights/components",
+                  "metric": "microsoft.insights/components-Server-requests/count",
+                  "aggregation": 7
+                }
+              ],
+              "title": "Server requests",
+              "showOpenInMe": true,
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "33",
+            "name": "Server requests"
+          }
+        ]
+      },
+      "name": "Application Insights"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "Azure Cache for Redis",
+        "expandable": true,
+        "expanded": true,
+        "items": [
+          {
+            "type": 10,
+            "content": {
+              "chartId": "a08ab8ac-676d-42d3-87e1-0653ee26468d",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.cache/redis",
+              "metricScope": 0,
+              "resourceParameter": "RedisCacheResource",
+              "resourceIds": ["{RedisCacheResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.cache/redis",
+                  "metric": "microsoft.cache/redis--usedmemory",
+                  "aggregation": 3
+                }
+              ],
+              "title": "Memory Usage",
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "50",
+            "name": "metric - 1"
+          },
+          {
+            "type": 10,
+            "content": {
+              "chartId": "05825840-9812-4692-adc0-dc9da72fd4e5",
+              "version": "MetricsItem/2.0",
+              "size": 0,
+              "chartType": 2,
+              "resourceType": "microsoft.cache/redis",
+              "metricScope": 0,
+              "resourceParameter": "RedisCacheResource",
+              "resourceIds": ["{RedisCacheResource}"],
+              "timeContextFromParameter": "Timerange",
+              "timeContext": {
+                "durationMs": 3600000
+              },
+              "metrics": [
+                {
+                  "namespace": "microsoft.cache/redis",
+                  "metric": "microsoft.cache/redis--serverLoad",
+                  "aggregation": 3
+                }
+              ],
+              "title": "Redis Server Load",
+              "timeBrushParameterName": "Timerange",
+              "gridSettings": {
+                "rowLimit": 10000
+              }
+            },
+            "customWidth": "50",
+            "name": "metric - 2"
+          }
+        ]
+      },
+      "name": "Redis"
+    },
+    {
+      "type": 12,
+      "content": {
+        "version": "NotebookGroup/1.0",
+        "groupType": "editable",
+        "title": "Queries",
+        "items": [
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "traces\n| where message == 'GraphQL operation'\n| extend query = extract('(query|mutation) (\\\\w*)', 2, tostring(customDimensions.query), typeof(string))\n| extend duration = toint(customDimensions.duration)\n| where query != ''\n| summarize count(), round(avg(duration)), percentiles(duration, 50, 95, 99) by query\n| order by percentile_duration_99 desc\n\n",
+              "size": 1,
+              "showAnalytics": true,
+              "title": "GraphQL operation duration",
+              "timeContextFromParameter": "Timerange",
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.insights/components"
+            },
+            "name": "GraphQL operation duration",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "dependencies\n| where type == 'SQL'\n| extend query = extract('/\\\\* (.+?) \\\\*/', 1, data, typeof(string))\n| where query != ''\n| summarize count(), round(avg(duration)), percentiles(round(duration), 50, 95, 99) by query\n| order by percentile_duration_99\n",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "SQL operation duration",
+              "timeContextFromParameter": "Timerange",
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.insights/components"
+            },
+            "name": "SQL operation duration",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "traces\n| where isnotnull(customDimensions.issuance)\n| extend Service = customDimensions.service\n| extend Issuance = todynamic(tostring(customDimensions.issuance))\n| extend Id = Issuance.id\n| extend IdentityId = Issuance.identityId\n| extend ContractId = Issuance.contractId\n| extend IssuedById = Issuance.issuedById\n| project\n timestamp,\n message,\n Id,\n IdentityId,\n ContractId,\n IssuedById,\n Issuance,\n customDimensions\n",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Issuances",
+              "timeContextFromParameter": "Timerange",
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.insights/components"
+            },
+            "name": "Issuances",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "traces\n| where isnotnull(customDimensions.presentation)\n| extend Service = customDimensions.service\n| extend Presentation = todynamic(tostring(customDimensions.presentation))\n| extend RequestedCredentials = Presentation.requestedCredentialsJson\n| extend PresentedCredentials = Presentation.presentedCredentialsJson\n| extend Id = Presentation.id\n| extend IdentityId = Presentation.identityId\n| extend IssuanceIds = Presentation.issuanceIds\n| project\n timestamp,\n message,\n Id,\n IdentityId,\n IssuanceIds,\n RequestedCredentials,\n PresentedCredentials,\n Presentation,\n customDimensions\n",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Presentations",
+              "timeContextFromParameter": "Timerange",
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.insights/components"
+            },
+            "name": "Presentations",
+            "styleSettings": {
+              "showBorder": true
+            }
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "traces\n| where customDimensions.logLevel == 'error'\n| project message\n| summarize count() by message\n| order by count_\n| take 10\n\n",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Top 10 errors",
+              "timeContextFromParameter": "Timerange",
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.insights/components"
+            },
+            "customWidth": "30",
+            "name": "Top 10 errors"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "traces\n| where customDimensions.logLevel == 'error'\n| project\n timestamp,\n message,\n customDimensions\n// | where message == 'db query error'\n// | where message == 'Bearer token verification failed'\n// | where message == 'HTTP request failed'\n// | where message == 'Background worker failed'\n\n",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Error logs",
+              "timeContextFromParameter": "Timerange",
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.insights/components"
+            },
+            "customWidth": "70",
+            "name": "Error logs"
+          },
+          {
+            "type": 3,
+            "content": {
+              "version": "KqlItem/1.0",
+              "query": "traces\n| where customDimensions.logLevel == 'audit'\n| extend Service = customDimensions.service\n| extend Request = todynamic(tostring(customDimensions.request))\n| extend RequestOrigin = Request.origin\n| extend User = todynamic(tostring(customDimensions.user))\n| extend UserOID = User.oid\n| extend UserScope = User.scp\n| extend UserRoles = User.roles\n| extend GraphQL_OperationType = customDimensions.type\n| extend GraphQL_OperationName = customDimensions.operationName\n| extend GraphQL_Query = customDimensions.query\n| extend GraphQL_Variables = customDimensions.variables\n| extend GraphQL_MutationResult = customDimensions.result\n| extend Presentation = customDimensions.presentation\n| extend Issuance = customDimensions.issuance\n| project\n timestamp,\n message,\n RequestOrigin,\n GraphQL_OperationType,\n GraphQL_OperationName,\n GraphQL_Query,\n GraphQL_Variables,\n GraphQL_MutationResult,\n UserOID,\n UserRoles,\n Issuance,\n Presentation,\n customDimensions\n// | where customDimensions has 'errors'\n// | where GraphQL_OperationType == 'query'\n// | where RequestOrigin == \"https://dev.verifiedorchestration.com\"\n// | where UserOID == 'ab32a43a-61ca-4215-aec3-00c45e9c7805'\n\n",
+              "size": 0,
+              "showAnalytics": true,
+              "title": "Audit logs",
+              "timeContextFromParameter": "Timerange",
+              "showRefreshButton": true,
+              "showExportToExcel": true,
+              "queryType": 0,
+              "resourceType": "microsoft.insights/components"
+            },
+            "name": "Audit logs",
+            "styleSettings": {
+              "showBorder": true
+            }
+          }
+        ]
+      },
+      "name": "Queries"
+    }
+  ],
+  "fallbackResourceIds": ["<appInsightsResourceId>"],
+  "$schema": "https://github.com/Microsoft/Application-Insights-Workbooks/blob/master/schema/workbook.json"
+}
