@@ -93,7 +93,13 @@ The app registration created for the instance would need a logo and the publishe
 
 ## Configure the application instance Dashboad in Application Insights
 
-Follow the [dashboard setup instructions](../dashboard/setup.md).
+<del>Follow the [dashboard setup instructions](../dashboard/setup.md).</del>
+
+_The manual setup of the application instance Dashboard is no longer required._
+
+The automated deployment pipeline provisions a workbook with charts using metrics from App Insights, Azure Cache for Redis, and custom queries for each instance.
+
+Follow [the guide](../dashboard/workbook.md) to customise and update the workbook in the deployment pipeline, so changes are applied to all instances.
 
 ## Troubleshooting
 
