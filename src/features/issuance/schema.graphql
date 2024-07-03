@@ -282,6 +282,10 @@ type Issuance {
   The issuance status.
   """
   status: IssuanceStatus!
+  """
+  Indicates whether the issued credential has face check photo.
+  """
+  hasFaceCheckPhoto: Boolean
 }
 
 """

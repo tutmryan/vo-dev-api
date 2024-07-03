@@ -74,7 +74,7 @@ export type AcquireLimitedAccessTokenInput = {
    * - will be used for issuance requests: limited access tokens can only be used to issue credentials to a fixed single identity specified at token acquisition time
    * - must match the identity ID in presented credentials
    * - will be saved as the identity of the presentation of partner credentials (useful when the presenter identity is known via authentication or other means)
-   * - must match that used in criteria when quering presentation, issuance or identity data; or when subscribing to issuance or presentation events
+   * - must match that used in criteria when querying presentation, issuance or identity data; or when subscribing to issuance or presentation events
    */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /**
@@ -1027,6 +1027,8 @@ export type Issuance = {
   credentialExpiresAt: Scalars['DateTime']['output'];
   /** When the issued credential expires, according to the validity period of the published contract (at the time of issuance). */
   expiresAt: Scalars['DateTime']['output'];
+  /** Indicates whether the issued credential has face check photo. */
+  hasFaceCheckPhoto?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   /** The identity of the person who was issued the credential. */
   identity: Identity;
@@ -3325,6 +3327,7 @@ export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends R
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType>;
   credentialExpiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   expiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  hasFaceCheckPhoto?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
   isRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;

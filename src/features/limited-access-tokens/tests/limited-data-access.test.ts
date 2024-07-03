@@ -102,6 +102,7 @@ async function createContractWithIssuance() {
         identityId: identity.id,
         issuedById: issuedBy.id,
         expiresAt: new Date(),
+        hasFaceCheckPhoto: null,
       }),
     )
     return { issuedBy, issuance }
