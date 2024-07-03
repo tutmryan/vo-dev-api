@@ -14,7 +14,7 @@ export type PersistedContractDisplayModel = Omit<ContractDisplayModel, 'card'> &
   card: Omit<ContractDisplayCredential, 'logo'> & { logo: Omit<ContractDisplayCredentialLogo, 'image'> }
 }
 
-@Entity('contract', { orderBy: { createdAt: 'ASC' } })
+@Entity('contract')
 export class ContractEntity extends AuditedAndTrackedEntity {
   constructor(
     args?: Pick<
