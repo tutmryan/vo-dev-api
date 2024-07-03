@@ -644,6 +644,8 @@ export type ContractIssuanceWhere = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
   issuedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The presentation which included the issuance */
+  presentationId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the platform user (application or person) that revoked the credential. */
@@ -960,6 +962,8 @@ export type IdentityIssuanceWhere = {
   hasFaceCheckPhoto?: InputMaybe<Scalars['Boolean']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
   issuedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The presentation which included the issuance */
+  presentationId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the platform user (application or person) that revoked the credential. */
@@ -1231,6 +1235,8 @@ export type IssuanceWhere = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
   issuedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The presentation which included the issuance */
+  presentationId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the platform user (application or person) that revoked the credential. */
@@ -2430,6 +2436,8 @@ export type UserIssuanceWhere = {
   hasFaceCheckPhoto?: InputMaybe<Scalars['Boolean']['input']>;
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The presentation which included the issuance */
+  presentationId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the platform user (application or person) that revoked the credential. */

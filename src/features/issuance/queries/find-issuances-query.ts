@@ -2,6 +2,7 @@ import { IsNull, type FindOptionsOrder, type FindOptionsRelations, type FindOpti
 import type { QueryContext } from '../../../cqs'
 import { IssuanceOrderBy, IssuanceStatus, OrderDirection, type IssuanceWhere, type Maybe } from '../../../generated/graphql'
 import { LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp, OptionalRange } from '../../../util/typeorm'
+import type { PresentationEntity } from '../../presentation/entities/presentation-entity'
 import { IssuanceEntity } from '../entities/issuance-entity'
 
 export async function FindIssuancesQuery(
@@ -23,6 +24,13 @@ export async function FindIssuancesQuery(
   if (criteria?.revokedById) where.revokedById = criteria.revokedById.toUpperCase()
   if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined) {
     where.hasFaceCheckPhoto = criteria.hasFaceCheckPhoto
+  }
+  if (criteria?.presentationId) {
+    relations.presentations = true
+    const presentationWhere: FindOptionsWhere<PresentationEntity> = {
+      id: criteria.presentationId.toUpperCase(),
+    }
+    where.presentations = presentationWhere
   }
 
   where.issuedAt = OptionalRange(criteria?.from, criteria?.to)
