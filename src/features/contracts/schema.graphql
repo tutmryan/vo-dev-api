@@ -461,6 +461,10 @@ input ContractWhere {
   List only the contracts whose deprecation status matches the flag
   """
   isDeprecated: Boolean
+  """
+  The type of face check photo support
+  """
+  faceCheckSupport: FaceCheckPhotoSupport
 }
 
 """
