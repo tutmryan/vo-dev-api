@@ -33,6 +33,7 @@ export async function CountIssuancesByUserQuery(
   if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined)
     query.andWhere('has_face_check_photo = :hasFaceCheckPhoto', { hasFaceCheckPhoto: criteria.hasFaceCheckPhoto })
   if (criteria?.issuedById) throw new Error("Sorry, can't filter by issuedById when grouping by issued by user.")
+  if (criteria?.presentationId) throw new Error("Sorry, can't filter by presentationId when counting issuances.")
 
   andWhereOptionalRange(query, 'issued_at', criteria?.from, criteria?.to)
   andWhereOptionalRange(query, 'expires_at', criteria?.expiresFrom, criteria?.expiresTo)

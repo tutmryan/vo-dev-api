@@ -15,6 +15,7 @@ export async function CountIssuancesQuery(this: QueryContext, criteria?: Maybe<I
   if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined) {
     where.hasFaceCheckPhoto = criteria.hasFaceCheckPhoto
   }
+  if (criteria?.presentationId) throw new Error("Sorry, can't filter by presentationId when counting issuances.")
 
   where.issuedAt = OptionalRange(criteria?.from, criteria?.to)
   where.expiresAt = OptionalRange(criteria?.expiresFrom, criteria?.expiresTo)
