@@ -14,7 +14,7 @@ import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import type { IssuanceEntity } from '../entities/issuance-entity'
 
-export type IssuanceRequestDetails = Pick<IssuanceEntity, 'id' | 'issuedById' | 'identityId' | 'contractId'> &
+export type IssuanceRequestDetails = Pick<IssuanceEntity, 'id' | 'issuedById' | 'identityId' | 'contractId' | 'hasFaceCheckPhoto'> &
   Pick<IssuanceRequestInput, 'expirationDate'>
 
 type StandardClaimsData = Record<StandardClaims, string>
@@ -88,6 +88,7 @@ export async function CreateIssuanceRequestCommand(
     identityId: identity.id.toUpperCase(),
     contractId: contract.id.toUpperCase(),
     expirationDate: issuanceRequest.expirationDate,
+    hasFaceCheckPhoto: contract.faceCheckSupport === FaceCheckPhotoSupport.None ? null : !!claims['photo'],
   }
   await requestDetailsCache.set(response.requestId, JSON.stringify(requestDetails), {
     ttl: REQUEST_CACHE_TTL,
