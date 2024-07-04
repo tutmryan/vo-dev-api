@@ -1029,6 +1029,8 @@ export type Issuance = {
   credentialExpiresAt: Scalars['DateTime']['output'];
   /** When the issued credential expires, according to the validity period of the published contract (at the time of issuance). */
   expiresAt: Scalars['DateTime']['output'];
+  /** Indicates whether the issued credential has face check photo. */
+  hasFaceCheckPhoto?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   /** The identity of the person who was issued the credential. */
   identity: Identity;
@@ -3327,6 +3329,7 @@ export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends R
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType>;
   credentialExpiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   expiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  hasFaceCheckPhoto?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
   isRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;

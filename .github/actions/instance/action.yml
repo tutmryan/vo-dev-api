@@ -148,7 +148,7 @@ runs:
   using: composite
   steps:
     - name: Log in to Azure
-      uses: azure/login@v1
+      uses: azure/login@v2
       with:
         client-id: ${{ inputs.azure-client-id }}
         tenant-id: ${{ inputs.azure-tenant-id }}
@@ -289,7 +289,7 @@ runs:
           additionalAuthTenantIds="${{ inputs.additional-auth-tenant-ids }}"
 
     - name: Log in to Azure again after potential long deployment
-      uses: azure/login@hf_447_release # Change back to azure/login@v1 after stable release https://github.com/Azure/login/issues/447
+      uses: azure/login@v2
       with:
         client-id: ${{ inputs.azure-client-id }}
         tenant-id: ${{ inputs.azure-tenant-id }}
@@ -415,7 +415,7 @@ runs:
         path: 'switch-db-owner.sql'
 
     - name: Log in to Azure as migration app
-      uses: azure/login@v1
+      uses: azure/login@v2
       with:
         client-id: ${{ steps.add-migration-app-registration.outputs.migrationAppId }}
         tenant-id: ${{ inputs.azure-tenant-id }}
@@ -440,7 +440,7 @@ runs:
         DATABASE: ${{inputs.resource-prefix}}-sql-db
 
     - name: Log back in to Azure as deployer after migration
-      uses: azure/login@hf_447_release # Change back to azure/login@v1 after stable release https://github.com/Azure/login/issues/447
+      uses: azure/login@v2
       with:
         client-id: ${{ inputs.azure-client-id }}
         tenant-id: ${{ inputs.azure-tenant-id }}

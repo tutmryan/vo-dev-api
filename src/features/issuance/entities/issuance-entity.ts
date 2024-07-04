@@ -9,7 +9,9 @@ import { UserEntity } from '../../users/entities/user-entity'
 @Entity('issuance')
 @Index(['contractId', 'issuedAt'])
 export class IssuanceEntity extends AuditedAndTrackedEntity {
-  constructor(args?: Pick<IssuanceEntity, 'id' | 'requestId' | 'contractId' | 'identityId' | 'issuedById' | 'expiresAt'>) {
+  constructor(
+    args?: Pick<IssuanceEntity, 'id' | 'requestId' | 'contractId' | 'identityId' | 'issuedById' | 'expiresAt' | 'hasFaceCheckPhoto'>,
+  ) {
     super()
     if (!args) return
     typeSafeAssign(this, args)
@@ -53,6 +55,9 @@ export class IssuanceEntity extends AuditedAndTrackedEntity {
 
   @Column({ type: 'datetimeoffset', nullable: true })
   revokedAt!: Date | null
+
+  @Column({ type: 'bit', nullable: true })
+  hasFaceCheckPhoto!: boolean | null
 
   markAsRevoked(user: UserEntity) {
     this.isRevoked = true
