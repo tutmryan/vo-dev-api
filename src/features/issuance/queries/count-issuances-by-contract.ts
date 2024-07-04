@@ -31,7 +31,7 @@ export async function CountIssuancesByContractQuery(
   if (criteria?.issuedById) query.andWhere('issued_by_id = :issuedById', { issuedById: criteria.issuedById.toUpperCase() })
   if (criteria?.revokedById) query.andWhere('revoked_by_id = :revokedById', { revokedById: criteria.revokedById.toUpperCase() })
   if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined)
-    query.andWhere('has_face_check_photo = :hasFaceCheckPhoto', { hasFaceCheckPhoto: criteria.hasFaceCheckPhoto })
+    query.andWhere('ISNULL(has_face_check_photo, 0) = :hasFaceCheckPhoto', { hasFaceCheckPhoto: criteria.hasFaceCheckPhoto })
   if (criteria?.contractId) throw new Error("Sorry, can't filter by contractId when grouping by contract.")
   if (criteria?.presentationId) throw new Error("Sorry, can't filter by presentationId when counting issuances.")
 
