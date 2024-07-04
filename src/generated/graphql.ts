@@ -638,6 +638,8 @@ export type ContractIssuanceWhere = {
   expiresTo?: InputMaybe<Scalars['DateTime']['input']>;
   /** The start of the issuedAt period to include. */
   from?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Indicates whether the issued credential has face check photo. */
+  hasFaceCheckPhoto?: InputMaybe<Scalars['Boolean']['input']>;
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
@@ -952,6 +954,8 @@ export type IdentityIssuanceWhere = {
   expiresTo?: InputMaybe<Scalars['DateTime']['input']>;
   /** The start of the issuedAt period to include. */
   from?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Indicates whether the issued credential has face check photo. */
+  hasFaceCheckPhoto?: InputMaybe<Scalars['Boolean']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
   issuedById?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
@@ -1219,6 +1223,8 @@ export type IssuanceWhere = {
   expiresTo?: InputMaybe<Scalars['DateTime']['input']>;
   /** The start of the issuedAt period to include. */
   from?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Indicates whether the issued credential has face check photo. */
+  hasFaceCheckPhoto?: InputMaybe<Scalars['Boolean']['input']>;
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
@@ -2411,6 +2417,8 @@ export type UserIssuanceWhere = {
   expiresTo?: InputMaybe<Scalars['DateTime']['input']>;
   /** The start of the issuedAt period to include. */
   from?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Indicates whether the issued credential has face check photo. */
+  hasFaceCheckPhoto?: InputMaybe<Scalars['Boolean']['input']>;
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */

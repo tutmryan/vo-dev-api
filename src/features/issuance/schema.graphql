@@ -336,6 +336,10 @@ input ContractIssuanceWhere {
   The end of the revokedAt period to include.
   """
   revokedTo: DateTime
+  """
+  Indicates whether the issued credential has face check photo.
+  """
+  hasFaceCheckPhoto: Boolean
 }
 """
 Criteria for calculating weekly average of contract issuances.
@@ -399,6 +403,10 @@ input IdentityIssuanceWhere {
   The end of the revokedAt period to include.
   """
   revokedTo: DateTime
+  """
+  Indicates whether the issued credential has face check photo.
+  """
+  hasFaceCheckPhoto: Boolean
 }
 
 """
@@ -449,6 +457,10 @@ input UserIssuanceWhere {
   The end of the revokedAt period to include.
   """
   revokedTo: DateTime
+  """
+  Indicates whether the issued credential has face check photo.
+  """
+  hasFaceCheckPhoto: Boolean
 }
 
 """
@@ -503,6 +515,10 @@ input IssuanceWhere {
   The end of the revokedAt period to include.
   """
   revokedTo: DateTime
+  """
+  Indicates whether the issued credential has face check photo.
+  """
+  hasFaceCheckPhoto: Boolean
 }
 
 extend type Contract {
