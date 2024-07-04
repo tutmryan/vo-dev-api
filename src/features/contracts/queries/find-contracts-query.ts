@@ -35,6 +35,10 @@ export async function FindContractsQuery(
   if (criteria && criteria.isDeprecated !== null && criteria.isDeprecated !== undefined)
     where.isDeprecated = Raw((alias) => `ISNULL(${alias}, 0) = :isDeprecated`, { isDeprecated: criteria.isDeprecated })
 
+  if (criteria?.faceCheckSupport !== null && criteria?.faceCheckSupport !== undefined) {
+    where.faceCheckSupport = criteria.faceCheckSupport
+  }
+
   const direction = orderDirection ?? OrderDirection.Asc
   switch (orderBy) {
     case ContractOrderBy.ContractName:

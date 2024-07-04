@@ -708,6 +708,8 @@ export type ContractWhere = {
   createdTo?: InputMaybe<Scalars['DateTime']['input']>;
   /** List only the contracts which include any of these credential types */
   credentialTypes?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** The type of face check photo support */
+  faceCheckSupport?: InputMaybe<FaceCheckPhotoSupport>;
   /** List only the contracts whose deprecation status matches the flag */
   isDeprecated?: InputMaybe<Scalars['Boolean']['input']>;
   /** List only contracts that are or are not published in the Verified Credentials Network */
