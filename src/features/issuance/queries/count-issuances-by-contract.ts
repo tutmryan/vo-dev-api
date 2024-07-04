@@ -29,9 +29,9 @@ export async function CountIssuancesByContractQuery(
   if (criteria?.requestId) query.andWhere('request_id = :requestId', { identityId: criteria.requestId.toUpperCase() })
   if (criteria?.identityId) query.andWhere('identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
   if (criteria?.issuedById) query.andWhere('issued_by_id = :issuedById', { issuedById: criteria.issuedById.toUpperCase() })
-  if (criteria?.revokedById) query.andWhere('revoked_by_id = :revokedById', { issuedById: criteria.revokedById.toUpperCase() })
+  if (criteria?.revokedById) query.andWhere('revoked_by_id = :revokedById', { revokedById: criteria.revokedById.toUpperCase() })
   if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined)
-    query.where('has_face_check_photo = :hasFaceCheckPhoto')
+    query.where('has_face_check_photo = :hasFaceCheckPhoto', { hasFaceCheckPhoto: criteria.hasFaceCheckPhoto })
   if (criteria?.contractId) throw new Error("Sorry, can't filter by contractId when grouping by contract.")
 
   andWhereOptionalRange(query, 'issued_at', criteria?.from, criteria?.to)
