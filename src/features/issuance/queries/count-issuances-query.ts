@@ -11,6 +11,10 @@ export async function CountIssuancesQuery(this: QueryContext, criteria?: Maybe<I
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.contractId) where.contractId = criteria.contractId.toUpperCase()
   if (criteria?.issuedById) where.issuedById = criteria.issuedById.toUpperCase()
+  if (criteria?.revokedById) where.revokedById = criteria.revokedById.toUpperCase()
+  if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined) {
+    where.hasFaceCheckPhoto = criteria.hasFaceCheckPhoto
+  }
 
   where.issuedAt = OptionalRange(criteria?.from, criteria?.to)
   where.expiresAt = OptionalRange(criteria?.expiresFrom, criteria?.expiresTo)

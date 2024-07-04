@@ -29,7 +29,9 @@ export async function CountIssuancesByUserQuery(
   if (criteria?.requestId) query.andWhere('request_id = :requestId', { requestId: criteria.requestId.toUpperCase() })
   if (criteria?.identityId) query.andWhere('identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
   if (criteria?.contractId) query.andWhere('contract_id = :contractId', { contractId: criteria.contractId.toUpperCase() })
-  if (criteria?.revokedById) query.andWhere('revoked_by_id = :revokedById', { issuedById: criteria.revokedById.toUpperCase() })
+  if (criteria?.revokedById) query.andWhere('revoked_by_id = :revokedById', { revokedById: criteria.revokedById.toUpperCase() })
+  if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined)
+    query.andWhere('has_face_check_photo = :hasFaceCheckPhoto', { hasFaceCheckPhoto: criteria.hasFaceCheckPhoto })
   if (criteria?.issuedById) throw new Error("Sorry, can't filter by issuedById when grouping by issued by user.")
 
   andWhereOptionalRange(query, 'issued_at', criteria?.from, criteria?.to)
