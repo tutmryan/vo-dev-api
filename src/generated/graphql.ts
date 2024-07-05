@@ -684,6 +684,8 @@ export type ContractPresentationWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** Whether face check validation was requested. */
+  isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
   /** The partner who issued the credential that was presented */
@@ -1001,6 +1003,8 @@ export type IdentityPresentationWhere = {
   contractId?: InputMaybe<Scalars['ID']['input']>;
   /** The start of the presentedAt period to include. */
   from?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Whether face check validation was requested. */
+  isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
   /** The partner who issued the credential that was presented */
@@ -1120,6 +1124,8 @@ export type IssuancePresentationWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** Whether face check validation was requested. */
+  isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
   /** The partner who issued the credential that was presented */
   partnerId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
@@ -1541,6 +1547,8 @@ export type PartnerPresentationWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** Whether face check validation was requested. */
+  isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
@@ -1752,6 +1760,8 @@ export type PresentationWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** Whether face check validation was requested. */
+  isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
   /** The partner who issued the credential that was presented */
@@ -2468,6 +2478,8 @@ export type UserPresentationWhere = {
   from?: InputMaybe<Scalars['DateTime']['input']>;
   /** The ID of the identity who presented the credential (if known). */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** Whether face check validation was requested. */
+  isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
   /** The partner who issued the credential that was presented */

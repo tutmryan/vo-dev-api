@@ -1,9 +1,10 @@
-import type { FindOptionsRelations, FindOptionsWhere } from 'typeorm'
+import { Not, type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
 import type { QueryContext } from '../../../cqs'
 import type { Maybe, PresentationWhere } from '../../../generated/graphql'
 import { BetweenTimestamp, LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp } from '../../../util/typeorm'
 import type { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { PresentationEntity } from '../entities/presentation-entity'
+import { faceCheckRequested } from './find-presentations-query'
 
 export async function CountPresentationsQuery(this: QueryContext, criteria?: Maybe<PresentationWhere>) {
   const where: FindOptionsWhere<PresentationEntity> = {}
@@ -27,6 +28,9 @@ export async function CountPresentationsQuery(this: QueryContext, criteria?: May
   if (criteria?.from && criteria.to) where.presentedAt = BetweenTimestamp(criteria.from, criteria.to)
   else if (criteria?.from) where.presentedAt = MoreThanOrEqualTimestamp(criteria.from)
   else if (criteria?.to) where.presentedAt = LessThanOrEqualTimestamp(criteria.to)
+
+  if (criteria?.isFaceCheckRequested === true) where.requestedCredentialsJson = faceCheckRequested
+  else if (criteria?.isFaceCheckRequested === false) where.requestedCredentialsJson = Not(faceCheckRequested)
 
   const count = await this.entityManager.getRepository(PresentationEntity).count({
     comment: 'CountPresentationsQuery',

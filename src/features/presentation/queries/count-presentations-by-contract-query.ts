@@ -1,5 +1,6 @@
 import type { QueryContext } from '../../../cqs'
 import type { Maybe, PresentationWhere } from '../../../generated/graphql'
+import { FACE_CHECK_REQUESTED_LIKE_MATCH } from './find-presentations-query'
 
 export async function CountPresentationsByContractQuery(
   this: QueryContext,
@@ -46,6 +47,11 @@ export async function CountPresentationsByContractQuery(
     query.andWhere('p.presented_at BETWEEN :from AND :to', { from: criteria.from.toISOString(), to: criteria.to.toISOString() })
   else if (criteria?.from) query.andWhere('p.presented_at >= :from', { from: criteria.from.toISOString() })
   else if (criteria?.to) query.andWhere('p.presented_at <= :to', { to: criteria.to.toISOString() })
+
+  if (criteria?.isFaceCheckRequested === true)
+    query.andWhere('requested_credentials_json LIKE :faceCheckRequested', { FACE_CHECK_REQUESTED_LIKE_MATCH })
+  else if (criteria?.isFaceCheckRequested === false)
+    query.andWhere('requested_credentials_json NOT LIKE :faceCheckRequested', { FACE_CHECK_REQUESTED_LIKE_MATCH })
 
   return query
     .getRawMany()

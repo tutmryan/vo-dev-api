@@ -374,6 +374,10 @@ input ContractPresentationWhere {
   The type of credential presented.
   """
   presentedType: String
+  """
+  Whether face check validation was requested.
+  """
+  isFaceCheckRequested: Boolean
 }
 
 """
@@ -429,6 +433,10 @@ input IdentityPresentationWhere {
   The type of credential presented.
   """
   presentedType: String
+  """
+  Whether face check validation was requested.
+  """
+  isFaceCheckRequested: Boolean
 }
 
 """
@@ -471,6 +479,10 @@ input UserPresentationWhere {
   The type of credential presented.
   """
   presentedType: String
+  """
+  Whether face check validation was requested.
+  """
+  isFaceCheckRequested: Boolean
 }
 
 """
@@ -509,6 +521,10 @@ input IssuancePresentationWhere {
   The type of credential presented.
   """
   presentedType: String
+  """
+  Whether face check validation was requested.
+  """
+  isFaceCheckRequested: Boolean
 }
 
 """
@@ -551,6 +567,10 @@ input PartnerPresentationWhere {
   The type of credential presented.
   """
   presentedType: String
+  """
+  Whether face check validation was requested.
+  """
+  isFaceCheckRequested: Boolean
 }
 
 """
@@ -597,6 +617,10 @@ input PresentationWhere {
   The type of credential presented.
   """
   presentedType: String
+  """
+  Whether face check validation was requested.
+  """
+  isFaceCheckRequested: Boolean
 }
 
 extend type Contract {

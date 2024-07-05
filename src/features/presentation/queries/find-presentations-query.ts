@@ -1,11 +1,14 @@
 import type { FindOptionsOrder } from 'typeorm'
-import { ILike, type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
+import { ILike, Not, type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
 import type { QueryContext } from '../../../cqs'
 import type { Maybe, PresentationWhere } from '../../../generated/graphql'
 import { OrderDirection, PresentationOrderBy } from '../../../generated/graphql'
 import { OptionalRange } from '../../../util/typeorm'
 import type { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { PresentationEntity } from '../entities/presentation-entity'
+
+export const FACE_CHECK_REQUESTED_LIKE_MATCH = `%"configuration":{"validation":%"faceCheck":%`
+export const faceCheckRequested = ILike(FACE_CHECK_REQUESTED_LIKE_MATCH)
 
 export async function FindPresentationsQuery(
   this: QueryContext,
@@ -35,6 +38,9 @@ export async function FindPresentationsQuery(
   }
   if (criteria?.requestedType) where.requestedCredentialsJson = ILike(`%"type":"${criteria.requestedType}"%`)
   if (criteria?.presentedType) where.presentedCredentialsJson = ILike(`%"type":[[]%"${criteria.presentedType}"%]%`) // [[] is how you escape [ https://stackoverflow.com/questions/439495/how-can-i-escape-square-brackets-in-a-like-clause
+
+  if (criteria?.isFaceCheckRequested === true) where.requestedCredentialsJson = faceCheckRequested
+  else if (criteria?.isFaceCheckRequested === false) where.requestedCredentialsJson = Not(faceCheckRequested)
 
   where.presentedAt = OptionalRange(criteria?.from, criteria?.to)
 
