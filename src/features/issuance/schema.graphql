@@ -340,6 +340,10 @@ input ContractIssuanceWhere {
   Indicates whether the issued credential has face check photo.
   """
   hasFaceCheckPhoto: Boolean
+  """
+  The presentation which included the issuance
+  """
+  presentationId: ID
 }
 """
 Criteria for calculating weekly average of contract issuances.
@@ -407,6 +411,10 @@ input IdentityIssuanceWhere {
   Indicates whether the issued credential has face check photo.
   """
   hasFaceCheckPhoto: Boolean
+  """
+  The presentation which included the issuance
+  """
+  presentationId: ID
 }
 
 """
@@ -461,6 +469,10 @@ input UserIssuanceWhere {
   Indicates whether the issued credential has face check photo.
   """
   hasFaceCheckPhoto: Boolean
+  """
+  The presentation which included the issuance
+  """
+  presentationId: ID
 }
 
 """
@@ -519,6 +531,10 @@ input IssuanceWhere {
   Indicates whether the issued credential has face check photo.
   """
   hasFaceCheckPhoto: Boolean
+  """
+  The presentation which included the issuance
+  """
+  presentationId: ID
 }
 
 extend type Contract {

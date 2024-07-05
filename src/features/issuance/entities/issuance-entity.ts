@@ -1,9 +1,10 @@
-import { Column, CreateDateColumn, Entity, Index, ManyToOne, RelationId } from 'typeorm'
+import { Column, CreateDateColumn, Entity, Index, JoinTable, ManyToMany, ManyToOne, RelationId } from 'typeorm'
 import { IssuanceStatus } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
+import { PresentationEntity } from '../../presentation/entities/presentation-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('issuance')
@@ -58,6 +59,13 @@ export class IssuanceEntity extends AuditedAndTrackedEntity {
 
   @Column({ type: 'bit', nullable: true })
   hasFaceCheckPhoto!: boolean | null
+
+  @ManyToMany(() => PresentationEntity)
+  @JoinTable({ name: 'presentation_issuances' })
+  presentations!: Promise<PresentationEntity[]>
+
+  @RelationId((issuance: IssuanceEntity) => issuance.presentations)
+  presentationIds!: string[]
 
   markAsRevoked(user: UserEntity) {
     this.isRevoked = true

@@ -1,4 +1,4 @@
-import { IsNull, type FindOptionsWhere } from 'typeorm'
+import { IsNull, Raw, type FindOptionsWhere } from 'typeorm'
 import type { QueryContext } from '../../../cqs'
 import { IssuanceStatus, type IssuanceWhere, type Maybe } from '../../../generated/graphql'
 import { LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp, OptionalRange } from '../../../util/typeorm'
@@ -13,8 +13,9 @@ export async function CountIssuancesQuery(this: QueryContext, criteria?: Maybe<I
   if (criteria?.issuedById) where.issuedById = criteria.issuedById.toUpperCase()
   if (criteria?.revokedById) where.revokedById = criteria.revokedById.toUpperCase()
   if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined) {
-    where.hasFaceCheckPhoto = criteria.hasFaceCheckPhoto
+    where.hasFaceCheckPhoto = Raw((alias) => `ISNULL(${alias}, 0) = :hasFaceCheckPhoto`, { hasFaceCheckPhoto: criteria.hasFaceCheckPhoto })
   }
+  if (criteria?.presentationId) throw new Error("Sorry, can't filter by presentationId when counting issuances.")
 
   where.issuedAt = OptionalRange(criteria?.from, criteria?.to)
   where.expiresAt = OptionalRange(criteria?.expiresFrom, criteria?.expiresTo)

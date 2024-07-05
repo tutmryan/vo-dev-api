@@ -658,6 +658,10 @@ enum PresentationOrderBy {
 
 extend type Query {
   """
+  Returns a presentation by ID
+  """
+  presentation(id: ID!): Presentation!
+  """
   Returns successful credential presentations, optionally matching the specified criteria.
   """
   findPresentations(

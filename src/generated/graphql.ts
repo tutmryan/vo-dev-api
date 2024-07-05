@@ -644,6 +644,8 @@ export type ContractIssuanceWhere = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
   issuedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The presentation which included the issuance */
+  presentationId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the platform user (application or person) that revoked the credential. */
@@ -960,6 +962,8 @@ export type IdentityIssuanceWhere = {
   hasFaceCheckPhoto?: InputMaybe<Scalars['Boolean']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
   issuedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The presentation which included the issuance */
+  presentationId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the platform user (application or person) that revoked the credential. */
@@ -1231,6 +1235,8 @@ export type IssuanceWhere = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the user (Person or Application) that issued the credential. */
   issuedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The presentation which included the issuance */
+  presentationId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the platform user (application or person) that revoked the credential. */
@@ -1835,6 +1841,8 @@ export type Query = {
   networkContracts: Array<NetworkContract>;
   /** Returns a partner by ID */
   partner: Partner;
+  /** Returns a presentation by ID */
+  presentation: Presentation;
   /** Returns the successful presentation count, optionally matching the specified criteria. */
   presentationCount: Scalars['NonNegativeInt']['output'];
   /** Returns the successful presentation count, grouped by Contract, optionally matching the specified criteria. */
@@ -1988,6 +1996,11 @@ export type QueryNetworkContractsArgs = {
 
 
 export type QueryPartnerArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryPresentationArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -2423,6 +2436,8 @@ export type UserIssuanceWhere = {
   hasFaceCheckPhoto?: InputMaybe<Scalars['Boolean']['input']>;
   /** The ID of the identity that was issued the credential. */
   identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** The presentation which included the issuance */
+  presentationId?: InputMaybe<Scalars['ID']['input']>;
   /** The requestId of the issuance request. */
   requestId?: InputMaybe<Scalars['ID']['input']>;
   /** The ID of the platform user (application or person) that revoked the credential. */
@@ -3542,6 +3557,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   issuanceCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByUserArgs>>;
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
   partner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<QueryPartnerArgs, 'id'>>;
+  presentation?: Resolver<ResolversTypes['Presentation'], ParentType, ContextType, RequireFields<QueryPresentationArgs, 'id'>>;
   presentationCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryPresentationCountArgs>>;
   presentationCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryPresentationCountByContractArgs>>;
   presentationCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryPresentationCountByUserArgs>>;

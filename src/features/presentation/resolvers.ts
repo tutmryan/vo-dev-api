@@ -11,6 +11,7 @@ import { WeeklyAveragePresentationsByContractQuery } from './queries/weekly-aver
 
 export const resolvers: Resolvers = {
   Query: {
+    presentation: (_, { id }, { dataLoaders: { presentations } }) => presentations.load(id),
     findPresentations: (_parent, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindPresentationsQuery, where, offset, limit, orderBy, orderDirection),
     presentationCount: (_parent, { where }, context) => query(context, CountPresentationsQuery, where),
