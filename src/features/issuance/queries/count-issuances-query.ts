@@ -1,3 +1,4 @@
+import type { FindOptionsRelations } from 'typeorm'
 import { IsNull, Raw, type FindOptionsWhere } from 'typeorm'
 import type { QueryContext } from '../../../cqs'
 import { IssuanceStatus, type IssuanceWhere, type Maybe } from '../../../generated/graphql'
@@ -6,7 +7,7 @@ import { IssuanceEntity } from '../entities/issuance-entity'
 
 export async function CountIssuancesQuery(this: QueryContext, criteria?: Maybe<IssuanceWhere>) {
   const where: FindOptionsWhere<IssuanceEntity> = {}
-
+  const relations: FindOptionsRelations<IssuanceEntity> = {}
   if (criteria?.requestId) where.requestId = criteria.requestId.toUpperCase()
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.contractId) where.contractId = criteria.contractId.toUpperCase()
@@ -15,7 +16,12 @@ export async function CountIssuancesQuery(this: QueryContext, criteria?: Maybe<I
   if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined) {
     where.hasFaceCheckPhoto = Raw((alias) => `ISNULL(${alias}, 0) = :hasFaceCheckPhoto`, { hasFaceCheckPhoto: criteria.hasFaceCheckPhoto })
   }
-  if (criteria?.presentationId) throw new Error("Sorry, can't filter by presentationId when counting issuances.")
+  if (criteria?.presentationId) {
+    relations.presentations = true
+    where.presentations = {
+      id: criteria.presentationId.toUpperCase(),
+    }
+  }
 
   where.issuedAt = OptionalRange(criteria?.from, criteria?.to)
   where.expiresAt = OptionalRange(criteria?.expiresFrom, criteria?.expiresTo)
@@ -33,6 +39,7 @@ export async function CountIssuancesQuery(this: QueryContext, criteria?: Maybe<I
   const count = await this.entityManager.getRepository(IssuanceEntity).count({
     comment: 'CountIssuancesQuery',
     where,
+    relations,
   })
 
   return count

@@ -46,9 +46,9 @@ export async function CountPresentationsByUserQuery(
   else if (criteria?.to) query.andWhere('presented_at <= :to', { to: criteria.to.toISOString() })
 
   if (criteria?.isFaceCheckRequested === true)
-    query.andWhere('requested_credentials_json LIKE :faceCheckRequested', { FACE_CHECK_REQUESTED_LIKE_MATCH })
+    query.andWhere('requested_credentials_json LIKE :faceCheckRequested', { faceCheckRequested: FACE_CHECK_REQUESTED_LIKE_MATCH })
   else if (criteria?.isFaceCheckRequested === false)
-    query.andWhere('requested_credentials_json NOT LIKE :faceCheckRequested', { FACE_CHECK_REQUESTED_LIKE_MATCH })
+    query.andWhere('requested_credentials_json NOT LIKE :faceCheckRequested', { faceCheckRequested: FACE_CHECK_REQUESTED_LIKE_MATCH })
 
   return query.getRawMany().then((rows) => rows.map((row) => ({ user: users.load(row.requested_by_id), count: row.count })))
 }

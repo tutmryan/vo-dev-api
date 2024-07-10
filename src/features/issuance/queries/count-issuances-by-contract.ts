@@ -26,14 +26,18 @@ export async function CountIssuancesByContractQuery(
   if (offset) query.skip(offset)
   if (limit) query.take(limit)
 
-  if (criteria?.requestId) query.andWhere('request_id = :requestId', { identityId: criteria.requestId.toUpperCase() })
-  if (criteria?.identityId) query.andWhere('identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
-  if (criteria?.issuedById) query.andWhere('issued_by_id = :issuedById', { issuedById: criteria.issuedById.toUpperCase() })
-  if (criteria?.revokedById) query.andWhere('revoked_by_id = :revokedById', { revokedById: criteria.revokedById.toUpperCase() })
+  if (criteria?.requestId) query.andWhere('issuance.request_id = :requestId', { identityId: criteria.requestId.toUpperCase() })
+  if (criteria?.identityId) query.andWhere('issuance.identity_id = :identityId', { identityId: criteria.identityId.toUpperCase() })
+  if (criteria?.issuedById) query.andWhere('issuance.issued_by_id = :issuedById', { issuedById: criteria.issuedById.toUpperCase() })
+  if (criteria?.revokedById) query.andWhere('issuance.revoked_by_id = :revokedById', { revokedById: criteria.revokedById.toUpperCase() })
   if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined)
     query.andWhere('ISNULL(has_face_check_photo, 0) = :hasFaceCheckPhoto', { hasFaceCheckPhoto: criteria.hasFaceCheckPhoto })
   if (criteria?.contractId) throw new Error("Sorry, can't filter by contractId when grouping by contract.")
-  if (criteria?.presentationId) throw new Error("Sorry, can't filter by presentationId when counting issuances.")
+  if (criteria?.presentationId) {
+    query.innerJoin('presentation_issuances', 'pi', 'issuance.id = pi.issuance_id')
+    query.innerJoin('presentation', 'p', 'pi.presentation_id = p.id')
+    query.andWhere('presentation_id = :presentationId', { presentationId: criteria.presentationId.toUpperCase() })
+  }
 
   andWhereOptionalRange(query, 'issued_at', criteria?.from, criteria?.to)
   andWhereOptionalRange(query, 'expires_at', criteria?.expiresFrom, criteria?.expiresTo)

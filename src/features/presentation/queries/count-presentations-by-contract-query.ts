@@ -34,8 +34,6 @@ export async function CountPresentationsByContractQuery(
   if (criteria?.requestedById) query.andWhere('p.requested_by_id = :requestedById', { requestedById: criteria.requestedById.toUpperCase() })
   if (criteria?.contractId) throw new Error("Sorry, can't filter by contractId when grouping by contract.")
   if (criteria?.issuanceId) {
-    query.innerJoin('presentation_issuances', 'pi', 'p.id = pi.presentation_id')
-    query.innerJoin('issuance', 'i', 'pi.issuance_id = i.id')
     query.andWhere('issuance_id = :issuanceId', { issuanceId: criteria.issuanceId.toUpperCase() })
   }
   if (criteria?.partnerId) {
@@ -49,9 +47,9 @@ export async function CountPresentationsByContractQuery(
   else if (criteria?.to) query.andWhere('p.presented_at <= :to', { to: criteria.to.toISOString() })
 
   if (criteria?.isFaceCheckRequested === true)
-    query.andWhere('requested_credentials_json LIKE :faceCheckRequested', { FACE_CHECK_REQUESTED_LIKE_MATCH })
+    query.andWhere('requested_credentials_json LIKE :faceCheckRequested', { faceCheckRequested: FACE_CHECK_REQUESTED_LIKE_MATCH })
   else if (criteria?.isFaceCheckRequested === false)
-    query.andWhere('requested_credentials_json NOT LIKE :faceCheckRequested', { FACE_CHECK_REQUESTED_LIKE_MATCH })
+    query.andWhere('requested_credentials_json NOT LIKE :faceCheckRequested', { faceCheckRequested: FACE_CHECK_REQUESTED_LIKE_MATCH })
 
   return query
     .getRawMany()
