@@ -57,23 +57,6 @@ Add the new environment to the deployment matrix in `.github/workflows/release.y
 - Create a branch and PR for the changes to the deployment matrix.
 - Once the PR is merged, the new environment will be available for deployment.
 
-## Notes on the instance Database setup
-
-The instance database is created by the deployment service principal who is a member of `dbmanager` role. After creation of the instance database, the deployment service principal creates two SQL users in the instance database and grant them necessary permmissions for API and migration scripts. After that, the deployment service princpal transfers the ownership to a disabled SQL login called `DisabledLogin` as recommend by [this article](https://learn.microsoft.com/en-us/sql/t-sql/statements/alter-authorization-transact-sql?view=sql-server-ver16#best-practice). Once that is done, the deployment service principal will no longer be able to connect to the instance database. If the deployment service principal needs to connect to the instance database in the future, the deployment service principal will need to be added to the Azure SQL administrators group to grant it the server admin permissions.
-
-When setting up an instance database for the first time, the release pipeline:
-
-- creates an instance database in the elastic pool using t-sql as the deployment service principal so that it becomes `db_owner` of the newly created database
-- creates an app registration (e.g. "Verified Orchestration Migration (dev)") in Microsoft Entra specifically for the instance to run migration scripts
-- sets up federated credential in the migration app for GitHub OIDC connection
-- sets up the migration app service principal as a user in the instance database with `db_datareader`, `db_datawriter`, and `db_ddladmin` role memberships
-- sets up the API service principal as a user in the instance database with `db_datareader` and `db_datawriter` role memberships
-- replaces `db_owner` of the instance database with `DisabledLogin`
-- logs in as the migration app service principal
-- runs migration scripts
-- logs back in as the deployer service principal
-- continues with provisioning other resources
-
 ## Manual steps to be performed after the first deployment run
 
 The app registration created for the instance would need a logo and the publisher verification so that it is presented as a verified app from "Verified Orchestration Pty Ltd" when the customer installs it into their tenant and grants admin consent.
@@ -91,33 +74,7 @@ The app registration created for the instance would need a logo and the publishe
 1. Refer to the "Setting up a new instance" section in [Admin Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-admin/blob/main/README.md#setting-up-a-new-instance)
 1. Refer to the "Setting up a new instance" section in [Portal Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-portal/blob/main/README.md#setting-up-a-new-instance)
 
-## Configure the application instance Dashboad in Application Insights
-
-<del>Follow the [dashboard setup instructions](../dashboard/setup.md).</del>
-
-_The manual setup of the application instance Dashboard is no longer required._
-
-The automated deployment pipeline provisions a workbook with charts using metrics from App Insights, Azure Cache for Redis, and custom queries for each instance.
-
-Follow [the guide](../dashboard/workbook.md) to customise and update the workbook in the deployment pipeline, so changes are applied to all instances.
-
-## Troubleshooting
-
-- `Deploy SQL DB instance` step in `Instance SQL database job` failed
-
-  > "message":"The Resource 'Microsoft.Sql/servers/vo-platform-sql-server-1/databases/vo-\<instance\>-sql-db' under resource group 'vo-platform-shared-infra' was not found.
-
-  This step could throw a transient error above as it can take sometime for the sql database created in the step preceeding it to become available in some cases.
-
-  It can be resolved by running the pipeline again.
-
-## Revert temporary permissions for authority verification
-
-If you wish to revert temporary permissions granted to interactive users for authority verification, you can follow these steps:
-
-- Delete the access policy from the by the Verified ID service keyvault for the interative user.
-
-## Tear down an instance
+## Steps to tear down an instance
 
 1. Deprecate all contracts which would revoke all issuances as the Verified ID authority cannot be deleted
 1. Delete the instance resource group e.g. vo-{name}-instance
@@ -131,3 +88,20 @@ If you wish to revert temporary permissions granted to interactive users for aut
 1. Delete all the instance app registrations:
    - `Verified Orchestration (<instance>)`
    - `Verified Orchestration Migration (<instance>)`
+
+## Notes on the instance Database setup
+
+The instance database is created by the deployment service principal who is a member of `dbmanager` role. After creation of the instance database, the deployment service principal creates two SQL users in the instance database and grant them necessary permmissions for API and migration scripts. After that, the deployment service princpal transfers the ownership to a disabled SQL login called `DisabledLogin` as recommend by [this article](https://learn.microsoft.com/en-us/sql/t-sql/statements/alter-authorization-transact-sql?view=sql-server-ver16#best-practice). Once that is done, the deployment service principal will no longer be able to connect to the instance database. If the deployment service principal needs to connect to the instance database in the future, the deployment service principal will need to be added to the Azure SQL administrators group to grant it the server admin permissions.
+
+When setting up an instance database for the first time, the release pipeline:
+
+- creates an instance database in the elastic pool using t-sql as the deployment service principal so that it becomes `db_owner` of the newly created database
+- creates an app registration (e.g. "Verified Orchestration Migration (dev)") in Microsoft Entra specifically for the instance to run migration scripts
+- sets up federated credential in the migration app for GitHub OIDC connection
+- sets up the migration app service principal as a user in the instance database with `db_datareader`, `db_datawriter`, and `db_ddladmin` role memberships
+- sets up the API service principal as a user in the instance database with `db_datareader` and `db_datawriter` role memberships
+- replaces `db_owner` of the instance database with `DisabledLogin`
+- logs in as the migration app service principal
+- runs migration scripts
+- logs back in as the deployer service principal
+- continues with provisioning other resources
