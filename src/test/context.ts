@@ -1,9 +1,8 @@
 import type { JwtPayload, RequestInfo } from '@makerx/graphql-core'
 import casual from 'casual'
 import { randomUUID } from 'crypto'
-import { omit } from 'lodash'
 import type { GraphQLContext } from '../context'
-import { findUpdateOrCreateUser } from '../context'
+import { findUpdateOrCreateUser, findUpdateOrCreateUserEntity } from '../context'
 import { dataSource } from '../data'
 import { setLimitedAccessData } from '../features/limited-access-tokens'
 import type { LimitedApprovalData } from '../features/limited-approval-tokens'
@@ -13,7 +12,6 @@ import { createDataLoaders } from '../loaders'
 import { logger } from '../logger'
 import { createServices } from '../services'
 import type { PartialBy } from '../util/partial-by'
-import { userInvariant } from '../util/user-invariant'
 
 const requestInfo: RequestInfo = {
   protocol: 'http',
@@ -61,10 +59,9 @@ export const createContext = async (
 
   // limited access and limited approval data injection
   if (limitedAccessInput || limitedApprovalInput) {
-    const user = await findUpdateOrCreateUser(omit(jwtPayload, 'roles'), token)
-    userInvariant(user)
-    if (limitedAccessInput) await setLimitedAccessData(token, Object.assign({ userId: user.userEntity.id }, limitedAccessInput))
-    if (limitedApprovalInput) await setLimitedApprovalData(token, Object.assign({ userId: user.userEntity.id }, limitedApprovalInput))
+    const userEntity = await findUpdateOrCreateUserEntity(jwtPayload!)
+    if (limitedAccessInput) await setLimitedAccessData(token, Object.assign({ userId: userEntity.id }, limitedAccessInput))
+    if (limitedApprovalInput) await setLimitedApprovalData(token, Object.assign({ userId: userEntity.id }, limitedApprovalInput))
   }
 
   // create the context
