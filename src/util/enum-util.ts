@@ -10,3 +10,7 @@ export const convertEnum = <TEnumIn, TEnumOut, TKeys extends string>(
   }
   return toEnum[keyOfValue as keyof typeof toEnum]
 }
+
+export const enumStringValues = <TEnum extends Record<keyof TEnum, TEnum[keyof TEnum]>>(enumObject: TEnum): string[] => {
+  return Object.values(enumObject) as string[]
+}

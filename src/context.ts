@@ -7,7 +7,7 @@ import { logging, platformConsumerApps } from './config'
 import type { DispatchContext } from './cqs'
 import { dispatch } from './cqs'
 import { dataSource } from './data'
-import { getLimitedAccessData } from './features/limited-access-tokens'
+import { getLimitedAccessData, LimitedAccessTokenAcquisitionRoles } from './features/limited-access-tokens'
 import { getLimitedApprovalData } from './features/limited-approval-tokens'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
 import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or-create-user'
@@ -15,10 +15,11 @@ import { UserEntity } from './features/users/entities/user-entity'
 import type { DataLoaders } from './loaders'
 import { createDataLoaders } from './loaders'
 import { logger } from './logger'
-import { InternalRoles } from './roles'
+import { AppRoles, InternalRoles, UserRoles } from './roles'
 import type { Services } from './services'
 import { createServices } from './services'
 import { User } from './user'
+import { enumStringValues } from './util/enum-util'
 import { invariant } from './util/invariant'
 
 export type BaseContext = GraphQLContextBase<typeof logger, RequestInfo, User | undefined>
@@ -56,14 +57,32 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
     return new User(claims, token, userEntity, undefined, limitedApprovalData)
   }
 
+  // If the claims do not include any of the plaform roles, return undefined
+  const platformRoles = [
+    ...enumStringValues(UserRoles),
+    ...enumStringValues(AppRoles),
+    ...enumStringValues(LimitedAccessTokenAcquisitionRoles),
+  ]
+  if (platformRoles.every((r) => !claims.roles?.includes(r))) {
+    return undefined
+  }
+
+  const userEntity = await findUpdateOrCreateUserEntity(claims)
+
+  return new User(claims, token, userEntity)
+}
+
+export const findUpdateOrCreateUserEntity = async (claims: JwtPayload): Promise<UserEntity> => {
   /**
    * We determine whether the incoming identity is an app two ways:
    *  - If we have the `idtyp` claim, we check if its value is `app`
    *  - Otherwise, we check if the `oid` and the `sub` claims have the same values
    */
+
   const idType = claims['idtyp']
   const isApp = typeof idType === 'string' ? (idType as string) === 'app' : claims.oid === claims.sub
 
+  const tenantId = claims['tid'] as string
   const input: FindUpdateOrCreateUserInput = {
     tenantId,
     oid: claims.oid,
@@ -81,9 +100,7 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
     services: {} as any as Services,
     dataLoaders: {} as any as DataLoaders,
   }
-  const userEntity = await dispatch(context, FindUpdateOrCreateUser, input)
-
-  return new User(claims, token, userEntity)
+  return dispatch(context, FindUpdateOrCreateUser, input)
 }
 
 const augmentContext = (context: BaseContext) => {
