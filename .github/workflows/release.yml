@@ -136,6 +136,9 @@ jobs:
           - instance: dev
             resourceGroup: vo-dev-instance
             resourcePrefix: vo-dev
+          - instance: demo.nelnet
+            resourceGroup: vo-demo-nelnet-instance
+            resourcePrefix: vo-demo-nelnet
     environment:
       name: ${{ matrix.instance }}
       url: ${{ matrix.instance }}.verifiedorchestration.com
