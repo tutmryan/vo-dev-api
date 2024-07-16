@@ -51,6 +51,8 @@ inputs:
     default: 'false'
   dev-tools-enabled:
     description: The flag indicating whether the dev tools (i.e. Apollo Sandbox, .etc) are deployed
+  face-check-enabled:
+    description: The flag indicating whether the face check features (i.e. issuing credentials with face check photo, .etc) are available
   identity-issuers:
     description: Mapping of identity issuer identifiers to labels (JSON Record<string, string>)
   platform-consumer-apps:
@@ -293,6 +295,7 @@ runs:
           homeTenantVidServiceClientSecret=${{ inputs.home-tenant-vid-service-client-secret }}
           vidAuthorityId=${{ steps.create-vid-authority.outputs.authorityId != '' && steps.create-vid-authority.outputs.authorityId || steps.check-vid-authority.outputs.authorityId}}
           devToolsEnabled=${{ inputs.dev-tools-enabled }}
+          faceCheckEnabled=${{ inputs.face-check-enabled }}
           identityIssuers="${{ inputs.identity-issuers }}"
           platformConsumerApps="${{ inputs.platform-consumer-apps }}"
           additionalAuthTenantIds="${{ inputs.additional-auth-tenant-ids }}"

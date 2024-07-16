@@ -33,6 +33,7 @@ export const redis = config.get('redis')
 export const blobStorage = config.get('blobStorage')
 export const events = config.has('events') ? config.get('events') : undefined
 export const devToolsEnabled = config.get('devToolsEnabled')
+export const faceCheckEnabled = config.get('faceCheckEnabled')
 export const authorityId = config.get('authorityId')
 export const issuanceCallbackRoute = config.get('issuanceCallbackRoute')
 export const presentationCallbackRoute = config.get('presentationCallbackRoute')

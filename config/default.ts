@@ -69,6 +69,7 @@ const config: DeepPartial<Config> = {
     manual: 'Manually Issued',
   },
   devToolsEnabled: true,
+  faceCheckEnabled: true,
 }
 
 module.exports = config

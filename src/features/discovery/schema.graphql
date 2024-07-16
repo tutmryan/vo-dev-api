@@ -11,6 +11,11 @@ type Features {
   Indicates whether the API dev tools (Apollo sandbox, introspection, PKCE) are available.
   """
   devToolsEnabled: Boolean!
+
+  """
+  Indicates whether the face check features (i.e. issuing credentials with face check photo, .etc) are available
+  """
+  faceCheckEnabled: Boolean!
 }
 
 """
