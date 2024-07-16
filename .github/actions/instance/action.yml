@@ -164,6 +164,7 @@ runs:
       run: >-
         ./infrastructure/scripts/create-app-registration.ps1
         -Name 'Verified Orchestration (${{ inputs.instance }})'
+        -HomePageUrl 'https://${{ inputs.instance }}.${{ inputs.domain }}'
 
     - name: Add app registration for migration
       id: add-migration-app-registration

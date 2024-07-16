@@ -2,7 +2,11 @@
 param (
   [Parameter(Mandatory = $true)]
   [string]
-  $Name
+  $Name,
+
+  [Parameter(Mandatory = $true)]
+  [string]
+  $HomePageUrl
 )
 
 $ErrorActionPreference = 'Stop'
@@ -29,7 +33,7 @@ if ($appRegistration) {
   az ad app create `
     --display-name $Name `
     --sign-in-audience AzureADMultipleOrgs `
-    --web-home-page-url 'https://verifiedorchestration.com/' `
+    --web-home-page-url $HomePageUrl `
     --output none
 
   Write-Output ('Created API app registration ''{0}''' -f $Name)
@@ -62,7 +66,8 @@ az ad app update `
   --id $appRegistrationObjectId `
   --required-resource-accesses ('@{0}' -f $constants.requestedResourceAccessFile)`
   --app-roles ('@{0}' -f $constants.appRolesFile) `
-  --enable-id-token-issuance $true
+  --enable-id-token-issuance $true `
+  --web-home-page-url $HomePageUrl
 
 Write-Output 'Set app roles and enabling id token issuance...'
 
