@@ -92,11 +92,15 @@ function hasLimitedAccessDataRule(ruleKey: string, verify: (data: AcquireLimited
 export const isValidLimitedIssuanceRequest = and(
   isLimitedIssuanceApp,
   rule('isValidLimitedIssuanceRequest', { cache: 'strict' })(
-    (_, { request: { contractId, identityId } }: MutationCreateIssuanceRequestArgs, { user }: GraphQLContext) => {
+    (_, args: MutationCreateIssuanceRequestArgs | null | undefined, { user }: GraphQLContext) => {
+      if (!args?.request) return false
+      const {
+        request: { contractId, identityId },
+      } = args
       if (!user?.limitedAccessData?.identityId) return false
       if (identityId && identityId !== user.limitedAccessData.identityId) return false
       if (!user.limitedAccessData.issuableContractIds) return false
-      return user.limitedAccessData.issuableContractIds.includes(contractId)
+      return contractId && user.limitedAccessData.issuableContractIds.includes(contractId)
     },
   ),
 )

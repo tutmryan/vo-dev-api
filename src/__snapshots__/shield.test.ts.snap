@@ -362,6 +362,38 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "strict"
         }
       ]
+    },
+    "createPhotoCaptureRequest": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "hasLimitedAccessData-limitedIssuance",
+                  "cache": "contextual"
+                }
+              ]
+            },
+            {
+              "name": "isValidLimitedIssuanceRequest",
+              "cache": "strict"
+            }
+          ]
+        }
+      ]
     }
   },
   "Subscription": {

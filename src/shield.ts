@@ -86,6 +86,7 @@ export const rules: ShieldSchema<Resolvers> = {
     createApprovalRequest: isApprovalRequestApp,
     createPresentationRequestForApproval: isValidLimitedPresentationRequestForApproval,
     actionApprovalRequest: and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId),
+    createPhotoCaptureRequest: isAllowedToIssue,
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
   Subscription: {

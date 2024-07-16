@@ -1295,6 +1295,8 @@ export type Mutation = {
   createIssuanceRequest: IssuanceRequestResponse;
   /** Creates a partner whose credential types can be requested for presentation */
   createPartner: Partner;
+  /** Creates a request to support capturing a photo to be used in a subsequent issuance. */
+  createPhotoCaptureRequest: PhotoCaptureRequestResponse;
   /** The result of this request returns a QR code with a link to start the presentation process, or an error */
   createPresentationRequest: PresentationRequestResponse;
   /** The result of this request returns a QR code with a link to start the presentation process, or an error */
@@ -1363,6 +1365,11 @@ export type MutationCreateIssuanceRequestArgs = {
 
 export type MutationCreatePartnerArgs = {
   input: CreatePartnerInput;
+};
+
+
+export type MutationCreatePhotoCaptureRequestArgs = {
+  request: PhotoCaptureRequest;
 };
 
 
@@ -1571,6 +1578,28 @@ export type PartnerWhere = {
   linkedDomainUrl?: InputMaybe<Scalars['String']['input']>;
   /** The partial name of the partner to match */
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/**
+ * Input required to create a photo capture request.
+ * A photo capture can only be used for a single issuance for a single identity.
+ */
+export type PhotoCaptureRequest = {
+  /** The ID of the contract which will be issued with captured photo. */
+  contractId: Scalars['ID']['input'];
+  /** The ID of the identity who will be issued a credential with the captured photo. */
+  identityId: Scalars['ID']['input'];
+};
+
+/** The ID, URL and QR code for a photo capture request. */
+export type PhotoCaptureRequestResponse = {
+  __typename?: 'PhotoCaptureRequestResponse';
+  /** The ID of the photo capture request, which can be included in a subsequent issuance request to use the captured photo. */
+  id: Scalars['ID']['output'];
+  /** The QR code in ([data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) format) which can be scanned to capture a photo. */
+  photoCaptureQrCode: Scalars['String']['output'];
+  /** The URL which can be opened to capture a photo. */
+  photoCaptureUrl: Scalars['URL']['output'];
 };
 
 /**
@@ -2910,6 +2939,8 @@ export type ResolversTypes = {
   PartnerOrderBy: PartnerOrderBy;
   PartnerPresentationWhere: PartnerPresentationWhere;
   PartnerWhere: PartnerWhere;
+  PhotoCaptureRequest: PhotoCaptureRequest;
+  PhotoCaptureRequestResponse: ResolverTypeWrapper<PhotoCaptureRequestResponse>;
   Pin: Pin;
   PositiveFloat: ResolverTypeWrapper<Scalars['PositiveFloat']['output']>;
   PositiveInt: ResolverTypeWrapper<Scalars['PositiveInt']['output']>;
@@ -3050,6 +3081,8 @@ export type ResolversParentTypes = {
   Partner: PartnerEntity;
   PartnerPresentationWhere: PartnerPresentationWhere;
   PartnerWhere: PartnerWhere;
+  PhotoCaptureRequest: PhotoCaptureRequest;
+  PhotoCaptureRequestResponse: PhotoCaptureRequestResponse;
   Pin: Pin;
   PositiveFloat: Scalars['PositiveFloat']['output'];
   PositiveInt: Scalars['PositiveInt']['output'];
@@ -3419,6 +3452,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationCreateContractArgs, 'input'>>;
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
   createPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationCreatePartnerArgs, 'input'>>;
+  createPhotoCaptureRequest?: Resolver<ResolversTypes['PhotoCaptureRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePhotoCaptureRequestArgs, 'request'>>;
   createPresentationRequest?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestArgs, 'request'>>;
   createPresentationRequestForApproval?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestForApprovalArgs, 'approvalRequestId'>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
@@ -3471,6 +3505,13 @@ export type PartnerResolvers<ContextType = GraphQLContext, ParentType extends Re
   tenantId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type PhotoCaptureRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PhotoCaptureRequestResponse'] = ResolversParentTypes['PhotoCaptureRequestResponse']> = {
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  photoCaptureQrCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  photoCaptureUrl?: Resolver<ResolversTypes['URL'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -3787,6 +3828,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   NetworkIssuer?: NetworkIssuerResolvers<ContextType>;
   NonNegativeInt?: GraphQLScalarType;
   Partner?: PartnerResolvers<ContextType>;
+  PhotoCaptureRequestResponse?: PhotoCaptureRequestResponseResolvers<ContextType>;
   PositiveFloat?: GraphQLScalarType;
   PositiveInt?: GraphQLScalarType;
   Presentation?: PresentationResolvers<ContextType>;

@@ -62,6 +62,7 @@
     "@types/mime-types": "^2.1.4",
     "@types/mssql": "^9.1.5",
     "@types/prompt-sync": "^4.2.3",
+    "@types/qrcode": "^1.5.5",
     "casual": "^1.6.2",
     "colors": "^1.4.0",
     "copyfiles": "^2.4.1",
@@ -138,6 +139,7 @@
     "mssql": "^9.3.2",
     "opentelemetry-instrumentation-ws": "^0.5.0",
     "prettier-2": "npm:prettier@^2",
+    "qrcode": "^1.5.3",
     "rate-limiter-flexible": "^5.0.3",
     "typeorm": "^0.3.20",
     "ws": "^8.17.1"
