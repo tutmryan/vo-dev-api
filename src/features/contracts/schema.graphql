@@ -185,13 +185,13 @@ type Contract {
 }
 
 """
-Defines the input to create or update a template
+Defines the input to create or update a contract
 """
 input ContractInput {
   """
-  The name of the template
+  The name of the contract.
   """
-  name: String!
+  name: String! @constraint(maxLength: 50)
 
   """
   The ID of the template used as a base for the contract
@@ -224,7 +224,7 @@ input ContractInput {
 }
 
 """
-Credential display definitions at the template level
+Credential display definitions at the contract level
 """ # eslint-disable @graphql-eslint/strict-id-in-types
 type ContractDisplayModel {
   locale: Locale!
@@ -234,7 +234,7 @@ type ContractDisplayModel {
 }
 
 """
-Credential display definitions at the template level
+Credential display definitions at the contract level
 """
 input ContractDisplayModelInput {
   locale: Locale!
@@ -244,7 +244,7 @@ input ContractDisplayModelInput {
 }
 
 """
-The display properties of the verifiable credential at the template level
+The display properties of the verifiable credential at the contract level
 See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design#display-definition-wallet-credential-visuals
 """ # eslint-disable @graphql-eslint/strict-id-in-types
 type ContractDisplayCredential {
@@ -275,7 +275,7 @@ type ContractDisplayCredential {
 }
 
 """
-The display properties of the verifiable credential at the template level
+The display properties of the verifiable credential at the contract level
 See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/credential-design#display-definition-wallet-credential-visuals
 """
 input ContractDisplayCredentialInput {
