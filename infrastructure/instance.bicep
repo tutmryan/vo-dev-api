@@ -316,6 +316,8 @@ param homeTenantVidServiceClientId string
 param homeTenantVidServiceClientSecret string
 @description('The flag indicating whether the dev tools (i.e. Apollo Sandbox, .etc) are deployed')
 param devToolsEnabled string
+@description('The flag indicating whether the face check features (i.e. issuing credentials with face check photo, .etc) are available')
+param faceCheckEnabled string
 @description('JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant')
 param additionalAuthTenantIds string
 
@@ -560,6 +562,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     HOME_TENANT_VID_SERVICE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantVidServiceClientSecretSecret.properties.secretUri})'
     VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
     DEV_TOOLS_ENABLED: devToolsEnabled
+    FACE_CHECK_ENABLED: faceCheckEnabled
     IDENTITY_ISSUERS: identityIssuers
     PLATFORM_CONSUMER_APPS: platformConsumerApps
     ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds

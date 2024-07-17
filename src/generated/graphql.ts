@@ -897,6 +897,8 @@ export type Features = {
   __typename?: 'Features';
   /** Indicates whether the API dev tools (Apollo sandbox, introspection, PKCE) are available. */
   devToolsEnabled: Scalars['Boolean']['output'];
+  /** Indicates whether the face check features (i.e. issuing credentials with face check photo, .etc) are available */
+  faceCheckEnabled: Scalars['Boolean']['output'];
   /** Indicates whether the API instance is configured to support finding home tenant identities via the findTenantIdentities query. */
   findTenantIdentities: Scalars['Boolean']['output'];
 };
@@ -3403,6 +3405,7 @@ export type FaceCheckValidationResolvers<ContextType = GraphQLContext, ParentTyp
 
 export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Features'] = ResolversParentTypes['Features']> = {
   devToolsEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  faceCheckEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   findTenantIdentities?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

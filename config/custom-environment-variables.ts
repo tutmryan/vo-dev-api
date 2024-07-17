@@ -31,6 +31,7 @@ const config: EnvVarSubstitution<Config> = {
   },
   instance: 'INSTANCE',
   devToolsEnabled: json('DEV_TOOLS_ENABLED'),
+  faceCheckEnabled: json('FACE_CHECK_ENABLED'),
   authorityId: 'VID_AUTHORITY_ID',
   database: {
     host: 'DATABASE_HOST',

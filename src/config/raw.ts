@@ -47,6 +47,7 @@ export type Config = {
    */
   instance: string
   devToolsEnabled: boolean
+  faceCheckEnabled: boolean
   authorityId: string
   database: {
     host: string
