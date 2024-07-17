@@ -42,7 +42,7 @@ describe('find-identity', () => {
     expect(data?.findIdentities[0]?.name).toEqual(input.name)
   })
 
-  it('returns an errors when in an anonymous context', async () => {
+  it('returns an unauthorized error when accessed anonymously', async () => {
     // Act
     const { errors } = await executeOperationAnonymous({
       query: findIdentitiesQuery,

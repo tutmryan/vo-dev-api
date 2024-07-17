@@ -24,6 +24,11 @@ const config: DeepPartial<Config> = {
       clientId: '20b94470-7f92-46fd-b332-e5e9d06a04df',
     },
   },
+  limitedPhotoCapture: {
+    credentials: {
+      clientId: '0d3d87e4-a50c-4a32-90d7-3d90670e39ee',
+    },
+  },
 }
 
 module.exports = config

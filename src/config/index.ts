@@ -41,5 +41,6 @@ export const homeTenant = omit(config.get('homeTenant'), ['vidServiceCredentials
 export const issuanceRequestRegistration = config.get('issuanceRequestRegistration')
 export const limitedAccess = config.get('limitedAccess')
 export const limitedApproval = config.get('limitedApproval')
+export const limitedPhotoCapture = config.get('limitedPhotoCapture')
 export const verifiedIdAdmin = config.get('verifiedIdAdmin')
 export const verifiedIdRequest = config.get('verifiedIdRequest')

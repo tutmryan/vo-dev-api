@@ -6,7 +6,7 @@ The following app registrations are created for the internal operations of the V
 
 ## Create an app registration to hold the roles for internal applications
 
-- creat app registration named `Verified Orchestration Internal` (with `(non prod)` suffix for the non prod environment)
+- create app registration named `Verified Orchestration Internal` (with `(non prod)` suffix for the non prod environment)
 - choose `Single tenant` option for `Supported account types`
 - click "Register" to create the app registration
 - add `Application ID URI` (e.g. `api://verified-orchestration-internal-non-prod` for the non prod environment)
@@ -46,6 +46,14 @@ The following app registrations are created for the internal operations of the V
 
   ```JSON
   {
+    description: "Provides limited access to photo capture features of the Verified Orchestration platform - access tokens with this role are created by the API and given to limited photo capture clients. DO NOT GRANT TO OTHER APPLICATIONS.",
+    displayName: "Limited photo capture [INTERNAL API USE ONLY]",
+    value: "VerifiableCredential.LimitedPhotoCapture"
+  }
+  ```
+
+  ```JSON
+  {
     description "Used to secure the issuance and presentation request callback endpoints - access tokens with this role are creatd by the API and given to Entra to securely invoke the callback endpoint. DO NOT GRANT TO OTHER APPLICATIONS.",
     displayName: "Request callback [INTERNAL API USE ONLY]",
     value: "VerifiableCredential.Request.Callback"
@@ -54,7 +62,7 @@ The following app registrations are created for the internal operations of the V
 
 ## Create an app registration for acquiring limited access tokens
 
-- creat app registration named `Verified Orchestration Limited Access Client` (with `(non prod)` suffix for the non prod environment)
+- create app registration named `Verified Orchestration Limited Access Client` (with `(non prod)` suffix for the non prod environment)
 - choose `Single tenant` option for `Supported account types`
 - click "Register" to create the app registration
 - create a client secret for the Verified Orchestration API to generate a token
@@ -67,7 +75,7 @@ The following app registrations are created for the internal operations of the V
 
 ## Create an app registration for acquiring limited approval tokens
 
-- creat app registration named `Verified Orchestration Limited Approval Client` (with `(non prod)` suffix for the non prod environment)
+- create app registration named `Verified Orchestration Limited Approval Client` (with `(non prod)` suffix for the non prod environment)
 - choose `Single tenant` option for `Supported account types`
 - click "Register" to create the app registration
 - create a client secret for the Verified Orchestration API to generate a token
@@ -76,6 +84,19 @@ The following app registrations are created for the internal operations of the V
   - set `[NON_PROD | PROD]_LIMITED_APPROVAL_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.LimitedApproval
+- grant admin consent for the added permissions
+
+## Create an app registration for acquiring limited photo capture tokens
+
+- create app registration named `Verified Orchestration Limited Photo Capture Client` (with `(non prod)` suffix for the non prod environment)
+- choose `Single tenant` option for `Supported account types`
+- click "Register" to create the app registration
+- create a client secret for the Verified Orchestration API to generate a token
+  - set it to expires in 24 months
+  - store it in 1Password, `NonProd - Verified Orchestration -> Limited photo capture client secret` for the non prod environment
+  - set `[NON_PROD | PROD]_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET` secret in the GitHub organisation
+- add the following application permissions from `Verified Orchestration Internal` API
+  - VerifiableCredential.LimitedPhotoCapture
 - grant admin consent for the added permissions
 
 ## Create an app registration for Verified ID callback token generation

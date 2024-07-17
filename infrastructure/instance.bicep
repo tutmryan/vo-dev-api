@@ -184,7 +184,7 @@ resource limitedAccessClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022
   }
 }
 
-@description('The secret for limited access client data keys')
+@description('The secret for limited access data keys')
 @secure()
 param limitedAccessSecret string
 
@@ -214,7 +214,7 @@ resource limitedApprovalClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@20
   }
 }
 
-@description('The secret for limited approval client data keys')
+@description('The secret for limited approval data keys')
 @secure()
 param limitedApprovalSecret string
 
@@ -226,6 +226,36 @@ resource limitedApprovalSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-
       enabled: true
     }
     value: limitedApprovalSecret
+  }
+}
+
+@description('The client secret of the limited photo capture client')
+@secure()
+param limitedPhotoCaptureClientSecret string
+
+resource limitedPhotoCaptureClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-PHOTO-CAPTURE-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedPhotoCaptureClientSecret
+  }
+}
+
+@description('The secret for limited photo capture data keys')
+@secure()
+param limitedPhotoCaptureSecret string
+
+resource limitedPhotoCaptureSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-PHOTO-CAPTURE-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedPhotoCaptureSecret
   }
 }
 
@@ -520,6 +550,8 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessSecretSecret.properties.secretUri})'
     LIMITED_APPROVAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedApprovalClientSecretSecret.properties.secretUri})'
     LIMITED_APPROVAL_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedApprovalSecretSecret.properties.secretUri})'
+    LIMITED_PHOTO_CAPTURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPhotoCaptureClientSecretSecret.properties.secretUri})'
+    LIMITED_PHOTO_CAPTURE_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPhotoCaptureSecretSecret.properties.secretUri})'
     HOME_TENANT_NAME: homeTenantName
     HOME_TENANT_ID: homeTenantId
     HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId

@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { graphql } from '../../../generated'
 import type { AccessTokenResponse, AcquireLimitedAccessTokenInput } from '../../../generated/graphql'
-import { beforeAfterAll, buildJwt, executeOperationAs, expectToBeDefined, expectUnauthorizedError } from '../../../test'
+import { beforeAfterAll, buildJwt, executeOperationAs, expectUnauthorizedError } from '../../../test'
 import { createIdentityInput, saveIdentityMutation } from '../../identity/create-update-identity.test'
 import { LimitedAccessTokenAcquisitionRoles } from '../shield-rules'
 
@@ -40,7 +40,7 @@ describe('limited access token acquisition for issuance', () => {
       buildJwt({ roles: [LimitedAccessTokenAcquisitionRoles.issuance] }),
     )
     expect(errors).toBeUndefined()
-    expectToBeDefined(data?.saveIdentity?.id)
+    expect(data?.saveIdentity?.id).toBeDefined()
   })
 
   it('cannot save and read identity info with anonymous acquisition role', async () => {

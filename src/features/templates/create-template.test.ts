@@ -13,7 +13,7 @@ import { buildTemplateInput, createTemplate, createTemplateMutation, getEmptyTem
 describe('createTemplate mutation', () => {
   beforeAfterAll()
 
-  it('returns an errors when in an anonymous context', async () => {
+  it('returns an unauthorized error when accessed anonymously', async () => {
     // Act
     const { errors } = await executeOperationAnonymous({
       query: createTemplateMutation,

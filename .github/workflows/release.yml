@@ -215,11 +215,15 @@ jobs:
 
           internal-client-secret: ${{ secrets.NON_PROD_INTERNAL_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.NON_PROD_VID_CALLBACK_CLIENT_SECRET }}
+
           limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}
           limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
 
           limited-approval-client-secret: ${{ secrets.NON_PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
           limited-approval-secret: ${{ secrets.LIMITED_APPROVAL_SECRET }}
+
+          limited-photo-capture-client-secret: ${{ secrets.NON_PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
+          limited-photo-capture-secret: ${{ secrets.LIMITED_PHOTO_CAPTURE_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
@@ -379,11 +383,15 @@ jobs:
 
           internal-client-secret: ${{ secrets.PROD_INTERNAL_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.PROD_VID_CALLBACK_CLIENT_SECRET }}
+
           limited-access-client-secret: ${{ secrets.PROD_LIMITED_ACCESS_CLIENT_SECRET }}
           limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
 
           limited-approval-client-secret: ${{ secrets.PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
           limited-approval-secret: ${{ secrets.LIMITED_APPROVAL_SECRET }}
+
+          limited-photo-capture-client-secret: ${{ secrets.PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
+          limited-photo-capture-secret: ${{ secrets.LIMITED_PHOTO_CAPTURE_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}

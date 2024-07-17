@@ -88,17 +88,21 @@ const config: EnvVarSubstitution<Config> = {
   },
   limitedAccess: {
     credentials: {
-      clientId: 'LIMITED_ACCESS_CLIENT_ID',
       clientSecret: 'LIMITED_ACCESS_CLIENT_SECRET',
     },
     secret: 'LIMITED_ACCESS_SECRET',
   },
   limitedApproval: {
     credentials: {
-      clientId: 'LIMITED_APPROVAL_CLIENT_ID',
       clientSecret: 'LIMITED_APPROVAL_CLIENT_SECRET',
     },
     secret: 'LIMITED_APPROVAL_SECRET',
+  },
+  limitedPhotoCapture: {
+    credentials: {
+      clientSecret: 'LIMITED_PHOTO_CAPTURE_CLIENT_SECRET',
+    },
+    secret: 'LIMITED_PHOTO_CAPTURE_SECRET',
   },
   callbackCredentials: {
     clientId: 'VID_CALLBACK_CLIENT_ID',

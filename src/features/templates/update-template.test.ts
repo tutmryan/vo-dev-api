@@ -48,7 +48,7 @@ describe('updateTemplate mutation', () => {
     return { template }
   }
 
-  it('returns an errors when in an anonymous context', async () => {
+  it('returns an unauthorized error when accessed anonymously', async () => {
     // Arrange
     const { template } = await givenTemplate({})
 

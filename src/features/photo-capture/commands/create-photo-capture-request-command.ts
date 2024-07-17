@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import QRCode from 'qrcode'
-import { photoCaptureRequestCache } from '..'
+import { setPhotoCaptureRequest } from '..'
 import { portalUrl } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import type { PhotoCaptureRequest, PhotoCaptureRequestResponse } from '../../../generated/graphql'
@@ -22,7 +22,7 @@ export async function CreatePhotoCaptureRequestCommand(
 
   // store request in cache for subsequent retrieval
   const id = randomUUID()
-  await photoCaptureRequestCache.set(id, JSON.stringify(request))
+  await setPhotoCaptureRequest(id, request)
 
   // generate URL and QR code for photo capture
   const photoCaptureUrl = `${portalUrl}/photo-capture/${id}`

@@ -93,13 +93,19 @@ inputs:
     description: The client secret of the limited access client in Azure AD
     required: true
   limited-access-secret:
-    description: The secret for limited access client data keys
+    description: The secret for limited access data keys
     required: true
   limited-approval-client-secret:
     description: The client secret of the limited approval client in Azure AD
     required: true
   limited-approval-secret:
-    description: The secret for limited approval client data keys
+    description: The secret for limited approval data keys
+    required: true
+  limited-photo-capture-client-secret:
+    description: The client secret of the limited photo capture client in Azure AD
+    required: true
+  limited-photo-capture-secret:
+    description: The secret for limited photo capture data keys
     required: true
   home-tenant-id:
     description: The tenant ID of the home tenant
@@ -277,6 +283,8 @@ runs:
           limitedAccessSecret=${{ inputs.limited-access-secret }}
           limitedApprovalClientSecret=${{ inputs.limited-approval-client-secret }}
           limitedApprovalSecret=${{ inputs.limited-approval-secret }}
+          limitedPhotoCaptureClientSecret=${{ inputs.limited-photo-capture-client-secret }}
+          limitedPhotoCaptureSecret=${{ inputs.limited-photo-capture-secret }}
           homeTenantId=${{ inputs.home-tenant-id }}
           homeTenantName=${{ inputs.home-tenant-name }}
           homeTenantGraphClientId=${{ inputs.home-tenant-graph-client-id }}

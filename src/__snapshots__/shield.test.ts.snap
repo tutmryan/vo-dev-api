@@ -231,6 +231,9 @@ exports[`shield rules are setup correctly 1`] = `
     "acquireLimitedApprovalToken": {
       "rules": []
     },
+    "acquireLimitedPhotoCaptureToken": {
+      "rules": []
+    },
     "createIssuanceRequest": {
       "rulesOr": [
         {
@@ -629,6 +632,11 @@ exports[`shield rules are setup correctly 1`] = `
     }
   },
   "ApprovalTokenResponse": {
+    "*": {
+      "rules": []
+    }
+  },
+  "PhotoCaptureTokenResponse": {
     "*": {
       "rules": []
     }

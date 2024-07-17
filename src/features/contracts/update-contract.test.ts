@@ -38,7 +38,7 @@ describe('updateContract mutation', () => {
     return { contract }
   }
 
-  it('returns an errors when in an anonymous context', async () => {
+  it('returns an unauthorized error when accessed anonymously', async () => {
     // Arrange
     const { contract } = await givenContract({})
 

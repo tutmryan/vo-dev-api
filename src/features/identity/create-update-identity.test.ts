@@ -126,7 +126,7 @@ describe('create-update-identity', () => {
     expect(data?.identity).toMatchObject({ ...input, id: saveResponse.data?.saveIdentity.id.toUpperCase() })
   })
 
-  it('returns an errors when in an anonymous context', async () => {
+  it('returns an unauthorized error when accessed anonymously', async () => {
     // Arrange
     const input = createIdentityInput()
 

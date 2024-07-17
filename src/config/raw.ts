@@ -93,6 +93,10 @@ export type Config = {
     credentials: ClientCredentials
     secret?: string
   }
+  limitedPhotoCapture: {
+    credentials: ClientCredentials
+    secret?: string
+  }
   verifiedIdAdmin: {
     baseUrl: string
     scope: string
