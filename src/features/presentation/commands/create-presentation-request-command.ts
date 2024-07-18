@@ -2,6 +2,7 @@ import { flatten, set } from 'lodash'
 import { In } from 'typeorm'
 import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
 import type { CommandContext } from '../../../cqs'
+import { isFaceCheckPresentationEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import type { PresentationRequestInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
@@ -14,6 +15,8 @@ import type { PresentationEntity } from '../entities/presentation-entity'
 export type PresentationRequestDetails = Pick<PresentationEntity, 'requestedById' | 'identityId' | 'requestedCredentials'> & {
   limitedApprovalKey?: string
 }
+
+registerFeatureCheck(CreatePresentationRequestCommand, async (...[, input]) => isFaceCheckPresentationEnabled(input))
 
 export async function CreatePresentationRequestCommand(
   this: CommandContext,

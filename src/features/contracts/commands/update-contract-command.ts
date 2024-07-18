@@ -1,9 +1,12 @@
 import { basename } from 'path'
 import type { CommandContext } from '../../../cqs'
+import { isFaceCheckSupportEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { FaceCheckPhotoSupport, type ContractInput } from '../../../generated/graphql'
 import { ContractEntity } from '../entities/contract-entity'
 import { ensureNoOverridingTemplateData, toPersistedDisplayModel } from '../mapping'
 import { validateContractInput } from '../validation'
+
+registerFeatureCheck(UpdateContractCommand, async (...[, , input]) => isFaceCheckSupportEnabled(input))
 
 export async function UpdateContractCommand(this: CommandContext, id: string, input: ContractInput) {
   const repository = this.entityManager.getRepository(ContractEntity)

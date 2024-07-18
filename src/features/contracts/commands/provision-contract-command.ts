@@ -1,5 +1,6 @@
 import { omit } from 'lodash'
 import type { CommandContext } from '../../../cqs'
+import { isFaceCheckSupportEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { FaceCheckPhotoSupport } from '../../../generated/graphql'
 import type { Contract, CreateContractInput, UpdateContractInput } from '../../../services/verified-id'
 import {
@@ -10,6 +11,14 @@ import {
   standardContractDislayClaims,
 } from '../claims'
 import { ContractEntity } from '../entities/contract-entity'
+
+registerFeatureCheck(ProvisionContractCommand, async (context: CommandContext, id: string) => {
+  const repository = context.entityManager.getRepository(ContractEntity)
+
+  const contract = await repository.findOneByOrFail({ id })
+
+  isFaceCheckSupportEnabled(contract)
+})
 
 export async function ProvisionContractCommand(this: CommandContext, id: string) {
   const repository = this.entityManager.getRepository(ContractEntity)

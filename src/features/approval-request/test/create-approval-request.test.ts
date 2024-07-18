@@ -5,7 +5,7 @@ import { createApprovalRequestMutation, getDefaultApprovalRequestInput } from '.
 describe('create approval request mutation', () => {
   beforeAfterAll()
 
-  it('returns an error when in an anonymous context', async () => {
+  it('returns an unauthorized error when accessed anonymously', async () => {
     // Act
     const { errors } = await executeOperationAnonymous({
       query: createApprovalRequestMutation,

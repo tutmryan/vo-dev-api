@@ -2,6 +2,7 @@ import type { CommandContext, QueryContext } from '.'
 import type { GraphQLContext } from '../context'
 import { entityManager, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../data'
 import { addUserToManager } from '../features/auditing/user-context-helper'
+import { performFeatureCheck } from './feature-map'
 
 export type CommandLike = (this: CommandContext, ...args: any) => any
 export type QueryLike = (this: QueryContext, ...args: any) => any
@@ -18,18 +19,19 @@ export const dispatch = async <T extends CommandLike>(
       addUserToManager(entityManager, user.userEntity.id)
     }
 
-    return await command.apply(
-      {
-        user,
-        entityManager,
-        logger,
-        services,
-        dataLoaders,
-        requestInfo,
-        contextType: 'command',
-      },
-      args,
-    )
+    const ctx: CommandContext = {
+      user,
+      entityManager,
+      logger,
+      services,
+      dataLoaders,
+      requestInfo,
+      contextType: 'command',
+    }
+
+    await performFeatureCheck(ctx, command, args)
+
+    return await command.apply(ctx, args)
   })
 }
 

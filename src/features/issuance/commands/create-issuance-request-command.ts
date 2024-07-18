@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
 import { issuanceRequestRegistration } from '../../../config'
 import type { CommandContext } from '../../../cqs'
+import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { FaceCheckPhotoSupport, type IssuanceRequestInput } from '../../../generated/graphql'
 import type { IssuanceRequest } from '../../../services/verified-id'
 import { parseDataUrl } from '../../../util/data-url'
@@ -18,6 +19,8 @@ export type IssuanceRequestDetails = Pick<IssuanceEntity, 'id' | 'issuedById' | 
   Pick<IssuanceRequestInput, 'expirationDate'>
 
 type StandardClaimsData = Record<StandardClaims, string>
+
+registerFeatureCheck(CreateIssuanceRequestCommand, async (...[, input]) => isFaceCheckPhotoEnabled(input))
 
 export async function CreateIssuanceRequestCommand(
   this: CommandContext,

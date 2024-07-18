@@ -132,8 +132,8 @@ describe('list contracts and identity-based access', () => {
     const contract = data?.findContracts.find((c) => c.id === id.toUpperCase())
     expectToBeDefined(contract)
 
-    expectToBeDefined(contract.issuances)
-    expect(contract.issuances.length).toBeGreaterThanOrEqual(1)
+    expectToBeDefined(contract?.issuances)
+    expect(contract?.issuances.length).toBeGreaterThanOrEqual(1)
   })
 
   it('cannot find contracts with issuances (and presentations) for a different identity', async () => {
@@ -206,9 +206,8 @@ describe('issuance and data-access', () => {
 
     expect(errors).toBeUndefined()
 
-    expectToBeDefined(data?.contract)
-    expectToBeDefined(data.contract.issuances)
-    expect(data.contract.issuances.length).toBeGreaterThanOrEqual(1)
+    const { issuances } = expectToBeDefined(data?.contract)
+    expect(issuances.length).toBeGreaterThanOrEqual(1)
   })
 
   it('cannot query contract with issuances with the another identity specified', async () => {

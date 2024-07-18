@@ -1,9 +1,12 @@
 import { basename } from 'path'
 import type { CommandContext } from '../../../cqs'
-import type { TemplateInput } from '../../../generated/graphql'
+import { isFaceCheckSupportEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
+import { type TemplateInput } from '../../../generated/graphql'
 import { validateTemplateInput } from '../../contracts/validation'
 import { TemplateEntity } from '../entities/template-entity'
 import { ensureNoIntersectingTemplateData, toPersistedDisplayModel, toTemplateParentData } from '../mapping'
+
+registerFeatureCheck(UpdateTemplateCommand, async (...[, , input]) => isFaceCheckSupportEnabled(input))
 
 export async function UpdateTemplateCommand(this: CommandContext, id: string, input: TemplateInput) {
   const repository = this.entityManager.getRepository(TemplateEntity)

@@ -1,7 +1,7 @@
 import { addDays } from 'date-fns'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
 import type { LimitedApprovalOperationInput } from '../../../test'
-import { beforeAfterAll, executeOperationAsLimitedApprovalClient, expectToBeDefined, expectUnauthorizedError } from '../../../test'
+import { beforeAfterAll, executeOperationAsLimitedApprovalClient, expectUnauthorizedError } from '../../../test'
 import {
   actionApprovalRequestMutation,
   createApprovalRequest,
@@ -105,9 +105,7 @@ describe('action approval request', () => {
       limitedApprovalInput,
     )
     // Assert
-    expectToBeDefined(errors)
-    expectToBeDefined(errors[0])
-    expect(errors[0].message).toMatchInlineSnapshot(`"Cannot action an approval request that is approved"`)
+    expect(errors?.[0]?.message).toMatchInlineSnapshot(`"Cannot action an approval request that is approved"`)
   })
 
   it('returns an error when request is expired', async () => {
@@ -128,8 +126,6 @@ describe('action approval request', () => {
       limitedApprovalInput,
     )
     // Assert
-    expectToBeDefined(errors)
-    expectToBeDefined(errors[0])
-    expect(errors[0].message).toMatchInlineSnapshot(`"Cannot action an approval request that is expired"`)
+    expect(errors?.[0]?.message).toMatchInlineSnapshot(`"Cannot action an approval request that is expired"`)
   })
 })

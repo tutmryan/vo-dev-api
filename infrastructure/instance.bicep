@@ -184,7 +184,7 @@ resource limitedAccessClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022
   }
 }
 
-@description('The secret for limited access client data keys')
+@description('The secret for limited access data keys')
 @secure()
 param limitedAccessSecret string
 
@@ -214,7 +214,7 @@ resource limitedApprovalClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@20
   }
 }
 
-@description('The secret for limited approval client data keys')
+@description('The secret for limited approval data keys')
 @secure()
 param limitedApprovalSecret string
 
@@ -226,6 +226,36 @@ resource limitedApprovalSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-
       enabled: true
     }
     value: limitedApprovalSecret
+  }
+}
+
+@description('The client secret of the limited photo capture client')
+@secure()
+param limitedPhotoCaptureClientSecret string
+
+resource limitedPhotoCaptureClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-PHOTO-CAPTURE-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedPhotoCaptureClientSecret
+  }
+}
+
+@description('The secret for limited photo capture data keys')
+@secure()
+param limitedPhotoCaptureSecret string
+
+resource limitedPhotoCaptureSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-PHOTO-CAPTURE-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedPhotoCaptureSecret
   }
 }
 
@@ -286,6 +316,8 @@ param homeTenantVidServiceClientId string
 param homeTenantVidServiceClientSecret string
 @description('The flag indicating whether the dev tools (i.e. Apollo Sandbox, .etc) are deployed')
 param devToolsEnabled string
+@description('The flag indicating whether the face check features (i.e. issuing credentials with face check photo, .etc) are available')
+param faceCheckEnabled string
 @description('JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant')
 param additionalAuthTenantIds string
 
@@ -520,6 +552,8 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessSecretSecret.properties.secretUri})'
     LIMITED_APPROVAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedApprovalClientSecretSecret.properties.secretUri})'
     LIMITED_APPROVAL_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedApprovalSecretSecret.properties.secretUri})'
+    LIMITED_PHOTO_CAPTURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPhotoCaptureClientSecretSecret.properties.secretUri})'
+    LIMITED_PHOTO_CAPTURE_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPhotoCaptureSecretSecret.properties.secretUri})'
     HOME_TENANT_NAME: homeTenantName
     HOME_TENANT_ID: homeTenantId
     HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId
@@ -528,6 +562,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     HOME_TENANT_VID_SERVICE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantVidServiceClientSecretSecret.properties.secretUri})'
     VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
     DEV_TOOLS_ENABLED: devToolsEnabled
+    FACE_CHECK_ENABLED: faceCheckEnabled
     IDENTITY_ISSUERS: identityIssuers
     PLATFORM_CONSUMER_APPS: platformConsumerApps
     ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds

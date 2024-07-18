@@ -82,18 +82,19 @@ Add organisation variables and secrets to GitHub using the output from the previ
 
 Prefix the variable names with the hosting tenant name, e.g. `[NON_]PROD_AZURE_CLIENT_ID`.
 
-| Name                             | Value                                                                          |
-| -------------------------------- | ------------------------------------------------------------------------------ |
-| `AZURE_CLIENT_ID`                | The client ID of the deployment app registration                               |
-| `AZURE_TENANT_ID`                | The ID of the target tenant                                                    |
-| `AZURE_SUBSCRIPTION_ID`          | The ID of the target subscription                                              |
-| `KEY_VAULT_NAME`                 | The name of the key vault to hold signing keys used by Verified ID authorities |
-| `KEY_VAULT_RESOURCE_GROUP_NAME`  | The name of the resource group to hold Verified ID resources                   |
-| `DNS_API_KEY`                    | The GoDaddy DNS API key                                                        |
-| `DNS_API_SECRET`                 | The GoDaddy DNS API secret                                                     |
-| `LIMITED_ACCESS_CLIENT_SECRET`   | The client secret for the limited access client                                |
-| `LIMITED_APPROVAL_CLIENT_SECRET` | The client secret for the limited approval client                              |
-| `VID_CALLBACK_CLIENT_SECRET`     | The client secret for the VID callback client                                  |
+| Name                                  | Value                                                                          |
+| ------------------------------------- | ------------------------------------------------------------------------------ |
+| `AZURE_CLIENT_ID`                     | The client ID of the deployment app registration                               |
+| `AZURE_TENANT_ID`                     | The ID of the target tenant                                                    |
+| `AZURE_SUBSCRIPTION_ID`               | The ID of the target subscription                                              |
+| `KEY_VAULT_NAME`                      | The name of the key vault to hold signing keys used by Verified ID authorities |
+| `KEY_VAULT_RESOURCE_GROUP_NAME`       | The name of the resource group to hold Verified ID resources                   |
+| `DNS_API_KEY`                         | The GoDaddy DNS API key                                                        |
+| `DNS_API_SECRET`                      | The GoDaddy DNS API secret                                                     |
+| `LIMITED_ACCESS_CLIENT_SECRET`        | The client secret for the limited access client                                |
+| `LIMITED_APPROVAL_CLIENT_SECRET`      | The client secret for the limited approval client                              |
+| `LIMITED_PHOTO_CAPTURE_CLIENT_SECRET` | The client secret for the limited photo capture client                         |
+| `VID_CALLBACK_CLIENT_SECRET`          | The client secret for the VID callback client                                  |
 
 To do so:
 

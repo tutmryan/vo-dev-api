@@ -30,6 +30,7 @@ The environment should have deployment protection rules applied (required review
 
 - AUDIT_LOG_STREAMING_ENABLED (optional feature, use a value of `true` to enable provisioning of the Event Hubs and Stream Analytics job)
 - DEV_TOOLS_ENABLED (optional, use `false` to disable developer tools e.g. in production instances, defaults to `true` if not provided)
+- FACE_CHECK_ENABLED (optional, use `false` to disable Face Check feature e.g issuing credentials with face check photo, creating presentation request with face check; defaults to `true` if not provided)
 
 #### Instance configuration variables
 
@@ -42,6 +43,7 @@ The environment should have deployment protection rules applied (required review
 - API_COOKIE_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
 - LIMITED_ACCESS_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
 - LIMITED_APPROVAL_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
+- LIMITED_PHOTO_CAPTURE_SECRET: `node crypto.randomUUID().replace(/-/g, '')`
 - HOME_TENANT_GRAPH_CLIENT_SECRET (optional, only required for MS Graph integration)
 - HOME_TENANT_VID_SERVICE_CLIENT_SECRET (optional, only required for customer hosted authorities)
 

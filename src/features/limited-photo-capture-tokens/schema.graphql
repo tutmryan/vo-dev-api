@@ -1,0 +1,24 @@
+"""
+Input for acquiring a limited token for photo capture.
+"""
+input AcquireLimitedPhotoCaptureTokenInput {
+  """
+  The ID of the photo capture request to which access will be limited.
+  """
+  photoCaptureRequestId: UUID!
+}
+
+"""
+A limited photo capture token response.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type PhotoCaptureTokenResponse {
+  token: String!
+  expires: DateTime!
+}
+
+extend type Mutation {
+  """
+  Acquire a limited photo capture token that can be used to upload a photo for the photo capture request.
+  """
+  acquireLimitedPhotoCaptureToken(input: AcquireLimitedPhotoCaptureTokenInput!): PhotoCaptureTokenResponse!
+}

@@ -47,6 +47,7 @@ export type Config = {
    */
   instance: string
   devToolsEnabled: boolean
+  faceCheckEnabled: boolean
   authorityId: string
   database: {
     host: string
@@ -90,6 +91,10 @@ export type Config = {
     secret?: string
   }
   limitedApproval: {
+    credentials: ClientCredentials
+    secret?: string
+  }
+  limitedPhotoCapture: {
     credentials: ClientCredentials
     secret?: string
   }

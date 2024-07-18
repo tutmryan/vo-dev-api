@@ -186,6 +186,7 @@ jobs:
           node-env: nonprod
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
+          face-check-enabled: ${{ vars.FACE_CHECK_ENABLED }}
           identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
           platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 
@@ -215,11 +216,15 @@ jobs:
 
           internal-client-secret: ${{ secrets.NON_PROD_INTERNAL_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.NON_PROD_VID_CALLBACK_CLIENT_SECRET }}
+
           limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}
           limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
 
           limited-approval-client-secret: ${{ secrets.NON_PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
           limited-approval-secret: ${{ secrets.LIMITED_APPROVAL_SECRET }}
+
+          limited-photo-capture-client-secret: ${{ secrets.NON_PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
+          limited-photo-capture-secret: ${{ secrets.LIMITED_PHOTO_CAPTURE_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
@@ -350,6 +355,7 @@ jobs:
           node-env: production
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
+          face-check-enabled: ${{ vars.FACE_CHECK_ENABLED }}
           identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
           platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 
@@ -379,11 +385,15 @@ jobs:
 
           internal-client-secret: ${{ secrets.PROD_INTERNAL_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.PROD_VID_CALLBACK_CLIENT_SECRET }}
+
           limited-access-client-secret: ${{ secrets.PROD_LIMITED_ACCESS_CLIENT_SECRET }}
           limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
 
           limited-approval-client-secret: ${{ secrets.PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
           limited-approval-secret: ${{ secrets.LIMITED_APPROVAL_SECRET }}
+
+          limited-photo-capture-client-secret: ${{ secrets.PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
+          limited-photo-capture-secret: ${{ secrets.LIMITED_PHOTO_CAPTURE_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
