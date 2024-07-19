@@ -8,7 +8,7 @@ import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
 import type { AppRoles } from '../roles'
 import { InternalRoles, UserRoles } from '../roles'
 import schema from '../schema'
-import type { LimitedApprovalOperationInput } from './context'
+import type { LimitedApprovalOperationInput, LimitedPhotoCaptureOperationInput } from './context'
 import { buildJwt, createContext } from './context'
 
 export const server = new ApolloServer<GraphQLContext>({
@@ -24,9 +24,10 @@ const executeOperation = async <TData = Record<string, unknown>, TVariables exte
   jwtPayload?: JwtPayload,
   limitedAccessData?: AcquireLimitedAccessTokenInput,
   limitedApprovalData?: LimitedApprovalOperationInput,
+  limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
 ): Promise<FormattedExecutionResult<TData>> => {
   const response = await server.executeOperation(request, {
-    contextValue: await createContext(jwtPayload, limitedAccessData, limitedApprovalData),
+    contextValue: await createContext(jwtPayload, limitedAccessData, limitedApprovalData, limitedPhotoCaptureData),
   })
   if (response.body.kind !== 'single') throw new Error('Invalid response body kind')
   return response.body.singleResult as FormattedExecutionResult<TData>
@@ -93,6 +94,17 @@ export const executeOperationAsLimitedApprovalClient = async <
   limitedApprovalData?: LimitedApprovalOperationInput,
 ): Promise<FormattedExecutionResult<TData>> =>
   executeOperation(request, buildJwt({ roles: [InternalRoles.limitedApproval] }), undefined, limitedApprovalData)
+
+export const executeOperationAsLimitedPhotoCaptureClient = async <
+  TData = Record<string, unknown>,
+  TVariables extends VariableValues = VariableValues,
+>(
+  request: Omit<GraphQLRequest<TVariables>, 'query'> & {
+    query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
+  },
+  limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
+): Promise<FormattedExecutionResult<TData>> =>
+  executeOperation(request, buildJwt({ roles: [InternalRoles.limitedPhotoCapture] }), undefined, undefined, limitedPhotoCaptureData)
 
 export const executeOperationAsApp = async <TData = Record<string, unknown>, TVariables extends VariableValues = VariableValues>(
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {

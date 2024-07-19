@@ -15,13 +15,19 @@ export const createPhotoCaptureRequestMutation = graphql(`
   }
 `)
 
-const setup = Lazy(async () => {
+export const capturePhotoMutation = graphql(`
+  mutation CapturePhoto($photoCaptureRequestId: UUID!, $photo: String!) {
+    capturePhoto(photoCaptureRequestId: $photoCaptureRequestId, photo: $photo)
+  }
+`)
+
+export const setupPhotoCaptureData = Lazy(async () => {
   const [contract, identity] = await Promise.all([createContract(getDefaultContractInput()), createIdentity(createIdentityInput())])
   return { contract, identity }
 })
 
 export async function createPhotoCaptureRequest() {
-  const { contract, identity } = await setup()
+  const { contract, identity } = await setupPhotoCaptureData()
 
   return executeOperationAsApp(
     {

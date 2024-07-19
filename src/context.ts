@@ -9,6 +9,8 @@ import { dispatch } from './cqs'
 import { dataSource } from './data'
 import { getLimitedAccessData, LimitedAccessTokenAcquisitionRoles } from './features/limited-access-tokens'
 import { getLimitedApprovalData } from './features/limited-approval-tokens'
+import { getLimitedPhotoCaptureSession } from './features/limited-photo-capture-tokens'
+import { getPhotoCaptureData } from './features/photo-capture'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
 import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or-create-user'
 import { UserEntity } from './features/users/entities/user-entity'
@@ -49,12 +51,25 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
 
   // Special case: when called with a limited approval token:
   // - load the limited approval data associated with the token
-  // - load the user that acquired token
-  const isApprovalRequestApp = Array.isArray(claims.roles) && claims.roles.includes(InternalRoles.limitedApproval)
-  if (isApprovalRequestApp) {
+  // - load the user that created the approval request
+  const isApprovalRequestClient = Array.isArray(claims.roles) && claims.roles.includes(InternalRoles.limitedApproval)
+  if (isApprovalRequestClient) {
     const limitedApprovalData = await getLimitedApprovalData(token)
     const userEntity = await dataSource.getRepository(UserEntity).findOneOrFail({ where: { id: limitedApprovalData.userId } })
     return new User(claims, token, userEntity, undefined, limitedApprovalData)
+  }
+
+  // Special case: when called with a limited photo capture token:
+  // - load the photo capture data associated with the token
+  // - load the user that created the photo capture request
+  const isLimitedPhotoCaptureClient = Array.isArray(claims.roles) && claims.roles.includes(InternalRoles.limitedPhotoCapture)
+  if (isLimitedPhotoCaptureClient) {
+    const photoCaptureRequestId = await getLimitedPhotoCaptureSession(token)
+    invariant(photoCaptureRequestId, 'Invalid token')
+    const photoCaptureData = await getPhotoCaptureData(photoCaptureRequestId)
+    invariant(photoCaptureData, 'Invalid token')
+    const userEntity = await dataSource.getRepository(UserEntity).findOneOrFail({ where: { id: photoCaptureData.userId } })
+    return new User(claims, token, userEntity, undefined, undefined, photoCaptureData)
   }
 
   // If the claims do not include any of the plaform roles, return undefined

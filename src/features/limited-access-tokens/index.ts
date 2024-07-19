@@ -18,5 +18,5 @@ export async function getLimitedAccessData(token: string): Promise<LimitedAccess
 
 export async function setLimitedAccessData(token: string, data: LimitedAccessData): Promise<void> {
   const key = createKey(token, limitedAccess.secret)
-  await limitedAccessCache.set(key, JSON.stringify(data), { ttl: 60 * 60 }) // 1 hour - access tokens are valid for 50 minutes
+  await limitedAccessCache.set(key, JSON.stringify(data), { ttl: 60 * 60 }) // 1 hour - access tokens are valid for 50 minutes + 10 minute buffer
 }

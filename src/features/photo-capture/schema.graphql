@@ -36,4 +36,9 @@ extend type Mutation {
   Creates a request to support capturing a photo to be used in a subsequent issuance.
   """
   createPhotoCaptureRequest(request: PhotoCaptureRequest!): PhotoCaptureRequestResponse!
+  """
+  Captures a photo for the specified photo capture request, ready to be used in a subsequent issuance request.
+  The photo must be a [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) using base64 encoding.
+  """
+  capturePhoto(photoCaptureRequestId: UUID!, photo: String!): Void
 }

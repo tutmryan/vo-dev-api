@@ -27,6 +27,7 @@ import {
   isValidLimitedApprovalPresentationFilter,
   isValidLimitedPresentationRequestForApproval,
 } from './features/limited-approval-tokens/shield-rules'
+import { isValidCapturePhoto } from './features/photo-capture/shield-rules'
 import type { Resolvers } from './generated/graphql'
 import { AppRoles, UserRoles } from './roles'
 import { hasAnyRoleRuleWithName, hasRoleRule } from './util/shield-utils'
@@ -88,6 +89,7 @@ export const rules: ShieldSchema<Resolvers> = {
     createPresentationRequestForApproval: isValidLimitedPresentationRequestForApproval,
     actionApprovalRequest: and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId),
     createPhotoCaptureRequest: isAllowedToIssue,
+    capturePhoto: isValidCapturePhoto,
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
   Subscription: {

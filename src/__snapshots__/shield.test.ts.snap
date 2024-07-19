@@ -397,6 +397,18 @@ exports[`shield rules are setup correctly 1`] = `
           ]
         }
       ]
+    },
+    "capturePhoto": {
+      "rulesAnd": [
+        {
+          "name": "isLimitedPhotoCaptureUser",
+          "cache": "contextual"
+        },
+        {
+          "name": "isValidCapturePhotoRequestId",
+          "cache": "strict"
+        }
+      ]
     }
   },
   "Subscription": {

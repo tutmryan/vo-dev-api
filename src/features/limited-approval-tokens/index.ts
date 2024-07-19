@@ -24,7 +24,7 @@ export async function setLimitedApprovalData(token: string, data: LimitedApprova
 }
 
 export async function setLimitedApprovalDataByKey(key: string, data: LimitedApprovalData): Promise<void> {
-  await limitedApprovalCache.set(key, JSON.stringify(data), { ttl: 60 * 60 }) // 1 hour - access tokens are valid for 50 minutes
+  await limitedApprovalCache.set(key, JSON.stringify(data), { ttl: 60 * 60 }) // 1 hour - access tokens are valid for 50 minutes + 10 minute buffer
 }
 
 export const getLimitedApprovalKey = (token: string) => createKey(token, limitedApproval.secret)

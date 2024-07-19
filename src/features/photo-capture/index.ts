@@ -1,18 +1,20 @@
 import { newCacheSection } from '../../cache'
 import type { PhotoCaptureRequest } from '../../generated/graphql'
 
-export const photoCaptureRequestCache = newCacheSection('photoCaptureRequest')
+export const photoCaptureCache = newCacheSection('photoCaptureCache')
 
-export async function setPhotoCaptureRequest(id: string, request: PhotoCaptureRequest) {
-  await photoCaptureRequestCache.set(id, JSON.stringify(request))
+export type PhotoCaptureData = PhotoCaptureRequest & { photoCaptureRequestId: string; userId: string; photo?: string }
+
+export async function setPhotoCaptureData(id: string, data: PhotoCaptureData) {
+  await photoCaptureCache.set(id, JSON.stringify(data))
 }
 
-export async function getPhotoCaptureRequest(id: string): Promise<PhotoCaptureRequest | undefined> {
-  const data = await photoCaptureRequestCache.get(id)
+export async function getPhotoCaptureData(id: string): Promise<PhotoCaptureData | undefined> {
+  const data = await photoCaptureCache.get(id)
   if (!data) return undefined
-  return JSON.parse(data) as PhotoCaptureRequest
+  return JSON.parse(data) as PhotoCaptureData
 }
 
 export async function deletePhotoCaptureRequest(id: string) {
-  await photoCaptureRequestCache.delete(id)
+  await photoCaptureCache.delete(id)
 }

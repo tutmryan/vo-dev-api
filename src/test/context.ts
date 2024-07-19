@@ -7,6 +7,8 @@ import { dataSource } from '../data'
 import { setLimitedAccessData } from '../features/limited-access-tokens'
 import type { LimitedApprovalData } from '../features/limited-approval-tokens'
 import { setLimitedApprovalData } from '../features/limited-approval-tokens'
+import { setLimitedPhotoCaptureSession } from '../features/limited-photo-capture-tokens'
+import { setPhotoCaptureData, type PhotoCaptureData } from '../features/photo-capture'
 import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
 import { createDataLoaders } from '../loaders'
 import { logger } from '../logger'
@@ -48,20 +50,29 @@ export const buildJwt = ({
 })
 
 export type LimitedApprovalOperationInput = PartialBy<LimitedApprovalData, 'userId'>
+export type LimitedPhotoCaptureOperationInput = PartialBy<PhotoCaptureData, 'userId'> & { disableSession?: boolean }
 
 export const createContext = async (
   jwtPayload?: JwtPayload,
   limitedAccessInput?: AcquireLimitedAccessTokenInput,
   limitedApprovalInput?: LimitedApprovalOperationInput,
+  limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
 ): Promise<GraphQLContext> => {
   // create a user
   const token = randomUUID()
 
   // limited access and limited approval data injection
-  if (limitedAccessInput || limitedApprovalInput) {
+  if (limitedAccessInput || limitedApprovalInput || limitedPhotoCaptureData) {
     const userEntity = await findUpdateOrCreateUserEntity(jwtPayload!)
     if (limitedAccessInput) await setLimitedAccessData(token, Object.assign({ userId: userEntity.id }, limitedAccessInput))
     if (limitedApprovalInput) await setLimitedApprovalData(token, Object.assign({ userId: userEntity.id }, limitedApprovalInput))
+    if (limitedPhotoCaptureData) {
+      await setPhotoCaptureData(
+        limitedPhotoCaptureData.photoCaptureRequestId,
+        Object.assign({ userId: userEntity.id }, limitedPhotoCaptureData),
+      )
+      await setLimitedPhotoCaptureSession(token, limitedPhotoCaptureData.photoCaptureRequestId)
+    }
   }
 
   // create the context

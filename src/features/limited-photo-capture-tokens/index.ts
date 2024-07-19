@@ -1,15 +1,24 @@
 import { limitedPhotoCapture } from '../../config'
-import type { PhotoCaptureRequest } from '../../generated/graphql'
 import { createKey } from '../../util/token'
-import { photoCaptureRequestCache } from '../photo-capture'
+import { photoCaptureCache } from '../photo-capture'
 
-export async function setLimitedPhotoCaptureData(token: string, data: PhotoCaptureRequest): Promise<void> {
+export async function setLimitedPhotoCaptureSession(token: string, photoCaptureRequestId: string) {
   const key = getLimitedPhotoCaptureKey(token)
-  await setLimitedPhotoCaptureDataByKey(key, data)
+  await setLimitedPhotoCaptureSessionByKey(key, photoCaptureRequestId)
 }
 
-export async function setLimitedPhotoCaptureDataByKey(key: string, data: PhotoCaptureRequest): Promise<void> {
-  await photoCaptureRequestCache.set(key, JSON.stringify(data), { ttl: 60 * 60 }) // 1 hour - access tokens are valid for 50 minutes
+async function setLimitedPhotoCaptureSessionByKey(key: string, photoCaptureRequestId: string) {
+  await photoCaptureCache.set(key, photoCaptureRequestId, { ttl: 60 * 60 }) // 1 hour - access tokens are valid for 50 minutes + 10 minute buffer
 }
 
-export const getLimitedPhotoCaptureKey = (token: string) => createKey(token, limitedPhotoCapture.secret)
+export async function deleteLimitedPhotoCaptureSession(token: string) {
+  const key = getLimitedPhotoCaptureKey(token)
+  await photoCaptureCache.delete(key)
+}
+
+export async function getLimitedPhotoCaptureSession(token: string) {
+  const key = getLimitedPhotoCaptureKey(token)
+  return await photoCaptureCache.get(key)
+}
+
+const getLimitedPhotoCaptureKey = (token: string) => createKey(token, limitedPhotoCapture.secret)

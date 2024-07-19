@@ -62,7 +62,8 @@ export async function CreateIssuanceRequestCommand(
   // add issuance request claims input, overriding any contract-defined claim values
   if (claimsInput) Object.entries(claimsInput).forEach(([claim, value]) => (claims[claim] = value))
   // add face check photo claim, if supplied & allowed by the contract
-  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None) claims['photo'] = getFaceCheckClaimData(faceCheckPhoto)
+  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None)
+    claims['photo'] = parseAndReencodeFaceCheckPhoto(faceCheckPhoto)
 
   // add standard claims
   const standardClaims: StandardClaimsData = {
@@ -101,7 +102,7 @@ export async function CreateIssuanceRequestCommand(
 }
 
 // validates face check photo input and returns base64url encoded image data
-function getFaceCheckClaimData(faceCheckPhoto: string) {
+export function parseAndReencodeFaceCheckPhoto(faceCheckPhoto: string) {
   try {
     const { encoding, data } = parseDataUrl(faceCheckPhoto, {
       validMimeTypes: ['image/jpeg'],
