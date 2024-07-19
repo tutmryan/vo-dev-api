@@ -5,3 +5,14 @@ build
 coverage
 test-results.xml
 temp
+
+#
+# IDE - IntelliJ based
+#
+# Default (ignore everything)
+.idea/*
+# Prettier - run on save
+!.idea/prettier.xml
+# Lint - fix on save
+!.idea/jsLinters/
+!.idea/jsLinters/eslint.xml
