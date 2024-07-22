@@ -6,9 +6,7 @@ coverage
 test-results.xml
 temp
 
-#
 # IDE - IntelliJ based
-#
 # Default (ignore everything)
 .idea/*
 # Prettier - run on save
@@ -16,3 +14,9 @@ temp
 # Lint - fix on save
 !.idea/jsLinters/
 !.idea/jsLinters/eslint.xml
+
+# Mac directory/files
+.DS_Store
+
+# Windows directory/files
+Thumbs.db
