@@ -4,8 +4,16 @@ The verified orchestration platform GraphQL API backend repository.
 
 ## Developer prerequisites
 
-- docker
-- node v20 LTS
+- [Docker](https://www.docker.com/products/docker-desktop/)
+- [Node v20 LTS](https://nodejs.org/en/download/package-manager)
+
+## Developer IDE recommendations
+
+The VO solution is known to work well with [VSCode](https://code.visualstudio.com/) and [Webstorm](https://www.jetbrains.com/webstorm/).
+
+When using VSCode, the VO recommendation is to use the extensions listed in the `./vscode/extensions.json` file. After opening the solution in VSCode, you will prompt to you install these extensions if you don't already have them.
+
+For webstorm users, the VO recommendation is to enable 'Optimize imports' on save. This can be done by going to `Settings -> Tools -> Actions on Save ` and check the optimize imports`.
 
 ## Getting started
 
