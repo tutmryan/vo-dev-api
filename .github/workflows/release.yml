@@ -139,6 +139,9 @@ jobs:
           - instance: demo.nelnet
             resourceGroup: vo-demo-nelnet-instance
             resourcePrefix: vo-demo-nelnet
+          - instance: demo.komainu
+            resourceGroup: vo-demo-komainu-instance
+            resourcePrefix: vo-demo-komainu
     environment:
       name: ${{ matrix.instance }}
       url: ${{ matrix.instance }}.verifiedorchestration.com
