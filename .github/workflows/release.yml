@@ -142,6 +142,9 @@ jobs:
           - instance: demo.komainu
             resourceGroup: vo-demo-komainu-instance
             resourcePrefix: vo-demo-komainu
+          - instance: demo.openlearning
+            resourceGroup: vo-demo-openlearning-instance
+            resourcePrefix: vo-demo-openlearning
     environment:
       name: ${{ matrix.instance }}
       url: ${{ matrix.instance }}.verifiedorchestration.com
