@@ -1,5 +1,5 @@
 import { getClientCredentialsToken } from '@makerx/node-common'
-import { setLimitedPhotoCaptureSession } from '..'
+import { createLimitedPhotoCaptureSession } from '..'
 import { limitedPhotoCaptureAuth } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import type { AcquireLimitedPhotoCaptureTokenInput, PhotoCaptureTokenResponse } from '../../../generated/graphql'
@@ -17,9 +17,11 @@ export async function AcquireLimitedPhotoCaptureTokenCommand(
   invariant(photoCaptureRequest, 'The specified photo capture request does not exist')
   invariant(photoCaptureRequest.photo === undefined, 'The photo has already been captured for this request')
 
-  // acquire a token and store the request reference against the token for subsequent retrieval (by token)
+  // acquire a token
   const token = await getClientCredentialsToken(limitedPhotoCaptureAuth)
-  await setLimitedPhotoCaptureSession(token.access_token, input.photoCaptureRequestId)
+
+  // store the request reference against the token for subsequent retrieval (by token)
+  await createLimitedPhotoCaptureSession(token.access_token, input.photoCaptureRequestId)
 
   return {
     token: token.access_token,

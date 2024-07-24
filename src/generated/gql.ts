@@ -38,6 +38,7 @@ const documents = {
     "\n  mutation AcquireLimitedPhotoCaptureToken($input: AcquireLimitedPhotoCaptureTokenInput!) {\n    acquireLimitedPhotoCaptureToken(input: $input) {\n      token\n      expires\n    }\n  }\n": types.AcquireLimitedPhotoCaptureTokenDocument,
     "\n  mutation CreatePhotoCaptureRequest($request: PhotoCaptureRequest!) {\n    createPhotoCaptureRequest(request: $request) {\n      id\n      photoCaptureUrl\n      photoCaptureQrCode\n    }\n  }\n": types.CreatePhotoCaptureRequestDocument,
     "\n  mutation CapturePhoto($photoCaptureRequestId: UUID!, $photo: String!) {\n    capturePhoto(photoCaptureRequestId: $photoCaptureRequestId, photo: $photo)\n  }\n": types.CapturePhotoDocument,
+    "\n  query PhotoCaptureStatus($photoCaptureRequestId: UUID!) {\n    photoCaptureStatus(photoCaptureRequestId: $photoCaptureRequestId) {\n      status\n    }\n  }\n": types.PhotoCaptureStatusDocument,
     "\n  fragment TemplateParentDataFragment on Template {\n    parentData {\n      display {\n        locale\n        card {\n          title\n          issuedBy\n          backgroundColor\n          textColor\n          description\n          logo {\n            uri\n            description\n          }\n        }\n        consent {\n          title\n          instructions\n        }\n        claims {\n          label\n          claim\n          type\n          description\n          value\n        }\n      }\n      isPublic\n      validityIntervalInSeconds\n      credentialTypes\n    }\n  }\n  ": types.TemplateParentDataFragmentFragmentDoc,
     "\n  query GetTemplateParentDataQuery($id: ID!) {\n    template(id: $id) {\n      ...TemplateParentDataFragment\n    }\n  }": types.GetTemplateParentDataQueryDocument,
     "\n  fragment TemplateFragment on Template {\n    id\n    name\n    description\n    parent {\n      id\n      name\n      description\n      isPublic\n      validityIntervalInSeconds\n    }\n    display {\n      locale\n      card {\n        title\n        issuedBy\n        backgroundColor\n        textColor\n        description\n        logo {\n          uri\n          image\n          description\n        }\n      }\n      consent {\n        title\n        instructions\n      }\n      claims {\n        label\n        claim\n        type\n        description\n        value\n      }\n    }\n    isPublic\n    validityIntervalInSeconds\n    credentialTypes\n  }\n": types.TemplateFragmentFragmentDoc,
@@ -162,6 +163,10 @@ export function graphql(source: "\n  mutation CreatePhotoCaptureRequest($request
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation CapturePhoto($photoCaptureRequestId: UUID!, $photo: String!) {\n    capturePhoto(photoCaptureRequestId: $photoCaptureRequestId, photo: $photo)\n  }\n"): (typeof documents)["\n  mutation CapturePhoto($photoCaptureRequestId: UUID!, $photo: String!) {\n    capturePhoto(photoCaptureRequestId: $photoCaptureRequestId, photo: $photo)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query PhotoCaptureStatus($photoCaptureRequestId: UUID!) {\n    photoCaptureStatus(photoCaptureRequestId: $photoCaptureRequestId) {\n      status\n    }\n  }\n"): (typeof documents)["\n  query PhotoCaptureStatus($photoCaptureRequestId: UUID!) {\n    photoCaptureStatus(photoCaptureRequestId: $photoCaptureRequestId) {\n      status\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

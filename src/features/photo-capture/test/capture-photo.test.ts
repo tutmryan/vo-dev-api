@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto'
-import { capturePhotoMutation, createPhotoCaptureRequest, setupPhotoCaptureData } from '.'
+import { capturePhotoMutation, createPhotoCaptureRequest, pngPhotoDataUrl, setupPhotoCaptureData, validPhotoDataUrl } from '.'
 import { AppRoles, UserRoles } from '../../../roles'
 import {
   beforeAfterAll,
@@ -11,9 +11,6 @@ import {
   expectUnauthorizedError,
 } from '../../../test'
 import { acquireLimitedPhotoCaptureTokenMutation } from '../../limited-photo-capture-tokens/test'
-
-const validPhotoDataUrl = 'data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAATYAAAE2CAYAAADrvL6pAAAACXBI'
-const pngPhotoDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAATYAAAE2CAYAAADrvL6pAAAACXBI'
 
 describe('capturePhoto mutation', () => {
   beforeAfterAll()

@@ -7,7 +7,7 @@ import { dataSource } from '../data'
 import { setLimitedAccessData } from '../features/limited-access-tokens'
 import type { LimitedApprovalData } from '../features/limited-approval-tokens'
 import { setLimitedApprovalData } from '../features/limited-approval-tokens'
-import { setLimitedPhotoCaptureSession } from '../features/limited-photo-capture-tokens'
+import { createLimitedPhotoCaptureSession } from '../features/limited-photo-capture-tokens'
 import { setPhotoCaptureData, type PhotoCaptureData } from '../features/photo-capture'
 import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
 import { createDataLoaders } from '../loaders'
@@ -71,7 +71,7 @@ export const createContext = async (
         limitedPhotoCaptureData.photoCaptureRequestId,
         Object.assign({ userId: userEntity.id }, limitedPhotoCaptureData),
       )
-      await setLimitedPhotoCaptureSession(token, limitedPhotoCaptureData.photoCaptureRequestId)
+      await createLimitedPhotoCaptureSession(token, limitedPhotoCaptureData.photoCaptureRequestId)
     }
   }
 

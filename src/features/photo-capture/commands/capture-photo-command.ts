@@ -3,7 +3,7 @@ import type { CommandContext } from '../../../cqs'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { parseAndReencodeFaceCheckPhoto } from '../../issuance/commands/create-issuance-request-command'
-import { deleteLimitedPhotoCaptureSession } from '../../limited-photo-capture-tokens'
+import { completeLimitedPhotoCaptureSession } from '../../limited-photo-capture-tokens'
 
 export async function CapturePhotoCommand(this: CommandContext, photoCaptureRequestId: string, photo: string): Promise<void> {
   const { user } = this
@@ -22,5 +22,5 @@ export async function CapturePhotoCommand(this: CommandContext, photoCaptureRequ
   // persist the photo for subsequent retrieval
   user.limitedPhotoCaptureData.photo = base64Url
   await setPhotoCaptureData(photoCaptureRequestId, user.limitedPhotoCaptureData)
-  await deleteLimitedPhotoCaptureSession(user.token)
+  await completeLimitedPhotoCaptureSession(user.token, photoCaptureRequestId)
 }

@@ -209,6 +209,38 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual"
         }
       ]
+    },
+    "photoCaptureStatus": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "hasLimitedAccessData-limitedIssuance",
+                  "cache": "contextual"
+                }
+              ]
+            },
+            {
+              "name": "isValidLimitedIssuanceRequest",
+              "cache": "strict"
+            }
+          ]
+        }
+      ]
     }
   },
   "Mutation": {
@@ -511,6 +543,38 @@ exports[`shield rules are setup correctly 1`] = `
           ]
         }
       ]
+    },
+    "photoCaptureEvent": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "hasLimitedAccessData-limitedIssuance",
+                  "cache": "contextual"
+                }
+              ]
+            },
+            {
+              "name": "isValidLimitedIssuanceRequest",
+              "cache": "strict"
+            }
+          ]
+        }
+      ]
     }
   },
   "Contract": {
@@ -648,11 +712,6 @@ exports[`shield rules are setup correctly 1`] = `
       "rules": []
     }
   },
-  "PhotoCaptureTokenResponse": {
-    "*": {
-      "rules": []
-    }
-  },
   "ActionedApprovalData": {
     "*": {
       "rulesOr": [
@@ -677,6 +736,45 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "name": "isApprovalRequestApp",
           "cache": "contextual"
+        }
+      ]
+    }
+  },
+  "PhotoCaptureTokenResponse": {
+    "*": {
+      "rules": []
+    }
+  },
+  "PhotoCaptureEventData": {
+    "*": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "hasLimitedAccessData-limitedIssuance",
+                  "cache": "contextual"
+                }
+              ]
+            },
+            {
+              "name": "isValidLimitedIssuanceRequest",
+              "cache": "strict"
+            }
+          ]
         }
       ]
     }

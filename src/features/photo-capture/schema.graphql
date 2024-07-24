@@ -31,6 +31,34 @@ type PhotoCaptureRequestResponse {
   photoCaptureQrCode: String!
 }
 
+"""
+Data for a photo capture event.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type PhotoCaptureEventData {
+  status: PhotoCaptureStatus!
+}
+
+"""
+The status of the photo capture process.
+"""
+enum PhotoCaptureStatus {
+  """
+  The photo capture has not yet started
+  """
+  # eslint-disable-next-line @graphql-eslint/naming-convention
+  not_started
+  """
+  The photo capture has been started
+  """
+  # eslint-disable-next-line @graphql-eslint/naming-convention
+  started
+  """
+  The photo has been successfully captured
+  """
+  # eslint-disable-next-line @graphql-eslint/naming-convention
+  complete
+}
+
 extend type Mutation {
   """
   Creates a request to support capturing a photo to be used in a subsequent issuance.
@@ -41,4 +69,19 @@ extend type Mutation {
   The photo must be a [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) using base64 encoding.
   """
   capturePhoto(photoCaptureRequestId: UUID!, photo: String!): Void
+}
+
+extend type Subscription {
+  """
+  Returns events for the specified photo capture request.
+  """
+  photoCaptureEvent(photoCaptureRequestId: UUID!): PhotoCaptureEventData!
+}
+
+extend type Query {
+  """
+  Returns the current status of the specified photo capture request.
+  Note: this query is an alternative to the `photoCaptureEvent` subscription, suitable for polling behaviour.
+  """
+  photoCaptureStatus(photoCaptureRequestId: UUID!): PhotoCaptureEventData!
 }

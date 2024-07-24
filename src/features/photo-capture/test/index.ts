@@ -5,6 +5,9 @@ import { Lazy } from '../../../util/lazy'
 import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
 import { createIdentity, createIdentityInput } from '../../identity/create-update-identity.test'
 
+export const validPhotoDataUrl = 'data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAATYAAAE2CAYAAADrvL6pAAAACXBI'
+export const pngPhotoDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAATYAAAE2CAYAAADrvL6pAAAACXBI'
+
 export const createPhotoCaptureRequestMutation = graphql(`
   mutation CreatePhotoCaptureRequest($request: PhotoCaptureRequest!) {
     createPhotoCaptureRequest(request: $request) {

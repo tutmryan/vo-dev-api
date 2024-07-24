@@ -68,6 +68,7 @@ export const rules: ShieldSchema<Resolvers> = {
     networkContracts: isPartnerAdminUser,
     approvalRequest: or(isApprovalRequestAdminUser, and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId)),
     actionedApprovalData: or(isApprovalRequestAdminUser, isApprovalRequestApp),
+    photoCaptureStatus: isAllowedToIssue,
   },
   Mutation: {
     '*': isCredentialAdminUser,
@@ -103,6 +104,7 @@ export const rules: ShieldSchema<Resolvers> = {
       ),
     ),
     issuanceEvent: or(isIssuerUser, isCredentialAdminUser, and(requestIdFilterDefined, or(isIssuanceApp, isLimitedIssuanceApp))),
+    photoCaptureEvent: isAllowedToIssue,
   },
   Contract: {
     issuances: isAllowedToViewIssuances,
@@ -129,14 +131,17 @@ export const rules: ShieldSchema<Resolvers> = {
   ApprovalTokenResponse: {
     '*': allow,
   },
-  PhotoCaptureTokenResponse: {
-    '*': allow,
-  },
   ActionedApprovalData: {
     '*': or(isApprovalRequestAdminUser, isApprovalRequestApp),
   },
   ActionedBy: {
     '*': or(isApprovalRequestAdminUser, isApprovalRequestApp),
+  },
+  PhotoCaptureTokenResponse: {
+    '*': allow,
+  },
+  PhotoCaptureEventData: {
+    '*': isAllowedToIssue,
   },
 }
 export const permissions = wrappedShield(rules)

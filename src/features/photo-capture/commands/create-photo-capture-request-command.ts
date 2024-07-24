@@ -3,10 +3,11 @@ import QRCode from 'qrcode'
 import { setPhotoCaptureData } from '..'
 import { portalUrl } from '../../../config'
 import type { CommandContext } from '../../../cqs'
-import type { PhotoCaptureRequest, PhotoCaptureRequestResponse } from '../../../generated/graphql'
+import { PhotoCaptureStatus, type PhotoCaptureRequest, type PhotoCaptureRequestResponse } from '../../../generated/graphql'
 import { userInvariant } from '../../../util/user-invariant'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
+import { addPhotoCaptureEventDataToCache } from '../subscription/cache'
 
 export async function CreatePhotoCaptureRequestCommand(
   this: CommandContext,
@@ -26,6 +27,9 @@ export async function CreatePhotoCaptureRequestCommand(
   // generate URL and QR code for photo capture
   const photoCaptureUrl = `${portalUrl}/photo-capture/${photoCaptureRequestId}`
   const photoCaptureQrCode = await QRCode.toDataURL(photoCaptureUrl)
+
+  // add initial photo capture status data to cache
+  await addPhotoCaptureEventDataToCache({ photoCaptureRequestId, eventData: { status: PhotoCaptureStatus.NotStarted } })
 
   return {
     id: photoCaptureRequestId,

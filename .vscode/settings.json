@@ -10,8 +10,7 @@
     "extensions": [".ts", ".graphql"]
   },
   "typescript.preferences.quoteStyle": "single",
-  "jest.autoRun": "off",
-  "jest.showTerminalOnLaunch": false,
+  "jest.runMode": "on-demand",
   "[powershell]": {
     "editor.defaultFormatter": "ms-vscode.powershell"
   },
