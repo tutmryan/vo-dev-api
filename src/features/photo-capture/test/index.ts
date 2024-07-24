@@ -3,7 +3,7 @@ import { AppRoles } from '../../../roles'
 import { executeOperationAsApp } from '../../../test'
 import { Lazy } from '../../../util/lazy'
 import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
-import { createIdentity, createIdentityInput } from '../../identity/create-update-identity.test'
+import { createIdentity, createIdentityInput } from '../../identity/tests/create-identity'
 
 export const validPhotoDataUrl = 'data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAATYAAAE2CAYAAADrvL6pAAAACXBI'
 export const pngPhotoDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAATYAAAE2CAYAAADrvL6pAAAACXBI'

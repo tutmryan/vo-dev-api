@@ -6,7 +6,7 @@ import type { AcquireLimitedAccessTokenInput } from '../../../generated/graphql'
 import { beforeAfterAll, executeOperationAsLimitedAccessClient, expectToBeDefined, expectUnauthorizedError } from '../../../test'
 import { addUserToManager } from '../../auditing/user-context-helper'
 import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
-import { createIdentity } from '../../identity/create-update-identity.test'
+import { createIdentity } from '../../identity/tests/create-identity'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 

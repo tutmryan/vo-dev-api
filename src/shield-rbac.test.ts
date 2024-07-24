@@ -1,29 +1,11 @@
 import { buildContractInput } from './features/contracts/test/create-contract'
 import { updateContractMutation } from './features/contracts/test/update-contract'
+import { createIssuanceRequestMutation } from './features/issuance/tests/create-issuance'
 import { graphql } from './generated'
-import type { AcquireLimitedAccessTokenInput, CreatePartnerInput, IssuanceRequestInput } from './generated/graphql'
+import type { AcquireLimitedAccessTokenInput, CreatePartnerInput } from './generated/graphql'
 import { UserRoles } from './roles'
 import { beforeAfterAll, buildJwt, executeOperationAs, executeOperationAsCredentialAdmin, expectUnauthorizedError } from './test'
 
-const createIssuanceRequestMutation = graphql(
-  `
-  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
-    createIssuanceRequest(request: $request) {
-      ... on IssuanceResponse {
-        requestId
-        url
-        qrCode
-      }
-      ... on RequestErrorResponse {
-        error {
-          code
-          message
-        }
-      }
-    }
-  }
-` as const,
-)
 const createPartnerMutation = graphql(
   `
   mutation CreatePartner($input: CreatePartnerInput!) {
@@ -51,7 +33,7 @@ describe('smoke test shield rules application', () => {
     async () => {
       const { errors } = await executeOperationAsCredentialAdmin({
         query: createIssuanceRequestMutation,
-        variables: { request: { contractId: 'contract-1' } as IssuanceRequestInput },
+        variables: { request: { contractId: 'contract-1' } },
       })
       expect(errors).toBeDefined()
       expectUnauthorizedError(errors)

@@ -1,13 +1,13 @@
 import { randomUUID } from 'crypto'
-import { mock as AdminService, mockCreateContract } from '../../services/__mocks__/verified-id'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
+import { mockAdminServiceHelper } from '../../test/mock-services'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
 import { provisionContractMutation } from './test/provision-contract'
 
 describe('deprecateContract mutation', () => {
   beforeAfterAll()
-  beforeEach(() => AdminService.clearAllMocks())
+  beforeEach(() => mockAdminServiceHelper.clearAllMocks())
 
   async function givenContract() {
     const contract = await createContract(buildContractInput({}))
@@ -36,7 +36,7 @@ describe('deprecateContract mutation', () => {
     // Arrange
     const { contract } = await givenContract()
     const externalContractId = randomUUID()
-    mockCreateContract.mockResolvedValue({ id: externalContractId })
+    mockAdminServiceHelper.createContract.resolveWith(mockAdminServiceHelper.createContract.buildResolve({ id: externalContractId }))
     await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,
       variables: {
