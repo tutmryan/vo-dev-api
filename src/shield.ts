@@ -43,7 +43,7 @@ const isApprovalRequestAdminUser = hasRoleRule(UserRoles.approvalRequestAdmin)
 const isIssuanceApp = hasRoleRule(AppRoles.issue, 'isIssuanceApp')
 const isPresentationApp = hasRoleRule(AppRoles.present, 'isPresentationApp')
 
-const isAllowedToIssue = or(isIssuerUser, isIssuanceApp, isValidLimitedIssuanceRequest)
+const isIssuer = or(isIssuerUser, isIssuanceApp, isLimitedIssuanceApp)
 
 const fallbackRule = or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isLimitedAccessApp, isLimitedApprovalApp)
 
@@ -68,14 +68,14 @@ export const rules: ShieldSchema<Resolvers> = {
     networkContracts: isPartnerAdminUser,
     approvalRequest: or(isApprovalRequestAdminUser, and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId)),
     actionedApprovalData: or(isApprovalRequestAdminUser, isApprovalRequestApp),
-    photoCaptureStatus: isAllowedToIssue,
+    photoCaptureStatus: isIssuer,
   },
   Mutation: {
     '*': isCredentialAdminUser,
     acquireLimitedAccessToken: and(hasTokenAcquisitionRole, isValidAcquireLimitedAccessTokenRequest),
     acquireLimitedApprovalToken: allow,
     acquireLimitedPhotoCaptureToken: allow,
-    createIssuanceRequest: isAllowedToIssue,
+    createIssuanceRequest: or(isIssuerUser, isIssuanceApp, isValidLimitedIssuanceRequest),
     createPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedPresentationRequest),
     saveIdentity: or(
       isIssuerUser,
@@ -89,7 +89,7 @@ export const rules: ShieldSchema<Resolvers> = {
     createApprovalRequest: isApprovalRequestApp,
     createPresentationRequestForApproval: isValidLimitedPresentationRequestForApproval,
     actionApprovalRequest: and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId),
-    createPhotoCaptureRequest: isAllowedToIssue,
+    createPhotoCaptureRequest: isIssuer,
     capturePhoto: isValidCapturePhoto,
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
@@ -104,7 +104,7 @@ export const rules: ShieldSchema<Resolvers> = {
       ),
     ),
     issuanceEvent: or(isIssuerUser, isCredentialAdminUser, and(requestIdFilterDefined, or(isIssuanceApp, isLimitedIssuanceApp))),
-    photoCaptureEvent: isAllowedToIssue,
+    photoCaptureEvent: isIssuer,
   },
   Contract: {
     issuances: isAllowedToViewIssuances,
@@ -141,7 +141,7 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': allow,
   },
   PhotoCaptureEventData: {
-    '*': isAllowedToIssue,
+    '*': isIssuer,
   },
 }
 export const permissions = wrappedShield(rules)

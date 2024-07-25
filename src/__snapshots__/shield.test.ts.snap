@@ -223,20 +223,12 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "rulesAnd": [
             {
-              "rulesAnd": [
-                {
-                  "name": "isLimitedAccessApp",
-                  "cache": "contextual"
-                },
-                {
-                  "name": "hasLimitedAccessData-limitedIssuance",
-                  "cache": "contextual"
-                }
-              ]
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
             },
             {
-              "name": "isValidLimitedIssuanceRequest",
-              "cache": "strict"
+              "name": "hasLimitedAccessData-limitedIssuance",
+              "cache": "contextual"
             }
           ]
         }
@@ -411,20 +403,12 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "rulesAnd": [
             {
-              "rulesAnd": [
-                {
-                  "name": "isLimitedAccessApp",
-                  "cache": "contextual"
-                },
-                {
-                  "name": "hasLimitedAccessData-limitedIssuance",
-                  "cache": "contextual"
-                }
-              ]
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
             },
             {
-              "name": "isValidLimitedIssuanceRequest",
-              "cache": "strict"
+              "name": "hasLimitedAccessData-limitedIssuance",
+              "cache": "contextual"
             }
           ]
         }
@@ -557,20 +541,12 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "rulesAnd": [
             {
-              "rulesAnd": [
-                {
-                  "name": "isLimitedAccessApp",
-                  "cache": "contextual"
-                },
-                {
-                  "name": "hasLimitedAccessData-limitedIssuance",
-                  "cache": "contextual"
-                }
-              ]
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
             },
             {
-              "name": "isValidLimitedIssuanceRequest",
-              "cache": "strict"
+              "name": "hasLimitedAccessData-limitedIssuance",
+              "cache": "contextual"
             }
           ]
         }
@@ -759,20 +735,12 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "rulesAnd": [
             {
-              "rulesAnd": [
-                {
-                  "name": "isLimitedAccessApp",
-                  "cache": "contextual"
-                },
-                {
-                  "name": "hasLimitedAccessData-limitedIssuance",
-                  "cache": "contextual"
-                }
-              ]
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
             },
             {
-              "name": "isValidLimitedIssuanceRequest",
-              "cache": "strict"
+              "name": "hasLimitedAccessData-limitedIssuance",
+              "cache": "contextual"
             }
           ]
         }
