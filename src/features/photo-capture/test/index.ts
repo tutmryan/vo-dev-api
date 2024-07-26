@@ -25,8 +25,6 @@ export const capturePhotoMutation = graphql(`
   }
 `)
 
-export const validPhotoDataUrl = 'data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAATYAAAE2CAYAAADrvL6pAAAACXBI'
-
 export async function capturePhoto(request: { photo: string; photoCaptureRequestId: string; contractId: string; identityId: string }) {
   const { photo, photoCaptureRequestId, contractId, identityId } = request
   return await executeOperationAsLimitedPhotoCaptureClient(
