@@ -14,6 +14,7 @@ import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import type { IssuanceEntity } from '../entities/issuance-entity'
+import { getPhotoCaptureData } from '../../photo-capture'
 
 export type IssuanceRequestDetails = Pick<IssuanceEntity, 'id' | 'issuedById' | 'identityId' | 'contractId' | 'hasFaceCheckPhoto'> &
   Pick<IssuanceRequestInput, 'expirationDate'>
@@ -24,7 +25,15 @@ registerFeatureCheck(CreateIssuanceRequestCommand, async (...[, input]) => isFac
 
 export async function CreateIssuanceRequestCommand(
   this: CommandContext,
-  { contractId, identityId, identity: identityInput, claims: claimsInput, faceCheckPhoto, ...rest }: IssuanceRequestInput,
+  {
+    contractId,
+    identityId,
+    identity: identityInput,
+    claims: claimsInput,
+    faceCheckPhoto,
+    photoCaptureRequestId,
+    ...rest
+  }: IssuanceRequestInput,
 ) {
   const {
     user,
@@ -46,8 +55,22 @@ export async function CreateIssuanceRequestCommand(
   invariant(provisionedContract, 'Published contract could not be found')
 
   // validate the face check photo input
-  if (contract.faceCheckSupport === FaceCheckPhotoSupport.Required)
-    invariant(faceCheckPhoto, 'Face check photo is required for issuance of this contract')
+  if (contract.faceCheckSupport === FaceCheckPhotoSupport.Required) {
+    invariant(
+      faceCheckPhoto || photoCaptureRequestId,
+      'Face check photo or photo capture request Id is required for issuance of this contract',
+    )
+  }
+
+  if (contract.faceCheckSupport === FaceCheckPhotoSupport.None) {
+    invariant(
+      !faceCheckPhoto && !photoCaptureRequestId,
+      'Contract must support face check when providing either a face check photo or a photo capture request id',
+    )
+  }
+
+  // validate that there is either no image data or the image data is from a single source
+  invariant(!faceCheckPhoto || !photoCaptureRequestId, 'Face check photo cannot be provided when using a photo capture')
 
   // find or create the identity
   let identity: IdentityEntity
@@ -64,6 +87,23 @@ export async function CreateIssuanceRequestCommand(
   // add face check photo claim, if supplied & allowed by the contract
   if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None)
     claims['photo'] = parseAndReencodeFaceCheckPhoto(faceCheckPhoto)
+
+  // validate the photo capture request matches to the contract and identity
+  // and where it does, set the faceCheckPhoto to the photo data
+  if (photoCaptureRequestId) {
+    const photoCaptureRequest = await getPhotoCaptureData(photoCaptureRequestId)
+    invariant(photoCaptureRequest, 'Photo capture request not found')
+    invariant(
+      photoCaptureRequest.contractId.toUpperCase() === contractId.toUpperCase(),
+      'Photo capture request must be for the same contract',
+    )
+    invariant(
+      photoCaptureRequest.identityId.toUpperCase() === identity.id.toUpperCase(),
+      'Photo capture request must be for the same identity',
+    )
+    invariant(photoCaptureRequest.photo, 'Photo capture request must have a photo captured')
+    claims['photo'] = photoCaptureRequest.photo
+  }
 
   // add standard claims
   const standardClaims: StandardClaimsData = {

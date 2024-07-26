@@ -1,6 +1,7 @@
 import { graphql } from '../../../generated'
+import type { PhotoCaptureRequest } from '../../../generated/graphql'
 import { AppRoles } from '../../../roles'
-import { executeOperationAsApp } from '../../../test'
+import { executeOperationAsApp, executeOperationAsLimitedPhotoCaptureClient } from '../../../test'
 import { Lazy } from '../../../util/lazy'
 import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
 import { createIdentity, createIdentityInput } from '../../identity/tests/create-identity'
@@ -24,22 +25,45 @@ export const capturePhotoMutation = graphql(`
   }
 `)
 
+export const validPhotoDataUrl = 'data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAATYAAAE2CAYAAADrvL6pAAAACXBI'
+
+export async function capturePhoto(request: { photo: string; photoCaptureRequestId: string; contractId: string; identityId: string }) {
+  const { photo, photoCaptureRequestId, contractId, identityId } = request
+  return await executeOperationAsLimitedPhotoCaptureClient(
+    {
+      query: capturePhotoMutation,
+      variables: {
+        photoCaptureRequestId,
+        photo,
+      },
+    },
+    {
+      contractId,
+      identityId,
+      photoCaptureRequestId,
+    },
+  )
+}
+
 export const setupPhotoCaptureData = Lazy(async () => {
   const [contract, identity] = await Promise.all([createContract(getDefaultContractInput()), createIdentity(createIdentityInput())])
   return { contract, identity }
 })
 
-export async function createPhotoCaptureRequest() {
-  const { contract, identity } = await setupPhotoCaptureData()
+export async function createPhotoCaptureRequest(request?: PhotoCaptureRequest) {
+  if (!request) {
+    const { contract, identity } = await setupPhotoCaptureData()
+    request = {
+      contractId: contract.id,
+      identityId: identity.id,
+    }
+  }
 
   return executeOperationAsApp(
     {
       query: createPhotoCaptureRequestMutation,
       variables: {
-        request: {
-          contractId: contract.id,
-          identityId: identity.id,
-        },
+        request,
       },
     },
     AppRoles.issue,
