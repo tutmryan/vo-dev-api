@@ -34,8 +34,6 @@ describe('limited access issuance', () => {
       { identityId, issuableContractIds: [contractId] },
     )
 
-    console.log(data?.createIssuanceRequest)
-
     expectToBeDefined(data?.createIssuanceRequest)
     expect(errors).toBeUndefined()
   })

@@ -690,7 +690,6 @@ Contains information about the error.
 type RequestError {
   code: String!
   message: String!
-
 }
 
 """
