@@ -42,6 +42,7 @@ input IssuanceRequestInput {
   The issuee's photo for the purpose of face check presentation verification, also displayed via the authenticator app.
   The image content type and encoding must be: `image/jpg;base64`.
   For more info on the photo requirements, see the [Face Check documentation](https://learn.microsoft.com/en-us/entra/verified-id/using-facecheck#what-are-the-requirements-for-the-photo-in-the-verified-id)
+  Please note that optional image data can only be provided by a single source, either from the faceCheckPhoto or the photoCaptureRequestId properties.
   """
   faceCheckPhoto: String
 
@@ -55,6 +56,13 @@ input IssuanceRequestInput {
   Please note that the date should be in ISO format.
   """
   expirationDate: DateTime
+
+  """
+  The ID of the photo capture request, which can be included in a subsequent issuance request to use the captured photo one single time.
+  Please note that the photo capture request is only valid for a single issuance.
+  Please note that optional image data can only be provided by a single source, either from the faceCheckPhoto or the photoCaptureRequestId properties.
+  """
+  photoCaptureRequestId: ID
 }
 
 """
@@ -682,6 +690,7 @@ Contains information about the error.
 type RequestError {
   code: String!
   message: String!
+
 }
 
 """
