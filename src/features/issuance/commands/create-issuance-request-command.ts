@@ -58,14 +58,14 @@ export async function CreateIssuanceRequestCommand(
   if (contract.faceCheckSupport === FaceCheckPhotoSupport.Required) {
     invariant(
       faceCheckPhoto || photoCaptureRequestId,
-      'Face check photo or photo capture request Id is required for issuance of this contract',
+      'Face check photo or using a photo capture request is required for issuance of this contract',
     )
   }
 
   if (contract.faceCheckSupport === FaceCheckPhotoSupport.None) {
     invariant(
       !faceCheckPhoto && !photoCaptureRequestId,
-      'Contract must support face check when providing either a face check photo or a photo capture request id',
+      'Contract must support face check when providing either a face check photo or using a photo capture request',
     )
   }
 
