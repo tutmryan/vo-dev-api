@@ -32,7 +32,7 @@ export async function createIssuanceRequest(request: IssuanceRequestInput, limit
   )
 
   if (errors) {
-    throw new Error(`Error while creating a contract: ${JSON.stringify(errors)}`)
+    throw new Error(`Error while creating a issuance request: ${JSON.stringify(errors)}`)
   }
 
   return data!.createIssuanceRequest

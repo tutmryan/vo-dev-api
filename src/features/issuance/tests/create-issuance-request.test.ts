@@ -43,7 +43,7 @@ async function givenPhotoCapture(request: PhotoCaptureRequest) {
   })
 
   if (captureErrors) {
-    throw new Error(`Error while creating a contract: ${JSON.stringify(captureErrors)}`)
+    throw new Error(`Error while capturing a photo: ${JSON.stringify(captureErrors)}`)
   }
 
   return data!.createPhotoCaptureRequest
