@@ -105,8 +105,6 @@ export async function CreateIssuanceRequestCommand(
     )
     invariant(photoCaptureRequest.photo, 'Photo capture request must have a photo captured')
     claims['photo'] = photoCaptureRequest.photo
-    // remove the cache, as the photo data is designed to be used a single time
-    await deletePhotoCaptureRequest(photoCaptureRequestId)
   }
 
   // add standard claims
@@ -128,6 +126,9 @@ export async function CreateIssuanceRequestCommand(
 
   // send it
   const response = await request.createIssuanceRequest(issuanceRequest)
+
+  // if this was a photo capture, remove the cache, as the photo data is designed to be used a single time
+  if (photoCaptureRequestId) await deletePhotoCaptureRequest(photoCaptureRequestId)
 
   // cache issuance details for use in the callback
   const requestDetails: IssuanceRequestDetails = {
