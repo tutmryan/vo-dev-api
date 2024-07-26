@@ -1,6 +1,7 @@
 import '../services/__mocks__/blob-storage-container-service'
 import { fakeDownloadToDataURL } from './data-url'
-export { mock as MockAdminService, mockCreateContract, mockUpdateContract } from '../services/__mocks__/verified-id'
+export { helper as mockAdminServiceHelper } from '../services/__mocks__/verified-id'
+export { helper as mockRequestServiceHelper } from '../services/__mocks__/verified-request'
 export const mockDownloadToDataURL = jest.fn(fakeDownloadToDataURL)
 
 export function mockServices() {

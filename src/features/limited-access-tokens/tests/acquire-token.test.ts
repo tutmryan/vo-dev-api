@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { graphql } from '../../../generated'
 import type { AccessTokenResponse, AcquireLimitedAccessTokenInput } from '../../../generated/graphql'
 import { beforeAfterAll, buildJwt, executeOperationAs, expectUnauthorizedError } from '../../../test'
-import { createIdentityInput, saveIdentityMutation } from '../../identity/create-update-identity.test'
+import { createIdentityInput, saveIdentityMutation } from '../../identity/tests/create-identity'
 import { LimitedAccessTokenAcquisitionRoles } from '../shield-rules'
 
 const getClientCredentialsTokenMock = jest.fn(() => ({ access_token: randomUUID(), expires: 1000 * 60 * 50 }))

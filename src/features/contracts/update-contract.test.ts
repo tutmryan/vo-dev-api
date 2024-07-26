@@ -9,7 +9,7 @@ import {
   fakeJpegDataURL,
   fakePngDataURL,
 } from '../../test'
-import { MockAdminService, mockCreateContract } from '../../test/mock-services'
+import { mockAdminServiceHelper } from '../../test/mock-services'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
@@ -20,7 +20,7 @@ import { getUpdateContractInput, updateContractMutation } from './test/update-co
 describe('updateContract mutation', () => {
   beforeAfterAll()
   beforeEach(() => {
-    MockAdminService.clearAllMocks()
+    mockAdminServiceHelper.clearAllMocks()
   })
 
   async function givenContract({ withTemplate = false }: { withTemplate?: boolean }) {
@@ -145,7 +145,7 @@ describe('updateContract mutation', () => {
     // Arrange
     const { contract } = await givenContract({ withTemplate: true })
     const externalContractId = randomUUID()
-    mockCreateContract.mockResolvedValue({ id: externalContractId })
+    mockAdminServiceHelper.createContract.resolveWith(mockAdminServiceHelper.createContract.buildResolve({ id: externalContractId }))
     //publishing for the first time
     await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,

@@ -9,3 +9,7 @@ export type DeepPartial<T> = T extends object
   : T
 
 export type Nullable<T> = T | null | undefined
+
+export type AwaitedReturnTypeOf<Service, Method extends keyof Service> = Awaited<
+  ReturnType<Service[Method] extends (...args: any) => any ? Service[Method] : never>
+>

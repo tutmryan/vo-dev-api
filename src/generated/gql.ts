@@ -25,14 +25,14 @@ const documents = {
     "\n  mutation UpdateContract($id: ID!, $input: ContractInput!) {\n    updateContract(id: $id, input: $input) {\n      ...ContractFragment\n    }\n  }\n": types.UpdateContractDocument,
     "\n  query Healthcheck {\n    healthcheck\n  }\n": types.HealthcheckDocument,
     "\n  query Identity($id: ID!) {\n    identity(id: $id) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": types.IdentityDocument,
-    "\n  mutation SaveIdentity($input: IdentityInput!) {\n    saveIdentity(input: $input) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": types.SaveIdentityDocument,
     "\n  query FindIdentities($where: IdentityWhere, $limit: PositiveInt, $offset: PositiveInt) {\n    findIdentities(where: $where, limit: $limit, offset: $offset) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": types.FindIdentitiesDocument,
+    "\n  mutation SaveIdentity($input: IdentityInput!) {\n    saveIdentity(input: $input) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": types.SaveIdentityDocument,
+    "\n  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {\n    createIssuanceRequest(request: $request) {\n      ... on IssuanceResponse {\n        requestId\n        url\n        qrCode\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n        }\n      }\n    }\n  }\n": types.CreateIssuanceRequestDocument,
     "\n  mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {\n    acquireLimitedAccessToken(input: $input) {\n      expires\n      token\n    }\n  }\n": types.AcquireLimitedAccessTokenDocument,
     "\n  query FindContracts($where: ContractWhere, $forIdentityId: ID) {\n    findContracts(where: $where) {\n      id\n      credentialTypes\n      display {\n        card {\n          title\n          issuedBy\n          backgroundColor\n          textColor\n          description\n          logo {\n            uri\n            description\n          }\n        }\n      }\n      issuances(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        issuedAt\n        expiresAt\n      }\n      presentations(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        presentedAt\n      }\n    }\n  }\n": types.FindContractsDocument,
     "\n  query Contract($id: ID!, $forIdentityId: ID) {\n    contract(id: $id) {\n      id\n      credentialTypes\n      display {\n        card {\n          title\n          issuedBy\n          backgroundColor\n          textColor\n          description\n          logo {\n            uri\n            description\n          }\n        }\n      }\n      issuances(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        issuedAt\n        expiresAt\n      }\n      presentations(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        presentedAt\n      }\n    }\n  }\n": types.ContractDocument,
     "\n  query FindIssuances($where: IssuanceWhere) {\n    findIssuances(where: $where) {\n      issuedAt\n    }\n  }\n": types.FindIssuancesDocument,
     "\n  query CredentialTypes {\n    credentialTypes\n  }\n": types.CredentialTypesDocument,
-    "\n  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {\n    createIssuanceRequest(request: $request) {\n      ... on IssuanceResponse {\n        requestId\n        url\n        qrCode\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n        }\n      }\n    }\n  }\n": types.CreateIssuanceRequestDocument,
     "\n  mutation CreatePresentationRequest($request: PresentationRequestInput!) {\n    createPresentationRequest(request: $request) {\n      ... on PresentationResponse {\n        requestId\n        url\n        qrCode\n        expiry\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n          innererror {\n            code\n            message\n            target\n          }\n        }\n      }\n    }\n  }\n": types.CreatePresentationRequestDocument,
     "\n  mutation AcquireLimitedApprovalToken($input: AcquireLimitedApprovalTokenInput!) {\n    acquireLimitedApprovalToken(input: $input) {\n      token\n      expires\n    }\n  }\n": types.AcquireLimitedApprovalTokenDocument,
     "\n  mutation AcquireLimitedPhotoCaptureToken($input: AcquireLimitedPhotoCaptureTokenInput!) {\n    acquireLimitedPhotoCaptureToken(input: $input) {\n      token\n      expires\n    }\n  }\n": types.AcquireLimitedPhotoCaptureTokenDocument,
@@ -114,11 +114,15 @@ export function graphql(source: "\n  query Identity($id: ID!) {\n    identity(id
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  query FindIdentities($where: IdentityWhere, $limit: PositiveInt, $offset: PositiveInt) {\n    findIdentities(where: $where, limit: $limit, offset: $offset) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n"): (typeof documents)["\n  query FindIdentities($where: IdentityWhere, $limit: PositiveInt, $offset: PositiveInt) {\n    findIdentities(where: $where, limit: $limit, offset: $offset) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  mutation SaveIdentity($input: IdentityInput!) {\n    saveIdentity(input: $input) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation SaveIdentity($input: IdentityInput!) {\n    saveIdentity(input: $input) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query FindIdentities($where: IdentityWhere, $limit: PositiveInt, $offset: PositiveInt) {\n    findIdentities(where: $where, limit: $limit, offset: $offset) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n"): (typeof documents)["\n  query FindIdentities($where: IdentityWhere, $limit: PositiveInt, $offset: PositiveInt) {\n    findIdentities(where: $where, limit: $limit, offset: $offset) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n"];
+export function graphql(source: "\n  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {\n    createIssuanceRequest(request: $request) {\n      ... on IssuanceResponse {\n        requestId\n        url\n        qrCode\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {\n    createIssuanceRequest(request: $request) {\n      ... on IssuanceResponse {\n        requestId\n        url\n        qrCode\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n        }\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -139,10 +143,6 @@ export function graphql(source: "\n  query FindIssuances($where: IssuanceWhere) 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query CredentialTypes {\n    credentialTypes\n  }\n"): (typeof documents)["\n  query CredentialTypes {\n    credentialTypes\n  }\n"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {\n    createIssuanceRequest(request: $request) {\n      ... on IssuanceResponse {\n        requestId\n        url\n        qrCode\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {\n    createIssuanceRequest(request: $request) {\n      ... on IssuanceResponse {\n        requestId\n        url\n        qrCode\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n        }\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

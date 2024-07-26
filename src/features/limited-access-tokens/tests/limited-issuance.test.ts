@@ -1,10 +1,10 @@
 import casual from 'casual'
 import { randomUUID } from 'crypto'
-import { graphql } from '../../../generated'
 import { beforeAfterAll, executeOperationAsLimitedAccessClient, expectToBeDefined, expectUnauthorizedError } from '../../../test'
+import { createIssuanceRequestMutation } from '../../issuance/tests/create-issuance'
 
 // this test is all about testing the limited access authorization rules (../shield-rules.ts)
-// we we're going to mock the resolver, underneath the shield schema middleware
+// we're going to mock the resolver, underneath the shield schema middleware
 
 jest.mock('../../issuance/resolvers', () => {
   const originalModule = jest.requireActual('../../issuance/resolvers')
@@ -19,24 +19,6 @@ jest.mock('../../issuance/resolvers', () => {
   }
 })
 
-const createIssuanceMutation = graphql(`
-  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
-    createIssuanceRequest(request: $request) {
-      ... on IssuanceResponse {
-        requestId
-        url
-        qrCode
-      }
-      ... on RequestErrorResponse {
-        error {
-          code
-          message
-        }
-      }
-    }
-  }
-`)
-
 describe('limited access issuance', () => {
   beforeAfterAll()
 
@@ -46,7 +28,7 @@ describe('limited access issuance', () => {
 
     const { data, errors } = await executeOperationAsLimitedAccessClient(
       {
-        query: createIssuanceMutation,
+        query: createIssuanceRequestMutation,
         variables: { request: { contractId, identityId } },
       },
       { identityId, issuableContractIds: [contractId] },
@@ -62,7 +44,7 @@ describe('limited access issuance', () => {
 
     const { errors } = await executeOperationAsLimitedAccessClient(
       {
-        query: createIssuanceMutation,
+        query: createIssuanceRequestMutation,
         variables: { request: { contractId: randomUUID(), identityId } },
       },
       { identityId, issuableContractIds: [contractId] },
@@ -77,7 +59,7 @@ describe('limited access issuance', () => {
 
     const { data, errors } = await executeOperationAsLimitedAccessClient(
       {
-        query: createIssuanceMutation,
+        query: createIssuanceRequestMutation,
         variables: { request: { contractId } },
       },
       { identityId, issuableContractIds: [contractId] },
@@ -93,7 +75,7 @@ describe('limited access issuance', () => {
 
     const { errors } = await executeOperationAsLimitedAccessClient(
       {
-        query: createIssuanceMutation,
+        query: createIssuanceRequestMutation,
         variables: { request: { contractId, identityId: randomUUID() } },
       },
       { identityId, issuableContractIds: [contractId] },
