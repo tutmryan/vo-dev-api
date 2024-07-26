@@ -91,8 +91,7 @@ export async function CreateIssuanceRequestCommand(
   if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None)
     claims['photo'] = parseAndReencodeFaceCheckPhoto(faceCheckPhoto)
 
-  // validate the photo capture request matches to the contract and identity
-  // and where it does, set the faceCheckPhoto to the photo data
+  // validate the photo capture request matches to the contract and identity, set the claims data, and remove the capture cache
   if (photoCaptureRequestId) {
     const photoCaptureRequest = await getPhotoCaptureData(photoCaptureRequestId)
     invariant(photoCaptureRequest, 'Photo capture request not found')
