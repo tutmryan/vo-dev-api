@@ -69,8 +69,11 @@ export async function CreateIssuanceRequestCommand(
     )
   }
 
-  // validate that there is either no image data or the image data is from a single source
-  invariant(!faceCheckPhoto || !photoCaptureRequestId, 'Face check photo cannot be provided when using a photo capture')
+  // validate that there is either no image data (false, false) or the image data is from a single source (false, true) | (true, false)
+  invariant(
+    (!faceCheckPhoto && !photoCaptureRequestId) || (faceCheckPhoto && !photoCaptureRequestId) || (!faceCheckPhoto && photoCaptureRequestId),
+    'Face check photo cannot be provided when using a photo capture request',
+  )
 
   // find or create the identity
   let identity: IdentityEntity
