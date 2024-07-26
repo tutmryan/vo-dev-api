@@ -2,7 +2,7 @@ import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { addYears } from 'date-fns'
 import type { AwaitedReturnTypeOf } from '../../util/type-helpers'
-import type { VerifiedIdRequestService } from '../verified-id/request'
+import type { IssuanceRequest, VerifiedIdRequestService } from '../verified-id/request'
 import type { IssuanceResponse } from '../../generated/graphql'
 
 type ServiceReturn<Method extends keyof VerifiedIdRequestService> = AwaitedReturnTypeOf<VerifiedIdRequestService, Method>
@@ -29,5 +29,6 @@ export const helper = {
     mock: mockCreateIssuanceRequest,
     resolveWith: (v: ServiceReturn<'createIssuanceRequest'>) => mockCreateIssuanceRequest.mockResolvedValue(v),
     buildResolve: buildCreateIssuanceRequestReturn,
+    getLastCallArg: () => mockCreateIssuanceRequest.mock.calls[mockCreateIssuanceRequest.mock.calls.length - 1][0] as IssuanceRequest,
   },
 }
