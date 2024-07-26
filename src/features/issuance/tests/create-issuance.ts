@@ -3,7 +3,7 @@ import type { AcquireLimitedAccessTokenInput, IssuanceRequestInput } from '../..
 import { executeOperationAsLimitedAccessClient } from '../../../test'
 
 export const createIssuanceRequestMutation = graphql(`
-  mutation CreateIssuanceRequestT($request: IssuanceRequestInput!) {
+  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
     createIssuanceRequest(request: $request) {
       ... on IssuanceResponse {
         requestId
