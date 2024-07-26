@@ -21,7 +21,7 @@ type RequestServiceOptions = HttpClientOptions<BaseContext> & {
   presentationCallbackAuthConfig: ClientCredentialsConfig
 }
 
-export type IssuanceRequest = Omit<IssuanceRequestInput, 'contractId' | 'identity' | 'identityId'> & {
+export type IssuanceRequest = Pick<IssuanceRequestInput, 'includeQRCode' | 'callback' | 'pin' | 'claims' | 'expirationDate'> & {
   authority: string
   manifest: string
   registration: IssuanceRequestRegistration
@@ -39,7 +39,10 @@ export interface IssuanceRequestRegistration {
   termsOfServiceUrl?: URL
 }
 
-export type PresentationRequest = Omit<PresentationRequestInput, 'requestedContracts' | 'identity' | 'identityId'> & {
+export type PresentationRequest = Pick<
+  PresentationRequestInput,
+  'includeQRCode' | 'includeReceipt' | 'registration' | 'callback' | 'requestedCredentials'
+> & {
   authority: string
 }
 
