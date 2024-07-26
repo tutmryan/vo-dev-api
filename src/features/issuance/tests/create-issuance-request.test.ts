@@ -224,7 +224,7 @@ describe('createIssuanceRequest mutation', () => {
         {},
       )
     })
-    it('fails when the contract specifies face check and either photo or photo request id is provided', async () => {
+    it('fails when the contract specifies face check none and either photo or photo request id is provided', async () => {
       await doValidationCheck(
         {
           faceCheckSupport: FaceCheckPhotoSupport.None,
