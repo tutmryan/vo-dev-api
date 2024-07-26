@@ -1,6 +1,6 @@
 import { graphql } from '../../../generated'
-import type { IssuanceRequestInput } from '../../../generated/graphql'
-import { executeOperationAsCredentialAdmin } from '../../../test'
+import type { AcquireLimitedAccessTokenInput, IssuanceRequestInput } from '../../../generated/graphql'
+import { executeOperationAsLimitedAccessClient } from '../../../test'
 
 export const createIssuanceRequestMutation = graphql(`
   mutation CreateIssuanceRequestT($request: IssuanceRequestInput!) {
@@ -20,13 +20,16 @@ export const createIssuanceRequestMutation = graphql(`
   }
 `)
 
-export async function createIssuanceRequest(request: IssuanceRequestInput) {
-  const { data, errors } = await executeOperationAsCredentialAdmin({
-    query: createIssuanceRequestMutation,
-    variables: {
-      request,
+export async function createIssuanceRequest(request: IssuanceRequestInput, limitedAccessData: AcquireLimitedAccessTokenInput) {
+  const { data, errors } = await executeOperationAsLimitedAccessClient(
+    {
+      query: createIssuanceRequestMutation,
+      variables: {
+        request,
+      },
     },
-  })
+    limitedAccessData,
+  )
 
   if (errors) {
     throw new Error(`Error while creating a contract: ${JSON.stringify(errors)}`)

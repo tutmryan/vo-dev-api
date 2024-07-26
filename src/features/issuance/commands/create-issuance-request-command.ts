@@ -14,7 +14,7 @@ import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import type { IssuanceEntity } from '../entities/issuance-entity'
-import { getPhotoCaptureData } from '../../photo-capture'
+import { deletePhotoCaptureRequest, getPhotoCaptureData } from '../../photo-capture'
 
 export type IssuanceRequestDetails = Pick<IssuanceEntity, 'id' | 'issuedById' | 'identityId' | 'contractId' | 'hasFaceCheckPhoto'> &
   Pick<IssuanceRequestInput, 'expirationDate'>
@@ -103,6 +103,8 @@ export async function CreateIssuanceRequestCommand(
     )
     invariant(photoCaptureRequest.photo, 'Photo capture request must have a photo captured')
     claims['photo'] = photoCaptureRequest.photo
+    // remove the cache, as the photo data is designed to be used a single time
+    await deletePhotoCaptureRequest(photoCaptureRequestId)
   }
 
   // add standard claims

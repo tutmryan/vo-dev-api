@@ -7,7 +7,7 @@ import { provisionContract } from '../../contracts/test/provision-contract'
 import { createIdentity } from '../../identity/tests/create-identity'
 import { capturePhoto, createPhotoCaptureRequest } from '../../photo-capture/test'
 import { parseAndReencodeFaceCheckPhoto } from '../commands/create-issuance-request-command'
-import { createIssuanceRequestMutation } from './create-issuance'
+import { createIssuanceRequest, createIssuanceRequestMutation } from './create-issuance'
 
 const credentialType = 'issuance-test'
 const externalContractId = randomUUID()
@@ -113,7 +113,7 @@ describe('createIssuanceRequest mutation', () => {
     const issuanceRequest = mockRequestServiceHelper.createIssuanceRequest.getLastCallArg()
     expect(issuanceRequest.claims!['photo']).toBe(parseAndReencodeFaceCheckPhoto(faceCheckPhoto))
   })
-  it('works with face check when passing the photo request id', async () => {
+  it('works with face check when passing the photo capture request id', async () => {
     // Arrange
     const { contract } = await givenContract({
       faceCheckSupport: FaceCheckPhotoSupport.Required,
@@ -147,6 +147,45 @@ describe('createIssuanceRequest mutation', () => {
     // Assert the photo was passed to the issuance request
     const issuanceRequest = mockRequestServiceHelper.createIssuanceRequest.getLastCallArg()
     expect(issuanceRequest.claims!['photo']).toBe(parseAndReencodeFaceCheckPhoto(photoCapturePhoto))
+  })
+  it('fails with face check when passing a previously used photo capture request id', async () => {
+    // Arrange
+    const { contract } = await givenContract({
+      faceCheckSupport: FaceCheckPhotoSupport.Required,
+    })
+    const identity = await createIdentity()
+    const photoCaptureRequest = await givenPhotoCapture({
+      contractId: contract.id,
+      identityId: identity.id,
+    })
+    withMockedAdminService()
+    await createIssuanceRequest(
+      {
+        contractId: contract.id,
+        identityId: identity.id,
+        photoCaptureRequestId: photoCaptureRequest.id,
+      },
+      { identityId: identity.id, issuableContractIds: [contract.id] },
+    )
+
+    // Act
+    const { errors, data } = await executeOperationAsLimitedAccessClient(
+      {
+        query: createIssuanceRequestMutation,
+        variables: {
+          request: {
+            contractId: contract.id,
+            identityId: identity.id,
+            photoCaptureRequestId: photoCaptureRequest.id,
+          },
+        },
+      },
+      { identityId: identity.id, issuableContractIds: [contract.id] },
+    )
+
+    // Assert
+    expect(errors).toBeDefined()
+    expect(data).toBeDefined()
   })
   describe('face check validation', () => {
     async function doValidationCheck(
