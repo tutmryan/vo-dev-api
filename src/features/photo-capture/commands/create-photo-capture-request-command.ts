@@ -9,6 +9,8 @@ import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { addPhotoCaptureEventDataToCache } from '../subscription/cache'
 
+const qrCodeImageWidth = 292 // same size as Microsoft VID QR codes
+
 export async function CreatePhotoCaptureRequestCommand(
   this: CommandContext,
   request: PhotoCaptureRequest,
@@ -26,7 +28,7 @@ export async function CreatePhotoCaptureRequestCommand(
 
   // generate URL and QR code for photo capture
   const photoCaptureUrl = `${portalUrl}/photo-capture/${photoCaptureRequestId}`
-  const photoCaptureQrCode = await QRCode.toDataURL(photoCaptureUrl)
+  const photoCaptureQrCode = await QRCode.toDataURL(photoCaptureUrl, { width: qrCodeImageWidth })
 
   // add initial photo capture status data to cache
   await addPhotoCaptureEventDataToCache({ photoCaptureRequestId, eventData: { status: PhotoCaptureStatus.NotStarted } })
