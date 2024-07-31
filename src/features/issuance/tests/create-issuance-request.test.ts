@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto'
 import { ContractInput, FaceCheckPhotoSupport, type IssuanceRequestInput, type PhotoCaptureRequest } from '../../../generated/graphql'
 import { beforeAfterAll, executeOperationAsLimitedAccessClient } from '../../../test'
 import { mockAdminServiceHelper, mockRequestServiceHelper } from '../../../test/mock-services'
+import { NonNullableFields, WithRequired } from '../../../util/type-helpers'
 import { buildContractInput, createContract } from '../../contracts/test/create-contract'
 import { provisionContract } from '../../contracts/test/provision-contract'
 import { createIdentity } from '../../identity/tests/create-identity'
@@ -28,7 +29,7 @@ async function givenContract({ faceCheckSupport }: { faceCheckSupport?: Contract
   return { contract }
 }
 
-async function givenPhotoCapture(request: PhotoCaptureRequest) {
+async function givenPhotoCapture(request: NonNullableFields<WithRequired<PhotoCaptureRequest, 'identityId'>>) {
   const { data, errors } = await createPhotoCaptureRequest(request)
 
   if (errors) {

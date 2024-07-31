@@ -1,9 +1,14 @@
 import { newCacheSection } from '../../cache'
 import type { PhotoCaptureRequest } from '../../generated/graphql'
+import type { NonNullableFields, WithRequired } from '../../util/type-helpers'
 
 export const photoCaptureCache = newCacheSection('photoCaptureCache')
 
-export type PhotoCaptureData = PhotoCaptureRequest & { photoCaptureRequestId: string; userId: string; photo?: string }
+export type PhotoCaptureData = NonNullableFields<WithRequired<PhotoCaptureRequest, 'identityId'>> & {
+  photoCaptureRequestId: string
+  userId: string
+  photo?: string
+}
 
 export async function setPhotoCaptureData(id: string, data: PhotoCaptureData) {
   await photoCaptureCache.set(id, JSON.stringify(data))

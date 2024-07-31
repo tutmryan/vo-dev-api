@@ -1,10 +1,11 @@
 import { randomUUID } from 'crypto'
-import { createPhotoCaptureRequest, createPhotoCaptureRequestMutation } from '.'
+import { createPhotoCaptureRequest, createPhotoCaptureRequestMutation, setupPhotoCaptureData } from '.'
 import { AppRoles, UserRoles } from '../../../roles'
 import {
   beforeAfterAll,
   executeOperationAnonymous,
   executeOperationAsApp,
+  executeOperationAsLimitedAccessClient,
   executeOperationAsUser,
   expectUnauthorizedError,
 } from '../../../test'
@@ -126,5 +127,85 @@ describe('createPhotoCaptureRequest mutation', () => {
       photoCaptureUrl: expect.stringMatching(/^https:\/\/test.portal.verifiedorchestration.com\/photo-capture\/(.*)$/),
       photoCaptureQrCode: expect.stringMatching(/^data:image\/png;base64,(.*)$/),
     })
+  })
+
+  it('works as a limited access issuance app without specifying identityId', async () => {
+    // Arrange
+    const { contract, identity } = await setupPhotoCaptureData()
+
+    // Act
+    const { data, errors } = await executeOperationAsLimitedAccessClient(
+      {
+        query: createPhotoCaptureRequestMutation,
+        variables: {
+          request: {
+            contractId: contract.id,
+          },
+        },
+      },
+      {
+        issuableContractIds: [contract.id],
+        identityId: identity.id,
+      },
+    )
+
+    // Assert
+    expect(errors).toBeUndefined()
+    expect(data?.createPhotoCaptureRequest).toMatchObject({
+      id: expect.any(String),
+      photoCaptureUrl: expect.stringMatching(/^https:\/\/test.portal.verifiedorchestration.com\/photo-capture\/(.*)$/),
+      photoCaptureQrCode: expect.stringMatching(/^data:image\/png;base64,(.*)$/),
+    })
+  })
+
+  it('fails when a limited access app uses the wrong contractId', async () => {
+    // Arrange
+    const { contract, identity } = await setupPhotoCaptureData()
+
+    // Act
+    const { errors, data } = await executeOperationAsLimitedAccessClient(
+      {
+        query: createPhotoCaptureRequestMutation,
+        variables: {
+          request: {
+            contractId: contract.id,
+          },
+        },
+      },
+      {
+        issuableContractIds: [randomUUID()],
+        identityId: identity.id,
+      },
+    )
+
+    // Assert
+    expect(data).toBeNull()
+    expectUnauthorizedError(errors)
+  })
+
+  it('fails when a limited access app uses the wrong identityId', async () => {
+    // Arrange
+    const { contract, identity } = await setupPhotoCaptureData()
+
+    // Act
+    const { errors, data } = await executeOperationAsLimitedAccessClient(
+      {
+        query: createPhotoCaptureRequestMutation,
+        variables: {
+          request: {
+            identityId: identity.id,
+            contractId: contract.id,
+          },
+        },
+      },
+      {
+        issuableContractIds: [contract.id],
+        identityId: randomUUID(),
+      },
+    )
+
+    // Assert
+    expect(data).toBeNull()
+    expectUnauthorizedError(errors)
   })
 })

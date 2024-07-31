@@ -1626,8 +1626,12 @@ export type PhotoCaptureEventData = {
 export type PhotoCaptureRequest = {
   /** The ID of the contract which will be issued with captured photo. */
   contractId: Scalars['UUID']['input'];
-  /** The ID of the identity who will be issued a credential with the captured photo. */
-  identityId: Scalars['UUID']['input'];
+  /**
+   * The ID of the identity who will be issued a credential with the captured photo.
+   *
+   * - Not required when issuing using a limited access token
+   */
+  identityId?: InputMaybe<Scalars['UUID']['input']>;
 };
 
 /** The ID, URL and QR code for a photo capture request. */

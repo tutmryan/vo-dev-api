@@ -13,3 +13,9 @@ export type Nullable<T> = T | null | undefined
 export type AwaitedReturnTypeOf<Service, Method extends keyof Service> = Awaited<
   ReturnType<Service[Method] extends (...args: any) => any ? Service[Method] : never>
 >
+
+export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
+
+export type NonNullableFields<T> = {
+  [P in keyof T]: NonNullable<T[P]>
+}

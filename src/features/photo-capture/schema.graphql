@@ -9,8 +9,10 @@ input PhotoCaptureRequest {
   contractId: UUID!
   """
   The ID of the identity who will be issued a credential with the captured photo.
+
+  - Not required when issuing using a limited access token
   """
-  identityId: UUID!
+  identityId: UUID
 }
 
 """

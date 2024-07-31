@@ -4,6 +4,7 @@ import { setPhotoCaptureData } from '..'
 import { portalUrl } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import { PhotoCaptureStatus, type PhotoCaptureRequest, type PhotoCaptureRequestResponse } from '../../../generated/graphql'
+import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
@@ -13,18 +14,22 @@ const qrCodeImageWidth = 292 // same size as Microsoft VID QR codes
 
 export async function CreatePhotoCaptureRequestCommand(
   this: CommandContext,
-  request: PhotoCaptureRequest,
+  { identityId: requestIdentityId, ...request }: PhotoCaptureRequest,
 ): Promise<PhotoCaptureRequestResponse> {
   const { user, entityManager } = this
   userInvariant(user)
 
+  // consume identityId from limited access data OR input
+  const identityId = user.limitedAccessData?.identityId ?? requestIdentityId
+  invariant(identityId, 'identityId is required unless using a limited access token')
+
   // validate input
   await entityManager.getRepository(ContractEntity).findOneByOrFail({ id: request.contractId })
-  await entityManager.getRepository(IdentityEntity).findOneByOrFail({ id: request.identityId })
+  await entityManager.getRepository(IdentityEntity).findOneByOrFail({ id: identityId })
 
   // persist photo capture data in cache for subsequent retrieval
   const photoCaptureRequestId = randomUUID()
-  await setPhotoCaptureData(photoCaptureRequestId, { ...request, photoCaptureRequestId, userId: user.userEntity.id })
+  await setPhotoCaptureData(photoCaptureRequestId, { ...request, identityId, photoCaptureRequestId, userId: user.userEntity.id })
 
   // generate URL and QR code for photo capture
   const photoCaptureUrl = `${portalUrl}/photo-capture/${photoCaptureRequestId}`

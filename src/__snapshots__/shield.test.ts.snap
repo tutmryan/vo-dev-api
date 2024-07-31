@@ -403,12 +403,20 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "rulesAnd": [
             {
-              "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "hasLimitedAccessData-limitedIssuance",
+                  "cache": "contextual"
+                }
+              ]
             },
             {
-              "name": "hasLimitedAccessData-limitedIssuance",
-              "cache": "contextual"
+              "name": "isValidLimitedIssuancePhotoCaptureRequest",
+              "cache": "strict"
             }
           ]
         }
