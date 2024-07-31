@@ -9,7 +9,7 @@ import { userInvariant } from '../../../util/user-invariant'
 import { faceCheckPhotoClaimAttestation } from '../../contracts/claims'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
-import { PartnerEntity } from '../../network/entities/partner-entity'
+import { PartnerEntity } from '../../partners/entities/partner-entity'
 import type { PresentationEntity } from '../entities/presentation-entity'
 
 export type PresentationRequestDetails = Pick<PresentationEntity, 'requestedById' | 'identityId' | 'requestedCredentials'> & {

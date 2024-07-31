@@ -6,7 +6,7 @@ import { UserEntity } from '../features/users/entities/user-entity';
 import { IssuanceEntity } from '../features/issuance/entities/issuance-entity';
 import { PresentationEntity } from '../features/presentation/entities/presentation-entity';
 import { IdentityEntity } from '../features/identity/entities/identity-entity';
-import { PartnerEntity } from '../features/network/entities/partner-entity';
+import { PartnerEntity } from '../features/partners/entities/partner-entity';
 import { ApprovalRequestEntity } from '../features/approval-request/entities/approval-request-entity';
 import { GraphQLContext } from '../context';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
@@ -1195,7 +1195,7 @@ export type IssuanceRequestInput = {
    */
   includeQRCode?: InputMaybe<Scalars['Boolean']['input']>;
   /**
-   * The ID of the photo capture request, which can be included in a subsequent issuance request to use the captured photo a single time.
+   * The ID of the completed photo capture request to use for the face check photo.
    * Please note that the photo capture request is only valid for a single issuance.
    * Please note that optional image data can only be provided by a single source, either from the faceCheckPhoto or the photoCaptureRequestId properties.
    */

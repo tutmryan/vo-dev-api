@@ -4,7 +4,7 @@ import type { PresentedCredential, RequestCredential } from '../../../generated/
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
-import { PartnerEntity } from '../../network/entities/partner-entity'
+import { PartnerEntity } from '../../partners/entities/partner-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
 export type PresentedData = Omit<PresentedCredential, 'claims'>
