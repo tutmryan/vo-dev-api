@@ -12,28 +12,46 @@ import {
 import { invariant } from '../../../util/invariant'
 import { addPhotoCaptureEventDataToCache, getPhotoCaptureEventDataFromCache } from './cache'
 
-const PHOTO_CAPTURE_TOPIC = 'photo-capture'
+const photoCaptureTopic = (photoCaptureRequestId: string) => `photo-capture.${photoCaptureRequestId}`
 
 export type PhotoCaptureTopicData = Pick<PhotoCaptureData, 'photoCaptureRequestId'> & { eventData: PhotoCaptureEventData }
 
 export const publishPhotoCaptureEvent = async (data: PhotoCaptureTopicData): Promise<void> => {
-  await pubsub.publish(PHOTO_CAPTURE_TOPIC, data)
   await addPhotoCaptureEventDataToCache(data)
+  await pubsub.publish(photoCaptureTopic(data.photoCaptureRequestId), data)
 }
 
+const eventIsFinal = (eventData: PhotoCaptureEventData) => eventData.status === PhotoCaptureStatus.Complete
+
 export const subscribeToPhotoCaptureEvents = (args: SubscriptionPhotoCaptureEventArgs) => {
+  const iterator = pubsub.asyncIterator<PhotoCaptureTopicData>(photoCaptureTopic(args.photoCaptureRequestId))
+
   let count = 0
-  const iterator = pubsub.asyncIterator<PhotoCaptureEventData>(PHOTO_CAPTURE_TOPIC)
+  let done = false
+
   return {
     next: async () => {
-      // check for cached completed event data and return it
-      const cachedData = await getPhotoCaptureEventDataFromCache(args.photoCaptureRequestId)
-      if (cachedData && cachedData.eventData.status === PhotoCaptureStatus.Complete) return { done: count++ === 1, value: cachedData }
-      // validate that the photo capture request is still in progress
-      const inProgressData = await getPhotoCaptureData(args.photoCaptureRequestId)
-      invariant(inProgressData, 'The requested photo capture request was not found or was completed some time ago')
-      // use the pubsub iterator to receive the next event
-      return iterator.next.call(iterator)
+      // eagerly end iteration
+      if (done) return { done: true, value: undefined }
+
+      // when subscribing
+      if (count++ === 0) {
+        // check for cached final event data
+        const cachedData = await getPhotoCaptureEventDataFromCache(args.photoCaptureRequestId)
+        if (cachedData && eventIsFinal(cachedData.eventData)) {
+          done = true
+          return { value: cachedData }
+        }
+
+        // otherwise, validate that the photo capture request is still in progress
+        const inProgressData = await getPhotoCaptureData(args.photoCaptureRequestId)
+        invariant(inProgressData, 'The requested photo capture request was not found or was completed some time ago')
+      }
+
+      // inspect values to eagerly end iteration when the event is final
+      const next = await iterator.next.call(iterator)
+      if (!next.done && eventIsFinal(next.value.eventData)) done = true
+      return next
     },
     return: iterator.return!.bind(iterator),
     throw: iterator.throw!.bind(iterator),

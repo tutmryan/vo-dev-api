@@ -24,15 +24,34 @@ export const publishIssuanceEvent = async (data: IssuanceTopicData): Promise<voi
   pubsub.publish(ISSUANCE_TOPIC, data)
 }
 
+const eventIsFinal = (data: IssuanceTopicData) =>
+  [IssuanceRequestStatus.IssuanceSuccessful, IssuanceRequestStatus.IssuanceError].includes(data.event.requestStatus)
+
 export const subscribeToIssuanceEvents = (args?: SubscriptionIssuanceEventArgs) => {
-  let count = 0
   const iterator = pubsub.asyncIterator<IssuanceTopicData>(ISSUANCE_TOPIC)
+
+  let count = 0
+  let done = false
+
   return {
     next: async () => {
-      if (!args?.where?.requestId) return iterator.next.call(iterator)
-      const data = await getIssuanceDataFromCache(args.where.requestId)
-      if (!data || data.event.requestStatus === IssuanceRequestStatus.RequestRetrieved) return iterator.next.call(iterator)
-      return { done: count++ === 1, value: data }
+      // eagerly end iteration
+      if (done) return { done: true, value: undefined }
+
+      // when subscribing by requestId
+      if (count++ === 0 && args?.where?.requestId) {
+        // check for cached final event data
+        const cachedData = await getIssuanceDataFromCache(args.where.requestId)
+        if (cachedData && eventIsFinal(cachedData)) {
+          done = true
+          return { value: cachedData }
+        }
+      }
+
+      // inspect values to eagerly end iteration for requestId subscribers when the event is final
+      const next = await iterator.next.call(iterator)
+      if (!next.done && args?.where?.requestId && eventIsFinal(next.value)) done = true
+      return next
     },
     return: iterator.return!.bind(iterator),
     throw: iterator.throw!.bind(iterator),

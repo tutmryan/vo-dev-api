@@ -25,15 +25,34 @@ export const publishPresentationEvent = async (data: PresentationTopicData): Pro
   pubsub.publish(PRESENTATION_TOPIC, data)
 }
 
+const eventIsFinal = (data: PresentationTopicData) =>
+  [PresentationRequestStatus.PresentationVerified, PresentationRequestStatus.PresentationError].includes(data.event.requestStatus)
+
 export const subscribeToPresentationEvents = (args?: SubscriptionPresentationEventArgs) => {
-  let count = 0
   const iterator = pubsub.asyncIterator<PresentationTopicData>(PRESENTATION_TOPIC)
+
+  let count = 0
+  let done = false
+
   return {
     next: async () => {
-      if (!args?.where?.requestId) return iterator.next.call(iterator)
-      const data = await getPresentationDataFromCache(args.where.requestId)
-      if (!data || data.event.requestStatus === PresentationRequestStatus.RequestRetrieved) return iterator.next.call(iterator)
-      return { done: count++ === 1, value: data }
+      // eagerly end iteration
+      if (done) return { done: true, value: undefined }
+
+      // when subscribing by requestId
+      if (count++ === 0 && args?.where?.requestId) {
+        // check for cached final event data
+        const cachedData = await getPresentationDataFromCache(args.where.requestId)
+        if (cachedData && eventIsFinal(cachedData)) {
+          done = true
+          return { value: cachedData }
+        }
+      }
+
+      // inspect values to eagerly end iteration for requestId subscribers when the event is final
+      const next = await iterator.next.call(iterator)
+      if (!next.done && args?.where?.requestId && eventIsFinal(next.value)) done = true
+      return next
     },
     return: iterator.return!.bind(iterator),
     throw: iterator.throw!.bind(iterator),

@@ -37,16 +37,37 @@ const getJobFinishedEventFromCache = async (jobId?: InputMaybe<string>): Promise
   return cachedValue ? (JSON.parse(cachedValue) as BackgroundJobTopicData) : null
 }
 
+const eventIsFinal = (data: BackgroundJobTopicData) =>
+  [BackgroundJobStatus.Completed, BackgroundJobStatus.Failed].includes(data.event.status)
+
 export const subscribeToBackgroundJobEvents = (args?: SubscriptionBackgroundJobEventArgs) => {
+  const iterator = pubsub.asyncIterator<BackgroundJobTopicData>(BACKGROUND_JOB_TOPIC)
+
   let count = 0
-  const pubsubIterator = pubsub.asyncIterator<BackgroundJobTopicData>(BACKGROUND_JOB_TOPIC)
+  let done = false
+
   return {
     next: async () => {
-      const cachedEvent = await getJobFinishedEventFromCache(args?.where?.jobId)
-      return cachedEvent ? { done: count++ === 1, value: cachedEvent } : pubsubIterator.next.call(pubsubIterator)
+      // eagerly end iteration
+      if (done) return { done: true, value: undefined }
+
+      // when subscribing by jobId
+      if (count++ === 0 && args?.where?.jobId) {
+        // check for cached final event data
+        const cachedData = await getJobFinishedEventFromCache(args.where.jobId)
+        if (cachedData && eventIsFinal(cachedData)) {
+          done = true
+          return { value: cachedData }
+        }
+      }
+
+      // inspect values to eagerly end iteration for jobId subscribers when the event is final
+      const next = await iterator.next.call(iterator)
+      if (!next.done && args?.where?.jobId && eventIsFinal(next.value)) done = true
+      return next
     },
-    return: pubsubIterator.return!.bind(pubsubIterator),
-    throw: pubsubIterator.throw!.bind(pubsubIterator),
+    return: iterator.return!.bind(iterator),
+    throw: iterator.throw!.bind(iterator),
   }
 }
 
