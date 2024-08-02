@@ -12,9 +12,9 @@
     "debug": "cross-env NODE_EXTRA_CA_CERTS=./local-cert/127.0.0.1.pem ts-node-dev --transpile-only --watch ./src/**/*.graphql,.env -r dotenv/config ./src/main",
     "typeorm": "dotenv -e .env -- ts-node ./node_modules/typeorm/cli.js",
     "db:init-localdev": "dotenv -e .env -- ts-node --transpile-only ./scripts/localdev-database-setup",
-    "db:start": "dotenv -e .env -- docker-compose up -d --wait && npm run db:init-localdev",
-    "db:stop": "docker-compose stop",
-    "db:delete": "docker-compose down",
+    "db:start": "dotenv -e .env -- docker compose up -d --wait && npm run db:init-localdev",
+    "db:stop": "docker compose stop",
+    "db:delete": "docker compose down",
     "db:reset": "cross-env DATABASE_USERNAME=sa npm run typeorm -- schema:drop --dataSource src/data && npm run db:migrate",
     "db:migration:generate": "cross-env DATABASE_USERNAME=sa ts-node scripts/add-migration.ts generate",
     "db:migration:create": "ts-node scripts/add-migration.ts create",
@@ -34,7 +34,7 @@
     "build:3-npm-install": "npm ci --prefix build --ignore-scripts --omit=dev && rimraf build/package.json build/package-lock.json build/.npmrc",
     "start:built": "cd build && dotenv -e ../.env node ./src/main && cd ..",
     "test": "jest",
-    "test:ci:start-db": "docker-compose up -d && cross-env NODE_ENV=test ts-node scripts/localdev-database-wait",
+    "test:ci:start-db": "docker compose up -d && cross-env NODE_ENV=test ts-node scripts/localdev-database-wait",
     "test:ci": "jest --ci --reporters=default --reporters=jest-junit"
   },
   "repository": {
