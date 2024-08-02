@@ -313,6 +313,9 @@ jobs:
           - instance: sandbox.devops1
             resourceGroup: vo-sandbox-devops1-instance
             resourcePrefix: vo-sandbox-devops1
+          - instance: sandbox.openlearning
+            resourceGroup: vo-sandbox-openlearning-instance
+            resourcePrefix: vo-sandbox-openlearning
 
     environment:
       name: ${{ matrix.instance }}
