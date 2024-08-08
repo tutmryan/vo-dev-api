@@ -249,7 +249,7 @@ Documentation indicates outbound IPs of the App Service can change when the App 
 
 https://learn.microsoft.com/en-us/azure/azure-functions/ip-addresses?tabs=portal#outbound-ip-address-changes
 
-Currently, the Redis firewall is created based on the outbound IPs of the App Service at the time of deployment.
+The Redis, SQL, KeyVault firewalls are configured based on the outbound IPs of the App Service at the time of deployment.
 
 You must consider this situation when planning any change to the App Service plan tier or enabling auto-scaling.
 

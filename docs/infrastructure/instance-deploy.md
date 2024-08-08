@@ -1,5 +1,12 @@
 # Steps to deploy a new instance
 
+## Check capacity before deploying a new instance
+
+Check the capacity of the shared infrastructure resources before deploying a new instance.
+
+- Is the SQL elastic pool at capacity?
+- Is the App Service Plan at capacity?
+
 ## Configure environment
 
 Create a new environment in the API GitHub repositories at:
