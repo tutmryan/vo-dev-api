@@ -26,7 +26,7 @@ msalInstance.acquireTokenSilent({ scopes: ['api://<your-backend-API>/.default'] 
       url: '<Verified Orchestration API URL>',
       accessToken: data.token,
     })
-    // now we can issue the credential
+    // begin issuance
     issue()
   })
 })
@@ -41,12 +41,15 @@ Create an issuance request specifying the contract of the credential to be issue
 - callback info, if issuance event data should also be sent to a server-side endpoint
 
 ```js
-const contractId = 'TODO: fill this in'
+const contract = 'TODO: fill this in'
 let pin
 function issue() {
-  app.innerHTML = 'Generating issuance request...'
+  app.innerHTML = 'Generating issuance ...'
   pin = [...Array(4)].map(() => Math.floor(Math.random() * 10)).join('')
-  verifiedOrchestrationClient.createIssuanceRequest({ contractId, pin }, onIssuanceEvent).then(displayQRCodeOrOpenLink).catch(displayError)
+  verifiedOrchestrationClient
+    .createIssuanceRequest({ contractId, pin }, onIssuanceEvent)
+    .then((response) => onIssuance(response))
+    .catch(displayError)
 }
 ```
 
@@ -55,14 +58,23 @@ function issue() {
 If the user is on a mobile device, open the issuance link in the browser. Otherwise, display the QR code for the user to scan.
 
 ```js
-function displayQRCodeOrOpenLink(response) {
+function onIssuance(response) {
   if ('error' in response) {
     displayError(response.error)
     return
   }
+  app.innerHTML = `<div>Scan to install credential</div>`
+  const { qrCode, url } = response
+  displayQRCodeOrOpenLink(qrCode, url)
+}
+
+function displayQRCodeOrOpenLink(qrcode, url) {
   const isMobile = /Android|iPhone/i.test(navigator.userAgent)
-  if (isMobile) window.location.href = data.createIssuanceRequest.url
-  else app.innerHTML = '<img src="' + response.qrCode + '" alt="scan qr code to issue credential(s)" />'
+  if (isMobile) {
+    window.location.href = url
+  } else {
+    app.innerHTML += `<img src="${qrcode}" alt="${url}" />`
+  }
 }
 ```
 
@@ -72,9 +84,17 @@ If a PIN was specified in the issuance request, it must be entered by the recipi
 
 ```js
 function onIssuanceEvent(data) {
-  if (data instanceof Error) displayError(data)
-  else if (data.event.requestStatus === 'request_retrieved') app.innerHTML = `Enter verification code ${pin} to complete issuance...`
-  else // TODO: handle issuance_complete
+  if (data instanceof Error) {
+    displayError(data)
+  } else if (data.event.requestStatus === 'request_retrieved') {
+    // Consider relaying the PIN via a separate channel. This example displays the PIN on screen.
+    app.innerHTML = `<div>Enter verification code ${pin} to complete issuance...</div>`
+  } else {
+    app.innerHTML = `
+      <div>Issuance complete ✅</div>
+      <button onClick="showIssuanceUI()">Issue another</button>
+    `
+  }
 }
 ```
 
@@ -84,90 +104,205 @@ Upon completion of issuance, the `event.requestStatus` will be `issuance_success
 
 ```js
 function onIssuanceEvent(data) {
-  if (data instanceof Error) displayError(data)
-  else if (data.event.requestStatus === 'request_retrieved') app.innerHTML = `Enter verification code ${pin} to complete issuance...`
-  else
+  if (data instanceof Error) {
+    displayError(data)
+  } else if (data.event.requestStatus === 'request_retrieved') {
+    app.innerHTML = `<div>Enter verification code ${pin} to complete issuance...</div>`
+  } else {
+    // Handle issuance_complete and data.event.issuance. This example reloads the UI.
     app.innerHTML = `
       <div>Issuance complete ✅</div>
+      <button onClick="showIssuanceUI()">Issue another</button>
     `
+  }
+}
+```
+
+### 6. Optional: photo capture issuance request
+
+For contracts that require a face check photo for issuance, a photo can be captured before issuing the credential via the `createPhotoCaptureIssuance` function.
+
+This function will return a QR code and URL which can be opened on any device to capture a photo.
+
+Once the photo has been captured, issuance will proceed as normal.
+
+```js
+function issue() {
+  const contract = 'TODO: fill this in'
+  if (contract.faceCheckSupport) {
+    app.innerHTML = 'Generating photo capture issuance...'
+    verifiedOrchestrationClient
+      .createPhotoCaptureIssuance({ contractId, callback }, onPhotoCaptureEvent, onIssuance, onIssuanceEvent)
+      .then((response) => onPhotoCapture(response))
+      .catch(displayError)
+  }
+}
+
+function onPhotoCaptureEvent(data) {
+  if (data instanceof Error) {
+    displayError(data)
+  } else if (data.status === 'complete') {
+    app.innerHTML += '<div>Photo Capture is complete ✅</div>'
+  }
+}
+
+function onPhotoCapture(response) {
+  if ('error' in response) {
+    displayError(response.error)
+    return
+  }
+  app.innerHTML = `<div>Scan to capture photo</div>`
+  const { photoCaptureQrCode, photoCaptureUrl } = response
+  displayQRCodeOrOpenLink(photoCaptureQrCode, photoCaptureUrl)
 }
 ```
 
 ## Complete example
 
 ```html title="Complete working HTML page example"
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Present Credentials</title>
+    <title>Issue Credentials</title>
     <script type="text/javascript" src="https://unpkg.com/@verified-orchestration/client-js/index.min.js"></script>
     <script type="text/javascript" src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
   </head>
   <body>
+    <div id="app">Loading...</div>
     <script type="text/javascript">
-      const contractId = 'TODO: fill this in'
+      /* The contracts of credentials that this client can issue (to the logged-in user).
+       Example of prefilled contracts:
+       const contracts = [
+         { id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', faceCheckSupport: true },
+         { id: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX' }
+       ]
+    */
+      const contracts = 'TODO: fill this in'
 
-      let msalInstance, apiAccessToken, verifiedOrchestrationClient, pin
+      const app = document.getElementById('app')
+      let msalInstance, apiAccessToken, verifiedOrchestrationClient, pin, photoCaptureRequestId
 
       function displayError(error) {
-        app.innerHTML = 'Error: ' + error.message
+        app.innerHTML = `Error: ${error.message}`
       }
 
+      function showIssuanceUI() {
+        app.innerHTML = `
+        <div>
+          <select id="contractId">
+            ${contracts.map((contract) => `<option value="${contract.id}">${contract.id}</option>`).join('\n')}
+          </select>
+          <button onclick="issue()">Issue</button>
+        </div>
+      `
+      }
+
+      // Create issuance request
       function issue() {
-        app.innerHTML = 'Generating issuance request...'
-        pin = [...Array(4)].map(() => Math.floor(Math.random() * 10)).join('')
-        verifiedOrchestrationClient
-          .createIssuanceRequest({ contractId, pin, callback: { url: 'https://enr3r4d4gvwrb.x.pipedream.net/issuance' } }, onIssuanceEvent)
-          .then(displayQRCodeOrOpenLink)
-          .catch(displayError)
+        const selectedId = document.getElementById('contractId').value
+        const contract = contracts.find((contract) => contract.id === selectedId)
+        const contractId = contract.id
+        const callback = { url: 'https://<your-callback-url>' }
+
+        pin = Array.from({ length: 4 }, () => Math.floor(Math.random() * 10)).join('')
+
+        if (contract.faceCheckSupport) {
+          app.innerHTML = 'Generating photo capture issuance...'
+          verifiedOrchestrationClient
+            .createPhotoCaptureIssuance({ contractId, pin, callback }, onPhotoCaptureEvent, onIssuance, onIssuanceEvent)
+            .then((response) => onPhotoCapture(response))
+            .catch(displayError)
+        } else {
+          app.innerHTML = 'Generating issuance...'
+          verifiedOrchestrationClient
+            .createIssuanceRequest({ contractId, pin, callback }, onIssuanceEvent)
+            .then((response) => onIssuance(response))
+            .catch(displayError)
+        }
       }
 
-      function displayQRCodeOrOpenLink(response) {
+      function displayQRCodeOrOpenLink(qrcode, url) {
+        const isMobile = /Android|iPhone/i.test(navigator.userAgent)
+        if (isMobile) {
+          window.location.href = url
+        } else {
+          app.innerHTML += `<img src="${qrcode}" alt="${url}" />`
+        }
+      }
+
+      function onPhotoCaptureEvent(data) {
+        if (data instanceof Error) {
+          displayError(data)
+        } else if (data.status === 'complete') {
+          app.innerHTML += '<div>Photo Capture is complete ✅</div>'
+        }
+      }
+
+      function onPhotoCapture(response) {
         if ('error' in response) {
           displayError(response.error)
           return
         }
-        const isMobile = /Android|iPhone/i.test(navigator.userAgent)
-        if (isMobile) window.location.href = data.createIssuanceRequest.url
-        else app.innerHTML = '<img src="' + response.qrCode + '" alt="scan qr code to issue credential(s)" />'
+        app.innerHTML = `<div>Scan to capture photo</div>`
+        const { photoCaptureQrCode, photoCaptureUrl } = response
+        displayQRCodeOrOpenLink(photoCaptureQrCode, photoCaptureUrl)
       }
 
       function onIssuanceEvent(data) {
-        if (data instanceof Error) displayError(data)
-        else if (data.event.requestStatus === 'request_retrieved') app.innerHTML = `Enter verification code ${pin} to complete issuance...`
-        else
+        if (data instanceof Error) {
+          displayError(data)
+        } else if (data.event.requestStatus === 'request_retrieved') {
+          app.innerHTML = `<div>Enter verification code ${pin} to complete issuance...</div>`
+        } else {
           app.innerHTML = `
-          <div>Issuance complete ✅</div>
-        `
+            <div>Issuance complete ✅</div>
+            <button onClick="showIssuanceUI()">Issue another</button>
+          `
+        }
       }
 
-      // Acquire an issuance token from your secure backend API,
-      // the issuance token allows a credential to be issued to the logged-in user,
+      function onIssuance(response) {
+        if ('error' in response) {
+          displayError(response.error)
+          return
+        }
+        app.innerHTML = `<div>Scan to install credential</div>`
+        const { qrCode, url } = response
+        displayQRCodeOrOpenLink(qrCode, url)
+      }
+
+      // Acquire an issuance token from a secure backend API,
+      // the issuance token allows a fixed set of credentials to be issued to the logged-in user,
       // our backend API also creates a reference to the logged-in user, which is fixed for the issuance token
       async function acquireIssuanceToken() {
         app.innerHTML = 'Acquiring identity-based token for issuance...'
-        const response = await fetch('https://<TODO: your backend API>/acquireTokenForIssuance', {
+        const response = await fetch('https://<your-backend-API>/acquireTokenForIssuance', {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiAccessToken}` },
           method: 'POST',
         })
-        return await response.json()
+        return response.json()
       }
 
-      addEventListener('load', () => {
-        const app = document.getElementById('app')
-
-        // MSAL authentication - set up MSAL and log in
+      // MSAL authentication - set up MSAL and log in
+      function initializeMsal() {
         msalInstance = new msal.PublicClientApplication({
           auth: {
             clientId: '<client ID>',
-            authority: 'https://login.microsoftonline.com/<tenant ID>/v2.0',
+            authority: 'https://login.microsoftonline.com/<tenant-ID>/v2.0',
+            knownAuthorities: ['https://login.microsoftonline.com/<tenant-ID>'],
+            navigateToLoginRequestUrl: true,
+          },
+          cache: {
+            cacheLocation: 'sessionStorage',
+            claimsBasedCachingEnabled: true,
           },
         })
 
         msalInstance.addEventCallback(({ eventType, payload }) => {
-          if (eventType === msal.EventType.LOGIN_SUCCESS && payload && 'account' in payload && payload.account)
+          if (eventType === msal.EventType.LOGIN_SUCCESS && payload && payload.account) {
             msalInstance.setActiveAccount(payload.account)
+          }
         })
 
         msalInstance.handleRedirectPromise().then(() => {
@@ -177,31 +312,31 @@ function onIssuanceEvent(data) {
             // now we are logged in
             // obtain an access token to call your API
             msalInstance
-              .acquireTokenSilent({ scopes: ['api://<your-backend-API>/.default'] })
+              .acquireTokenSilent({
+                scopes: ['api://<your-backend-API>/.default'],
+              })
               .then((response) => {
                 apiAccessToken = response.accessToken
                 // call your backend API for an issuance token
                 acquireIssuanceToken().then((data) => {
-                  // contruct a VerifiedOrchestrationClient with the issuance token
+                  // construct a VerifiedOrchestrationClient with the issuance token
                   verifiedOrchestrationClient = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
-                    url: '<Verified Orchestration API URL>',
+                    url: '<Verified-Orchestration-API-URL>',
                     accessToken: data.token,
                   })
-                  // now we can issue credentials
-                  issue()
+                  // begin issuance
+                  showIssuanceUI()
                 })
               })
               .catch(displayError)
           } else {
             app.innerHTML = 'Logging in...'
-            msalInstance.loginRedirect({
-              scopes: ['openid', 'profile', 'email'],
-            })
+            msalInstance.loginRedirect({ scopes: ['openid', 'profile', 'email'] })
           }
         })
-      })
+      }
+      addEventListener('load', initializeMsal)
     </script>
-    <div id="app">Loading...</div>
   </body>
 </html>
 ```
