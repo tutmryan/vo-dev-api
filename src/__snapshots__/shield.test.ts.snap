@@ -366,6 +366,10 @@ exports[`shield rules are setup correctly 1`] = `
       "name": "isApprovalRequestApp",
       "cache": "contextual"
     },
+    "updateApprovalRequest": {
+      "name": "isApprovalRequestApp",
+      "cache": "contextual"
+    },
     "createPresentationRequestForApproval": {
       "rulesAnd": [
         {

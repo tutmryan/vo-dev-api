@@ -17,7 +17,7 @@ export const server = new ApolloServer<GraphQLContext>({
 
 type VariableValues = { [name: string]: any }
 
-const executeOperation = async <TData = Record<string, unknown>, TVariables extends VariableValues = VariableValues>(
+export const executeOperation = async <TData = Record<string, unknown>, TVariables extends VariableValues = VariableValues>(
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },

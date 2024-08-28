@@ -136,7 +136,7 @@ export type ActionedApprovalData = {
   correlationId?: Maybe<Scalars['ID']['output']>;
   /** Indicates whether the approval has been granted. */
   isApproved: Scalars['Boolean']['output'];
-  /** Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type. */
+  /** Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type. */
   requestData?: Maybe<Scalars['JSONObject']['output']>;
   /** Arbitrary state value which was optionally included in the approval request callback definition. */
   state?: Maybe<Scalars['String']['output']>;
@@ -171,9 +171,9 @@ export type ApprovalRequest = {
   purpose: Scalars['String']['output'];
   /** Optional URL to the artifact for approval. */
   referenceUrl?: Maybe<Scalars['String']['output']>;
-  /** Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type. */
+  /** Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type. */
   requestData?: Maybe<Scalars['JSONObject']['output']>;
-  /** The type of approval request, useful for partioning and filtering different types of approval requests. */
+  /** The type of approval request, useful for partitioning and filtering different types of approval requests. */
   requestType: Scalars['String']['output'];
   requestedAt: Scalars['DateTime']['output'];
   /** The platform user (application or person) that requested the approval. */
@@ -199,13 +199,13 @@ export type ApprovalRequestInput = {
   expiresAt?: InputMaybe<Scalars['DateTime']['input']>;
   /** The presentation request definition for this approval. */
   presentationRequestInput: ApprovalRequestPresentationInput;
-  /** Purpose for requesting approval. */
+  /** Purpose for requesting approval. Markdown is supported. */
   purpose: Scalars['String']['input'];
   /** Optional URL to the artifact for approval. */
   referenceUrl?: InputMaybe<Scalars['String']['input']>;
-  /** Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type. */
+  /** Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type. */
   requestData?: InputMaybe<Scalars['JSONObject']['input']>;
-  /** The type of approval request, useful for partioning and filtering different types of approval requests. */
+  /** The type of approval request, useful for partitioning and filtering different types of approval requests. */
   requestType: Scalars['String']['input'];
 };
 
@@ -1345,6 +1345,8 @@ export type Mutation = {
   revokeUserIssuances: Scalars['ID']['output'];
   /** Creates or updates an identity based on its issuer and identifier */
   saveIdentity: Identity;
+  /** Updates an existing pending approval request. */
+  updateApprovalRequest?: Maybe<Scalars['Void']['output']>;
   /** Updates an existing contract */
   updateContract: Contract;
   /** Updates the name and credential types of a partner */
@@ -1469,6 +1471,12 @@ export type MutationRevokeUserIssuancesArgs = {
 
 export type MutationSaveIdentityArgs = {
   input: IdentityInput;
+};
+
+
+export type MutationUpdateApprovalRequestArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateApprovalRequestInput;
 };
 
 
@@ -2470,6 +2478,14 @@ export type TenantIdentityWhere = {
   nameStartsWith: Scalars['String']['input'];
 };
 
+/** The input for updating an existing approval request. */
+export type UpdateApprovalRequestInput = {
+  /** Purpose for requesting approval. Markdown is supported. */
+  purpose: Scalars['String']['input'];
+  /** Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type. */
+  requestData?: InputMaybe<Scalars['JSONObject']['input']>;
+};
+
 /** Input type for updating a new partner */
 export type UpdatePartnerInput = {
   /**
@@ -2649,6 +2665,14 @@ export type ApprovalRequestQueryVariables = Exact<{
 
 
 export type ApprovalRequestQuery = { __typename?: 'Query', approvalRequest: { __typename?: 'ApprovalRequest', id: string, requestedAt: Date, expiresAt: Date, requestType: string, correlationId?: string | null, referenceUrl?: string | null, purpose: string, requestData?: Record<string, unknown> | null, actionedComment?: string | null, status: ApprovalRequestStatus } };
+
+export type UpdateApprovalRequestMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: UpdateApprovalRequestInput;
+}>;
+
+
+export type UpdateApprovalRequestMutation = { __typename?: 'Mutation', updateApprovalRequest?: null | undefined | void | null };
 
 export type ContractFragmentFragment = { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> } };
 
@@ -2848,6 +2872,7 @@ export const CreateApprovalRequestDocument = {"kind":"Document","definitions":[{
 export const ActionApprovalRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ActionApprovalRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ActionApprovalRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionApprovalRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"isApproved"}},{"kind":"Field","name":{"kind":"Name","value":"actionedComment"}}]}}]}}]} as unknown as DocumentNode<ActionApprovalRequestMutation, ActionApprovalRequestMutationVariables>;
 export const FindActionedApprovalDataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindActionedApprovalData"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionedApprovalData"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"approvalRequestId"}},{"kind":"Field","name":{"kind":"Name","value":"correlationId"}},{"kind":"Field","name":{"kind":"Name","value":"requestData"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"isApproved"}},{"kind":"Field","name":{"kind":"Name","value":"actionedComment"}},{"kind":"Field","name":{"kind":"Name","value":"actionedAt"}},{"kind":"Field","name":{"kind":"Name","value":"actionedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"callbackSecret"}}]}}]}}]} as unknown as DocumentNode<FindActionedApprovalDataQuery, FindActionedApprovalDataQueryVariables>;
 export const ApprovalRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ApprovalRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"approvalRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"approvalRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"approvalRequestId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"requestedAt"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"requestType"}},{"kind":"Field","name":{"kind":"Name","value":"correlationId"}},{"kind":"Field","name":{"kind":"Name","value":"referenceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"purpose"}},{"kind":"Field","name":{"kind":"Name","value":"requestData"}},{"kind":"Field","name":{"kind":"Name","value":"actionedComment"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<ApprovalRequestQuery, ApprovalRequestQueryVariables>;
+export const UpdateApprovalRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateApprovalRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateApprovalRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateApprovalRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<UpdateApprovalRequestMutation, UpdateApprovalRequestMutationVariables>;
 export const CreateContractDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateContract"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ContractInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createContract"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ContractFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ContractFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Contract"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"template"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<CreateContractMutation, CreateContractMutationVariables>;
 export const DeprecateContractDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeprecateContract"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deprecateContract"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ContractFragment"}},{"kind":"Field","name":{"kind":"Name","value":"externalId"}},{"kind":"Field","name":{"kind":"Name","value":"provisionedAt"}},{"kind":"Field","name":{"kind":"Name","value":"lastProvisionedAt"}},{"kind":"Field","name":{"kind":"Name","value":"isDeprecated"}},{"kind":"Field","name":{"kind":"Name","value":"deprecatedAt"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ContractFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Contract"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"template"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<DeprecateContractMutation, DeprecateContractMutationVariables>;
 export const GetContractDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContract"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"contract"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ContractFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ContractFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Contract"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"template"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<GetContractQuery, GetContractQueryVariables>;
@@ -3096,6 +3121,7 @@ export type ResolversTypes = {
   TenantIdentityWhere: TenantIdentityWhere;
   URL: ResolverTypeWrapper<Scalars['URL']['output']>;
   UUID: ResolverTypeWrapper<Scalars['UUID']['output']>;
+  UpdateApprovalRequestInput: UpdateApprovalRequestInput;
   UpdatePartnerInput: UpdatePartnerInput;
   User: ResolverTypeWrapper<UserEntity>;
   UserCount: ResolverTypeWrapper<Omit<UserCount, 'user'> & { user: ResolversTypes['User'] }>;
@@ -3239,6 +3265,7 @@ export type ResolversParentTypes = {
   TenantIdentityWhere: TenantIdentityWhere;
   URL: Scalars['URL']['output'];
   UUID: Scalars['UUID']['output'];
+  UpdateApprovalRequestInput: UpdateApprovalRequestInput;
   UpdatePartnerInput: UpdatePartnerInput;
   User: UserEntity;
   UserCount: Omit<UserCount, 'user'> & { user: ResolversParentTypes['User'] };
@@ -3586,6 +3613,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   revokeIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeIssuancesArgs, 'ids'>>;
   revokeUserIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeUserIssuancesArgs, 'userId'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
+  updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
   updatePartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationUpdatePartnerArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;

@@ -21,7 +21,7 @@ input ApprovalRequestInput {
   """
   expiresAt: DateTime
   """
-  The type of approval request, useful for partioning and filtering different types of approval requests.
+  The type of approval request, useful for partitioning and filtering different types of approval requests.
   """
   requestType: String!
   """
@@ -33,11 +33,11 @@ input ApprovalRequestInput {
   """
   referenceUrl: String
   """
-  Purpose for requesting approval.
+  Purpose for requesting approval. Markdown is supported.
   """
   purpose: String!
   """
-  Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type.
+  Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type.
   """
   requestData: JSONObject
   """
@@ -48,6 +48,20 @@ input ApprovalRequestInput {
   Callback will be invoked when the approval request is actioned.
   """
   callback: Callback
+}
+
+"""
+The input for updating an existing approval request.
+"""
+input UpdateApprovalRequestInput {
+  """
+  Purpose for requesting approval. Markdown is supported.
+  """
+  purpose: String!
+  """
+  Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type.
+  """
+  requestData: JSONObject
 }
 
 """
@@ -109,7 +123,7 @@ type ApprovalRequest {
   """
   expiresAt: DateTime!
   """
-  The type of approval request, useful for partioning and filtering different types of approval requests.
+  The type of approval request, useful for partitioning and filtering different types of approval requests.
   """
   requestType: String!
   """
@@ -125,7 +139,7 @@ type ApprovalRequest {
   """
   purpose: String!
   """
-  Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type.
+  Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type.
   """
   requestData: JSONObject
   """
@@ -185,7 +199,7 @@ type ActionedApprovalData {
   """
   correlationId: ID
   """
-  Optional additional data that is useful for / relevent to the approval; the schema of which would vary by type.
+  Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type.
   """
   requestData: JSONObject
   """
@@ -233,6 +247,10 @@ extend type Mutation {
   Creates a new approval request.
   """
   createApprovalRequest(request: ApprovalRequestInput!): ApprovalRequestResponse!
+  """
+  Updates an existing pending approval request.
+  """
+  updateApprovalRequest(id: ID!, input: UpdateApprovalRequestInput!): Void
   """
   The result of this request returns a QR code with a link to start the presentation process, or an error
   """

@@ -1,3 +1,4 @@
+import type { JwtPayload } from '@makerx/graphql-core'
 import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { addDays, startOfToday } from 'date-fns'
@@ -6,7 +7,7 @@ import { graphql } from '../../../generated'
 import type { ApprovalRequestInput } from '../../../generated/graphql'
 import { AppRoles } from '../../../roles'
 import type { LimitedApprovalOperationInput } from '../../../test'
-import { executeOperationAsApp, executeOperationAsLimitedApprovalClient } from '../../../test'
+import { executeOperation, executeOperationAsApp, executeOperationAsLimitedApprovalClient } from '../../../test'
 import { addUserToManager } from '../../auditing/user-context-helper'
 import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
 import { createIdentity } from '../../identity/tests/create-identity'
@@ -55,7 +56,24 @@ export function getDefaultApprovalRequestInput(): ApprovalRequestInput {
   }
 }
 
-export async function createApprovalRequest(input: ApprovalRequestInput) {
+export async function createApprovalRequest(input: ApprovalRequestInput, jwt?: JwtPayload) {
+  if (jwt) {
+    const { data, errors } = await executeOperation(
+      {
+        query: createApprovalRequestMutation,
+        variables: {
+          input,
+        },
+      },
+      jwt,
+    )
+    if (errors) {
+      throw new Error(`Error while creating an approval request: ${JSON.stringify(errors)}`)
+    }
+
+    return data!.createApprovalRequest
+  }
+
   const { data, errors } = await executeOperationAsApp(
     {
       query: createApprovalRequestMutation,
@@ -102,15 +120,20 @@ async function createPresentationForApprovalRequest(approvalRequestId: string) {
   return { identity, contract, presentation }
 }
 
-export async function createApprovalRequestWithPresentation(input: ApprovalRequestInput) {
-  const approvalRequest = await createApprovalRequest(input)
+export async function createApprovalRequestWithPresentation(input: ApprovalRequestInput, jwt?: JwtPayload) {
+  const approvalRequest = await createApprovalRequest(input, jwt)
   const { presentation, identity } = await createPresentationForApprovalRequest(approvalRequest.id)
 
   return { approvalRequest, presentation, identity }
 }
 
-export async function createActionedApprovalRequest(input: ApprovalRequestInput, isApproved: boolean, actionedComment: string) {
-  const { presentation, identity, approvalRequest } = await createApprovalRequestWithPresentation(input)
+export async function createActionedApprovalRequest(
+  input: ApprovalRequestInput,
+  isApproved: boolean,
+  actionedComment: string,
+  createApprovalJwt?: JwtPayload,
+) {
+  const { presentation, identity, approvalRequest } = await createApprovalRequestWithPresentation(input, createApprovalJwt)
   const limitedApprovalInput: LimitedApprovalOperationInput = {
     approvalRequestId: approvalRequest.id,
     presentationId: presentation.id,
