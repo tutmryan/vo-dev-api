@@ -41,7 +41,6 @@ const cancelAsyncIssuanceRequests = async (job: Job, context: WorkerContext, whe
         )
         request.canceled()
         await entityManager.getRepository(AsyncIssuanceEntity).save(request)
-        logger.audit('Async issuance request canceled', { asyncIssuanceRequest: request, jobId: job.id, jobData: job.data })
       })
     } catch (err) {
       logger.error(`Error occurred when canceling the async issuance request ${request.id}`, err)

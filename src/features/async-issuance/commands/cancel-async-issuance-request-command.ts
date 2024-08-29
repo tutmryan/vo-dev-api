@@ -1,5 +1,4 @@
 import type { CommandContext } from '../../../cqs'
-import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 import { convertAsyncIssuanceExpiryDaysToRequestExpiry } from '../index'
@@ -20,6 +19,5 @@ export async function CancelAsyncIssuanceRequestCommand(this: CommandContext, as
   request.canceled()
   await this.entityManager.getRepository(AsyncIssuanceEntity).save(request)
 
-  logger.audit('Async issuance request canceled', { asyncIssuanceRequest: request })
   return request
 }
