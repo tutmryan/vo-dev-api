@@ -13,10 +13,11 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * Therefore it is highly recommended to use the babel or swc plugin for production.
  */
 const documents = {
+    "\n    mutation CancelApprovalRequest($id: ID!) {\n      cancelApprovalRequest(id: $id)\n    }\n  ": types.CancelApprovalRequestDocument,
+    "\n  query ApprovalRequest($approvalRequestId: ID!) {\n    approvalRequest(id: $approvalRequestId) {\n      id\n      requestedAt\n      expiresAt\n      requestType\n      correlationId\n      referenceUrl\n      purpose\n      requestData\n      actionedComment\n      status\n    }\n  }\n": types.ApprovalRequestDocument,
     "\n  mutation CreateApprovalRequest($input: ApprovalRequestInput!) {\n    createApprovalRequest(request: $input) {\n      id\n      portalUrl\n      callbackSecret\n    }\n  }\n": types.CreateApprovalRequestDocument,
     "\n    mutation ActionApprovalRequest($id: ID!, $input: ActionApprovalRequestInput!) {\n      actionApprovalRequest(id: $id, input: $input) {\n        id\n        status\n        isApproved\n        actionedComment\n      }\n    }\n  ": types.ActionApprovalRequestDocument,
     "\n  query FindActionedApprovalData($id: ID!) {\n    actionedApprovalData(id: $id) {\n      approvalRequestId\n      correlationId\n      requestData\n      state\n      isApproved\n      actionedComment\n      actionedAt\n      actionedBy {\n        id\n        name\n      }\n      callbackSecret\n    }\n  }": types.FindActionedApprovalDataDocument,
-    "\n  query ApprovalRequest($approvalRequestId: ID!) {\n    approvalRequest(id: $approvalRequestId) {\n      id\n      requestedAt\n      expiresAt\n      requestType\n      correlationId\n      referenceUrl\n      purpose\n      requestData\n      actionedComment\n      status\n    }\n  }\n": types.ApprovalRequestDocument,
     "\n    mutation UpdateApprovalRequest($id: ID!, $input: UpdateApprovalRequestInput!) {\n      updateApprovalRequest(id: $id, input: $input)\n    }\n  ": types.UpdateApprovalRequestDocument,
     "\n  fragment ContractFragment on Contract {\n    id\n    name\n    description\n    template {\n      id\n      name\n      description\n      isPublic\n      validityIntervalInSeconds\n    }\n    credentialTypes\n    display {\n      locale\n      card {\n        title\n        issuedBy\n        backgroundColor\n        textColor\n        description\n        logo {\n          uri\n          image\n          description\n        }\n      }\n      consent {\n        title\n        instructions\n      }\n      claims {\n        label\n        claim\n        type\n        description\n        value\n      }\n    }\n    isPublic\n    validityIntervalInSeconds\n  }\n": types.ContractFragmentFragmentDoc,
     "\n  mutation CreateContract($input: ContractInput!) {\n    createContract(input: $input) {\n      ...ContractFragment\n    }\n  }\n": types.CreateContractDocument,
@@ -67,6 +68,14 @@ export function graphql(source: string): unknown;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n    mutation CancelApprovalRequest($id: ID!) {\n      cancelApprovalRequest(id: $id)\n    }\n  "): (typeof documents)["\n    mutation CancelApprovalRequest($id: ID!) {\n      cancelApprovalRequest(id: $id)\n    }\n  "];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query ApprovalRequest($approvalRequestId: ID!) {\n    approvalRequest(id: $approvalRequestId) {\n      id\n      requestedAt\n      expiresAt\n      requestType\n      correlationId\n      referenceUrl\n      purpose\n      requestData\n      actionedComment\n      status\n    }\n  }\n"): (typeof documents)["\n  query ApprovalRequest($approvalRequestId: ID!) {\n    approvalRequest(id: $approvalRequestId) {\n      id\n      requestedAt\n      expiresAt\n      requestType\n      correlationId\n      referenceUrl\n      purpose\n      requestData\n      actionedComment\n      status\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  mutation CreateApprovalRequest($input: ApprovalRequestInput!) {\n    createApprovalRequest(request: $input) {\n      id\n      portalUrl\n      callbackSecret\n    }\n  }\n"): (typeof documents)["\n  mutation CreateApprovalRequest($input: ApprovalRequestInput!) {\n    createApprovalRequest(request: $input) {\n      id\n      portalUrl\n      callbackSecret\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -76,10 +85,6 @@ export function graphql(source: "\n    mutation ActionApprovalRequest($id: ID!, 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query FindActionedApprovalData($id: ID!) {\n    actionedApprovalData(id: $id) {\n      approvalRequestId\n      correlationId\n      requestData\n      state\n      isApproved\n      actionedComment\n      actionedAt\n      actionedBy {\n        id\n        name\n      }\n      callbackSecret\n    }\n  }"): (typeof documents)["\n  query FindActionedApprovalData($id: ID!) {\n    actionedApprovalData(id: $id) {\n      approvalRequestId\n      correlationId\n      requestData\n      state\n      isApproved\n      actionedComment\n      actionedAt\n      actionedBy {\n        id\n        name\n      }\n      callbackSecret\n    }\n  }"];
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "\n  query ApprovalRequest($approvalRequestId: ID!) {\n    approvalRequest(id: $approvalRequestId) {\n      id\n      requestedAt\n      expiresAt\n      requestType\n      correlationId\n      referenceUrl\n      purpose\n      requestData\n      actionedComment\n      status\n    }\n  }\n"): (typeof documents)["\n  query ApprovalRequest($approvalRequestId: ID!) {\n    approvalRequest(id: $approvalRequestId) {\n      id\n      requestedAt\n      expiresAt\n      requestType\n      correlationId\n      referenceUrl\n      purpose\n      requestData\n      actionedComment\n      status\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

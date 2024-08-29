@@ -1,6 +1,7 @@
 import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { ActionApprovalRequestCommand } from './commands/action-approval-request-command'
+import { CancelApprovalRequestCommand } from './commands/cancel-approval-request-command'
 import { CreateApprovalRequestCommand } from './commands/create-approval-request-command'
 import { CreatePresentationRequestForApprovalCommand } from './commands/create-presentation-request-for-approval-command'
 import { UpdateApprovalRequestCommand } from './commands/update-approval-request-command'
@@ -10,6 +11,7 @@ export const resolvers: Resolvers = {
   Mutation: {
     createApprovalRequest: (_, { request }, context) => dispatch(context, CreateApprovalRequestCommand, request),
     updateApprovalRequest: (_, { id, input }, context) => dispatch(context, UpdateApprovalRequestCommand, id, input),
+    cancelApprovalRequest: (_, { id }, context) => dispatch(context, CancelApprovalRequestCommand, id),
     createPresentationRequestForApproval: (_, { approvalRequestId, input }, context) =>
       dispatch(context, CreatePresentationRequestForApprovalCommand, approvalRequestId, input ?? undefined),
     actionApprovalRequest: (_, { id, input }, context) => dispatch(context, ActionApprovalRequestCommand, id, input),

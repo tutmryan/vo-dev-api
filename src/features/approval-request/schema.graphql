@@ -9,6 +9,7 @@ enum ApprovalRequestStatus {
   expired
   approved
   rejected
+  cancelled
 }
 
 """
@@ -251,6 +252,10 @@ extend type Mutation {
   Updates an existing pending approval request.
   """
   updateApprovalRequest(id: ID!, input: UpdateApprovalRequestInput!): Void
+  """
+  Cancels an existing pending approval request.
+  """
+  cancelApprovalRequest(id: ID!): Void
   """
   The result of this request returns a QR code with a link to start the presentation process, or an error
   """

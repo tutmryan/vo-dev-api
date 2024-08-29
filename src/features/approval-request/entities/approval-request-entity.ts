@@ -83,12 +83,16 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'bit', nullable: true })
   isApproved!: boolean | null
 
+  @Column({ type: 'bit', nullable: true })
+  isCancelled!: boolean | null
+
   @Column({ type: 'nvarchar', nullable: true })
   actionedComment!: string | null
 
   get status(): ApprovalRequestStatus {
     if (this.isApproved) return ApprovalRequestStatus.Approved
     if (this.isApproved === false) return ApprovalRequestStatus.Rejected
+    if (this.isCancelled) return ApprovalRequestStatus.Cancelled
     if (this.expiresAt.getTime() < Date.now()) return ApprovalRequestStatus.Expired
     return ApprovalRequestStatus.Pending
   }
