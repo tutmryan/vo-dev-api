@@ -663,16 +663,16 @@ resource privateStorageEncryptionKey 'Microsoft.KeyVault/vaults/keys@2021-10-01'
   }
 }
 
-module privateStorageFirewall './storage-account-firewall.bicep' = {
-  name: 'private-storage-firewall'
-  params: {
-    storageAccountName: privateStorageAccount.name
-    storageAccountIdentity: privateStorageIdentity
-    storageAccountProperties: privateStorageProps
-    location: location
-    ipAddresses: split(apiAppService.properties.outboundIpAddresses, ',')
-  }
-}
+// module privateStorageFirewall './storage-account-firewall.bicep' = {
+//   name: 'private-storage-firewall'
+//   params: {
+//     storageAccountName: privateStorageAccount.name
+//     storageAccountIdentity: privateStorageIdentity
+//     storageAccountProperties: privateStorageProps
+//     location: location
+//     ipAddresses: split(apiAppService.properties.outboundIpAddresses, ',')
+//   }
+// }
 
 @description('The key for encrypting private storage data')
 @secure()
