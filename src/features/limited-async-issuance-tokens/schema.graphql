@@ -1,0 +1,32 @@
+"""
+A limited async issuance token response.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type AsyncIssuanceTokenResponse {
+  token: String!
+  expires: DateTime!
+  """
+  The photo capture request ID to use with photo capture operations prior to issuance. This will be set if the async issuance was created with `photoCapture` set to true.
+
+  When this field is set:
+
+  - A photo must be captured prior to calling `Mutation.createIssuanceRequestForAsyncIssuance`.
+  - The async issuance token can used for photo capture operations: `Mutation.capturePhoto`, `Subscription.photoCaptureEvent` and `Query.photoCaptureStatus`.
+  """
+  photoCaptureRequestId: String
+}
+
+extend type Mutation {
+  """
+  Sends a verification code to the issuee.
+
+  The verification code can then be used to acquire a token for issuance.
+  """
+  sendAsyncIssuanceVerification(asyncIssuanceRequestId: UUID!): Void
+
+  """
+  Acquires a token for issuance using the verification code.
+
+  If successful, the token can be used for issuance operations.
+  """
+  acquireAsyncIssuanceToken(asyncIssuanceRequestId: UUID!, verificationCode: String!): AsyncIssuanceTokenResponse!
+}

@@ -1,15 +1,18 @@
+// eslint-disable-next-line no-restricted-imports
+import config from 'config'
+
 import type { Configuration as MsalConfiguration } from '@azure/msal-node'
 import type { BearerConfig } from '@makerx/express-bearer'
 import type { ClientCredentialsConfig } from '@makerx/node-common'
 import { createTypedConfig } from '@makerx/node-common'
-// eslint-disable-next-line no-restricted-imports
-import config from 'config'
+import type { MailDataRequired } from '@sendgrid/mail'
 import type { CorsOptions } from 'cors'
 import type { LoggerOptions } from 'typeorm'
 import type { ConsoleTransportOptions } from 'winston/lib/winston/transports'
 import type { IssuanceRequestRegistration } from '../services/verified-id'
 
-type ClientCredentials = Pick<ClientCredentialsConfig, 'clientId' | 'clientSecret'>
+export type ClientCredentials = Pick<ClientCredentialsConfig, 'clientId' | 'clientSecret'>
+export type BlobStorageCredentials = { accountName: string; accountKey: string }
 
 export type Config = {
   cors: Omit<CorsOptions, 'origin'> & { origin: true | string[] | undefined }
@@ -63,11 +66,26 @@ export type Config = {
   }
   blobStorage: {
     url: string
-    credential?: {
-      accountName: string
-      accountKey: string
-    }
+    credentials?: BlobStorageCredentials
     logoImagesContainer: string
+  }
+  privateBlobStorage: {
+    url: string
+    credentials?: BlobStorageCredentials
+    asyncIssuanceContainer: string
+    clientEncryptionKey: string
+  }
+  sms: {
+    sid: string
+    secret: string
+    from: string
+  }
+  email: Pick<MailDataRequired, 'from'> & {
+    apiKey: string
+    templates: {
+      issuance: string
+      verificationCode: string
+    }
   }
   homeTenant: {
     name: string
@@ -95,6 +113,10 @@ export type Config = {
     secret?: string
   }
   limitedPhotoCapture: {
+    credentials: ClientCredentials
+    secret?: string
+  }
+  limitedAsyncIssuance: {
     credentials: ClientCredentials
     secret?: string
   }

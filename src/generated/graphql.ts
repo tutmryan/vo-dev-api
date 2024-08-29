@@ -8,6 +8,8 @@ import { PresentationEntity } from '../features/presentation/entities/presentati
 import { IdentityEntity } from '../features/identity/entities/identity-entity';
 import { PartnerEntity } from '../features/partners/entities/partner-entity';
 import { ApprovalRequestEntity } from '../features/approval-request/entities/approval-request-entity';
+import { AsyncIssuanceEntity } from '../features/async-issuance/entities/async-issuance-entity';
+import { CommunicationEntity } from '../features/communication/entities/communication-entity';
 import { GraphQLContext } from '../context';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
@@ -242,6 +244,259 @@ export type ApprovalTokenResponse = {
   token: Scalars['String']['output'];
 };
 
+/** An async issuance issuee contact information. */
+export type AsyncIssuanceContact = {
+  __typename?: 'AsyncIssuanceContact';
+  /** How the notification will be sent. */
+  notification: Contact;
+  /**
+   * How the verification will be sent.
+   *
+   * Items to note:
+   *
+   * - _Optional:_ When no verification contact is set, the notification contact information is used for verification.
+   */
+  verification?: Maybe<Contact>;
+};
+
+/** Input defining an async issuance issuee contact information. */
+export type AsyncIssuanceContactInput = {
+  /** How the notification should be sent. */
+  notification: ContactInput;
+  /**
+   * How the verification should be sent.
+   *
+   * Items to note:
+   *
+   * - _Optional:_ When no verification contact is set, the notification contact information is used for verification.
+   */
+  verification?: InputMaybe<ContactInput>;
+};
+
+/** Represents an error returned by the create async issuance request. */
+export type AsyncIssuanceErrorResponse = {
+  __typename?: 'AsyncIssuanceErrorResponse';
+  /**
+   * A collection of errors with each entry corresponding to each item of the async issuance request input.
+   *
+   * Items of note:
+   *
+   * - The return order of the errors matches the order of the input requests.
+   * - Where there is a mix of valid and invalid requests, a null is used to represent a potentially successful request.
+   */
+  errors: Array<Maybe<Scalars['String']['output']>>;
+};
+
+/** The async issuance request. */
+export type AsyncIssuanceRequest = {
+  __typename?: 'AsyncIssuanceRequest';
+  /** The communications that have been sent for this async issuance request. */
+  communications: Array<Communication>;
+  /** The contract to be issued. */
+  contract: Contract;
+  /** When the async issuance request was created. */
+  createdAt: Scalars['DateTime']['output'];
+  /** The user who created the async issuance request. */
+  createdBy: User;
+  /**
+   * The point in the future which the issuees can no longer complete the issuance process.
+   *
+   * Items to note:
+   *
+   * - The period started upon receipt of the request.
+   */
+  expiresOn: Scalars['DateTime']['output'];
+  /** The expiry setting for this async issuance request. */
+  expiry: AsyncIssuanceRequestExpiry;
+  /**
+   * When set, the reason this async issuance request failed to issue.
+   *
+   * Items to note:
+   *
+   * - The reason is only available when the status is `failed`.
+   */
+  failureReason?: Maybe<Scalars['String']['output']>;
+  /** The ID of the async issuance request. */
+  id: Scalars['ID']['output'];
+  /** The issuee identity */
+  identity: Identity;
+  /**
+   * The issuance.
+   *
+   * Items of note:
+   *
+   * - When not set, the issuance has not been successfully claimed by the issuee.
+   */
+  issuance?: Maybe<Issuance>;
+  /** The status of the async issuance request. */
+  status: AsyncIssuanceRequestStatus;
+  /** When the async issuance request was last updated. */
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The user who last updated the async issuance request. */
+  updatedBy?: Maybe<User>;
+};
+
+
+/** The async issuance request. */
+export type AsyncIssuanceRequestCommunicationsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<CommunicationOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<CommunicationWhere>;
+};
+
+/** A time period for the expiry of an async issuance request. */
+export enum AsyncIssuanceRequestExpiry {
+  OneDay = 'oneDay',
+  OneMonth = 'oneMonth',
+  OneWeek = 'oneWeek',
+  ThreeDays = 'threeDays',
+  ThreeMonths = 'threeMonths',
+  TwoWeeks = 'twoWeeks'
+}
+
+/** Represents the input required for creating an async issuance request. */
+export type AsyncIssuanceRequestInput = {
+  /**
+   * The collection of assertions made about the subject in the verifiable credential.
+   *
+   * Item of note:
+   *
+   * - You must fulfill the contract claims definition. Review contract creation for more information.
+   */
+  claims?: InputMaybe<Scalars['JSONObject']['input']>;
+  /** The issuee's contact information. */
+  contact: AsyncIssuanceContactInput;
+  /** The ID of the contract you wish to issue. */
+  contractId: Scalars['UUID']['input'];
+  /**
+   * Setting the expiration data allows for explicitly control over credential expiry, regardless of when it is issued.
+   *
+   * Items of note:
+   *
+   *  - The date must be in ISO format.
+   */
+  expirationDate?: InputMaybe<Scalars['DateTime']['input']>;
+  /**
+   * The point in the future which the issuees can no longer complete the issuance process.
+   *
+   * Items to note:
+   *
+   *  - The period starts upon receipt of the request.
+   *  - No further issuances are possible once expired.
+   *  - Data associated with a request is automatically removed upon issuance or expiry.
+   */
+  expiry: AsyncIssuanceRequestExpiry;
+  /**
+   * The issuee's photo for use with face check presentation verification.
+   *
+   * Items of note:
+   *
+   *  - _Optional:_ When no photo is set and the contract does not require one, the issuance process does not require a photo.
+   *  - The photo is displayed via the authenticator app.
+   *  - The photo must be encoded using the [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) format, and the base-64 encoded image must be of a JPEG type.
+   *  - Image data can only be provided by a single source, either from the faceCheckPhoto or the photoCapture fields.
+   *  - When the contract **requires** face check, either the **faceCheckPhoto** or the **photoCapture** property must be set.
+   *  - When the contract **requires no** face check, neither the **faceCheckPhoto** nor the **photoCapture** property can be set.
+   */
+  faceCheckPhoto?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * The identity to issue to.
+   *
+   * Items of note:
+   *
+   * - _Required_ When not using the identityId property
+   */
+  identity?: InputMaybe<IdentityInput>;
+  /**
+   * The ID of the identity to issue to.
+   *
+   *  Items of note:
+   *
+   *   - _Required_ When not using the identity property.
+   */
+  identityId?: InputMaybe<Scalars['UUID']['input']>;
+  /**
+   * When set to true, the issuee is required to capture their photo during the issuance process.
+   *
+   * Items of note:
+   *
+   * - _Optional:_ When no photo capture is set and the contract does not require one, the issuance process does not require a photo.
+   * - The captured photo is displayed via the authenticator app.
+   * - Image data can only be provided by a single source, either from the faceCheckPhoto or the photoCapture fields.
+   * - When the contract **requires** face check, either the **faceCheckPhoto** or the **photoCapture** property must be set.
+   * - When the contract **requires no** face check, neither the **faceCheckPhoto** nor the **photoCapture** property can be set.
+   */
+  photoCapture?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** The createAsyncIssuanceRequest mutation response. Either a successful response or a validation error response. */
+export type AsyncIssuanceRequestResponse = AsyncIssuanceErrorResponse | AsyncIssuanceResponse;
+
+/** The status of the async issuance request. */
+export enum AsyncIssuanceRequestStatus {
+  /** The issuance request has been cancelled. */
+  Cancelled = 'cancelled',
+  /** The issuance request has expired. */
+  Expired = 'expired',
+  /** The issuance failed, refer to the failure reason in the issuance request. */
+  Failed = 'failed',
+  /** The issuance has been successfully claimed by the issuee. */
+  Issued = 'issued',
+  /** Issuance request is pending. */
+  Pending = 'pending'
+}
+
+/** Fields that can be used for sorting async issuance requests by. */
+export enum AsyncIssuanceRequestsOrderBy {
+  /** The timestamp when the async issuance request was created. */
+  CreatedAt = 'createdAt'
+}
+
+/** Represents the criteria for filtering async issuances requests. */
+export type AsyncIssuanceRequestsWhere = {
+  /** Return async issuance requests for the specified contract. */
+  contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** Return async issuance requests created after this point. */
+  createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Return async issuance requests created before this point. */
+  createdTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Return async issuance requests for the specified identity. */
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** Return async issuance requests with the specified status. */
+  status?: InputMaybe<AsyncIssuanceRequestStatus>;
+};
+
+/** The response of an async issuance request. */
+export type AsyncIssuanceResponse = {
+  __typename?: 'AsyncIssuanceResponse';
+  /**
+   * Request Ids collections contains an autogenerated request ID for each async issuance request.
+   *
+   * Items to note:
+   *
+   * - The return order of the request IDs matches the order of the input requests.
+   */
+  asyncIssuanceRequestIds: Array<Scalars['ID']['output']>;
+};
+
+/** A limited async issuance token response. */
+export type AsyncIssuanceTokenResponse = {
+  __typename?: 'AsyncIssuanceTokenResponse';
+  expires: Scalars['DateTime']['output'];
+  /**
+   * The photo capture request ID to use with photo capture operations prior to issuance. This will be set if the async issuance was created with `photoCapture` set to true.
+   *
+   * When this field is set:
+   *
+   * - A photo must be captured prior to calling `Mutation.createIssuanceRequestForAsyncIssuance`.
+   * - The async issuance token can used for photo capture operations: `Mutation.capturePhoto`, `Subscription.photoCaptureEvent` and `Query.photoCaptureStatus`.
+   */
+  photoCaptureRequestId?: Maybe<Scalars['String']['output']>;
+  token: Scalars['String']['output'];
+};
+
 /** A configured authority or verifiable credential service instance */
 export type Authority = {
   __typename?: 'Authority';
@@ -353,6 +608,54 @@ export type Callback = {
   url: Scalars['URL']['input'];
 };
 
+/** Record of a communication sent to a recipient. */
+export type Communication = {
+  __typename?: 'Communication';
+  /** The contact method used to send the communication. */
+  contactMethod: ContactMethod;
+  /** The user (Person or Application) whose action resulted in the communication. */
+  createdBy: User;
+  id: Scalars['ID']['output'];
+  /** The purpose of the communication. */
+  purpose: CommunicationPurpose;
+  /** The receipient of the communication. */
+  recipient: Identity;
+  /** When the communication was sent. */
+  sentAt: Scalars['DateTime']['output'];
+};
+
+/** Fields that can be used for sorting communications. */
+export enum CommunicationOrderBy {
+  /** The name of the communication recipient. */
+  RecipientName = 'recipientName',
+  /** When the communication was sent. */
+  SentAt = 'sentAt'
+}
+
+/** The possible communication purposes. */
+export enum CommunicationPurpose {
+  Issuance = 'issuance',
+  Verification = 'verification'
+}
+
+/** Defines the filter critiera used to find communications. */
+export type CommunicationWhere = {
+  /** The ID of the async issuance request that the communication is related to. */
+  asyncIssuanceRequestId?: InputMaybe<Scalars['ID']['input']>;
+  /** The contact method of the communication. */
+  contactMethod?: InputMaybe<ContactMethod>;
+  /** The ID of the user (Person or Application) whose action resulted in the communication. */
+  createdById?: InputMaybe<Scalars['ID']['input']>;
+  /** The purpose of the communication. */
+  purpose?: InputMaybe<CommunicationPurpose>;
+  /** The ID of the recipient of the communication. */
+  recipientId?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the sentAt period to include. */
+  sentFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the sentAt period to include. */
+  sentTo?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
 /** Provides information about the presented credentials should be validated */
 export type ConfigurationValidation = {
   /** Determines if a revoked credential should be accepted. Default is false (it shouldn't be accepted). */
@@ -365,6 +668,37 @@ export type ConfigurationValidation = {
   /** Determines if the linked domain should be validated. Default is false. Setting this flag to false means you as a Relying Party application accept credentials from unverified linked domain. Setting this flag to true means the linked domain will be validated and only verified domains will be accepted. */
   validateLinkedDomain?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
+/** Represents the contact information. */
+export type Contact = {
+  __typename?: 'Contact';
+  /** The method of contact. */
+  method: ContactMethod;
+  /**
+   * The value of the contact method.
+   *
+   * For example, if the method is `sms`, the value would be a phone number.
+   */
+  value: Scalars['String']['output'];
+};
+
+/** Input defining the contact information. */
+export type ContactInput = {
+  /** The method of contact. */
+  method: ContactMethod;
+  /**
+   * The value of the contact method.
+   *
+   * For example, if the method is `sms`, the value would be a phone number.
+   */
+  value: Scalars['String']['input'];
+};
+
+/** The possible contact methods. */
+export enum ContactMethod {
+  Email = 'email',
+  Sms = 'sms'
+}
 
 /** Defines a contract that can be used to issue credentials */
 export type Contract = {
@@ -667,7 +1001,7 @@ export type ContractIssuanceWhere = {
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
-/** Columns that can be used for sorting contracts. */
+/** Fields that can be used for sorting contracts. */
 export enum ContractOrderBy {
   /** The name of the contract. */
   ContractName = 'contractName',
@@ -998,7 +1332,7 @@ export type IdentityIssuer = {
   label?: Maybe<Scalars['String']['output']>;
 };
 
-/** Columns that can be used for sorting identities. */
+/** Fields that can be used for sorting identities. */
 export enum IdentityOrderBy {
   /** The unique identifier of the identity in the issuing tenant */
   Identifier = 'identifier',
@@ -1113,7 +1447,7 @@ export type IssuanceEventWhere = {
   status?: InputMaybe<IssuanceRequestStatus>;
 };
 
-/** Columns that can be used for sorting issuances. */
+/** Fields that can be used for sorting issuances. */
 export enum IssuanceOrderBy {
   /** The name of the contract that was issued. */
   ContractName = 'contractName',
@@ -1151,57 +1485,107 @@ export type IssuancePresentationWhere = {
 
 /**
  * The issuance request payload contains information about your verifiable credentials issuance request.
+ *
  * The following example demonstrates an issuance request by using a PIN code flow with user claims, such as first name and last name.
- * The result of this request returns a QR code with a link to start the issuance process.
+ *
+ * ```json
+ * {
+ *   "contractId": "01910769-c6e8-7d2a-9ecd-1f2bcb7f62ba"
+ *   "identityId": "8ae15985-0d43-40f8-a52e-b51399a0de12"
+ *   "includeQRCode": true,
+ *   "claims": {
+ *     "firstName": "John",
+ *     "lastName": "Doe"
+ *   },
+ *   "pin": {
+ *     "value": "1234"
+ *   }
+ * }
+ * ```
+ *
+ * The result of this request returns a URL and optional QR code to start the issuance process.
  */
 export type IssuanceRequestInput = {
+  /** The callback to register. */
   callback?: InputMaybe<Callback>;
   /**
-   * A collection of assertions made about the subject in the verifiable credential.
-   * Must fulfill the contract claims definition.
+   * The collection of assertions made about the subject in the verifiable credential.
+   *
+   * Item of note:
+   *
+   * - You must fulfill the contract claims definition. Review contract creation for more information.
    */
   claims?: InputMaybe<Scalars['JSONObject']['input']>;
-  /** The ID of the contract you wish to issue */
+  /** The ID of the contract you wish to issue. */
   contractId: Scalars['ID']['input'];
   /**
-   * Use this setting to explicitly control when a credential expires, regardless of when it is issued.
-   * Please note that the date should be in ISO format.
+   * Setting the expiration data allows for explicitly control over credential expiry, regardless of when it is issued.
+   *
+   * Item of note:
+   *
+   * - The date must be in ISO format.
    */
   expirationDate?: InputMaybe<Scalars['DateTime']['input']>;
   /**
-   * The issuee's photo for the purpose of face check presentation verification, also displayed via the authenticator app.
-   * The image content type and encoding must be: `image/jpg;base64`.
-   * For more info on the photo requirements, see the [Face Check documentation](https://learn.microsoft.com/en-us/entra/verified-id/using-facecheck#what-are-the-requirements-for-the-photo-in-the-verified-id)
-   * Please note that optional image data can only be provided by a single source, either from the faceCheckPhoto or the photoCaptureRequestId properties.
+   * The issuee's photo for use with face check presentation verification.
+   *
+   * Items of note:
+   *
+   * - _Optional:_ When no photo is set and the contract does not require one, the issuance process does not require a photo.
+   * - The photo is displayed via the authenticator app.
+   * - The image content type and encoding must be: `image/jpg;base64`.
+   * - Image data can only be provided by a single source, either from the faceCheckPhoto or the photoCaptureRequestId fields.
+   * - When the contract **requires** face check, either the **faceCheckPhoto** or the **photoCaptureRequestId** property must be set.
+   * - When the contract **requires no** face check, neither the **faceCheckPhoto** nor the **photoCaptureRequestId** property can be set.
    */
   faceCheckPhoto?: InputMaybe<Scalars['String']['input']>;
   /**
-   * The identity you wish to issue to (alternatively use the identityId property, if known)
+   * The identity you wish to issue to.
    *
-   * - Not required when issuing using a limited access token
+   * Item of note:
+   *
+   * - _Optional:_ When issuing using a limited access token or the identityId property.
    */
   identity?: InputMaybe<IdentityInput>;
   /**
-   * The ID of the identity you wish to issue to (alternatively use the identity property)
+   * The ID of the identity you wish to issue to.
    *
-   * - Not required when issuing using a limited access token
+   * Item of note:
+   *
+   * - _Optional:_ When issuing using a limited access token or the identity property.
    */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /**
-   * Determines whether a QR code is included in the response of this request
-   * Present the QR code and ask the user to scan it.
-   * Scanning the QR code launches the authenticator app with this issuance request.
-   * Possible values are true (default) or false.
-   * When you set the value to false, use the return url property to render a deep link.
+   * A flag to specify whether a QR Code is included in the response of the request.
+   *
+   * Items of note:
+   *
+   * - The Possible values are true (default) or false.
+   * - Present the QR code and ask the user to scan it.
+   * - Scanning the QR code launches the authenticator app with this issuance request.
+   * - When not using the QR Code, use the return url property to render a deep link.
    */
   includeQRCode?: InputMaybe<Scalars['Boolean']['input']>;
   /**
-   * The ID of the completed photo capture request to use for the face check photo.
-   * Please note that the photo capture request is only valid for a single issuance.
-   * Please note that optional image data can only be provided by a single source, either from the faceCheckPhoto or the photoCaptureRequestId properties.
+   * The ID of the photo capture request.
+   *
+   * Items of note:
+   *
+   * - _Optional:_ When no photo capture is set and the contract does not require one, the issuance process does not require a photo.
+   * - The captured photo is displayed via the authenticator app.
+   * - Image data can only be provided by a single source, either from the faceCheckPhoto or the photoCaptureRequestId fields.
+   * - When the contract **requires** face check, either the **faceCheckPhoto** or the **photoCaptureRequestId** property must be set.
+   * - When the contract **requires no** face check, neither the **faceCheckPhoto** nor the **photoCaptureRequestId** property can be set.
+   * - A photo capture request is only valid for a single issuance.
    */
   photoCaptureRequestId?: InputMaybe<Scalars['ID']['input']>;
-  /** Optional PIN code required for the issuance. */
+  /**
+   * The PIN code required for the issuance.
+   *
+   * Item of note:
+   *
+   * - _Optional:_ When no PIN is set, the issuance process does not require a PIN.
+   */
   pin?: InputMaybe<Pin>;
 };
 
@@ -1218,7 +1602,7 @@ export enum IssuanceRequestStatus {
 }
 
 /**
- * Respresents a successful issuance.
+ * Represents a successful issuance.
  * When your app receives the response, the app needs to present the QR code to the user.
  * The user scans the QR code, which opens the authenticator app and starts the issuance process.
  */
@@ -1284,6 +1668,12 @@ export type IssuerIdentifierInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   /**
+   * Acquires a token for issuance using the verification code.
+   *
+   * If successful, the token can be used for issuance operations.
+   */
+  acquireAsyncIssuanceToken: AsyncIssuanceTokenResponse;
+  /**
    * Acquire a limited access token, suitable for use in a client application, which can be used:
    * - to issue one or more credentials to a specified identity
    * - for presentations of one or more credentials from the specified identity (for scenarios where the identity is known via authentication or other means)
@@ -1308,21 +1698,46 @@ export type Mutation = {
   /** Cancels an existing pending approval request. */
   cancelApprovalRequest?: Maybe<Scalars['Void']['output']>;
   /**
+   * Cancel an issuance request.
+   *
+   * Items of note:
+   *
+   * - An async issuance request must not have been issued.
+   */
+  cancelAsyncIssuanceRequest?: Maybe<AsyncIssuanceRequest>;
+  /**
+   * Cancel one or more async issuance requests.
+   *
+   * Items of note:
+   *
+   * - An async issuance request must not have been issued.
+   * - Starts a background job for all cancellations and returns that job id.
+   */
+  cancelAsyncIssuanceRequests: Scalars['ID']['output'];
+  /**
    * Captures a photo for the specified photo capture request, ready to be used in a subsequent issuance request.
    * The photo must be a [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) using base64 encoding.
    */
   capturePhoto?: Maybe<Scalars['Void']['output']>;
   /** Creates a new approval request. */
   createApprovalRequest: ApprovalRequestResponse;
+  /** Creates one or more async issuance requests. */
+  createAsyncIssuanceRequest: AsyncIssuanceRequestResponse;
   /** Creates a new contract */
   createContract: Contract;
-  /** The result of this request returns a QR code with a link to start the issuance process, or an error */
+  /** The result of this request returns a URL and optional QR code to start the issuance process or an error. */
   createIssuanceRequest: IssuanceRequestResponse;
+  /**
+   * Creates an issuance request for the specified async issuance request.
+   *
+   * Returns a URL and optional QR code to start the issuance process or an error.
+   */
+  createIssuanceRequestForAsyncIssuance: IssuanceRequestResponse;
   /** Creates a partner whose credential types can be requested for presentation */
   createPartner: Partner;
   /** Creates a request to support capturing a photo to be used in a subsequent issuance. */
   createPhotoCaptureRequest: PhotoCaptureRequestResponse;
-  /** The result of this request returns a QR code with a link to start the presentation process, or an error */
+  /** The result of this request returns a URL and optional QR code to start the presentation process or an error. */
   createPresentationRequest: PresentationRequestResponse;
   /** The result of this request returns a QR code with a link to start the presentation process, or an error */
   createPresentationRequestForApproval: PresentationRequestResponse;
@@ -1336,6 +1751,22 @@ export type Mutation = {
   deprecateContract: Contract;
   /** Provisions or re-provisions a contract into the Verified ID service */
   provisionContract: Contract;
+  /**
+   * Resend a single async issuance notification for the specified request ID.
+   *
+   * Items of note:
+   *
+   * - Synchronous operation that returns the updated asyncIssuanceRequest.
+   */
+  resendAsyncIssuanceNotification?: Maybe<AsyncIssuanceRequest>;
+  /**
+   * Resend async issuance notifications for the specified request IDs.
+   *
+   * Items of note:
+   *
+   * - Starts a background job for all notifications and returns that job id.
+   */
+  resendAsyncIssuanceNotifications: Scalars['ID']['output'];
   /** Revokes existing credentials for a contract. */
   revokeContractIssuances: Scalars['ID']['output'];
   /** Revokes existing credentials for an identity. */
@@ -1348,14 +1779,34 @@ export type Mutation = {
   revokeUserIssuances: Scalars['ID']['output'];
   /** Creates or updates an identity based on its issuer and identifier */
   saveIdentity: Identity;
+  /**
+   * Sends a verification code to the issuee.
+   *
+   * The verification code can then be used to acquire a token for issuance.
+   */
+  sendAsyncIssuanceVerification?: Maybe<Scalars['Void']['output']>;
   /** Updates an existing pending approval request. */
   updateApprovalRequest?: Maybe<Scalars['Void']['output']>;
+  /**
+   * Updates the async issuance issuee's contact information.
+   *
+   * Items of note:
+   *
+   * - Information can only be updated when the async issuance request is pending.
+   */
+  updateAsyncIssuanceContact: AsyncIssuanceContact;
   /** Updates an existing contract */
   updateContract: Contract;
   /** Updates the name and credential types of a partner */
   updatePartner: Partner;
   /** Updates an existing template */
   updateTemplate: Template;
+};
+
+
+export type MutationAcquireAsyncIssuanceTokenArgs = {
+  asyncIssuanceRequestId: Scalars['UUID']['input'];
+  verificationCode: Scalars['String']['input'];
 };
 
 
@@ -1385,6 +1836,16 @@ export type MutationCancelApprovalRequestArgs = {
 };
 
 
+export type MutationCancelAsyncIssuanceRequestArgs = {
+  asyncIssuanceRequestId: Scalars['UUID']['input'];
+};
+
+
+export type MutationCancelAsyncIssuanceRequestsArgs = {
+  asyncIssuanceRequestIds: Array<Scalars['UUID']['input']>;
+};
+
+
 export type MutationCapturePhotoArgs = {
   photo: Scalars['String']['input'];
   photoCaptureRequestId: Scalars['UUID']['input'];
@@ -1396,6 +1857,11 @@ export type MutationCreateApprovalRequestArgs = {
 };
 
 
+export type MutationCreateAsyncIssuanceRequestArgs = {
+  request: Array<AsyncIssuanceRequestInput>;
+};
+
+
 export type MutationCreateContractArgs = {
   input: ContractInput;
 };
@@ -1403,6 +1869,11 @@ export type MutationCreateContractArgs = {
 
 export type MutationCreateIssuanceRequestArgs = {
   request: IssuanceRequestInput;
+};
+
+
+export type MutationCreateIssuanceRequestForAsyncIssuanceArgs = {
+  asyncIssuanceRequestId: Scalars['UUID']['input'];
 };
 
 
@@ -1452,6 +1923,16 @@ export type MutationProvisionContractArgs = {
 };
 
 
+export type MutationResendAsyncIssuanceNotificationArgs = {
+  asyncIssuanceRequestId: Scalars['UUID']['input'];
+};
+
+
+export type MutationResendAsyncIssuanceNotificationsArgs = {
+  asyncIssuanceRequestIds: Array<Scalars['UUID']['input']>;
+};
+
+
 export type MutationRevokeContractIssuancesArgs = {
   contractId: Scalars['ID']['input'];
 };
@@ -1482,9 +1963,20 @@ export type MutationSaveIdentityArgs = {
 };
 
 
+export type MutationSendAsyncIssuanceVerificationArgs = {
+  asyncIssuanceRequestId: Scalars['UUID']['input'];
+};
+
+
 export type MutationUpdateApprovalRequestArgs = {
   id: Scalars['ID']['input'];
   input: UpdateApprovalRequestInput;
+};
+
+
+export type MutationUpdateAsyncIssuanceContactArgs = {
+  asyncIssuanceRequestId: Scalars['UUID']['input'];
+  contact: AsyncIssuanceContactInput;
 };
 
 
@@ -1585,7 +2077,7 @@ export type PartnerPresentationsArgs = {
   where?: InputMaybe<PartnerPresentationWhere>;
 };
 
-/** Columns that can be used for sorting partners. */
+/** Fields that can be used for sorting partners. */
 export enum PartnerOrderBy {
   /** The unique identifier of the verifiable credential service instance if the partner is on Entra network */
   IssuerId = 'issuerId',
@@ -1779,7 +2271,7 @@ export type PresentationEventWhere = {
   type?: InputMaybe<Scalars['String']['input']>;
 };
 
-/** Columns that can be used for sorting presentations. */
+/** Fields that can be used for sorting presentations. */
 export enum PresentationOrderBy {
   /** The name of the identity who presented the credential. */
   IdentityName = 'identityName',
@@ -1900,6 +2392,17 @@ export type Query = {
   actionedApprovalData?: Maybe<ActionedApprovalData>;
   /** Returns an approval request by ID. */
   approvalRequest: ApprovalRequest;
+  /**
+   * Returns the async issuance issuee contact information.
+   *
+   * Items of note:
+   *
+   * - Returns PII information about the issuee. Use with caution. Intended for verification of async issuance requests by admins only.
+   * - If the async issuance has been issued, or has expired, this information is no longer available.
+   */
+  asyncIssuanceContact: AsyncIssuanceContact;
+  /** Returns an async issuance request by ID. */
+  asyncIssuanceRequest: AsyncIssuanceRequest;
   /** Returns the details of the configured instance authority */
   authority: Authority;
   /** Returns a contract by ID */
@@ -1910,6 +2413,10 @@ export type Query = {
    */
   credentialTypes: Array<Scalars['String']['output']>;
   discovery: Discovery;
+  /** Returns async issuance requests, optionally matching the specified criteria. */
+  findAsyncIssuanceRequests: Array<AsyncIssuanceRequest>;
+  /** Returns communications, optionally matching the specified criteria */
+  findCommunications: Array<Communication>;
   /** Returns contracts, optionally matching the specified criteria */
   findContracts: Array<Contract>;
   /** Returns identites, optionally matching the specified criteria */
@@ -1988,6 +2495,16 @@ export type QueryApprovalRequestArgs = {
 };
 
 
+export type QueryAsyncIssuanceContactArgs = {
+  asyncIssuanceRequestId: Scalars['UUID']['input'];
+};
+
+
+export type QueryAsyncIssuanceRequestArgs = {
+  id: Scalars['UUID']['input'];
+};
+
+
 export type QueryContractArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1995,6 +2512,24 @@ export type QueryContractArgs = {
 
 export type QueryCredentialTypesArgs = {
   where?: InputMaybe<CredentialTypesWhere>;
+};
+
+
+export type QueryFindAsyncIssuanceRequestsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<AsyncIssuanceRequestsOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<AsyncIssuanceRequestsWhere>;
+};
+
+
+export type QueryFindCommunicationsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<CommunicationOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<CommunicationWhere>;
 };
 
 
@@ -2592,7 +3127,7 @@ export type UserIssuanceWhere = {
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
-/** Columns that can be used for sorting users. */
+/** Fields that can be used for sorting users. */
 export enum UserOrderBy {
   /** The email of the user. */
   Email = 'email',
@@ -2984,6 +3519,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping of union types */
 export type ResolversUnionTypes<_RefType extends Record<string, unknown>> = {
+  AsyncIssuanceRequestResponse: ( AsyncIssuanceErrorResponse ) | ( AsyncIssuanceResponse );
   BackgroundJobEvent: ( BackgroundJobActiveEvent ) | ( BackgroundJobCompletedEvent ) | ( BackgroundJobErrorEvent ) | ( BackgroundJobProgressEvent );
   IssuanceRequestResponse: ( IssuanceResponse ) | ( RequestErrorResponse );
   PresentationRequestResponse: ( PresentationResponse ) | ( RequestErrorResponse );
@@ -3008,6 +3544,18 @@ export type ResolversTypes = {
   ApprovalRequestResponse: ResolverTypeWrapper<ApprovalRequestResponse>;
   ApprovalRequestStatus: ApprovalRequestStatus;
   ApprovalTokenResponse: ResolverTypeWrapper<ApprovalTokenResponse>;
+  AsyncIssuanceContact: ResolverTypeWrapper<AsyncIssuanceContact>;
+  AsyncIssuanceContactInput: AsyncIssuanceContactInput;
+  AsyncIssuanceErrorResponse: ResolverTypeWrapper<AsyncIssuanceErrorResponse>;
+  AsyncIssuanceRequest: ResolverTypeWrapper<AsyncIssuanceEntity>;
+  AsyncIssuanceRequestExpiry: AsyncIssuanceRequestExpiry;
+  AsyncIssuanceRequestInput: AsyncIssuanceRequestInput;
+  AsyncIssuanceRequestResponse: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['AsyncIssuanceRequestResponse']>;
+  AsyncIssuanceRequestStatus: AsyncIssuanceRequestStatus;
+  AsyncIssuanceRequestsOrderBy: AsyncIssuanceRequestsOrderBy;
+  AsyncIssuanceRequestsWhere: AsyncIssuanceRequestsWhere;
+  AsyncIssuanceResponse: ResolverTypeWrapper<AsyncIssuanceResponse>;
+  AsyncIssuanceTokenResponse: ResolverTypeWrapper<AsyncIssuanceTokenResponse>;
   Authority: ResolverTypeWrapper<Authority>;
   BackgroundJobActiveEvent: ResolverTypeWrapper<BackgroundJobActiveEvent>;
   BackgroundJobCompletedEvent: ResolverTypeWrapper<BackgroundJobCompletedEvent>;
@@ -3019,7 +3567,14 @@ export type ResolversTypes = {
   BackgroundJobStatus: BackgroundJobStatus;
   CacheControlScope: CacheControlScope;
   Callback: Callback;
+  Communication: ResolverTypeWrapper<CommunicationEntity>;
+  CommunicationOrderBy: CommunicationOrderBy;
+  CommunicationPurpose: CommunicationPurpose;
+  CommunicationWhere: CommunicationWhere;
   ConfigurationValidation: ConfigurationValidation;
+  Contact: ResolverTypeWrapper<Contact>;
+  ContactInput: ContactInput;
+  ContactMethod: ContactMethod;
   Contract: ResolverTypeWrapper<ContractEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
@@ -3166,6 +3721,15 @@ export type ResolversParentTypes = {
   ApprovalRequestPresentationInput: ApprovalRequestPresentationInput;
   ApprovalRequestResponse: ApprovalRequestResponse;
   ApprovalTokenResponse: ApprovalTokenResponse;
+  AsyncIssuanceContact: AsyncIssuanceContact;
+  AsyncIssuanceContactInput: AsyncIssuanceContactInput;
+  AsyncIssuanceErrorResponse: AsyncIssuanceErrorResponse;
+  AsyncIssuanceRequest: AsyncIssuanceEntity;
+  AsyncIssuanceRequestInput: AsyncIssuanceRequestInput;
+  AsyncIssuanceRequestResponse: ResolversUnionTypes<ResolversParentTypes>['AsyncIssuanceRequestResponse'];
+  AsyncIssuanceRequestsWhere: AsyncIssuanceRequestsWhere;
+  AsyncIssuanceResponse: AsyncIssuanceResponse;
+  AsyncIssuanceTokenResponse: AsyncIssuanceTokenResponse;
   Authority: Authority;
   BackgroundJobActiveEvent: BackgroundJobActiveEvent;
   BackgroundJobCompletedEvent: BackgroundJobCompletedEvent;
@@ -3175,7 +3739,11 @@ export type ResolversParentTypes = {
   BackgroundJobEventWhere: BackgroundJobEventWhere;
   BackgroundJobProgressEvent: BackgroundJobProgressEvent;
   Callback: Callback;
+  Communication: CommunicationEntity;
+  CommunicationWhere: CommunicationWhere;
   ConfigurationValidation: ConfigurationValidation;
+  Contact: Contact;
+  ContactInput: ContactInput;
   Contract: ContractEntity;
   Int: Scalars['Int']['output'];
   Float: Scalars['Float']['output'];
@@ -3377,6 +3945,50 @@ export type ApprovalTokenResponseResolvers<ContextType = GraphQLContext, ParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type AsyncIssuanceContactResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AsyncIssuanceContact'] = ResolversParentTypes['AsyncIssuanceContact']> = {
+  notification?: Resolver<ResolversTypes['Contact'], ParentType, ContextType>;
+  verification?: Resolver<Maybe<ResolversTypes['Contact']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type AsyncIssuanceErrorResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AsyncIssuanceErrorResponse'] = ResolversParentTypes['AsyncIssuanceErrorResponse']> = {
+  errors?: Resolver<Array<Maybe<ResolversTypes['String']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type AsyncIssuanceRequestResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AsyncIssuanceRequest'] = ResolversParentTypes['AsyncIssuanceRequest']> = {
+  communications?: Resolver<Array<ResolversTypes['Communication']>, ParentType, ContextType, Partial<AsyncIssuanceRequestCommunicationsArgs>>;
+  contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  expiresOn?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  expiry?: Resolver<ResolversTypes['AsyncIssuanceRequestExpiry'], ParentType, ContextType>;
+  failureReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
+  issuance?: Resolver<Maybe<ResolversTypes['Issuance']>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['AsyncIssuanceRequestStatus'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type AsyncIssuanceRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AsyncIssuanceRequestResponse'] = ResolversParentTypes['AsyncIssuanceRequestResponse']> = {
+  __resolveType: TypeResolveFn<'AsyncIssuanceErrorResponse' | 'AsyncIssuanceResponse', ParentType, ContextType>;
+};
+
+export type AsyncIssuanceResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AsyncIssuanceResponse'] = ResolversParentTypes['AsyncIssuanceResponse']> = {
+  asyncIssuanceRequestIds?: Resolver<Array<ResolversTypes['ID']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type AsyncIssuanceTokenResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AsyncIssuanceTokenResponse'] = ResolversParentTypes['AsyncIssuanceTokenResponse']> = {
+  expires?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  photoCaptureRequestId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type AuthorityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Authority'] = ResolversParentTypes['Authority']> = {
   didModel?: Resolver<ResolversTypes['WebDidModel'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -3417,6 +4029,22 @@ export type BackgroundJobEventDataResolvers<ContextType = GraphQLContext, Parent
 export type BackgroundJobProgressEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobProgressEvent'] = ResolversParentTypes['BackgroundJobProgressEvent']> = {
   progress?: Resolver<ResolversTypes['PositiveInt'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['BackgroundJobStatus'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type CommunicationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Communication'] = ResolversParentTypes['Communication']> = {
+  contactMethod?: Resolver<ResolversTypes['ContactMethod'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  purpose?: Resolver<ResolversTypes['CommunicationPurpose'], ParentType, ContextType>;
+  recipient?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
+  sentAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ContactResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Contact'] = ResolversParentTypes['Contact']> = {
+  method?: Resolver<ResolversTypes['ContactMethod'], ParentType, ContextType>;
+  value?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -3606,15 +4234,20 @@ export interface LocaleScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
 }
 
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
+  acquireAsyncIssuanceToken?: Resolver<ResolversTypes['AsyncIssuanceTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireAsyncIssuanceTokenArgs, 'asyncIssuanceRequestId' | 'verificationCode'>>;
   acquireLimitedAccessToken?: Resolver<ResolversTypes['AccessTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireLimitedAccessTokenArgs, 'input'>>;
   acquireLimitedApprovalToken?: Resolver<ResolversTypes['ApprovalTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireLimitedApprovalTokenArgs, 'input'>>;
   acquireLimitedPhotoCaptureToken?: Resolver<ResolversTypes['PhotoCaptureTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireLimitedPhotoCaptureTokenArgs, 'input'>>;
   actionApprovalRequest?: Resolver<ResolversTypes['ApprovalRequest'], ParentType, ContextType, RequireFields<MutationActionApprovalRequestArgs, 'id' | 'input'>>;
   cancelApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationCancelApprovalRequestArgs, 'id'>>;
+  cancelAsyncIssuanceRequest?: Resolver<Maybe<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<MutationCancelAsyncIssuanceRequestArgs, 'asyncIssuanceRequestId'>>;
+  cancelAsyncIssuanceRequests?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationCancelAsyncIssuanceRequestsArgs, 'asyncIssuanceRequestIds'>>;
   capturePhoto?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationCapturePhotoArgs, 'photo' | 'photoCaptureRequestId'>>;
   createApprovalRequest?: Resolver<ResolversTypes['ApprovalRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateApprovalRequestArgs, 'request'>>;
+  createAsyncIssuanceRequest?: Resolver<ResolversTypes['AsyncIssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateAsyncIssuanceRequestArgs, 'request'>>;
   createContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationCreateContractArgs, 'input'>>;
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
+  createIssuanceRequestForAsyncIssuance?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestForAsyncIssuanceArgs, 'asyncIssuanceRequestId'>>;
   createPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationCreatePartnerArgs, 'input'>>;
   createPhotoCaptureRequest?: Resolver<ResolversTypes['PhotoCaptureRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePhotoCaptureRequestArgs, 'request'>>;
   createPresentationRequest?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestArgs, 'request'>>;
@@ -3624,13 +4257,17 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;
   deprecateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationDeprecateContractArgs, 'id'>>;
   provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
+  resendAsyncIssuanceNotification?: Resolver<Maybe<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<MutationResendAsyncIssuanceNotificationArgs, 'asyncIssuanceRequestId'>>;
+  resendAsyncIssuanceNotifications?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationResendAsyncIssuanceNotificationsArgs, 'asyncIssuanceRequestIds'>>;
   revokeContractIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeContractIssuancesArgs, 'contractId'>>;
   revokeIdentityIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeIdentityIssuancesArgs, 'identityId'>>;
   revokeIssuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<MutationRevokeIssuanceArgs, 'id'>>;
   revokeIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeIssuancesArgs, 'ids'>>;
   revokeUserIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeUserIssuancesArgs, 'userId'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
+  sendAsyncIssuanceVerification?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationSendAsyncIssuanceVerificationArgs, 'asyncIssuanceRequestId'>>;
   updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
+  updateAsyncIssuanceContact?: Resolver<ResolversTypes['AsyncIssuanceContact'], ParentType, ContextType, RequireFields<MutationUpdateAsyncIssuanceContactArgs, 'asyncIssuanceRequestId' | 'contact'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
   updatePartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationUpdatePartnerArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;
@@ -3762,10 +4399,14 @@ export type PresentedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   actionedApprovalData?: Resolver<Maybe<ResolversTypes['ActionedApprovalData']>, ParentType, ContextType, RequireFields<QueryActionedApprovalDataArgs, 'id'>>;
   approvalRequest?: Resolver<ResolversTypes['ApprovalRequest'], ParentType, ContextType, RequireFields<QueryApprovalRequestArgs, 'id'>>;
+  asyncIssuanceContact?: Resolver<ResolversTypes['AsyncIssuanceContact'], ParentType, ContextType, RequireFields<QueryAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
+  asyncIssuanceRequest?: Resolver<ResolversTypes['AsyncIssuanceRequest'], ParentType, ContextType, RequireFields<QueryAsyncIssuanceRequestArgs, 'id'>>;
   authority?: Resolver<ResolversTypes['Authority'], ParentType, ContextType>;
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, Partial<QueryCredentialTypesArgs>>;
   discovery?: Resolver<ResolversTypes['Discovery'], ParentType, ContextType>;
+  findAsyncIssuanceRequests?: Resolver<Array<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<QueryFindAsyncIssuanceRequestsArgs, 'limit'>>;
+  findCommunications?: Resolver<Array<ResolversTypes['Communication']>, ParentType, ContextType, Partial<QueryFindCommunicationsArgs>>;
   findContracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType, Partial<QueryFindContractsArgs>>;
   findIdentities?: Resolver<Array<ResolversTypes['Identity']>, ParentType, ContextType, RequireFields<QueryFindIdentitiesArgs, 'limit'>>;
   findIssuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, RequireFields<QueryFindIssuancesArgs, 'limit'>>;
@@ -3971,6 +4612,12 @@ export type Resolvers<ContextType = GraphQLContext> = {
   ApprovalRequest?: ApprovalRequestResolvers<ContextType>;
   ApprovalRequestResponse?: ApprovalRequestResponseResolvers<ContextType>;
   ApprovalTokenResponse?: ApprovalTokenResponseResolvers<ContextType>;
+  AsyncIssuanceContact?: AsyncIssuanceContactResolvers<ContextType>;
+  AsyncIssuanceErrorResponse?: AsyncIssuanceErrorResponseResolvers<ContextType>;
+  AsyncIssuanceRequest?: AsyncIssuanceRequestResolvers<ContextType>;
+  AsyncIssuanceRequestResponse?: AsyncIssuanceRequestResponseResolvers<ContextType>;
+  AsyncIssuanceResponse?: AsyncIssuanceResponseResolvers<ContextType>;
+  AsyncIssuanceTokenResponse?: AsyncIssuanceTokenResponseResolvers<ContextType>;
   Authority?: AuthorityResolvers<ContextType>;
   BackgroundJobActiveEvent?: BackgroundJobActiveEventResolvers<ContextType>;
   BackgroundJobCompletedEvent?: BackgroundJobCompletedEventResolvers<ContextType>;
@@ -3978,6 +4625,8 @@ export type Resolvers<ContextType = GraphQLContext> = {
   BackgroundJobEvent?: BackgroundJobEventResolvers<ContextType>;
   BackgroundJobEventData?: BackgroundJobEventDataResolvers<ContextType>;
   BackgroundJobProgressEvent?: BackgroundJobProgressEventResolvers<ContextType>;
+  Communication?: CommunicationResolvers<ContextType>;
+  Contact?: ContactResolvers<ContextType>;
   Contract?: ContractResolvers<ContextType>;
   ContractCount?: ContractCountResolvers<ContextType>;
   ContractDisplayClaim?: ContractDisplayClaimResolvers<ContextType>;

@@ -202,7 +202,7 @@ union PresentationRequestResponse = PresentationResponse | RequestErrorResponse
 # eslint-disable-next-line @graphql-eslint/require-description
 type Mutation {
   """
-  The result of this request returns a QR code with a link to start the presentation process, or an error
+  The result of this request returns a URL and optional QR code to start the presentation process or an error.
   """
   createPresentationRequest(request: PresentationRequestInput!): PresentationRequestResponse!
 }
@@ -663,7 +663,7 @@ extend type Partner {
 }
 
 """
-Columns that can be used for sorting presentations.
+Fields that can be used for sorting presentations.
 """
 enum PresentationOrderBy {
   """

@@ -34,6 +34,19 @@ const config: DeepPartial<Config> = {
   blobStorage: {
     logoImagesContainer: 'logo-images',
   },
+  privateBlobStorage: {
+    asyncIssuanceContainer: 'async-issuance',
+  },
+  sms: {
+    sid: 'AC860727ab860a86187f00a15bb05bd812',
+    from: '+15709124097',
+  },
+  email: {
+    from: {
+      name: 'Verified Orchestration',
+      email: 'no-reply@verifiedorchestration.com',
+    },
+  },
   auth: {
     pkce: {
       logoutUrl: 'https://login.microsoftonline.com/common/oauth2/v2.0/logout',

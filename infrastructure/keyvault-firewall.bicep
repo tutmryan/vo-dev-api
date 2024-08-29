@@ -15,11 +15,11 @@ resource keyVaultIPAddress 'Microsoft.KeyVault/vaults@2022-07-01' = {
   name: keyVaultName
   location: location
   properties: union(keyVaultProperties, {
-      publicNetworkAccess: 'Enabled'
-      networkAcls: {
-        defaultAction: 'Deny'
-        virtualNetworkRules: []
-        ipRules: ipRules
-      }
-    })
+    publicNetworkAccess: 'Enabled'
+    networkAcls: {
+      defaultAction: 'Deny'
+      virtualNetworkRules: []
+      ipRules: ipRules
+    }
+  })
 }

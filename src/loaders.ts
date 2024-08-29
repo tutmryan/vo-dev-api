@@ -1,4 +1,5 @@
 import { approvalRequestLoader } from './features/approval-request/loaders'
+import { asyncIssuanceLoader } from './features/async-issuance/loaders'
 import { contractLoader } from './features/contracts/loaders'
 import { identityLoader } from './features/identity/loaders'
 import { issuanceCountByContractLoader, issuanceCountByIdentityLoader, issuanceLoader } from './features/issuance/loaders'
@@ -20,4 +21,5 @@ export const createDataLoaders = () => ({
   partners: partnerLoader(),
   presentations: presentationLoader(),
   approvalRequests: approvalRequestLoader(),
+  asyncIssuances: asyncIssuanceLoader(),
 })

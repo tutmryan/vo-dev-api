@@ -1,14 +1,15 @@
-import { and, rule } from 'graphql-shield'
+import { and, or, rule } from 'graphql-shield'
 import type { GraphQLContext } from '../../context'
 import type { MutationCapturePhotoArgs, MutationCreatePhotoCaptureRequestArgs } from '../../generated/graphql'
 import { InternalRoles } from '../../roles'
 import { hasRoleRule } from '../../util/shield-utils'
 import { isLimitedIssuanceApp } from '../limited-access-tokens'
+import { isLimitedAsyncIssuancePhotoCaptureUser } from '../limited-async-issuance-tokens/shield-rules'
 
 export const isLimitedPhotoCaptureUser = hasRoleRule(InternalRoles.limitedPhotoCapture, 'isLimitedPhotoCaptureUser')
 
 export const isValidCapturePhoto = and(
-  isLimitedPhotoCaptureUser,
+  or(isLimitedPhotoCaptureUser, isLimitedAsyncIssuancePhotoCaptureUser),
   rule('isValidCapturePhotoRequestId', { cache: 'strict' })(
     (_, { photoCaptureRequestId }: MutationCapturePhotoArgs, { user }: GraphQLContext) => {
       if (!user?.limitedPhotoCaptureData?.photoCaptureRequestId) return false

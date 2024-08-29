@@ -16,5 +16,6 @@ export enum InternalRoles {
   limitedAccess = 'VerifiableCredential.LimitedAccess',
   limitedApproval = 'VerifiableCredential.LimitedApproval',
   limitedPhotoCapture = 'VerifiableCredential.LimitedPhotoCapture',
+  limitedAsyncIssuance = 'VerifiableCredential.LimitedAsyncIssuance',
   callback = 'VerifiableCredential.Request.Callback',
 }

@@ -4,6 +4,16 @@ import type {
   InvokeApprovalCallbackJobType,
 } from '../features/approval-request/jobs/invoke-approval-callback'
 import { invokeApprovalCallbackJobHandler } from '../features/approval-request/jobs/invoke-approval-callback'
+import type {
+  CancelAsyncIssuanceRequestsJobName,
+  CancelAsyncIssuanceRequestsJobType,
+} from '../features/async-issuance/jobs/cancel-async-issuance-requests'
+import { cancelAsyncIssuanceRequestsHandler } from '../features/async-issuance/jobs/cancel-async-issuance-requests'
+import type {
+  SendAsyncIssuanceNotificationsJobName,
+  SendAsyncIssuanceNotificationsJobType,
+} from '../features/async-issuance/jobs/send-async-issuance-notifications'
+import { sendAsyncIssuanceNotificationsJobHandler } from '../features/async-issuance/jobs/send-async-issuance-notifications'
 import type { RevokeContractIssuancesJobName, RevokeContractIssuancesJobType } from '../features/issuance/jobs/revoke-contract-issuances'
 import { revokeContractIssuancesJobHandler } from '../features/issuance/jobs/revoke-contract-issuances'
 import type { RevokeIdentityIssuancesJobName, RevokeIdentityIssuancesJobType } from '../features/issuance/jobs/revoke-identity-issuances'
@@ -14,13 +24,13 @@ import type { RevokeUserIssuancesJobName, RevokeUserIssuancesJobType } from '../
 import { revokeUserIssuancesJobHandler } from '../features/issuance/jobs/revoke-user-issuances'
 import type { UserEntity } from '../features/users/entities/user-entity'
 import type { logger } from '../logger'
-import type { VerifiedIdAdminService } from '../services/verified-id'
+import type { Services } from '../services'
 import type { PartialRecord } from '../util/partial-record'
 
 export type WorkerContext = {
   logger: typeof logger
-  verifiedIdAdminService: VerifiedIdAdminService
   user: UserEntity
+  services: Pick<Services, 'verifiedIdAdmin' | 'asyncIssuances' | 'communications'>
 }
 
 export interface JobPayload {
@@ -40,6 +50,8 @@ export type JobNames =
   | RevokeIdentityIssuancesJobName
   | RevokeUserIssuancesJobName
   | InvokeApprovalCallbackJobName
+  | SendAsyncIssuanceNotificationsJobName
+  | CancelAsyncIssuanceRequestsJobName
 
 export type JobTypes =
   | RevokeIssuancesJobType
@@ -47,6 +59,8 @@ export type JobTypes =
   | RevokeIdentityIssuancesJobType
   | RevokeUserIssuancesJobType
   | InvokeApprovalCallbackJobType
+  | SendAsyncIssuanceNotificationsJobType
+  | CancelAsyncIssuanceRequestsJobType
 
 export const handlers: HandlerMap<JobTypes> = {
   revokeIssuances: revokeIssuancesJobHandler,
@@ -54,6 +68,8 @@ export const handlers: HandlerMap<JobTypes> = {
   revokeIdentityIssuances: revokeIdentityIssuancesJobHandler,
   revokeUserIssuances: revokeUserIssuancesJobHandler,
   invokeApprovalCallback: invokeApprovalCallbackJobHandler,
+  sendAsyncIssuanceNotifications: sendAsyncIssuanceNotificationsJobHandler,
+  cancelAsyncIssuanceRequests: cancelAsyncIssuanceRequestsHandler,
 }
 
 // override default job options for specific job handlers

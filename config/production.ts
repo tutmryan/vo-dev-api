@@ -29,6 +29,11 @@ const config: DeepPartial<Config> = {
       clientId: '0d3d87e4-a50c-4a32-90d7-3d90670e39ee',
     },
   },
+  limitedAsyncIssuance: {
+    credentials: {
+      clientId: '8497a306-a749-44ae-acb9-ea723eefbc49',
+    },
+  },
 }
 
 module.exports = config

@@ -50,6 +50,11 @@ export const limitedPhotoCaptureAuth: ClientCredentialsConfig = {
   tokenUrl: platformTokenUrl,
   ...config.get('limitedPhotoCapture.credentials'),
 }
+export const limitedAsyncIssuanceAuth: ClientCredentialsConfig = {
+  scope: internalScope,
+  tokenUrl: platformTokenUrl,
+  ...config.get('limitedAsyncIssuance.credentials'),
+}
 
 // VID service client credentials config
 export const hasHomeTenantAuthority = config.has('homeTenant.vidServiceCredentials.clientId')

@@ -19,3 +19,7 @@ export type WithRequired<T, K extends keyof T> = T & { [P in K]-?: T[P] }
 export type NonNullableFields<T> = {
   [P in keyof T]: NonNullable<T[P]>
 }
+
+export function assertExhaustive(value: never, message?: string): never {
+  throw new Error(message ?? `Reached unexpected case ${value} in exhaustive switch`)
+}

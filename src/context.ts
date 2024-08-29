@@ -9,7 +9,9 @@ import { dispatch } from './cqs'
 import { dataSource } from './data'
 import { getLimitedAccessData, LimitedAccessTokenAcquisitionRoles } from './features/limited-access-tokens'
 import { getLimitedApprovalData } from './features/limited-approval-tokens'
+import { getLimitedAsyncIssuanceData } from './features/limited-async-issuance-tokens'
 import { getLimitedPhotoCaptureSession } from './features/limited-photo-capture-tokens'
+import type { PhotoCaptureData } from './features/photo-capture'
 import { getPhotoCaptureData } from './features/photo-capture'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
 import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or-create-user'
@@ -70,6 +72,30 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
     invariant(photoCaptureData, 'Invalid token')
     const userEntity = await dataSource.getRepository(UserEntity).findOneOrFail({ where: { id: photoCaptureData.userId } })
     return new User(claims, token, userEntity, undefined, undefined, photoCaptureData)
+  }
+
+  // Special case: when called with a limited async issuance token:
+  // - load the limited async issuance data associated with the token
+  // - optionally load the photo capture data associated with the token
+  // - load the user that created the async issuance request
+  const isLimitedAsyncIssuanceClient = Array.isArray(claims.roles) && claims.roles.includes(InternalRoles.limitedAsyncIssuance)
+  if (isLimitedAsyncIssuanceClient) {
+    // load async issuance data
+    const limitedAsyncIssuanceData = await getLimitedAsyncIssuanceData(token)
+    invariant(limitedAsyncIssuanceData, 'Invalid token')
+
+    // optionally load photo capture data during photo capture session
+    let photoCaptureData: PhotoCaptureData | undefined
+    if (limitedAsyncIssuanceData.photoCapture) {
+      const photoCaptureRequestId = await getLimitedPhotoCaptureSession(token)
+      if (photoCaptureRequestId) {
+        photoCaptureData = await getPhotoCaptureData(photoCaptureRequestId)
+        invariant(photoCaptureData, 'Invalid token')
+      }
+    }
+
+    const userEntity = await dataSource.getRepository(UserEntity).findOneOrFail({ where: { id: limitedAsyncIssuanceData.userId } })
+    return new User(claims, token, userEntity, undefined, undefined, photoCaptureData, limitedAsyncIssuanceData)
   }
 
   // If the claims do not include any of the plaform roles, return undefined

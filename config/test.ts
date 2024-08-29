@@ -21,6 +21,11 @@ const config: DeepPartial<Config> = {
     pkce: {},
   },
   redis: {},
+  privateBlobStorage: {
+    clientEncryptionKey: 'TEST_PRIVATE_STORAGE_ENCRYPTION_KEY',
+  },
+  sms: {},
+  email: {},
   homeTenant: {
     name: 'TEST_HOME_TENANT_NAME',
     tenantId: 'TEST_HOME_TENANT_ID',
@@ -46,6 +51,9 @@ const config: DeepPartial<Config> = {
     credentials: {},
   },
   limitedPhotoCapture: {
+    credentials: {},
+  },
+  limitedAsyncIssuance: {
     credentials: {},
   },
 }

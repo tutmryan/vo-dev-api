@@ -9,7 +9,7 @@ type CreatedByUpdatedByResolvers = {
   updatedBy: Resolver<ResolversTypes['User'] | null, { updatedById: string | null }, GraphQLContext>
 }
 
-const createdByUpdatedBy: CreatedByUpdatedByResolvers = {
+export const createdByUpdatedBy: CreatedByUpdatedByResolvers = {
   createdBy: ({ createdById }, _, { dataLoaders: { users } }) => users.load(createdById),
   updatedBy: ({ updatedById }, _, { dataLoaders: { users } }) => (updatedById ? users.load(updatedById) : null),
 }
@@ -46,5 +46,8 @@ export const resolvers: Resolvers = {
   ApprovalRequest: {
     requestedBy: ({ createdById }: ApprovalRequestEntity, _, { dataLoaders: { users } }) => users.load(createdById),
     updatedBy: ({ updatedById }, _, { dataLoaders: { users } }) => (updatedById ? users.load(updatedById) : null),
+  },
+  AsyncIssuanceRequest: {
+    ...createdByUpdatedBy,
   },
 }

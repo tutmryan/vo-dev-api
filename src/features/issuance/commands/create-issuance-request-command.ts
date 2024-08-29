@@ -13,11 +13,14 @@ import { validateIssuanceClaims } from '../../contracts/claims'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
-import type { IssuanceEntity } from '../entities/issuance-entity'
 import { deletePhotoCaptureRequest, getPhotoCaptureData } from '../../photo-capture'
+import type { IssuanceEntity } from '../entities/issuance-entity'
 
 export type IssuanceRequestDetails = Pick<IssuanceEntity, 'id' | 'issuedById' | 'identityId' | 'contractId' | 'hasFaceCheckPhoto'> &
-  Pick<IssuanceRequestInput, 'expirationDate'>
+  Pick<IssuanceRequestInput, 'expirationDate' | 'photoCaptureRequestId'> &
+  AsyncIssuanceRequestDetails
+
+type AsyncIssuanceRequestDetails = { asyncIssuanceKey?: string }
 
 type StandardClaimsData = Record<StandardClaims, string>
 
@@ -32,8 +35,9 @@ export async function CreateIssuanceRequestCommand(
     claims: claimsInput,
     faceCheckPhoto,
     photoCaptureRequestId,
+    asyncIssuanceKey,
     ...rest
-  }: IssuanceRequestInput,
+  }: IssuanceRequestInput & AsyncIssuanceRequestDetails,
 ) {
   const {
     user,
@@ -88,8 +92,7 @@ export async function CreateIssuanceRequestCommand(
   // add issuance request claims input, overriding any contract-defined claim values
   if (claimsInput) Object.entries(claimsInput).forEach(([claim, value]) => (claims[claim] = value))
   // add face check photo claim, if supplied & allowed by the contract
-  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None)
-    claims['photo'] = parseAndReencodeFaceCheckPhoto(faceCheckPhoto)
+  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None) claims['photo'] = convertFaceCheckPhoto(faceCheckPhoto)
 
   // validate the photo capture request matches to the contract and identity, set the claims data, and remove the capture cache
   if (photoCaptureRequestId) {
@@ -137,7 +140,9 @@ export async function CreateIssuanceRequestCommand(
     identityId: identity.id.toUpperCase(),
     contractId: contract.id.toUpperCase(),
     expirationDate: issuanceRequest.expirationDate,
+    photoCaptureRequestId,
     hasFaceCheckPhoto: contract.faceCheckSupport === FaceCheckPhotoSupport.None ? null : !!claims['photo'],
+    asyncIssuanceKey,
   }
   await requestDetailsCache.set(response.requestId, JSON.stringify(requestDetails), {
     ttl: REQUEST_CACHE_TTL,
@@ -146,16 +151,37 @@ export async function CreateIssuanceRequestCommand(
   return response
 }
 
-// validates face check photo input and returns base64url encoded image data
-export function parseAndReencodeFaceCheckPhoto(faceCheckPhoto: string) {
+const invalidFaceCheckError = 'Face check photo must be a valid image/jpeg data URL with base64 encoding'
+
+export function tryConvertFaceCheckPhoto(faceCheckPhoto: string):
+  | {
+      data: string
+      success: true
+      error?: undefined
+    }
+  | { data?: undefined; success: false; error: string } {
   try {
-    const { encoding, data } = parseDataUrl(faceCheckPhoto, {
+    return { data: convertFaceCheckPhoto(faceCheckPhoto), success: true }
+  } catch {
+    return { success: false, error: invalidFaceCheckError }
+  }
+}
+
+// validates face check photo input and returns base64url encoded image data
+export function convertFaceCheckPhoto(faceCheckPhoto: string) {
+  const { encoding, data } = parseFaceCheckPhotoDataUrl(faceCheckPhoto)
+  const buffer = Buffer.from(data, encoding)
+  return buffer.toString('base64url')
+}
+
+// validates face check photo input
+export function parseFaceCheckPhotoDataUrl(faceCheckPhoto: string) {
+  try {
+    return parseDataUrl(faceCheckPhoto, {
       validMimeTypes: ['image/jpeg'],
       validEncodings: ['base64'],
     })
-    const buffer = Buffer.from(data, encoding)
-    return buffer.toString('base64url')
-  } catch (error) {
-    throw new Error('Face check photo must be a valid image/jpeg data URL with base64 encoding')
+  } catch {
+    throw new Error(invalidFaceCheckError)
   }
 }

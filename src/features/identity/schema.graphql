@@ -133,7 +133,7 @@ type Mutation {
 }
 
 """
-Columns that can be used for sorting identities.
+Fields that can be used for sorting identities.
 """
 enum IdentityOrderBy {
   """

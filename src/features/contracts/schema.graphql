@@ -1,7 +1,7 @@
 # eslint-disable @graphql-eslint/naming-convention
 
 """
-Columns that can be used for sorting contracts.
+Fields that can be used for sorting contracts.
 """
 enum ContractOrderBy {
   """

@@ -19,7 +19,7 @@ import config from './raw'
  */
 
 // export the raw Config type
-export type { Config } from './raw'
+export type { BlobStorageCredentials, ClientCredentials, Config } from './raw'
 
 // export all expanded configs
 export * from './expanded'
@@ -31,6 +31,9 @@ export const cookieSession = config.get('cookieSession')
 export const database = config.get('database')
 export const redis = config.get('redis')
 export const blobStorage = config.get('blobStorage')
+export const privateBlobStorage = config.get('privateBlobStorage')
+export const sms = config.get('sms')
+export const email = config.get('email')
 export const events = config.has('events') ? config.get('events') : undefined
 export const devToolsEnabled = config.get('devToolsEnabled')
 export const faceCheckEnabled = config.get('faceCheckEnabled')
@@ -43,5 +46,6 @@ export const issuanceRequestRegistration = config.get('issuanceRequestRegistrati
 export const limitedAccess = config.get('limitedAccess')
 export const limitedApproval = config.get('limitedApproval')
 export const limitedPhotoCapture = config.get('limitedPhotoCapture')
+export const limitedAsyncIssuance = config.get('limitedAsyncIssuance')
 export const verifiedIdAdmin = config.get('verifiedIdAdmin')
 export const verifiedIdRequest = config.get('verifiedIdRequest')

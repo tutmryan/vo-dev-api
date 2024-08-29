@@ -6,6 +6,7 @@ import { IssuanceRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { createVerifiedIdAdminService } from '../../../services'
 import { invariant } from '../../../util/invariant'
+import { completeAsyncIssuance } from '../../async-issuance'
 import { addUserToManager } from '../../auditing/user-context-helper'
 import type { IssuanceCallbackHandler } from '../../callback'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
@@ -24,7 +25,7 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
     return
   }
 
-  const issuanceRequestDetails = JSON.parse(requestDetails) as IssuanceRequestDetails
+  const { photoCaptureRequestId, asyncIssuanceKey, ...issuanceRequestDetails } = JSON.parse(requestDetails) as IssuanceRequestDetails
   const topicData: IssuanceTopicData = { ...issuanceRequestDetails, event }
 
   if (event.requestStatus === IssuanceRequestStatus.IssuanceSuccessful) {
@@ -41,15 +42,18 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
         validityIntervalInSeconds = publishedValidityInterval
       }
       // create issuance record including expiresAt defn
-      const issuanceEntity = new IssuanceEntity({
+      const issuance = new IssuanceEntity({
         ...issuanceRequestDetails,
         requestId: event.requestId,
         expiresAt: issuanceRequestDetails.expirationDate ?? addSeconds(eventReceived, validityIntervalInSeconds),
       })
       addUserToManager(entityManager, issuanceRequestDetails.issuedById)
-      const { id } = await entityManager.getRepository(IssuanceEntity).save(issuanceEntity)
+      const { id } = await entityManager.getRepository(IssuanceEntity).save(issuance)
       topicData.issuanceId = id
-      logger.audit('Issuance complete', { issuance: issuanceEntity })
+      logger.audit('Issuance complete', { issuance })
+
+      // if this was an async issuance, complete it
+      if (asyncIssuanceKey) await completeAsyncIssuance(asyncIssuanceKey, issuance, entityManager)
     })
   } else if (event.requestStatus === IssuanceRequestStatus.RequestRetrieved)
     logger.audit('Issuance retrieved', { event: omit(event, 'state') })

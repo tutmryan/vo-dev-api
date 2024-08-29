@@ -8,6 +8,10 @@ inputs:
   resource-group-location:
     description: Location of the resource group
     required: true
+outputs:
+  resource-group-unique-string:
+    description: The unique string for this resource group ID (lower-case)
+    value: ${{ steps.deploy-resource-group.outputs.resourceGroupUniqueString }}
 
 runs:
   using: composite

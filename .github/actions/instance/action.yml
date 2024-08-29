@@ -11,12 +11,18 @@ inputs:
   azure-subscription-id:
     description: ID of the target Azure subscription
     required: true
+  deployment-service-principal-object-id:
+    description: Object ID of the service principal used for deployment
+    required: true
 
   resource-prefix:
     description: Prefix to use for resource names
     required: true
   resource-group-name:
     description: Name of the resource group to deploy resources to
+    required: true
+  resource-group-unique-string:
+    description: The unique string for this resource group ID (lower-case)
     required: true
   shared-resource-group-name:
     description: Name of the shared resource group
@@ -81,8 +87,12 @@ inputs:
 
   cors-origin:
     description: The value to use for API cors.origin setting (RegExp string[] of additional origins)
-  api-cookie-secret:
-    description: Cookie secret used by the cookie-session Express middleware
+
+  sms-secret:
+    description: The SMS credential secret
+    required: true
+  email-api-key:
+    description: The email API key
     required: true
 
   internal-client-secret:
@@ -94,20 +104,14 @@ inputs:
   limited-access-client-secret:
     description: The client secret of the limited access client in Azure AD
     required: true
-  limited-access-secret:
-    description: The secret for limited access data keys
-    required: true
   limited-approval-client-secret:
     description: The client secret of the limited approval client in Azure AD
-    required: true
-  limited-approval-secret:
-    description: The secret for limited approval data keys
     required: true
   limited-photo-capture-client-secret:
     description: The client secret of the limited photo capture client in Azure AD
     required: true
-  limited-photo-capture-secret:
-    description: The secret for limited photo capture data keys
+  limited-async-issuance-client-secret:
+    description: The client secret of the limited async issuance client in Azure AD
     required: true
   home-tenant-id:
     description: The tenant ID of the home tenant
@@ -256,6 +260,24 @@ runs:
         -OrganisationName '${{ inputs.organisation-name }}'
         -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
 
+    - name: Prepare new secrets script
+      id: prepare-new-secrets-script
+      shell: bash
+      run: chmod +x ./infrastructure/scripts/prepare-secrets.sh
+
+    - name: Prepare new secrets
+      id: prepare-new-secrets
+      shell: bash
+      run: >-
+        ./infrastructure/scripts/prepare-secrets.sh
+        vo-kv-inst-${{ inputs.resource-group-unique-string }}
+        API-COOKIE-SECRET:hex:16
+        LIMITED-ACCESS-SECRET:hex:16
+        LIMITED-APPROVAL-SECRET:hex:16
+        LIMITED-PHOTO-CAPTURE-SECRET:hex:16
+        LIMITED-ASYNC-ISSUANCE-SECRET:hex:16
+        PRIVATE-STORAGE-ENCRYPTION-KEY:hex:32
+
     - name: Instance infrastructure
       id: instance-infra
       uses: azure/arm-deploy@v1
@@ -264,6 +286,7 @@ runs:
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/instance.bicep
         parameters: >-
+          deploymentServicePrincipalObjectId=${{ inputs.deployment-service-principal-object-id }}
           resourcePrefix=${{ inputs.resource-prefix }}
           sqlServerName=${{ inputs.sql-server-name }}
           sharedResourceGroupName=${{ inputs.shared-resource-group-name }}
@@ -276,17 +299,22 @@ runs:
           nodeEnv=${{ inputs.node-env }}
           instance=${{ inputs.instance }}
           corsOrigin="${{ inputs.cors-origin }}"
-          apiCookieSecret=${{ inputs.api-cookie-secret }}
+          apiCookieSecret=${{ steps.prepare-new-secrets.outputs.API-COOKIE-SECRET }}
+          privateStorageClientEncryptionKey=${{ steps.prepare-new-secrets.outputs.PRIVATE-STORAGE-ENCRYPTION-KEY }}
+          smsSecret=${{ inputs.sms-secret }}
+          emailApiKey=${{ inputs.email-api-key }}
           apiClientId=${{ steps.add-instance-app-registration.outputs.instanceAppId }}
           apiClientSecret=${{ steps.add-instance-app-registration.outputs.apiSecret }}
           internalClientSecret=${{ inputs.internal-client-secret }}
           vidCallbackClientSecret=${{ inputs.vid-callback-client-secret }}
           limitedAccessClientSecret=${{ inputs.limited-access-client-secret }}
-          limitedAccessSecret=${{ inputs.limited-access-secret }}
+          limitedAccessSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-ACCESS-SECRET }}
           limitedApprovalClientSecret=${{ inputs.limited-approval-client-secret }}
-          limitedApprovalSecret=${{ inputs.limited-approval-secret }}
+          limitedApprovalSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-APPROVAL-SECRET }}
           limitedPhotoCaptureClientSecret=${{ inputs.limited-photo-capture-client-secret }}
-          limitedPhotoCaptureSecret=${{ inputs.limited-photo-capture-secret }}
+          limitedPhotoCaptureSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-PHOTO-CAPTURE-SECRET }}
+          limitedAsyncIssuanceClientSecret=${{ inputs.limited-async-issuance-client-secret }}
+          limitedAsyncIssuanceSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-ASYNC-ISSUANCE-SECRET }}
           homeTenantId=${{ inputs.home-tenant-id }}
           homeTenantName=${{ inputs.home-tenant-name }}
           homeTenantGraphClientId=${{ inputs.home-tenant-graph-client-id }}
@@ -545,4 +573,3 @@ runs:
         template: ./infrastructure/audit-log-streaming.bicep
         parameters: >-
           resourcePrefix=${{ inputs.resource-prefix }}
-

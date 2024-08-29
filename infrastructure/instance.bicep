@@ -2,6 +2,9 @@
 @minLength(3)
 param resourcePrefix string
 
+@description('The ID of the deployment service principal')
+param deploymentServicePrincipalObjectId string
+
 param location string = resourceGroup().location
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' existing = {
@@ -26,6 +29,11 @@ resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
 var keyVaultProperties = {
   enabledForTemplateDeployment: true
   tenantId: subscription().tenantId
+  sku: {
+    name: 'standard'
+    family: 'A'
+  }
+  enablePurgeProtection: true
   accessPolicies: [
     {
       tenantId: subscription().tenantId
@@ -36,11 +44,27 @@ var keyVaultProperties = {
         ]
       }
     }
+    {
+      tenantId: subscription().tenantId
+      objectId: privateStorageUserAssignedIdentity.properties.principalId
+      permissions: {
+        keys: [
+          'unwrapKey'
+          'wrapKey'
+          'get'
+        ]
+      }
+    }
+    {
+      tenantId: subscription().tenantId
+      objectId: deploymentServicePrincipalObjectId
+      permissions: {
+        secrets: [
+          'list'
+        ]
+      }
+    }
   ]
-  sku: {
-    name: 'standard'
-    family: 'A'
-  }
 }
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
@@ -108,7 +132,7 @@ resource keyVaultDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-p
 @secure()
 param apiCookieSecret string
 
-resource apiCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource apiCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(apiCookieSecret)) {
   name: 'API-COOKIE-SECRET'
   parent: keyVault
   properties: {
@@ -116,6 +140,41 @@ resource apiCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
       enabled: true
     }
     value: apiCookieSecret
+  }
+}
+
+resource apiCookieSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(apiCookieSecret)) {
+  name: 'API-COOKIE-SECRET'
+  parent: keyVault
+}
+
+@description('The SMS credential secret')
+@secure()
+param smsSecret string
+
+resource smsSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'SMS-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: smsSecret
+  }
+}
+
+@description('The email API key')
+@secure()
+param emailApiKey string
+
+resource emailApiKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'EMAIL-API-KEY'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: emailApiKey
   }
 }
 
@@ -188,7 +247,7 @@ resource limitedAccessClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022
 @secure()
 param limitedAccessSecret string
 
-resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(limitedAccessSecret)) {
   name: 'LIMITED-ACCESS-SECRET'
   parent: keyVault
   properties: {
@@ -197,6 +256,11 @@ resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01
     }
     value: limitedAccessSecret
   }
+}
+
+resource limitedAccessSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(limitedAccessSecret)) {
+  name: 'LIMITED-ACCESS-SECRET'
+  parent: keyVault
 }
 
 @description('The client secret of the limited approval client')
@@ -218,7 +282,7 @@ resource limitedApprovalClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@20
 @secure()
 param limitedApprovalSecret string
 
-resource limitedApprovalSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource limitedApprovalSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(limitedApprovalSecret)) {
   name: 'LIMITED-APPROVAL-SECRET'
   parent: keyVault
   properties: {
@@ -227,6 +291,11 @@ resource limitedApprovalSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-
     }
     value: limitedApprovalSecret
   }
+}
+
+resource limitedApprovalSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(limitedApprovalSecret)) {
+  name: 'LIMITED-APPROVAL-SECRET'
+  parent: keyVault
 }
 
 @description('The client secret of the limited photo capture client')
@@ -248,7 +317,7 @@ resource limitedPhotoCaptureClientSecretSecret 'Microsoft.KeyVault/vaults/secret
 @secure()
 param limitedPhotoCaptureSecret string
 
-resource limitedPhotoCaptureSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource limitedPhotoCaptureSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(limitedPhotoCaptureSecret)) {
   name: 'LIMITED-PHOTO-CAPTURE-SECRET'
   parent: keyVault
   properties: {
@@ -257,6 +326,46 @@ resource limitedPhotoCaptureSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022
     }
     value: limitedPhotoCaptureSecret
   }
+}
+
+resource limitedPhotoCaptureSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(limitedPhotoCaptureSecret)) {
+  name: 'LIMITED-PHOTO-CAPTURE-SECRET'
+  parent: keyVault
+}
+
+@description('The client secret of the limited async issuance client')
+@secure()
+param limitedAsyncIssuanceClientSecret string
+
+resource limitedAsyncIssuanceClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-ASYNC-ISSUANCE-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedAsyncIssuanceClientSecret
+  }
+}
+
+@description('The secret for limited async issuance data keys')
+@secure()
+param limitedAsyncIssuanceSecret string
+
+resource limitedAsyncIssuanceSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(limitedAsyncIssuanceSecret)) {
+  name: 'LIMITED-ASYNC-ISSUANCE-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedAsyncIssuanceSecret
+  }
+}
+
+resource limitedAsyncIssuanceSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(limitedAsyncIssuanceSecret)) {
+  name: 'LIMITED-ASYNC-ISSUANCE-SECRET'
+  parent: keyVault
 }
 
 @description('The client secret of the docs site app registration in Azure AD')
@@ -442,7 +551,7 @@ resource verifiedOrchestrationStorage 'Microsoft.Storage/storageAccounts@2022-09
   }
 }
 
-resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
+resource verifiedOrchestrationStorageBlobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
   name: 'default'
   parent: verifiedOrchestrationStorage
   properties: {
@@ -472,7 +581,7 @@ resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01'
 
 resource logoImageContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
   name: 'logo-images'
-  parent: blobService
+  parent: verifiedOrchestrationStorageBlobService
   properties: {
     publicAccess: 'Blob'
   }
@@ -484,9 +593,260 @@ resource storageBlobContributorRoleDefinition 'Microsoft.Authorization/roleDefin
   name: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
 }
 
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource logoImagesContainerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: logoImageContainer
   name: guid(logoImageContainer.id, apiAppService.id, storageBlobContributorRoleDefinition.id)
+  properties: {
+    roleDefinitionId: storageBlobContributorRoleDefinition.id
+    principalId: apiAppService.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource privateStorageUserAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: '${resourcePrefix}-private-storage-identity-${uniqueSuffix}'
+  location: location
+}
+
+var privateStorageIdentity = {
+  type: 'UserAssigned'
+  userAssignedIdentities: {
+    '${privateStorageUserAssignedIdentity.id}': {}
+  }
+}
+
+var privateStorageProps = {
+  allowBlobPublicAccess: false
+  publicNetworkAccess: 'Enabled'
+  minimumTlsVersion: 'TLS1_2'
+  supportsHttpsTrafficOnly: true
+  allowSharedKeyAccess: false
+  encryption: {
+    services: {
+      blob: {
+        enabled: true
+      }
+    }
+    identity: {
+      userAssignedIdentity: privateStorageUserAssignedIdentity.id
+    }
+    keySource: 'Microsoft.Keyvault'
+    keyvaultproperties: {
+      keyname: privateStorageEncryptionKey.name
+      keyvaulturi: endsWith(keyVault.properties.vaultUri, '/')
+        ? substring(keyVault.properties.vaultUri, 0, length(keyVault.properties.vaultUri) - 1)
+        : keyVault.properties.vaultUri
+    }
+  }
+}
+
+resource privateStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+  name: 'voprivate${uniqueSuffix}'
+  location: location
+  kind: 'StorageV2'
+  sku: {
+    name: 'Standard_GRS'
+  }
+  identity: privateStorageIdentity
+  properties: privateStorageProps
+}
+
+resource privateStorageEncryptionKey 'Microsoft.KeyVault/vaults/keys@2021-10-01' = {
+  parent: keyVault
+  name: 'private-storage-key'
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    keySize: 4096
+    kty: 'RSA'
+  }
+}
+
+module privateStorageFirewall './storage-account-firewall.bicep' = {
+  name: 'private-storage-firewall'
+  params: {
+    storageAccountName: privateStorageAccount.name
+    storageAccountIdentity: privateStorageIdentity
+    storageAccountProperties: privateStorageProps
+    location: location
+    ipAddresses: split(apiAppService.properties.outboundIpAddresses, ',')
+  }
+}
+
+@description('The key for encrypting private storage data')
+@secure()
+param privateStorageClientEncryptionKey string
+
+resource privateStorageClientEncryptionKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(privateStorageClientEncryptionKey)) {
+  name: 'PRIVATE-STORAGE-ENCRYPTION-KEY'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: privateStorageClientEncryptionKey
+  }
+}
+
+resource privateStorageClientEncryptionKeySecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(privateStorageClientEncryptionKey)) {
+  name: 'PRIVATE-STORAGE-ENCRYPTION-KEY'
+  parent: keyVault
+}
+
+resource verifiedOrchestrationPrivateStorageBlobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
+  name: 'default'
+  parent: privateStorageAccount
+}
+
+resource asyncIssuanceBlobContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+  name: 'async-issuance'
+  parent: verifiedOrchestrationPrivateStorageBlobService
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
+resource privateStorageDeletePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2023-01-01' = {
+  name: 'default'
+  parent: privateStorageAccount
+  properties: {
+    policy: {
+      rules: [
+        {
+          name: 'DeleteAfter-1-days'
+          type: 'Lifecycle'
+          definition: {
+            filters: {
+              blobTypes: [
+                'blockBlob'
+              ]
+              prefixMatch: [
+                'async-issuance/1-day/'
+              ]
+            }
+            actions: {
+              baseBlob: {
+                delete: {
+                  daysAfterModificationGreaterThan: 1
+                }
+              }
+            }
+          }
+        }
+        {
+          name: 'DeleteAfter-3-days'
+          type: 'Lifecycle'
+          definition: {
+            filters: {
+              blobTypes: [
+                'blockBlob'
+              ]
+              prefixMatch: [
+                'async-issuance/3-days/'
+              ]
+            }
+            actions: {
+              baseBlob: {
+                delete: {
+                  daysAfterModificationGreaterThan: 3
+                }
+              }
+            }
+          }
+        }
+        {
+          name: 'DeleteAfter-7-days'
+          type: 'Lifecycle'
+          definition: {
+            filters: {
+              blobTypes: [
+                'blockBlob'
+              ]
+              prefixMatch: [
+                'async-issuance/7-days/'
+              ]
+            }
+            actions: {
+              baseBlob: {
+                delete: {
+                  daysAfterModificationGreaterThan: 7
+                }
+              }
+            }
+          }
+        }
+        {
+          name: 'DeleteAfter-14-days'
+          type: 'Lifecycle'
+          definition: {
+            filters: {
+              blobTypes: [
+                'blockBlob'
+              ]
+              prefixMatch: [
+                'async-issuance/14-days/'
+              ]
+            }
+            actions: {
+              baseBlob: {
+                delete: {
+                  daysAfterModificationGreaterThan: 14
+                }
+              }
+            }
+          }
+        }
+        {
+          name: 'DeleteAfter-30-days'
+          type: 'Lifecycle'
+          definition: {
+            filters: {
+              blobTypes: [
+                'blockBlob'
+              ]
+              prefixMatch: [
+                'async-issuance/30-days/'
+              ]
+            }
+            actions: {
+              baseBlob: {
+                delete: {
+                  daysAfterModificationGreaterThan: 30
+                }
+              }
+            }
+          }
+        }
+        {
+          name: 'DeleteAfter-90-days'
+          type: 'Lifecycle'
+          definition: {
+            filters: {
+              blobTypes: [
+                'blockBlob'
+              ]
+              prefixMatch: [
+                'async-issuance/90-days/'
+              ]
+            }
+            actions: {
+              baseBlob: {
+                delete: {
+                  daysAfterModificationGreaterThan: 90
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+resource asyncIssuanceBlobContainerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: asyncIssuanceBlobContainer
+  name: guid(asyncIssuanceBlobContainer.id, apiAppService.id, storageBlobContributorRoleDefinition.id)
   properties: {
     roleDefinitionId: storageBlobContributorRoleDefinition.id
     principalId: apiAppService.identity.principalId
@@ -537,23 +897,29 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     APPLICATIONINSIGHTS_CONNECTION_STRING: apiAppInsights.properties.ConnectionString
     INSTANCE: instance
     CORS_ORIGIN: corsOrigin
-    COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${apiCookieSecretSecret.properties.secretUri})'
+    COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiCookieSecret) ? apiCookieSecretSecretExisting : apiCookieSecretSecret).properties.secretUri})'
+    SMS_SECRET: '@Microsoft.KeyVault(SecretUri=${smsSecretSecret.properties.secretUri})'
+    EMAIL_API_KEY: '@Microsoft.KeyVault(SecretUri=${emailApiKeySecret.properties.secretUri})'
     DATABASE_HOST: '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
     DATABASE_NAME: '${resourcePrefix}-sql-db'
     REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
     REDIS_HOST: '${redisCache.name}.redis.cache.windows.net'
     BLOB_STORAGE_URL: 'https://${verifiedOrchestrationStorage.name}.blob.${az.environment().suffixes.storage}'
+    PRIVATE_BLOB_STORAGE_URL: 'https://${privateStorageAccount.name}.blob.${az.environment().suffixes.storage}'
+    PRIVATE_STORAGE_ENCRYPTION_KEY: '@Microsoft.KeyVault(SecretUri=${(empty(privateStorageClientEncryptionKey) ? privateStorageClientEncryptionKeySecretExisting : privateStorageClientEncryptionKeySecret).properties.secretUri})'
     API_CLIENT_ID: apiClientId
     API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiClientSecret) ? apiClientSecretSecretExisting : apiClientSecretSecret).properties.secretUri})'
     API_CLIENT_URI: apiClientId
     INTERNAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${internalClientSecretSecret.properties.secretUri})'
     VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
     LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
-    LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessSecretSecret.properties.secretUri})'
+    LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAccessSecret) ? limitedAccessSecretSecretExisting : limitedAccessSecretSecret).properties.secretUri})'
     LIMITED_APPROVAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedApprovalClientSecretSecret.properties.secretUri})'
-    LIMITED_APPROVAL_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedApprovalSecretSecret.properties.secretUri})'
+    LIMITED_APPROVAL_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedApprovalSecret) ? limitedApprovalSecretSecretExisting : limitedApprovalSecretSecret).properties.secretUri})'
     LIMITED_PHOTO_CAPTURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPhotoCaptureClientSecretSecret.properties.secretUri})'
-    LIMITED_PHOTO_CAPTURE_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPhotoCaptureSecretSecret.properties.secretUri})'
+    LIMITED_PHOTO_CAPTURE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedPhotoCaptureSecret) ? limitedPhotoCaptureSecretSecretExisting : limitedPhotoCaptureSecretSecret).properties.secretUri})'
+    LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAsyncIssuanceClientSecretSecret.properties.secretUri})'
+    LIMITED_ASYNC_ISSUANCE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAsyncIssuanceSecret) ? limitedAsyncIssuanceSecretSecretExisting : limitedAsyncIssuanceSecretSecret).properties.secretUri})'
     HOME_TENANT_NAME: homeTenantName
     HOME_TENANT_ID: homeTenantId
     HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId

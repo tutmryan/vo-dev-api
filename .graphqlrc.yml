@@ -23,6 +23,8 @@ extensions:
                 Identity: ../features/identity/entities/identity-entity#IdentityEntity
                 Partner: ../features/partners/entities/partner-entity#PartnerEntity
                 ApprovalRequest: ../features/approval-request/entities/approval-request-entity#ApprovalRequestEntity
+                AsyncIssuanceRequest: ../features/async-issuance/entities/async-issuance-entity#AsyncIssuanceEntity
+                Communication: ../features/communication/entities/communication-entity#CommunicationEntity
         config:
           strictScalars: true
           scalars:

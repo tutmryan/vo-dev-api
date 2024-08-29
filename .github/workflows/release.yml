@@ -200,7 +200,9 @@ jobs:
           azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
           azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
           resource-group-name: ${{ matrix.resourceGroup }}
+          resource-group-unique-string: ${{ steps.instance-resource-group.outputs.resource-group-unique-string }}
           resource-prefix: ${{ matrix.resourcePrefix }}
+          deployment-service-principal-object-id: ${{ vars.NON_PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
 
           key-vault-resource-group-name: ${{ vars.NON_PROD_KEY_VAULT_RESOURCE_GROUP_NAME }}
           key-vault-name: ${{ vars.NON_PROD_KEY_VAULT_NAME }}
@@ -218,19 +220,16 @@ jobs:
           redis-cache-capacity: 0
 
           cors-origin: "${{ vars.CORS_ORIGIN }}"
-          api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
+          sms-secret: ${{ secrets.NON_PROD_SMS_SECRET }}
+          email-api-key: ${{ secrets.NON_PROD_EMAIL_API_KEY }}
 
           internal-client-secret: ${{ secrets.NON_PROD_INTERNAL_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.NON_PROD_VID_CALLBACK_CLIENT_SECRET }}
 
           limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}
-          limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
-
           limited-approval-client-secret: ${{ secrets.NON_PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
-          limited-approval-secret: ${{ secrets.LIMITED_APPROVAL_SECRET }}
-
           limited-photo-capture-client-secret: ${{ secrets.NON_PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
-          limited-photo-capture-secret: ${{ secrets.LIMITED_PHOTO_CAPTURE_SECRET }}
+          limited-async-issuance-client-secret: ${{ secrets.NON_PROD_LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
@@ -372,7 +371,9 @@ jobs:
           azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
           azure-subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
           resource-group-name: ${{ matrix.resourceGroup }}
+          resource-group-unique-string: ${{ steps.instance-resource-group.outputs.resource-group-unique-string }}
           resource-prefix: ${{ matrix.resourcePrefix }}
+          deployment-service-principal-object-id: ${{ vars.PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
 
           key-vault-resource-group-name: ${{ vars.PROD_KEY_VAULT_RESOURCE_GROUP_NAME }}
           key-vault-name: ${{ vars.PROD_KEY_VAULT_NAME }}
@@ -390,19 +391,17 @@ jobs:
           redis-cache-capacity: 0
 
           cors-origin: "${{ vars.CORS_ORIGIN }}"
-          api-cookie-secret: ${{ secrets.API_COOKIE_SECRET }}
+
+          sms-secret: ${{ secrets.PROD_SMS_SECRET }}
+          email-api-key: ${{ secrets.PROD_EMAIL_API_KEY }}
 
           internal-client-secret: ${{ secrets.PROD_INTERNAL_CLIENT_SECRET }}
           vid-callback-client-secret: ${{ secrets.PROD_VID_CALLBACK_CLIENT_SECRET }}
 
           limited-access-client-secret: ${{ secrets.PROD_LIMITED_ACCESS_CLIENT_SECRET }}
-          limited-access-secret: ${{ secrets.LIMITED_ACCESS_SECRET }}
-
           limited-approval-client-secret: ${{ secrets.PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
-          limited-approval-secret: ${{ secrets.LIMITED_APPROVAL_SECRET }}
-
           limited-photo-capture-client-secret: ${{ secrets.PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
-          limited-photo-capture-secret: ${{ secrets.LIMITED_PHOTO_CAPTURE_SECRET }}
+          limited-async-issuance-client-secret: ${{ secrets.PROD_LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}

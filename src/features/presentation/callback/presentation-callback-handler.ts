@@ -5,7 +5,6 @@ import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { createVerifiedIdAdminService } from '../../../services'
-import { Lazy } from '../../../util/lazy'
 import type { PresentationCallbackHandler } from '../../callback'
 import { StandardClaims } from '../../contracts/claims'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
@@ -18,11 +17,11 @@ import { addPresentationDataToCache } from './cache'
 import type { PresentationTopicData } from './pubsub'
 import { publishPresentationEvent } from './pubsub'
 
-const getPlatformIssuerDid = Lazy(async () => {
+async function getPlatformIssuerDid() {
   const admin = createVerifiedIdAdminService(logger)
   const authority = await admin.authority()
   return authority.didModel.did
-})
+}
 
 export const presentationCallbackHandler: PresentationCallbackHandler = async (event) => {
   const requestDetails = await requestDetailsCache.get(event.requestId)

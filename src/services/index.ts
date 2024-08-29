@@ -12,7 +12,9 @@ import {
   vidServiceAuth,
 } from '../config'
 import type { BaseContext } from '../context'
+import { AsyncIssuanceService } from './async-issuance-service'
 import { BlobStorageContainerService } from './blob-storage-container-service'
+import { CommunicationsService } from './communications-service'
 import { GraphService } from './graph-service'
 import { VerifiedIdAdminService, VerifiedIdRequestService } from './verified-id'
 
@@ -23,6 +25,8 @@ export interface Services {
   verifiedIdAdmin: VerifiedIdAdminService
   verifiedIdRequest: VerifiedIdRequestService
   logoImages: BlobStorageContainerService
+  asyncIssuances: AsyncIssuanceService
+  communications: CommunicationsService
 }
 
 export const createServices = (context: BaseContext): Services => {
@@ -30,7 +34,13 @@ export const createServices = (context: BaseContext): Services => {
     homeTenantGraph: createGraphService(),
     verifiedIdAdmin: createVerifiedIdAdminService(context.logger, context.requestInfo.correlationId),
     verifiedIdRequest: createVerifiedIdRequestService(context),
-    logoImages: new BlobStorageContainerService({ containerName: blobStorage.logoImagesContainer }),
+    logoImages: new BlobStorageContainerService({
+      url: blobStorage.url,
+      credentials: blobStorage.credentials,
+      containerName: blobStorage.logoImagesContainer,
+    }),
+    asyncIssuances: new AsyncIssuanceService(),
+    communications: new CommunicationsService(context.logger),
   }
 }
 

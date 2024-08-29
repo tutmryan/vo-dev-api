@@ -123,6 +123,18 @@ exports[`shield rules are setup correctly 1`] = `
               ]
             }
           ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
         }
       ]
     },
@@ -213,6 +225,46 @@ exports[`shield rules are setup correctly 1`] = `
     "photoCaptureStatus": {
       "rulesOr": [
         {
+          "rulesOr": [
+            {
+              "name": "hasRole-VerifiableCredential.Issuer",
+              "cache": "contextual"
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "hasLimitedAccessData-limitedIssuance",
+                  "cache": "contextual"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "asyncIssuanceRequiresPhotoCapture",
+              "cache": "contextual"
+            }
+          ]
+        }
+      ]
+    },
+    "asyncIssuanceRequest": {
+      "rulesOr": [
+        {
           "name": "hasRole-VerifiableCredential.Issuer",
           "cache": "contextual"
         },
@@ -233,6 +285,10 @@ exports[`shield rules are setup correctly 1`] = `
           ]
         }
       ]
+    },
+    "asyncIssuanceContact": {
+      "name": "hasRole-VerifiableCredential.Issuer",
+      "cache": "contextual"
     }
   },
   "Mutation": {
@@ -287,6 +343,18 @@ exports[`shield rules are setup correctly 1`] = `
               "cache": "strict"
             }
           ]
+        }
+      ]
+    },
+    "createIssuanceRequestForAsyncIssuance": {
+      "rulesAnd": [
+        {
+          "name": "isLimitedAsyncIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "hasCorrectCreateIssuanceRequestForAsyncIssuanceArgs",
+          "cache": "strict"
         }
       ]
     },
@@ -433,12 +501,130 @@ exports[`shield rules are setup correctly 1`] = `
     "capturePhoto": {
       "rulesAnd": [
         {
-          "name": "isLimitedPhotoCaptureUser",
-          "cache": "contextual"
+          "rulesOr": [
+            {
+              "name": "isLimitedPhotoCaptureUser",
+              "cache": "contextual"
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAsyncIssuanceApp",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "asyncIssuanceRequiresPhotoCapture",
+                  "cache": "contextual"
+                }
+              ]
+            }
+          ]
         },
         {
           "name": "isValidCapturePhotoRequestId",
           "cache": "strict"
+        }
+      ]
+    },
+    "createAsyncIssuanceRequest": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "hasLimitedAccessData-limitedIssuance",
+              "cache": "contextual"
+            }
+          ]
+        }
+      ]
+    },
+    "updateAsyncIssuanceContact": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "hasLimitedAccessData-limitedIssuance",
+              "cache": "contextual"
+            }
+          ]
+        }
+      ]
+    },
+    "sendAsyncIssuanceVerification": {
+      "rules": []
+    },
+    "acquireAsyncIssuanceToken": {
+      "rules": []
+    },
+    "resendAsyncIssuanceNotifications": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "hasLimitedAccessData-limitedIssuance",
+              "cache": "contextual"
+            }
+          ]
+        }
+      ]
+    },
+    "resendAsyncIssuanceNotification": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "hasLimitedAccessData-limitedIssuance",
+              "cache": "contextual"
+            }
+          ]
         }
       ]
     }
@@ -537,6 +723,10 @@ exports[`shield rules are setup correctly 1`] = `
                       "cache": "contextual"
                     }
                   ]
+                },
+                {
+                  "name": "isLimitedAsyncIssuanceApp",
+                  "cache": "contextual"
                 }
               ]
             }
@@ -547,21 +737,37 @@ exports[`shield rules are setup correctly 1`] = `
     "photoCaptureEvent": {
       "rulesOr": [
         {
-          "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
-        },
-        {
-          "name": "isIssuanceApp",
-          "cache": "contextual"
+          "rulesOr": [
+            {
+              "name": "hasRole-VerifiableCredential.Issuer",
+              "cache": "contextual"
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "hasLimitedAccessData-limitedIssuance",
+                  "cache": "contextual"
+                }
+              ]
+            }
+          ]
         },
         {
           "rulesAnd": [
             {
-              "name": "isLimitedAccessApp",
+              "name": "isLimitedAsyncIssuanceApp",
               "cache": "contextual"
             },
             {
-              "name": "hasLimitedAccessData-limitedIssuance",
+              "name": "asyncIssuanceRequiresPhotoCapture",
               "cache": "contextual"
             }
           ]
@@ -597,6 +803,18 @@ exports[`shield rules are setup correctly 1`] = `
                   "cache": "strict"
                 }
               ]
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
             }
           ]
         }
@@ -741,6 +959,48 @@ exports[`shield rules are setup correctly 1`] = `
     "*": {
       "rulesOr": [
         {
+          "rulesOr": [
+            {
+              "name": "hasRole-VerifiableCredential.Issuer",
+              "cache": "contextual"
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "hasLimitedAccessData-limitedIssuance",
+                  "cache": "contextual"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "asyncIssuanceRequiresPhotoCapture",
+              "cache": "contextual"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "AsyncIssuanceRequest": {
+    "*": {
+      "rulesOr": [
+        {
           "name": "hasRole-VerifiableCredential.Issuer",
           "cache": "contextual"
         },
@@ -761,6 +1021,17 @@ exports[`shield rules are setup correctly 1`] = `
           ]
         }
       ]
+    }
+  },
+  "AsyncIssuanceContact": {
+    "*": {
+      "name": "hasRole-VerifiableCredential.Issuer",
+      "cache": "contextual"
+    }
+  },
+  "AsyncIssuanceTokenResponse": {
+    "*": {
+      "rules": []
     }
   }
 }"

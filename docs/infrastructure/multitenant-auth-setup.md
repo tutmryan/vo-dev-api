@@ -54,6 +54,14 @@ The following app registrations are created for the internal operations of the V
 
   ```JSON
   {
+    description: "Provides limited access to async issuance features of the Verified Orchestration platform - access tokens with this role are created by the API and given to limited async issuance clients. DO NOT GRANT TO OTHER APPLICATIONS.",
+    displayName: "Limited async issuance [INTERNAL API USE ONLY]",
+    value: "VerifiableCredential.LimitedAsyncIssuance"
+  }
+  ```
+
+  ```JSON
+  {
     description "Used to secure the issuance and presentation request callback endpoints - access tokens with this role are creatd by the API and given to Entra to securely invoke the callback endpoint. DO NOT GRANT TO OTHER APPLICATIONS.",
     displayName: "Request callback [INTERNAL API USE ONLY]",
     value: "VerifiableCredential.Request.Callback"
@@ -97,6 +105,19 @@ The following app registrations are created for the internal operations of the V
   - set `[NON_PROD | PROD]_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.LimitedPhotoCapture
+- grant admin consent for the added permissions
+
+## Create an app registration for acquiring limited async issuance tokens
+
+- create app registration named `Verified Orchestration Limited Async Issuance Client` (with `(non prod)` suffix for the non prod environment)
+- choose `Single tenant` option for `Supported account types`
+- click "Register" to create the app registration
+- create a client secret for the Verified Orchestration API to generate a token
+  - set it to expires in 24 months
+  - store it in 1Password, `NonProd - Verified Orchestration -> Limited async issuance client secret` for the non prod environment
+  - set `[NON_PROD | PROD]_LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET` secret in the GitHub organisation
+- add the following application permissions from `Verified Orchestration Internal` API
+  - VerifiableCredential.LimitedAsyncIssuance
 - grant admin consent for the added permissions
 
 ## Create an app registration for Verified ID callback token generation

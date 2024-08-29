@@ -26,7 +26,11 @@ export const revokeIssuances = async (
   contract?: ContractEntity,
 ) => {
   const errorMessages = []
-  const { logger, verifiedIdAdminService: adminService, user } = context
+  const {
+    logger,
+    services: { verifiedIdAdmin },
+    user,
+  } = context
   const issuances = await dataSource.getRepository(IssuanceEntity).find({ where })
 
   for (let index = 0; index < issuances.length; index++) {
@@ -38,7 +42,7 @@ export const revokeIssuances = async (
         await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
           logger.info(`revoking issuance ${issuance.id}`)
 
-          const result = await revokeIssuance(issuance, adminService, user, logger, contract)
+          const result = await revokeIssuance(issuance, verifiedIdAdmin, user, logger, contract)
           if (result) {
             addUserToManager(entityManager, user.id)
             await entityManager.getRepository(IssuanceEntity).save(result)

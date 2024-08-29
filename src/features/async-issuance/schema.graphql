@@ -1,0 +1,442 @@
+# eslint-disable @graphql-eslint/naming-convention
+
+"""
+The possible contact methods.
+"""
+enum ContactMethod {
+  sms
+  email
+}
+
+"""
+Input defining the contact information.
+"""
+input ContactInput {
+  """
+  The method of contact.
+  """
+  method: ContactMethod!
+
+  """
+  The value of the contact method.
+
+  For example, if the method is `sms`, the value would be a phone number.
+  """
+  value: String!
+}
+
+"""
+Represents the contact information.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type Contact {
+  """
+  The method of contact.
+  """
+  method: ContactMethod!
+
+  """
+  The value of the contact method.
+
+  For example, if the method is `sms`, the value would be a phone number.
+  """
+  value: String!
+}
+
+"""
+Input defining an async issuance issuee contact information.
+"""
+input AsyncIssuanceContactInput {
+  """
+  How the notification should be sent.
+  """
+  notification: ContactInput!
+
+  """
+  How the verification should be sent.
+
+  Items to note:
+
+  - _Optional:_ When no verification contact is set, the notification contact information is used for verification.
+  """
+  verification: ContactInput
+}
+
+"""
+An async issuance issuee contact information.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type AsyncIssuanceContact {
+  """
+  How the notification will be sent.
+  """
+  notification: Contact!
+
+  """
+  How the verification will be sent.
+
+  Items to note:
+
+  - _Optional:_ When no verification contact is set, the notification contact information is used for verification.
+  """
+  verification: Contact
+}
+
+"""
+Represents the input required for creating an async issuance request.
+"""
+input AsyncIssuanceRequestInput {
+  """
+  The issuee's contact information.
+  """
+  contact: AsyncIssuanceContactInput!
+
+  """
+  The point in the future which the issuees can no longer complete the issuance process.
+
+  Items to note:
+
+   - The period starts upon receipt of the request.
+   - No further issuances are possible once expired.
+   - Data associated with a request is automatically removed upon issuance or expiry.
+  """
+  expiry: AsyncIssuanceRequestExpiry!
+
+  """
+  The ID of the contract you wish to issue.
+  """
+  contractId: UUID!
+
+  """
+  The ID of the identity to issue to.
+
+   Items of note:
+
+    - _Required_ When not using the identity property.
+  """
+  identityId: UUID
+
+  """
+  The identity to issue to.
+
+  Items of note:
+
+  - _Required_ When not using the identityId property
+  """
+  identity: IdentityInput
+
+  """
+  The collection of assertions made about the subject in the verifiable credential.
+
+  Item of note:
+
+  - You must fulfill the contract claims definition. Review contract creation for more information.
+  """
+  claims: JSONObject
+
+  """
+  The issuee's photo for use with face check presentation verification.
+
+  Items of note:
+
+   - _Optional:_ When no photo is set and the contract does not require one, the issuance process does not require a photo.
+   - The photo is displayed via the authenticator app.
+   - The photo must be encoded using the [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) format, and the base-64 encoded image must be of a JPEG type.
+   - Image data can only be provided by a single source, either from the faceCheckPhoto or the photoCapture fields.
+   - When the contract **requires** face check, either the **faceCheckPhoto** or the **photoCapture** property must be set.
+   - When the contract **requires no** face check, neither the **faceCheckPhoto** nor the **photoCapture** property can be set.
+  """
+  faceCheckPhoto: String
+
+  """
+  Setting the expiration data allows for explicitly control over credential expiry, regardless of when it is issued.
+
+  Items of note:
+
+   - The date must be in ISO format.
+  """
+  expirationDate: DateTime
+
+  """
+  When set to true, the issuee is required to capture their photo during the issuance process.
+
+  Items of note:
+
+  - _Optional:_ When no photo capture is set and the contract does not require one, the issuance process does not require a photo.
+  - The captured photo is displayed via the authenticator app.
+  - Image data can only be provided by a single source, either from the faceCheckPhoto or the photoCapture fields.
+  - When the contract **requires** face check, either the **faceCheckPhoto** or the **photoCapture** property must be set.
+  - When the contract **requires no** face check, neither the **faceCheckPhoto** nor the **photoCapture** property can be set.
+  """
+  photoCapture: Boolean
+}
+
+"""
+A time period for the expiry of an async issuance request.
+"""
+enum AsyncIssuanceRequestExpiry {
+  oneDay
+  threeDays
+  oneWeek
+  twoWeeks
+  oneMonth
+  threeMonths
+}
+
+"""
+The response of an async issuance request.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type AsyncIssuanceResponse {
+  """
+  Request Ids collections contains an autogenerated request ID for each async issuance request.
+
+  Items to note:
+
+  - The return order of the request IDs matches the order of the input requests.
+  """
+  asyncIssuanceRequestIds: [ID!]!
+}
+
+"""
+Represents an error returned by the create async issuance request.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type AsyncIssuanceErrorResponse {
+  """
+  A collection of errors with each entry corresponding to each item of the async issuance request input.
+
+  Items of note:
+
+  - The return order of the errors matches the order of the input requests.
+  - Where there is a mix of valid and invalid requests, a null is used to represent a potentially successful request.
+  """
+  errors: [String]!
+}
+
+"""
+The createAsyncIssuanceRequest mutation response. Either a successful response or a validation error response.
+"""
+union AsyncIssuanceRequestResponse = AsyncIssuanceResponse | AsyncIssuanceErrorResponse
+
+extend type Mutation {
+  """
+  Creates one or more async issuance requests.
+  """
+  createAsyncIssuanceRequest(request: [AsyncIssuanceRequestInput!]!): AsyncIssuanceRequestResponse!
+  """
+  Resend async issuance notifications for the specified request IDs.
+
+  Items of note:
+
+  - Starts a background job for all notifications and returns that job id.
+  """
+  resendAsyncIssuanceNotifications(asyncIssuanceRequestIds: [UUID!]!): ID!
+  """
+  Resend a single async issuance notification for the specified request ID.
+
+  Items of note:
+
+  - Synchronous operation that returns the updated asyncIssuanceRequest.
+  """
+  resendAsyncIssuanceNotification(asyncIssuanceRequestId: UUID!): AsyncIssuanceRequest
+  """
+  Updates the async issuance issuee's contact information.
+
+  Items of note:
+
+  - Information can only be updated when the async issuance request is pending.
+  """
+  updateAsyncIssuanceContact(asyncIssuanceRequestId: UUID!, contact: AsyncIssuanceContactInput!): AsyncIssuanceContact!
+  """
+  Cancel one or more async issuance requests.
+
+  Items of note:
+
+  - An async issuance request must not have been issued.
+  - Starts a background job for all cancellations and returns that job id.
+  """
+  cancelAsyncIssuanceRequests(asyncIssuanceRequestIds: [UUID!]!): ID!
+  """
+  Cancel an issuance request.
+
+  Items of note:
+
+  - An async issuance request must not have been issued.
+  """
+  cancelAsyncIssuanceRequest(asyncIssuanceRequestId: UUID!): AsyncIssuanceRequest
+  """
+  Creates an issuance request for the specified async issuance request.
+
+  Returns a URL and optional QR code to start the issuance process or an error.
+  """
+  createIssuanceRequestForAsyncIssuance(asyncIssuanceRequestId: UUID!): IssuanceRequestResponse!
+}
+
+"""
+The status of the async issuance request.
+"""
+enum AsyncIssuanceRequestStatus {
+  """
+  Issuance request is pending.
+  """
+  pending
+  """
+  The issuance has been successfully claimed by the issuee.
+  """
+  issued
+  """
+  The issuance failed, refer to the failure reason in the issuance request.
+  """
+  failed
+  """
+  The issuance request has expired.
+  """
+  expired
+  """
+  The issuance request has been cancelled.
+  """
+  cancelled
+}
+
+"""
+The async issuance request.
+"""
+type AsyncIssuanceRequest {
+  """
+  The ID of the async issuance request.
+  """
+  id: ID!
+  """
+  The issuee identity
+  """
+  identity: Identity!
+  """
+  The contract to be issued.
+  """
+  contract: Contract!
+  """
+  The issuance.
+
+  Items of note:
+
+  - When not set, the issuance has not been successfully claimed by the issuee.
+  """
+  issuance: Issuance
+
+  """
+  The status of the async issuance request.
+  """
+  status: AsyncIssuanceRequestStatus!
+
+  """
+  When set, the reason this async issuance request failed to issue.
+
+  Items to note:
+
+  - The reason is only available when the status is `failed`.
+  """
+  failureReason: String
+
+  """
+  The expiry setting for this async issuance request.
+  """
+  expiry: AsyncIssuanceRequestExpiry!
+
+  """
+  The point in the future which the issuees can no longer complete the issuance process.
+
+  Items to note:
+
+  - The period started upon receipt of the request.
+  """
+  expiresOn: DateTime!
+
+  """
+  The user who created the async issuance request.
+  """
+  createdBy: User!
+  """
+  When the async issuance request was created.
+  """
+  createdAt: DateTime!
+
+  """
+  The user who last updated the async issuance request.
+  """
+  updatedBy: User
+  """
+  When the async issuance request was last updated.
+  """
+  updatedAt: DateTime
+  """
+  The communications that have been sent for this async issuance request.
+  """
+  communications(
+    where: CommunicationWhere
+    offset: PositiveInt
+    limit: PositiveInt
+    orderBy: CommunicationOrderBy
+    orderDirection: OrderDirection
+  ): [Communication!]!
+}
+
+"""
+Represents the criteria for filtering async issuances requests.
+"""
+input AsyncIssuanceRequestsWhere {
+  """
+  Return async issuance requests with the specified status.
+  """
+  status: AsyncIssuanceRequestStatus
+  """
+  Return async issuance requests for the specified contract.
+  """
+  contractId: ID
+  """
+  Return async issuance requests for the specified identity.
+  """
+  identityId: ID
+  """
+  Return async issuance requests created after this point.
+  """
+  createdFrom: DateTime
+  """
+  Return async issuance requests created before this point.
+  """
+  createdTo: DateTime
+}
+
+"""
+Fields that can be used for sorting async issuance requests by.
+"""
+enum AsyncIssuanceRequestsOrderBy {
+  """
+  The timestamp when the async issuance request was created.
+  """
+  createdAt
+}
+
+extend type Query {
+  """
+  Returns async issuance requests, optionally matching the specified criteria.
+  """
+  findAsyncIssuanceRequests(
+    where: AsyncIssuanceRequestsWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: AsyncIssuanceRequestsOrderBy
+    orderDirection: OrderDirection
+  ): [AsyncIssuanceRequest!]!
+
+  """
+  Returns an async issuance request by ID.
+  """
+  asyncIssuanceRequest(id: UUID!): AsyncIssuanceRequest!
+
+  """
+  Returns the async issuance issuee contact information.
+
+  Items of note:
+
+  - Returns PII information about the issuee. Use with caution. Intended for verification of async issuance requests by admins only.
+  - If the async issuance has been issued, or has expired, this information is no longer available.
+  """
+  asyncIssuanceContact(asyncIssuanceRequestId: UUID!): AsyncIssuanceContact!
+}

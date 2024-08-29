@@ -3,64 +3,119 @@
 
 """
 The issuance request payload contains information about your verifiable credentials issuance request.
+
 The following example demonstrates an issuance request by using a PIN code flow with user claims, such as first name and last name.
-The result of this request returns a QR code with a link to start the issuance process.
+
+```json
+{
+  "contractId": "01910769-c6e8-7d2a-9ecd-1f2bcb7f62ba"
+  "identityId": "8ae15985-0d43-40f8-a52e-b51399a0de12"
+  "includeQRCode": true,
+  "claims": {
+    "firstName": "John",
+    "lastName": "Doe"
+  },
+  "pin": {
+    "value": "1234"
+  }
+}
+```
+
+The result of this request returns a URL and optional QR code to start the issuance process.
 """
 input IssuanceRequestInput {
   """
-  The ID of the contract you wish to issue
+  The ID of the contract you wish to issue.
   """
   contractId: ID!
-  """
-  The ID of the identity you wish to issue to (alternatively use the identity property)
 
-  - Not required when issuing using a limited access token
+  """
+  The ID of the identity you wish to issue to.
+
+  Item of note:
+
+  - _Optional:_ When issuing using a limited access token or the identity property.
   """
   identityId: ID
-  """
-  The identity you wish to issue to (alternatively use the identityId property, if known)
 
-  - Not required when issuing using a limited access token
+  """
+  The identity you wish to issue to.
+
+  Item of note:
+
+  - _Optional:_ When issuing using a limited access token or the identityId property.
   """
   identity: IdentityInput
+
   """
-  Determines whether a QR code is included in the response of this request
-  Present the QR code and ask the user to scan it.
-  Scanning the QR code launches the authenticator app with this issuance request.
-  Possible values are true (default) or false.
-  When you set the value to false, use the return url property to render a deep link.
+  A flag to specify whether a QR Code is included in the response of the request.
+
+  Items of note:
+
+  - The Possible values are true (default) or false.
+  - Present the QR code and ask the user to scan it.
+  - Scanning the QR code launches the authenticator app with this issuance request.
+  - When not using the QR Code, use the return url property to render a deep link.
   """
   includeQRCode: Boolean
-  callback: Callback
+
   """
-  A collection of assertions made about the subject in the verifiable credential.
-  Must fulfill the contract claims definition.
+  The callback to register.
+  """
+  callback: Callback
+
+  """
+  The collection of assertions made about the subject in the verifiable credential.
+
+  Item of note:
+
+  - You must fulfill the contract claims definition. Review contract creation for more information.
   """
   claims: JSONObject
 
   """
-  The issuee's photo for the purpose of face check presentation verification, also displayed via the authenticator app.
-  The image content type and encoding must be: `image/jpg;base64`.
-  For more info on the photo requirements, see the [Face Check documentation](https://learn.microsoft.com/en-us/entra/verified-id/using-facecheck#what-are-the-requirements-for-the-photo-in-the-verified-id)
-  Please note that optional image data can only be provided by a single source, either from the faceCheckPhoto or the photoCaptureRequestId properties.
+  The issuee's photo for use with face check presentation verification.
+
+  Items of note:
+
+  - _Optional:_ When no photo is set and the contract does not require one, the issuance process does not require a photo.
+  - The photo is displayed via the authenticator app.
+  - The image content type and encoding must be: `image/jpg;base64`.
+  - Image data can only be provided by a single source, either from the faceCheckPhoto or the photoCaptureRequestId fields.
+  - When the contract **requires** face check, either the **faceCheckPhoto** or the **photoCaptureRequestId** property must be set.
+  - When the contract **requires no** face check, neither the **faceCheckPhoto** nor the **photoCaptureRequestId** property can be set.
   """
   faceCheckPhoto: String
 
   """
-  Optional PIN code required for the issuance.
+  The PIN code required for the issuance.
+
+  Item of note:
+
+  - _Optional:_ When no PIN is set, the issuance process does not require a PIN.
   """
   pin: Pin
 
   """
-  Use this setting to explicitly control when a credential expires, regardless of when it is issued.
-  Please note that the date should be in ISO format.
+  Setting the expiration data allows for explicitly control over credential expiry, regardless of when it is issued.
+
+  Item of note:
+
+  - The date must be in ISO format.
   """
   expirationDate: DateTime
 
   """
-  The ID of the completed photo capture request to use for the face check photo.
-  Please note that the photo capture request is only valid for a single issuance.
-  Please note that optional image data can only be provided by a single source, either from the faceCheckPhoto or the photoCaptureRequestId properties.
+  The ID of the photo capture request.
+
+  Items of note:
+
+  - _Optional:_ When no photo capture is set and the contract does not require one, the issuance process does not require a photo.
+  - The captured photo is displayed via the authenticator app.
+  - Image data can only be provided by a single source, either from the faceCheckPhoto or the photoCaptureRequestId fields.
+  - When the contract **requires** face check, either the **faceCheckPhoto** or the **photoCaptureRequestId** property must be set.
+  - When the contract **requires no** face check, neither the **faceCheckPhoto** nor the **photoCaptureRequestId** property can be set.
+  - A photo capture request is only valid for a single issuance.
   """
   photoCaptureRequestId: ID
 }
@@ -122,7 +177,7 @@ input Pin {
 }
 
 """
-Respresents a successful issuance.
+Represents a successful issuance.
 When your app receives the response, the app needs to present the QR code to the user.
 The user scans the QR code, which opens the authenticator app and starts the issuance process.
 """
@@ -209,7 +264,7 @@ union IssuanceRequestResponse = IssuanceResponse | RequestErrorResponse
 # eslint-disable-next-line @graphql-eslint/require-description
 type Mutation {
   """
-  The result of this request returns a QR code with a link to start the issuance process, or an error
+  The result of this request returns a URL and optional QR code to start the issuance process or an error.
   """
   createIssuanceRequest(request: IssuanceRequestInput!): IssuanceRequestResponse!
 
@@ -579,7 +634,7 @@ extend type User {
 }
 
 """
-Columns that can be used for sorting issuances.
+Fields that can be used for sorting issuances.
 """
 enum IssuanceOrderBy {
   """

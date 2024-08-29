@@ -2,6 +2,12 @@ import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 
 const config: DeepPartial<Config> = {
+  email: {
+    templates: {
+      issuance: 'd-eec8b1882af84250b18638e56da3b44c',
+      verificationCode: 'd-1354c25245bb4a538b98c76e285e061d',
+    },
+  },
   platformTenant: {
     tenantId: '5c14bb50-7602-4c0d-b785-5dee865e4665',
   },
@@ -27,6 +33,11 @@ const config: DeepPartial<Config> = {
   limitedPhotoCapture: {
     credentials: {
       clientId: '07414b7d-4c42-4902-8661-a841270ef289',
+    },
+  },
+  limitedAsyncIssuance: {
+    credentials: {
+      clientId: '3e02aa99-a182-4c81-b795-1964964e375d',
     },
   },
 }

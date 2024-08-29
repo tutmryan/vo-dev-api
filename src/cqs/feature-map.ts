@@ -24,8 +24,15 @@ export const isFaceCheckSupportEnabled = ({ faceCheckSupport }: { faceCheckSuppo
   }
 }
 
-export const isFaceCheckPhotoEnabled = ({ faceCheckPhoto }: { faceCheckPhoto?: Maybe<string> }) => {
-  if (!faceCheckEnabled && !!faceCheckPhoto) {
+export const isFaceCheckPhotoEnabled = (input: { faceCheckPhoto?: Maybe<string> } | { faceCheckPhoto?: Maybe<string> }[]) => {
+  if (faceCheckEnabled) return
+
+  if (Array.isArray(input)) {
+    if (input.some((i) => i.faceCheckPhoto)) throw faceCheckFeatureNotAvailableError
+    return
+  }
+
+  if (input.faceCheckPhoto) {
     throw faceCheckFeatureNotAvailableError
   }
 }

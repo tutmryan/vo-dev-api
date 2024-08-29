@@ -61,7 +61,7 @@ input UserWhere {
 }
 
 """
-Columns that can be used for sorting users.
+Fields that can be used for sorting users.
 """
 enum UserOrderBy {
   """

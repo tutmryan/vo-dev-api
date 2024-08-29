@@ -230,7 +230,7 @@ input PartnerWhere {
 }
 
 """
-Columns that can be used for sorting partners.
+Fields that can be used for sorting partners.
 """
 enum PartnerOrderBy {
   """

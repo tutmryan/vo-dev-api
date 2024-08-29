@@ -48,6 +48,16 @@ const config: EnvVarSubstitution<Config> = {
   blobStorage: {
     url: 'BLOB_STORAGE_URL',
   },
+  privateBlobStorage: {
+    url: 'PRIVATE_BLOB_STORAGE_URL',
+    clientEncryptionKey: 'PRIVATE_STORAGE_ENCRYPTION_KEY',
+  },
+  sms: {
+    secret: 'SMS_SECRET',
+  },
+  email: {
+    apiKey: 'EMAIL_API_KEY',
+  },
   homeTenant: {
     name: 'HOME_TENANT_NAME',
     tenantId: 'HOME_TENANT_ID',
@@ -104,6 +114,12 @@ const config: EnvVarSubstitution<Config> = {
       clientSecret: 'LIMITED_PHOTO_CAPTURE_CLIENT_SECRET',
     },
     secret: 'LIMITED_PHOTO_CAPTURE_SECRET',
+  },
+  limitedAsyncIssuance: {
+    credentials: {
+      clientSecret: 'LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET',
+    },
+    secret: 'LIMITED_ASYNC_ISSUANCE_SECRET',
   },
   callbackCredentials: {
     clientId: 'VID_CALLBACK_CLIENT_ID',

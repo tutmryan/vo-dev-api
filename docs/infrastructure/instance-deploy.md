@@ -47,10 +47,6 @@ The environment should have deployment protection rules applied (required review
 
 ### Secrets
 
-- API_COOKIE_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
-- LIMITED_ACCESS_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
-- LIMITED_APPROVAL_SECRET: `node: crypto.randomUUID().replace(/-/g, '')`
-- LIMITED_PHOTO_CAPTURE_SECRET: `node crypto.randomUUID().replace(/-/g, '')`
 - HOME_TENANT_GRAPH_CLIENT_SECRET (optional, only required for MS Graph integration)
 - HOME_TENANT_VID_SERVICE_CLIENT_SECRET (optional, only required for customer hosted authorities)
 

@@ -7,7 +7,7 @@ import { buildContractInput, createContract } from '../../contracts/test/create-
 import { provisionContract } from '../../contracts/test/provision-contract'
 import { createIdentity } from '../../identity/tests/create-identity'
 import { capturePhoto, createPhotoCaptureRequest } from '../../photo-capture/test'
-import { parseAndReencodeFaceCheckPhoto } from '../commands/create-issuance-request-command'
+import { convertFaceCheckPhoto } from '../commands/create-issuance-request-command'
 import { createIssuanceRequest, createIssuanceRequestMutation } from './create-issuance'
 
 const credentialType = 'issuance-test'
@@ -112,7 +112,7 @@ describe('createIssuanceRequest mutation', () => {
 
     // Assert the photo was passed to the issuance request
     const issuanceRequest = mockRequestServiceHelper.createIssuanceRequest.getLastCallArg()
-    expect(issuanceRequest.claims!['photo']).toBe(parseAndReencodeFaceCheckPhoto(faceCheckPhoto))
+    expect(issuanceRequest.claims!['photo']).toBe(convertFaceCheckPhoto(faceCheckPhoto))
   })
   it('works with face check when passing the photo capture request id', async () => {
     // Arrange
@@ -147,7 +147,7 @@ describe('createIssuanceRequest mutation', () => {
 
     // Assert the photo was passed to the issuance request
     const issuanceRequest = mockRequestServiceHelper.createIssuanceRequest.getLastCallArg()
-    expect(issuanceRequest.claims!['photo']).toBe(parseAndReencodeFaceCheckPhoto(photoCapturePhoto))
+    expect(issuanceRequest.claims!['photo']).toBe(convertFaceCheckPhoto(photoCapturePhoto))
   })
   it('fails with face check when passing a previously used photo capture request id', async () => {
     // Arrange

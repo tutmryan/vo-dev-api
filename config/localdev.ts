@@ -3,8 +3,17 @@ import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 import * as nonprod from './nonprod'
 
-const { platformTenant, apiClient, internalClient, callbackCredentials, limitedAccess, limitedApproval, limitedPhotoCapture } =
-  nonprod as Config
+const {
+  email,
+  platformTenant,
+  apiClient,
+  internalClient,
+  callbackCredentials,
+  limitedAccess,
+  limitedApproval,
+  limitedPhotoCapture,
+  limitedAsyncIssuance,
+} = nonprod as Config
 
 const config: DeepPartial<Config> = {
   server: {
@@ -29,11 +38,19 @@ const config: DeepPartial<Config> = {
   redis: { host: 'localhost' },
   blobStorage: {
     url: 'https://127.0.0.1:10000/devstoreaccount1',
-    credential: {
+    credentials: {
       accountName: 'devstoreaccount1',
       accountKey: 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==',
     },
   },
+  privateBlobStorage: {
+    url: 'https://127.0.0.1:10000/devstoreaccount1',
+    credentials: {
+      accountName: 'devstoreaccount1',
+      accountKey: 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==',
+    },
+  },
+  email,
   auth: {
     bearer: {
       verifyOptions: {
@@ -58,6 +75,7 @@ const config: DeepPartial<Config> = {
   limitedAccess,
   limitedApproval,
   limitedPhotoCapture,
+  limitedAsyncIssuance,
 }
 
 module.exports = config

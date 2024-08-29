@@ -1,0 +1,99 @@
+# eslint-disable @graphql-eslint/naming-convention
+
+"""
+The possible communication purposes.
+"""
+enum CommunicationPurpose {
+  issuance
+  verification
+}
+
+"""
+Record of a communication sent to a recipient.
+"""
+type Communication {
+  id: ID!
+  """
+  The receipient of the communication.
+  """
+  recipient: Identity!
+  """
+  The contact method used to send the communication.
+  """
+  contactMethod: ContactMethod!
+  """
+  The purpose of the communication.
+  """
+  purpose: CommunicationPurpose!
+  """
+  When the communication was sent.
+  """
+  sentAt: DateTime!
+  """
+  The user (Person or Application) whose action resulted in the communication.
+  """
+  createdBy: User!
+}
+
+"""
+Defines the filter critiera used to find communications.
+"""
+input CommunicationWhere {
+  """
+  The ID of the recipient of the communication.
+  """
+  recipientId: ID
+  """
+  The ID of the user (Person or Application) whose action resulted in the communication.
+  """
+  createdById: ID
+  """
+  The start of the sentAt period to include.
+  """
+  sentFrom: DateTime
+  """
+  The end of the sentAt period to include.
+  """
+  sentTo: DateTime
+  """
+  The contact method of the communication.
+  """
+  contactMethod: ContactMethod
+  """
+  The ID of the async issuance request that the communication is related to.
+  """
+  asyncIssuanceRequestId: ID
+  """
+  The purpose of the communication.
+  """
+  purpose: CommunicationPurpose
+}
+
+"""
+Fields that can be used for sorting communications.
+"""
+enum CommunicationOrderBy {
+  """
+  When the communication was sent.
+  """
+  # eslint-disable-next-line @graphql-eslint/naming-convention
+  sentAt
+  """
+  The name of the communication recipient.
+  """
+  # eslint-disable-next-line @graphql-eslint/naming-convention
+  recipientName
+}
+
+extend type Query {
+  """
+  Returns communications, optionally matching the specified criteria
+  """
+  findCommunications(
+    where: CommunicationWhere
+    offset: PositiveInt
+    limit: PositiveInt
+    orderBy: CommunicationOrderBy
+    orderDirection: OrderDirection
+  ): [Communication!]!
+}

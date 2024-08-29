@@ -2,7 +2,7 @@ import { setPhotoCaptureData } from '..'
 import type { CommandContext } from '../../../cqs'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
-import { parseAndReencodeFaceCheckPhoto } from '../../issuance/commands/create-issuance-request-command'
+import { convertFaceCheckPhoto } from '../../issuance/commands/create-issuance-request-command'
 import { completeLimitedPhotoCaptureSession } from '../../limited-photo-capture-tokens'
 
 export async function CapturePhotoCommand(this: CommandContext, photoCaptureRequestId: string, photo: string): Promise<void> {
@@ -16,8 +16,8 @@ export async function CapturePhotoCommand(this: CommandContext, photoCaptureRequ
   // validate the photo has not been captured
   invariant(user.limitedPhotoCaptureData.photo === undefined, 'The photo has already been captured for this request')
 
-  // parse and convert the photo
-  const base64Url = parseAndReencodeFaceCheckPhoto(photo)
+  // convert the photo
+  const base64Url = convertFaceCheckPhoto(photo)
 
   // persist the photo for subsequent retrieval
   user.limitedPhotoCaptureData.photo = base64Url

@@ -6,6 +6,8 @@ import { BackgroundJobStatus } from '../generated/graphql'
 import { logger } from '../logger'
 import { redisOptions } from '../redis'
 import { createVerifiedIdAdminService } from '../services'
+import { AsyncIssuanceService } from '../services/async-issuance-service'
+import { CommunicationsService } from '../services/communications-service'
 import { Lazy } from '../util/lazy'
 import type { JobPayload } from './jobs'
 import { handlers, type JobNames, type WorkerContext } from './jobs'
@@ -16,8 +18,12 @@ type BackgroundJob = Job<JobPayload>
 
 const createWorkerContext = async (userId: string): Promise<WorkerContext> => ({
   logger,
-  verifiedIdAdminService: createVerifiedIdAdminService(logger),
   user: await dataSource.getRepository(UserEntity).findOneByOrFail({ id: userId }),
+  services: {
+    verifiedIdAdmin: createVerifiedIdAdminService(logger),
+    asyncIssuances: new AsyncIssuanceService(),
+    communications: new CommunicationsService(logger),
+  },
 })
 
 export const worker = Lazy(

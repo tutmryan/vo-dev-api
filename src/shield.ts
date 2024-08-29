@@ -27,6 +27,12 @@ import {
   isValidLimitedApprovalPresentationFilter,
   isValidLimitedPresentationRequestForApproval,
 } from './features/limited-approval-tokens/shield-rules'
+import {
+  isLimitedAsyncIssuanceApp,
+  isLimitedAsyncIssuancePhotoCaptureUser,
+  isValidCreateIssuanceRequestForAsyncIssuanceRequest,
+  isValidLimitedAsyncIssuanceIssuanceFilter,
+} from './features/limited-async-issuance-tokens/shield-rules'
 import { isValidCapturePhoto, isValidLimitedIssuancePhotoCaptureRequest } from './features/photo-capture/shield-rules'
 import type { Resolvers } from './generated/graphql'
 import { AppRoles, UserRoles } from './roles'
@@ -45,10 +51,22 @@ const isPresentationApp = hasRoleRule(AppRoles.present, 'isPresentationApp')
 
 const isIssuer = or(isIssuerUser, isIssuanceApp, isLimitedIssuanceApp)
 
-const fallbackRule = or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isLimitedAccessApp, isLimitedApprovalApp)
+const fallbackRule = or(
+  isUserWithReadPermissions,
+  isIssuanceApp,
+  isPresentationApp,
+  isLimitedAccessApp,
+  isLimitedApprovalApp,
+  isLimitedAsyncIssuanceApp,
+)
 
 // issuance and presentation access rules
-const isAllowedToViewIssuances = or(isUserWithReadPermissions, isIssuanceApp, isValidLimitedAccessIssuanceFilter)
+const isAllowedToViewIssuances = or(
+  isUserWithReadPermissions,
+  isIssuanceApp,
+  isValidLimitedAccessIssuanceFilter,
+  isValidLimitedAsyncIssuanceIssuanceFilter,
+)
 const isAllowedToViewPresentations = or(
   isUserWithReadPermissions,
   isPresentationApp,
@@ -68,7 +86,9 @@ export const rules: ShieldSchema<Resolvers> = {
     networkContracts: isPartnerAdminUser,
     approvalRequest: or(isApprovalRequestAdminUser, and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId)),
     actionedApprovalData: or(isApprovalRequestAdminUser, isApprovalRequestApp),
-    photoCaptureStatus: isIssuer,
+    photoCaptureStatus: or(isIssuer, isLimitedAsyncIssuancePhotoCaptureUser),
+    asyncIssuanceRequest: isIssuer,
+    asyncIssuanceContact: isIssuerUser,
   },
   Mutation: {
     '*': isCredentialAdminUser,
@@ -76,6 +96,7 @@ export const rules: ShieldSchema<Resolvers> = {
     acquireLimitedApprovalToken: allow,
     acquireLimitedPhotoCaptureToken: allow,
     createIssuanceRequest: or(isIssuerUser, isIssuanceApp, isValidLimitedIssuanceRequest),
+    createIssuanceRequestForAsyncIssuance: isValidCreateIssuanceRequestForAsyncIssuanceRequest,
     createPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedPresentationRequest),
     saveIdentity: or(
       isIssuerUser,
@@ -93,6 +114,12 @@ export const rules: ShieldSchema<Resolvers> = {
     actionApprovalRequest: and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId),
     createPhotoCaptureRequest: or(isIssuerUser, isIssuanceApp, isValidLimitedIssuancePhotoCaptureRequest),
     capturePhoto: isValidCapturePhoto,
+    createAsyncIssuanceRequest: isIssuer,
+    updateAsyncIssuanceContact: isIssuer,
+    sendAsyncIssuanceVerification: allow,
+    acquireAsyncIssuanceToken: allow,
+    resendAsyncIssuanceNotifications: isIssuer,
+    resendAsyncIssuanceNotification: isIssuer,
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
   Subscription: {
@@ -105,8 +132,12 @@ export const rules: ShieldSchema<Resolvers> = {
         or(isUserWithReadPermissions, isPresentationApp, isLimitedPresentationApp, isLimitedAnonymousPresentationApp, isLimitedApprovalApp),
       ),
     ),
-    issuanceEvent: or(isIssuerUser, isCredentialAdminUser, and(requestIdFilterDefined, or(isIssuanceApp, isLimitedIssuanceApp))),
-    photoCaptureEvent: isIssuer,
+    issuanceEvent: or(
+      isIssuerUser,
+      isCredentialAdminUser,
+      and(requestIdFilterDefined, or(isIssuanceApp, isLimitedIssuanceApp, isLimitedAsyncIssuanceApp)),
+    ),
+    photoCaptureEvent: or(isIssuer, isLimitedAsyncIssuancePhotoCaptureUser),
   },
   Contract: {
     issuances: isAllowedToViewIssuances,
@@ -143,7 +174,16 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': allow,
   },
   PhotoCaptureEventData: {
+    '*': or(isIssuer, isLimitedAsyncIssuancePhotoCaptureUser),
+  },
+  AsyncIssuanceRequest: {
     '*': isIssuer,
+  },
+  AsyncIssuanceContact: {
+    '*': isIssuerUser,
+  },
+  AsyncIssuanceTokenResponse: {
+    '*': allow,
   },
 }
 export const permissions = wrappedShield(rules)

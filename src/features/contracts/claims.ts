@@ -1,4 +1,9 @@
-import type { ContractDisplayModelInput, CreateUpdateTemplateDisplayModelInput, IssuanceRequestInput } from '../../generated/graphql'
+import type {
+  AsyncIssuanceRequestInput,
+  ContractDisplayModelInput,
+  CreateUpdateTemplateDisplayModelInput,
+  IssuanceRequestInput,
+} from '../../generated/graphql'
 import type { AttestationClaimMapping, DisplayClaim } from '../../services/verified-id'
 
 export const displayClaimPrefix = 'vc.credentialSubject.'
@@ -50,7 +55,7 @@ const standardClaimsErrorMessage = `Claims must not include any of: ${standardCl
 /**
  * Throws an error if any of the standard claims are included.
  */
-export const validateIssuanceClaims = (claims?: IssuanceRequestInput['claims']): void => {
+export const validateIssuanceClaims = (claims?: IssuanceRequestInput['claims'] | AsyncIssuanceRequestInput['claims']): void => {
   if (claims && Object.keys(claims).some((key) => standardClaims.includes(key as StandardClaims)))
     throw new Error(standardClaimsErrorMessage)
 }

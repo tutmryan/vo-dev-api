@@ -1,18 +1,22 @@
 import { DefaultAzureCredential } from '@azure/identity'
-import type { BlockBlobParallelUploadOptions } from '@azure/storage-blob'
+import type {
+  BlobDeleteIfExistsResponse,
+  BlobGetPropertiesResponse,
+  BlobUploadCommonResponse,
+  BlockBlobParallelUploadOptions,
+} from '@azure/storage-blob'
 import { ContainerClient, StorageSharedKeyCredential } from '@azure/storage-blob'
 import mime from 'mime-types'
-import { blobStorage } from '../config'
+import type { BlobStorageCredentials } from '../config'
 import { parseDataUrl } from '../util/data-url'
 import { Lazy } from '../util/lazy'
 
 export class BlobStorageContainerService {
-  constructor({ containerName }: { containerName: string }) {
+  constructor({ url, containerName, credentials }: { url: string; containerName: string; credentials?: BlobStorageCredentials }) {
     this.containerClient = Lazy(() => {
-      const { url, credential } = blobStorage
       const client = new ContainerClient(
         [url, containerName].join('/'),
-        credential ? new StorageSharedKeyCredential(credential.accountName, credential.accountKey) : new DefaultAzureCredential(),
+        credentials ? new StorageSharedKeyCredential(credentials.accountName, credentials.accountKey) : new DefaultAzureCredential(),
       )
       return client
     })
@@ -39,13 +43,23 @@ export class BlobStorageContainerService {
     return [this.containerClient().url, name].join('/')
   }
 
-  async upload(blobName: string, buffer: Buffer, options?: BlockBlobParallelUploadOptions): Promise<void> {
+  async upload(blobName: string, buffer: Buffer, options?: BlockBlobParallelUploadOptions): Promise<BlobUploadCommonResponse> {
     const blockBlobClient = this.containerClient().getBlockBlobClient(blobName)
-    await blockBlobClient.uploadData(buffer, options)
+    return blockBlobClient.uploadData(buffer, options)
   }
 
-  async deleteIfExists(blobName: string): Promise<void> {
+  async downloadToBuffer(blobName: string): Promise<Buffer | undefined> {
     const blockBlobClient = this.containerClient().getBlockBlobClient(blobName)
-    await blockBlobClient.deleteIfExists()
+    return blockBlobClient.downloadToBuffer()
+  }
+
+  async deleteIfExists(blobName: string): Promise<BlobDeleteIfExistsResponse> {
+    const blockBlobClient = this.containerClient().getBlockBlobClient(blobName)
+    return blockBlobClient.deleteIfExists()
+  }
+
+  async getProperties(blobName: string): Promise<BlobGetPropertiesResponse | undefined> {
+    const blockBlobClient = this.containerClient().getBlockBlobClient(blobName)
+    return blockBlobClient.getProperties()
   }
 }
