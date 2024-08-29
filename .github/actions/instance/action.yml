@@ -271,6 +271,7 @@ runs:
       run: >-
         ./infrastructure/scripts/prepare-secrets.sh
         vo-kv-inst-${{ inputs.resource-group-unique-string }}
+        ${{ inputs.deployment-service-principal-object-id }}
         API-COOKIE-SECRET:hex:16
         LIMITED-ACCESS-SECRET:hex:16
         LIMITED-APPROVAL-SECRET:hex:16
