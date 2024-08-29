@@ -197,7 +197,7 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 
 ## Create a key vault to hold signing keys used Verified ID authorities
 
-1. Navigate to the Azure Portal key vaults blade: https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.KeyVault%2Fvaults
+1. Navigate to the Azure Portal key vaults blade: <https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.KeyVault%2Fvaults>
 1. Click on "+ Create"
 1. Select the resource group created in the previous step (e.g. `vo-entra-verified-id-core`)
 1. Pick a name (e.g. `vo-vid-keys-nonprod` for non prod tenant), select the appropriate region, enable purge protection and click "Next" to configure access
@@ -227,6 +227,72 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 1. Select "Allow trusted Microsoft services to bypass this firewall"
 1. Click "Apply"
 
+## Create alerts for SQL Elastic Pool
+
+1. Navigate to Monitor Alerts
+2. Select new alert rule
+3. For the Resource, Select the shared infra SQL Elastic Pool resource
+4. For conditions, select:
+   1. Data space used percent:
+      - Operator: Greater than
+      - Aggregation type: Average
+      - Threshold value: 70
+      - Frequency of evaluation: Every 15 minutes Lookback period: 15 minutes
+   2. CPU percentage:
+      - Operator: Greater than
+      - Aggregation type: Average
+      - Threshold value: 70
+      - Frequency of evaluation: Every 1 minutes Lookback period: 5 minutes
+   3. DTU percentage:
+      - Operator: Greater than
+      - Aggregation type: Average
+      - Threshold value: 70
+      - Frequency of evaluation: Every 1 minutes Lookback period: 5 minutes
+5. Under Action Group, select + Create action group.
+   1. Basics:
+      - Resource group: vo-platform-shared-infra
+      - Region: Global
+      - Action group name: VO Alerts
+      - Display Name: VO Alerts
+   2. Notifications:
+      - Notification type: Email/SMS message/Push/Voice
+      - Enter the email where alerts will be sent
+   3. Review and create
+6. Under details.
+   - Resource group: vo-platform-shared-infra
+   - Severity: critical
+   - Alert rule name: VO SQL Elastic Pool Alert
+   - Severity: critical
+
+## Create alerts for the App Service Plan
+
+1. Navigate to Monitor Alerts
+2. Select new alert rule
+3. For the Resource, Select the shared infra App Service Plan resource
+4. For conditions, select:
+   1. CPU percentage:
+      - Operator: Greater than
+      - Aggregation type: Average
+      - Threshold value: 80
+      - Frequency of evaluation: Every 1 minutes Lookback period: 5 minutes
+   2. Memory percentage:
+      - Operator: Greater than
+      - Aggregation type: Average
+      - Threshold value: 80
+      - Frequency of evaluation: Every 1 minutes Lookback period: 5 minutes
+   3. HTTP Queue Length percentage:
+      - Operator: Greater than
+      - Aggregation type: Average
+      - Unit: Count
+      - Threshold value: 100
+      - Frequency of evaluation: Every 1 minutes Lookback period: 5 minutes
+5. Under Action Group, select previously created VO Alerts.
+6. Under details.
+   - Resource group: vo-platform-shared-infra
+   - Severity: critical
+   - Alert rule name: VO App Service Plan Alert
+   - Severity: critical
+
 ## Create and run the shared infrastructure pipeline
 
 You can now create a new workflow in the `.github/workflows` directory to call the `shared-infra` action for the hosting tenant.
@@ -250,7 +316,7 @@ Documentation indicates outbound IPs of the App Service can change when the App 
 
 > Because of autoscaling behaviors, the outbound IP can change at any time when running on a Consumption plan or in a Premium plan.
 
-https://learn.microsoft.com/en-us/azure/azure-functions/ip-addresses?tabs=portal#outbound-ip-address-changes
+<https://learn.microsoft.com/en-us/azure/azure-functions/ip-addresses?tabs=portal#outbound-ip-address-changes>
 
 The Redis, SQL, KeyVault firewalls are configured based on the outbound IPs of the App Service at the time of deployment.
 
