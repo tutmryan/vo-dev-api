@@ -8,6 +8,7 @@ import type {
 import { ContainerClient, StorageSharedKeyCredential } from '@azure/storage-blob'
 import mime from 'mime-types'
 import type { BlobStorageCredentials } from '../config'
+import { logger } from '../logger'
 import { parseDataUrl } from '../util/data-url'
 import { Lazy } from '../util/lazy'
 
@@ -18,6 +19,11 @@ export class BlobStorageContainerService {
         [url, containerName].join('/'),
         credentials ? new StorageSharedKeyCredential(credentials.accountName, credentials.accountKey) : new DefaultAzureCredential(),
       )
+      logger.info(`Created BlobStorageContainerService for container ${containerName}`, {
+        url,
+        containerName,
+        credentials: credentials ? 'provided' : 'default',
+      })
       return client
     })
   }
@@ -44,6 +50,10 @@ export class BlobStorageContainerService {
   }
 
   async upload(blobName: string, buffer: Buffer, options?: BlockBlobParallelUploadOptions): Promise<BlobUploadCommonResponse> {
+    logger.info(`Uploading blob ${blobName} to container ${this.containerClient().containerName}`, {
+      blobName,
+      containerName: this.containerClient().containerName,
+    })
     const blockBlobClient = this.containerClient().getBlockBlobClient(blobName)
     return blockBlobClient.uploadData(buffer, options)
   }
