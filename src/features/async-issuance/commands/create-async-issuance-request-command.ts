@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto'
+import { omit } from 'lodash'
 import { convertAsyncIssuanceRequestExpiryToDays } from '..'
 import { addToJobQueue } from '../../../background-jobs/queue'
 import type { CommandContext } from '../../../cqs'
@@ -21,6 +22,8 @@ import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 registerFeatureCheck(CreateAsyncIssuanceRequestCommand, async (...[, input]) => isFaceCheckPhotoEnabled(input))
 
 const identityInputKey = ({ issuer, identifier }: IdentityInput) => issuer + identifier
+
+const loggableAsyncIssuanceInput = (input: AsyncIssuanceRequestInput) => omit(input, ['contact'])
 
 export async function CreateAsyncIssuanceRequestCommand(
   this: CommandContext,
@@ -85,7 +88,8 @@ export async function CreateAsyncIssuanceRequestCommand(
       )
     } catch (error) {
       logger.error(`Validation of async issuance request ${index + 1} of ${requestInput.length} failed`, {
-        asyncIssuanceInput,
+        error,
+        asyncIssuanceInput: loggableAsyncIssuanceInput(asyncIssuanceInput),
       })
       errorResponse.errors[index] = error instanceof Error ? error.message : 'An unknown error occurred'
     }
@@ -137,7 +141,10 @@ export async function CreateAsyncIssuanceRequestCommand(
       await asyncIssuances.uploadAsyncIssuance(issuanceRequest.id, asyncIssuanceInput)
       response.asyncIssuanceRequestIds.push(issuanceRequest.id)
     } catch (error) {
-      logger.error(`Saving async issuance request ${index + 1} of ${requestInput.length} failed`, { asyncIssuanceInput })
+      logger.error(`Saving async issuance request ${index + 1} of ${requestInput.length} failed`, {
+        error,
+        asyncIssuanceInput: loggableAsyncIssuanceInput(asyncIssuanceInput),
+      })
       throw error
     }
   }
