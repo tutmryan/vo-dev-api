@@ -252,7 +252,7 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
    1. Basics:
       - Resource group: vo-platform-shared-infra
       - Region: Global
-      - Action group name: VO Alerts
+      - Action group name: VO-Alerts
       - Display Name: VO Alerts
    2. Notifications:
       - Notification type: Email/SMS message/Push/Voice
