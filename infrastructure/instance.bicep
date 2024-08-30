@@ -531,6 +531,85 @@ resource redisCacheDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01
   }
 }
 
+resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
+  name: 'VO Redis Cache Alert'
+  location: 'global'
+  properties: {
+    description: 'Triggers when the redis cache reaches critical levels'
+    severity: 0
+    enabled: true
+    scopes: [
+      redisCache.id
+    ]
+    evaluationFrequency: 'PT1M'
+    windowSize: 'PT5M'
+    criteria: {
+       'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
+      allOf: [
+        {
+          threshold: 80
+          name: 'Server Load'
+          metricNamespace: 'Microsoft.Cache/Redis'
+          metricName: 'serverLoad'
+          operator: 'GreaterThan'
+          timeAggregation: 'Average'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 80
+          name: 'Used Memory Percentage'
+          metricNamespace: 'Microsoft.Cache/Redis'
+          metricName: 'usedmemorypercentage'
+          operator: 'GreaterThan'
+          timeAggregation: 'Average'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 5625
+          name: 'Connected Clients'
+          metricNamespace: 'Microsoft.Cache/Redis'
+          metricName: 'connectedclients'
+          operator: 'GreaterThan'
+          timeAggregation: 'Maximum'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 100000
+          name: 'Cache Read'
+          metricNamespace: 'Microsoft.Cache/Redis'
+          metricName: 'cacheRead'
+          operator: 'GreaterThan'
+          timeAggregation: 'Maximum'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 80
+          name: 'CPU Percentage'
+          metricNamespace: 'Microsoft.Cache/Redis'
+          metricName: 'percentProcessorTime'
+          operator: 'GreaterThan'
+          timeAggregation: 'Maximum'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+      ]
+    }
+    autoMitigate: true
+    targetResourceType: 'Microsoft.Cache/Redis'
+    targetResourceRegion: location
+    actions: [
+      {
+        actionGroupId: resourceId(sharedResourceGroupName,'Microsoft.Insights/actionGroups', 'VO-Alerts')
+        webHookProperties: {}
+      }
+    ]
+  }
+}
+
 output databaseHost string = '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
 
 resource verifiedOrchestrationStorage 'Microsoft.Storage/storageAccounts@2022-09-01' = {
