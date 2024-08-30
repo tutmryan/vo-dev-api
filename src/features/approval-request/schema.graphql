@@ -46,7 +46,7 @@ input ApprovalRequestInput {
   """
   presentationRequestInput: ApprovalRequestPresentationInput!
   """
-  Callback will be invoked when the approval request is actioned.
+  Callback will be invoked when the approval request is actioned (i.e. approved, rejected, or cancelled).
   """
   callback: Callback
 }
@@ -189,7 +189,7 @@ type ActionedBy {
 
 """
 Details of the action taken on the approval request.
-""" # eslint-disable-next-line @graphql-eslint/no-unreachable-types
+"""
 type ActionedApprovalData {
   """
   The ID of the approval request that was actioned.
@@ -208,15 +208,15 @@ type ActionedApprovalData {
   """
   state: String
   """
-  Indicates whether the approval has been granted.
+  The current status of the approval request.
   """
-  isApproved: Boolean!
+  status: ApprovalRequestStatus!
   """
   Optional comment on approval or rejection of this request.
   """
   actionedComment: String
   """
-  The person who actioned the approval request, if known.
+  The person, if known, who approved/rejected the approval request or the app that cancelled the approval request.
   """
   actionedBy: ActionedBy
   """

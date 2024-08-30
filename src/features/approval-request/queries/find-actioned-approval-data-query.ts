@@ -21,7 +21,7 @@ export async function FindActionedApprovalDataQuery(this: QueryContext, id: stri
     correlationId: approvalRequest.correlationId,
     requestData: approvalRequest.requestData,
     state: approvalRequest.callbackInput?.state,
-    isApproved: approvalRequest.isApproved!,
+    status: approvalRequest.status,
     actionedComment: approvalRequest.actionedComment,
     actionedAt: approvalRequest.updatedAt!,
     actionedBy: identity ? { id: identity.id, name: identity.name } : null,

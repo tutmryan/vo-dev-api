@@ -1,4 +1,5 @@
 import { graphql } from '../../../generated'
+import { ApprovalRequestStatus } from '../../../generated/graphql'
 import { AppRoles } from '../../../roles'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsApp, expectUnauthorizedError } from '../../../test'
 import { createActionedApprovalRequest, createApprovalRequest, getDefaultApprovalRequestInput } from './create-approval-request'
@@ -11,7 +12,7 @@ export const findActionedApprovalDataQuery = graphql(
       correlationId
       requestData
       state
-      isApproved
+      status
       actionedComment
       actionedAt
       actionedBy {
@@ -71,7 +72,7 @@ describe('find actioned approval data', () => {
     // Assert
     expect(data?.actionedApprovalData).not.toBeNull()
     expect(data?.actionedApprovalData?.approvalRequestId).toEqual(approvalRequest.id.toUpperCase())
-    expect(data?.actionedApprovalData?.isApproved).toEqual(true)
+    expect(data?.actionedApprovalData?.status).toEqual(ApprovalRequestStatus.Approved)
     expect(data?.actionedApprovalData?.actionedBy?.id).toEqual(identity.id.toUpperCase())
   })
 })
