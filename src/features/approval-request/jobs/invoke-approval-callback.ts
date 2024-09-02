@@ -19,7 +19,7 @@ export const invokeApprovalCallbackJobHandler: JobHandler<InvokeApprovalCallback
   if (!actionedApprovalRequest.callbackInput) throw new UnrecoverableError('Approval request does not have callback input')
 
   const presentation = await actionedApprovalRequest.presentation
-  const identity = await presentation.identity
+  const identity = await presentation?.identity
 
   const data: ActionedApprovalData = {
     approvalRequestId: actionedApprovalRequest.id.toLowerCase(),
