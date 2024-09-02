@@ -75,10 +75,10 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
   }
 
   @ManyToOne(() => PresentationEntity)
-  presentation!: Promise<PresentationEntity>
+  presentation!: Promise<PresentationEntity | null>
 
   @Column({ type: 'uniqueidentifier', nullable: true })
-  presentationId!: string
+  presentationId!: string | null
 
   @Column({ type: 'bit', nullable: true })
   isApproved!: boolean | null
