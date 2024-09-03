@@ -31,7 +31,7 @@ const baseLogger = createLogger({
  * We can then filter logs using the `logLevel` property instead.
  * Implementation as per logger.child() winston/lib/winston/logger.js
  */
-export const logger = Object.create(baseLogger, {
+export const logger: Logger = Object.create(baseLogger, {
   write: {
     value: function ({ level, ...rest }: { level: any }) {
       const transform = baseLogger as any

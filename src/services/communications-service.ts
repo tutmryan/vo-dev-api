@@ -2,6 +2,7 @@ import type { GraphQLContext } from '../context'
 import type { VerifiedOrchestrationEntityManager } from '../data/entity-manager'
 import { CommunicationEntity } from '../features/communication/entities/communication-entity'
 import { CommunicationPurpose, ContactMethod } from '../generated/graphql'
+import type { Logger } from '../logger'
 import { sendIssuanceEmail, sendVerificationCodeEmail } from '../util/email'
 import { sendSms } from '../util/sms'
 
@@ -20,7 +21,7 @@ type CommunicationData = Pick<CommunicationEntity, 'contactMethod' | 'recipientI
 }
 
 export class CommunicationsService {
-  constructor(private readonly logger: GraphQLContext) {}
+  constructor(private readonly logger: Logger) {}
 
   async sendIssuance(
     to: string,
