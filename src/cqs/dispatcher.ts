@@ -1,10 +1,11 @@
-import type { CommandContext, QueryContext } from '.'
+import type { CommandContext, MultiTransactionalCommandContext, QueryContext } from '.'
 import type { GraphQLContext } from '../context'
 import { entityManager, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../data'
 import { addUserToManager } from '../features/auditing/user-context-helper'
 import { performFeatureCheck } from './feature-map'
 
 export type CommandLike = (this: CommandContext, ...args: any) => any
+export type MultiTransactionalCommandLike = (this: MultiTransactionalCommandContext, ...args: any) => any
 export type QueryLike = (this: QueryContext, ...args: any) => any
 
 export type DispatchContext = Pick<GraphQLContext, 'dataSource' | 'user' | 'services' | 'dataLoaders' | 'logger' | 'requestInfo'>
@@ -33,6 +34,36 @@ export const dispatch = async <T extends CommandLike>(
 
     return await command.apply(ctx, args)
   })
+}
+
+export const dispatchMultiTransactional = async <T extends MultiTransactionalCommandLike>(
+  { dataSource, user, logger, services, dataLoaders, requestInfo }: DispatchContext,
+  command: T,
+  ...args: Parameters<T>
+): Promise<Awaited<ReturnType<T>>> => {
+  const context: MultiTransactionalCommandContext = {
+    runInTransaction: async (fn) => {
+      return await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
+        if (user) {
+          addUserToManager(entityManager, user.userEntity.id)
+        }
+
+        const ctx: CommandContext = {
+          user,
+          entityManager,
+          logger,
+          services,
+          dataLoaders,
+          requestInfo,
+          contextType: 'command',
+        }
+
+        return await fn(ctx)
+      })
+    },
+  }
+
+  return await command.apply(context, args)
 }
 
 export const query = async <T extends QueryLike>(
