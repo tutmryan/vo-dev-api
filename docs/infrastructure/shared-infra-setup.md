@@ -227,6 +227,23 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 1. Select "Allow trusted Microsoft services to bypass this firewall"
 1. Click "Apply"
 
+## Create and run the shared infrastructure pipeline
+
+You can now create a new workflow in the `.github/workflows` directory to call the `shared-infra` action for the hosting tenant.
+
+## Give the SQL Server user assigned identity AAD Directory Readers role assignment
+
+After running the shared infrastructure pipeline, but before deploying any instances, the SQL Server user assigned identity must be assigned the AAD Directory Readers role to support authentication from API managed identities.
+
+1. Navigate to the Azure Active Directory blade in the Azure Portal: <https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview>.
+1. In the "Manage" section, click on "Roles and administrators".
+1. Find the "Directory Readers" role, select it, then click on "Add assignments".
+1. Search for the SQL Server user assigned identity by its name e.g. `vo-nonprd-platform-sql-server-identity`, then click on "Add".
+
+## Remove the deployment service principal from the Azure SQL administrators group
+
+The deployment service principal needs to be removed from the Azure SQL administrators group so that it is no longer a server administrator. If it remains a server administrator, the deployment service principal can connect to any instance databases in the server.
+
 ## Create alerts for SQL Elastic Pool
 
 1. Navigate to Monitor Alerts
@@ -250,7 +267,7 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
       - Frequency of evaluation: Every 1 minutes Lookback period: 5 minutes
 5. Under Action Group, select + Create action group.
    1. Basics:
-      - Resource group: vo-platform-shared-infra
+      - Resource group: vo-[nonprd-]platform-shared-infra
       - Region: Global
       - Action group name: VO-Alerts
       - Display Name: VO Alerts
@@ -290,25 +307,9 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 6. Under details.
    - Resource group: vo-platform-shared-infra
    - Severity: critical
-   - Alert rule name: VO App Service Plan Alert
+   - Alert rule name: Verified Orchestration App Service Plan 1 (non prod) Alert
    - Severity: critical
-
-## Create and run the shared infrastructure pipeline
-
-You can now create a new workflow in the `.github/workflows` directory to call the `shared-infra` action for the hosting tenant.
-
-## Give the SQL Server user assigned identity AAD Directory Readers role assignment
-
-After running the shared infrastructure pipeline, but before deploying any instances, the SQL Server user assigned identity must be assigned the AAD Directory Readers role to support authentication from API managed identities.
-
-1. Navigate to the Azure Active Directory blade in the Azure Portal: <https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview>.
-1. In the "Manage" section, click on "Roles and administrators".
-1. Find the "Directory Readers" role, select it, then click on "Add assignments".
-1. Search for the SQL Server user assigned identity by its name e.g. `vo-nonprd-platform-sql-server-identity`, then click on "Add".
-
-## Remove the deployment service principal from the Azure SQL administrators group
-
-The deployment service principal needs to be removed from the Azure SQL administrators group so that it is no longer a server administrator. If it remains a server administrator, the deployment service principal can connect to any instance databases in the server.
+7. Repeat these steps for each App Service Plan.
 
 ## Warning about changing shared infrastructure (App Service Plan)
 
