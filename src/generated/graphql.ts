@@ -617,10 +617,12 @@ export type Communication = {
   contactMethod: ContactMethod;
   /** The user (Person or Application) whose action resulted in the communication. */
   createdBy: User;
+  /** The error while sending the communication, if any. */
+  error?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   /** The purpose of the communication. */
   purpose: CommunicationPurpose;
-  /** The receipient of the communication. */
+  /** The recipient of the communication. */
   recipient: Identity;
   /** When the communication was sent. */
   sentAt: Scalars['DateTime']['output'];
@@ -640,7 +642,7 @@ export enum CommunicationPurpose {
   Verification = 'verification'
 }
 
-/** Defines the filter critiera used to find communications. */
+/** Defines the filter criteria used to find communications. */
 export type CommunicationWhere = {
   /** The ID of the async issuance request that the communication is related to. */
   asyncIssuanceRequestId?: InputMaybe<Scalars['ID']['input']>;
@@ -4043,6 +4045,7 @@ export type BackgroundJobProgressEventResolvers<ContextType = GraphQLContext, Pa
 export type CommunicationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Communication'] = ResolversParentTypes['Communication']> = {
   contactMethod?: Resolver<ResolversTypes['ContactMethod'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   purpose?: Resolver<ResolversTypes['CommunicationPurpose'], ParentType, ContextType>;
   recipient?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
