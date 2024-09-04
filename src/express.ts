@@ -114,6 +114,9 @@ export const getExpressApp = (): Express => {
     logger.info(`Added /voyager`)
   }
 
+  // add a health check endpoint
+  app.get('/health', (req, res) => res.send('OK').end())
+
   // add bearer auth to all requests
   app.use(
     bearerTokenMiddleware({
@@ -123,6 +126,7 @@ export const getExpressApp = (): Express => {
     }),
   )
 
+  // apply rate limiting
   app.use(rateLimiterMiddleware)
 
   // add issuance and presentation callback routes
