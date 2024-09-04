@@ -1083,3 +1083,58 @@ resource workbook 'Microsoft.Insights/workbooks@2023-06-01' = {
     sourceId: apiAppInsights.id
   }
 }
+
+resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
+  name: '${resourcePrefix}-api-availability-test'
+  location: location
+  kind: 'standard'
+  tags: {
+    'hidden-link:${apiAppInsights.id}': 'Resource'
+  }
+  properties: {
+    Description: 'Health check for API'
+    Enabled: true
+    Frequency: 300
+    Kind: 'standard'
+    Locations: [
+      {
+        Id: 'emea-au-syd-edge' // Australia East
+      }
+      {
+        Id: 'apac-hk-hkn-azr' // East Asia
+      }
+      {
+        Id: 'apac-sg-sin-azr' // Southeast Asia
+      }
+      {
+        Id: 'emea-nl-ams-azr' // West Europe
+      }
+      {
+        Id: 'emea-gb-db3-azr' // North Europe
+      }
+      {
+        Id: 'us-va-ash-azr' // East US
+      }
+      {
+        Id: 'us-ca-sjc-azr' // West US
+      }
+      {
+        Id: 'latam-br-gru-edge' // Brazil South
+      }
+    ]
+    Name: '${resourcePrefix}-api-healthcheck-webtest'
+    Request: {
+      HttpVerb: 'GET'
+      ParseDependentRequests: false
+      RequestUrl: 'https://${apiAppService.properties.defaultHostName}/health'
+    }
+    RetryEnabled: true
+    SyntheticMonitorId: '${resourcePrefix}-api-healthcheck-webtest'
+    Timeout: 60
+    ValidationRules: {
+      ExpectedHttpStatusCode: 200
+      SSLCertRemainingLifetimeCheck: 7
+      SSLCheck: true
+    }
+  }
+}
