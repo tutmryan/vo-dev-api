@@ -10,9 +10,9 @@ import { AsyncIssuanceService } from '../services/async-issuance-service'
 import { CommunicationsService } from '../services/communications-service'
 import { Lazy } from '../util/lazy'
 import type { JobPayload } from './jobs'
-import { handlers, type JobNames, type WorkerContext } from './jobs'
+import { handlers, jobOptions, type JobNames, type WorkerContext } from './jobs'
 import { publishBackgroundJobEvent } from './pubsub'
-import { JobQueueName, MAX_RETRY } from './queue'
+import { defaultJobOptions, JobQueueName } from './queue'
 
 type BackgroundJob = Job<JobPayload>
 
@@ -68,7 +68,8 @@ worker().on('completed', (job: BackgroundJob, result) => {
 
 worker().on('failed', (job: BackgroundJob | undefined, error) => {
   const hasEncounteredUnrecoverableError = (j: BackgroundJob) => !!j.finishedOn
-  const hasNoAttemptsLeft = (j: BackgroundJob) => j.attemptsMade >= MAX_RETRY
+  const jobRetries = jobOptions[job?.name as JobNames]?.attempts ?? defaultJobOptions.attempts ?? 0
+  const hasNoAttemptsLeft = (j: BackgroundJob) => j.attemptsMade >= jobRetries
   if (job) {
     publishBackgroundJobEvent({
       event: {

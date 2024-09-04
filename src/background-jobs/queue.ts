@@ -1,3 +1,4 @@
+import type { DefaultJobOptions } from 'bullmq'
 import { Queue, QueueEvents } from 'bullmq'
 import { randomUUID } from 'crypto'
 import { logger } from '../logger'
@@ -7,23 +8,23 @@ import type { JobTypes } from './jobs'
 import { jobOptions } from './jobs'
 
 export const JobQueueName = 'jobQueue'
-export const MAX_RETRY = 3
 export type JobType<TName extends string, TPayload extends { userId: string; requestId?: string }> = {
   name: TName
   payload: TPayload
+}
+
+export const defaultJobOptions: DefaultJobOptions = {
+  backoff: {
+    type: 'exponential',
+    delay: 1000,
+  },
 }
 
 export const jobQueue = Lazy(
   () =>
     new Queue(JobQueueName, {
       connection: redisOptions,
-      defaultJobOptions: {
-        attempts: MAX_RETRY,
-        backoff: {
-          type: 'exponential',
-          delay: 1000,
-        },
-      },
+      defaultJobOptions,
     }),
 )
 
