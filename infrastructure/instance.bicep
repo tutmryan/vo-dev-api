@@ -479,6 +479,7 @@ param redisCacheFamily string
 param redisCacheCapacity int
 
 var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
+var actionGroupAlertId = resourceId(sharedResourceGroupName,'Microsoft.Insights/actionGroups', 'VO-Alerts')
 
 resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   name: '${resourcePrefix}-redis-${uniqueSuffix}'
@@ -603,8 +604,7 @@ resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
     targetResourceRegion: location
     actions: [
       {
-        actionGroupId: resourceId(sharedResourceGroupName,'Microsoft.Insights/actionGroups', 'VO-Alerts')
-        webHookProperties: {}
+        actionGroupId: actionGroupAlertId
       }
     ]
   }
@@ -1092,45 +1092,29 @@ resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
     'hidden-link:${apiAppInsights.id}': 'Resource'
   }
   properties: {
-    Description: 'Health check for API'
+    Description: 'Availbility test for the API'
     Enabled: true
     Frequency: 300
     Kind: 'standard'
     Locations: [
-      {
-        Id: 'emea-au-syd-edge' // Australia East
-      }
-      {
-        Id: 'apac-hk-hkn-azr' // East Asia
-      }
-      {
-        Id: 'apac-sg-sin-azr' // Southeast Asia
-      }
-      {
-        Id: 'emea-nl-ams-azr' // West Europe
-      }
-      {
-        Id: 'emea-gb-db3-azr' // North Europe
-      }
-      {
-        Id: 'us-va-ash-azr' // East US
-      }
-      {
-        Id: 'us-ca-sjc-azr' // West US
-      }
-      {
-        Id: 'latam-br-gru-edge' // Brazil South
-      }
+      { Id: 'emea-au-syd-edge' } // Australia East
+      { Id: 'apac-hk-hkn-azr' } // East Asia
+      { Id: 'apac-sg-sin-azr' } // Southeast Asia
+      { Id: 'emea-nl-ams-azr' } // West Europe
+      { Id: 'emea-gb-db3-azr' } // North Europe
+      { Id: 'us-va-ash-azr' } // East US
+      { Id: 'us-ca-sjc-azr' } // West US
+      { Id: 'latam-br-gru-edge' } // Brazil South
     ]
-    Name: '${resourcePrefix}-api-healthcheck-webtest'
+    Name: '${resourcePrefix}-api-availability-webtest'
     Request: {
       HttpVerb: 'GET'
       ParseDependentRequests: false
       RequestUrl: 'https://${apiAppService.properties.defaultHostName}/health'
     }
     RetryEnabled: true
-    SyntheticMonitorId: '${resourcePrefix}-api-healthcheck-webtest'
-    Timeout: 60
+    SyntheticMonitorId: '${resourcePrefix}-api-availability-webtest'
+    Timeout: 30
     ValidationRules: {
       ExpectedHttpStatusCode: 200
       SSLCertRemainingLifetimeCheck: 7
@@ -1138,3 +1122,38 @@ resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
     }
   }
 }
+
+resource apiAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
+  name: '${resourcePrefix}-api-availability-alert'
+  location: 'global'
+  properties: {
+    description: 'Triggers when API healthchecks fails'
+    severity: 0
+    enabled: true
+    scopes: [
+      apiAppInsights.id
+    ]
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT5M'
+    criteria: {
+      'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
+      allOf: [
+        {
+          name: 'API Availability Percentage Check'
+          criterionType: 'StaticThresholdCriterion'
+          metricName: 'availabilityResults/AvailabilityPercentage'
+          metricNamespace: 'microsoft.insights/components'
+          operator: 'LessThan'
+          threshold: 80 // In practice this means within a 5 minute period, if more than 1 of these checks from any of the 8 locations fails the alert will trigger.
+          timeAggregation: 'Average'
+        }
+      ]
+    }
+    actions: [
+      {
+        actionGroupId:  actionGroupAlertId
+      }
+    ]
+  }
+}
+
