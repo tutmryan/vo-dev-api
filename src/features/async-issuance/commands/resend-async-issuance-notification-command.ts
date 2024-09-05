@@ -24,7 +24,7 @@ export async function ResendAsyncNotificationCommand(
 
       const repository = context.entityManager.getRepository(AsyncIssuanceEntity)
       const asyncIssuance = await repository.findOneByOrFail({ id: asyncIssuanceRequestId })
-      asyncIssuance.failed('Failed to send notification')
+      asyncIssuance.failed('contact-failed')
       await repository.save(asyncIssuance)
 
       if (error instanceof CommunicationError) {

@@ -9,6 +9,10 @@ import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 
+type EndsWithFailed<T extends string> = T extends `${string}-failed` ? T : never
+
+export type FailedStates = EndsWithFailed<AsyncIssuanceEntity['state']>
+
 const indexFor = (fields: [keyof AsyncIssuanceEntity]) => fields
 
 @Entity('async_issuance')
@@ -50,10 +54,7 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
   issuanceId!: string | null
 
   @Column({ type: 'nvarchar', default: 'pending' })
-  state!: 'pending' | 'contacted' | 'issued' | 'failed' | 'cancelled'
-
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
-  failureReason!: string | null
+  state!: 'pending' | 'contacted' | 'contact-failed' | 'issued' | 'issuance-failed' | 'cancelled'
 
   @OneToMany(() => CommunicationEntity, (communication) => communication.asyncIssuance)
   communications!: Promise<CommunicationEntity[]>
@@ -62,7 +63,8 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
     if (this.state === 'issued') return AsyncIssuanceRequestStatus.Issued
     if (this.state === 'cancelled') return AsyncIssuanceRequestStatus.Cancelled
     if (this.expiresOn < new Date()) return AsyncIssuanceRequestStatus.Expired
-    if (this.state === 'failed') return AsyncIssuanceRequestStatus.Failed
+    if (this.state === 'contact-failed') return AsyncIssuanceRequestStatus.Failed
+    if (this.state === 'issuance-failed') return AsyncIssuanceRequestStatus.Failed
     return AsyncIssuanceRequestStatus.Pending
   }
 
@@ -70,24 +72,20 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
     return convertAsyncIssuanceExpiryDaysToRequestExpiry(this.expiryPeriodInDays)
   }
 
-  public failed(failureReason: string) {
-    this.state = 'failed'
-    this.failureReason = failureReason
+  public failed(reason: FailedStates) {
+    this.state = reason
   }
 
   public issued(issuance: IssuanceEntity) {
     this.state = 'issued'
     this.issuanceId = issuance.id
-    this.failureReason = null
   }
 
   public canceled() {
     this.state = 'cancelled'
-    this.failureReason = null
   }
 
   public contacted() {
     this.state = 'contacted'
-    this.failureReason = null
   }
 }

@@ -37,6 +37,11 @@ export const resolvers: Resolvers = {
     identity: async (parent, _, { dataLoaders }) => dataLoaders.identities.load(parent.identityId),
     contract: async (parent, _, { dataLoaders }) => dataLoaders.contracts.load(parent.contractId),
     issuance: async (parent, _, { dataLoaders }) => (parent.issuanceId ? dataLoaders.issuances.load(parent.issuanceId) : null),
+    failureReason: (parent) => {
+      if (parent.state === 'contact-failed') return 'Failed to contact the identity'
+      if (parent.state === 'issuance-failed') return 'Failed to issue the credential'
+      return null
+    },
     ...createdByUpdatedBy,
   },
   AsyncIssuanceRequestResponse: {

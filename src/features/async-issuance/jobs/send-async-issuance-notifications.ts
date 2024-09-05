@@ -25,7 +25,7 @@ export const sendAsyncIssuanceNotificationsJobHandler: JobHandler<SendAsyncIssua
       await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
         const repository = entityManager.getRepository(AsyncIssuanceEntity)
         const asyncIssuance = await repository.findOneByOrFail({ id: asyncIssuanceRequestId })
-        asyncIssuance.failed('Failed to send notification')
+        asyncIssuance.failed('contact-failed')
         await repository.save(asyncIssuance)
 
         if (err instanceof CommunicationError) {
