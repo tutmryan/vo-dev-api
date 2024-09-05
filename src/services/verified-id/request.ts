@@ -12,7 +12,7 @@ import type {
   PresentationResponse,
   RequestErrorResponse,
 } from '../../generated/graphql'
-import { throwBestResponseErrorInfo } from './utils'
+import { findBestResponseErrorInfo } from './utils'
 
 type RequestServiceOptions = HttpClientOptions<BaseContext> & {
   issuanceCallbackUrl: string
@@ -95,7 +95,9 @@ export class VerifiedIdRequestService extends HttpClient<BaseContext> {
     } catch (error: any) {
       const { message, ...rest } = error
       this.options.logger?.error('Error creating issuance request', { message, ...rest })
-      throwBestResponseErrorInfo(error)
+      const bestError = findBestResponseErrorInfo(error)
+      if ('requestId' in bestError) return bestError
+      throw bestError
     }
   }
 
@@ -127,7 +129,9 @@ export class VerifiedIdRequestService extends HttpClient<BaseContext> {
     } catch (error: any) {
       const { message, ...rest } = error
       this.options.logger?.error('Error creating presentation request', { message, ...rest })
-      throwBestResponseErrorInfo(error)
+      const bestError = findBestResponseErrorInfo(error)
+      if ('requestId' in bestError) return bestError
+      throw bestError
     }
   }
 }

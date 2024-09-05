@@ -27,6 +27,9 @@ export async function CreateIssuanceRequestForAsyncIssuanceCommand(
     { ...asyncIssuance, includeQRCode: true, photoCaptureRequestId: user.limitedAsyncIssuanceData.photoCaptureRequestId, asyncIssuanceKey },
   ])
 
+  // if the response is RequestErrorResponse, return it immediately
+  if ('error' in response) return response
+
   // persist the issuance request id for subsequent retrieval
   if ('requestId' in response) {
     user.limitedAsyncIssuanceData.issuanceRequestId = response.requestId

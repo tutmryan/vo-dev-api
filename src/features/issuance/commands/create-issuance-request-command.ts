@@ -130,6 +130,9 @@ export async function CreateIssuanceRequestCommand(
   // send it
   const response = await request.createIssuanceRequest(issuanceRequest)
 
+  // if the response is RequestErrorResponse, return it immediately
+  if ('error' in response) return response
+
   // if this was a photo capture, remove the cache, as the photo data is designed to be used a single time
   if (photoCaptureRequestId) await deletePhotoCaptureRequest(photoCaptureRequestId)
 

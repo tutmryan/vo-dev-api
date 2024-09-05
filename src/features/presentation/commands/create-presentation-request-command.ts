@@ -78,6 +78,9 @@ export async function CreatePresentationRequestCommand(
   // send it
   const response = await verifiedIdRequest.createPresentationRequest({ ...presentationRequest, authority: platformIssuerDid })
 
+  // if the response is RequestErrorResponse, return it immediately
+  if ('error' in response) return response
+
   // cache presentation details for use in the callback
   const requestDetails: PresentationRequestDetails = {
     requestedById: user.userEntity.id.toUpperCase(),
