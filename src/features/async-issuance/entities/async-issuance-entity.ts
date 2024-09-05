@@ -59,10 +59,10 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
   communications!: Promise<CommunicationEntity[]>
 
   get status(): AsyncIssuanceRequestStatus {
+    if (this.state === 'issued') return AsyncIssuanceRequestStatus.Issued
     if (this.state === 'cancelled') return AsyncIssuanceRequestStatus.Cancelled
     if (this.expiresOn < new Date()) return AsyncIssuanceRequestStatus.Expired
     if (this.state === 'failed') return AsyncIssuanceRequestStatus.Failed
-    if (this.state === 'issued') return AsyncIssuanceRequestStatus.Issued
     return AsyncIssuanceRequestStatus.Pending
   }
 
