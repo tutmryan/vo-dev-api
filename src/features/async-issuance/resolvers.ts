@@ -1,4 +1,4 @@
-import { dispatch, query } from '../../cqs'
+import { dispatch, dispatchMultiTransactional, query } from '../../cqs'
 import { type Resolvers } from '../../generated/graphql'
 import { createdByUpdatedBy } from '../users/resolvers'
 import { CancelAsyncIssuanceRequestCommand } from './commands/cancel-async-issuance-request-command'
@@ -27,7 +27,7 @@ export const resolvers: Resolvers = {
     resendAsyncIssuanceNotifications: (_, { asyncIssuanceRequestIds }, context) =>
       dispatch(context, ResendAsyncIssuanceNotificationsCommand, asyncIssuanceRequestIds),
     resendAsyncIssuanceNotification: (_, { asyncIssuanceRequestId }, context) =>
-      dispatch(context, ResendAsyncNotificationCommand, asyncIssuanceRequestId),
+      dispatchMultiTransactional(context, ResendAsyncNotificationCommand, asyncIssuanceRequestId),
     cancelAsyncIssuanceRequest: (_, { asyncIssuanceRequestId }, context) =>
       dispatch(context, CancelAsyncIssuanceRequestCommand, asyncIssuanceRequestId),
     cancelAsyncIssuanceRequests: (_, { asyncIssuanceRequestIds }, context) =>
