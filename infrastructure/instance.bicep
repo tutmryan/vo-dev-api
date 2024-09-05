@@ -479,7 +479,10 @@ param redisCacheFamily string
 param redisCacheCapacity int
 
 var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
-var actionGroupAlertId = resourceId(sharedResourceGroupName,'Microsoft.Insights/actionGroups', 'VO-Alerts')
+
+@description('The shared action group for alerts, if action group for alerts has not been set up yet this param value will be empty')
+param actionGroupAlertName string
+var actionGroupAlertId = resourceId(sharedResourceGroupName,'Microsoft.Insights/actionGroups', actionGroupAlertName)
 
 resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   name: '${resourcePrefix}-redis-${uniqueSuffix}'
@@ -532,8 +535,8 @@ resource redisCacheDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01
   }
 }
 
-resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
-  name: 'VO Redis Cache Alert'
+resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if(!empty(actionGroupAlertName)){
+  name: '${resourcePrefix}-redis-metric-alert'
   location: 'global'
   properties: {
     description: 'Triggers when the redis cache reaches critical levels'
@@ -1123,31 +1126,28 @@ resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
   }
 }
 
-resource apiAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
+resource apiAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
   name: '${resourcePrefix}-api-availability-alert'
   location: 'global'
+  tags: {
+    'hidden-link:${apiAppInsights.id}': 'Resource'
+    'hidden-link:${apiAvailabilityTest.id}': 'Resource'
+  }
   properties: {
     description: 'Triggers when API healthchecks fails'
     severity: 0
     enabled: true
     scopes: [
       apiAppInsights.id
+      apiAvailabilityTest.id
     ]
     evaluationFrequency: 'PT5M'
     windowSize: 'PT5M'
     criteria: {
-      'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
-      allOf: [
-        {
-          name: 'API Availability Percentage Check'
-          criterionType: 'StaticThresholdCriterion'
-          metricName: 'availabilityResults/AvailabilityPercentage'
-          metricNamespace: 'microsoft.insights/components'
-          operator: 'LessThan'
-          threshold: 80 // In practice this means within a 5 minute period, if more than 1 of these checks from any of the 8 locations fails the alert will trigger.
-          timeAggregation: 'Average'
-        }
-      ]
+      'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
+      webTestId: apiAvailabilityTest.id
+      componentId: apiAppInsights.id
+      failedLocationCount: 6
     }
     actions: [
       {

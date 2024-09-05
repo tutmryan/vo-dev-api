@@ -136,7 +136,6 @@ inputs:
     description: The client secret of the home tenant VID service app registration
     required: true
 
-
   additional-auth-tenant-ids:
     description: JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant
 outputs:
@@ -279,6 +278,15 @@ runs:
         LIMITED-ASYNC-ISSUANCE-SECRET:hex:16
         PRIVATE-STORAGE-ENCRYPTION-KEY:hex:32
 
+    - name: Check if a action group for alerts has been created
+      id: check-action-group-alert-exists
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/check-if-action-group-exist.ps1
+        -ActionGroupName 'VO-alerts'
+        -SharedResourceGroupName '${{ inputs.shared-resource-group-name }}'
+        -SubscriptionId '${{ inputs.azure-subscription-id }}'
+
     - name: Instance infrastructure
       id: instance-infra
       uses: azure/arm-deploy@v1
@@ -328,6 +336,7 @@ runs:
           identityIssuers="${{ inputs.identity-issuers }}"
           platformConsumerApps="${{ inputs.platform-consumer-apps }}"
           additionalAuthTenantIds="${{ inputs.additional-auth-tenant-ids }}"
+          actionGroupAlertName="${{ steps.check-action-group-alert-exists.outputs.actionGroupName }}"
 
     - name: Log in to Azure again after potential long deployment
       uses: azure/login@v2

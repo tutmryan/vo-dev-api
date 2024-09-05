@@ -270,7 +270,9 @@ The deployment service principal needs to be removed from the Azure SQL administ
       - Resource group: vo-[nonprd-]platform-shared-infra
       - Region: Global
       - Action group name: VO-Alerts
-      - Display Name: VO Alerts
+      - Display Name: VO Alerts [NP]
+
+      _Note: Display name has 12 character limit_
    2. Notifications:
       - Notification type: Email/SMS message/Push/Voice
       - Enter the email where alerts will be sent
