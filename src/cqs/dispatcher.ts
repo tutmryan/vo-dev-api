@@ -47,8 +47,7 @@ export const dispatchMultiTransactional = async <T extends MultiTransactionalCom
         if (user) {
           addUserToManager(entityManager, user.userEntity.id)
         }
-
-        const ctx: CommandContext = {
+        return await fn({
           user,
           entityManager,
           logger,
@@ -56,9 +55,7 @@ export const dispatchMultiTransactional = async <T extends MultiTransactionalCom
           dataLoaders,
           requestInfo,
           contextType: 'command',
-        }
-
-        return await fn(ctx)
+        })
       })
     },
   }
