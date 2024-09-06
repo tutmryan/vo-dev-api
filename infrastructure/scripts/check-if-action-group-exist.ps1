@@ -21,6 +21,7 @@ try {
   }
 }
 catch {
-  Write-Output "The action group '$ActionGroupName' does not exist in the resource group '$SharedResourceGroupName' under the subscription '$SubscriptionId'."
-  Write-Output "Please create the action group manually and refer to the 'shared-infra-setup.md' documentation for detailed instructions."
+  $errorMessage = $_.Exception.Message
+  Write-Output "$($errorMessage)"
+  Write-Output "Please create the action group '$($ActionGroupName)' manually and refer to the 'shared-infra-setup.md' documentation for detailed instructions."
 }
