@@ -13,11 +13,14 @@ param(
   $SubscriptionId
 )
 
-$actionGroup = Get-AzActionGroup -SubscriptionId $SubscriptionId -ResourceGroupName $SharedResourceGroupName -Name $ActionGroupName
-
-if ($null -ne $actionGroup) {
-    Write-Output "Action Group Exists: $($actionGroup.Name)"
+try {
+  $actionGroup = Get-AzActionGroup -SubscriptionId $SubscriptionId -ResourceGroupName $SharedResourceGroupName -Name $ActionGroupName -ErrorAction Stop
+  if ($null -ne $actionGroup) {
+    Write-Output "Action group '$($actionGroup.Name)' was found in the resource group '$($SharedResourceGroupName)'."
     Write-Output "actionGroupName=$($actionGroup.Name)" >> $Env:GITHUB_OUTPUT
-} else {
-    Write-Output "Action Group $($actionGroup.Name) does not exist."
+  }
+}
+catch {
+  Write-Output "The action group '$ActionGroupName' does not exist in the resource group '$SharedResourceGroupName' under the subscription '$SubscriptionId'."
+  Write-Output "Please create the action group manually and refer to the 'shared-infra-setup.md' documentation for detailed instructions."
 }
