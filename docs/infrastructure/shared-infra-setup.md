@@ -266,21 +266,25 @@ The deployment service principal needs to be removed from the Azure SQL administ
       - Threshold value: 70
       - Frequency of evaluation: Every 1 minutes Lookback period: 5 minutes
 5. Under Action Group, select + Create action group.
+
    1. Basics:
+
       - Resource group: vo-[nonprd-]platform-shared-infra
       - Region: Global
-      - Action group name: VO-Alerts
+      - Action group name: vo-[nonprd-]alerts
       - Display Name: VO Alerts [NP]
 
       _Note: Display name has 12 character limit_
+
    2. Notifications:
       - Notification type: Email/SMS message/Push/Voice
       - Enter the email where alerts will be sent
    3. Review and create
+
 6. Under details.
-   - Resource group: vo-platform-shared-infra
+   - Resource group: vo-[nonprd-]platform-shared-infra
    - Severity: critical
-   - Alert rule name: VO SQL Elastic Pool Alert
+   - Alert rule name: VO SQL Elastic Pool [(non prod)] Alert
    - Severity: critical
 
 ## Create alerts for the App Service Plan
@@ -305,11 +309,11 @@ The deployment service principal needs to be removed from the Azure SQL administ
       - Unit: Count
       - Threshold value: 100
       - Frequency of evaluation: Every 1 minutes Lookback period: 5 minutes
-5. Under Action Group, select previously created VO Alerts.
+5. Under Action Group, select previously created vo-[nonprd-]alerts.
 6. Under details.
-   - Resource group: vo-platform-shared-infra
+   - Resource group: vo-[nonprd-]platform-shared-infra
    - Severity: critical
-   - Alert rule name: Verified Orchestration App Service Plan 1 (non prod) Alert
+   - Alert rule name: Verified Orchestration App Service Plan 1 [(non prod)] Alert
    - Severity: critical
 7. Repeat these steps for each App Service Plan.
 

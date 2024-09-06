@@ -283,7 +283,7 @@ runs:
       shell: pwsh
       run: >-
         ./infrastructure/scripts/check-if-action-group-exist.ps1
-        -ActionGroupName 'VO-alerts'
+        -ActionGroupName '${{ inputs.shared-action-alert-group-name }}'
         -SharedResourceGroupName '${{ inputs.shared-resource-group-name }}'
         -SubscriptionId '${{ inputs.azure-subscription-id }}'
 
