@@ -16,7 +16,10 @@ export async function setVerificationCode(asyncIssuanceRequestId: string, verifi
 export async function redeemVerificationCode(asyncIssuanceRequestId: string, verificationCode: string): Promise<boolean> {
   const code = await verificationCache.get(asyncIssuanceRequestId)
   const isValid = code === verificationCode
-  if (isValid) await verificationCache.delete(asyncIssuanceRequestId)
+  if (isValid) {
+    await verificationCache.delete(asyncIssuanceRequestId)
+    await clearVerificationThrottleForIssuance(asyncIssuanceRequestId)
+  }
   return isValid
 }
 
@@ -49,3 +52,25 @@ export async function deleteLimitedAsyncIssuanceData(asyncIssuanceKey: string) {
 }
 
 export const getLimitedAsyncIssuanceKey = (token: string) => createKey(token, limitedAsyncIssuance.secret)
+
+const verificationThrottleSeconds = 120 - 1 // 2 minutes - 1 second for buffer
+const verificationThrottleCache = newCacheSection('verificationThrottle')
+function getVerificationThrottleKey(asyncIssuanceId: string) {
+  return `asyncIssuanceVerification:${asyncIssuanceId}`
+}
+
+export async function throttleVerificationForIssuance(asyncIssuanceId: string) {
+  const throttleKey = getVerificationThrottleKey(asyncIssuanceId)
+  await verificationThrottleCache.set(throttleKey, true.toString(), { ttl: verificationThrottleSeconds })
+}
+
+export async function clearVerificationThrottleForIssuance(asyncIssuanceId: string) {
+  const throttleKey = getVerificationThrottleKey(asyncIssuanceId)
+  await verificationThrottleCache.delete(throttleKey)
+}
+
+export async function isAsyncIssuanceVerificationThrottled(asyncIssuanceId: string) {
+  const throttleKey = getVerificationThrottleKey(asyncIssuanceId)
+  const throttleEntry = await verificationThrottleCache.get(throttleKey)
+  return !!throttleEntry
+}

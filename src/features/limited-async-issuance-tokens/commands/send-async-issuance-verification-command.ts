@@ -1,14 +1,10 @@
-import { codeExpiryMinutes, setVerificationCode } from '..'
-import { newCacheSection } from '../../../cache'
+import { codeExpiryMinutes, isAsyncIssuanceVerificationThrottled, setVerificationCode, throttleVerificationForIssuance } from '..'
 import type { CommandContext } from '../../../cqs'
 import type { SendAsyncIssuanceVerificationResponse } from '../../../generated/graphql'
 import { AsyncIssuanceRequestStatus } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { randomDigits } from '../../../util/random-digits'
 import { AsyncIssuanceEntity } from '../../async-issuance/entities/async-issuance-entity'
-
-const verificationThrottleSeconds = 120 - 1 // 2 minutes - 1 second for buffer
-const verificationThrottleCache = newCacheSection('verificationThrottle')
 
 const canIssueStatuses = [AsyncIssuanceRequestStatus.Pending, AsyncIssuanceRequestStatus.Failed]
 
@@ -31,9 +27,8 @@ export async function SendAsyncIssuanceVerificationCommand(
   const verification = asyncIssuanceRequest.contact.verification ?? asyncIssuanceRequest.contact.notification
 
   // throttle subsequent verification, if necessary
-  const throttleKey = `asyncIssuanceVerification:${entity.identityId}`
-  const shouldThrottle = await verificationThrottleCache.get(throttleKey)
-  if (shouldThrottle) {
+  const isThrottled = await isAsyncIssuanceVerificationThrottled(entity.id)
+  if (isThrottled) {
     this.logger.warn(`Throttling verification for async issuance: ${entity.id}`)
     return { method: verification.method }
   }
@@ -56,8 +51,8 @@ export async function SendAsyncIssuanceVerificationCommand(
     entityManager,
   )
 
-  // set throttle entry
-  await verificationThrottleCache.set(throttleKey, true.toString(), { ttl: verificationThrottleSeconds })
+  // throttle further verifications
+  await throttleVerificationForIssuance(entity.id)
 
   return { method: verification.method }
 }
