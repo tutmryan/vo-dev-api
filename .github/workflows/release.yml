@@ -291,27 +291,15 @@ jobs:
           - instance: sandbox.barhead
             resourceGroup: vo-sandbox-barhead-instance
             resourcePrefix: vo-sandbox-barhead
-          - instance: sandbox.thoughtworksau
-            resourceGroup: vo-sandbox-thoughtworksau-instance
-            resourcePrefix: vo-sandbox-thoughtworksau
-          - instance: sandbox.mantel
-            resourceGroup: vo-sandbox-mantel-instance
-            resourcePrefix: vo-sandbox-mantel
           - instance: sandbox.alyve
             resourceGroup: vo-sandbox-alyve-instance
             resourcePrefix: vo-sandbox-alyve
-          - instance: sandbox.anz
-            resourceGroup: vo-sandbox-anz-instance
-            resourcePrefix: vo-sandbox-anz
           - instance: sandbox.scw
             resourceGroup: vo-sandbox-scw-instance
             resourcePrefix: vo-sandbox-scw
           - instance: sandbox.cybernexus
             resourceGroup: vo-sandbox-cybernexus-instance
             resourcePrefix: vo-sandbox-cybernexus
-          - instance: sandbox.devops1
-            resourceGroup: vo-sandbox-devops1-instance
-            resourcePrefix: vo-sandbox-devops1
           - instance: sandbox.openlearning
             resourceGroup: vo-sandbox-openlearning-instance
             resourcePrefix: vo-sandbox-openlearning
