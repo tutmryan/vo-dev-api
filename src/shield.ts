@@ -185,6 +185,9 @@ export const rules: ShieldSchema<Resolvers> = {
   AsyncIssuanceTokenResponse: {
     '*': allow,
   },
+  SendAsyncIssuanceVerificationResponse: {
+    '*': allow,
+  },
 }
 export const permissions = wrappedShield(rules)
 
