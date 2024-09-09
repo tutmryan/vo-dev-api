@@ -1784,7 +1784,7 @@ export type Mutation = {
    *
    * The verification code can then be used to acquire a token for issuance.
    */
-  sendAsyncIssuanceVerification?: Maybe<Scalars['Void']['output']>;
+  sendAsyncIssuanceVerification: SendAsyncIssuanceVerificationResponse;
   /** Updates an existing pending approval request. */
   updateApprovalRequest?: Maybe<Scalars['Void']['output']>;
   /**
@@ -2809,6 +2809,13 @@ export type RequestedCredentialSpecificationInput = {
   credentialType: Scalars['String']['input'];
 };
 
+/** The response for sending an async issuance verification code. */
+export type SendAsyncIssuanceVerificationResponse = {
+  __typename?: 'SendAsyncIssuanceVerificationResponse';
+  /** The method by which the verification code was sent. */
+  method: ContactMethod;
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   /** Returns event data when the background job progresses from being queued to completed or failed */
@@ -3678,6 +3685,7 @@ export type ResolversTypes = {
   RequestedConfiguration: ResolverTypeWrapper<RequestedConfiguration>;
   RequestedCredential: ResolverTypeWrapper<RequestedCredential>;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
+  SendAsyncIssuanceVerificationResponse: ResolverTypeWrapper<SendAsyncIssuanceVerificationResponse>;
   Subscription: ResolverTypeWrapper<{}>;
   Template: ResolverTypeWrapper<TemplateEntity>;
   TemplateDisplayClaim: ResolverTypeWrapper<TemplateDisplayClaim>;
@@ -3835,6 +3843,7 @@ export type ResolversParentTypes = {
   RequestedConfiguration: RequestedConfiguration;
   RequestedCredential: RequestedCredential;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
+  SendAsyncIssuanceVerificationResponse: SendAsyncIssuanceVerificationResponse;
   Subscription: {};
   Template: TemplateEntity;
   TemplateDisplayClaim: TemplateDisplayClaim;
@@ -4265,7 +4274,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   revokeIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeIssuancesArgs, 'ids'>>;
   revokeUserIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeUserIssuancesArgs, 'userId'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
-  sendAsyncIssuanceVerification?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationSendAsyncIssuanceVerificationArgs, 'asyncIssuanceRequestId'>>;
+  sendAsyncIssuanceVerification?: Resolver<ResolversTypes['SendAsyncIssuanceVerificationResponse'], ParentType, ContextType, RequireFields<MutationSendAsyncIssuanceVerificationArgs, 'asyncIssuanceRequestId'>>;
   updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
   updateAsyncIssuanceContact?: Resolver<ResolversTypes['AsyncIssuanceContact'], ParentType, ContextType, RequireFields<MutationUpdateAsyncIssuanceContactArgs, 'asyncIssuanceRequestId' | 'contact'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
@@ -4485,6 +4494,11 @@ export type RequestedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type SendAsyncIssuanceVerificationResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SendAsyncIssuanceVerificationResponse'] = ResolversParentTypes['SendAsyncIssuanceVerificationResponse']> = {
+  method?: Resolver<ResolversTypes['ContactMethod'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type SubscriptionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
   backgroundJobEvent?: SubscriptionResolver<ResolversTypes['BackgroundJobEventData'], "backgroundJobEvent", ParentType, ContextType, Partial<SubscriptionBackgroundJobEventArgs>>;
   issuanceEvent?: SubscriptionResolver<ResolversTypes['IssuanceEventData'], "issuanceEvent", ParentType, ContextType, Partial<SubscriptionIssuanceEventArgs>>;
@@ -4675,6 +4689,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   RequestInnerError?: RequestInnerErrorResolvers<ContextType>;
   RequestedConfiguration?: RequestedConfigurationResolvers<ContextType>;
   RequestedCredential?: RequestedCredentialResolvers<ContextType>;
+  SendAsyncIssuanceVerificationResponse?: SendAsyncIssuanceVerificationResponseResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
   Template?: TemplateResolvers<ContextType>;
   TemplateDisplayClaim?: TemplateDisplayClaimResolvers<ContextType>;

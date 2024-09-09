@@ -15,13 +15,23 @@ type AsyncIssuanceTokenResponse {
   photoCaptureRequestId: String
 }
 
+"""
+The response for sending an async issuance verification code.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type SendAsyncIssuanceVerificationResponse {
+  """
+  The method by which the verification code was sent.
+  """
+  method: ContactMethod!
+}
+
 extend type Mutation {
   """
   Sends a verification code to the issuee.
 
   The verification code can then be used to acquire a token for issuance.
   """
-  sendAsyncIssuanceVerification(asyncIssuanceRequestId: UUID!): Void
+  sendAsyncIssuanceVerification(asyncIssuanceRequestId: UUID!): SendAsyncIssuanceVerificationResponse!
 
   """
   Acquires a token for issuance using the verification code.
