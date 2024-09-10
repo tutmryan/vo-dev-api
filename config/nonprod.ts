@@ -2,6 +2,9 @@ import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 
 const config: DeepPartial<Config> = {
+  sms: {
+    sid: 'SKe71ebe72ff10f44a40658f32de020693',
+  },
   email: {
     templates: {
       issuance: 'd-eec8b1882af84250b18638e56da3b44c',

@@ -51,6 +51,9 @@ const config: DeepPartial<Config> = {
     },
   },
   email,
+  sms: {
+    sid: 'SK6f953274aa24929f409245f865b655e9',
+  },
   auth: {
     bearer: {
       verifyOptions: {

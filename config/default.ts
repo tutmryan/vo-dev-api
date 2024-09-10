@@ -38,8 +38,8 @@ const config: DeepPartial<Config> = {
     asyncIssuanceContainer: 'async-issuance',
   },
   sms: {
-    sid: 'AC860727ab860a86187f00a15bb05bd812',
-    from: '+15709124097',
+    accountSid: 'AC860727ab860a86187f00a15bb05bd812',
+    from: '+61483984493',
   },
   email: {
     from: {
