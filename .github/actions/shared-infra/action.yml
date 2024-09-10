@@ -46,9 +46,7 @@ runs:
         deploymentName: ${{env.NOW}}-shared-infra-github-actions
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/shared.bicep
-        parameters: |
-          ./infrastructure/parameters/shared.${{ inputs.infra-environment }}.bicepparam
-          actionGroupAlertEmail=${{ inputs.alerts-email }}
+        parameters: ./infrastructure/parameters/shared.${{ inputs.infra-environment }}.bicepparam actionGroupAlertEmail=${{ inputs.alerts-email }}
 
     - name: 'Create database service principal setup scripts'
       shell: bash
