@@ -15,7 +15,7 @@ import { FaceCheckPhotoSupport } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
-import { validateIssuanceClaims } from '../../contracts/claims'
+import { validateIssuanceClaims, validateIssuanceClaimsIncludeRequiredContractClaims } from '../../contracts/claims'
 import { createOrUpdateIdentity } from '../../identity'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
@@ -49,6 +49,7 @@ export async function CreateAsyncIssuanceRequestCommand(
     try {
       const { contractId, identityId, identity, claims, faceCheckPhoto: faceCheckPhotoInput, photoCapture } = asyncIssuanceInput
 
+      // validate issuance claims (excluding contract claims)
       validateIssuanceClaims(claims)
 
       // find the contract
@@ -56,6 +57,9 @@ export async function CreateAsyncIssuanceRequestCommand(
       invariant(contract, 'Contract could not be found')
       invariant(contract.externalId, 'Contract must be provisioned before issuance')
       invariant(!contract.isDeprecated, 'Contract must not be deprecated')
+
+      // validate that the provided claims include the required contract claims
+      validateIssuanceClaimsIncludeRequiredContractClaims(claims, contract.display.claims)
 
       // find the identity if specified by ID
       if (identityId) {

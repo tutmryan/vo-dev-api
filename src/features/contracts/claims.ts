@@ -68,3 +68,17 @@ export const validateContractClaims = (
 ): void => {
   if (claims && claims.some(({ claim }) => standardClaims.includes(claim as StandardClaims))) throw new Error(standardClaimsErrorMessage)
 }
+
+/**
+ * Throws an error if required contract claims are not included in the issuance claims.
+ * Note: This function is only intended to be used for upfront validation of async issuance requests, since actual issuances are validated according to the published contract by the Microsoft VID service.
+ */
+export const validateIssuanceClaimsIncludeRequiredContractClaims = (
+  claims?: IssuanceRequestInput['claims'] | AsyncIssuanceRequestInput['claims'],
+  contractClaims?: ContractDisplayModelInput['claims'] | CreateUpdateTemplateDisplayModelInput['claims'],
+): void => {
+  const requiredClaims = contractClaims?.filter(({ value }) => value === undefined)
+  if (!requiredClaims) return
+  const missingClaims = requiredClaims.filter(({ claim }) => !claims || !claims[claim])
+  if (missingClaims.length > 0) throw new Error(`Claims must include: ${missingClaims.map(({ claim }) => claim).join(', ')}`)
+}
