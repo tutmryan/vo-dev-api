@@ -10,6 +10,7 @@ permissions:
   contents: read
 
 jobs:
+
   ci-api:
     name: CI API
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
@@ -192,8 +193,8 @@ jobs:
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
           face-check-enabled: ${{ vars.FACE_CHECK_ENABLED }}
-          identity-issuers: '${{ vars.IDENTITY_ISSUERS }}'
-          platform-consumer-apps: '${{ vars.PLATFORM_CONSUMER_APPS }}'
+          identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
+          platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 
           azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
@@ -219,7 +220,7 @@ jobs:
           redis-cache-family: C
           redis-cache-capacity: 0
 
-          cors-origin: '${{ vars.CORS_ORIGIN }}'
+          cors-origin: "${{ vars.CORS_ORIGIN }}"
           sms-secret: ${{ secrets.NON_PROD_SMS_SECRET }}
           email-api-key: ${{ secrets.NON_PROD_EMAIL_API_KEY }}
 
@@ -238,7 +239,7 @@ jobs:
           home-tenant-authority-id: ${{ vars.HOME_TENANT_AUTHORITY_ID }}
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
-          additional-auth-tenant-ids: '${{ vars.ADDITIONAL_AUTH_TENANT_IDS }}'
+          additional-auth-tenant-ids: "${{ vars.ADDITIONAL_AUTH_TENANT_IDS }}"
       - name: Instance SQL database audit
         id: instance-sql-db-audit
         uses: ./github-actions/sql-db-audit
@@ -352,8 +353,8 @@ jobs:
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
           face-check-enabled: ${{ vars.FACE_CHECK_ENABLED }}
-          identity-issuers: '${{ vars.IDENTITY_ISSUERS }}'
-          platform-consumer-apps: '${{ vars.PLATFORM_CONSUMER_APPS }}'
+          identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
+          platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 
           azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
@@ -379,7 +380,7 @@ jobs:
           redis-cache-family: C
           redis-cache-capacity: 0
 
-          cors-origin: '${{ vars.CORS_ORIGIN }}'
+          cors-origin: "${{ vars.CORS_ORIGIN }}"
 
           sms-secret: ${{ secrets.PROD_SMS_SECRET }}
           email-api-key: ${{ secrets.PROD_EMAIL_API_KEY }}
@@ -399,7 +400,7 @@ jobs:
           home-tenant-authority-id: ${{ vars.HOME_TENANT_AUTHORITY_ID }}
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
-          additional-auth-tenant-ids: '${{ vars.ADDITIONAL_AUTH_TENANT_IDS }}'
+          additional-auth-tenant-ids: "${{ vars.ADDITIONAL_AUTH_TENANT_IDS }}"
       - name: Instance SQL database audit
         id: instance-sql-db-audit
         uses: ./github-actions/sql-db-audit
