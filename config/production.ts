@@ -2,6 +2,9 @@ import type { Config } from '../src/config'
 import type { DeepPartial } from '../src/util/type-helpers'
 
 const config: DeepPartial<Config> = {
+  sms: {
+    sid: 'SK1b652ea9f03bd0cfd005c56d08224a5a',
+  },
   platformTenant: {
     tenantId: '3d804793-53dd-40a2-9d8a-9f67a92fd349',
   },

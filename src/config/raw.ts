@@ -76,6 +76,7 @@ export type Config = {
     clientEncryptionKey: string
   }
   sms: {
+    accountSid: string
     sid: string
     secret: string
     from: string
