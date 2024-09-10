@@ -1033,6 +1033,11 @@ exports[`shield rules are setup correctly 1`] = `
     "*": {
       "rules": []
     }
+  },
+  "SendAsyncIssuanceVerificationResponse": {
+    "*": {
+      "rules": []
+    }
   }
 }"
 `;
