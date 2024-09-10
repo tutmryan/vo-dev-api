@@ -27,6 +27,9 @@ inputs:
   shared-resource-group-name:
     description: Name of the shared resource group
     required: true
+  shared-action-group-alert-name:
+    description: Name of the shared action group for alerts
+    required: true
 
   key-vault-resource-group-name:
     description: The resource group which contains the shared key vault used by Verified ID
@@ -285,7 +288,7 @@ runs:
         ./infrastructure/scripts/check-if-action-group-exist.ps1
         -ActionGroupName '${{ inputs.shared-action-group-alert-name }}'
         -SharedResourceGroupName '${{ inputs.shared-resource-group-name }}'
-        
+
     - name: Instance infrastructure
       id: instance-infra
       uses: azure/arm-deploy@v1
