@@ -6,18 +6,18 @@ param(
 
   [Parameter(Mandatory = $true)]
   [string]
-  $SharedResourceGroupName,
-
-  [Parameter(Mandatory = $true)]
-  [string]
-  $SubscriptionId
+  $SharedResourceGroupName
 )
 
 try {
-  $actionGroup = Get-AzActionGroup -SubscriptionId $SubscriptionId -ResourceGroupName $SharedResourceGroupName -Name $ActionGroupName -ErrorAction Stop
+  $actionGroupJson = az monitor action-group show --resource-group $SharedResourceGroupName --name $ActionGroupName
+  $actionGroup = $actionGroupJson | ConvertFrom-Json
   if ($null -ne $actionGroup) {
-    Write-Output "Action group '$($actionGroup.Name)' was found in the resource group '$($SharedResourceGroupName)'."
-    Write-Output "actionGroupName=$($actionGroup.Name)" >> $Env:GITHUB_OUTPUT
+    Write-Output "Action group '$($actionGroup.name)' was found in the resource group '$($SharedResourceGroupName)'."
+    Write-Output "actionGroupName=$($actionGroup.name)" >> $Env:GITHUB_OUTPUT
+  }
+  else {
+    throw "Action group $($ActionGroupName) not found."
   }
 }
 catch {

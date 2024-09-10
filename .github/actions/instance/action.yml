@@ -285,8 +285,7 @@ runs:
         ./infrastructure/scripts/check-if-action-group-exist.ps1
         -ActionGroupName '${{ inputs.shared-action-group-alert-name }}'
         -SharedResourceGroupName '${{ inputs.shared-resource-group-name }}'
-        -SubscriptionId '${{ inputs.azure-subscription-id }}'
-
+        
     - name: Instance infrastructure
       id: instance-infra
       uses: azure/arm-deploy@v1
