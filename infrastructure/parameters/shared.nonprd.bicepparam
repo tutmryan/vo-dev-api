@@ -12,4 +12,4 @@ param actionGroupAlertName = 'vo-nonprd-alerts'
 param actionGroupAlertShortName = 'VO-Alerts NP'
 param sqlServerElasticPoolAlertName = 'VO SQL Elastic Pool (non-prod) Alert'
 param appServicePlanAlertName = 'VO App Service Plan 1 (non-prod) Alert'
-
+param actionGroupAlertEmail = '' // Will be set by organisation setting
