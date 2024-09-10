@@ -40,3 +40,4 @@ jobs:
           infra-environment: prd
           resource-group-name: vo-platform-shared-infra
           partner-id: ${{ vars.PROD_PARTNER_ID }}
+          alerts-email: ${{ vars.PROD_ALERTS_EMAIL }}

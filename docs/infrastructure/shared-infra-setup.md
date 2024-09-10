@@ -323,7 +323,7 @@ Create an action group that will be used to send alerts via email from the share
 5. Under Action Group: Select the previously created `vo-[nonprd-]alerts`.
 6. Under Details:
    - Resource group: `vo-[nonprd-]platform-shared-infra`
-   - Alert rule name: `Verified Orchestration App Service Plan 1 [(non-prod)] Alert`
+   - Alert rule name: `VO App Service Plan 1 [(non-prod)] Alert`
    - Severity: Critical
 7. Repeat these steps for each App Service Plan.
 
