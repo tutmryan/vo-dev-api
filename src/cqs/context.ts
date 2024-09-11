@@ -6,8 +6,8 @@ export type CommandContext = Readonly<Pick<GraphQLContext, 'user' | 'logger' | '
   readonly contextType: 'command'
 }
 
-export type MultiTransactionalCommandContext = {
-  runInTransaction: <T>(fn: (context: CommandContext) => Promise<T>) => Promise<T>
+export type TransactionalCommandContext = Omit<CommandContext, 'entityManager'> & {
+  inTransaction: <T>(fn: (entityManager: CommandContext['entityManager']) => Promise<T>) => Promise<T>
 }
 
 export type QueryContext = Readonly<Pick<GraphQLContext, 'user' | 'logger' | 'services' | 'dataLoaders'>> & {

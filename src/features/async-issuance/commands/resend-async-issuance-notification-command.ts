@@ -1,34 +1,30 @@
-import type { MultiTransactionalCommandContext } from '../../../cqs'
-import type { CommandContext } from '../../../cqs'
+import type { TransactionalCommandContext } from '../../../cqs'
 import { CommunicationError } from '../../../services/communications-service'
 import { userInvariant } from '../../../util/user-invariant'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 import { sendAsyncIssuanceNotification } from '../notification'
 
 export async function ResendAsyncNotificationCommand(
-  this: MultiTransactionalCommandContext,
+  this: TransactionalCommandContext,
   asyncIssuanceRequestId: string,
 ): Promise<AsyncIssuanceEntity> {
+  const { logger, services, user, inTransaction } = this
+
+  userInvariant(user)
+
   try {
-    return await this.runInTransaction((context: CommandContext) => {
-      userInvariant(context.user)
-      return sendAsyncIssuanceNotification(
-        { logger: context.logger, services: context.services, user: context.user.userEntity },
-        context.entityManager,
-        asyncIssuanceRequestId,
-      )
+    return await inTransaction((entityManager) => {
+      return sendAsyncIssuanceNotification({ logger, services, user: user.userEntity }, entityManager, asyncIssuanceRequestId)
     })
   } catch (error) {
-    await this.runInTransaction(async (context: CommandContext) => {
-      userInvariant(context.user)
-
-      const repository = context.entityManager.getRepository(AsyncIssuanceEntity)
+    await inTransaction(async (entityManager) => {
+      const repository = entityManager.getRepository(AsyncIssuanceEntity)
       const asyncIssuance = await repository.findOneByOrFail({ id: asyncIssuanceRequestId })
       asyncIssuance.failed('contact-failed')
       await repository.save(asyncIssuance)
 
       if (error instanceof CommunicationError) {
-        await context.services.communications.recordCommunicationFailure(error, context.entityManager)
+        await services.communications.recordCommunicationFailure(error, entityManager)
       }
     })
     throw error
