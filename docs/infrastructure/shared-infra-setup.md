@@ -197,7 +197,7 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 
 ## Create a key vault to hold signing keys used Verified ID authorities
 
-1. Navigate to the Azure Portal key vaults blade: <https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.KeyVault%2Fvaults>
+1. Navigate to the Azure Portal key vaults blade: https://portal.azure.com/#view/HubsExtension/BrowseResource/resourceType/Microsoft.KeyVault%2Fvaults
 1. Click on "+ Create"
 1. Select the resource group created in the previous step (e.g. `vo-entra-verified-id-core`)
 1. Pick a name (e.g. `vo-vid-keys-nonprod` for non prod tenant), select the appropriate region, enable purge protection and click "Next" to configure access
@@ -244,96 +244,13 @@ After running the shared infrastructure pipeline, but before deploying any insta
 
 The deployment service principal needs to be removed from the Azure SQL administrators group so that it is no longer a server administrator. If it remains a server administrator, the deployment service principal can connect to any instance databases in the server.
 
-## Create Action Group for Alerts
-
-Create an action group that will be used to send alerts via email from the shared infrastructure resource group and all instance resource groups.
-
-1. Navigate to: Monitor > Alerts.
-2. Select: Action groups > + Create.
-
-   - Basics:
-
-     - Resource group: `vo-[nonprd-]platform-shared-infra`
-     - Region: Global
-     - Action group name: `vo-[nonprd-]alerts`
-     - Display Name: `VO Alerts [NP]`
-
-     _Note: The display name has a 12-character limit._
-
-   - Notifications:
-     - Notification type: Email/SMS message/Push/Voice
-     - Enter the email where the alerts will be sent.
-   - Review and Create: Confirm the details and create the action group.
-
-## Create Alerts for SQL Elastic Pool
-
-1. Navigate to: Monitor > Alerts.
-2. Select: New alert rule.
-3. For the Resource: Select the shared infra SQL Elastic Pool resource.
-4. For Conditions, select:
-   1. Data space used percent:
-      - Operator: Greater than
-      - Aggregation type: Average
-      - Threshold value: 70
-      - Frequency of evaluation: Every 15 minutes
-      - Lookback period: 15 minutes
-   2. CPU percentage:
-      - Operator: Greater than
-      - Aggregation type: Average
-      - Threshold value: 70
-      - Frequency of evaluation: Every 1 minute
-      - Lookback period: 5 minutes
-   3. DTU percentage:
-      - Operator: Greater than
-      - Aggregation type: Average
-      - Threshold value: 70
-      - Frequency of evaluation: Every 1 minute
-      - Lookback period: 5 minutes
-5. Under Action Group: Select the previously created `vo-[nonprd-]alerts`.
-6. Under Details:
-   - Resource group: `vo-[nonprd-]platform-shared-infra`
-   - Alert rule name: `VO SQL Elastic Pool [(non-prod)] Alert`
-   - Severity: Critical
-
-## Create Alerts for the App Service Plan
-
-1. Navigate to: Monitor > Alerts.
-2. Select: New alert rule.
-3. For the Resource: Select the shared infra App Service Plan resource.
-4. For Conditions, select:
-   1. CPU percentage:
-      - Operator: Greater than
-      - Aggregation type: Average
-      - Threshold value: 80
-      - Frequency of evaluation: Every 1 minute
-      - Lookback period: 5 minutes
-   2. Memory percentage:
-      - Operator: Greater than
-      - Aggregation type: Average
-      - Threshold value: 80
-      - Frequency of evaluation: Every 1 minute
-      - Lookback period: 5 minutes
-   3. HTTP Queue Length:
-      - Operator: Greater than
-      - Aggregation type: Average
-      - Unit: Count
-      - Threshold value: 100
-      - Frequency of evaluation: Every 1 minute
-      - Lookback period: 5 minutes
-5. Under Action Group: Select the previously created `vo-[nonprd-]alerts`.
-6. Under Details:
-   - Resource group: `vo-[nonprd-]platform-shared-infra`
-   - Alert rule name: `VO App Service Plan 1 [(non-prod)] Alert`
-   - Severity: Critical
-7. Repeat these steps for each App Service Plan.
-
 ## Warning about changing shared infrastructure (App Service Plan)
 
 Documentation indicates outbound IPs of the App Service can change when the App Service Plan tier changes or when auto-scaling is enabled.
 
 > Because of autoscaling behaviors, the outbound IP can change at any time when running on a Consumption plan or in a Premium plan.
 
-<https://learn.microsoft.com/en-us/azure/azure-functions/ip-addresses?tabs=portal#outbound-ip-address-changes>
+https://learn.microsoft.com/en-us/azure/azure-functions/ip-addresses?tabs=portal#outbound-ip-address-changes
 
 The Redis, SQL, KeyVault firewalls are configured based on the outbound IPs of the App Service at the time of deployment.
 
