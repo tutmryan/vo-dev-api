@@ -1,5 +1,7 @@
 import { dispatch, dispatchMultiTransactional, query } from '../../cqs'
 import { type Resolvers } from '../../generated/graphql'
+import { logger } from '../../logger'
+import { assertExhaustive } from '../../util/type-helpers'
 import { createdByUpdatedBy } from '../users/resolvers'
 import { CancelAsyncIssuanceRequestCommand } from './commands/cancel-async-issuance-request-command'
 import { CancelAsyncIssuanceRequestsCommand } from './commands/cancel-async-issuance-requests-command'
@@ -8,6 +10,8 @@ import { CreateIssuanceRequestForAsyncIssuanceCommand } from './commands/create-
 import { ResendAsyncNotificationCommand } from './commands/resend-async-issuance-notification-command'
 import { ResendAsyncIssuanceNotificationsCommand } from './commands/resend-async-issuance-notifications-command'
 import { UpdateAsyncIssuanceContactCommand } from './commands/update-async-issuance-contact-command'
+import type { FailedStates } from './entities/async-issuance-entity'
+import { failedStates } from './entities/async-issuance-entity'
 import { FindAsyncIssuanceContactQuery } from './queries/async-issuance-contact-query'
 import { FindAsyncIssuancesQuery } from './queries/find-async-issuances-query'
 
@@ -21,7 +25,7 @@ export const resolvers: Resolvers = {
   Mutation: {
     createAsyncIssuanceRequest: (_, { request }, context) => dispatch(context, CreateAsyncIssuanceRequestCommand, request),
     createIssuanceRequestForAsyncIssuance: (_, { asyncIssuanceRequestId }, context) =>
-      dispatch(context, CreateIssuanceRequestForAsyncIssuanceCommand, asyncIssuanceRequestId),
+      dispatchMultiTransactional(context, CreateIssuanceRequestForAsyncIssuanceCommand, asyncIssuanceRequestId),
     updateAsyncIssuanceContact: (_, { asyncIssuanceRequestId, contact }, context) =>
       dispatch(context, UpdateAsyncIssuanceContactCommand, asyncIssuanceRequestId, contact),
     resendAsyncIssuanceNotifications: (_, { asyncIssuanceRequestIds }, context) =>
