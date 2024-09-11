@@ -321,6 +321,14 @@ export type AsyncIssuanceRequest = {
   /** The issuee identity */
   identity: Identity;
   /**
+   * A flag indicating if the status of the async issuance request is final.
+   *
+   * Items to note:
+   *
+   * - When set to `true`, the status will not change and no further actions can be taken on the async issuance request.
+   */
+  isStatusFinal: Scalars['Boolean']['output'];
+  /**
    * The issuance.
    *
    * Items of note:
@@ -642,6 +650,12 @@ export enum CommunicationPurpose {
   Verification = 'verification'
 }
 
+/** The possible statuses of a communication. */
+export enum CommunicationStatus {
+  Failed = 'failed',
+  Sent = 'sent'
+}
+
 /** Defines the filter criteria used to find communications. */
 export type CommunicationWhere = {
   /** The ID of the async issuance request that the communication is related to. */
@@ -658,6 +672,8 @@ export type CommunicationWhere = {
   sentFrom?: InputMaybe<Scalars['DateTime']['input']>;
   /** The end of the sentAt period to include. */
   sentTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The status of the communication. */
+  status?: InputMaybe<CommunicationStatus>;
 };
 
 /** Provides information about the presented credentials should be validated */
@@ -3578,6 +3594,7 @@ export type ResolversTypes = {
   Communication: ResolverTypeWrapper<CommunicationEntity>;
   CommunicationOrderBy: CommunicationOrderBy;
   CommunicationPurpose: CommunicationPurpose;
+  CommunicationStatus: CommunicationStatus;
   CommunicationWhere: CommunicationWhere;
   ConfigurationValidation: ConfigurationValidation;
   Contact: ResolverTypeWrapper<Contact>;
@@ -3976,6 +3993,7 @@ export type AsyncIssuanceRequestResolvers<ContextType = GraphQLContext, ParentTy
   failureReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
+  isStatusFinal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issuance?: Resolver<Maybe<ResolversTypes['Issuance']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['AsyncIssuanceRequestStatus'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
