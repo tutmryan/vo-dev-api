@@ -9,6 +9,14 @@ enum CommunicationPurpose {
 }
 
 """
+The possible statuses of a communication.
+"""
+enum CommunicationStatus {
+  sent
+  failed
+}
+
+"""
 Record of a communication sent to a recipient.
 """
 type Communication {
@@ -71,6 +79,10 @@ input CommunicationWhere {
   The purpose of the communication.
   """
   purpose: CommunicationPurpose
+  """
+  The status of the communication.
+  """
+  status: CommunicationStatus
 }
 
 """

@@ -1,4 +1,5 @@
 import type { FindOptionsOrder, FindOptionsRelations, FindOptionsWhere } from 'typeorm'
+import { IsNull, Not } from 'typeorm'
 import type { QueryContext } from '../../../cqs'
 import type { Maybe } from '../../../generated/graphql'
 import { CommunicationOrderBy, OrderDirection, type CommunicationWhere } from '../../../generated/graphql'
@@ -23,6 +24,7 @@ export async function FindCommunicationsQuery(
   if (criteria?.asyncIssuanceRequestId) where.asyncIssuanceId = criteria.asyncIssuanceRequestId.toUpperCase()
   if (criteria?.contactMethod) where.contactMethod = criteria.contactMethod
   if (criteria?.purpose) where.purpose = criteria.purpose
+  if (criteria?.status) where.error = criteria.status === 'sent' ? IsNull() : Not(IsNull())
 
   where.sentAt = OptionalRange(criteria?.sentFrom, criteria?.sentTo)
 
