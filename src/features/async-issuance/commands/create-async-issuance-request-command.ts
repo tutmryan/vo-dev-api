@@ -1,20 +1,23 @@
 import { randomUUID } from 'crypto'
+import { isValidPhoneNumber } from 'libphonenumber-js'
 import { omit } from 'lodash'
 import { convertAsyncIssuanceRequestExpiryToDays } from '..'
 import { addToJobQueue } from '../../../background-jobs/queue'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import type {
+  AsyncIssuanceContactInput,
   AsyncIssuanceErrorResponse,
   AsyncIssuanceRequestInput,
   AsyncIssuanceResponse,
   IdentityInput,
   Maybe,
 } from '../../../generated/graphql'
-import { FaceCheckPhotoSupport } from '../../../generated/graphql'
+import { ContactMethod, FaceCheckPhotoSupport } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
+import { isValidEmail } from '../../../util/validation'
 import { validateIssuanceClaims, validateIssuanceClaimsIncludeRequiredContractClaims } from '../../contracts/claims'
 import { createOrUpdateIdentity } from '../../identity'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
@@ -24,6 +27,27 @@ registerFeatureCheck(CreateAsyncIssuanceRequestCommand, async (...[, input]) => 
 const identityInputKey = ({ issuer, identifier }: IdentityInput) => issuer + identifier
 
 const loggableAsyncIssuanceInput = (input: AsyncIssuanceRequestInput) => omit(input, ['contact'])
+
+const invalidPhoneNumberMessage = (contactType: 'notification' | 'verification') =>
+  `Phone number for contact ${contactType} must use international E.164 format`
+
+const invalidEmailMessage = (contactType: 'notification' | 'verification') => `Email address for contact ${contactType} is invalid`
+
+function validateContact({ notification, verification }: AsyncIssuanceContactInput) {
+  if (notification.method === ContactMethod.Email) {
+    if (!isValidEmail(notification.value)) throw new Error(invalidEmailMessage('notification'))
+  } else {
+    if (!isValidPhoneNumber(notification.value)) throw new Error(invalidPhoneNumberMessage('notification'))
+  }
+
+  if (!verification) return
+
+  if (verification.method === ContactMethod.Email) {
+    if (!isValidEmail(verification.value)) throw new Error(invalidEmailMessage('verification'))
+  } else {
+    if (!isValidPhoneNumber(verification.value)) throw new Error(invalidPhoneNumberMessage('verification'))
+  }
+}
 
 export async function CreateAsyncIssuanceRequestCommand(
   this: CommandContext,
@@ -47,7 +71,10 @@ export async function CreateAsyncIssuanceRequestCommand(
   // Validate the input
   for (const [index, asyncIssuanceInput] of requestInput.entries()) {
     try {
-      const { contractId, identityId, identity, claims, faceCheckPhoto: faceCheckPhotoInput, photoCapture } = asyncIssuanceInput
+      const { contractId, identityId, identity, claims, faceCheckPhoto: faceCheckPhotoInput, photoCapture, contact } = asyncIssuanceInput
+
+      // validate contact
+      validateContact(contact)
 
       // validate issuance claims (excluding contract claims)
       validateIssuanceClaims(claims)

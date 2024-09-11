@@ -674,11 +674,7 @@ export type Contact = {
   __typename?: 'Contact';
   /** The method of contact. */
   method: ContactMethod;
-  /**
-   * The value of the contact method.
-   *
-   * For example, if the method is `sms`, the value would be a phone number.
-   */
+  /** The value of the contact method, either an email address or phone number for SMS. */
   value: Scalars['String']['output'];
 };
 
@@ -687,9 +683,10 @@ export type ContactInput = {
   /** The method of contact. */
   method: ContactMethod;
   /**
-   * The value of the contact method.
+   * The value of the contact method, either an email address or phone number for SMS.
    *
-   * For example, if the method is `sms`, the value would be a phone number.
+   * Item of note:
+   * - For phone numbers, the value must be in international E.164 format.
    */
   value: Scalars['String']['input'];
 };
