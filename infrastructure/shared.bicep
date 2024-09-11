@@ -205,3 +205,150 @@ resource appServicePlan1 'Microsoft.Web/serverfarms@2022-03-01' = {
 }
 
 output appServicePlan1Id string = appServicePlan1.id
+
+@description('The name of the shared action group for alerts')
+param actionGroupAlertName string
+
+@description('The display or short name for the shared action group used for alerts (e.g., SMS notifications). Maximum length: 12 characters.')
+param actionGroupAlertShortName string
+
+@description('The email the actionGroupAlert will send alerts to')
+param actionGroupAlertEmail string
+
+resource actionGroupAlert 'Microsoft.Insights/actionGroups@2023-09-01-preview' = {
+  name: actionGroupAlertName
+  location: 'Global'
+  properties: {
+    groupShortName: actionGroupAlertShortName
+    enabled: true
+    emailReceivers: [
+      {
+        name: '${actionGroupAlertName}-EmailAction'
+        emailAddress: actionGroupAlertEmail
+        useCommonAlertSchema: false
+      }
+    ]
+  }
+}
+
+@description('The name of the SQL Server Elastic Pool alert')
+param sqlServerElasticPoolAlertName string
+
+resource sqlServerElasticPoolAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
+  name: sqlServerElasticPoolAlertName
+  location: 'global'
+  properties: {
+    description: 'Triggers alerts when critical thresholds are reached in the SQL Elastic Pool resource.'
+    severity: 0
+    enabled: true
+    scopes: [
+      sqlServerElasticPool.id
+    ]
+    evaluationFrequency: 'PT1M'
+    windowSize: 'PT5M'
+    criteria: {
+      allOf: [
+        {
+          threshold: 70
+          name: 'Storage Percent'
+          metricNamespace: 'Microsoft.Sql/servers/elasticpools'
+          metricName: 'storage_percent'
+          operator: 'GreaterThan'
+          timeAggregation: 'Average'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 70
+          name: 'CPU Percent'
+          metricNamespace: 'Microsoft.Sql/servers/elasticpools'
+          metricName: 'cpu_percent'
+          operator: 'GreaterThan'
+          timeAggregation: 'Average'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 70
+          name: 'DTU Consumption Percent'
+          metricNamespace: 'Microsoft.Sql/servers/elasticpools'
+          metricName: 'dtu_consumption_percent'
+          operator: 'GreaterThan'
+          timeAggregation: 'Average'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+      ]
+      'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
+    }
+    autoMitigate: true
+    targetResourceType: 'Microsoft.Sql/servers/elasticpools'
+    targetResourceRegion: location
+    actions: [
+      {
+        actionGroupId: actionGroupAlert.id
+      }
+    ]
+  }
+}
+
+@description('The name of the app service plan alert')
+param appServicePlanAlertName string
+
+resource appServicePlanAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
+  name: appServicePlanAlertName
+  location: 'global'
+  properties: {
+    description: 'Triggers alerts when critical thresholds are reached in the App Service Plan resource.'
+    severity: 0
+    enabled: true
+    scopes: [
+      appServicePlan1.id
+    ]
+    evaluationFrequency: 'PT1M'
+    windowSize: 'PT5M'
+    criteria: {
+      allOf: [
+        {
+          threshold: 80
+          name: 'CPU Percentage'
+          metricNamespace: 'Microsoft.Web/serverFarms'
+          metricName: 'CpuPercentage'
+          operator: 'GreaterThan'
+          timeAggregation: 'Average'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 80
+          name: 'Memory Percentage'
+          metricNamespace: 'Microsoft.Web/serverFarms'
+          metricName: 'MemoryPercentage'
+          operator: 'GreaterThan'
+          timeAggregation: 'Average'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 100
+          name: 'Http Queue Length'
+          metricNamespace: 'Microsoft.Web/serverFarms'
+          metricName: 'HttpQueueLength'
+          operator: 'GreaterThan'
+          timeAggregation: 'Average'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+      ]
+      'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
+    }
+    autoMitigate: true
+    targetResourceType: 'Microsoft.Web/serverFarms'
+    targetResourceRegion: location
+    actions: [
+      {
+        actionGroupId: actionGroupAlert.id
+      }
+    ]
+  }
+}

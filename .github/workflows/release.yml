@@ -214,6 +214,7 @@ jobs:
 
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           shared-resource-group-name: vo-nonprd-platform-shared-infra
+          shared-action-group-alert-name: vo-nonprd-alerts
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
           redis-cache-sku: Basic
           redis-cache-family: C
@@ -373,6 +374,7 @@ jobs:
 
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           shared-resource-group-name: vo-platform-shared-infra
+          shared-action-group-alert-name: vo-alerts
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
           redis-cache-sku: Basic
           redis-cache-family: C

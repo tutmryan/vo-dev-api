@@ -480,6 +480,10 @@ param redisCacheCapacity int
 
 var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
 
+@description('The shared action group for alerts, if action group for alerts has not been set up yet this param value will be empty')
+param actionGroupAlertName string
+var actionGroupAlertId = resourceId(sharedResourceGroupName,'Microsoft.Insights/actionGroups', actionGroupAlertName)
+
 resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   name: '${resourcePrefix}-redis-${uniqueSuffix}'
   location: location
@@ -526,6 +530,84 @@ resource redisCacheDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01
         category: 'AllMetrics'
         enabled: true
         timeGrain: null
+      }
+    ]
+  }
+}
+
+resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if(!empty(actionGroupAlertName)){
+  name: '${resourcePrefix}-redis-metric-alert'
+  location: 'global'
+  properties: {
+    description: 'Triggers when the redis cache reaches critical levels'
+    severity: 0
+    enabled: true
+    scopes: [
+      redisCache.id
+    ]
+    evaluationFrequency: 'PT1M'
+    windowSize: 'PT5M'
+    criteria: {
+       'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
+      allOf: [
+        {
+          threshold: 80
+          name: 'Server Load'
+          metricNamespace: 'Microsoft.Cache/Redis'
+          metricName: 'serverLoad'
+          operator: 'GreaterThan'
+          timeAggregation: 'Average'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 80
+          name: 'Used Memory Percentage'
+          metricNamespace: 'Microsoft.Cache/Redis'
+          metricName: 'usedmemorypercentage'
+          operator: 'GreaterThan'
+          timeAggregation: 'Average'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 5625
+          name: 'Connected Clients'
+          metricNamespace: 'Microsoft.Cache/Redis'
+          metricName: 'connectedclients'
+          operator: 'GreaterThan'
+          timeAggregation: 'Maximum'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 100000
+          name: 'Cache Read'
+          metricNamespace: 'Microsoft.Cache/Redis'
+          metricName: 'cacheRead'
+          operator: 'GreaterThan'
+          timeAggregation: 'Maximum'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+        {
+          threshold: 80
+          name: 'CPU Percentage'
+          metricNamespace: 'Microsoft.Cache/Redis'
+          metricName: 'percentProcessorTime'
+          operator: 'GreaterThan'
+          timeAggregation: 'Maximum'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+      ]
+    }
+    autoMitigate: true
+    targetResourceType: 'Microsoft.Cache/Redis'
+    targetResourceRegion: location
+    actions: [
+      {
+        actionGroupId: actionGroupAlertId
       }
     ]
   }
@@ -1004,3 +1086,74 @@ resource workbook 'Microsoft.Insights/workbooks@2023-06-01' = {
     sourceId: apiAppInsights.id
   }
 }
+
+resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
+  name: '${resourcePrefix}-api-availability-test'
+  location: location
+  kind: 'standard'
+  tags: {
+    'hidden-link:${apiAppInsights.id}': 'Resource'
+  }
+  properties: {
+    Description: 'Availbility test for the API'
+    Enabled: true
+    Frequency: 300
+    Kind: 'standard'
+    Locations: [
+      { Id: 'emea-au-syd-edge' } // Australia East
+      { Id: 'apac-hk-hkn-azr' } // East Asia
+      { Id: 'apac-sg-sin-azr' } // Southeast Asia
+      { Id: 'emea-nl-ams-azr' } // West Europe
+      { Id: 'emea-gb-db3-azr' } // North Europe
+      { Id: 'us-va-ash-azr' } // East US
+      { Id: 'us-ca-sjc-azr' } // West US
+      { Id: 'latam-br-gru-edge' } // Brazil South
+    ]
+    Name: '${resourcePrefix}-api-availability-webtest'
+    Request: {
+      HttpVerb: 'GET'
+      ParseDependentRequests: false
+      RequestUrl: 'https://${apiAppService.properties.defaultHostName}/health'
+    }
+    RetryEnabled: true
+    SyntheticMonitorId: '${resourcePrefix}-api-availability-webtest'
+    Timeout: 30
+    ValidationRules: {
+      ExpectedHttpStatusCode: 200
+      SSLCertRemainingLifetimeCheck: 7
+      SSLCheck: true
+    }
+  }
+}
+
+resource apiAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
+  name: '${resourcePrefix}-api-availability-alert'
+  location: 'global'
+  tags: {
+    'hidden-link:${apiAppInsights.id}': 'Resource'
+    'hidden-link:${apiAvailabilityTest.id}': 'Resource'
+  }
+  properties: {
+    description: 'Triggers when API healthchecks fails'
+    severity: 0
+    enabled: true
+    scopes: [
+      apiAppInsights.id
+      apiAvailabilityTest.id
+    ]
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT5M'
+    criteria: {
+      'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
+      webTestId: apiAvailabilityTest.id
+      componentId: apiAppInsights.id
+      failedLocationCount: 6
+    }
+    actions: [
+      {
+        actionGroupId:  actionGroupAlertId
+      }
+    ]
+  }
+}
+

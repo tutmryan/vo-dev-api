@@ -27,6 +27,9 @@ inputs:
   shared-resource-group-name:
     description: Name of the shared resource group
     required: true
+  shared-action-group-alert-name:
+    description: Name of the shared action group for alerts
+    required: true
 
   key-vault-resource-group-name:
     description: The resource group which contains the shared key vault used by Verified ID
@@ -135,7 +138,6 @@ inputs:
   home-tenant-vid-service-client-secret:
     description: The client secret of the home tenant VID service app registration
     required: true
-
 
   additional-auth-tenant-ids:
     description: JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant
@@ -279,6 +281,14 @@ runs:
         LIMITED-ASYNC-ISSUANCE-SECRET:hex:16
         PRIVATE-STORAGE-ENCRYPTION-KEY:hex:32
 
+    - name: Check if a action group for alerts has been created
+      id: check-action-group-alert-exists
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/check-if-action-group-exist.ps1
+        -ActionGroupName '${{ inputs.shared-action-group-alert-name }}'
+        -SharedResourceGroupName '${{ inputs.shared-resource-group-name }}'
+
     - name: Instance infrastructure
       id: instance-infra
       uses: azure/arm-deploy@v1
@@ -328,6 +338,7 @@ runs:
           identityIssuers="${{ inputs.identity-issuers }}"
           platformConsumerApps="${{ inputs.platform-consumer-apps }}"
           additionalAuthTenantIds="${{ inputs.additional-auth-tenant-ids }}"
+          actionGroupAlertName="${{ steps.check-action-group-alert-exists.outputs.actionGroupName }}"
 
     - name: Log in to Azure again after potential long deployment
       uses: azure/login@v2
