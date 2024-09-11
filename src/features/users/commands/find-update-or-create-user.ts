@@ -11,7 +11,7 @@ const userCache = new InMemoryLRUCache<UserEntity>({
   ttl: 1000 * 60 * 60,
   // 100 items, we don't expect many users to be logged in at the same time
   max: 100,
-  // as per doc, unecessary
+  // as per doc, unnecessary
   ttlAutopurge: false,
 })
 
