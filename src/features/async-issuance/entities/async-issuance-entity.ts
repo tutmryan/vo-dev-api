@@ -13,6 +13,8 @@ type EndsWithFailed<T extends string> = T extends `${string}-failed` ? T : never
 
 export type FailedStates = EndsWithFailed<AsyncIssuanceEntity['state']>
 
+export const failedStates: FailedStates[] = ['contact-failed', 'issuance-failed', 'issuance-verification-failed'] as const
+
 const indexFor = (fields: [keyof AsyncIssuanceEntity]) => fields
 
 @Entity('async_issuance')
@@ -54,7 +56,7 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
   issuanceId!: string | null
 
   @Column({ type: 'nvarchar', default: 'pending' })
-  state!: 'pending' | 'contacted' | 'contact-failed' | 'issued' | 'issuance-failed' | 'cancelled'
+  state!: 'pending' | 'contacted' | 'contact-failed' | 'issued' | 'issuance-verification-failed' | 'issuance-failed' | 'cancelled'
 
   @OneToMany(() => CommunicationEntity, (communication) => communication.asyncIssuance)
   communications!: Promise<CommunicationEntity[]>
@@ -63,8 +65,7 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
     if (this.state === 'issued') return AsyncIssuanceRequestStatus.Issued
     if (this.state === 'cancelled') return AsyncIssuanceRequestStatus.Cancelled
     if (this.expiresOn < new Date()) return AsyncIssuanceRequestStatus.Expired
-    if (this.state === 'contact-failed') return AsyncIssuanceRequestStatus.Failed
-    if (this.state === 'issuance-failed') return AsyncIssuanceRequestStatus.Failed
+    if (failedStates.includes(this.state as FailedStates)) return AsyncIssuanceRequestStatus.Failed
     return AsyncIssuanceRequestStatus.Pending
   }
 

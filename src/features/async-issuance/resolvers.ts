@@ -38,8 +38,13 @@ export const resolvers: Resolvers = {
     contract: async (parent, _, { dataLoaders }) => dataLoaders.contracts.load(parent.contractId),
     issuance: async (parent, _, { dataLoaders }) => (parent.issuanceId ? dataLoaders.issuances.load(parent.issuanceId) : null),
     failureReason: (parent) => {
-      if (parent.state === 'contact-failed') return 'Failed to contact the identity'
+      if (parent.state === 'contact-failed') return 'Failed to contact the issuee'
+      if (parent.state === 'issuance-verification-failed') return 'Failed to verify the issuee'
       if (parent.state === 'issuance-failed') return 'Failed to issue the credential'
+      if (failedStates.includes(parent.state as FailedStates)) {
+        logger.warn(`Unhandled failed state ${parent.state}`)
+        return 'Failed to issue the credential'
+      }
       return null
     },
     ...createdByUpdatedBy,
