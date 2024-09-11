@@ -358,6 +358,8 @@ export enum AsyncIssuanceRequestExpiry {
 
 /** Represents the input required for creating an async issuance request. */
 export type AsyncIssuanceRequestInput = {
+  /** The callback to register. */
+  callback?: InputMaybe<Callback>;
   /**
    * The collection of assertions made about the subject in the verifiable credential.
    *
