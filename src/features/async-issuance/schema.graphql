@@ -123,6 +123,11 @@ input AsyncIssuanceRequestInput {
   identity: IdentityInput
 
   """
+  The callback to register.
+  """
+  callback: Callback
+
+  """
   The collection of assertions made about the subject in the verifiable credential.
 
   Item of note:
