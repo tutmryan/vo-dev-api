@@ -330,6 +330,15 @@ type AsyncIssuanceRequest {
   status: AsyncIssuanceRequestStatus!
 
   """
+  A flag indicating if the status of the async issuance request is final.
+
+  Items to note:
+
+  - When set to `true`, the status will not change and no further actions can be taken on the async issuance request.
+  """
+  isStatusFinal: Boolean!
+
+  """
   When set, the reason this async issuance request failed to issue.
 
   Items to note:

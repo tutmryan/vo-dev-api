@@ -1,12 +1,9 @@
 import type { WorkerContext } from '../../background-jobs/jobs'
 import { portalUrl } from '../../config'
 import type { VerifiedOrchestrationEntityManager } from '../../data/entity-manager'
-import { AsyncIssuanceRequestStatus } from '../../generated/graphql'
 import type { IssuanceCommunicationData } from '../../services/communications-service'
 import { invariant } from '../../util/invariant'
 import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
-
-export const validNotificationStatuses = [AsyncIssuanceRequestStatus.Pending, AsyncIssuanceRequestStatus.Failed]
 
 /**
  * Sends an async issuance notification to the issuee and updates entity state.
@@ -20,7 +17,7 @@ export async function sendAsyncIssuanceNotification(
   // load the entity and contract
   const repo = entityManager.getRepository(AsyncIssuanceEntity)
   const entity = await repo.findOneOrFail({ where: { id: requestId }, relations: { contract: true } })
-  invariant(validNotificationStatuses.includes(entity.status), 'Invalid status for sending notifications')
+  invariant(!entity.isStatusFinal, 'Invalid status for sending notifications')
 
   const contract = await entity.contract
 

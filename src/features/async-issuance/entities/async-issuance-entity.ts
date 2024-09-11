@@ -2,6 +2,7 @@ import { addDays } from 'date-fns'
 import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm'
 import { convertAsyncIssuanceExpiryDaysToRequestExpiry, ExpiryPeriodsInDays } from '..'
 import { AsyncIssuanceRequestExpiry, AsyncIssuanceRequestStatus } from '../../../generated/graphql'
+import { logger } from '../../../logger'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { CommunicationEntity } from '../../communication/entities/communication-entity'
@@ -64,13 +65,38 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
   get status(): AsyncIssuanceRequestStatus {
     if (this.state === 'issued') return AsyncIssuanceRequestStatus.Issued
     if (this.state === 'cancelled') return AsyncIssuanceRequestStatus.Cancelled
-    if (this.expiresOn < new Date()) return AsyncIssuanceRequestStatus.Expired
+    if (this.isExpired) return AsyncIssuanceRequestStatus.Expired
     if (failedStates.includes(this.state as FailedStates)) return AsyncIssuanceRequestStatus.Failed
     return AsyncIssuanceRequestStatus.Pending
   }
 
   get expiry(): AsyncIssuanceRequestExpiry {
     return convertAsyncIssuanceExpiryDaysToRequestExpiry(this.expiryPeriodInDays)
+  }
+
+  get isExpired() {
+    return this.expiresOn < new Date()
+  }
+
+  get failureReason() {
+    if (this.state === 'contact-failed') return 'Failed to contact the issuee'
+    if (this.state === 'issuance-verification-failed') return 'Failed to verify the issuee'
+    if (this.state === 'issuance-failed') return 'Failed to issue the credential'
+    if (failedStates.includes(this.state as FailedStates)) {
+      logger.warn(`Unhandled failed state ${this.state}`)
+      return 'Failed to issue the credential'
+    }
+    return null
+  }
+
+  public get isStatusFinal() {
+    return [AsyncIssuanceRequestStatus.Expired, AsyncIssuanceRequestStatus.Cancelled, AsyncIssuanceRequestStatus.Issued].includes(
+      this.status,
+    )
+  }
+
+  public get canCancel() {
+    return ![AsyncIssuanceRequestStatus.Cancelled, AsyncIssuanceRequestStatus.Issued].includes(this.status)
   }
 
   public failed(reason: FailedStates) {
