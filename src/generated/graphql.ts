@@ -237,6 +237,30 @@ export enum ApprovalRequestStatus {
   Rejected = 'rejected'
 }
 
+/** Fields that can be used for sorting approval requests by. */
+export enum ApprovalRequestsOrderBy {
+  /** The timestamp when the approval request was created. */
+  RequestedAt = 'requestedAt'
+}
+
+/** Represents the criteria for filtering approval requests. */
+export type ApprovalRequestsWhere = {
+  /** Returns approval requests with the specified type */
+  requestType?: InputMaybe<Scalars['String']['input']>;
+  /** Return approval requests requested after this point. */
+  requestedFrom?: InputMaybe<Scalars['ID']['input']>;
+  /** Return approval requests requested before this point. */
+  requestedTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Return approval requests with the specified status. */
+  status?: InputMaybe<ApprovalRequestStatus>;
+  /** Return approval requests updated after this point. */
+  updatedFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Return approval requests updated before this point. */
+  updatedTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Returns approval requests requested with the specified user (application or person) */
+  userId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 /** A limited approval token response. */
 export type ApprovalTokenResponse = {
   __typename?: 'ApprovalTokenResponse';
@@ -2430,6 +2454,8 @@ export type Query = {
    */
   credentialTypes: Array<Scalars['String']['output']>;
   discovery: Discovery;
+  /** Returns approval requests, optionally matching the specified criteria. */
+  findApprovalRequests: Array<ApprovalRequest>;
   /** Returns async issuance requests, optionally matching the specified criteria. */
   findAsyncIssuanceRequests: Array<AsyncIssuanceRequest>;
   /** Returns communications, optionally matching the specified criteria */
@@ -2529,6 +2555,15 @@ export type QueryContractArgs = {
 
 export type QueryCredentialTypesArgs = {
   where?: InputMaybe<CredentialTypesWhere>;
+};
+
+
+export type QueryFindApprovalRequestsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<ApprovalRequestsOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<ApprovalRequestsWhere>;
 };
 
 
@@ -3567,6 +3602,8 @@ export type ResolversTypes = {
   ApprovalRequestPresentationInput: ApprovalRequestPresentationInput;
   ApprovalRequestResponse: ResolverTypeWrapper<ApprovalRequestResponse>;
   ApprovalRequestStatus: ApprovalRequestStatus;
+  ApprovalRequestsOrderBy: ApprovalRequestsOrderBy;
+  ApprovalRequestsWhere: ApprovalRequestsWhere;
   ApprovalTokenResponse: ResolverTypeWrapper<ApprovalTokenResponse>;
   AsyncIssuanceContact: ResolverTypeWrapper<AsyncIssuanceContact>;
   AsyncIssuanceContactInput: AsyncIssuanceContactInput;
@@ -3746,6 +3783,7 @@ export type ResolversParentTypes = {
   ApprovalRequestInput: ApprovalRequestInput;
   ApprovalRequestPresentationInput: ApprovalRequestPresentationInput;
   ApprovalRequestResponse: ApprovalRequestResponse;
+  ApprovalRequestsWhere: ApprovalRequestsWhere;
   ApprovalTokenResponse: ApprovalTokenResponse;
   AsyncIssuanceContact: AsyncIssuanceContact;
   AsyncIssuanceContactInput: AsyncIssuanceContactInput;
@@ -4434,6 +4472,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, Partial<QueryCredentialTypesArgs>>;
   discovery?: Resolver<ResolversTypes['Discovery'], ParentType, ContextType>;
+  findApprovalRequests?: Resolver<Array<ResolversTypes['ApprovalRequest']>, ParentType, ContextType, RequireFields<QueryFindApprovalRequestsArgs, 'limit'>>;
   findAsyncIssuanceRequests?: Resolver<Array<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<QueryFindAsyncIssuanceRequestsArgs, 'limit'>>;
   findCommunications?: Resolver<Array<ResolversTypes['Communication']>, ParentType, ContextType, Partial<QueryFindCommunicationsArgs>>;
   findContracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType, Partial<QueryFindContractsArgs>>;
