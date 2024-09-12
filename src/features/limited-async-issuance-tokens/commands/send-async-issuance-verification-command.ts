@@ -43,6 +43,7 @@ export async function SendAsyncIssuanceVerificationCommand(
   // send verification
   try {
     return await inTransaction(async (entityManager) => {
+      addUserToManager(entityManager, asyncIssuanceEntity.createdById)
       await communications.sendVerification(
         verification.value,
         {
