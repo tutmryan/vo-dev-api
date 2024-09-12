@@ -321,6 +321,14 @@ export type AsyncIssuanceRequest = {
   /** The issuee identity */
   identity: Identity;
   /**
+   * A flag indicating if the status of the async issuance request is final.
+   *
+   * Items to note:
+   *
+   * - When set to `true`, the status will not change and no further actions can be taken on the async issuance request.
+   */
+  isStatusFinal: Scalars['Boolean']['output'];
+  /**
    * The issuance.
    *
    * Items of note:
@@ -617,10 +625,12 @@ export type Communication = {
   contactMethod: ContactMethod;
   /** The user (Person or Application) whose action resulted in the communication. */
   createdBy: User;
+  /** The error while sending the communication, if any. */
+  error?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   /** The purpose of the communication. */
   purpose: CommunicationPurpose;
-  /** The receipient of the communication. */
+  /** The recipient of the communication. */
   recipient: Identity;
   /** When the communication was sent. */
   sentAt: Scalars['DateTime']['output'];
@@ -640,7 +650,13 @@ export enum CommunicationPurpose {
   Verification = 'verification'
 }
 
-/** Defines the filter critiera used to find communications. */
+/** The possible statuses of a communication. */
+export enum CommunicationStatus {
+  Failed = 'failed',
+  Sent = 'sent'
+}
+
+/** Defines the filter criteria used to find communications. */
 export type CommunicationWhere = {
   /** The ID of the async issuance request that the communication is related to. */
   asyncIssuanceRequestId?: InputMaybe<Scalars['ID']['input']>;
@@ -656,6 +672,8 @@ export type CommunicationWhere = {
   sentFrom?: InputMaybe<Scalars['DateTime']['input']>;
   /** The end of the sentAt period to include. */
   sentTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The status of the communication. */
+  status?: InputMaybe<CommunicationStatus>;
 };
 
 /** Provides information about the presented credentials should be validated */
@@ -3576,6 +3594,7 @@ export type ResolversTypes = {
   Communication: ResolverTypeWrapper<CommunicationEntity>;
   CommunicationOrderBy: CommunicationOrderBy;
   CommunicationPurpose: CommunicationPurpose;
+  CommunicationStatus: CommunicationStatus;
   CommunicationWhere: CommunicationWhere;
   ConfigurationValidation: ConfigurationValidation;
   Contact: ResolverTypeWrapper<Contact>;
@@ -3974,6 +3993,7 @@ export type AsyncIssuanceRequestResolvers<ContextType = GraphQLContext, ParentTy
   failureReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
+  isStatusFinal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issuance?: Resolver<Maybe<ResolversTypes['Issuance']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['AsyncIssuanceRequestStatus'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
@@ -4043,6 +4063,7 @@ export type BackgroundJobProgressEventResolvers<ContextType = GraphQLContext, Pa
 export type CommunicationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Communication'] = ResolversParentTypes['Communication']> = {
   contactMethod?: Resolver<ResolversTypes['ContactMethod'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   purpose?: Resolver<ResolversTypes['CommunicationPurpose'], ParentType, ContextType>;
   recipient?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;

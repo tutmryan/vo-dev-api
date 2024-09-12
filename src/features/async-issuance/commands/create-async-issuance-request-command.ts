@@ -79,7 +79,7 @@ export async function CreateAsyncIssuanceRequestCommand(
       // validate issuance claims (excluding contract claims)
       validateIssuanceClaims(claims)
 
-      // find the contract
+      // locate and validate the contract
       const contract = await contracts.load(contractId)
       invariant(contract, 'Contract could not be found')
       invariant(contract.externalId, 'Contract must be provisioned before issuance')

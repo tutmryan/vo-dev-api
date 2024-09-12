@@ -24,7 +24,7 @@ export async function AcquireAsyncIssuanceTokenCommand(
 
   // validate async issuance entity state
   const entity = await entityManager.getRepository(AsyncIssuanceEntity).findOneByOrFail({ id: asyncIssuanceRequestId })
-  invariant(entity.state === 'contacted', 'Invalid async issuance state for issuance')
+  invariant(!entity.isStatusFinal, 'Invalid async issuance state for issuance')
 
   // download the async issuance request
   const asyncIssuanceRequest = await this.services.asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, entity.expiry)

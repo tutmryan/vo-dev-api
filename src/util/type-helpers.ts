@@ -23,3 +23,7 @@ export type NonNullableFields<T> = {
 export function assertExhaustive(value: never, message?: string): never {
   throw new Error(message ?? `Reached unexpected case ${value} in exhaustive switch`)
 }
+
+export function isObject(x: unknown): x is object {
+  return typeof x === 'object' && x !== null
+}

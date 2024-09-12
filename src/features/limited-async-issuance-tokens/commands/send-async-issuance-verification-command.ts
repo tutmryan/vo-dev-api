@@ -1,35 +1,38 @@
 import { codeExpiryMinutes, isAsyncIssuanceVerificationThrottled, setVerificationCode, throttleVerificationForIssuance } from '..'
-import type { CommandContext } from '../../../cqs'
+import type { TransactionalCommandContext } from '../../../cqs'
 import type { SendAsyncIssuanceVerificationResponse } from '../../../generated/graphql'
-import { AsyncIssuanceRequestStatus } from '../../../generated/graphql'
+import { CommunicationError } from '../../../services/communications-service'
 import { invariant } from '../../../util/invariant'
 import { randomDigits } from '../../../util/random-digits'
 import { AsyncIssuanceEntity } from '../../async-issuance/entities/async-issuance-entity'
-
-const canIssueStatuses = [AsyncIssuanceRequestStatus.Pending, AsyncIssuanceRequestStatus.Failed]
+import { addUserToManager } from '../../auditing/user-context-helper'
 
 export async function SendAsyncIssuanceVerificationCommand(
-  this: CommandContext,
+  this: TransactionalCommandContext,
   asyncIssuanceRequestId: string,
 ): Promise<SendAsyncIssuanceVerificationResponse> {
   const {
-    entityManager,
+    inTransaction,
     services: { asyncIssuances, communications },
+    logger,
   } = this
 
-  // validate async issuance entity
-  const entity = await entityManager.getRepository(AsyncIssuanceEntity).findOneByOrFail({ id: asyncIssuanceRequestId })
-  invariant(canIssueStatuses.includes(entity.status), `Invalid async issuance status for verification: ${entity.status}`)
+  // locate the async issuance entity
+  const asyncIssuanceEntity = await inTransaction(async (entityManager) => {
+    return await entityManager.getRepository(AsyncIssuanceEntity).findOneByOrFail({ id: asyncIssuanceRequestId })
+  })
+
+  invariant(!asyncIssuanceEntity.isStatusFinal, `Invalid async issuance status for verification: ${asyncIssuanceEntity.status}`)
 
   // load async issuance data
-  const asyncIssuanceRequest = await asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, entity.expiry)
+  const asyncIssuanceRequest = await asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, asyncIssuanceEntity.expiry)
   invariant(asyncIssuanceRequest, 'Failed to download async issuance details')
   const verification = asyncIssuanceRequest.contact.verification ?? asyncIssuanceRequest.contact.notification
 
   // throttle subsequent verification, if necessary
-  const isThrottled = await isAsyncIssuanceVerificationThrottled(entity.id)
+  const isThrottled = await isAsyncIssuanceVerificationThrottled(asyncIssuanceEntity.id)
   if (isThrottled) {
-    this.logger.warn(`Throttling verification for async issuance: ${entity.id}`)
+    logger.warn(`Throttling verification for async issuance: ${asyncIssuanceEntity.id}`)
     return { method: verification.method }
   }
 
@@ -38,21 +41,39 @@ export async function SendAsyncIssuanceVerificationCommand(
   await setVerificationCode(asyncIssuanceRequestId, verificationCode)
 
   // send verification
-  await communications.sendVerification(
-    verification.value,
-    {
-      verificationCode,
-      codeExpiryMinutes,
-      contactMethod: verification.method,
-      recipientId: entity.identityId,
-      createdById: entity.createdById,
-      asyncIssuanceId: entity.id,
-    },
-    entityManager,
-  )
+  try {
+    return await inTransaction(async (entityManager) => {
+      addUserToManager(entityManager, asyncIssuanceEntity.createdById)
+      await communications.sendVerification(
+        verification.value,
+        {
+          verificationCode,
+          codeExpiryMinutes,
+          contactMethod: verification.method,
+          recipientId: asyncIssuanceEntity.identityId,
+          createdById: asyncIssuanceEntity.createdById,
+          asyncIssuanceId: asyncIssuanceEntity.id,
+        },
+        entityManager,
+      )
 
-  // throttle further verifications
-  await throttleVerificationForIssuance(entity.id)
+      // throttle further verifications
+      await throttleVerificationForIssuance(asyncIssuanceEntity.id)
 
-  return { method: verification.method }
+      return { method: verification.method }
+    })
+  } catch (error) {
+    await inTransaction(async (entityManager) => {
+      addUserToManager(entityManager, asyncIssuanceEntity.createdById)
+
+      asyncIssuanceEntity.failed('issuance-verification-failed')
+      await entityManager.getRepository(AsyncIssuanceEntity).save(asyncIssuanceEntity)
+
+      if (error instanceof CommunicationError) {
+        await communications.recordCommunicationFailure(error, entityManager)
+      }
+    })
+
+    throw error
+  }
 }

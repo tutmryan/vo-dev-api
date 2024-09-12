@@ -11,9 +11,9 @@ export async function CancelAsyncIssuanceRequestCommand(this: CommandContext, as
   const request = await this.entityManager.getRepository(AsyncIssuanceEntity).findOneByOrFail({
     id: asyncIssuanceRequestId,
   })
-  invariant(request.status !== 'issued', 'Issuance request has been issued')
-
   if (request.state === 'cancelled') return request
+
+  invariant(request.canCancel, 'Cannot cancel async issuance request')
 
   await asyncIssuances.deleteAsyncIssuanceIfExists(request.id, convertAsyncIssuanceExpiryDaysToRequestExpiry(request.expiryPeriodInDays))
   request.canceled()

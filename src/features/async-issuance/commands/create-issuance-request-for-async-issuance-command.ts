@@ -1,40 +1,63 @@
-import { type CommandContext } from '../../../cqs'
+import { type TransactionalCommandContext } from '../../../cqs'
 import { type IssuanceRequestResponse } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { CreateIssuanceRequestCommand } from '../../issuance/commands/create-issuance-request-command'
 import { getLimitedAsyncIssuanceKey, setLimitedAsyncIssuanceData } from '../../limited-async-issuance-tokens'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
-import { validNotificationStatuses } from '../notification'
 
 export async function CreateIssuanceRequestForAsyncIssuanceCommand(
-  this: CommandContext,
+  this: TransactionalCommandContext,
   asyncIssuanceRequestId: string,
 ): Promise<IssuanceRequestResponse> {
-  const { user, entityManager, services } = this
+  const { services, user, inTransaction } = this
 
   invariant(user?.limitedAsyncIssuanceData, 'User has no async issuance data')
   invariant(user.limitedAsyncIssuanceData.asyncIssuanceRequestId === asyncIssuanceRequestId, 'Invalid async issuance request id')
 
-  const entity = await entityManager.getRepository(AsyncIssuanceEntity).findOneByOrFail({ id: asyncIssuanceRequestId })
-  invariant(validNotificationStatuses.includes(entity.status), 'Invalid status for issuance')
+  // TypeScript does not carry the inferred/narrowed types in a closure. So this a little workaround till such time it does or the AI overlords take over. Either way, this is a temporary workaround.
+  const { limitedAsyncIssuanceData } = user
 
-  const asyncIssuance = await services.asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, entity.expiry)
+  const asyncIssuanceEntity = await inTransaction(async (entityManager) => {
+    return await entityManager.getRepository(AsyncIssuanceEntity).findOneByOrFail({ id: asyncIssuanceRequestId })
+  })
+
+  invariant(!asyncIssuanceEntity.isStatusFinal, 'Invalid status for issuance')
+
+  const asyncIssuance = await services.asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, asyncIssuanceEntity.expiry)
   invariant(asyncIssuance, 'Async issuance request data not found')
 
-  const asyncIssuanceKey = getLimitedAsyncIssuanceKey(user.token)
+  try {
+    return await inTransaction(async (entityManager) => {
+      const asyncIssuanceKey = getLimitedAsyncIssuanceKey(user.token)
+      const response = await CreateIssuanceRequestCommand.apply({ ...this, entityManager }, [
+        {
+          ...asyncIssuance,
+          includeQRCode: true,
+          photoCaptureRequestId: limitedAsyncIssuanceData.photoCaptureRequestId,
+          asyncIssuanceKey,
+        },
+      ])
 
-  const response = await CreateIssuanceRequestCommand.apply(this, [
-    { ...asyncIssuance, includeQRCode: true, photoCaptureRequestId: user.limitedAsyncIssuanceData.photoCaptureRequestId, asyncIssuanceKey },
-  ])
+      // if the response is RequestErrorResponse, return it immediately
+      if ('error' in response) {
+        asyncIssuanceEntity.failed('issuance-failed')
+        await entityManager.getRepository(AsyncIssuanceEntity).save(asyncIssuanceEntity)
+        return response
+      }
 
-  // if the response is RequestErrorResponse, return it immediately
-  if ('error' in response) return response
+      // persist the issuance request id for subsequent retrieval
+      if ('requestId' in response) {
+        limitedAsyncIssuanceData.issuanceRequestId = response.requestId
+        await setLimitedAsyncIssuanceData(user.token, limitedAsyncIssuanceData)
+      }
 
-  // persist the issuance request id for subsequent retrieval
-  if ('requestId' in response) {
-    user.limitedAsyncIssuanceData.issuanceRequestId = response.requestId
-    await setLimitedAsyncIssuanceData(user.token, user.limitedAsyncIssuanceData)
+      return response
+    })
+  } catch (error) {
+    await this.inTransaction(async (entityManager) => {
+      asyncIssuanceEntity.failed('issuance-failed')
+      await entityManager.getRepository(AsyncIssuanceEntity).save(asyncIssuanceEntity)
+    })
+    throw error
   }
-
-  return response
 }

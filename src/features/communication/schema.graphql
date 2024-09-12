@@ -9,12 +9,20 @@ enum CommunicationPurpose {
 }
 
 """
+The possible statuses of a communication.
+"""
+enum CommunicationStatus {
+  sent
+  failed
+}
+
+"""
 Record of a communication sent to a recipient.
 """
 type Communication {
   id: ID!
   """
-  The receipient of the communication.
+  The recipient of the communication.
   """
   recipient: Identity!
   """
@@ -33,10 +41,14 @@ type Communication {
   The user (Person or Application) whose action resulted in the communication.
   """
   createdBy: User!
+  """
+  The error while sending the communication, if any.
+  """
+  error: String
 }
 
 """
-Defines the filter critiera used to find communications.
+Defines the filter criteria used to find communications.
 """
 input CommunicationWhere {
   """
@@ -67,6 +79,10 @@ input CommunicationWhere {
   The purpose of the communication.
   """
   purpose: CommunicationPurpose
+  """
+  The status of the communication.
+  """
+  status: CommunicationStatus
 }
 
 """

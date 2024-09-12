@@ -12,7 +12,7 @@ const indexFor = (fields: [keyof CommunicationEntity]) => fields
 @Index(indexFor(['sentAt']))
 export class CommunicationEntity extends VerifiedOrchestrationEntity {
   constructor(
-    args?: Pick<CommunicationEntity, 'createdById' | 'recipientId' | 'contactMethod' | 'purpose'> & { asyncIssuanceId?: string },
+    args?: Pick<CommunicationEntity, 'createdById' | 'recipientId' | 'contactMethod' | 'purpose' | 'error'> & { asyncIssuanceId?: string },
   ) {
     super()
     if (!args) return
@@ -46,4 +46,7 @@ export class CommunicationEntity extends VerifiedOrchestrationEntity {
 
   @Column({ nullable: true })
   asyncIssuanceId!: string | null
+
+  @Column({ type: 'nvarchar', nullable: true })
+  error?: string
 }
