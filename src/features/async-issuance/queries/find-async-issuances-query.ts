@@ -10,7 +10,7 @@ import {
 } from '../../../generated/graphql'
 import { assertExhaustive } from '../../../util/type-helpers'
 import { LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp } from '../../../util/typeorm'
-import { failedStates, FailedStates } from '../entities/async-issuance-entity'
+import { failedStates } from '../entities/async-issuance-entity'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
 export async function FindAsyncIssuancesQuery(

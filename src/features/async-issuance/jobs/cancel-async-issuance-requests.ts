@@ -26,13 +26,14 @@ const cancelAsyncIssuanceRequests = async (job: Job, context: WorkerContext, whe
   for (let i = 0; i < requests.length; i++) {
     const request = requests[i]!
     try {
-      if (request.state === 'issued') {
-        errorMessages.push(`Cannot cancel the async issuance request ${request.id} because it has been issued`)
-        continue
-      }
       if (request.state === 'cancelled') {
         continue
       }
+      if (!request.canCancel) {
+        errorMessages.push(`Cannot cancel the async issuance request ${request.id} because its status is final`)
+        continue
+      }
+
       await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
         addUserToManager(entityManager, user.id)
         await asyncIssuances.deleteAsyncIssuanceIfExists(

@@ -17,6 +17,7 @@ export async function SendAsyncIssuanceVerificationCommand(
     logger,
   } = this
 
+  // locate the async issuance entity
   const asyncIssuanceEntity = await inTransaction(async (entityManager) => {
     return await entityManager.getRepository(AsyncIssuanceEntity).findOneByOrFail({ id: asyncIssuanceRequestId })
   })

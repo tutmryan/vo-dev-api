@@ -23,11 +23,11 @@ export async function CreateIssuanceRequestForAsyncIssuanceCommand(
 
   invariant(!asyncIssuanceEntity.isStatusFinal, 'Invalid status for issuance')
 
+  const asyncIssuance = await services.asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, asyncIssuanceEntity.expiry)
+  invariant(asyncIssuance, 'Async issuance request data not found')
+
   try {
     return await this.inTransaction(async (entityManager) => {
-      const asyncIssuance = await services.asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, asyncIssuanceEntity.expiry)
-      invariant(asyncIssuance, 'Async issuance request data not found')
-
       const asyncIssuanceKey = getLimitedAsyncIssuanceKey(user!.token)
       const response = await CreateIssuanceRequestCommand.apply({ ...this, entityManager }, [
         {
@@ -55,7 +55,7 @@ export async function CreateIssuanceRequestForAsyncIssuanceCommand(
     })
   } catch (error) {
     await this.inTransaction(async (entityManager) => {
-      asyncIssuanceEntity.failed('issuance-verification-failed')
+      asyncIssuanceEntity.failed('issuance-failed')
       await entityManager.getRepository(AsyncIssuanceEntity).save(asyncIssuanceEntity)
     })
     throw error
