@@ -28,7 +28,7 @@ export async function CreateIssuanceRequestForAsyncIssuanceCommand(
 
   try {
     return await this.inTransaction(async (entityManager) => {
-      const asyncIssuanceKey = getLimitedAsyncIssuanceKey(user!.token)
+      const asyncIssuanceKey = getLimitedAsyncIssuanceKey(user.token)
       const response = await CreateIssuanceRequestCommand.apply({ ...this, entityManager }, [
         {
           ...asyncIssuance,
