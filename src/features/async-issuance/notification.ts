@@ -7,7 +7,6 @@ import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
 
 /**
  * Sends an async issuance notification to the issuee and updates entity state.
- * Logs and throws errors if any occur.
  */
 export async function sendAsyncIssuanceNotification(
   { services: { asyncIssuances, communications } }: WorkerContext,

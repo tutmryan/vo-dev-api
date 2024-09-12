@@ -21,7 +21,6 @@ export const sendAsyncIssuanceNotificationsJobHandler: JobHandler<SendAsyncIssua
         await sendAsyncIssuanceNotification(context, entityManager, asyncIssuanceRequestId)
       })
     } catch (err: unknown) {
-      // Fail the async issuance and log the communication error
       await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
         const repository = entityManager.getRepository(AsyncIssuanceEntity)
         const asyncIssuance = await repository.findOneByOrFail({ id: asyncIssuanceRequestId })
