@@ -1,9 +1,1 @@
-{
-  "advisories": {
-    "GHSA-9wv6-86v2-598j": {
-      "path": "path-to-regexp",
-      "expires": "2024-09-14",
-      "reason": "No patch yet, check in one week"
-    }
-  }
-}
+{}
