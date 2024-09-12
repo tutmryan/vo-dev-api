@@ -27,7 +27,7 @@ export async function CreateIssuanceRequestForAsyncIssuanceCommand(
   invariant(asyncIssuance, 'Async issuance request data not found')
 
   try {
-    return await this.inTransaction(async (entityManager) => {
+    return await inTransaction(async (entityManager) => {
       const asyncIssuanceKey = getLimitedAsyncIssuanceKey(user.token)
       const response = await CreateIssuanceRequestCommand.apply({ ...this, entityManager }, [
         {
