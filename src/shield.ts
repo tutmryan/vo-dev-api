@@ -79,6 +79,7 @@ export const rules: ShieldSchema<Resolvers> = {
     healthcheck: allow,
     contract: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isValidLimitedContractRequest),
     findContracts: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isLimitedListContractsApp),
+    findApprovalRequests: isApprovalRequestAdminUser,
     identity: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isValidLimitedIdentityRequest),
     findIssuances: isAllowedToViewIssuances,
     findPresentations: isAllowedToViewPresentations,

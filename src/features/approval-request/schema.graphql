@@ -276,15 +276,19 @@ input ApprovalRequestsWhere {
   """
   Returns approval requests requested with the specified user (application or person)
   """
-  userId: ID
+  requestedById: ID
   """
   Returns approval requests with the specified type
   """
   requestType: String
   """
+  Return approval requests with requested credential type.
+  """
+  requestedCredential: String
+  """
   Return approval requests requested after this point.
   """
-  requestedFrom: ID
+  requestedFrom: DateTime
   """
   Return approval requests requested before this point.
   """
@@ -293,14 +297,6 @@ input ApprovalRequestsWhere {
   Return approval requests with the specified status.
   """
   status: ApprovalRequestStatus
-  """
-  Return approval requests updated after this point.
-  """
-  updatedFrom: DateTime
-  """
-  Return approval requests updated before this point.
-  """
-  updatedTo: DateTime
 }
 
 """

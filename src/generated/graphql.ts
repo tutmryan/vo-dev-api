@@ -247,18 +247,16 @@ export enum ApprovalRequestsOrderBy {
 export type ApprovalRequestsWhere = {
   /** Returns approval requests with the specified type */
   requestType?: InputMaybe<Scalars['String']['input']>;
+  /** Returns approval requests requested with the specified user (application or person) */
+  requestedById?: InputMaybe<Scalars['ID']['input']>;
+  /** Return approval requests requested before this point. */
+  requestedCredential?: InputMaybe<Scalars['String']['input']>;
   /** Return approval requests requested after this point. */
-  requestedFrom?: InputMaybe<Scalars['ID']['input']>;
+  requestedFrom?: InputMaybe<Scalars['DateTime']['input']>;
   /** Return approval requests requested before this point. */
   requestedTo?: InputMaybe<Scalars['DateTime']['input']>;
   /** Return approval requests with the specified status. */
   status?: InputMaybe<ApprovalRequestStatus>;
-  /** Return approval requests updated after this point. */
-  updatedFrom?: InputMaybe<Scalars['DateTime']['input']>;
-  /** Return approval requests updated before this point. */
-  updatedTo?: InputMaybe<Scalars['DateTime']['input']>;
-  /** Returns approval requests requested with the specified user (application or person) */
-  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** A limited approval token response. */
