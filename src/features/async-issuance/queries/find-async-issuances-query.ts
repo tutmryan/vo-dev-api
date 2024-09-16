@@ -9,9 +9,8 @@ import {
   OrderDirection,
 } from '../../../generated/graphql'
 import { assertExhaustive } from '../../../util/type-helpers'
-import { LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp } from '../../../util/typeorm'
-import { failedStates } from '../entities/async-issuance-entity'
-import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
+import { LessThanOrEqualTimestamp, OptionalRange } from '../../../util/typeorm'
+import { AsyncIssuanceEntity, failedStates } from '../entities/async-issuance-entity'
 
 export async function FindAsyncIssuancesQuery(
   this: QueryContext,
@@ -51,8 +50,7 @@ export async function FindAsyncIssuancesQuery(
   if (criteria?.contractId) where.contractId = criteria.contractId.toUpperCase()
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
 
-  if (criteria?.createdFrom) where.createdBy = MoreThanOrEqualTimestamp(criteria.createdFrom)
-  if (criteria?.createdTo) where.createdBy = LessThanOrEqualTimestamp(criteria.createdTo)
+  where.createdAt = OptionalRange(criteria?.createdFrom, criteria?.createdTo)
 
   const direction = orderDirection ?? OrderDirection.Asc
   switch (orderBy) {
