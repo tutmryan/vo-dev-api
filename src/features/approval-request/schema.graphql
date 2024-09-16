@@ -282,19 +282,19 @@ input ApprovalRequestsWhere {
   """
   requestType: String
   """
-  Return approval requests with requested credential type.
+  Returns approval requests with requested credential type.
   """
   requestedCredential: String
   """
-  Return approval requests requested after this point.
+  Returns approval requests requested after this point.
   """
   requestedFrom: DateTime
   """
-  Return approval requests requested before this point.
+  Returns approval requests requested before this point.
   """
   requestedTo: DateTime
   """
-  Return approval requests with the specified status.
+  Returns approval requests with the specified status.
   """
   status: ApprovalRequestStatus
 }
