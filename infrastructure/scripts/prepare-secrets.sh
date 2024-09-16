@@ -64,6 +64,7 @@ else
 
     if [ $ret -ne 0 ]; then
       echo "Error listing secret names from vault $keyVaultName"
+      az keyvault network-rule remove --name $keyVaultName --ip-address $ip -o none
       exit 1
     fi
   fi
