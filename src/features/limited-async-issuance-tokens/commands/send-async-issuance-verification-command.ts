@@ -40,6 +40,9 @@ export async function SendAsyncIssuanceVerificationCommand(
   const verificationCode = randomDigits(6)
   await setVerificationCode(asyncIssuanceRequestId, verificationCode)
 
+  // throttle further verification attempts for this issuance
+  await throttleVerificationForIssuance(asyncIssuanceEntity.id)
+
   // send verification
   try {
     return await inTransaction(async (entityManager) => {
@@ -56,9 +59,6 @@ export async function SendAsyncIssuanceVerificationCommand(
         },
         entityManager,
       )
-
-      // throttle further verifications
-      await throttleVerificationForIssuance(asyncIssuanceEntity.id)
 
       return { method: verification.method }
     })
