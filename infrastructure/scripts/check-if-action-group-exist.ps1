@@ -9,18 +9,17 @@ param(
   $SharedResourceGroupName
 )
 
-try {
-  $actionGroupJson = az monitor action-group show --resource-group $SharedResourceGroupName --name $ActionGroupName
-  $actionGroup = $actionGroupJson | ConvertFrom-Json
-  if ($null -ne $actionGroup) {
-    Write-Output "Action group '$($actionGroup.name)' was found in the resource group '$($SharedResourceGroupName)'."
-    Write-Output "actionGroupName=$($actionGroup.name)" >> $Env:GITHUB_OUTPUT
-  }
-  else {
-    throw "Action group $($ActionGroupName) not found."
-  }
-}
-catch {
-  $errorMessage = $_.Exception.Message
-  Write-Output "$($errorMessage)"
+$ErrorActionPreference = 'Stop'
+$PSNativeCommandUseErrorActionPreference = $true
+
+$actionGroup = az monitor action-group list `
+  --resource-group $SharedResourceGroupName | `
+  ConvertFrom-Json | `
+  Where-Object -FilterScript { $_.name -eq $ActionGroupName }[0]
+
+if ($null -ne $actionGroup) {
+  Write-Output "Action group '$($actionGroup.name)' was found in the resource group '$($SharedResourceGroupName)'."
+  Write-Output "actionGroupName=$($actionGroup.name)" >> $Env:GITHUB_OUTPUT
+} else {
+  Write-Output "Action group '$($ActionGroupName)' not found."
 }
