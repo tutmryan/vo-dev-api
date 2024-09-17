@@ -113,8 +113,10 @@ An instance of an approval request.
 type ApprovalRequest {
   id: ID!
 
+  """
+  When the approval request was created.
+  """
   requestedAt: DateTime!
-
   """
   The platform user (application or person) that requested the approval.
   """
@@ -269,7 +271,57 @@ extend type Mutation {
   actionApprovalRequest(id: ID!, input: ActionApprovalRequestInput!): ApprovalRequest!
 }
 
+"""
+Represents the criteria for filtering approval requests.
+"""
+input ApprovalRequestsWhere {
+  """
+  Returns approval requests requested by the specified user (application or person).
+  """
+  requestedById: ID
+  """
+  Returns approval requests with the specified type.
+  """
+  requestType: String
+  """
+  Returns approval requests with the requested credential type.
+  """
+  requestedCredentialType: String
+  """
+  Returns approval requests requested after this point.
+  """
+  requestedFrom: DateTime
+  """
+  Returns approval requests requested before this point.
+  """
+  requestedTo: DateTime
+  """
+  Returns approval requests with the specified status.
+  """
+  status: ApprovalRequestStatus
+}
+
+"""
+Fields that can be used for sorting approval requests by.
+"""
+enum ApprovalRequestsOrderBy {
+  """
+  The timestamp when the approval request was created.
+  """
+  requestedAt
+}
+
 extend type Query {
+  """
+  Returns approval requests, optionally matching the specified criteria.
+  """
+  findApprovalRequests(
+    where: ApprovalRequestsWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: ApprovalRequestsOrderBy
+    orderDirection: OrderDirection
+  ): [ApprovalRequest!]!
   """
   Returns an approval request by ID.
   """

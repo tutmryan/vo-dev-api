@@ -6,6 +6,7 @@ import { CreateApprovalRequestCommand } from './commands/create-approval-request
 import { CreatePresentationRequestForApprovalCommand } from './commands/create-presentation-request-for-approval-command'
 import { UpdateApprovalRequestCommand } from './commands/update-approval-request-command'
 import { FindActionedApprovalDataQuery } from './queries/find-actioned-approval-data-query'
+import { FindApprovalRequestsQuery } from './queries/find-approvals-query'
 
 export const resolvers: Resolvers = {
   Mutation: {
@@ -19,6 +20,8 @@ export const resolvers: Resolvers = {
   Query: {
     approvalRequest: (_, { id }, { dataLoaders: { approvalRequests } }) => approvalRequests.load(id),
     actionedApprovalData: (_, { id }, context) => query(context, FindActionedApprovalDataQuery, id),
+    findApprovalRequests: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
+      query(context, FindApprovalRequestsQuery, where, offset, limit, orderBy, orderDirection),
   },
   ApprovalRequest: {
     requestedAt: ({ createdAt }) => createdAt,
