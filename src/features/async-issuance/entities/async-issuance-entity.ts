@@ -1,6 +1,5 @@
-import { addDays } from 'date-fns'
 import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm'
-import { convertAsyncIssuanceExpiryDaysToRequestExpiry, ExpiryPeriodsInDays } from '..'
+import { calculateExpiryFromNow, convertAsyncIssuanceExpiryDaysToRequestExpiry, ExpiryPeriodsInDays } from '..'
 import { AsyncIssuanceRequestExpiry, AsyncIssuanceRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
@@ -26,7 +25,7 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
     super()
     if (!args) return
     typeSafeAssign(this, {
-      expiresOn: addDays(new Date(), args.expiryPeriodInDays),
+      expiresOn: calculateExpiryFromNow(args.expiryPeriodInDays),
       ...args,
       state: 'pending',
     })

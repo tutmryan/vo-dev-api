@@ -1,3 +1,4 @@
+import { addDays } from 'date-fns'
 import { AsyncIssuanceRequestExpiry } from '../../generated/graphql'
 import { completeAsyncIssuance } from './handlers/complete-async-issuance'
 
@@ -36,6 +37,11 @@ const expiryDaysToExpiryMap: Record<ExpiryPeriodsInDays, AsyncIssuanceRequestExp
 export const convertAsyncIssuanceExpiryDaysToRequestExpiry = (days: ExpiryPeriodsInDays): AsyncIssuanceRequestExpiry => {
   if (!Object.keys(expiryDaysToExpiryMap).includes(days.toString())) throw new Error(`Unexpected expiry period in days: ${days}`)
   return expiryDaysToExpiryMap[days]
+}
+
+export const calculateExpiryFromNow = (expiry: ExpiryPeriodsInDays | AsyncIssuanceRequestExpiry) => {
+  const expiryPeriodInDays = typeof expiry === 'string' ? convertAsyncIssuanceRequestExpiryToDays(expiry) : expiry
+  return addDays(new Date(), expiryPeriodInDays)
 }
 
 export { completeAsyncIssuance }

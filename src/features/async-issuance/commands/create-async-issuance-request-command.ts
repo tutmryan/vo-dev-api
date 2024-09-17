@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import { omit } from 'lodash'
-import { convertAsyncIssuanceRequestExpiryToDays } from '..'
+import { calculateExpiryFromNow, convertAsyncIssuanceRequestExpiryToDays } from '..'
 import { addToJobQueue } from '../../../background-jobs/queue'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
@@ -71,7 +71,17 @@ export async function CreateAsyncIssuanceRequestCommand(
   // Validate the input
   for (const [index, asyncIssuanceInput] of requestInput.entries()) {
     try {
-      const { contractId, identityId, identity, claims, faceCheckPhoto: faceCheckPhotoInput, photoCapture, contact } = asyncIssuanceInput
+      const {
+        contractId,
+        identityId,
+        identity,
+        claims,
+        faceCheckPhoto: faceCheckPhotoInput,
+        photoCapture,
+        contact,
+        expiry,
+        expirationDate,
+      } = asyncIssuanceInput
 
       // validate contact
       validateContact(contact)
@@ -117,6 +127,10 @@ export async function CreateAsyncIssuanceRequestCommand(
         (!faceCheckPhotoInput && !photoCapture) || (faceCheckPhotoInput && !photoCapture) || (!faceCheckPhotoInput && photoCapture),
         'Face check photo cannot be provided when using a photo capture request',
       )
+
+      if (expirationDate) {
+        invariant(calculateExpiryFromNow(expiry) < expirationDate, 'Credential expiry must fall after the period to claim it')
+      }
     } catch (error) {
       logger.error(`Validation of async issuance request ${index + 1} of ${requestInput.length} failed`, {
         error,
