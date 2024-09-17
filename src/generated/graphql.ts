@@ -177,6 +177,7 @@ export type ApprovalRequest = {
   requestData?: Maybe<Scalars['JSONObject']['output']>;
   /** The type of approval request, useful for partitioning and filtering different types of approval requests. */
   requestType: Scalars['String']['output'];
+  /** When the approval request was created. */
   requestedAt: Scalars['DateTime']['output'];
   /** The platform user (application or person) that requested the approval. */
   requestedBy: User;
@@ -245,17 +246,17 @@ export enum ApprovalRequestsOrderBy {
 
 /** Represents the criteria for filtering approval requests. */
 export type ApprovalRequestsWhere = {
-  /** Returns approval requests with the specified type */
+  /** Returns approval requests with the specified type. */
   requestType?: InputMaybe<Scalars['String']['input']>;
-  /** Returns approval requests requested with the specified user (application or person) */
+  /** Returns approval requests requested by the specified user (application or person). */
   requestedById?: InputMaybe<Scalars['ID']['input']>;
-  /** Return approval requests requested before this point. */
-  requestedCredential?: InputMaybe<Scalars['String']['input']>;
-  /** Return approval requests requested after this point. */
+  /** Returns approval requests with the requested credential type. */
+  requestedCredentialType?: InputMaybe<Scalars['String']['input']>;
+  /** Returns approval requests requested after this point. */
   requestedFrom?: InputMaybe<Scalars['DateTime']['input']>;
-  /** Return approval requests requested before this point. */
+  /** Returns approval requests requested before this point. */
   requestedTo?: InputMaybe<Scalars['DateTime']['input']>;
-  /** Return approval requests with the specified status. */
+  /** Returns approval requests with the specified status. */
   status?: InputMaybe<ApprovalRequestStatus>;
 };
 

@@ -113,8 +113,10 @@ An instance of an approval request.
 type ApprovalRequest {
   id: ID!
 
+  """
+  When the approval request was created.
+  """
   requestedAt: DateTime!
-
   """
   The platform user (application or person) that requested the approval.
   """
@@ -274,17 +276,17 @@ Represents the criteria for filtering approval requests.
 """
 input ApprovalRequestsWhere {
   """
-  Returns approval requests requested with the specified user (application or person)
+  Returns approval requests requested by the specified user (application or person).
   """
   requestedById: ID
   """
-  Returns approval requests with the specified type
+  Returns approval requests with the specified type.
   """
   requestType: String
   """
-  Returns approval requests with requested credential type.
+  Returns approval requests with the requested credential type.
   """
-  requestedCredential: String
+  requestedCredentialType: String
   """
   Returns approval requests requested after this point.
   """

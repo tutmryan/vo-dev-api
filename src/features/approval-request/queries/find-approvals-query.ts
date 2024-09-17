@@ -1,9 +1,8 @@
-import { type FindOptionsOrder, type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
+import { ILike, IsNull, type FindOptionsOrder, type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
 import type { QueryContext } from '../../../cqs'
 import type { ApprovalRequestsWhere } from '../../../generated/graphql'
-import { ApprovalRequestsOrderBy, OrderDirection, type Maybe } from '../../../generated/graphql'
-import type { PresentationRequest } from '../../../services/verified-id/request'
-import { OptionalRange } from '../../../util/typeorm'
+import { ApprovalRequestsOrderBy, ApprovalRequestStatus, OrderDirection, type Maybe } from '../../../generated/graphql'
+import { LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp, OptionalRange } from '../../../util/typeorm'
 import { ApprovalRequestEntity } from '../entities/approval-request-entity'
 
 export async function FindApprovalRequestsQuery(
@@ -20,6 +19,20 @@ export async function FindApprovalRequestsQuery(
 
   if (criteria?.requestedById) where.createdById = criteria.requestedById.toUpperCase()
   if (criteria?.requestType) where.requestType = criteria.requestType
+  if (criteria?.requestedCredentialType) where.presentationRequestJson = ILike(`%"type":"${criteria.requestedCredentialType}"%`)
+  if (criteria?.status === ApprovalRequestStatus.Approved) where.isApproved = true
+  if (criteria?.status === ApprovalRequestStatus.Rejected) where.isApproved = false
+  if (criteria?.status === ApprovalRequestStatus.Cancelled) where.isCancelled = true
+  if (criteria?.status === ApprovalRequestStatus.Expired) {
+    where.isApproved = IsNull()
+    where.isCancelled = false
+    where.expiresAt = LessThanOrEqualTimestamp(new Date())
+  }
+  if (criteria?.status === ApprovalRequestStatus.Pending) {
+    where.isApproved = IsNull()
+    where.isCancelled = false
+    where.expiresAt = MoreThanOrEqualTimestamp(new Date())
+  }
 
   where.createdAt = OptionalRange(criteria?.requestedFrom, criteria?.requestedTo)
 
@@ -42,12 +55,5 @@ export async function FindApprovalRequestsQuery(
     order,
   })
 
-  return approvalRequests.filter((request) => {
-    const presentationRequest = request.presentationRequest as PresentationRequest
-    const matchesStatus = criteria?.status ? request.status === criteria.status : true
-    const matchesCredential = criteria?.requestedCredential
-      ? presentationRequest.requestedCredentials.some((credential) => credential.type === criteria.requestedCredential)
-      : true
-    return matchesStatus && matchesCredential
-  })
+  return approvalRequests
 }
