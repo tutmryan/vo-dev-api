@@ -25,12 +25,12 @@ export async function FindApprovalRequestsQuery(
   if (criteria?.status === ApprovalRequestStatus.Cancelled) where.isCancelled = true
   if (criteria?.status === ApprovalRequestStatus.Expired) {
     where.isApproved = IsNull()
-    where.isCancelled = false
+    where.isCancelled = IsNull()
     where.expiresAt = LessThanOrEqualTimestamp(new Date())
   }
   if (criteria?.status === ApprovalRequestStatus.Pending) {
     where.isApproved = IsNull()
-    where.isCancelled = false
+    where.isCancelled = IsNull()
     where.expiresAt = MoreThanOrEqualTimestamp(new Date())
   }
 
