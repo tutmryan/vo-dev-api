@@ -99,6 +99,6 @@ export const pkce: Config['auth']['pkce'] = merge(
 export const identityIssuers = { [config.get('homeTenant.tenantId')]: config.get('homeTenant.name'), ...config.get('identityIssuers') }
 export const portalUrl = config.has('instance')
   ? `https://${config.get('instance')}.portal.verifiedorchestration.com`
-  : config.has('localDevTunnelUri')
-    ? config.get('localDevTunnelUri')
+  : config.has('localDevPortalTunnelUri')
+    ? config.get('localDevPortalTunnelUri')
     : 'http://localhost:5173'

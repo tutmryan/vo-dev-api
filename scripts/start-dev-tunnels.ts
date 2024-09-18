@@ -105,8 +105,6 @@ const startNgrok = async () => {
   })
   console.log(`✅ API tunnel created at ${apiUrl}`)
 
-  console.log('Updating the API .env file with the new API URL...')
-  replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_URI', apiUrl, pathToApi, '.env')
   console.log('Updating the Admin UI .env.local file with the new API URL...')
   replaceValueInEnvConfigFile('VITE_API_URL', `${apiUrl}/graphql`, pathToAdminUi, '.env.local')
   console.log('Updating the Portal UI .env.local file with the new API URL...')
@@ -122,9 +120,12 @@ const startNgrok = async () => {
   console.log('Creating tunnel to the Portal UI project...')
   const portalUiUrl = await ngrok.connect({
     proto: 'http',
-    addr: 50173,
+    addr: 5174,
   })
   console.log(`✅ Portal UI tunnel created at ${portalUiUrl}`)
+
+  console.log('Updating the API .env file with the new Portal tunnel URL...')
+  replaceValueInEnvConfigFile('LOCAL_DEV_PORTAL_TUNNEL_URI', portalUiUrl, pathToApi, '.env')
 
   open('http://127.0.0.1:4040/').catch(console.error)
 

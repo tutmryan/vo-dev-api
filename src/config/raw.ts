@@ -135,7 +135,7 @@ export type Config = {
   issuanceRequestRegistration: IssuanceRequestRegistration
   platformConsumerApps: Record<string, string>
   identityIssuers: Record<string, string>
-  localDevTunnelUri: string
+  localDevPortalTunnelUri: string
 }
 
 const typedConfig = createTypedConfig<Config>(config)
