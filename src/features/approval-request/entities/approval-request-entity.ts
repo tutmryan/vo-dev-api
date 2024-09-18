@@ -39,7 +39,7 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'nvarchar', nullable: true })
   referenceUrl!: string | null
 
-  @Column({ type: 'nvarchar', nullable: true })
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
   purpose!: string | null
 
   @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
