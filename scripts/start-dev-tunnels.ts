@@ -44,8 +44,11 @@ const checkNgrokConfiguration = async () => {
   if (fs.existsSync(ngrokConfigPath)) {
     const ngrokConfig = YAML.parse(fs.readFileSync(ngrokConfigPath, 'utf8')) as {
       authtoken?: string
+      agent?: {
+        authtoken?: string
+      }
     }
-    if (ngrokConfig.authtoken) {
+    if (ngrokConfig.authtoken || (ngrokConfig.agent && ngrokConfig.agent.authtoken)) {
       console.log('🙌 Ngrok configuration found and authtoken is present...')
       console.log(`💡 If you get an auth error, update the authtoken in the configuration file located at ${ngrokConfigPath}`)
       isAuthenticated = true
@@ -63,9 +66,11 @@ const checkNgrokConfiguration = async () => {
       input: process.stdin,
       output: process.stdout,
     })
-    rl.question('Please paste it here:', (token) => {
-      ngrokAuthToken = token
-      rl.close()
+    ngrokAuthToken = await new Promise((resolve) => {
+      rl.question('Please paste it here:', (token) => {
+        rl.close()
+        resolve(token)
+      })
     })
   }
 }
@@ -96,6 +101,14 @@ const startNgrok = async () => {
   if (!isAuthenticated && !ngrokAuthToken) {
     console.error('No authtoken provided. Exiting...')
     process.exit(-1)
+  }
+
+  if (!isAuthenticated) {
+    console.log('Creating Ngrok configuration file...')
+    ngrok.authtoken(ngrokAuthToken)
+    await new Promise((resolve) => {
+      setTimeout(resolve, 1000)
+    })
   }
 
   console.log('Creating tunnel to the API project...')
