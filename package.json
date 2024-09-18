@@ -36,7 +36,8 @@
     "start:built": "cd build && dotenv -e ../.env node ./src/main && cd ..",
     "test": "jest",
     "test:ci:start-db": "docker compose up -d && cross-env NODE_ENV=test ts-node scripts/localdev-database-wait",
-    "test:ci": "jest --ci --reporters=default --reporters=jest-junit"
+    "test:ci": "jest --ci --reporters=default --reporters=jest-junit",
+    "start:dev:tunnels": "cross-env ts-node-dev scripts/start-dev-tunnels"
   },
   "repository": {
     "type": "git",
@@ -141,13 +142,15 @@
     "lodash": "^4.17.21",
     "mime-types": "^2.1.35",
     "mssql": "^9.3.2",
+    "ngrok": "^5.0.0-beta.2",
+    "open": "^8.4.2",
     "opentelemetry-instrumentation-ws": "^0.5.0",
     "prettier-2": "npm:prettier@^2",
     "qrcode": "^1.5.3",
     "rate-limiter-flexible": "^5.0.3",
     "twilio": "^5.2.2",
-    "typeorm": "^0.3.20",
-    "ws": "^8.17.1"
+    "ws": "^8.17.1",
+    "yaml": "^2.5.1"
   },
   "jest-junit": {
     "outputName": "test-results.xml",
