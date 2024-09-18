@@ -149,6 +149,7 @@
     "qrcode": "^1.5.3",
     "rate-limiter-flexible": "^5.0.3",
     "twilio": "^5.2.2",
+    "typeorm": "^0.3.20",
     "ws": "^8.17.1",
     "yaml": "^2.5.1"
   },
