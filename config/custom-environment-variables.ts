@@ -130,6 +130,7 @@ const config: EnvVarSubstitution<Config> = {
     ...json('IDENTITY_ISSUERS'),
   },
   platformConsumerApps: json('PLATFORM_CONSUMER_APPS'),
+  localDevTunnelUri: 'LOCAL_DEV_TUNNEL_URI',
 }
 
 export default config
