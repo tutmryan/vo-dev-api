@@ -22,6 +22,7 @@ export const sendAsyncIssuanceNotificationsJobHandler: JobHandler<SendAsyncIssua
       })
     } catch (err: unknown) {
       await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
+        addUserToManager(entityManager, job.data.userId)
         const repository = entityManager.getRepository(AsyncIssuanceEntity)
         const asyncIssuance = await repository.findOneByOrFail({ id: asyncIssuanceRequestId })
         asyncIssuance.failed('contact-failed')

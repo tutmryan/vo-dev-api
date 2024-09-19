@@ -5,12 +5,6 @@ const config: DeepPartial<Config> = {
   sms: {
     sid: 'SKe71ebe72ff10f44a40658f32de020693',
   },
-  email: {
-    templates: {
-      issuance: 'd-eec8b1882af84250b18638e56da3b44c',
-      verificationCode: 'd-1354c25245bb4a538b98c76e285e061d',
-    },
-  },
   platformTenant: {
     tenantId: '5c14bb50-7602-4c0d-b785-5dee865e4665',
   },

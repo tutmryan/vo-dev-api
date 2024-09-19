@@ -46,6 +46,10 @@ const config: DeepPartial<Config> = {
       name: 'Verified Orchestration',
       email: 'no-reply@verifiedorchestration.com',
     },
+    templates: {
+      issuance: { id: 'd-8500cff9c1ba4bdc9326a46d85f93632', asm: { groupId: 26962, groupsToDisplay: [26962] } },
+      verification: { id: 'd-a2af5a4bcad04f4392b51f7023106f2a', asm: { groupId: 27199, groupsToDisplay: [27199] } },
+    },
   },
   auth: {
     pkce: {

@@ -29,7 +29,7 @@ export async function SendAsyncIssuanceVerificationCommand(
   invariant(asyncIssuanceRequest, 'Failed to download async issuance details')
   const verification = asyncIssuanceRequest.contact.verification ?? asyncIssuanceRequest.contact.notification
 
-  // throttle subsequent verification, if necessary
+  // avoid execution if the async issuance is throttled
   const isThrottled = await isAsyncIssuanceVerificationThrottled(asyncIssuanceEntity.id)
   if (isThrottled) {
     logger.warn(`Throttling verification for async issuance: ${asyncIssuanceEntity.id}`)
@@ -56,6 +56,9 @@ export async function SendAsyncIssuanceVerificationCommand(
           recipientId: asyncIssuanceEntity.identityId,
           createdById: asyncIssuanceEntity.createdById,
           asyncIssuanceId: asyncIssuanceEntity.id,
+          contractName: (await asyncIssuanceEntity.contract).name,
+          identityName: (await asyncIssuanceEntity.identity).name,
+          issuer: (await asyncIssuanceEntity.contract).display.card.issuedBy,
         },
         entityManager,
       )

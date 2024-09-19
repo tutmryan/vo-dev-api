@@ -14,6 +14,11 @@ import type { IssuanceRequestRegistration } from '../services/verified-id'
 export type ClientCredentials = Pick<ClientCredentialsConfig, 'clientId' | 'clientSecret'>
 export type BlobStorageCredentials = { accountName: string; accountKey: string }
 
+export type EmailTemplateConfig = {
+  id: string
+  asm: MailDataRequired['asm']
+}
+
 export type Config = {
   cors: Omit<CorsOptions, 'origin'> & { origin: true | string[] | undefined }
   server: {
@@ -84,8 +89,8 @@ export type Config = {
   email: Pick<MailDataRequired, 'from'> & {
     apiKey: string
     templates: {
-      issuance: string
-      verificationCode: string
+      issuance: EmailTemplateConfig
+      verification: EmailTemplateConfig
     }
   }
   homeTenant: {

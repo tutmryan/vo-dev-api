@@ -110,7 +110,7 @@ export const rules: ShieldSchema<Resolvers> = {
     updatePartner: isPartnerAdminUser,
     createApprovalRequest: isApprovalRequestApp,
     updateApprovalRequest: isApprovalRequestApp,
-    cancelApprovalRequest: isApprovalRequestApp,
+    cancelApprovalRequest: or(isApprovalRequestAdminUser, isApprovalRequestApp),
     createPresentationRequestForApproval: isValidLimitedPresentationRequestForApproval,
     actionApprovalRequest: and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId),
     createPhotoCaptureRequest: or(isIssuerUser, isIssuanceApp, isValidLimitedIssuancePhotoCaptureRequest),

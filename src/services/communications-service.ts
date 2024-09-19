@@ -6,11 +6,18 @@ import { sendIssuanceEmail, sendVerificationCodeEmail } from '../util/email'
 import { sendSms } from '../util/sms'
 
 export type IssuanceCommunicationData = CommunicationData & {
-  issuanceUrl: string
   contractName: string
+  identityName: string
+  issuer: string
+  issuanceUrl: string
+  expiry: string
+  verificationMethod: string
 }
 
 export type VerificationCommunicationData = CommunicationData & {
+  contractName: string
+  identityName: string
+  issuer: string
   verificationCode: string
   codeExpiryMinutes: number
 }
@@ -35,7 +42,18 @@ export class CommunicationsService {
 
   async sendIssuance(
     to: string,
-    { contactMethod, recipientId, createdById, asyncIssuanceId, issuanceUrl, contractName }: IssuanceCommunicationData,
+    {
+      contactMethod,
+      recipientId,
+      createdById,
+      asyncIssuanceId,
+      issuanceUrl,
+      contractName,
+      identityName,
+      issuer,
+      expiry,
+      verificationMethod,
+    }: IssuanceCommunicationData,
     entityManager: VerifiedOrchestrationEntityManager,
   ) {
     return await this.trySendCommunication(
@@ -43,12 +61,25 @@ export class CommunicationsService {
         if (contactMethod === ContactMethod.Email) {
           await sendIssuanceEmail({
             to,
-            issuanceUrl,
+            subjectCredentialName: contractName,
+            subjectOrganisation: issuer,
+            preheaderIdentityName: identityName,
+            preheaderOrganisation: issuer,
             preheaderCredentialName: contractName,
             credentialName: contractName,
+            verificationMethod,
+            identityName,
+            issuer,
+            issuerContact: issuer,
+            issuerTeam: issuer,
+            expiry,
+            issuanceUrl,
           })
         } else {
-          await sendSms(to, `You have been issued a ${contractName} credential.\n\nAccept it here: ${issuanceUrl}`)
+          await sendSms(
+            to,
+            `Dear ${identityName}, ${issuer} initiated the issuance of a ${contractName} digital credential to you.\n\nAccept it here: ${issuanceUrl}`,
+          )
         }
       },
       { purpose: CommunicationPurpose.Issuance, contactMethod, recipientId, createdById, asyncIssuanceId },
@@ -58,7 +89,17 @@ export class CommunicationsService {
 
   async sendVerification(
     to: string,
-    { contactMethod, recipientId, createdById, asyncIssuanceId, verificationCode, codeExpiryMinutes }: VerificationCommunicationData,
+    {
+      contactMethod,
+      recipientId,
+      createdById,
+      asyncIssuanceId,
+      verificationCode,
+      codeExpiryMinutes,
+      contractName,
+      identityName,
+      issuer,
+    }: VerificationCommunicationData,
     entityManager: VerifiedOrchestrationEntityManager,
   ) {
     return this.trySendCommunication(
@@ -67,9 +108,12 @@ export class CommunicationsService {
           await sendVerificationCodeEmail({
             to,
             code: verificationCode,
-            preheader: 'Enter verification code to complete issuance',
-            instruction: 'Please enter the following verification code to complete your issuance.',
-            codeInstruction: `This code will be valid for ${codeExpiryMinutes} minutes.`,
+            codeLifetimeMinutes: `${codeExpiryMinutes}`,
+            preheaderIdentityName: identityName,
+            identityName,
+            issuerContact: issuer,
+            credentialName: contractName,
+            issuerTeam: issuer,
           })
         } else {
           await sendSms(to, `Your issuance verification code is: ${verificationCode}`)

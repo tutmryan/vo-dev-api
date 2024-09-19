@@ -1,6 +1,8 @@
+import { startCase } from 'lodash'
 import type { WorkerContext } from '../../background-jobs/jobs'
 import { portalUrl } from '../../config'
 import type { VerifiedOrchestrationEntityManager } from '../../data/entity-manager'
+import { ContactMethod } from '../../generated/graphql'
 import type { IssuanceCommunicationData } from '../../services/communications-service'
 import { invariant } from '../../util/invariant'
 import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
@@ -28,6 +30,8 @@ export async function sendAsyncIssuanceNotification(
   // generate the issuance URL
   const issuanceUrl = `${portalUrl}/issuance/${requestId}`
 
+  const verificationMethod = request.contact.verification?.method ?? request.contact.notification.method
+
   // send issuance notification + update entity state
   const data: IssuanceCommunicationData = {
     contactMethod: notification.method,
@@ -36,6 +40,10 @@ export async function sendAsyncIssuanceNotification(
     asyncIssuanceId: requestId,
     issuanceUrl,
     contractName: contract.name,
+    expiry: startCase(entity.expiry).toLowerCase(),
+    identityName: (await entity.identity).name,
+    issuer: contract.display.card.issuedBy,
+    verificationMethod: verificationMethod === ContactMethod.Sms ? 'SMS' : 'email',
   }
 
   await communications.sendIssuance(notification.value, data, entityManager)

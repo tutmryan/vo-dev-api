@@ -443,8 +443,16 @@ exports[`shield rules are setup correctly 1`] = `
       "cache": "contextual"
     },
     "cancelApprovalRequest": {
-      "name": "isApprovalRequestApp",
-      "cache": "contextual"
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isApprovalRequestApp",
+          "cache": "contextual"
+        }
+      ]
     },
     "createPresentationRequestForApproval": {
       "rulesAnd": [

@@ -4,7 +4,6 @@ import type { DeepPartial } from '../src/util/type-helpers'
 import * as nonprod from './nonprod'
 
 const {
-  email,
   platformTenant,
   apiClient,
   internalClient,
@@ -50,7 +49,6 @@ const config: DeepPartial<Config> = {
       accountKey: 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==',
     },
   },
-  email,
   sms: {
     sid: 'SK6f953274aa24929f409245f865b655e9',
   },

@@ -9,8 +9,18 @@ const mailClient = Lazy(() => {
 })
 
 interface IssuanceEmailTemplateData {
+  subjectOrganisation: string
+  subjectCredentialName: string
+  preheaderIdentityName: string
+  preheaderOrganisation: string
   preheaderCredentialName: string
+  identityName: string
+  issuer: string
   credentialName: string
+  verificationMethod: string
+  expiry: string
+  issuerContact: string
+  issuerTeam: string
   issuanceUrl: string
 }
 
@@ -21,7 +31,8 @@ export const sendIssuanceEmail = async ({
   to: MailDataRequired['to']
 } & IssuanceEmailTemplateData) => {
   const data = {
-    templateId: email.templates.issuance,
+    templateId: email.templates.issuance.id,
+    asm: email.templates.issuance.asm,
     from: email.from,
     personalizations: [
       {
@@ -34,10 +45,13 @@ export const sendIssuanceEmail = async ({
 }
 
 interface VerificationCodeTemplateData {
-  preheader: string
-  instruction: string
+  preheaderIdentityName: string
+  identityName: string
+  credentialName: string
   code: string
-  codeInstruction: string
+  codeLifetimeMinutes: string
+  issuerContact: string
+  issuerTeam: string
 }
 
 export const sendVerificationCodeEmail = async ({
@@ -47,7 +61,8 @@ export const sendVerificationCodeEmail = async ({
   to: MailDataRequired['to']
 } & VerificationCodeTemplateData) => {
   const data = {
-    templateId: email.templates.verificationCode,
+    templateId: email.templates.verification.id,
+    asm: email.templates.verification.asm,
     from: email.from,
     personalizations: [
       {
