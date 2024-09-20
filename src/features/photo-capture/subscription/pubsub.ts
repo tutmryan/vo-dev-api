@@ -2,13 +2,13 @@ import type { GraphQLContext } from '@makerx/graphql-core'
 import { withFilter } from 'graphql-subscriptions'
 import type { PhotoCaptureData } from '..'
 import { getPhotoCaptureData } from '..'
-import { pubsub } from '../../../cache'
 import {
   PhotoCaptureStatus,
   type PhotoCaptureEventData,
   type SubscriptionPhotoCaptureEventArgs,
   type SubscriptionSubscribeFn,
 } from '../../../generated/graphql'
+import { pubsub } from '../../../redis'
 import { invariant } from '../../../util/invariant'
 import { addPhotoCaptureEventDataToCache, getPhotoCaptureEventDataFromCache } from './cache'
 

@@ -1,6 +1,5 @@
 import { withFilter } from 'graphql-subscriptions'
 import { isNil } from 'lodash'
-import { pubsub } from '../../../cache'
 import type { GraphQLContext } from '../../../context'
 import { entityManager } from '../../../data'
 import type {
@@ -10,6 +9,7 @@ import type {
   SubscriptionSubscribeFn,
 } from '../../../generated/graphql'
 import { PresentationRequestStatus } from '../../../generated/graphql'
+import { pubsub } from '../../../redis'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import { PresentationEntity } from '../entities/presentation-entity'
 import { getPresentationDataFromCache } from './cache'

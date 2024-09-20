@@ -30,7 +30,7 @@ import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './fe
 import { issuanceCallbackHandler } from './features/issuance/callback/issuance-callback-handler'
 import { presentationCallbackHandler } from './features/presentation/callback/presentation-callback-handler'
 import { logger } from './logger'
-import rateLimiterMiddleware from './rate-limiter'
+import { rateLimiterMiddleware } from './rate-limiter'
 import { addVoyager } from './voyager'
 
 export const getExpressApp = (): Express => {
