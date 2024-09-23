@@ -43,10 +43,10 @@ export async function capturePhoto(request: { photo: string; photoCaptureRequest
   )
 }
 
-export const setupPhotoCaptureData = Lazy(async () => {
+export const setupPhotoCaptureData = async () => {
   const [contract, identity] = await Promise.all([createContract(getDefaultContractInput()), createIdentity(createIdentityInput())])
   return { contract, identity }
-})
+}
 
 export async function createPhotoCaptureRequest(request?: PhotoCaptureRequest) {
   if (!request) {

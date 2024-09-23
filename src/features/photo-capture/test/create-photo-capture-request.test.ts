@@ -9,10 +9,16 @@ import {
   executeOperationAsUser,
   expectUnauthorizedError,
 } from '../../../test'
+import { mockServiceUtil } from '../../../test/mock-services'
 
 describe('createPhotoCaptureRequest mutation', () => {
   beforeAfterAll()
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   it('returns an unauthorized error when accessed anonymously', async () => {
     // Act
     const { errors } = await executeOperationAnonymous({

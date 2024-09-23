@@ -1,14 +1,18 @@
 import { randomUUID } from 'crypto'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
-import { mockAdminServiceHelper } from '../../test/mock-services'
+import { mockServiceUtil } from '../../test/mock-services'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
 import { provisionContractMutation } from './test/provision-contract'
 
 describe('provisionContract mutation', () => {
   beforeAfterAll()
-  beforeEach(() => mockAdminServiceHelper.clearAllMocks())
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   async function givenContract() {
     const contract = await createContract(buildContractInput({}))
     return { contract }
@@ -35,7 +39,10 @@ describe('provisionContract mutation', () => {
     // Arrange
     const { contract } = await givenContract()
     const externalContractId = randomUUID()
-    mockAdminServiceHelper.createContract.resolveWith(mockAdminServiceHelper.createContract.buildResolve({ id: externalContractId }))
+
+    mockServiceUtil.adminService.createContract.resolveWith(
+      mockServiceUtil.adminService.createContract.buildResolve({ id: externalContractId }),
+    )
 
     // Act
     const { errors, data } = await executeOperationAsCredentialAdmin({
@@ -46,7 +53,7 @@ describe('provisionContract mutation', () => {
     })
 
     // Assert
-    expect(mockAdminServiceHelper.createContract.mock).toHaveBeenCalled()
+    expect(mockServiceUtil.adminService.createContract.mock).toHaveBeenCalled()
     expect(errors).toBeUndefined()
     expect(data).not.toBeNull()
     expect(data?.provisionContract.externalId).toBe(externalContractId)
@@ -57,7 +64,9 @@ describe('provisionContract mutation', () => {
     // Arrange
     const { contract } = await givenContract()
     const externalContractId = randomUUID()
-    mockAdminServiceHelper.createContract.resolveWith(mockAdminServiceHelper.createContract.buildResolve({ id: externalContractId }))
+    mockServiceUtil.adminService.createContract.resolveWith(
+      mockServiceUtil.adminService.createContract.buildResolve({ id: externalContractId }),
+    )
     //publishing for the first time
     await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,
@@ -76,8 +85,8 @@ describe('provisionContract mutation', () => {
     })
 
     // Assert
-    expect(mockAdminServiceHelper.createContract.mock).toHaveBeenCalled()
-    expect(mockAdminServiceHelper.updateContract.mock).toHaveBeenCalled()
+    expect(mockServiceUtil.adminService.createContract.mock).toHaveBeenCalled()
+    expect(mockServiceUtil.adminService.updateContract.mock).toHaveBeenCalled()
     expect(errors).toBeUndefined()
     expect(data).not.toBeNull()
     expect(data?.provisionContract.lastProvisionedAt).not.toBeNull()
@@ -87,7 +96,9 @@ describe('provisionContract mutation', () => {
     // Arrange
     const { contract } = await givenContract()
     const externalContractId = randomUUID()
-    mockAdminServiceHelper.createContract.resolveWith(mockAdminServiceHelper.createContract.buildResolve({ id: externalContractId }))
+    mockServiceUtil.adminService.createContract.resolveWith(
+      mockServiceUtil.adminService.createContract.buildResolve({ id: externalContractId }),
+    )
     //publishing for the first time
     await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,

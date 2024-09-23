@@ -4,6 +4,7 @@ import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { graphql } from '../../../generated'
 import type { AcquireLimitedAccessTokenInput } from '../../../generated/graphql'
 import { beforeAfterAll, executeOperationAsLimitedAccessClient, expectToBeDefined, expectUnauthorizedError } from '../../../test'
+import { mockServiceUtil } from '../../../test/mock-services'
 import { addUserToManager } from '../../auditing/user-context-helper'
 import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
 import { createIdentity } from '../../identity/tests/create-identity'
@@ -113,7 +114,12 @@ async function createContractWithIssuance() {
 
 describe('list contracts and identity-based access', () => {
   beforeAfterAll()
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   it('can find contracts with issuances (and presentations) for the given identity', async () => {
     const {
       identity,
@@ -194,7 +200,12 @@ describe('list contracts and identity-based access', () => {
 
 describe('issuance and data-access', () => {
   beforeAfterAll()
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   it('can query issuable contract with issuance data for the given identity', async () => {
     const { identity, contract } = await createContractWithIssuance()
     const limitedAccessData: AcquireLimitedAccessTokenInput = { identityId: identity.id, issuableContractIds: [contract.id] }
@@ -206,8 +217,8 @@ describe('issuance and data-access', () => {
 
     expect(errors).toBeUndefined()
 
-    const { issuances } = expectToBeDefined(data?.contract)
-    expect(issuances.length).toBeGreaterThanOrEqual(1)
+    expectToBeDefined(data?.contract)
+    expect(data.contract.issuances.length).toBeGreaterThanOrEqual(1)
   })
 
   it('cannot query contract with issuances with the another identity specified', async () => {

@@ -11,6 +11,7 @@ import {
   expectToBeDefined,
   expectUnauthorizedError,
 } from '../../../test'
+import { mockServiceUtil } from '../../../test/mock-services'
 import { acquireLimitedPhotoCaptureTokenMutation } from '../../limited-photo-capture-tokens/test'
 
 const getClientCredentialsTokenMock = jest.fn(() => ({ access_token: randomUUID(), expires: 1000 * 60 * 50 }))
@@ -34,7 +35,12 @@ const photoCaptureStatusQuery = graphql(`
 
 describe('photoCaptureStatus query', () => {
   beforeAfterAll()
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   it('returns the correct statuses', async () => {
     // Initial setup
     const {
@@ -42,7 +48,8 @@ describe('photoCaptureStatus query', () => {
       identity: { id: identityId },
     } = await setupPhotoCaptureData()
     const photoCaptureRequest = await createPhotoCaptureRequest()
-    const { id: photoCaptureRequestId } = expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
     // Photo capture request created - test initial status
     const { data: initialData } = await executeOperationAsApp(
@@ -103,7 +110,8 @@ describe('photoCaptureStatus query', () => {
     // Arrange
     await setupPhotoCaptureData()
     const photoCaptureRequest = await createPhotoCaptureRequest()
-    const { id: photoCaptureRequestId } = expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
     // Act
     const { data, errors } = await executeOperationAnonymous({

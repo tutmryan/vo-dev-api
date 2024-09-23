@@ -1,11 +1,17 @@
 import { randomUUID } from 'crypto'
 import { acquireLimitedPhotoCaptureTokenMutation } from '.'
 import { beforeAfterAll, executeOperationAnonymous, expectToBeDefined } from '../../../test'
+import { mockServiceUtil } from '../../../test/mock-services'
 import { createPhotoCaptureRequest } from '../../photo-capture/test'
 
 describe('acquireLimitedPhotoCaptureToken', () => {
   beforeAfterAll()
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   it('returns a validation error for invalid photo request ID', async () => {
     const { data, errors } = await executeOperationAnonymous({
       query: acquireLimitedPhotoCaptureTokenMutation,
@@ -30,7 +36,8 @@ describe('acquireLimitedPhotoCaptureToken', () => {
 
   it('can acquire a token for a valid photo capture request', async () => {
     const photoCaptureRequest = await createPhotoCaptureRequest()
-    const { id: photoCaptureRequestId } = expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
     const { data, errors } = await executeOperationAnonymous({
       query: acquireLimitedPhotoCaptureTokenMutation,
