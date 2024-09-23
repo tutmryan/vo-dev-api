@@ -8,11 +8,17 @@ import {
   fakeJpegDataURL,
   fakePngDataURL,
 } from '../../test'
+import { mockServiceUtil } from '../../test/mock-services'
 import { buildTemplateInput, createTemplate, createTemplateMutation, getEmptyTemplateInput } from './test/create-template'
 
 describe('createTemplate mutation', () => {
   beforeAfterAll()
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   it('returns an unauthorized error when accessed anonymously', async () => {
     // Act
     const { errors } = await executeOperationAnonymous({

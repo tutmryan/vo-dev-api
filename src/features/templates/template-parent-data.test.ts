@@ -1,5 +1,6 @@
 import { graphql } from '../../generated'
 import { beforeAfterAll, executeOperationAsCredentialAdmin, fakeJpegDataURL } from '../../test'
+import { mockServiceUtil } from '../../test/mock-services'
 import { createTemplate, getEmptyTemplateInput } from './test/create-template'
 
 graphql(
@@ -50,7 +51,12 @@ const getTemplateParentDataQuery = graphql(
 
 describe('template.parentData field', () => {
   beforeAfterAll()
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   it('returns null when the template has no parent', async () => {
     // Arrange
     const createdTemplate = await createTemplate(getEmptyTemplateInput())

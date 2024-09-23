@@ -2,7 +2,6 @@ import { graphql } from '../../../generated'
 import type { PhotoCaptureRequest } from '../../../generated/graphql'
 import { AppRoles } from '../../../roles'
 import { executeOperationAsApp, executeOperationAsLimitedPhotoCaptureClient } from '../../../test'
-import { Lazy } from '../../../util/lazy'
 import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
 import { createIdentity, createIdentityInput } from '../../identity/tests/create-identity'
 
@@ -43,10 +42,10 @@ export async function capturePhoto(request: { photo: string; photoCaptureRequest
   )
 }
 
-export const setupPhotoCaptureData = Lazy(async () => {
+export const setupPhotoCaptureData = async () => {
   const [contract, identity] = await Promise.all([createContract(getDefaultContractInput()), createIdentity(createIdentityInput())])
   return { contract, identity }
-})
+}
 
 export async function createPhotoCaptureRequest(request?: PhotoCaptureRequest) {
   if (!request) {

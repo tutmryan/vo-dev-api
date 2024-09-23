@@ -1,14 +1,18 @@
 import { randomUUID } from 'crypto'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
-import { mockAdminServiceHelper } from '../../test/mock-services'
+import { mockServiceUtil } from '../../test/mock-services'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
 import { provisionContractMutation } from './test/provision-contract'
 
 describe('deprecateContract mutation', () => {
   beforeAfterAll()
-  beforeEach(() => mockAdminServiceHelper.clearAllMocks())
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   async function givenContract() {
     const contract = await createContract(buildContractInput({}))
 
@@ -36,7 +40,10 @@ describe('deprecateContract mutation', () => {
     // Arrange
     const { contract } = await givenContract()
     const externalContractId = randomUUID()
-    mockAdminServiceHelper.createContract.resolveWith(mockAdminServiceHelper.createContract.buildResolve({ id: externalContractId }))
+
+    mockServiceUtil.adminService.createContract.resolveWith(
+      mockServiceUtil.adminService.createContract.buildResolve({ id: externalContractId }),
+    )
     await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,
       variables: {

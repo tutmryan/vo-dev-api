@@ -9,13 +9,19 @@ import {
   fakeJpegDataURL,
   fakePngDataURL,
 } from '../../test'
+import { mockServiceUtil } from '../../test/mock-services'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { StandardClaims } from './claims'
 import { createContractMutation, getDefaultContractInput } from './test/create-contract'
 
 describe('createContract mutation', () => {
   beforeAfterAll()
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   async function givenTemplate() {
     const template = await createTemplate(buildTemplateInput({}))
 

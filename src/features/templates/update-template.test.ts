@@ -9,13 +9,19 @@ import {
   fakeJpegDataURL,
   fakePngDataURL,
 } from '../../test'
+import { mockServiceUtil } from '../../test/mock-services'
 import { createTemplate, getEmptyTemplateInput } from './test/create-template'
 import { getTemplate } from './test/get-template'
 import { getUpdateTemplateInput, updateTemplateMutation } from './test/update-template'
 
 describe('updateTemplate mutation', () => {
   beforeAfterAll()
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   async function givenTemplate({ hasParent = false, hasChildren = false }: { hasParent?: boolean; hasChildren?: boolean }) {
     let parentTemplate: TemplateFragmentFragment | undefined = undefined
     if (hasParent) {

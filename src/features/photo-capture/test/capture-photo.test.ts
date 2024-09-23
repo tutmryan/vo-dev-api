@@ -8,13 +8,20 @@ import {
   executeOperationAsLimitedPhotoCaptureClient,
   executeOperationAsUser,
   expectToBeDefined,
+  expectToBeDefinedAndNotNull,
   expectUnauthorizedError,
 } from '../../../test'
+import { mockServiceUtil } from '../../../test/mock-services'
 import { acquireLimitedPhotoCaptureTokenMutation } from '../../limited-photo-capture-tokens/test'
 
 describe('capturePhoto mutation', () => {
   beforeAfterAll()
-
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   it('returns an unauthorized error when accessed anonymously', async () => {
     // Act
     const { errors } = await executeOperationAnonymous({
@@ -73,7 +80,8 @@ describe('capturePhoto mutation', () => {
       identity: { id: identityId },
     } = await setupPhotoCaptureData()
     const photoCaptureRequest = await createPhotoCaptureRequest()
-    const { id: photoCaptureRequestId } = expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
     // Act
     const { data, errors } = await executeOperationAsLimitedPhotoCaptureClient(
@@ -92,8 +100,8 @@ describe('capturePhoto mutation', () => {
     )
 
     expect(errors).toBeUndefined()
-    const { capturePhoto } = expectToBeDefined(data)
-    expect(capturePhoto).toBeNull()
+    expectToBeDefinedAndNotNull(data)
+    expect(data.capturePhoto).toBeNull()
   })
 
   it('prevents capturing a photo more than once', async () => {
@@ -103,7 +111,8 @@ describe('capturePhoto mutation', () => {
       identity: { id: identityId },
     } = await setupPhotoCaptureData()
     const photoCaptureRequest = await createPhotoCaptureRequest()
-    const { id: photoCaptureRequestId } = expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
     // Act
     const { errors } = await executeOperationAsLimitedPhotoCaptureClient(
@@ -134,7 +143,8 @@ describe('capturePhoto mutation', () => {
       identity: { id: identityId },
     } = await setupPhotoCaptureData()
     const photoCaptureRequest = await createPhotoCaptureRequest()
-    const { id: photoCaptureRequestId } = expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
     await executeOperationAsLimitedPhotoCaptureClient(
       {
@@ -168,7 +178,8 @@ describe('capturePhoto mutation', () => {
       identity: { id: identityId },
     } = await setupPhotoCaptureData()
     const photoCaptureRequest = await createPhotoCaptureRequest()
-    const { id: photoCaptureRequestId } = expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
     // Act
     const { errors } = await executeOperationAsLimitedPhotoCaptureClient(
@@ -196,7 +207,8 @@ describe('capturePhoto mutation', () => {
       identity: { id: identityId },
     } = await setupPhotoCaptureData()
     const photoCaptureRequest = await createPhotoCaptureRequest()
-    const { id: photoCaptureRequestId } = expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
     // Act
     const { errors } = await executeOperationAsLimitedPhotoCaptureClient(
@@ -223,10 +235,16 @@ describe('capturePhoto mutation', () => {
       contract: { id: contractId },
       identity: { id: identityId },
     } = await setupPhotoCaptureData()
-    const photoCaptureRequest = await createPhotoCaptureRequest()
+
+    const photoCaptureRequest = await createPhotoCaptureRequest({ contractId, identityId })
     const photoCaptureRequest2 = await createPhotoCaptureRequest()
-    const { id: photoCaptureRequestId } = expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
-    const { id: photoCaptureRequestId2 } = expectToBeDefined(photoCaptureRequest2.data?.createPhotoCaptureRequest)
+
+    expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
+    const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
+    expectToBeDefined(photoCaptureRequest2.data?.createPhotoCaptureRequest)
+    const { id: photoCaptureRequestId2 } = photoCaptureRequest2.data.createPhotoCaptureRequest
+
+    expect(photoCaptureRequestId).not.toEqual(photoCaptureRequestId2)
 
     // Act
     const { errors } = await executeOperationAsLimitedPhotoCaptureClient(
@@ -234,7 +252,7 @@ describe('capturePhoto mutation', () => {
         query: capturePhotoMutation,
         variables: {
           photoCaptureRequestId: photoCaptureRequestId2,
-          photo: pngPhotoDataUrl,
+          photo: validPhotoDataUrl,
         },
       },
       {

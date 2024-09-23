@@ -2,6 +2,7 @@ import { graphql } from '../../../generated'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
 import { AppRoles } from '../../../roles'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsApp, expectUnauthorizedError } from '../../../test'
+import { mockServiceUtil } from '../../../test/mock-services'
 import { createActionedApprovalRequest, createApprovalRequest, getDefaultApprovalRequestInput } from './create-approval-request'
 
 export const findActionedApprovalDataQuery = graphql(
@@ -26,6 +27,12 @@ export const findActionedApprovalDataQuery = graphql(
 
 describe('find actioned approval data', () => {
   beforeAfterAll()
+  beforeEach(() => {
+    mockServiceUtil.clearAllMocks()
+    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+  })
   it('returns null for pending approval requests', async () => {
     // Arrange
     const approvalRequest = await createApprovalRequest(getDefaultApprovalRequestInput())
