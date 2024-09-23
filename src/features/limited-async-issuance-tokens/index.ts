@@ -1,5 +1,6 @@
 import { newCacheSection } from '../../cache'
 import { limitedAsyncIssuance } from '../../config'
+import { acquireAsyncIssuanceTokenLimiter } from '../../rate-limiter'
 import { createKey } from '../../util/token'
 import type { AsyncIssuanceEntity } from '../async-issuance/entities/async-issuance-entity'
 
@@ -10,6 +11,7 @@ export const issuanceSessionExpiryMinutes = 60
 const asyncIssuanceCache = newCacheSection('asyncIssuance')
 
 export async function setVerificationCode(asyncIssuanceRequestId: string, verificationCode: string) {
+  await acquireAsyncIssuanceTokenLimiter.delete(asyncIssuanceRequestId)
   return verificationCache.set(asyncIssuanceRequestId, verificationCode, { ttl: 60 * codeExpiryMinutes })
 }
 
@@ -19,6 +21,7 @@ export async function redeemVerificationCode(asyncIssuanceRequestId: string, ver
   if (isValid) {
     await verificationCache.delete(asyncIssuanceRequestId)
     await clearVerificationThrottleForIssuance(asyncIssuanceRequestId)
+    await acquireAsyncIssuanceTokenLimiter.delete(asyncIssuanceRequestId)
   }
   return isValid
 }

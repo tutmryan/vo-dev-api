@@ -5,6 +5,7 @@ import { redeemVerificationCode, setLimitedAsyncIssuanceData } from '..'
 import { limitedAsyncIssuanceAuth } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import type { AsyncIssuanceTokenResponse } from '../../../generated/graphql'
+import { acquireAsyncIssuanceTokenLimiter, consumeRateLimit } from '../../../rate-limiter'
 import { invariant } from '../../../util/invariant'
 import { AsyncIssuanceEntity } from '../../async-issuance/entities/async-issuance-entity'
 import { createLimitedPhotoCaptureSession } from '../../limited-photo-capture-tokens'
@@ -17,6 +18,9 @@ export async function AcquireAsyncIssuanceTokenCommand(
   verificationCode: string,
 ): Promise<AsyncIssuanceTokenResponse> {
   const { entityManager } = this
+
+  // rate limit by async issuance request id
+  await consumeRateLimit(acquireAsyncIssuanceTokenLimiter, asyncIssuanceRequestId, 'Too many attempts on this issuance')
 
   // check + clear verification code
   const isValid = await redeemVerificationCode(asyncIssuanceRequestId, verificationCode)
