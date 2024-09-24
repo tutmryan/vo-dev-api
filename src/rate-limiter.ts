@@ -49,7 +49,10 @@ export const consumeRateLimit = async (
   }
 }
 
-const clientIp = (req: Request) => req.headers['x-forwarded-for']?.toString() ?? req.socket.remoteAddress
+function clientIp(req: Request) {
+  const ip = req.ip ?? req.socket.remoteAddress ?? 'ip-unknown'
+  return ip.split(':')[0]
+}
 const rateLimiterRequestKey = (clientIp?: string, jwtPayload?: JwtPayload) => `${clientIp}-${jwtPayload?.jti ?? jwtPayload?.uti}`
 
 export const rateLimiterMiddleware = (req: Request, res: Response, next: NextFunction) => {
@@ -74,6 +77,8 @@ export const rateLimiterMiddleware = (req: Request, res: Response, next: NextFun
         },
         ...loggableErrorData,
       })
+      return next()
+      // TODO restore this once rate limiting is stable
       if ('msBeforeNext' in error) {
         const secs = Math.round(error.msBeforeNext / 1000) || 1
         res.set('Retry-After', String(secs))
