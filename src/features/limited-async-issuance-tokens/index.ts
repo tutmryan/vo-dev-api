@@ -1,6 +1,6 @@
 import { newCacheSection } from '../../cache'
 import { limitedAsyncIssuance } from '../../config'
-import { acquireAsyncIssuanceTokenLimiter } from '../../rate-limiter'
+import { rateLimiter } from '../../redis'
 import { createKey } from '../../util/token'
 import type { AsyncIssuanceEntity } from '../async-issuance/entities/async-issuance-entity'
 
@@ -9,6 +9,13 @@ const verificationCache = newCacheSection('asyncIssuanceVerificationCache')
 
 export const issuanceSessionExpiryMinutes = 60
 const asyncIssuanceCache = newCacheSection('asyncIssuance')
+
+export const acquireAsyncIssuanceTokenLimiter = rateLimiter({
+  points: 10,
+  duration: 60 * codeExpiryMinutes,
+  keyPrefix: 'rate-limit-otp',
+  inMemoryBlockOnConsumed: 10,
+})
 
 export async function setVerificationCode(asyncIssuanceRequestId: string, verificationCode: string) {
   await acquireAsyncIssuanceTokenLimiter.delete(asyncIssuanceRequestId)

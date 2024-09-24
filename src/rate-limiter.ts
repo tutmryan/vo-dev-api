@@ -1,8 +1,9 @@
+import type { JwtPayload, RequestInfo } from '@makerx/graphql-core'
 import type { NextFunction, Request, Response } from 'express'
 import { GraphQLError } from 'graphql'
 import type { RateLimiterAbstract } from 'rate-limiter-flexible'
-import { BurstyRateLimiter } from 'rate-limiter-flexible'
-import { codeExpiryMinutes } from './features/limited-async-issuance-tokens'
+import { BurstyRateLimiter, RateLimiterRes } from 'rate-limiter-flexible'
+import type { GraphQLContext } from './context'
 import { logger } from './logger'
 import { rateLimiter } from './redis'
 
@@ -22,17 +23,26 @@ const burstRateLimiter = rateLimiter({
 
 const burstyLimiter = new BurstyRateLimiter(baseRateLimiter, burstRateLimiter)
 
-export const acquireAsyncIssuanceTokenLimiter = rateLimiter({
-  points: 10,
-  duration: 60 * codeExpiryMinutes,
-  keyPrefix: 'rate-limit-acquireAsyncIssuanceToken',
-})
+function buildRateLimitErrorLogMetadata(error: any | RateLimiterRes) {
+  let logMeta: any = { error }
+  if (error instanceof RateLimiterRes) {
+    const { consumedPoints, remainingPoints, msBeforeNext } = error
+    logMeta = { consumedPoints, remainingPoints, msBeforeNext }
+  }
+  return logMeta
+}
 
-export const consumeRateLimit = async (limiter: RateLimiterAbstract, key: string, errorMessage = 'Rate limit exceeded') => {
+export const consumeRateLimit = async (
+  limiter: RateLimiterAbstract,
+  key: string | GraphQLContext,
+  requestInfo?: RequestInfo,
+  errorMessage = 'Rate limit exceeded',
+) => {
   try {
-    await limiter.consume(key)
-  } catch (error) {
-    logger.warn(`Rate limit exceeded on limiter: ${limiter.keyPrefix} for key: ${key}`, { error })
+    await limiter.consume(typeof key === 'string' ? key : rateLimiterRequestKey(key.requestInfo.clientIp, key.user?.claims))
+  } catch (error: unknown | RateLimiterRes) {
+    const logMeta = { requestInfo, ...buildRateLimitErrorLogMetadata(error) }
+    logger.warn(`Rate limit exceeded on limiter: ${limiter.keyPrefix} for key: ${key}`, logMeta)
     throw new GraphQLError(errorMessage, {
       extensions: { code: 'TOO_MANY_REQUESTS', http: { status: 429 } },
     })
@@ -40,18 +50,21 @@ export const consumeRateLimit = async (limiter: RateLimiterAbstract, key: string
 }
 
 const clientIp = (req: Request) => req.headers['x-forwarded-for']?.toString() ?? req.socket.remoteAddress
-const rateLimiterRequestKey = (req: Request) => `${clientIp(req)}-${req.user?.jti ?? req.user?.uti}`
+const rateLimiterRequestKey = (clientIp?: string, jwtPayload?: JwtPayload) => `${clientIp}-${jwtPayload?.jti ?? jwtPayload?.uti}`
 
 export const rateLimiterMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const key = rateLimiterRequestKey(req)
+  const key = rateLimiterRequestKey(clientIp(req), req.user)
   burstyLimiter
     .consume(key)
-    .then(() => {
+    .then(({ consumedPoints, remainingPoints, msBeforeNext }) => {
+      // TODO remove this logging once rate limiting is stable
+      logger.info(`Rate limit consumed for ${key}`, { remainingPoints, consumedPoints, msBeforeNext })
       return next()
     })
     .catch((error) => {
+      const loggableErrorData = buildRateLimitErrorLogMetadata(error)
       logger.warn(`Rate limit exceeded on middleware request limiter for key: ${key}`, {
-        request: {
+        requestInfo: {
           host: req.hostname,
           method: req.method,
           url: req.originalUrl,
@@ -59,6 +72,7 @@ export const rateLimiterMiddleware = (req: Request, res: Response, next: NextFun
           referer: req.headers.referer?.toString() ?? '',
           clientIp: clientIp(req),
         },
+        ...loggableErrorData,
       })
       if ('msBeforeNext' in error) {
         const secs = Math.round(error.msBeforeNext / 1000) || 1
