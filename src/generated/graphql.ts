@@ -2432,6 +2432,8 @@ export type Query = {
   actionedApprovalData?: Maybe<ActionedApprovalData>;
   /** Returns an approval request by ID. */
   approvalRequest: ApprovalRequest;
+  /** Returns the distinct approval request types that have been used. */
+  approvalRequestTypes: Array<Scalars['String']['output']>;
   /**
    * Returns the async issuance issuee contact information.
    *
@@ -4465,6 +4467,7 @@ export type PresentedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   actionedApprovalData?: Resolver<Maybe<ResolversTypes['ActionedApprovalData']>, ParentType, ContextType, RequireFields<QueryActionedApprovalDataArgs, 'id'>>;
   approvalRequest?: Resolver<ResolversTypes['ApprovalRequest'], ParentType, ContextType, RequireFields<QueryApprovalRequestArgs, 'id'>>;
+  approvalRequestTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   asyncIssuanceContact?: Resolver<ResolversTypes['AsyncIssuanceContact'], ParentType, ContextType, RequireFields<QueryAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   asyncIssuanceRequest?: Resolver<ResolversTypes['AsyncIssuanceRequest'], ParentType, ContextType, RequireFields<QueryAsyncIssuanceRequestArgs, 'id'>>;
   authority?: Resolver<ResolversTypes['Authority'], ParentType, ContextType>;

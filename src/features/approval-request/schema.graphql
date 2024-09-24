@@ -330,4 +330,8 @@ extend type Query {
   Returns details of the action taken on the approval request.
   """
   actionedApprovalData(id: ID!): ActionedApprovalData
+  """
+  Returns the distinct approval request types that have been used.
+  """
+  approvalRequestTypes: [String!]!
 }

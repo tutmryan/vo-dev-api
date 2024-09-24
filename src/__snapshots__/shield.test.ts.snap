@@ -293,6 +293,10 @@ exports[`shield rules are setup correctly 1`] = `
     "asyncIssuanceContact": {
       "name": "hasRole-VerifiableCredential.Issuer",
       "cache": "contextual"
+    },
+    "approvalRequestTypes": {
+      "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
+      "cache": "contextual"
     }
   },
   "Mutation": {

@@ -90,6 +90,7 @@ export const rules: ShieldSchema<Resolvers> = {
     photoCaptureStatus: or(isIssuer, isLimitedAsyncIssuancePhotoCaptureUser),
     asyncIssuanceRequest: isIssuer,
     asyncIssuanceContact: isIssuerUser,
+    approvalRequestTypes: isApprovalRequestAdminUser,
   },
   Mutation: {
     '*': isCredentialAdminUser,
