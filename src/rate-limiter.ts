@@ -37,7 +37,10 @@ export const consumeRateLimit = async (limiter: RateLimiterAbstract, key: string
   }
 }
 
-const rateLimiterRequestKey = (req: Request) => `${req.ip}-${req.user?.jti ?? req.user?.uti}`
+function rateLimiterRequestKey(req: Request) {
+  const ip = req.headers['x-forwarded-for']?.toString() ?? req.socket.remoteAddress
+  return `${ip}-${req.user?.jti ?? req.user?.uti}`
+}
 
 export const rateLimiterMiddleware = (req: Request, res: Response, next: NextFunction) => {
   burstyLimiter

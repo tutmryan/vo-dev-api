@@ -9,7 +9,7 @@ const config: DeepPartial<Config> = {
   },
   logging: {
     userClaimsToLog: ['oid', 'aud', 'tid', 'azp', 'iss', 'scp', 'roles'],
-    requestInfoToLog: ['origin', 'requestId', 'correlationId'],
+    requestInfoToLog: ['origin', 'requestId', 'correlationId', 'clientIp'],
     omitPaths: [],
     loggerOptions: {
       defaultMeta: {
