@@ -6,24 +6,26 @@ import { codeExpiryMinutes } from './features/limited-async-issuance-tokens'
 import { logger } from './logger'
 import { rateLimiter } from './redis'
 
-const burstyLimiter = new BurstyRateLimiter(
-  rateLimiter({
-    points: 10,
-    duration: 1,
-    inMemoryBlockOnConsumed: 10,
-  }),
-  rateLimiter({
-    points: 100,
-    duration: 5,
-    keyPrefix: 'burst',
-    inMemoryBlockOnConsumed: 100,
-  }),
-)
+const baseRateLimiter = rateLimiter({
+  points: 10,
+  duration: 1,
+  inMemoryBlockOnConsumed: 10,
+  keyPrefix: 'rate-limit-base',
+})
+
+const burstRateLimiter = rateLimiter({
+  points: 100,
+  duration: 5,
+  keyPrefix: 'rate-limit-burst',
+  inMemoryBlockOnConsumed: 100,
+})
+
+const burstyLimiter = new BurstyRateLimiter(baseRateLimiter, burstRateLimiter)
 
 export const acquireAsyncIssuanceTokenLimiter = rateLimiter({
   points: 10,
   duration: 60 * codeExpiryMinutes,
-  keyPrefix: 'acquireAsyncIssuanceToken',
+  keyPrefix: 'rate-limit-acquireAsyncIssuanceToken',
 })
 
 export const consumeRateLimit = async (limiter: RateLimiterAbstract, key: string, errorMessage = 'Rate limit exceeded') => {
@@ -37,27 +39,31 @@ export const consumeRateLimit = async (limiter: RateLimiterAbstract, key: string
   }
 }
 
-function rateLimiterRequestKey(req: Request) {
-  const ip = req.headers['x-forwarded-for']?.toString() ?? req.socket.remoteAddress
-  return `${ip}-${req.user?.jti ?? req.user?.uti}`
-}
+const clientIp = (req: Request) => req.headers['x-forwarded-for']?.toString() ?? req.socket.remoteAddress
+const rateLimiterRequestKey = (req: Request) => `${clientIp(req)}-${req.user?.jti ?? req.user?.uti}`
 
 export const rateLimiterMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const key = rateLimiterRequestKey(req)
   burstyLimiter
-    .consume(rateLimiterRequestKey(req))
+    .consume(key)
     .then(() => {
       return next()
     })
-    .catch(() => {
-      logger.warn(`Rate limit exceeded on middleware request limiter for key: ${rateLimiterRequestKey(req)}`, {
+    .catch((error) => {
+      logger.warn(`Rate limit exceeded on middleware request limiter for key: ${key}`, {
         request: {
           host: req.hostname,
           method: req.method,
           url: req.originalUrl,
           origin: req.get('Origin') ?? '',
           referer: req.headers.referer?.toString() ?? '',
+          clientIp: clientIp(req),
         },
       })
+      if ('msBeforeNext' in error) {
+        const secs = Math.round(error.msBeforeNext / 1000) || 1
+        res.set('Retry-After', String(secs))
+      }
       res.sendStatus(429)
     })
 }
