@@ -54,7 +54,7 @@ function clientIp(req: Request) {
   const address = req.ip ?? req.socket.remoteAddress
   if (!address) return 'ip-unknown'
   if (address.startsWith('::')) return address
-  return address.split(':').pop() // discard the port
+  return address.split(':')[0] // discard the port
 }
 
 function rateLimiterRequestKey(jwtPayload?: JwtPayload, clientIp?: string) {
