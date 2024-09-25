@@ -19,6 +19,7 @@ import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
 import type { Logger } from './logger'
 import { logger } from './logger'
+import { rateLimiterMiddleware } from './rate-limiter'
 import createSchema from './schema'
 import { pruneKeys } from './util/prune-keys'
 
@@ -89,6 +90,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
 
   app.use(
     '/graphql',
+    rateLimiterMiddleware,
     json({ limit: '1mb' }),
     expressMiddleware(server, {
       context: async ({ req }) => createContext({ req, claims: req.user }),
