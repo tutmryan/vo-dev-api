@@ -25,24 +25,24 @@ export const redisOptions: RedisOptions = {
   port: 6380,
   password: redisConfig.key,
   tls: redisConfig.key ? {} : undefined,
-  enableOfflineQueue: false,
 }
 
-const redisClient = Lazy(() => {
-  const client = new Redis(redisOptions)
-  client.on('error', ({ message, stack, ...rest }) => logger.error('Redis error', { message, stack, ...rest }))
-  client.on('connect', () => logger.info('Connected to Redis'))
-  client.on('reconnecting', () => logger.info('Reconnecting to Redis'))
-  client.on('end', () => logger.info('Disconnected from Redis'))
-  client.on('close', () => logger.info('Redis connection closed'))
-  client.on('ready', () => logger.info('Redis connection ready'))
-  client.on('warning', (warning) => logger.warn('Redis warning', warning))
+function createRedisClient(clientName: 'cache' | 'publisher' | 'subscriber' | 'rate limit', options: RedisOptions = redisOptions) {
+  logger.info(`Creating Redis ${clientName} client`)
+  const client = new Redis(options)
+  client.on('connect', () => logger.info(`Connected to Redis ${clientName} client`))
+  client.on('warning', (warning) => logger.warn(`Redis ${clientName} client warning`, warning))
+  client.on('error', ({ message, stack, ...rest }) => logger.error(`Redis ${clientName} client error`, { message, stack, ...rest }))
   return client
-})
-const redisKeyVAdapter = Lazy(() => new KeyvAdapter(new Keyv({ store: new KeyvRedis(redisClient()) })))
-const redisPubsub = Lazy(() => new RedisPubSub({ publisher: redisClient(), subscriber: redisClient() }))
+}
 
-export const cache: KeyValueCache = isRedisEnabled ? redisKeyVAdapter() : new InMemoryLRUCache()
-export const pubsub = isRedisEnabled ? redisPubsub() : new PubSub()
+const createRedisKeyVAdapter = Lazy(() => new KeyvAdapter(new Keyv({ store: new KeyvRedis(createRedisClient('cache')) })))
+const createRedisPubsub = Lazy(
+  () => new RedisPubSub({ publisher: createRedisClient('publisher'), subscriber: createRedisClient('subscriber') }),
+)
+const redisRateLimitClient = Lazy(() => createRedisClient('rate limit', { ...redisOptions, enableOfflineQueue: false }))
+
+export const cache: KeyValueCache = isRedisEnabled ? createRedisKeyVAdapter() : new InMemoryLRUCache()
+export const pubsub = isRedisEnabled ? createRedisPubsub() : new PubSub()
 export const rateLimiter = (options: Omit<IRateLimiterStoreOptions, 'storeClient'>) =>
-  isRedisEnabled ? new RateLimiterRedis({ ...options, storeClient: redisClient() }) : new RateLimiterMemory(options)
+  isRedisEnabled ? new RateLimiterRedis({ ...options, storeClient: redisRateLimitClient() }) : new RateLimiterMemory(options)
