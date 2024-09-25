@@ -27,8 +27,6 @@ import {
   presentationCallbackRoute,
 } from './config'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
-import { issuanceCallbackHandler } from './features/issuance/callback/issuance-callback-handler'
-import { presentationCallbackHandler } from './features/presentation/callback/presentation-callback-handler'
 import { logger } from './logger'
 import { addVoyager } from './voyager'
 
@@ -128,10 +126,10 @@ export const getExpressApp = (): Express => {
   // add issuance and presentation callback routes
   const jsonParser = bodyParser.json({ limit: '1mb' })
 
-  app.post(issuanceCallbackRoute, jsonParser, issuanceCallbackMiddleware(issuanceCallbackHandler))
+  app.post(issuanceCallbackRoute, jsonParser, issuanceCallbackMiddleware)
   logger.info(`Added POST ${issuanceCallbackRoute}`)
 
-  app.post(presentationCallbackRoute, jsonParser, presentationCallbackMiddleware(presentationCallbackHandler))
+  app.post(presentationCallbackRoute, jsonParser, presentationCallbackMiddleware)
   logger.info(`Added POST ${presentationCallbackRoute}`)
 
   return app

@@ -5,16 +5,17 @@ import { requestCallbackCache } from '../../cache'
 import type { Callback, IssuanceCallbackEvent, PresentationCallbackEvent } from '../../generated/graphql'
 import { logger } from '../../logger'
 import { InternalRoles } from '../../roles'
+import { issuanceCallbackHandler } from '../issuance/callback/issuance-callback-handler'
+import { presentationCallbackHandler } from '../presentation/callback/presentation-callback-handler'
 
 export type IssuanceCallbackHandler = (event: IssuanceCallbackEvent) => Promise<void>
 export type PresentationCallbackHandler = (event: PresentationCallbackEvent) => Promise<void>
 
-export function issuanceCallbackMiddleware(handler?: IssuanceCallbackHandler): RequestHandler {
-  return requestCallbackMiddleware('issuance', handler as CallbackHandler)
-}
-export function presentationCallbackMiddleware(handler?: PresentationCallbackHandler): RequestHandler {
-  return requestCallbackMiddleware('presentation', handler as CallbackHandler)
-}
+export const issuanceCallbackMiddleware: RequestHandler = requestCallbackMiddleware('issuance', issuanceCallbackHandler as CallbackHandler)
+export const presentationCallbackMiddleware: RequestHandler = requestCallbackMiddleware(
+  'presentation',
+  presentationCallbackHandler as CallbackHandler,
+)
 
 type CallbackHandler = (event: IssuanceCallbackEvent | PresentationCallbackEvent) => Promise<void>
 
