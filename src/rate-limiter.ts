@@ -64,18 +64,16 @@ function rateLimiterRequestKey(jwtPayload?: JwtPayload, clientIp?: string) {
     invariant(key, 'Rate limiter key could not be determined, JWT payload has no jti or uti claim')
     return key
   }
-  // fallback to rate limiting by client IP
+  // for anonymous operations, rate limit by client IP
   invariant(clientIp, 'Rate limiter key could not be determined, client IP is missing')
   return clientIp
 }
 
 export const rateLimiterMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const key = rateLimiterRequestKey(req.user, req.ip)
+  const key = rateLimiterRequestKey(req.user, clientIp(req))
   burstyLimiter
     .consume(key)
-    .then(({ consumedPoints, remainingPoints, msBeforeNext }) => {
-      // TODO remove this logging once rate limiting is stable
-      logger.info(`Rate limit consumed for ${key}`, { remainingPoints, consumedPoints, msBeforeNext })
+    .then(() => {
       return next()
     })
     .catch((error) => {
@@ -87,12 +85,10 @@ export const rateLimiterMiddleware = (req: Request, res: Response, next: NextFun
           url: req.originalUrl,
           origin: req.get('Origin') ?? '',
           referer: req.headers.referer?.toString() ?? '',
-          clientIp: clientIp(req),
+          clientIp: req.ip,
         },
         ...loggableErrorData,
       })
-      return next()
-      // TODO restore this once rate limiting is stable
       if ('msBeforeNext' in error) {
         const secs = Math.round(error.msBeforeNext / 1000) || 1
         res.set('Retry-After', String(secs))
