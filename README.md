@@ -51,11 +51,10 @@ To resolve this, there's a small script that will configure Ngrok to expose the 
 This will allow you to issue credentials and test the platform as if it were hosted on a public server. Once running successfully, you will find similar readout in your terminal:
 
 ```
-------------------------------------------------
 Tunnels are open
-  API:       https://3b34-159-196-209-217.ngrok-free.app
-  Admin UI:  https://1fc1-159-196-209-217.ngrok-free.app
-  Portal UI: https://cbdb-159-196-209-217.ngrok-free.app
+  API:       https://0649-159-196-209-217.ngrok-free.app
+  Admin UI:  https://8305-159-196-209-217.ngrok-free.app
+  Portal UI: https://7d6e-159-196-209-217.ngrok-free.app
 
 Ngrok dashboard
   http://127.0.0.1:4040/
@@ -63,6 +62,11 @@ Ngrok dashboard
 ------------------------------------------------
 
 Press Ctrl+C to close the tunnels and exit
+
+Enter `b` to open the API
+Enter `a` to open the Admin UI
+Enter `p` to open the Portal UI
+Enter `n` to open the ngrok dashboard
 ```
 
 Note: *this script requires the local folder layout to be as follows:*
