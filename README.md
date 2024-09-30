@@ -6,6 +6,7 @@ The verified orchestration platform GraphQL API backend repository.
 
 - [Docker](https://www.docker.com/products/docker-desktop/)
 - [Node v20 LTS](https://nodejs.org/en/download/package-manager)
+- [Ngrok](https://ngrok.com/) (required for issuing credentials locally)
 
 ## Developer IDE recommendations
 
@@ -34,3 +35,42 @@ For webstorm users, the VO recommendation is to enable 'Optimize imports' on sav
 ## Azure Storage Explorer
 
 To view the local storage account, you can use the [Azure Storage Explorer](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-emulator). It has built-in support for connecting to Azurite, the local storage emulator. One thing to note is that the certificates need to be manually imported before a successful connection can be made. This can be done by going to `Edit -> SSL Certificates -> Import` and selecting the `local-cert/127.0.0.1.pem` file.
+
+## Running a fully functional local development environment
+
+By default, the local instances that comprise the VO platform are hosted on the following local ports:
+
+- API: `http://localhost:4000`
+- Admin UI: `http://localhost:5471/2` (Depending on order of startup, this may be on port 5472)
+- Portal UI: `http://localhost:5471/2` (Depending on order of startup, this may be on port 5472)
+
+However, the default configuration suffers from not being able to issue credentials as the MS servers require publicly accessible endpoints.
+
+To resolve this, there's a small script that will configure Ngrok to expose the local instances to the internet. This script can be run by executing the following command: `npm run start:dev:tunnels`
+
+This will allow you to issue credentials and test the platform as if it were hosted on a public server. Once running successfully, you will find similar readout in your terminal:
+
+```
+------------------------------------------------
+Tunnels are open
+  API:       https://3b34-159-196-209-217.ngrok-free.app
+  Admin UI:  https://1fc1-159-196-209-217.ngrok-free.app
+  Portal UI: https://cbdb-159-196-209-217.ngrok-free.app
+
+Ngrok dashboard
+  http://127.0.0.1:4040/
+
+------------------------------------------------
+
+Press Ctrl+C to close the tunnels and exit
+```
+
+Note: *this script requires the local folder layout to be as follows:*
+
+```
+/shared-parent-folder/verified-orchestration-api
+/shared-parent-folder/verified-orchestration-admin
+/shared-parent-folder/verified-orchestration-portal
+```
+
+Note: *this script configures the API, Admin UI, and Portal UI to be exposed to the internet and makes all required changes to the configuration files. These changes are reverted when the script is stopped.*

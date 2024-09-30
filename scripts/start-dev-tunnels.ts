@@ -140,22 +140,55 @@ const startNgrok = async () => {
   console.log('Updating the API .env file with the new Portal tunnel URL...')
   replaceValueInEnvConfigFile('LOCAL_DEV_PORTAL_TUNNEL_URI', portalUiUrl, pathToApi, '.env')
 
-  open('http://127.0.0.1:4040/').catch(console.error)
+  const renderUi = () => {
+    console.log('')
+    console.log('')
+    console.log('------------------------------------------------')
+    console.log('Tunnels are open')
+    console.log(`  API:       ${apiUrl}`)
+    console.log(`  Admin UI:  ${adminUiUrl}`)
+    console.log(`  Portal UI: ${portalUiUrl}`)
+    console.log('')
+    console.log('Ngrok dashboard')
+    console.log('  http://127.0.0.1:4040/')
+    console.log('')
+    console.log('------------------------------------------------')
+    console.log('')
+    console.log('Press Ctrl+C to close the tunnels and exit')
+    console.log('')
+    console.log('Enter `b` to open the API')
+    console.log('Enter `a` to open the Admin UI')
+    console.log('Enter `p` to open the Portal UI')
+    console.log('Enter `n` to open the ngrok dashboard')
+    console.log('')
+  }
 
-  console.log('')
-  console.log('')
-  console.log('------------------------------------------------')
-  console.log('Tunnels are open')
-  console.log(`  API:       ${apiUrl}`)
-  console.log(`  Admin UI:  ${adminUiUrl}`)
-  console.log(`  Portal UI: ${portalUiUrl}`)
-  console.log('')
-  console.log('Ngrok dashboard')
-  console.log('  http://127.0.0.1:4040/')
-  console.log('')
-  console.log('------------------------------------------------')
-  console.log('')
-  console.log('Press Ctrl+C to close the tunnels and exit')
+  renderUi()
+
+  const rl = readline.createInterface(process.stdin)
+
+  rl.on('line', (input) => {
+    console.clear()
+    renderUi()
+    switch (input.toLowerCase()) {
+      case 'b':
+        console.log('Opening API...')
+        open(apiUrl).catch(console.error)
+        break
+      case 'a':
+        console.log('Opening Admin UI...')
+        open(adminUiUrl).catch(console.error)
+        break
+      case 'p':
+        console.log('Opening Portal UI...')
+        open(portalUiUrl).catch(console.error)
+        break
+      case 'n':
+        console.log('Opening Ngrok dashboard...')
+        open('http://127.0.0.1:4040/').catch(console.error)
+        break
+    }
+  })
 }
 
 let gracefulExit = false
