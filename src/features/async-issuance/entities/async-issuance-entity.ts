@@ -2,6 +2,7 @@ import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm'
 import { calculateExpiryFromNow, convertAsyncIssuanceExpiryDaysToRequestExpiry, ExpiryPeriodsInDays } from '..'
 import { AsyncIssuanceRequestExpiry, AsyncIssuanceRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
+import { invariant } from '../../../util/invariant'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { CommunicationEntity } from '../../communication/entities/communication-entity'
@@ -18,6 +19,8 @@ export const failedStates: FailedStates[] = ['contact-failed', 'issuance-failed'
 const indexFor = (fields: [keyof AsyncIssuanceEntity]) => fields
 
 export type ValidCancellationStates = Exclude<AsyncIssuanceEntity['state'], 'issued'>
+
+const cannotModifyInFinalStateMessage = 'Async issuance cannot be modified'
 
 @Entity('async_issuance')
 @Index(indexFor(['expiresOn']))
@@ -100,20 +103,28 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
     return ![AsyncIssuanceRequestStatus.Cancelled, AsyncIssuanceRequestStatus.Issued].includes(this.status)
   }
 
+  public get canIssue() {
+    return !this.isStatusFinal
+  }
+
   public failed(reason: FailedStates) {
+    invariant(!this.isStatusFinal, cannotModifyInFinalStateMessage)
     this.state = reason
   }
 
   public issued(issuance: IssuanceEntity) {
+    invariant(this.canIssue, 'Async issuance cannot be issued')
     this.state = 'issued'
     this.issuanceId = issuance.id
   }
 
   public canceled() {
+    invariant(this.canCancel, 'Async issuance cannot be cancelled')
     this.state = 'cancelled'
   }
 
   public contacted() {
+    invariant(!this.isStatusFinal, cannotModifyInFinalStateMessage)
     this.state = 'contacted'
   }
 }
