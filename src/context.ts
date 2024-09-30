@@ -98,7 +98,7 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
     return new User(claims, token, userEntity, undefined, undefined, photoCaptureData, limitedAsyncIssuanceData)
   }
 
-  // If the claims do not include any of the plaform roles, return undefined
+  // If the claims do not include any of the platform roles, return undefined
   const platformRoles = [
     ...enumStringValues(UserRoles),
     ...enumStringValues(AppRoles),

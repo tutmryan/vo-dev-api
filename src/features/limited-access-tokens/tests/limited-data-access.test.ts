@@ -4,7 +4,7 @@ import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { graphql } from '../../../generated'
 import type { AcquireLimitedAccessTokenInput } from '../../../generated/graphql'
 import { beforeAfterAll, executeOperationAsLimitedAccessClient, expectToBeDefined, expectUnauthorizedError } from '../../../test'
-import { mockServiceUtil } from '../../../test/mock-services'
+import { mockedServices } from '../../../test/mocks'
 import { addUserToManager } from '../../auditing/user-context-helper'
 import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
 import { createIdentity } from '../../identity/tests/create-identity'
@@ -115,9 +115,9 @@ async function createContractWithIssuance() {
 describe('list contracts and identity-based access', () => {
   beforeAfterAll()
   beforeEach(() => {
-    mockServiceUtil.clearAllMocks()
-    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
-      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    mockedServices.clearAllMocks()
+    mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
     )
   })
   it('can find contracts with issuances (and presentations) for the given identity', async () => {
@@ -201,9 +201,9 @@ describe('list contracts and identity-based access', () => {
 describe('issuance and data-access', () => {
   beforeAfterAll()
   beforeEach(() => {
-    mockServiceUtil.clearAllMocks()
-    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
-      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    mockedServices.clearAllMocks()
+    mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
     )
   })
   it('can query issuable contract with issuance data for the given identity', async () => {

@@ -1,12 +1,9 @@
 import mime from 'mime'
 import { fakeBlobStorageHost } from '../../test/data-url'
 import { parseDataUrl } from '../../util/data-url'
-
-const mockUploadDataUrl = jest.fn()
-const mockUpload = jest.fn()
-const mockDownloadToBuffer = jest.fn()
-const mockDeleteIfExists = jest.fn()
-const mockGetProperties = jest.fn()
+import type { ServiceMock } from '../../util/jest'
+import { mockFunction } from '../../util/jest'
+import type { BlobStorageContainerService } from '../blob-storage-container-service'
 
 const buildUploadDataUrl = (blobName: string, dataUrl: string): Promise<string> => {
   const { mimeType, data } = parseDataUrl(dataUrl)
@@ -15,31 +12,35 @@ const buildUploadDataUrl = (blobName: string, dataUrl: string): Promise<string> 
   return Promise.resolve([fakeBlobStorageHost, name].join('/'))
 }
 
-export const mock = jest.mock('../blob-storage-container-service', () => ({
-  BlobStorageContainerService: jest.fn().mockImplementation(() => ({
-    uploadDataUrl: mockUploadDataUrl,
-    upload: mockUpload,
-    downloadToBuffer: mockDownloadToBuffer,
-    deleteIfExists: mockDeleteIfExists,
-    getProperties: mockGetProperties,
-  })),
+const serviceMock: ServiceMock<BlobStorageContainerService> = {
+  uploadDataUrl: mockFunction<BlobStorageContainerService['uploadDataUrl']>(),
+  upload: mockFunction<BlobStorageContainerService['upload']>(),
+  downloadToBuffer: mockFunction<BlobStorageContainerService['downloadToBuffer']>(),
+  deleteIfExists: mockFunction<BlobStorageContainerService['deleteIfExists']>(),
+  getProperties: mockFunction<BlobStorageContainerService['getProperties']>(),
+  containerClient: mockFunction<BlobStorageContainerService['containerClient']>(),
+}
+
+jest.mock('../blob-storage-container-service', () => ({
+  BlobStorageContainerService: jest.fn().mockImplementation(() => serviceMock),
 }))
 
 export const helper = {
-  clearAllMocks: mock.clearAllMocks,
+  clearAllMocks: () => {
+    Object.values(serviceMock).forEach((m) => m.mockClear())
+  },
   uploadDataUrl: {
-    mock: mockUploadDataUrl,
-    resolveWith: (v: Promise<string>) => mockUploadDataUrl.mockResolvedValue(v),
+    mock: () => serviceMock.uploadDataUrl,
     buildResolve: buildUploadDataUrl,
-    dynamicResolveWith: (fn: (blobName: string, dataUrl: string) => Promise<string>) => mockUploadDataUrl.mockImplementation(fn),
+    dynamicResolveWith: (fn: (blobName: string, dataUrl: string) => Promise<string>) => serviceMock.uploadDataUrl.mockImplementation(fn),
   },
   upload: {
-    mock: mockUpload,
+    mock: () => serviceMock.upload,
   },
   deleteIfExists: {
-    mock: mockDeleteIfExists,
+    mock: () => serviceMock.deleteIfExists,
   },
   downloadToBuffer: {
-    mock: mockDownloadToBuffer,
+    mock: () => serviceMock.downloadToBuffer,
   },
 }

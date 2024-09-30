@@ -1,15 +1,13 @@
+import type { HttpClient } from '@makerx/node-common/http'
 import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { DidDocumentStatus } from '../../generated/graphql'
+import type { ServiceMock } from '../../util/jest'
+import { mockFunction } from '../../util/jest'
 import type { AwaitedReturnTypeOf } from '../../util/type-helpers'
 import type { VerifiedIdAdminService } from '../verified-id'
 
 type ServiceReturn<Method extends keyof VerifiedIdAdminService> = AwaitedReturnTypeOf<VerifiedIdAdminService, Method>
-
-const mockCreateContract = jest.fn()
-const mockUpdateContract = jest.fn()
-const mockContract = jest.fn()
-const mockAuthority = jest.fn()
 
 const buildContractReturn = (mockedResult?: Partial<ServiceReturn<'contract'>>): ServiceReturn<'contract'> => ({
   id: randomUUID(),
@@ -63,33 +61,42 @@ const buildCreateContractReturn = (mockedResult?: Partial<ServiceReturn<'createC
   ...mockedResult,
 })
 
-const mock = jest.mock('../verified-id/admin', () => ({
-  VerifiedIdAdminService: jest.fn().mockImplementation(() => ({
-    createContract: mockCreateContract,
-    updateContract: mockUpdateContract,
-    contract: mockContract,
-    authority: mockAuthority,
-  })),
+const serviceMock: ServiceMock<VerifiedIdAdminService, keyof HttpClient> = {
+  createContract: mockFunction<VerifiedIdAdminService['createContract']>(),
+  updateContract: mockFunction<VerifiedIdAdminService['updateContract']>(),
+  contracts: mockFunction<VerifiedIdAdminService['contracts']>(),
+  contract: mockFunction<VerifiedIdAdminService['contract']>(),
+  findNetworkIssuers: mockFunction<VerifiedIdAdminService['findNetworkIssuers']>(),
+  networkContracts: mockFunction<VerifiedIdAdminService['networkContracts']>(),
+  findCredential: mockFunction<VerifiedIdAdminService['findCredential']>(),
+  revokeCredential: mockFunction<VerifiedIdAdminService['revokeCredential']>(),
+  authority: mockFunction<VerifiedIdAdminService['authority']>(),
+}
+
+jest.mock('../verified-id/admin', () => ({
+  VerifiedIdAdminService: jest.fn().mockImplementation(() => serviceMock),
 }))
 
 export const helper = {
-  clearAllMocks: mock.clearAllMocks,
+  clearAllMocks: () => {
+    Object.values(serviceMock).forEach((m) => m.mockClear())
+  },
   updateContract: {
-    mock: mockUpdateContract,
+    mock: () => serviceMock.updateContract,
   },
   createContract: {
-    mock: mockCreateContract,
-    resolveWith: (v: ServiceReturn<'createContract'>) => mockCreateContract.mockResolvedValue(v),
+    mock: () => serviceMock.createContract,
+    resolveWith: (v: ServiceReturn<'createContract'>) => serviceMock.createContract.mockResolvedValue(v),
     buildResolve: buildCreateContractReturn,
   },
   contract: {
-    mock: mockContract,
-    resolvedWith: (v: ServiceReturn<'contract'>) => mockContract.mockResolvedValue(v),
+    mock: () => serviceMock.contract,
+    resolvedWith: (v: ServiceReturn<'contract'>) => serviceMock.contract.mockResolvedValue(v),
     buildResolve: buildContractReturn,
   },
   authority: {
-    mock: mockAuthority,
-    resolvedWith: (v: ServiceReturn<'authority'>) => mockAuthority.mockResolvedValue(v),
+    mock: () => serviceMock.authority,
+    resolvedWith: (v: ServiceReturn<'authority'>) => serviceMock.authority.mockResolvedValue(v),
     buildResolve: buildAuthorityReturn,
   },
 }

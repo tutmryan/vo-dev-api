@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { ContractInput, FaceCheckPhotoSupport, type IssuanceRequestInput, type PhotoCaptureRequest } from '../../../generated/graphql'
 import { beforeAfterAll, executeOperationAsLimitedAccessClient } from '../../../test'
-import { mockServiceUtil } from '../../../test/mock-services'
+import { mockedServices } from '../../../test/mocks'
 import { NonNullableFields, WithRequired } from '../../../util/type-helpers'
 import { buildContractInput, createContract } from '../../contracts/test/create-contract'
 import { provisionContract } from '../../contracts/test/provision-contract'
@@ -51,18 +51,18 @@ async function givenPhotoCapture(request: NonNullableFields<WithRequired<PhotoCa
 }
 
 function withMockedServices() {
-  mockServiceUtil.adminService.contract.resolvedWith(mockServiceUtil.adminService.contract.buildResolve())
-  mockServiceUtil.adminService.authority.resolvedWith(mockServiceUtil.adminService.authority.buildResolve())
-  mockServiceUtil.requestService.createIssuanceRequest.resolveWith(mockServiceUtil.requestService.createIssuanceRequest.buildResolve())
-  mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
-    mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+  mockedServices.adminService.contract.resolvedWith(mockedServices.adminService.contract.buildResolve())
+  mockedServices.adminService.authority.resolvedWith(mockedServices.adminService.authority.buildResolve())
+  mockedServices.requestService.createIssuanceRequest.resolveWith(mockedServices.requestService.createIssuanceRequest.buildResolve())
+  mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+    mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
   )
 }
 
 describe('createIssuanceRequest mutation', () => {
   beforeAfterAll()
   beforeEach(() => {
-    mockServiceUtil.clearAllMocks()
+    mockedServices.clearAllMocks()
   })
   it('works with valid input ', async () => {
     // Arrange
@@ -113,7 +113,7 @@ describe('createIssuanceRequest mutation', () => {
     expect(data).toBeDefined()
 
     // Assert the photo was passed to the issuance request
-    const issuanceRequest = mockServiceUtil.requestService.createIssuanceRequest.getLastCallArg()
+    const issuanceRequest = mockedServices.requestService.createIssuanceRequest.getLastCallArg()
     expect(issuanceRequest.claims!['photo']).toBe(convertFaceCheckPhoto(faceCheckPhoto))
   })
   it('works with face check when passing the photo capture request id', async () => {
@@ -148,7 +148,7 @@ describe('createIssuanceRequest mutation', () => {
     expect(data).toBeDefined()
 
     // Assert the photo was passed to the issuance request
-    const issuanceRequest = mockServiceUtil.requestService.createIssuanceRequest.getLastCallArg()
+    const issuanceRequest = mockedServices.requestService.createIssuanceRequest.getLastCallArg()
     expect(issuanceRequest.claims!['photo']).toBe(convertFaceCheckPhoto(photoCapturePhoto))
   })
   it('fails with face check when passing a previously used photo capture request id', async () => {

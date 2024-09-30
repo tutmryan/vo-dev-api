@@ -70,15 +70,24 @@ export const validateContractClaims = (
 }
 
 /**
- * Throws an error if required contract claims are not included in the issuance claims.
+ * Throws an error if any fixed value claims are included or if any required claims are missing.
  * Note: This function is only intended to be used for upfront validation of async issuance requests, since actual issuances are validated according to the published contract by the Microsoft VID service.
  */
-export const validateIssuanceClaimsIncludeRequiredContractClaims = (
+export const validateIssuanceClaimsAgainstContractClaims = (
   claims?: IssuanceRequestInput['claims'] | AsyncIssuanceRequestInput['claims'],
   contractClaims?: ContractDisplayModelInput['claims'] | CreateUpdateTemplateDisplayModelInput['claims'],
 ): void => {
+  claims = claims ?? {}
+
+  const fixedValueClaims = contractClaims?.filter(({ value }) => value !== undefined)
+  const suppliedFixedValueClaims = fixedValueClaims?.filter(({ claim }) => claims[claim]) ?? []
+  if (suppliedFixedValueClaims.length > 0)
+    throw new Error(
+      `Claims must not include: ${suppliedFixedValueClaims.map(({ claim }) => claim).join(', ')}, as they are fixed by the credential`,
+    )
+
   const requiredClaims = contractClaims?.filter(({ value }) => value === undefined)
-  if (!requiredClaims) return
-  const missingClaims = requiredClaims.filter(({ claim }) => !claims || !claims[claim])
-  if (missingClaims.length > 0) throw new Error(`Claims must include: ${missingClaims.map(({ claim }) => claim).join(', ')}`)
+  const missingRequiredClaims = requiredClaims?.filter(({ claim }) => !claims[claim]) ?? []
+  if (missingRequiredClaims.length > 0)
+    throw new Error(`Claims must include: ${missingRequiredClaims.map(({ claim }) => claim).join(', ')}`)
 }

@@ -1,13 +1,15 @@
+import type { HttpClient } from '@makerx/node-common/http'
 import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { addYears } from 'date-fns'
+import type { ServiceMock } from '../../util/jest'
+import { mockFunction } from '../../util/jest'
 import type { AwaitedReturnTypeOf } from '../../util/type-helpers'
-import type { IssuanceRequest, VerifiedIdRequestService } from '../verified-id'
+import type { IssuanceRequest } from '../verified-id'
+import type { VerifiedIdRequestService } from '../verified-id'
 import type { IssuanceResponse } from '../../generated/graphql'
 
 type ServiceReturn<Method extends keyof VerifiedIdRequestService> = AwaitedReturnTypeOf<VerifiedIdRequestService, Method>
-
-const mockCreateIssuanceRequest = jest.fn()
 
 const buildCreateIssuanceRequestReturn = (mockedResult?: IssuanceResponse): ServiceReturn<'createIssuanceRequest'> => ({
   requestId: randomUUID(),
@@ -17,18 +19,24 @@ const buildCreateIssuanceRequestReturn = (mockedResult?: IssuanceResponse): Serv
   ...mockedResult,
 })
 
-const mock = jest.mock('../verified-id/request', () => ({
-  VerifiedIdRequestService: jest.fn().mockImplementation(() => ({
-    createIssuanceRequest: mockCreateIssuanceRequest,
-  })),
+const serviceMock: ServiceMock<VerifiedIdRequestService, keyof HttpClient> = {
+  createIssuanceRequest: mockFunction<VerifiedIdRequestService['createIssuanceRequest']>(),
+  createPresentationRequest: mockFunction<VerifiedIdRequestService['createPresentationRequest']>(),
+}
+
+jest.mock('../verified-id/request', () => ({
+  VerifiedIdRequestService: jest.fn().mockImplementation(() => serviceMock),
 }))
 
 export const helper = {
-  clearAllMocks: mock.clearAllMocks,
+  clearAllMocks: () => {
+    Object.values(serviceMock).forEach((m) => m.mockClear())
+  },
   createIssuanceRequest: {
-    mock: mockCreateIssuanceRequest,
-    resolveWith: (v: ServiceReturn<'createIssuanceRequest'>) => mockCreateIssuanceRequest.mockResolvedValue(v),
+    mock: () => serviceMock.createIssuanceRequest,
+    resolveWith: (v: ServiceReturn<'createIssuanceRequest'>) => serviceMock.createIssuanceRequest.mockResolvedValue(v),
     buildResolve: buildCreateIssuanceRequestReturn,
-    getLastCallArg: () => mockCreateIssuanceRequest.mock.calls[mockCreateIssuanceRequest.mock.calls.length - 1][0] as IssuanceRequest,
+    getLastCallArg: () =>
+      serviceMock.createIssuanceRequest.mock.calls[serviceMock.createIssuanceRequest.mock.calls.length - 1]![0] as IssuanceRequest,
   },
 }

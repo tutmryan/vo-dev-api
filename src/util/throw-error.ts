@@ -8,6 +8,7 @@ const val = someNullableValue ?? throwError(new Error('Oh noes it is null'))
 val.doSomething()
 
  */
-export const throwError = (error: Error): never => {
+export const throwError = (error: Error | string): never => {
+  if (typeof error === 'string') throw new Error(error)
   throw error
 }

@@ -3,6 +3,11 @@ import type { Config } from '../src/config'
 
 const config: DeepPartial<Config> = {
   instance: 'test',
+  logging: {
+    consoleOptions: {
+      silent: true,
+    },
+  },
   cors: {
     origin: true,
   },

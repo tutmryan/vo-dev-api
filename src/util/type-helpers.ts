@@ -2,11 +2,15 @@ type Scalar = Date | number | string | boolean | undefined | null
 type ScalarPropsInternal<T, TKey extends keyof T> = TKey extends any ? (T[TKey] extends Scalar ? TKey : never) : never
 export type ScalarProps<T> = Pick<T, ScalarPropsInternal<T, keyof T>>
 
-export type DeepPartial<T> = T extends object
-  ? {
-      [P in keyof T]?: DeepPartial<T[P]>
-    }
-  : T
+export const resolveToType = <T>(value: T) => value
+
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends (infer U)[]
+    ? DeepPartial<U>[]
+    : T[P] extends Readonly<infer U>[]
+      ? Readonly<DeepPartial<U>>[]
+      : DeepPartial<T[P]>
+}
 
 export type Nullable<T> = T | null | undefined
 
@@ -27,3 +31,5 @@ export function assertExhaustive(value: never, message?: string): never {
 export function isObject(x: unknown): x is object {
   return typeof x === 'object' && x !== null
 }
+
+export type NonEmptyArray<T> = [T, ...T[]]

@@ -1,3 +1,3 @@
-import { mockServices } from './src/test/mock-services'
+import { loadMocks } from './src/test/mocks'
 
-mockServices()
+loadMocks()

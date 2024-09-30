@@ -551,18 +551,6 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "name": "isIssuanceApp",
           "cache": "contextual"
-        },
-        {
-          "rulesAnd": [
-            {
-              "name": "isLimitedAccessApp",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasLimitedAccessData-limitedIssuance",
-              "cache": "contextual"
-            }
-          ]
         }
       ]
     },
@@ -575,18 +563,6 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "name": "isIssuanceApp",
           "cache": "contextual"
-        },
-        {
-          "rulesAnd": [
-            {
-              "name": "isLimitedAccessApp",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasLimitedAccessData-limitedIssuance",
-              "cache": "contextual"
-            }
-          ]
         }
       ]
     },
@@ -605,18 +581,6 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "name": "isIssuanceApp",
           "cache": "contextual"
-        },
-        {
-          "rulesAnd": [
-            {
-              "name": "isLimitedAccessApp",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasLimitedAccessData-limitedIssuance",
-              "cache": "contextual"
-            }
-          ]
         }
       ]
     },
@@ -629,18 +593,18 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "name": "isIssuanceApp",
           "cache": "contextual"
+        }
+      ]
+    },
+    "cancelAsyncIssuanceRequest": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
         },
         {
-          "rulesAnd": [
-            {
-              "name": "isLimitedAccessApp",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasLimitedAccessData-limitedIssuance",
-              "cache": "contextual"
-            }
-          ]
+          "name": "isIssuanceApp",
+          "cache": "contextual"
         }
       ]
     }
@@ -1023,18 +987,6 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "name": "isIssuanceApp",
           "cache": "contextual"
-        },
-        {
-          "rulesAnd": [
-            {
-              "name": "isLimitedAccessApp",
-              "cache": "contextual"
-            },
-            {
-              "name": "hasLimitedAccessData-limitedIssuance",
-              "cache": "contextual"
-            }
-          ]
         }
       ]
     }

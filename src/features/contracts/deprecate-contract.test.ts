@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredentialAdmin, expectUnauthorizedError } from '../../test'
-import { mockServiceUtil } from '../../test/mock-services'
+import { mockedServices } from '../../test/mocks'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
 import { provisionContractMutation } from './test/provision-contract'
@@ -8,9 +8,9 @@ import { provisionContractMutation } from './test/provision-contract'
 describe('deprecateContract mutation', () => {
   beforeAfterAll()
   beforeEach(() => {
-    mockServiceUtil.clearAllMocks()
-    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
-      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    mockedServices.clearAllMocks()
+    mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
     )
   })
   async function givenContract() {
@@ -41,8 +41,8 @@ describe('deprecateContract mutation', () => {
     const { contract } = await givenContract()
     const externalContractId = randomUUID()
 
-    mockServiceUtil.adminService.createContract.resolveWith(
-      mockServiceUtil.adminService.createContract.buildResolve({ id: externalContractId }),
+    mockedServices.adminService.createContract.resolveWith(
+      mockedServices.adminService.createContract.buildResolve({ id: externalContractId }),
     )
     await executeOperationAsCredentialAdmin({
       query: provisionContractMutation,

@@ -18,7 +18,7 @@ import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { isValidEmail } from '../../../util/validation'
-import { validateIssuanceClaims, validateIssuanceClaimsIncludeRequiredContractClaims } from '../../contracts/claims'
+import { validateIssuanceClaims, validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
 import { createOrUpdateIdentity } from '../../identity'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
@@ -96,7 +96,7 @@ export async function CreateAsyncIssuanceRequestCommand(
       invariant(!contract.isDeprecated, 'Contract must not be deprecated')
 
       // validate that the provided claims include the required contract claims
-      validateIssuanceClaimsIncludeRequiredContractClaims(claims, contract.display.claims)
+      validateIssuanceClaimsAgainstContractClaims(claims, contract.display.claims)
 
       // find the identity if specified by ID
       if (identityId) {

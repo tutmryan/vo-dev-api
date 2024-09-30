@@ -3,6 +3,8 @@ import { invariant } from '../../../util/invariant'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 import { convertAsyncIssuanceExpiryDaysToRequestExpiry } from '../index'
 
+export const cannotCancelError = 'Cannot cancel async issuance request'
+
 export async function CancelAsyncIssuanceRequestCommand(this: CommandContext, asyncIssuanceRequestId: string) {
   const {
     services: { asyncIssuances },
@@ -13,7 +15,7 @@ export async function CancelAsyncIssuanceRequestCommand(this: CommandContext, as
   })
   if (request.state === 'cancelled') return request
 
-  invariant(request.canCancel, 'Cannot cancel async issuance request')
+  invariant(request.canCancel, cannotCancelError)
 
   await asyncIssuances.deleteAsyncIssuanceIfExists(request.id, convertAsyncIssuanceExpiryDaysToRequestExpiry(request.expiryPeriodInDays))
   request.canceled()

@@ -1,7 +1,10 @@
+import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { graphql } from '../../../generated'
 import type { ContractInput } from '../../../generated/graphql'
 import { executeOperationAsCredentialAdmin, fakeJpegDataURL } from '../../../test'
+import type { DeepPartial } from '../../../util/type-helpers'
+import { resolveToType } from '../../../util/type-helpers'
 
 export const ContractFragment = graphql(
   `
@@ -96,7 +99,15 @@ export async function createContract(input: ContractInput) {
   return data!.createContract
 }
 
-export function buildContractInput(args: Partial<ContractInput>): ContractInput {
+const generateClaimAndLabelTitles = () => {
+  const thingName = casual.full_name
+  return {
+    claim: thingName,
+    label: thingName.replaceAll('_', ' '),
+  }
+}
+
+export function buildContractInput(args: DeepPartial<ContractInput>): ContractInput {
   return {
     name: randomUUID(),
     templateId: null,
@@ -104,7 +115,7 @@ export function buildContractInput(args: Partial<ContractInput>): ContractInput 
     validityIntervalInSeconds: 1000,
     credentialTypes: ['DefaultCredential'],
     ...args,
-    display: {
+    display: resolveToType<ContractInput['display']>({
       locale: 'en-AU',
       ...args.display,
       card: {
@@ -117,7 +128,7 @@ export function buildContractInput(args: Partial<ContractInput>): ContractInput 
         logo: {
           image: fakeJpegDataURL(),
           description: 'Logo description',
-          ...args.display?.card.logo,
+          ...args.display?.card?.logo,
         },
       },
       consent: {
@@ -125,11 +136,16 @@ export function buildContractInput(args: Partial<ContractInput>): ContractInput 
         instructions: 'Consent instructions',
         ...args.display?.consent,
       },
-      claims: args.display?.claims || [
-        { claim: 'claim_one', label: 'Claim 1', type: 'String', value: 'Claim 1' },
-        { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
-      ],
-    },
-    ...args,
+      claims: args.display?.claims
+        ? args.display.claims.map((c) => ({
+            ...generateClaimAndLabelTitles(),
+            type: 'String',
+            ...c,
+          }))
+        : resolveToType<ContractInput['display']['claims']>([
+            { claim: 'claim_one', label: 'Claim 1', type: 'String', value: 'Claim 1' },
+            { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
+          ]),
+    }),
   }
 }

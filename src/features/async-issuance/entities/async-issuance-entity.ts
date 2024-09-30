@@ -17,6 +17,8 @@ export const failedStates: FailedStates[] = ['contact-failed', 'issuance-failed'
 
 const indexFor = (fields: [keyof AsyncIssuanceEntity]) => fields
 
+export type ValidCancellationStates = Exclude<AsyncIssuanceEntity['state'], 'issued'>
+
 @Entity('async_issuance')
 @Index(indexFor(['expiresOn']))
 @Index(indexFor(['state']))

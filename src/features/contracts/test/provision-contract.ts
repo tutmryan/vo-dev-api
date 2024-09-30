@@ -1,6 +1,6 @@
 import { graphql } from '../../../generated'
 import { executeOperationAsCredentialAdmin } from '../../../test'
-import { mockServiceUtil } from '../../../test/mock-services'
+import { mockedServices } from '../../../test/mocks'
 
 export const provisionContractMutation = graphql(
   `
@@ -16,8 +16,8 @@ export const provisionContractMutation = graphql(
 )
 
 export async function provisionContract(contractId: string, externalContractId: string) {
-  mockServiceUtil.adminService.createContract.resolveWith(
-    mockServiceUtil.adminService.createContract.buildResolve({ id: externalContractId }),
+  mockedServices.adminService.createContract.resolveWith(
+    mockedServices.adminService.createContract.buildResolve({ id: externalContractId }),
   )
   const { data, errors } = await executeOperationAsCredentialAdmin({
     query: provisionContractMutation,

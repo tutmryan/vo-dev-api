@@ -426,7 +426,7 @@ input ContractDisplayClaimInput {
 }
 
 """
-Defines the filter critiera used to find contracts
+Defines the filter criteria used to find contracts
 """
 input ContractWhere {
   """

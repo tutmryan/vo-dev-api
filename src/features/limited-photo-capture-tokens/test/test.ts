@@ -1,15 +1,15 @@
 import { randomUUID } from 'crypto'
 import { acquireLimitedPhotoCaptureTokenMutation } from '.'
 import { beforeAfterAll, executeOperationAnonymous, expectToBeDefined } from '../../../test'
-import { mockServiceUtil } from '../../../test/mock-services'
+import { mockedServices } from '../../../test/mocks'
 import { createPhotoCaptureRequest } from '../../photo-capture/test'
 
 describe('acquireLimitedPhotoCaptureToken', () => {
   beforeAfterAll()
   beforeEach(() => {
-    mockServiceUtil.clearAllMocks()
-    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
-      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    mockedServices.clearAllMocks()
+    mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
     )
   })
   it('returns a validation error for invalid photo request ID', async () => {

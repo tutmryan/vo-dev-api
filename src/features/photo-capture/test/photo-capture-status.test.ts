@@ -11,7 +11,7 @@ import {
   expectToBeDefined,
   expectUnauthorizedError,
 } from '../../../test'
-import { mockServiceUtil } from '../../../test/mock-services'
+import { mockedServices } from '../../../test/mocks'
 import { acquireLimitedPhotoCaptureTokenMutation } from '../../limited-photo-capture-tokens/test'
 
 const getClientCredentialsTokenMock = jest.fn(() => ({ access_token: randomUUID(), expires: 1000 * 60 * 50 }))
@@ -36,9 +36,9 @@ const photoCaptureStatusQuery = graphql(`
 describe('photoCaptureStatus query', () => {
   beforeAfterAll()
   beforeEach(() => {
-    mockServiceUtil.clearAllMocks()
-    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
-      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    mockedServices.clearAllMocks()
+    mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
     )
   })
   it('returns the correct statuses', async () => {

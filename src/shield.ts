@@ -50,6 +50,7 @@ const isIssuanceApp = hasRoleRule(AppRoles.issue, 'isIssuanceApp')
 const isPresentationApp = hasRoleRule(AppRoles.present, 'isPresentationApp')
 
 const isIssuer = or(isIssuerUser, isIssuanceApp, isLimitedIssuanceApp)
+const isAsyncIssuer = or(isIssuerUser, isIssuanceApp)
 
 const fallbackRule = or(
   isUserWithReadPermissions,
@@ -116,12 +117,13 @@ export const rules: ShieldSchema<Resolvers> = {
     actionApprovalRequest: and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId),
     createPhotoCaptureRequest: or(isIssuerUser, isIssuanceApp, isValidLimitedIssuancePhotoCaptureRequest),
     capturePhoto: isValidCapturePhoto,
-    createAsyncIssuanceRequest: isIssuer,
-    updateAsyncIssuanceContact: isIssuer,
+    createAsyncIssuanceRequest: isAsyncIssuer,
+    updateAsyncIssuanceContact: isAsyncIssuer,
     sendAsyncIssuanceVerification: allow,
     acquireAsyncIssuanceToken: allow,
-    resendAsyncIssuanceNotifications: isIssuer,
-    resendAsyncIssuanceNotification: isIssuer,
+    resendAsyncIssuanceNotifications: isAsyncIssuer,
+    resendAsyncIssuanceNotification: isAsyncIssuer,
+    cancelAsyncIssuanceRequest: isAsyncIssuer,
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
   Subscription: {
@@ -179,7 +181,7 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': or(isIssuer, isLimitedAsyncIssuancePhotoCaptureUser),
   },
   AsyncIssuanceRequest: {
-    '*': isIssuer,
+    '*': isAsyncIssuer,
   },
   AsyncIssuanceContact: {
     '*': isIssuerUser,

@@ -4,6 +4,7 @@ import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
 import type { JwtPayload } from '@makerx/graphql-core'
 import type { DocumentNode, FormattedExecutionResult } from 'graphql'
 import type { GraphQLContext } from '../context'
+import type { LimitedAsyncIssuanceData } from '../features/limited-async-issuance-tokens'
 import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
 import type { AppRoles } from '../roles'
 import { InternalRoles, UserRoles } from '../roles'
@@ -25,9 +26,16 @@ export const executeOperation = async <TData = Record<string, unknown>, TVariabl
   limitedAccessData?: AcquireLimitedAccessTokenInput,
   limitedApprovalData?: LimitedApprovalOperationInput,
   limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
+  limitedAsyncIssuanceData?: LimitedAsyncIssuanceData,
 ): Promise<FormattedExecutionResult<TData>> => {
   const response = await server.executeOperation(request, {
-    contextValue: await createContext(jwtPayload, limitedAccessData, limitedApprovalData, limitedPhotoCaptureData),
+    contextValue: await createContext(
+      jwtPayload,
+      limitedAccessData,
+      limitedApprovalData,
+      limitedPhotoCaptureData,
+      limitedAsyncIssuanceData,
+    ),
   })
   if (response.body.kind !== 'single') throw new Error('Invalid response body kind')
   return response.body.singleResult as FormattedExecutionResult<TData>
@@ -112,3 +120,22 @@ export const executeOperationAsApp = async <TData = Record<string, unknown>, TVa
   },
   ...roles: AppRoles[]
 ): Promise<FormattedExecutionResult<TData>> => executeOperation(request, buildJwt({ roles }))
+
+export const executeOperationAsLimitedAsyncIssuanceClient = async <
+  TData = Record<string, unknown>,
+  TVariables extends VariableValues = VariableValues,
+>(
+  request: Omit<GraphQLRequest<TVariables>, 'query'> & {
+    query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
+  },
+  limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
+  limitedAsyncIssuanceData?: LimitedAsyncIssuanceData,
+): Promise<FormattedExecutionResult<TData>> =>
+  executeOperation(
+    request,
+    buildJwt({ roles: [InternalRoles.limitedAsyncIssuance] }),
+    undefined,
+    undefined,
+    limitedPhotoCaptureData,
+    limitedAsyncIssuanceData,
+  )

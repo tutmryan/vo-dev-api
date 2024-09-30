@@ -11,7 +11,7 @@ import {
   expectUnauthorizedError,
   LimitedApprovalOperationInput,
 } from '../../../test'
-import { mockServiceUtil } from '../../../test/mock-services'
+import { mockedServices } from '../../../test/mocks'
 import { createActionedApprovalRequest, createApprovalRequest, getDefaultApprovalRequestInput } from './create-approval-request'
 
 const cancelApprovalRequestMutation = graphql(
@@ -42,9 +42,9 @@ const approvalRequestQuery = graphql(`
 describe('cancel approval request mutation', () => {
   beforeAfterAll()
   beforeEach(() => {
-    mockServiceUtil.clearAllMocks()
-    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
-      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    mockedServices.clearAllMocks()
+    mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
     )
   })
   it('returns an unauthorized error when accessed anonymously', async () => {

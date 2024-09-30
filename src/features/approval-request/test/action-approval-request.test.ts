@@ -2,7 +2,7 @@ import { addDays } from 'date-fns'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
 import type { LimitedApprovalOperationInput } from '../../../test'
 import { beforeAfterAll, executeOperationAsLimitedApprovalClient, expectUnauthorizedError } from '../../../test'
-import { mockServiceUtil } from '../../../test/mock-services'
+import { mockedServices } from '../../../test/mocks'
 import {
   actionApprovalRequestMutation,
   createApprovalRequest,
@@ -13,9 +13,9 @@ import {
 describe('action approval request', () => {
   beforeAfterAll()
   beforeEach(() => {
-    mockServiceUtil.clearAllMocks()
-    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
-      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    mockedServices.clearAllMocks()
+    mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
     )
   })
   it('can be approved', async () => {

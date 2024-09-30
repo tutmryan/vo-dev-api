@@ -9,7 +9,7 @@ import {
   fakeJpegDataURL,
   fakePngDataURL,
 } from '../../test'
-import { mockServiceUtil } from '../../test/mock-services'
+import { mockedServices } from '../../test/mocks'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { buildContractInput, createContract } from './test/create-contract'
 import { deprecateContractMutation } from './test/deprecate-contract'
@@ -20,9 +20,9 @@ import { getUpdateContractInput, updateContractMutation } from './test/update-co
 describe('updateContract mutation', () => {
   beforeAfterAll()
   beforeEach(() => {
-    mockServiceUtil.clearAllMocks()
-    mockServiceUtil.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
-      mockServiceUtil.blobStorageContainerService.uploadDataUrl.buildResolve,
+    mockedServices.clearAllMocks()
+    mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
     )
   })
   async function givenContract({ withTemplate = false }: { withTemplate?: boolean }) {
@@ -147,8 +147,8 @@ describe('updateContract mutation', () => {
     // Arrange
     const { contract } = await givenContract({ withTemplate: true })
     const externalContractId = randomUUID()
-    mockServiceUtil.adminService.createContract.resolveWith(
-      mockServiceUtil.adminService.createContract.buildResolve({ id: externalContractId }),
+    mockedServices.adminService.createContract.resolveWith(
+      mockedServices.adminService.createContract.buildResolve({ id: externalContractId }),
     )
     //publishing for the first time
     await executeOperationAsCredentialAdmin({

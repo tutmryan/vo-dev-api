@@ -1,24 +1,42 @@
-const mockUploadAsyncIssuance = jest.fn()
-const mockDownloadAsyncIssuance = jest.fn()
-const mockDeleteAsyncIssuanceIfExists = jest.fn()
+import type { AsyncIssuanceRequestInput } from '../../generated/graphql'
+import type { ServiceMock } from '../../util/jest'
+import { mockFunction } from '../../util/jest'
+import { throwError } from '../../util/throw-error'
+import type { AsyncIssuanceService } from '../async-issuance-service'
 
-export const mock = jest.mock('../async-issuance-service', () => ({
-  AsyncIssuanceService: jest.fn().mockImplementation(() => ({
-    uploadAsyncIssuance: mockUploadAsyncIssuance,
-    downloadAsyncIssuance: mockDownloadAsyncIssuance,
-    deleteAsyncIssuanceIfExists: mockDeleteAsyncIssuanceIfExists,
-  })),
+const serviceMock: ServiceMock<AsyncIssuanceService> = {
+  uploadAsyncIssuance: mockFunction<AsyncIssuanceService['uploadAsyncIssuance']>(),
+  downloadAsyncIssuance: mockFunction<AsyncIssuanceService['downloadAsyncIssuance']>(),
+  deleteAsyncIssuanceIfExists: mockFunction<AsyncIssuanceService['deleteAsyncIssuanceIfExists']>(),
+  containerClient: mockFunction<AsyncIssuanceService['containerClient']>(),
+  upload: mockFunction<AsyncIssuanceService['upload']>(),
+  downloadToBuffer: mockFunction<AsyncIssuanceService['downloadToBuffer']>(),
+  getProperties: mockFunction<AsyncIssuanceService['getProperties']>(),
+  deleteIfExists: mockFunction<AsyncIssuanceService['deleteIfExists']>(),
+  uploadDataUrl: mockFunction<AsyncIssuanceService['uploadDataUrl']>(),
+}
+
+jest.mock('../async-issuance-service', () => ({
+  AsyncIssuanceService: jest.fn().mockImplementation(() => serviceMock),
 }))
 
 export const helper = {
-  clearAllMocks: mock.clearAllMocks,
+  clearAllMocks: () => {
+    Object.values(serviceMock).forEach((m) => m.mockClear())
+  },
   uploadAsyncIssuance: {
-    mock: mockUploadAsyncIssuance,
+    mock: () => serviceMock.uploadAsyncIssuance,
+    previousAsyncIssuanceCallArgResolver: () => () =>
+      serviceMock.uploadAsyncIssuance.mock.calls.map((args) => args[1])[0] ?? throwError('No previous call'),
   },
   downloadAsyncIssuance: {
-    mock: mockDownloadAsyncIssuance,
+    mock: () => serviceMock.downloadAsyncIssuance,
+    resolveWithCallArgsResolver: (v: () => AsyncIssuanceRequestInput) =>
+      serviceMock.downloadAsyncIssuance.mockImplementation(() => {
+        return Promise.resolve(v())
+      }),
   },
   deleteAsyncIssuanceIfExists: {
-    mock: mockDeleteAsyncIssuanceIfExists,
+    mock: () => serviceMock.deleteAsyncIssuanceIfExists,
   },
 }

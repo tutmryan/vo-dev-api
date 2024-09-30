@@ -7,6 +7,8 @@ import { dataSource } from '../data'
 import { setLimitedAccessData } from '../features/limited-access-tokens'
 import type { LimitedApprovalData } from '../features/limited-approval-tokens'
 import { setLimitedApprovalData } from '../features/limited-approval-tokens'
+import type { LimitedAsyncIssuanceData } from '../features/limited-async-issuance-tokens'
+import { setLimitedAsyncIssuanceData } from '../features/limited-async-issuance-tokens'
 import { createLimitedPhotoCaptureSession } from '../features/limited-photo-capture-tokens'
 import { setPhotoCaptureData, type PhotoCaptureData } from '../features/photo-capture'
 import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
@@ -57,12 +59,13 @@ export const createContext = async (
   limitedAccessInput?: AcquireLimitedAccessTokenInput,
   limitedApprovalInput?: LimitedApprovalOperationInput,
   limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
+  limitedAsyncIssuanceData?: LimitedAsyncIssuanceData,
 ): Promise<GraphQLContext> => {
   // create a user
   const token = randomUUID()
 
   // limited access and limited approval data injection
-  if (limitedAccessInput || limitedApprovalInput || limitedPhotoCaptureData) {
+  if (limitedAccessInput || limitedApprovalInput || limitedPhotoCaptureData || limitedAsyncIssuanceData) {
     const userEntity = await findUpdateOrCreateUserEntity(jwtPayload!)
     if (limitedAccessInput) await setLimitedAccessData(token, Object.assign({ userId: userEntity.id }, limitedAccessInput))
     if (limitedApprovalInput) await setLimitedApprovalData(token, Object.assign({ userId: userEntity.id }, limitedApprovalInput))
@@ -73,6 +76,7 @@ export const createContext = async (
       )
       await createLimitedPhotoCaptureSession(token, limitedPhotoCaptureData.photoCaptureRequestId)
     }
+    if (limitedAsyncIssuanceData) await setLimitedAsyncIssuanceData(token, limitedAsyncIssuanceData)
   }
 
   // create the context
