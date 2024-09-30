@@ -41,7 +41,7 @@ export async function SendAsyncIssuanceVerificationCommand(
   await setVerificationCode(asyncIssuanceRequestId, verificationCode)
 
   // throttle further verification attempts for this issuance
-  await throttleVerificationForIssuance(asyncIssuanceEntity.id)
+  await throttleVerificationForIssuance(asyncIssuanceRequestId)
 
   // send verification
   try {
