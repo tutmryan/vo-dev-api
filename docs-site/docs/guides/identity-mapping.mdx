@@ -138,6 +138,24 @@ mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
 }
 ```
 
+### Manually created identity references
+
+You may wish to manually create identity references to issue credentials to users who are not part of your organisation's identity system or identity stores.
+
+We recommend using an email address as a globally unique identifier, and `manual` as the issuer value:
+
+```json title="Example manual identity input"
+{
+  "issuer": "manual",
+  "identifier": "citizen@outlook.com",
+  "name": "Mary Citizen"
+}
+```
+
+:::tip
+The `manual` issuer value will be shown in the Admin UI with the label 'Manually Issued'.
+:::
+
 ## Using identity references
 
 Once identity references are saved:
