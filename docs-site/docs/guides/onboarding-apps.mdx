@@ -5,7 +5,6 @@ sidebar_position: 2
 import { Instance } from '@site/src/components/instance'
 import { ApiScope } from '@site/src/components/api-scope'
 
-
 # Onboarding an app
 
 For apps to integrate with Verified Orchestration platform, they will need to be granted access to Verified Orchestration application roles. Which roles are granted will depend on the tasks the app will carry out and the access model used.
@@ -21,7 +20,7 @@ The name of the Verified Orchestration platform application in Azure AD is: **Ve
 
 ## Access models
 
-Primary access to Verified Orchestration platform is via a client secret. A second access model caters for apps which do not have the ability to securely store a secret. Limited access tokens are used in this case.
+Primary access to Verified Orchestration platform is via a client secret. A second access model caters for apps which do not have the ability to securely store a secret. Limited access tokens can be used in this case.
 
 ### Limited access token model
 
@@ -47,7 +46,7 @@ This model is also available for the apps which can securely store a secret such
 - **VerifiableCredential.Present**<br/>
   Credential presentation
 - **VerifiableCredential.RequestApproval**<br/>
-  Create approval requests and read actioned approval data
+  Create and manage approval requests
 
 These permissions can be granted to the App registration depending on the requirements of the consumer app.
 
@@ -60,7 +59,6 @@ The scope for this Verified Orchestration platform instance is: **<ApiScope />**
 :::
 
 An example for getting an access token using the `@azure/msal-node` package is available in the [Secure backend API](/docs/guides/limited-access-tokens/secure-backend-api#get-access-token-to-call-verification-orchestration-platform) guide.
-
 
 ## Instance configuration
 

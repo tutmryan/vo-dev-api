@@ -9,6 +9,11 @@ import { AdminUrl } from '@site/src/components/admin-url'
 
 Issuance is the process of adding a credential to the recipient's wallet (Microsoft Authenticator or custom wallet implementation). The recipient can then use the credential to prove claims about themselves to a verifier.
 
+:::tip
+Issuance requires user-interface components to handle several steps and the recipient to be present, to accept the credential.
+Alternatively, the [remote issuance](/docs/guides/remote-issuance) feature supports issuance via email or SMS.
+:::
+
 Issuance is a multi-step process:
 
 1. [Create an issuance request](#create-issuance-request)
@@ -23,6 +28,10 @@ Issuance is a multi-step process:
     dark: '/img/issuance-dark.svg',
   }}
 />
+
+:::tip
+The [JavaScript client](/docs/guides/integration/javascript-client/issuance) offers a consolidated issuance function. It can even include capturing a photo of the recipient via the [photo capture service](#photo-capture-service) for credentials that require a photo.
+:::
 
 ## Create issuance request
 
@@ -39,6 +48,9 @@ The [issuance request input](/docs/reference/types/inputs/issuance-request-input
    1. A PIN code that the recipient must enter to retrieve the credential (best sent via a separate channel)
    1. Callback info, if issuance event data should also be sent to a server-side endpoint
    1. An expiration date to explicitly control when a credential expires, regardless of when it is issued
+   1. If the credential requires a photo, either:
+      - A photo of the recipient via the `faceCheckPhoto` field
+      - The photo capture request ID via the `photoCaptureRequestId` field
 
 ```graphql title="CreateIssuanceRequest mutation: will return a response with issuance request or error details"
 mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
@@ -107,6 +119,10 @@ The issuance request can be opened in one of two ways:
 
 - On a desktop or web application, display a QR code that the recipient can scan with their mobile device.
 - On a mobile application, the URL can be opened directly.
+
+:::tip
+For further info on how to handle presentation links and QR codes, see the [wallet link handling guide](/docs/guides/wallet-link-handling).
+:::
 
 ### Display QR code
 
@@ -215,3 +231,80 @@ Upon successful issuance, the issuing application can receive data by any combin
 :::tip
 For complete code samples of different methods of receiving issuance events, view the issuance samples for [your development stack](/docs/guides/integration/).
 :::
+
+## Issuance with photo
+
+If the credential requires a photo of the recipient, the photo must be supplied one of two ways:
+
+- directly supplying a base64 encoded photo in the `faceCheckPhoto` field
+- using the photo capture service to capture a photo of the recipient and supplying the `photoCaptureRequestId` field
+
+### Photo capture service
+
+The photo capture service allows you to generate a URL for the receipient to capture a photo. The URL can be opened in a browser on a mobile device, and the recipient can capture a photo of themselves. Once complete, the photo capture request ID can be included in the issuance.
+
+This allows issuing applications to request a photo of the recipient without needing to implement photo capture or have access to recipient photos.
+
+:::tip
+Since the photo capture is specific to the issuee, the issuee `identityId` must be provided in the photo capture request but can be omitted from the presentation request.
+:::
+
+```graphql title="CreatePhotoCaptureRequest mutation: will return a response with the photo capture request ID"
+mutation CreatePhotoCaptureRequest($request: PhotoCaptureRequest!) {
+  createPhotoCaptureRequest(request: $request) {
+    id
+    photoCaptureUrl
+    photoCaptureQrCode
+  }
+}
+```
+
+```json title="Example variables for photo capture request"
+{
+  "request": {
+    "contractId": "<id of the contract to be issued>",
+    "identityId": "<id of identity of recipient>"
+  }
+}
+```
+
+```json title="Example response of the photo capture request"
+{
+  "data": {
+    "createPhotoCaptureRequest": {
+      "id": "3eca057d-794c-4fdd-811f-b8a03a4f8567",
+      "photoCaptureUrl": "https://instance.portal.verifiedorchestration.com/photo-capture/3eca057d-794c-4fdd-811f-b8a03a4f8567",
+      "photoCaptureQrCode": "data:image/png;base64,iVBORw0...<base64 encoded image data>"
+    }
+  }
+}
+```
+
+#### Photo capture completion
+
+Photo capture progress can be monitored by:
+
+- Subscribing to the `photoCaptureEvent` subscription
+- Polling the `photoCaptureStatus` query
+
+```graphql title="The photoCaptureEvent subscription notifies when photo capture is started and completed"
+subscription PhotoCaptureEvent($photoCaptureRequestId: UUID!) {
+  photoCaptureEvent(photoCaptureRequestId: $photoCaptureRequestId) {
+    status
+  }
+}
+```
+
+```graphql title="The photoCaptureStatus query returns not_started, started and complete"
+query PhotoCaptureStatus($photoCaptureRequestId: UUID!) {
+  photoCaptureStatus(photoCaptureRequestId: $photoCaptureRequestId)
+}
+```
+
+```json title="Example response of the photoCaptureStatus query"
+{
+  "data": {
+    "photoCaptureStatus": "complete"
+  }
+}
+```

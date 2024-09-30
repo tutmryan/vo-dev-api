@@ -22,7 +22,7 @@ We recommend creating Microsoft Entra groups mapped to each Verified Orchestrati
 - [Partner admin](#partner-admin)
 - [Approval request admin](#approval-request-admin)
 
-A tenant administrator can set up the the group to role mapping and add/remove users from the groups.
+A tenant administrator can set up group-to-role mapping and add/remove users from the groups.
 
 ## Reader
 
@@ -46,6 +46,13 @@ Permissions:
 - create identity
 - update identity
 - issue credential
+- create remote issuances
+- view and filter the list of remote issuances
+- view remote issuance details
+- update contact details for pending remote issuances
+- resend remote issuance notifications
+- cancel pending remote issuances
+- upload CSV files to create remote issuances
 
 ## Credential admin
 
@@ -84,5 +91,7 @@ App role value: `VerifiableCredential.ApprovalRequestAdmin`
 
 Permissions:
 
-- view approval requests
-- view actioned approval data
+- all the permissions of [Reader](#reader) role, and
+- view and filter the list of approval requests
+- view approval request details including actioned approval data
+- cancel pending approval requests

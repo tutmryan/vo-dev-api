@@ -1,0 +1,133 @@
+---
+sidebar_position: 8
+---
+
+# Wallet link handling
+
+Credential issuance and presentation requests must be opened in a wallet (Microsoft Authenticator). This guide explains how to handle wallet links in your application.
+
+## Wallet link URL scheme
+
+Wallet links use the URL scheme `openid-vc://`. For the links to be opened by Microsoft Authenticator on the mobile device, the URL scheme must be assigned to the Microsoft Authenticator app in the device operating system.
+
+If another wallet application is installed after Microsoft Authenticator, the URL scheme may be assigned to the new wallet application, which may cause issuance and presentation links to fail to open.
+
+The only way to fix this, presently, is to uninstall and reinstall Microsoft Authenticator, which will restore association of the URL scheme to Microsoft Authenticator.
+
+In the future, mobile operating systems may provide a way to choose which wallet application opens `openid-vc://` URLs.
+
+## Issuance and presentation links and QR codes
+
+Issuance and presentation links work the same way, so for the purposes of this guide, we will refer to both as "wallet links".
+
+Issuance and presentation request responses can include a `qrCode` fields in addition to the `url` field. The QR code is a scannable representation of the URL, it can be opened via a mobile device's QR code reading apps, or directly by the scanner within the Microsoft Authenticator "Verified IDs" tab.
+
+At the time of writing, wallet links expire after 5 minutes (specified by the `expiry` field). They are not intended to be stored and used later. Opening an expired wallet link will result in an error.
+
+## Essential user-interface steps
+
+Once the issuance or presentation request is created, the first step depends on the device type.
+
+1. Display QR code or open wallet link:
+   - If the device is a mobile device, open the wallet link directly.
+   - If the device is a desktop or web application, display the QR code that the recipient can scan with their mobile device.
+   - Display and handle expiry of the wallet link according to the `expiry` field ([time stamp](https://en.wikipedia.org/wiki/Unix_time)).
+1. Subscribe to issuance or presentation events (or alternatively poll for completion).
+1. Handle issuance or presentation events (or completion):
+   - Issuance or presentation link is opened by Microsoft Authenticator
+   - Issuance or presentation is completed successfully
+   - Issuance or presentation fails
+   - Handle expiry of the wallet link (the user may open the link but not complete the issuance or presentation).
+
+### Other user-interface steps
+
+Issuance may require additional steps, such as:
+
+- Photo capture prior to issuance where the credential requires a photo.
+- PIN code entry between the issuance link being opened and the credential being added to the wallet.
+
+## Sample code
+
+The following React code snippets demonstrate how to handle wallet links your apps:
+
+- Display a QR code for desktop devices.
+- Open the link on mobile devices.
+- Link to the Microsoft Authenticator web page on desktop, the App Store or Google Play Store on mobile.
+- Display and handle expiry of the wallet link.
+- Provide a way to retry the if the link expires.
+
+```tsx title="Sample component to handle wallet links for desktop and mobile devices"
+export function AuthenticatorResponse({ url, qrCode, expiry, __typename }) {
+  const isMobile = /Android|iPhone/i.test(navigator.userAgent)
+  const expiryMinutes = Math.floor((expiry - Date.now() / 1000) / 60)
+  const type = __typename === 'IssuanceResponse' ? 'issuance' : 'presentation'
+
+  const [isExpired, setIsExpired] = useState(false)
+  useEffect(() => {
+    if (!expiry) return
+    const timer = setTimeout(() => setIsExpired(true), new Date(expiry * 1000).getTime() - Date.now())
+    return () => clearTimeout(timer)
+  }, [expiry])
+
+  return isExpired ? (
+    <Alert>
+      The issuance request has expired; <Button onClick={() => window.location.reload()}>Retry</Button>
+    </Alert>
+  ) : isMobile ? (
+    <MobileAuthenticatorUrl authenticatorUrl={url} expiryMinutes={expiryMinutes} type={type} />
+  ) : (
+    <DesktopAuthenticatorQrCode qrCode={qrCode ?? undefined} expiryMinutes={expiryMinutes} type={type} />
+  )
+}
+```
+
+```tsx title="Sample component to open the wallet link on mobile devices"
+const appleAppStoreLink = 'https://apps.apple.com/app/microsoft-authenticator/id983156458'
+const googlePlayStoreLink = 'https://play.google.com/store/apps/details?id=com.azure.authenticator'
+
+export function MobileAuthenticatorUrl({ authenticatorUrl, expiryMinutes, type }) {
+  const isAndroid = /Android/.test(navigator.userAgent)
+  const storeName = isAndroid ? 'Google Play' : 'App Store'
+  const storeLink = isAndroid ? googlePlayStoreLink : appleAppStoreLink
+
+  const openAuthenticator = useCallback(() => {
+    if (authenticatorUrl) window.location.href = authenticatorUrl
+  }, [authenticatorUrl])
+
+  useEffect(() => {
+    openAuthenticator()
+  }, [openAuthenticator])
+
+  return (
+    <>
+      <Button onClick={openAuthenticator}>{type === 'issuance' ? 'Open Credential' : 'Present Credentials'}</Button>
+      <Info>
+        <>
+          The {type === 'issuance' ? 'credential' : 'presentation'} must be opened using{' '}
+          <Link href={storeLink} target="_blank">
+            Microsoft Authenticator
+          </Link>
+          {expiryMinutes && `. The link will expire in ${expiryMinutes} minutes.`}
+        </>
+      </Info>
+    </>
+  )
+}
+```
+
+```tsx title="Sample component to display the QR code for desktop devices"
+export function DesktopAuthenticatorQrCode({ qrCode, expiryMinutes, type }: DesktopAuthenticatorQrCodeProps) {
+  return (
+    <>
+      <img alt={`${type === 'issuance' ? 'Issuance' : 'Presentation'} QR Code`} src={qrCode} />
+      <Info>
+        Scan this QR code on your phone to {type === 'issuance' ? 'open the credential' : 'present credentials'} in{' '}
+        <Link href="https://www.microsoft.com/en-au/security/mobile-authenticator-app" target="_blank">
+          Microsoft Authenticator
+        </Link>
+        {expiryMinutes && `. The QR code will expire in ${expiryMinutes} minutes.`}
+      </Info>
+    </>
+  )
+}
+```

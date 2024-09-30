@@ -1,0 +1,193 @@
+---
+sidebar_position: 10
+---
+
+import ThemedImage from '@theme/ThemedImage'
+import { AdminUrl } from '@site/src/components/admin-url'
+
+# Identity mapping
+
+This guide describes how to use Verified Orchestration identity references, so that issuances and presentations can be reliably linked back to your organisation's own identities (e.g. internal users, partners and customers).
+
+## Verified Orchestration identity reference
+
+The Verified Orchestration platform avoids holding personal data. Instead, it uses minimal identity references to link back to your organisation's own identity system.
+
+This allows references to issuances and presentations to be linked to identity references, facilitating abilities such as:
+
+- Reliably binding all issued credentials to identities.
+- Presentation data includes the identity of the presenter, which can be reliably matched to your organisation's users, partners or customers.
+- The API can be used to navigate relations between issuances, presentations and identities.
+- The ability to revoke all credentials for an identity reference.
+
+<ThemedImage
+  alt="identity mapping diagram"
+  sources={{
+    light: '/img/identity-mapping.svg',
+    dark: '/img/identity-mapping-dark.svg',
+  }}
+/>
+
+:::tip
+In the Admin UI, identity references are described as "Issuees". This is because the identity reference is the entity that is issued credentials.
+:::
+
+## How does it work?
+
+Verified Orchestration assumes that your organisation has one or more identity stores. Each store has:
+
+- A unique **identifier for the store** (for example in Entra ID, the Tenant ID can be used, which is available from Entra JWT payloads in the `iss` claim).
+- A unique **identifier for each identity** in the store (for example, in Entra ID, we would use the user Object ID, available from Entra JWT payloads in the `oid` claim).
+
+These two values form the unique key for both your own identities and the Verified Orchestration identity reference.
+
+### Example mapping of an Entra User
+
+This table shows how an Entra User can be mapped to a Verified Orchestration identity reference. JWT claims are also included, showing how an identity reference might be securely created from an interaction with an authenticated user:
+
+| Entra User Attribute | JWT Payload Claim | Verified Orchestration Identity Field |
+| -------------------- | ----------------- | ------------------------------------- |
+| Tenant ID            | `iss`             | `issuer`                              |
+| User Object ID       | `oid`             | `identifier`                          |
+| User Display name    | `name`            | `name`                                |
+
+### What each identity reference looks like
+
+For identity references to be recognisable, a name is helpful. The name is not essential, however the Admin UI will display the name when provided, so that issuances, remote issuances and presentations can be identified by the linked identity.
+
+Identity input has the following properties:
+
+- **issuer**: the unique identifier for the store that the identity belongs to)
+- **identifier**: the unique identifier for the identity in the store
+- **name**: a human-readable name for the identity
+
+:::tip
+Labels can be configured for issuer IDs, to make it easier to find and identify different issuers (user stores) via a human readable name. The admin UI will always display the label instead of the issuer ID, if one has been configured. See the [instance configuration guide](/docs/guides/instance-configuration) for more information.
+:::
+
+### How to create identity references
+
+For convenience, identity input can be included in issuance or remote issuance input, or the identity can be created separately and referenced by ID.
+
+#### Saving an identity reference separately
+
+To create an identity reference, use the `saveIdentity` mutation:
+
+```graphql title="saveIdentity mutation: saves or updates an identity by issuer and identifier"
+mutation SaveIdentity($input: IdentityInput!) {
+  saveIdentity(input: $input) {
+    id
+  }
+}
+```
+
+```typescript title="Example code to save an identity based on a logged in user's JWT claims"
+function saveIdentity(user: JwtPayload) {
+  const variables = {
+    issuer: user.iss,
+    identifier: user.oid,
+    name: user.name,
+  }
+
+  return this.client.mutate({ mutation: saveIdentityMutation, variables: variables })
+}
+```
+
+:::info
+The `saveIdentity` mutation will create a new identity if one does not already exist with the same issuer and identifier. If an identity already exists with the same issuer and identifier, the name will be updated if necessary.
+:::
+
+#### Providing identity input with issuance input
+
+When creating an issuance or remote issuance, you can include identity input instead of saving the identity separately. This can be more convenient, as the identity is saved and linked to the issuance in a single operation.
+
+```graphql title="createIssuance mutation"
+mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
+  createIssuanceRequest(request: $request) {
+    ... on IssuanceResponse {
+      requestId
+      url
+      qrCode
+      expiry
+    }
+    ... on RequestErrorResponse {
+      error {
+        code
+        message
+        innererror {
+          code
+          message
+          target
+        }
+      }
+    }
+  }
+}
+```
+
+```json title="Example issuance input with identity input included"
+{
+  "request": {
+    "contractId": "5C9D3AC6-0D6A-4ABB-8047-9E35EAD2B3EA",
+    "identity": {
+      "identifier": "d93907c3-8338-4acf-b8ed-0e3e5793a7c7",
+      "issuer": "a4577872-4a36-4a93-9846-b29a1220ca89",
+      "name": "Ebony Lawry"
+    }
+  }
+}
+```
+
+## Using identity references
+
+Once identity references are saved:
+
+- they can be used as an API entry point to related data
+- the Admin UI supports searching for issuances, remote issuances and presentations linked with the identity
+- admin users may use the search feature to find identities or list identities via the <AdminUrl path="/identities">Issuees page</AdminUrl>
+
+### Querying related data
+
+Identities can be queried by ID, or by issuer and identifier key, in single or multiples:
+
+- [identity](/docs/reference/api/queries/identity) finds a single identity by ID
+- [identities](/docs/reference/api/queries/identities) finds multiple identities by ID
+- [identitiesByIdentifier](/docs/reference/api/queries/identities-by-identifiers) finds one or more identities by issuer and identifier unique key
+- [findIdentities](/docs/reference/api/queries/find-identities) finds identities by issuer and name partial match
+
+```graphql title="Example query to find an identity and view issuances and presentations"
+query Identity($identityId: ID!, $limit: PositiveInt) {
+  identity(id: $identityId) {
+    id
+    issuer
+    issuerLabel
+    identifier
+    name
+    issuanceCount
+    issuances(limit: $limit) {
+      contract {
+        name
+      }
+      issuedAt
+      issuedBy {
+        name
+        isApp
+      }
+      status
+      hasFaceCheckPhoto
+    }
+    presentations(limit: $limit) {
+      presentedAt
+      presentedCredentials {
+        issuer
+        type
+        issuer
+      }
+      requestedBy {
+        name
+        isApp
+      }
+    }
+  }
+}
+```

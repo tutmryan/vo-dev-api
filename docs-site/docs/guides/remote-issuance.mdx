@@ -1,0 +1,144 @@
+---
+sidebar_position: 6
+---
+
+import ThemedImage from '@theme/ThemedImage'
+import { AdminUrl } from '@site/src/components/admin-url'
+
+# Remote issuance
+
+Remote issuance allows you to issue credentials to recipients who are not present at the time of issuance:
+
+- An email or SMS can be sent to the recipient with a link to receive the credential through the portal website.
+- An SMS or email (second factor) is used to verify the recipient via a OTP (one time passcode).
+- Photo capture can optionally be included in the process, to capture a photo of the recipient for the credential.
+
+<ThemedImage
+  alt="remote issuance interaction diagram"
+  sources={{
+    light: '/img/remote-issuance.svg',
+    dark: '/img/remote-issuance-dark.svg',
+  }}
+/>
+
+:::info
+Remote issuance is easier to implement than in-person issuance, since no user-interface is required. If you wish to embed issuance user-interface components into your own app, use [in-person issuance](/docs/guides/issuance).
+:::
+
+## Bulk remote issuance
+
+Remote issuance supports bulk issuing of credentials to many recipients, either via app integration to the API, or manually via the Admin UI.
+
+## Manual remote issuance
+
+The Admin UI provides the ability to:
+
+- Create remote issuances via the 'Issue Credential' button on the credential details page.
+- Create bulk remote issuances from CSV file via the 'Bulk Issue Credential' button on the credential details page.
+- List, filter and view the details of remote issuances via the 'Remote Issuances' page.
+- Cancel pending remote issuances via the 'Remote Issuances' page.
+
+## Create remote issuance request
+
+:::tip
+To create a remote issuance request definition and explore the API, use the <AdminUrl path="/issuance-builder">issuance builder</AdminUrl> and select 'Remote' as the 'Delivery method' option, as a starting point.
+:::
+
+The [async issuance request input](/docs/reference/types/inputs/async-issuance-request-input) specifies:
+
+1. Which credential will be issued
+1. The identity to whom the credential will be issued (recipient / issuee)
+1. Contact details of the recipient, for notifications and verification
+1. Values of any claims defined in the contract
+1. Expiration of the remote issuance (not the credential), after which the issuance cannot be completed
+1. Other optional input:
+   1. Callback info, if issuance event data should also be sent to a server-side endpoint
+   1. An expiration date to explicitly control when a credential expires, regardless of when it is issued
+   1. Instruction to capture a photo of the recipient during issuance, if the credential requires a face check photo, and the photo is not included with the claim data provided
+
+```graphql title="createAsyncIssuanceRequest mutation: will return a response with async issuance IDs or validation errors"
+mutation CreateAsyncIssuanceRequest($request: [AsyncIssuanceRequestInput!]!) {
+  createAsyncIssuanceRequest(request: $request) {
+    ... on AsyncIssuanceResponse {
+      asyncIssuanceRequestIds
+    }
+    ... on AsyncIssuanceErrorResponse {
+      errors
+    }
+  }
+}
+```
+
+```json title="Example variables with optional callback and PIN defined"
+{
+  "request": {
+    "contractId": "<id of the contract to be issued>",
+    "identityId": "<id of identity of recipient; or specify via identity field>",
+    "expirationDate": "<explicit expiry date of the credential in ISO format>",
+    "expiry": "<expiry period of the remote issuance, if not completed>",
+    "photoCapture": true, // include photo capture in the issuance process
+    "claims": {
+      "claimName": "claimValue" // claim data to be included in the credential
+    },
+    "contact": {
+      "notification": {
+        "method": "email",
+        "value": "name@outlook.com"
+      },
+      "verification": {
+        "method": "sms",
+        "value": "+61412123456"
+      }
+    }
+  }
+}
+```
+
+If the async issuance request is successful, the response will contain the async issuance request IDs.
+
+```json title="Example response of the async issuance request"
+{
+  "data": {
+    "createAsyncIssuanceRequest": {
+      "asyncIssuanceRequestIds": ["2bdb43e8-c85a-48c1-8541-ef634e5dba05", "6372d603-bfe7-4ba8-91d6-771a9b61fb32"]
+    }
+  }
+}
+```
+
+If there are validation errors, the response will contain a list of the errors (null will be returned in the position of async issuances with no errors).
+
+```json title="Example error response of the async issuance request"
+{
+  "data": {
+    "createAsyncIssuanceRequest": {
+      "errors": [null, "Claims must include: card_number"]
+    }
+  }
+}
+```
+
+## Remote issuance completion process
+
+Once the remote issuance is created, the notification email or SMS will be sent to the recipient including a link to complete the issuance.
+
+The issuance link can be opened in a desktop or web application, or on a mobile device. Either way, the recipient will need a mobile device with Microsoft Authenticator installed to complete the issuance.
+
+- Recipient opens the issuance link
+- A verification code is sent via SMS or email (according to the contact details provided)
+- Recipient enters the verification code
+- If photo capture is required, the recipient will be prompted to capture a photo
+- If using a mobile device, the recipient will be prompted to open Microsoft Authenticator
+- Otherwise, the recipient will be prompted to scan the QR code with Microsoft Authenticator
+- The recipient adds the credential to their wallet
+
+## Administration of remote issuances
+
+Once the remote issuance is created, it can be [viewed and managed via the Admin UI.
+
+- The <AdminUrl path="/remote-issuances">Remote Issuances</AdminUrl> page lists all remote issuances, with the ability to filter by status, recipient, credential and date of creation.
+- Pending remote issuances can be cancelled by selecting one or more in the list, or from the details page of a single remote issuance.
+- The details page shows a communications log, showing issuance and verification communications sent to the recipient. Communication failures are also shown, including the error encountered to assist troubleshooting.
+- The recipient contact details can be revealed and checked for correctness.
+- If required, contact details can be corrected.
+- The remote issuance notification can be resent to the recipient.

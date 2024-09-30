@@ -1,5 +1,5 @@
 ---
-sidebar_position: 8
+sidebar_position: 12
 ---
 
 # Audit
@@ -7,22 +7,22 @@ sidebar_position: 8
 Verified Orchestration plaform creates audit entries for the following event types;
 
 - invocations of GraphQL queries and mutations<br/>
-  [sample audit entry for GraphQL query](#sample-audit-entry-for-graphql-query), [sample audit entry for GraphQL mutation](#sample-audit-entry-for-graphql-mutation)
+  [sample audit entry for a GraphQL query](#sample-audit-entry-for-a-graphql-query), [sample audit entry for a GraphQL mutation](#sample-audit-entry-for-a-graphql-mutation)
 
 - GraphQL subscriptions<br/>
-  [sample audit entry for GraphQL subscription](#sample-audit-entry-for-graphql-subscription)
+  [sample audit entry for a GraphQL subscription](#sample-audit-entry-for-a-graphql-subscription)
 - callbacks for issuances and presentations from Microsoft Entra Verified ID<br/>
   [sample audit entry for callback Microsoft Entra Verified ID](#sample-audit-entry-for-a-callback-from-microsoft-entra-verified-id)
-- revoking credentials of an issuee, a contract, or a user in a background job<br/>
-  [sample audit entry for revocation of credentials in a background job](#sample-audit-entry-for-revocation-of-issuances-in-a-background-job)
+- revoking credentials of an issuee, a contract, or a user)<br/>
+  [sample audit entry for revocation of credentials](#sample-audit-entry-for-revocation-of-credentials)
 
-The platform audit log is avaiable in [Azure Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about) for integration with a System Information and Event Management (SIEM) tool of choice, e.g. [splunk](https://www.splunk.com/en_us/blog/platform/splunking-azure-event-hubs.html), [sumo logic](https://help.sumologic.com/docs/send-data/hosted-collectors/cloud-to-cloud-integration-framework/azure-event-hubs-source/), etc.
+The platform audit log is available in [Azure Event Hubs](https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-about) for integration with a System Information and Event Management (SIEM) tool of choice, e.g. [splunk](https://www.splunk.com/en_us/blog/platform/splunking-azure-event-hubs.html), [sumo logic](https://help.sumologic.com/docs/send-data/hosted-collectors/cloud-to-cloud-integration-framework/azure-event-hubs-source/), etc.
 
 Generally, an administrator of Verified Orchestration platform would create a dedicated Shared Access Policy (SAS) and provide the access keys and connection string for each integration with the SIEM tool.
 
-## Sample audit entry for GraphQL query
+## Sample audit entry for a GraphQL query
 
-```ts title="Sample audit entry for GraphQL query"
+```ts title="Sample audit entry for a GraphQL query"
 {
   "log": {
     "AppRoleInstance": "dd1e06f6d167",
@@ -71,9 +71,9 @@ Generally, an administrator of Verified Orchestration platform would create a de
 }
 ```
 
-## Sample audit entry for GraphQL mutation
+## Sample audit entry for a GraphQL mutation
 
-```ts title="Sample audit entry for GraphQL mutation"
+```ts title="Sample audit entry for a GraphQL mutation"
 {
   "log": {
     "AppRoleInstance": "dd1e06f6d167",
@@ -123,9 +123,9 @@ Generally, an administrator of Verified Orchestration platform would create a de
 }
 ```
 
-## Sample audit entry for GraphQL subscription
+## Sample audit entry for a GraphQL subscription
 
-```ts title="Sample audit entry for GraphQL subscription"
+```ts title="Sample audit entry for a GraphQL subscription"
 {
   "log": {
     "AppRoleInstance": "dd1e06f6d167",
@@ -169,9 +169,9 @@ Generally, an administrator of Verified Orchestration platform would create a de
 }
 ```
 
-## Sample audit entry for revocation of credentials in a background job
+## Sample audit entry for revocation of credentials
 
-```ts title="Sample audit entry for revocation of credentials in a background job"
+```ts title="Sample audit entry for revocation of credentials"
 {
   "log": {
     "AppRoleInstance": "dcc84c70813f",
@@ -218,7 +218,7 @@ Generally, an administrator of Verified Orchestration platform would create a de
 
 ## Sample audit entry for a callback from Microsoft Entra Verified ID
 
-```ts title="Sample audit entry for a callback from Microsoft Entra Verified ID"
+```ts title="Sample audit entry for an issuance or presentation callback from Microsoft Entra Verified ID"
 {
   "log": {
     "AppRoleInstance": "dd1e06f6d167",

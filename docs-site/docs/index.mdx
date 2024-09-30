@@ -6,11 +6,13 @@ import { AdminUrl } from '@site/src/components/admin-url'
 
 # Introduction
 
-Verified Orchestration is a platform that offers seamless integration experience for the consumer applications to fully realise the benefits of using [Verifiable Credentials](https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/decentralized-identifier-overview#what-are-verifiable-credentials) with [Microsoft Entra Verified ID](https://www.microsoft.com/en-au/security/business/identity-access/microsoft-entra-verified-id) and [Microsoft Authenticator App](https://www.microsoft.com/en-au/security/mobile-authenticator-app).
+Verified Orchestration is a platform that offers a seamless integration experience for consumer applications to fully realise the benefits of using [Verifiable Credentials](https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/decentralized-identifier-overview#what-are-verifiable-credentials) with [Microsoft Entra Verified ID](https://www.microsoft.com/en-au/security/business/identity-access/microsoft-entra-verified-id) and the [Microsoft Authenticator App](https://www.microsoft.com/en-au/security/mobile-authenticator-app).
 
 The platform is comprised of the following components:
 
-- <AdminUrl path="/">Admin UI</AdminUrl> offers a web interface mainly for the administrators of the platform to manage all aspects of the credential
-  lifecycle (including provisioning, issuance, revocation, etc.) and monitor the various usage statistics.
-- [GraphQL API](/docs/guides/integration/#graphql-api) allows rich and flexible data fetching mechanism and integration experience for the consumer applications.
-- [Auditing module](/docs/guides/audit) provides a stream of all audit-related events which can be easily ingested into the consumer's SIEM (Security Information and Event Management) system of choice.
+- <AdminUrl path="/">Admin UI</AdminUrl> offers a web interface for administrators of the platform to manage all aspects of the credential lifecycle
+  (including provisioning, issuance, revocation, etc.), templates, partners, approval workflows, remote issuance, users, integration tools and
+  usage statistics.
+- [GraphQL API](/docs/guides/integration/#graphql-api) is the core of the platform, supporting rich and varied integration options for building compelling consumer apps and admin user experiences.
+- [Auditing module](/docs/guides/audit) provides a stream of audit events which can be easily ingested into the consumer's SIEM (Security Information and Event Management) system of choice.
+- Portal UI provides issuee user interfaces for remote issuance, actioning approval requests and photo capture for credential issuance.

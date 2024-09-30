@@ -1,10 +1,13 @@
 ---
-sidebar_position: 7
+sidebar_position: 9
 ---
+
+import ThemedImage from '@theme/ThemedImage'
+import { AdminUrl } from '@site/src/components/admin-url'
 
 # Approvals
 
-The Verified Orchestration platform supports presentation of credentials to approve (or reject) a request. This feature can be used to facilitate workflows that require approval from a human via presentation of credentials.
+The Verified Orchestration platform supports presentation of credentials to approve (or reject) a request. This feature can be used to facilitate workflows that require approval from a human via presentation of credentials. The approval request can include rich markdown content and a reference link to provide context to the approver.
 
 ## Example Scenario
 
@@ -18,9 +21,9 @@ Our ficticuous organisation, Acme Software, uses GitHub to run their software de
 
 #### Step 1. Request approval
 
-The GitHub application requests approval of the deployment by calling the `CreateApprovalRequest` mutation.
+The GitHub application requests approval of the deployment by calling the `createApprovalRequest` mutation.
 
-```graphql title="CreateApprovalRequest mutation: will return the approval request ID and URL to action the approval"
+```graphql title="createApprovalRequest mutation: will return the approval request ID and URL to action the approval"
 mutation CreateApprovalRequest($request: ApprovalRequestInput!) {
   createApprovalRequest(request: $request) {
     id
@@ -30,7 +33,7 @@ mutation CreateApprovalRequest($request: ApprovalRequestInput!) {
 }
 ```
 
-```json title="Example variables for CreateApprovalRequest mutation"
+```json title="Example variables for createApprovalRequest mutation"
 {
   "request": {
     "callback": {
@@ -50,7 +53,11 @@ mutation CreateApprovalRequest($request: ApprovalRequestInput!) {
 }
 ```
 
-```json title="Example response from CreateApprovalRequest mutation"
+:::tip
+The `purpose` field can include markdown formatting to provide rich context to the approval request.
+:::
+
+```json title="Example response from createApprovalRequest mutation"
 {
   "data": {
     "createApprovalRequest": {
@@ -76,14 +83,14 @@ The change management team receives a notification that an approval is required.
 
 #### Step 3. Callback
 
-When the approval request is approved or rejected, the GitHub application will receive a callback to the URL provided in the `callback.url` field of the `CreateApprovalRequest` mutation. Refer to the [ActionedApprovalData](/docs/reference/types/objects/actioned-approval-data) for the complete definition.
+When the approval request is approved, rejected or cancelled, the GitHub application will receive a callback to the URL provided in the `callback.url` field of the `CreateApprovalRequest` mutation. Refer to the [ActionedApprovalData](/docs/reference/types/objects/actioned-approval-data) for the complete definition. The status field will be one of `approved`, `rejected` or `cancelled`.
 
 The GitHub application can then allow the deployment to proceed or cancel the deployment based on the approval status.
 
 ```json title="Example callback payload"
 {
   "approvalRequestId": "27091231-af65-42a9-a4c1-97604e04d018",
-  "isApproved": true,
+  "status": "approved",
   "actionedComment": "LGTM 👍",
   "actionedAt": "2024-04-04T02:20:15.856Z",
   "actionedBy": {
@@ -111,7 +118,7 @@ As an alternative to receiving a callback, applications coordinating approvals c
 ```graphql title="Example query to retrieve actioned approval data"
 query ActionedApprovalData($approvalRequestId: ID!) {
   actionedApprovalData(id: $approvalRequestId) {
-    isApproved
+    status
     actionedComment
     actionedBy {
       id
@@ -128,6 +135,53 @@ query ActionedApprovalData($approvalRequestId: ID!) {
 }
 ```
 
+### Updating approval requests
+
+Applications can update pending approval request content via the `updateApprovalRequest` mutation.
+
+```graphql title="updateApprovalRequest mutation"
+mutation UpdateApprovalRequest($updateApprovalRequestId: ID!, $input: UpdateApprovalRequestInput!) {
+  updateApprovalRequest(id: $updateApprovalRequestId, input: $input)
+}
+```
+
+```json title="Example variables for updateApprovalRequest mutation"
+{
+  "updateApprovalRequestId": "27091231-af65-42a9-a4c1-97604e04d018",
+  "input": {
+    "purpose": "Please provide ChangeManager approval for deployment **at 6am Friday** to Production in repo api"
+  }
+}
+```
+
+:::note
+Only the application that created the approval request can update the request content.
+:::
+
+### Cancelling approval requests
+
+Applications can cancel pending approval requests via the `cancelApprovalRequest` mutation.
+
+```graphql title="cancelApprovalRequest mutation"
+mutation CancelApprovalRequest($cancelApprovalRequestId: ID!) {
+  cancelApprovalRequest(id: $cancelApprovalRequestId)
+}
+```
+
+```json title="Example variables for cancelApprovalRequest mutation"
+{
+  "cancelApprovalRequestId": "27091231-af65-42a9-a4c1-97604e04d018"
+}
+```
+
+:::note
+Only the application that created the approval request can cancel it.
+:::
+
+:::tip
+Approval admin users can also cancel approval requests via the Verified Orchestration admin UI.
+:::
+
 ## Authorization
 
 Access to create approval requests and read approval data can be controlled by application and user roles.
@@ -140,6 +194,8 @@ Refer to [Onboarding an app](/docs/guides/onboarding-apps) for more information 
 
 ### Approval admin users
 
-Admin users can be authorized to view approval requests, via the `VerifiableCredential.ApprovalRequestAdmin` user role.
+Admin users can be authorized to view and cancel approval requests, via the `VerifiableCredential.ApprovalRequestAdmin` user role.
+
+The Verified Orchestration admin UI provides a <AdminUrl path="/approvals">user interface</AdminUrl> for filtering, viewing and cancelling approval requests.
 
 Refer to [Onboarding users](/docs/guides/onboarding-users) for more information on how to onboard a user.
