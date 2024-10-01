@@ -2,7 +2,7 @@ import { type TransactionalCommandContext } from '../../../cqs'
 import { type IssuanceRequestResponse } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { CreateIssuanceRequestCommand } from '../../issuance/commands/create-issuance-request-command'
-import { getLimitedAsyncIssuanceKey, setLimitedAsyncIssuanceData } from '../../limited-async-issuance-tokens'
+import { getLimitedAsyncIssuanceSessionKey, setLimitedAsyncIssuanceData } from '../../limited-async-issuance-tokens'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
 export async function CreateIssuanceRequestForAsyncIssuanceCommand(
@@ -28,7 +28,7 @@ export async function CreateIssuanceRequestForAsyncIssuanceCommand(
 
   try {
     return await inTransaction(async (entityManager) => {
-      const asyncIssuanceKey = getLimitedAsyncIssuanceKey(user.token)
+      const asyncIssuanceKey = getLimitedAsyncIssuanceSessionKey(user.token)
       const response = await CreateIssuanceRequestCommand.apply({ ...this, entityManager }, [
         {
           ...asyncIssuance,

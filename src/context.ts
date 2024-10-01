@@ -9,7 +9,7 @@ import { dispatch } from './cqs'
 import { dataSource } from './data'
 import { getLimitedAccessData, LimitedAccessTokenAcquisitionRoles } from './features/limited-access-tokens'
 import { getLimitedApprovalData } from './features/limited-approval-tokens'
-import { getLimitedAsyncIssuanceData } from './features/limited-async-issuance-tokens'
+import { getLimitedAsyncIssuanceDataForSession } from './features/limited-async-issuance-tokens'
 import { getLimitedPhotoCaptureSession } from './features/limited-photo-capture-tokens'
 import type { PhotoCaptureData } from './features/photo-capture'
 import { getPhotoCaptureData } from './features/photo-capture'
@@ -81,7 +81,7 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
   const isLimitedAsyncIssuanceClient = Array.isArray(claims.roles) && claims.roles.includes(InternalRoles.limitedAsyncIssuance)
   if (isLimitedAsyncIssuanceClient) {
     // load async issuance data
-    const limitedAsyncIssuanceData = await getLimitedAsyncIssuanceData(token)
+    const limitedAsyncIssuanceData = await getLimitedAsyncIssuanceDataForSession(token)
     invariant(limitedAsyncIssuanceData, 'Invalid token')
 
     // optionally load photo capture data during photo capture session

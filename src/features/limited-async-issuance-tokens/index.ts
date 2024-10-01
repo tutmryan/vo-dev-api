@@ -7,9 +7,6 @@ import type { AsyncIssuanceEntity } from '../async-issuance/entities/async-issua
 export const codeExpiryMinutes = 5
 const verificationCache = newCacheSection('asyncIssuanceVerificationCache')
 
-export const issuanceSessionExpiryMinutes = 60
-const asyncIssuanceCache = newCacheSection('asyncIssuance')
-
 export const acquireAsyncIssuanceTokenLimiter = rateLimiter({
   points: 10,
   duration: 60 * codeExpiryMinutes,
@@ -33,6 +30,12 @@ export async function redeemVerificationCode(asyncIssuanceRequestId: string, ver
   return isValid
 }
 
+export const issuanceSessionExpiryMinutes = 60
+// cache of async issuance data by async issuance request id
+const asyncIssuanceCache = newCacheSection('asyncIssuance')
+// cache of async issuance request id by token key
+const asyncIssuanceSessionCache = newCacheSection('asyncIssuanceSession')
+
 export type LimitedAsyncIssuanceData = Pick<AsyncIssuanceEntity, 'contractId' | 'identityId'> & {
   asyncIssuanceRequestId: string
   userId: string
@@ -42,26 +45,29 @@ export type LimitedAsyncIssuanceData = Pick<AsyncIssuanceEntity, 'contractId' | 
 }
 
 export async function setLimitedAsyncIssuanceData(token: string, data: LimitedAsyncIssuanceData) {
-  const key = getLimitedAsyncIssuanceKey(token)
-  await asyncIssuanceCache.set(key, JSON.stringify(data), { ttl: 60 * issuanceSessionExpiryMinutes })
+  const key = getLimitedAsyncIssuanceSessionKey(token)
+  await asyncIssuanceSessionCache.set(key, data.asyncIssuanceRequestId, { ttl: 60 * issuanceSessionExpiryMinutes })
+  await asyncIssuanceCache.set(data.asyncIssuanceRequestId, JSON.stringify(data), { ttl: 60 * issuanceSessionExpiryMinutes })
 }
 
-export async function getLimitedAsyncIssuanceData(token: string) {
-  const key = getLimitedAsyncIssuanceKey(token)
-  return getLimitedAsyncIssuanceDataByKey(key)
+export async function getLimitedAsyncIssuanceDataForSession(token: string) {
+  const key = getLimitedAsyncIssuanceSessionKey(token)
+  return getLimitedAsyncIssuanceDataBySessionKey(key)
 }
 
-export async function getLimitedAsyncIssuanceDataByKey(key: string) {
-  const data = await asyncIssuanceCache.get(key)
+export async function getLimitedAsyncIssuanceDataBySessionKey(sessionKey: string) {
+  const asyncIssuanceRequestId = await asyncIssuanceSessionCache.get(sessionKey)
+  if (!asyncIssuanceRequestId) return undefined
+  return getLimitedAsyncIssuanceData(asyncIssuanceRequestId)
+}
+
+export async function getLimitedAsyncIssuanceData(asyncIssuanceRequestId: string) {
+  const data = await asyncIssuanceCache.get(asyncIssuanceRequestId)
   if (!data) return undefined
   return JSON.parse(data) as LimitedAsyncIssuanceData
 }
 
-export async function deleteLimitedAsyncIssuanceData(asyncIssuanceKey: string) {
-  await asyncIssuanceCache.delete(asyncIssuanceKey)
-}
-
-export const getLimitedAsyncIssuanceKey = (token: string) => createKey(token, limitedAsyncIssuance.secret)
+export const getLimitedAsyncIssuanceSessionKey = (token: string) => createKey(token, limitedAsyncIssuance.secret)
 
 const verificationThrottleSeconds = 120 - 1 // 2 minutes - 1 second for buffer
 const verificationThrottleCache = newCacheSection('verificationThrottle')

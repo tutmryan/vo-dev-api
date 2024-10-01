@@ -19,7 +19,7 @@ export const presentationCallbackMiddleware: RequestHandler = requestCallbackMid
 
 type CallbackHandler = (event: IssuanceCallbackEvent | PresentationCallbackEvent) => Promise<void>
 
-function requestCallbackMiddleware(type: 'issuance' | 'presentation', handler?: CallbackHandler): RequestHandler {
+function requestCallbackMiddleware(type: 'issuance' | 'presentation', handler: CallbackHandler): RequestHandler {
   return async (req, res) => {
     // auth callback
     if (!req.user) {
@@ -46,19 +46,19 @@ function requestCallbackMiddleware(type: 'issuance' | 'presentation', handler?: 
     logger.info(`${capitalize(type)} callback received`, { event: loggableEventData, type })
 
     // invoke our handler
-    if (handler) {
-      try {
-        await handler(event)
-        logger.info(`${capitalize(type)} callback handler invoked`, { event: loggableEventData, type })
-      } catch (error) {
-        logger.error(`${capitalize(type)} callback handler failed`, { event: loggableEventData, type, error })
-      }
+    try {
+      await handler(event)
+      logger.info(`${capitalize(type)} callback handler invoked`, { event: loggableEventData, type })
+    } catch (error) {
+      logger.error(`${capitalize(type)} callback handler failed: ${error}`, { error, event: loggableEventData, type })
+      res.status(500).end()
+      return
     }
 
     // find the consumer callback for this event
     const callback = await requestCallbackCache.get(event.requestId)
     if (!callback) {
-      logger.warn(`Failed to locate a matching consumer ${type} callback`, { requestId: event.requestId })
+      logger.warn(`There is no consumer callback for this ${type}`, { requestId: event.requestId })
       res.status(204).end()
       return
     }

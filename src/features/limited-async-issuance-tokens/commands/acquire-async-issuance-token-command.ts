@@ -1,13 +1,17 @@
 import { getClientCredentialsToken } from '@makerx/node-common'
 import { randomUUID } from 'crypto'
 import type { LimitedAsyncIssuanceData } from '..'
-import { acquireAsyncIssuanceTokenLimiter, redeemVerificationCode, setLimitedAsyncIssuanceData } from '..'
+import { acquireAsyncIssuanceTokenLimiter, getLimitedAsyncIssuanceData, redeemVerificationCode, setLimitedAsyncIssuanceData } from '..'
+import { requestDetailsCache } from '../../../cache'
 import { limitedAsyncIssuanceAuth } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import type { AsyncIssuanceTokenResponse } from '../../../generated/graphql'
+import { IssuanceRequestStatus } from '../../../generated/graphql'
 import { consumeRateLimit } from '../../../rate-limiter'
 import { invariant } from '../../../util/invariant'
 import { AsyncIssuanceEntity } from '../../async-issuance/entities/async-issuance-entity'
+import { publishIssuanceEvent } from '../../issuance/callback/pubsub'
+import type { IssuanceRequestDetails } from '../../issuance/commands/create-issuance-request-command'
 import { createLimitedPhotoCaptureSession } from '../../limited-photo-capture-tokens'
 import type { PhotoCaptureData } from '../../photo-capture'
 import { setPhotoCaptureData } from '../../photo-capture'
@@ -33,6 +37,10 @@ export async function AcquireAsyncIssuanceTokenCommand(
   // download the async issuance request
   const asyncIssuanceRequest = await this.services.asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, entity.expiry)
   invariant(asyncIssuanceRequest, 'Async issuance request data not found')
+
+  // terminate any existing in-progress issuance request
+  const existingSessionData = await getLimitedAsyncIssuanceData(asyncIssuanceRequestId)
+  if (existingSessionData?.issuanceRequestId) terminateInProgressIssuanceRequest(existingSessionData.issuanceRequestId)
 
   // acquire a token
   const token = await getClientCredentialsToken(limitedAsyncIssuanceAuth)
@@ -65,4 +73,25 @@ export async function AcquireAsyncIssuanceTokenCommand(
     expires: token.expires,
     photoCaptureRequestId: limitedAsyncIssuanceData.photoCaptureRequestId,
   }
+}
+
+async function terminateInProgressIssuanceRequest(issuanceRequestId: string) {
+  // look up the issuance request details
+  const requestDetails = await requestDetailsCache.get(issuanceRequestId)
+  invariant(requestDetails, 'Issuance request details not found')
+  const issuanceRequestDetails = JSON.parse(requestDetails) as IssuanceRequestDetails
+  // delete existing request details
+  await requestDetailsCache.delete(issuanceRequestId)
+  // publish issuance error event to notify subscribers
+  await publishIssuanceEvent({
+    ...issuanceRequestDetails,
+    event: {
+      error: {
+        code: 'async-issuance-error',
+        message: 'A new remote issuance session was started',
+      },
+      requestId: issuanceRequestId,
+      requestStatus: IssuanceRequestStatus.IssuanceError,
+    },
+  })
 }

@@ -2,7 +2,7 @@ import type { VerifiedOrchestrationEntityManager } from '../../../data/entity-ma
 import { AsyncIssuanceService } from '../../../services/async-issuance-service'
 import { invariant } from '../../../util/invariant'
 import type { IssuanceEntity } from '../../issuance/entities/issuance-entity'
-import { getLimitedAsyncIssuanceDataByKey } from '../../limited-async-issuance-tokens'
+import { getLimitedAsyncIssuanceDataBySessionKey } from '../../limited-async-issuance-tokens'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
 export async function completeAsyncIssuance(
@@ -13,7 +13,7 @@ export async function completeAsyncIssuance(
   const asyncIssuanceRepo = entityManager.getRepository(AsyncIssuanceEntity)
 
   // look up the data by key
-  const asyncIssuanceData = await getLimitedAsyncIssuanceDataByKey(asyncIssuanceKey)
+  const asyncIssuanceData = await getLimitedAsyncIssuanceDataBySessionKey(asyncIssuanceKey)
   invariant(asyncIssuanceData, 'Async issuance data not found')
 
   // update and persist the async issuance
