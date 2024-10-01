@@ -24,6 +24,7 @@ describe('createAsyncIssuanceRequest mutation', () => {
       usePhotoCapture?: boolean
       useClaims?: boolean
       useExpiry?: boolean
+      useAdditionalClaims?: boolean
     }>([
       { type: 'single issuance works', numberOfRequests: 1 },
       { type: 'multiple issuances works' },
@@ -31,40 +32,44 @@ describe('createAsyncIssuanceRequest mutation', () => {
       { type: 'issuance photo capture works', usePhotoCapture: true },
       { type: 'issuance face check works', useFaceCheck: true },
       { type: 'issuance with claims works', useClaims: true },
+      { type: 'issuance with additional claims works', useClaims: true, useAdditionalClaims: true },
       { type: 'issuance with expiry works', useExpiry: true },
-    ])('$type', async ({ numberOfRequests = 2, useSingleFactor, useFaceCheck, usePhotoCapture, useClaims, useExpiry }) => {
-      // Arrange
-      const { contract } = await givenContract({
-        faceCheckSupport: useFaceCheck || usePhotoCapture ? FaceCheckPhotoSupport.Required : undefined,
-        claims: useClaims
-          ? [
-              { claim: 'fixed-claim', label: 'fixed-label', type: 'fixed-value', value: 'fixed-value' },
-              { claim: 'unfixed-claim', label: 'unfixed-label', type: 'unfixed-value', value: undefined },
-            ]
-          : undefined,
-      })
-      const identity = await Promise.all(new Array(numberOfRequests).fill(null).map(() => createIdentity()))
+    ])(
+      '$type',
+      async ({ numberOfRequests = 2, useSingleFactor, useFaceCheck, usePhotoCapture, useClaims, useExpiry, useAdditionalClaims }) => {
+        // Arrange
+        const { contract } = await givenContract({
+          faceCheckSupport: useFaceCheck || usePhotoCapture ? FaceCheckPhotoSupport.Required : undefined,
+          claims: useClaims
+            ? [
+                { claim: 'fixed-claim', label: 'fixed-label', type: 'fixed-value', value: 'fixed-value' },
+                { claim: 'unfixed-claim', label: 'unfixed-label', type: 'unfixed-value', value: undefined },
+              ]
+            : undefined,
+        })
+        const identity = await Promise.all(new Array(numberOfRequests).fill(null).map(() => createIdentity()))
 
-      // Act
-      const { errors, data } = await executeCreateAsyncIssuanceRequestAsIssuer(
-        new Array(numberOfRequests).fill(null).map((_, i) => ({
-          contractId: contract.id,
-          identityId: identity[i]?.id ?? throwError('Identity not created'),
-          expiry: AsyncIssuanceRequestExpiry.OneDay,
-          contact: buildContact(useSingleFactor),
-          faceCheckPhoto: useFaceCheck ? faceCheckPhoto : undefined,
-          photoCapture: usePhotoCapture ? true : undefined,
-          claims: useClaims ? { 'unfixed-claim': casual.word } : undefined,
-          expirationDate: useExpiry ? addDays(addMinutes(new Date(), 1), 1) : undefined,
-        })),
-      )
+        // Act
+        const { errors, data } = await executeCreateAsyncIssuanceRequestAsIssuer(
+          new Array(numberOfRequests).fill(null).map((_, i) => ({
+            contractId: contract.id,
+            identityId: identity[i]?.id ?? throwError('Identity not created'),
+            expiry: AsyncIssuanceRequestExpiry.OneDay,
+            contact: buildContact(useSingleFactor),
+            faceCheckPhoto: useFaceCheck ? faceCheckPhoto : undefined,
+            photoCapture: usePhotoCapture ? true : undefined,
+            claims: useClaims ? { 'unfixed-claim': casual.word, ...(useAdditionalClaims ? { random: 'claim' } : {}) } : undefined,
+            expirationDate: useExpiry ? addDays(addMinutes(new Date(), 1), 1) : undefined,
+          })),
+        )
 
-      // Assert
-      expectToBeUndefined(errors)
-      expectToBeDefinedAndNotNull(data)
-      expectResponseUnionToBe(data.createAsyncIssuanceRequest, 'AsyncIssuanceResponse')
-      expect(data.createAsyncIssuanceRequest.asyncIssuanceRequestIds).toHaveLength(numberOfRequests)
-    })
+        // Assert
+        expectToBeUndefined(errors)
+        expectToBeDefinedAndNotNull(data)
+        expectResponseUnionToBe(data.createAsyncIssuanceRequest, 'AsyncIssuanceResponse')
+        expect(data.createAsyncIssuanceRequest.asyncIssuanceRequestIds).toHaveLength(numberOfRequests)
+      },
+    )
   })
   describe('with invalid input', () => {
     it.each<{
@@ -72,13 +77,11 @@ describe('createAsyncIssuanceRequest mutation', () => {
       numberOfRequests?: number
       useInvalidExpiry?: boolean
       useMissedRequiredClaim?: boolean
-      useSuppliedFixedClaim?: boolean
       useMissingFaceCheck?: boolean
       useMissingPhotoCapture?: boolean
       useBothFaceCheckAndPhotoCapture?: boolean
     }>([
       { type: 'issuance with invalid expiry fails', useInvalidExpiry: true },
-      { type: 'issuance with fixed claim fails', useSuppliedFixedClaim: true },
       { type: 'issuance with required claim fails', useMissedRequiredClaim: true },
       { type: 'issuance with missing required face check fails', useMissingFaceCheck: true },
       { type: 'issuance with missing required face check fails', useMissingPhotoCapture: true },
@@ -89,7 +92,6 @@ describe('createAsyncIssuanceRequest mutation', () => {
         numberOfRequests = 2,
         useInvalidExpiry,
         useMissedRequiredClaim,
-        useSuppliedFixedClaim,
         useMissingFaceCheck,
         useMissingPhotoCapture,
         useBothFaceCheckAndPhotoCapture,
@@ -99,9 +101,7 @@ describe('createAsyncIssuanceRequest mutation', () => {
           faceCheckSupport: useMissingFaceCheck || useMissingPhotoCapture ? FaceCheckPhotoSupport.Required : undefined,
           claims: useMissedRequiredClaim
             ? [{ claim: 'unfixed-claim', label: 'unfixed-label', type: 'unfixed-value', value: undefined }]
-            : useSuppliedFixedClaim
-              ? [{ claim: 'fixed-claim', label: 'fixed-label', type: 'fixed-value', value: 'fixed-value' }]
-              : undefined,
+            : undefined,
         })
         const identity = await Promise.all(new Array(numberOfRequests).fill(null).map(() => createIdentity()))
 
@@ -113,7 +113,7 @@ describe('createAsyncIssuanceRequest mutation', () => {
             expiry: AsyncIssuanceRequestExpiry.OneDay,
             expirationDate: useInvalidExpiry ? new Date() : undefined,
             contact: buildContact(),
-            claims: useMissedRequiredClaim ? {} : useSuppliedFixedClaim ? { 'fixed-claim': casual.word } : undefined,
+            claims: useMissedRequiredClaim ? {} : undefined,
             faceCheckPhoto: useBothFaceCheckAndPhotoCapture ? faceCheckPhoto : undefined,
             photoCapture: useBothFaceCheckAndPhotoCapture ? true : undefined,
           })),
