@@ -14,7 +14,7 @@ Issuance requires user-interface components to handle several steps and the reci
 Alternatively, the [remote issuance](/docs/guides/remote-issuance) feature supports issuance via email or SMS.
 :::
 
-Issuance is a multi-step process:
+Issuance is a multistep process:
 
 1. [Create an issuance request](#create-issuance-request)
 1. [Display QR code or open link](#display-qr-code-or-open-link)
@@ -241,9 +241,9 @@ If the credential requires a photo of the recipient, the photo must be supplied 
 
 ### Photo capture service
 
-The photo capture service allows you to generate a URL for the receipient to capture a photo. The URL can be opened in a browser on a mobile device, and the recipient can capture a photo of themselves. Once complete, the photo capture request ID can be included in the issuance.
+The photo capture service allows you to generate a URL for the recipient to use to capture a photo. The URL can be opened in a browser or on a mobile device, and the recipient can capture a photo of themselves. Once complete, the photo capture request ID can be included in the issuance request.
 
-This allows issuing applications to request a photo of the recipient without needing to implement photo capture or have access to recipient photos.
+This allows issuing applications to request a photo of the recipient without needing to implement a photo capture mechanism or require access to recipient photos that may not have.
 
 :::tip
 Since the photo capture is specific to the issuee, the issuee `identityId` must be provided in the photo capture request but can be omitted from the presentation request.
@@ -282,10 +282,10 @@ mutation CreatePhotoCaptureRequest($request: PhotoCaptureRequest!) {
 
 #### Photo capture completion
 
-Photo capture progress can be monitored by:
+Photo capture progress can be monitored by either:
 
-- Subscribing to the `photoCaptureEvent` subscription
-- Polling the `photoCaptureStatus` query
+- Subscribing to the `photoCaptureEvent` subscription.
+- Or, polling the `photoCaptureStatus` query.
 
 ```graphql title="The photoCaptureEvent subscription notifies when photo capture is started and completed"
 subscription PhotoCaptureEvent($photoCaptureRequestId: UUID!) {
