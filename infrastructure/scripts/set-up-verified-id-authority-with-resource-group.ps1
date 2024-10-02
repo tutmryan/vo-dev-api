@@ -12,7 +12,7 @@ param(
   [string]
   $AuthorityId,
 
-  [Parameter(Mandatory = $true)]
+  [Parameter()]
   [string]
   $Location = 'australiaeast'
 )
