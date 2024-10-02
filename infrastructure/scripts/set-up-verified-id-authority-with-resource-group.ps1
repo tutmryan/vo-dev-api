@@ -14,7 +14,7 @@ param(
 
   [Parameter(Mandatory = $true)]
   [string]
-  $Location = 'westus2'
+  $Location = 'australiaeast'
 )
 
 $ErrorActionPreference = 'Stop'
