@@ -24,11 +24,7 @@ $constants = @{
   apiVersion = '2024-01-26-preview'
 }
 
-Write-Output "AuthorityId: $AuthorityId"
-Write-Output "SubscriptionId: $SubscriptionId"
-Write-Output "ResourceGroupName: $ResourceGroupName"
-
-Write-Output "Setup Verified ID Authority with the resource group..."
+Write-Output "Setting up Verified ID Authority with the resource group..."
 
 $setupAuthorityPayload = @{
   location = $Location
@@ -38,13 +34,10 @@ $setupAuthorityPayloadJson = ($setupAuthorityPayload | ConvertTo-Json -Compress)
 
 $authoritySetupUri = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.VerifiedId/authorities/$AuthorityId`?api-version=$($constants.apiVersion)"
 
-Write-Output "Authority Setup URI: $authoritySetupUri"
-
 $response = az rest `
   --method PUT `
   --uri $authoritySetupUri `
-  --body $setupAuthorityPayloadJson `
-  --verbose | ConvertFrom-Json
+  --body $setupAuthorityPayloadJson | ConvertFrom-Json
 
 if ($null -ne $response) {
   Write-Output "Successfully set up Verified ID Authority with the resource group."
