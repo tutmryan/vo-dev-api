@@ -43,6 +43,26 @@ describe('createContract mutation', () => {
     expectUnauthorizedError(errors)
   })
 
+  it(`returns an error if the template ID doesn't exist`, async () => {
+    // Act
+    const bogusTemplateId = randomUUID()
+
+    const contractInput = getDefaultContractInput()
+    contractInput.templateId = bogusTemplateId
+
+    const { errors } = await executeOperationAsCredentialAdmin({
+      query: createContractMutation,
+      variables: {
+        input: contractInput,
+      },
+    })
+
+    // Assert
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain(`Could not find any entity of type "TemplateEntity"`)
+    expect(errors?.[0]?.message).toContain(`"id": "${bogusTemplateId}"`)
+  })
+
   it(`returns an error if the contract input has a unsupported credential type`, async () => {
     // Act
     const bogusTemplateId = randomUUID()
