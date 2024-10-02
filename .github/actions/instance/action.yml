@@ -262,6 +262,16 @@ runs:
         -OrganisationName '${{ inputs.organisation-name }}'
         -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
 
+    - name: Set up Verified ID authority with resource group
+      id: set-up-vid-authority-with-resource-group
+      shell: pwsh
+      if: ${{ (steps.create-vid-authority.outputs.authorityId != '' || steps.check-vid-authority.outputs.authorityId != '') && steps.check-vid-authority.outputs.isVoSubdomain == 'True' }}
+      run: >-
+        ./infrastructure/scripts/set-up-verified-id-authority-with-resource-group.ps1
+        -SubscriptionId '${{ inputs.azure-subscription-id }}'
+        -ResourceGroupName '${{ inputs.resource-group-name }}'
+        -AuthorityId "${{ steps.create-vid-authority.outputs.authorityId != '' && steps.create-vid-authority.outputs.authorityId || steps.check-vid-authority.outputs.authorityId }}"
+
     - name: Prepare new secrets script
       id: prepare-new-secrets-script
       shell: bash
