@@ -270,7 +270,7 @@ runs:
         ./infrastructure/scripts/set-up-verified-id-authority-with-resource-group.ps1
         -SubscriptionId '${{ inputs.azure-subscription-id }}'
         -ResourceGroupName '${{ inputs.resource-group-name }}'
-        -AuthorityId '${{ steps.create-vid-authority.outputs.authorityId != '' && steps.create-vid-authority.outputs.authorityId || steps.check-vid-authority.outputs.authorityId }}'
+        -AuthorityId "${{ steps.create-vid-authority.outputs.authorityId != '' && steps.create-vid-authority.outputs.authorityId || steps.check-vid-authority.outputs.authorityId }}"
 
     - name: Prepare new secrets script
       id: prepare-new-secrets-script
