@@ -2,7 +2,7 @@ import type { ContractInput, TemplateInput } from '../../generated/graphql'
 import { parseDataUrl } from '../../util/data-url'
 import { validateContractClaims } from './claims'
 
-const notSupportedCredentialTypes = ['VerifiedEmployee']
+export const notSupportedCredentialTypes = ['VerifiedEmployee']
 
 export function validateContractInput(input: ContractInput) {
   validateContractClaims(input.display.claims)

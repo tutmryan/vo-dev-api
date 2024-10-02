@@ -5,6 +5,7 @@ import type { ContractInput } from '../../../generated/graphql'
 import { executeOperationAsCredentialAdmin, fakeJpegDataURL } from '../../../test'
 import type { DeepPartial } from '../../../util/type-helpers'
 import { resolveToType } from '../../../util/type-helpers'
+import { notSupportedCredentialTypes } from '../validation'
 
 export const ContractFragment = graphql(
   `
@@ -68,6 +69,28 @@ export function getDefaultContractInput(): ContractInput {
     isPublic: true,
     validityIntervalInSeconds: 1_440,
     credentialTypes: ['DefaultCredential'],
+    display: {
+      locale: 'en-AU',
+      card: {
+        title: 'Credential title',
+        description: 'Credential description',
+        issuedBy: 'Credential issuer',
+        logo: { description: 'Logo description', image: fakeJpegDataURL() },
+        textColor: '#ffffff',
+        backgroundColor: '#000000',
+      },
+      consent: {},
+      claims: [],
+    },
+  }
+}
+
+export function getUnsupportedCredentialTypeContractInput(): ContractInput {
+  return {
+    name: randomUUID(),
+    isPublic: true,
+    validityIntervalInSeconds: 1_440,
+    credentialTypes: notSupportedCredentialTypes,
     display: {
       locale: 'en-AU',
       card: {

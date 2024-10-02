@@ -16,6 +16,7 @@ import { deprecateContractMutation } from './test/deprecate-contract'
 import { getContract } from './test/get-contract'
 import { provisionContractMutation } from './test/provision-contract'
 import { getUpdateContractInput, updateContractMutation } from './test/update-contract'
+import { notSupportedCredentialTypes } from './validation'
 
 describe('updateContract mutation', () => {
   beforeAfterAll()
@@ -84,6 +85,35 @@ describe('updateContract mutation', () => {
     expect(errors?.[0]?.message).toMatchInlineSnapshot(
       `"The contract overrides the following properties from its template: display.locale, display.card.title, display.consent.title, isPublic, display.card.logo.image, display.claims[claim_two]"`,
     )
+  })
+
+  it('returns an error when updating the contract with unsupported credential type', async () => {
+    // Arrange
+    const { contract } = await givenContract({})
+
+    // Act
+    const input = getUpdateContractInput(contract)
+    input.name = 'Updated contract name'
+    input.isPublic = false
+    input.validityIntervalInSeconds = 500
+    input.display.locale = 'en-GB'
+    input.display.card.textColor = '#123123'
+    input.display.card.logo.image = fakeJpegDataURL()
+    input.display.claims = [{ claim: 'claim_name', label: 'Claim', type: 'String', value: 'Updated claim value' }]
+    input.display.consent.title = 'Updated consent title'
+    input.credentialTypes = notSupportedCredentialTypes
+
+    const { errors } = await executeOperationAsCredentialAdmin({
+      query: updateContractMutation,
+      variables: {
+        id: contract.id,
+        input,
+      },
+    })
+
+    // Assert
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toMatchInlineSnapshot(`"${notSupportedCredentialTypes[0]} is not a supported credential type"`)
   })
 
   it('updates the contract when there are no errors (no template)', async () => {
