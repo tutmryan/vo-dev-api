@@ -7,17 +7,18 @@ import { AdminUrl } from '@site/src/components/admin-url'
 
 # Identity mapping
 
-This guide describes how to use Verified Orchestration identity references, so that issuances and presentations can be reliably linked back to your organisation's own identities (e.g. internal users, partners and customers).
+This guide describes how to use Verified Orchestration identity references, which are used by issuances and presentations to reliably link back to your organisation's own identities (e.g., internal users, partners, and customers).
 
 ## Verified Orchestration identity reference
 
-The Verified Orchestration platform avoids holding personal data. Instead, it uses minimal identity references to link back to your organisation's own identity system.
+The Verified Orchestration platform minimises holding personal data. Instead, it stores and uses minimal identity references to link back into your organisation's own identity system.
 
-This allows references to issuances and presentations to be linked to identity references, facilitating abilities such as:
+This allows identity-linked issuances and presentations to be resolved by identity references, facilitating abilities such as:
 
-- Reliably binding all issued credentials to identities.
-- Presentation data includes the identity of the presenter, which can be reliably matched to your organisation's users, partners or customers.
-- The API can be used to navigate relations between issuances, presentations and identities.
+- Reliably resolving your organisation's own identity data (e.g. internal users, partners and customers).
+  - To all issued credentials and presentations.
+  - To the identity of the presenter in a presentation.
+- The ability to find data by navigating between relations when using the API, including the relations of issuances, presentations and identities.
 - The ability to revoke all credentials for an identity reference.
 
 <ThemedImage
@@ -29,47 +30,47 @@ This allows references to issuances and presentations to be linked to identity r
 />
 
 :::tip
-In the Admin UI, identity references are described as "Issuees". This is because the identity reference is the entity that is issued credentials.
+In the Admin UI, identity references are labelled as "Issuees".
 :::
 
 ## How does it work?
 
-Verified Orchestration assumes that your organisation has one or more identity stores. Each store has:
+Verified Orchestration assumes that your organisation has one or more identity stores. With each store having:
 
-- A unique **identifier for the store** (for example in Entra ID, the Tenant ID can be used, which is available from Entra JWT payloads in the `iss` claim).
-- A unique **identifier for each identity** in the store (for example, in Entra ID, we would use the user Object ID, available from Entra JWT payloads in the `oid` claim).
+- A unique **identifier for the store**. For example in Entra ID, the Tenant ID uniquely identifies the store and is available within an Entra JWT payload as the `iss` claim.
+- A unique **identifier for each identity** within a store. For example in Entra ID, the unique user Object ID is available within an Entra JWT payload as the `oid` claim.
 
-These two values form the unique key for both your own identities and the Verified Orchestration identity reference.
+These two values form the unique key which is used to link a Verified Orchestration identity reference back to an identity within your organisation's identity stores.
 
 ### Example mapping of an Entra User
 
-This table shows how an Entra User can be mapped to a Verified Orchestration identity reference. JWT claims are also included, showing how an identity reference might be securely created from an interaction with an authenticated user:
+The table below demonstrates how an Entra identity store user can be mapped to a Verified Orchestration identity reference. This reference includes both the Entra user attributes and under which claims the values are stored by an Entra produced JWT.
 
 | Entra User Attribute | JWT Payload Claim | Verified Orchestration Identity Field |
-| -------------------- | ----------------- | ------------------------------------- |
+|----------------------|-------------------|---------------------------------------|
 | Tenant ID            | `iss`             | `issuer`                              |
 | User Object ID       | `oid`             | `identifier`                          |
 | User Display name    | `name`            | `name`                                |
 
 ### What each identity reference looks like
 
-For identity references to be recognisable, a name is helpful. The name is not essential, however the Admin UI will display the name when provided, so that issuances, remote issuances and presentations can be identified by the linked identity.
+A name is a convenient way to make identity references easily recognisable without querying your organisation's identity stores. Providing the name is optional. However, when a name is supplied, the Admin UI will use it for display when creating or viewing issuances, remote issuances, and presentations.
 
 Identity input has the following properties:
 
-- **issuer**: the unique identifier for the store that the identity belongs to)
-- **identifier**: the unique identifier for the identity in the store
-- **name**: a human-readable name for the identity
+- **Issuer**: The unique identifier for the store to which the identity belongs.
+- **Identifier**: The unique identifier for the identity within the corresponding identity store.
+- **Name**: An optional human-readable name for quick identification of the identity.
 
 :::tip
-Labels can be configured for issuer IDs, to make it easier to find and identify different issuers (user stores) via a human readable name. The admin UI will always display the label instead of the issuer ID, if one has been configured. See the [instance configuration guide](/docs/guides/instance-configuration) for more information.
+Custom labels can be configured for each identity store's issuer ID. This is a convenient way to make each identity store easier to distinguish between. When set, the Admin UI displays these human-readable labels instead of the issuer ID. See the [instance configuration guide](/docs/guides/instance-configuration) for more information.
 :::
 
 ### How to create identity references
 
-For convenience, identity input can be included in issuance or remote issuance input, or the identity can be created separately and referenced by ID.
+There are two ways to create and maintain identity references: The first is to save an identity reference directly, and the second is to create an issuance or remote issuance with the identity information included. The latter can be more convenient, as the identity is saved or updated and linked to the issuance in a single operation.
 
-#### Saving an identity reference separately
+#### Creating an identity reference
 
 To create an identity reference, use the `saveIdentity` mutation:
 
@@ -94,12 +95,12 @@ function saveIdentity(user: JwtPayload) {
 ```
 
 :::info
-The `saveIdentity` mutation will create a new identity if one does not already exist with the same issuer and identifier. If an identity already exists with the same issuer and identifier, the name will be updated if necessary.
+The `saveIdentity` mutation will create a new identity when an existing one cannot be matched by the `issuer` and `identifier` fields. In the case that the identity exists, the name will be updated if changed.
 :::
 
-#### Providing identity input with issuance input
+#### Creating an identity with issuance
 
-When creating an issuance or remote issuance, you can include identity input instead of saving the identity separately. This can be more convenient, as the identity is saved and linked to the issuance in a single operation.
+When creating an issuance or remote issuance, you may optionally include the identity information instead supply the Verified Orchestration's identity ID. This can be more convenient, as the identity is saved or updated and linked to the issuance in a single operation.
 
 ```graphql title="createIssuance mutation"
 mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
@@ -125,7 +126,7 @@ mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
 }
 ```
 
-```json title="Example issuance input with identity input included"
+```json title="Example issuance input with identity information included"
 {
   "request": {
     "contractId": "5C9D3AC6-0D6A-4ABB-8047-9E35EAD2B3EA",
@@ -138,9 +139,9 @@ mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
 }
 ```
 
-### Manually created identity references
+### Creating non-identity store linked identity references
 
-You may wish to manually create identity references to issue credentials to users who are not part of your organisation's identity system or identity stores.
+There may be cases where you need to create identity references for users who are not part of your organisation's identity system or identity stores. In these cases, you can manually create identity references.
 
 We recommend using an email address as a globally unique identifier, and `manual` as the issuer value:
 
@@ -153,20 +154,22 @@ We recommend using an email address as a globally unique identifier, and `manual
 ```
 
 :::tip
-The `manual` issuer value will be shown in the Admin UI with the label 'Manually Issued'.
+The Admin UI has special handling of identity references featuring `manual` as the issuer, with these being shown and label as 'Manually Issued'.
 :::
 
 ## Using identity references
 
 Once identity references are saved:
 
-- they can be used as an API entry point to related data
-- the Admin UI supports searching for issuances, remote issuances and presentations linked with the identity
-- admin users may use the search feature to find identities or list identities via the <AdminUrl path="/identities">Issuees page</AdminUrl>
+- They can be used as an API entry point to find related data.
+- The Admin UI supports searching for issuances, remote issuances and presentations by linked identities.
+- Admin users can find identities or list identities via the <AdminUrl path="/identities">Issuees page</AdminUrl>.
 
 ### Querying related data
 
-Identities can be queried by ID, or by issuer and identifier key, in single or multiples:
+Identities can be queried to return one or many by using either the Verified Orchestration identity ID or your organisation's own identity data. When using your own organisation's own identity data, you will construct and pass one or more identity references which the Verified Orchestration API will use to find the corresponding identity.
+
+The following queries are available:
 
 - [identity](/docs/reference/api/queries/identity) finds a single identity by ID
 - [identities](/docs/reference/api/queries/identities) finds multiple identities by ID

@@ -16,6 +16,7 @@ import { getVerifiedOrchestrationToken } from './limited-access-session'
 
 const verifiedOrchestrationAuthLink = setContext(async (_, { headers }) => {
   const voAccessToken = await getVerifiedOrchestrationToken()
+  if (!voAccessToken) return headers
   return {
     headers: {
       ...headers,
@@ -52,9 +53,10 @@ const websocketsLink = new GraphQLWsLink(
     url: import.meta.env.VITE_VO_WS_URL ?? import.meta.env.VITE_VO_API_URL.replace(/^http/, 'ws'),
     connectionParams: async () => {
       const voAccessToken = getVerifiedOrchestrationToken()
-      if (!voAccessToken) throw new Error('Verified Orchestration access token is not set')
-      return { Authorization: `Bearer ${voAccessToken.token}` }
+      return voAccessToken ? { Authorization: `Bearer ${voAccessToken.token}` } : {}
     },
+    retryAttempts: 100,
+    shouldRetry: () => true,
   }),
 )
 
@@ -87,7 +89,7 @@ import { createClient } from 'graphql-ws'
 
 const verifiedOrchestrationAuthLink = setContext(async (_, { headers }) => {
   const voAccessToken = getVerifiedOrchestrationToken()
-  if (!voAccessToken) throw new Error('Verified Orchestration access token is not set')
+  if (!voAccessToken) return headers
   return {
     headers: {
       ...headers,
@@ -107,9 +109,10 @@ const websocketsLink = new GraphQLWsLink(
     url: import.meta.env.VITE_VO_WS_URL ?? import.meta.env.VITE_VO_API_URL.replace(/^http/, 'ws'),
     connectionParams: async () => {
       const voAccessToken = getVerifiedOrchestrationToken()
-      if (!voAccessToken) throw new Error('Verified Orchestration access token is not set')
-      return { Authorization: `Bearer ${voAccessToken.token}` }
+      return voAccessToken ? { Authorization: `Bearer ${voAccessToken.token}` } : {}
     },
+    retryAttempts: 100,
+    shouldRetry: () => true,
   }),
 )
 
@@ -143,7 +146,9 @@ The following file shows an example of how you might:
 3. Provide control over access token fetching and state to React components
 
 ```ts title="Example: verified-orchestration-token.ts contains a function to fetch limited access tokens from your secure backend API"
-export async function getLimitedAccessToken<TTokenResponse extends AccessTokenResponse = AccessTokenResponse>(type: 'issuance' | 'presentation') {
+export async function getLimitedAccessToken<TTokenResponse extends AccessTokenResponse = AccessTokenResponse>(
+  type: 'issuance' | 'presentation',
+) {
   const accessToken = await getApiAccessToken()
   const url = `${import.meta.env.VITE_API_URL}/limited-access-tokens/${type}`
   const response = await fetch(url, {
@@ -240,7 +245,6 @@ export function useVerifiedOrchestrationSessionToken<TInput, TAccessTokenRespons
 
   return useMemo(() => ({ accessToken: accessToken as TAccessTokenResponse, loading, error }), [accessToken, error, loading])
 }
-
 ```
 
 ## Next steps
