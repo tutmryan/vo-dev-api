@@ -12,8 +12,8 @@ export function validateContractInput(input: ContractInput) {
 
 export function validateTemplateInput(input: TemplateInput) {
   validateContractClaims(input.display?.claims)
-  if (input.credentialTypes) validateContractCredentialTypes(input.credentialTypes)
   if (input.display?.card?.logo?.image) validateDisplayLogoImage(input.display.card.logo.image)
+  if (input.credentialTypes) validateContractCredentialTypes(input.credentialTypes)
 }
 
 function validateDisplayLogoImage(displayLogoImage: string) {

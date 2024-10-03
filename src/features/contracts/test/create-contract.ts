@@ -86,25 +86,7 @@ export function getDefaultContractInput(): ContractInput {
 }
 
 export function getUnsupportedCredentialTypeContractInput(): ContractInput {
-  return {
-    name: randomUUID(),
-    isPublic: true,
-    validityIntervalInSeconds: 1_440,
-    credentialTypes: notSupportedCredentialTypes,
-    display: {
-      locale: 'en-AU',
-      card: {
-        title: 'Credential title',
-        description: 'Credential description',
-        issuedBy: 'Credential issuer',
-        logo: { description: 'Logo description', image: fakeJpegDataURL() },
-        textColor: '#ffffff',
-        backgroundColor: '#000000',
-      },
-      consent: {},
-      claims: [],
-    },
-  }
+  return { ...getDefaultContractInput(), credentialTypes: notSupportedCredentialTypes }
 }
 
 export async function createContract(input: ContractInput) {
