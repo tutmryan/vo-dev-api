@@ -7,11 +7,22 @@ import { AdminUrl } from '@site/src/components/admin-url'
 
 # Remote issuance
 
-Remote issuance allows you to issue credentials to recipients who are not present at the time of issuance:
+Remote issuance allows you to issue credentials to recipients who are not present at the time of issuance.
 
-- An email or SMS can be sent to the recipient with a link to receive the credential through the portal website.
-- An SMS or email (second factor) is used to verify the recipient via a OTP (one time passcode).
-- Photo capture can optionally be included in the process, to capture a photo of the recipient for the credential.
+The issuance flow is as follows:
+
+- The recipient receives an email or SMS containing a link to receive the credential via the Verified Orchestration Portal website.
+- The recipient opens the link and is verified by an SMS or email as second-factor authentication via an OTP (one-time passcode).
+  - *If the recipient is not verified, the issuance is not completed*
+- Optionally, a guided photo-capture flow is used to capture a photo of the recipient for credential presentation in combination with Face Check.
+- The recipient adds the credential to their wallet.
+  - *On a desktop, the recipient is prompted to scan the QR code to complete the issuance on their mobile device.*
+  - *On a mobile device, the wallet is opened via a deep link, and recipient is prompted to save their verifiable credential.*
+    - *If the recipient does not have a wallet, they will be prompted to install the Microsoft Authenticator app.*
+
+:::note
+A verifiable credential with Face Check requires presentation via the Microsoft Authenticator app and will not work with other wallet apps.
+:::
 
 <ThemedImage
   alt="remote issuance interaction diagram"
@@ -22,21 +33,20 @@ Remote issuance allows you to issue credentials to recipients who are not presen
 />
 
 :::info
-Remote issuance is easier to implement than in-person issuance, since no user-interface is required. If you wish to embed issuance user-interface components into your own app, use [in-person issuance](/docs/guides/issuance).
+Remote issuance is easier to implement than in-person issuance, since no user-interface is required. If you want control over the issuance process and user interface, use [in-person issuance](/docs/guides/issuance).
 :::
 
 ## Bulk remote issuance
 
-Remote issuance supports bulk issuing of credentials to many recipients, either via app integration to the API, or manually via the Admin UI.
+Remote issuance supports bulk credential issuing to many recipients, either via app integration with the Verified Orchestration API or manually via the Admin UI.
 
 ## Manual remote issuance
 
 The Admin UI provides the ability to:
 
-- Create remote issuances via the 'Issue Credential' button on the credential details page.
-- Create bulk remote issuances from CSV file via the 'Bulk Issue Credential' button on the credential details page.
-- List, filter and view the details of remote issuances via the 'Remote Issuances' page.
-- Cancel pending remote issuances via the 'Remote Issuances' page.
+- Create remote issuances by clicking 'Issue Credential' when viewing a verifiable credential.
+- Create bulk remote issuances from a CSV file by clicking 'Bulk Issue Credential' when viewing a verifiable credential.
+- The 'Remote Issuances' section of the Admin UI allows you to list, filter, cancel, or view the details of remote issuances.
 
 ## Create remote issuance request
 
@@ -46,15 +56,19 @@ To create a remote issuance request definition and explore the API, use the <Adm
 
 The [async issuance request input](/docs/reference/types/inputs/async-issuance-request-input) specifies:
 
-1. Which credential will be issued
-1. The identity to whom the credential will be issued (recipient / issuee)
-1. Contact details of the recipient, for notifications and verification
-1. Values of any claims defined in the contract
-1. Expiration of the remote issuance (not the credential), after which the issuance cannot be completed
+1. Which credential will be issued.
+1. The identity to whom the credential will be issued (recipient / issuee).
+1. The contact details of the recipient for notifications and verification during the issuance flow.
+1. The values of any claims defined by the contract.
+1. The expiration of the remote issuance (not the credential), after which the issuance cannot be completed.
 1. Other optional input:
-   1. Callback info, if issuance event data should also be sent to a server-side endpoint
-   1. An expiration date to explicitly control when a credential expires, regardless of when it is issued
-   1. Instruction to capture a photo of the recipient during issuance, if the credential requires a face check photo, and the photo is not included with the claim data provided
+   1. A callback URI if issuance event data should also be sent to a server-side endpoint.
+   1. An expiration date for explicit control over when a credential expires, regardless of when it is issued.
+   1. A request to capture a photo of the recipient during issuance if the credential requires a face check photo and the photo is not included with the claim data provided.
+
+:::note
+**PII** (personally identifiable information) is deleted after the remote issuance is completed, is cancelled or at expiry.
+:::
 
 ```graphql title="createAsyncIssuanceRequest mutation: will return a response with async issuance IDs or validation errors"
 mutation CreateAsyncIssuanceRequest($request: [AsyncIssuanceRequestInput!]!) {
@@ -76,9 +90,9 @@ mutation CreateAsyncIssuanceRequest($request: [AsyncIssuanceRequestInput!]!) {
     "identityId": "<id of identity of recipient; or specify via identity field>",
     "expirationDate": "<explicit expiry date of the credential in ISO format>",
     "expiry": "<expiry period of the remote issuance, if not completed>",
-    "photoCapture": true, // include photo capture in the issuance process
+    "photoCapture": true, // include photo capture in the issuance process to support Face Check
     "claims": {
-      "claimName": "claimValue" // claim data to be included in the credential
+      "claimName": "claimValue" // claim data specified by the contract that must be included in the credential
     },
     "contact": {
       "notification": {
@@ -106,7 +120,7 @@ If the async issuance request is successful, the response will contain the async
 }
 ```
 
-If there are validation errors, the response will contain a list of the errors (null will be returned in the position of async issuances with no errors).
+If there are validation errors, the response will contain a list of the errors. The order of the errors corresponds to the order of the requests in the input. Where there are no errors, the value will be `null`.
 
 ```json title="Example error response of the async issuance request"
 {
@@ -122,23 +136,27 @@ If there are validation errors, the response will contain a list of the errors (
 
 Once the remote issuance is created, the notification email or SMS will be sent to the recipient including a link to complete the issuance.
 
-The issuance link can be opened in a desktop or web application, or on a mobile device. Either way, the recipient will need a mobile device with Microsoft Authenticator installed to complete the issuance.
+The issuance link can be opened on a desktop or on a mobile device. Regardless of the method, the recipient will need a mobile device with a wallet or Microsoft Authenticator installed to complete the issuance.
 
-- Recipient opens the issuance link
-- A verification code is sent via SMS or email (according to the contact details provided)
-- Recipient enters the verification code
-- If photo capture is required, the recipient will be prompted to capture a photo
-- If using a mobile device, the recipient will be prompted to open Microsoft Authenticator
-- Otherwise, the recipient will be prompted to scan the QR code with Microsoft Authenticator
-- The recipient adds the credential to their wallet
+- The recipient opens the issuance link sent as part of the notification.
+- They then are prompted to enter a verification code that was sent via SMS or email (The method will depend on the supplied contact details at the time of creation).
+- If photo capture was requested at time of creation, the recipient will be guided to capture a photo.
+- If using a mobile device, the recipient will be prompted to open Microsoft Authenticator.
+   - If the recipient does not have Microsoft Authenticator installed, they will be prompted to install it.
+- Otherwise, the recipient will be prompted to scan the QR code with their mobile device.
+- The flow ends with the recipient adding the issued credential to their wallet.
+
+:::note
+A verifiable credential with Face Check requires presentation via the Microsoft Authenticator app and will not work with other wallet apps.
+:::
 
 ## Administration of remote issuances
 
-Once the remote issuance is created, it can be [viewed and managed via the Admin UI.
+Once the remote issuance is created, it can be <AdminUrl path="/remote-issuances">viewed</AdminUrl> and managed via the Admin UI.
 
 - The <AdminUrl path="/remote-issuances">Remote Issuances</AdminUrl> page lists all remote issuances, with the ability to filter by status, recipient, credential and date of creation.
-- Pending remote issuances can be cancelled by selecting one or more in the list, or from the details page of a single remote issuance.
-- The details page shows a communications log, showing issuance and verification communications sent to the recipient. Communication failures are also shown, including the error encountered to assist troubleshooting.
-- The recipient contact details can be revealed and checked for correctness.
+- Pending remote issuances can be cancelled by selecting one or more in the list, or from the details page when viewing a single remote issuance.
+- The details page shows a communications log, showing issuance and verification communications sent to the recipient. Communication failures are also shown, including the error encountered to assist with troubleshooting.
+- The recipient's contact details can be revealed and checked for correctness.
 - If required, contact details can be corrected.
 - The remote issuance notification can be resent to the recipient.
