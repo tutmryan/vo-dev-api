@@ -1,14 +1,10 @@
 # Presentation
 
-This page shows you how to present credentials with React and Apollo Client. For detailed info on credential presentation, refer to the [Presentation guide](/docs/guides/presentation).
+This page shows you how to present credentials with React and the Apollo Client. For detailed info on credential presentation, refer to the [Presentation guide](/docs/guides/presentation).
 
 ## Authentication
 
-Applications with an authenticated user should include an identity reference when acquiring presentation tokens. This ensures presentations of platform credentials cannot be made using credentials from another identity and also supports presentation of partner credentials.
-
-Anonymous presentations are also supported, for applications where there is no authenticated user, those applications should use [anonymous presentation tokens](/docs/guides/limited-access-tokens/#anonymous-presentation-tokens).
-
-Refer to the [Authorization guide](../authn.mdx) for further info. The [complete example below](#complete-example) uses Microsoft authorization, however there is no restriction on where identity references are sourced.
+All applications that request presentations must authenticate users and provide an identity reference to obtain an issuance access token. Refer to the [Authorization guide](../authn.mdx) for further info. The React examples below run within an authenticated application.
 
 ## Presentation steps
 
