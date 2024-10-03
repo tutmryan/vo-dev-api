@@ -12,7 +12,8 @@ import {
 import { mockedServices } from '../../test/mocks'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { StandardClaims } from './claims'
-import { createContractMutation, getDefaultContractInput } from './test/create-contract'
+import { createContractMutation, getDefaultContractInput, getUnsupportedCredentialTypeContractInput } from './test/create-contract'
+import { notSupportedCredentialTypes } from './validation'
 
 describe('createContract mutation', () => {
   beforeAfterAll()
@@ -60,6 +61,25 @@ describe('createContract mutation', () => {
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toContain(`Could not find any entity of type "TemplateEntity"`)
     expect(errors?.[0]?.message).toContain(`"id": "${bogusTemplateId}"`)
+  })
+
+  it(`returns an error if the contract input has a unsupported credential type`, async () => {
+    // Act
+    const bogusTemplateId = randomUUID()
+
+    const contractInput = getUnsupportedCredentialTypeContractInput()
+    contractInput.templateId = bogusTemplateId
+
+    const { errors } = await executeOperationAsCredentialAdmin({
+      query: createContractMutation,
+      variables: {
+        input: contractInput,
+      },
+    })
+
+    // Assert
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toMatchInlineSnapshot(`"${notSupportedCredentialTypes[0]} is not a supported credential type"`)
   })
 
   it('returns an error if the contract overrides properties from its template', async () => {

@@ -5,6 +5,7 @@ import type { ContractInput } from '../../../generated/graphql'
 import { executeOperationAsCredentialAdmin, fakeJpegDataURL } from '../../../test'
 import type { DeepPartial } from '../../../util/type-helpers'
 import { resolveToType } from '../../../util/type-helpers'
+import { notSupportedCredentialTypes } from '../validation'
 
 export const ContractFragment = graphql(
   `
@@ -82,6 +83,10 @@ export function getDefaultContractInput(): ContractInput {
       claims: [],
     },
   }
+}
+
+export function getUnsupportedCredentialTypeContractInput(): ContractInput {
+  return { ...getDefaultContractInput(), credentialTypes: notSupportedCredentialTypes }
 }
 
 export async function createContract(input: ContractInput) {
