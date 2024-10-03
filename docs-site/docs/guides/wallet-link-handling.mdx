@@ -4,46 +4,50 @@ sidebar_position: 8
 
 # Wallet link handling
 
-Credential issuance and presentation requests must be opened in a wallet (Microsoft Authenticator). This guide explains how to handle wallet links in your application.
+Credential issuance and presentation requests must be opened in a wallet, such as the Microsoft Authenticator app. This guide explains how to handle opening wallet links from your application.
 
 ## Wallet link URL scheme
 
-Wallet links use the URL scheme `openid-vc://`. For the links to be opened by Microsoft Authenticator on the mobile device, the URL scheme must be assigned to the Microsoft Authenticator app in the device operating system.
+Wallet links use the URL scheme of `openid-vc://`. For the links to be opened by the Microsoft Authenticator app on the mobile device, the URL scheme must be assigned to the Microsoft Authenticator app by the device operating system.
 
-If another wallet application is installed after Microsoft Authenticator, the URL scheme may be assigned to the new wallet application, which may cause issuance and presentation links to fail to open.
+If another wallet application is installed after installation of the Microsoft Authenticator app, the URL scheme will likely be assigned to the new wallet application, which may cause issuances and presentations to fail. For example, a credential that requires a Face Check will not work with other wallet apps.
 
-The only way to fix this, presently, is to uninstall and reinstall Microsoft Authenticator, which will restore association of the URL scheme to Microsoft Authenticator.
+The only way to fix this, presently, is to uninstall and reinstall Microsoft Authenticator, which restores the association of the URL scheme with the Microsoft Authenticator app.
 
-In the future, mobile operating systems may provide a way to choose which wallet application opens `openid-vc://` URLs.
+In the future, Verified Orchestration hopes mobile operating systems provide a way to choose which wallet application opens the `openid-vc://` scheme URLs.
+
+:::note
+We are currently working with Microsoft to provide a more robust solution for this issue.
+:::
 
 ## Issuance and presentation links and QR codes
 
 Issuance and presentation links work the same way, so for the purposes of this guide, we will refer to both as "wallet links".
 
-Issuance and presentation request responses can include a `qrCode` fields in addition to the `url` field. The QR code is a scannable representation of the URL, it can be opened via a mobile device's QR code reading apps, or directly by the scanner within the Microsoft Authenticator "Verified IDs" tab.
+Issuance and presentation request responses can include a `qrCode` fields in addition to the `url` field. The QR code is a scannable representation of the URL that can be opened via a mobile device's QR code scanner feature, or directly by the using the scanner within the Microsoft Authenticator app's "Verified IDs" tab.
 
-At the time of writing, wallet links expire after 5 minutes (specified by the `expiry` field). They are not intended to be stored and used later. Opening an expired wallet link will result in an error.
+At the time of writing, wallet links expire after 5 minutes (specified by the `expiry` field). They are not intended to be stored for use later, as opening an expired wallet link will result in an error.
 
 ## Essential user-interface steps
 
-Once the issuance or presentation request is created, the first step depends on the device type.
+Once the issuance or presentation request is created, the first step will depend on the device type.
 
-1. Display QR code or open wallet link:
-   - If the device is a mobile device, open the wallet link directly.
-   - If the device is a desktop or web application, display the QR code that the recipient can scan with their mobile device.
-   - Display and handle expiry of the wallet link according to the `expiry` field ([time stamp](https://en.wikipedia.org/wiki/Unix_time)).
-1. Subscribe to issuance or presentation events (or alternatively poll for completion).
-1. Handle issuance or presentation events (or completion):
-   - Issuance or presentation link is opened by Microsoft Authenticator
-   - Issuance or presentation is completed successfully
-   - Issuance or presentation fails
-   - Handle expiry of the wallet link (the user may open the link but not complete the issuance or presentation).
+1. On the desktop, display the QR code for the recipient to scan with their mobile device to launch into the mobile flow.
+1. On a mobile device, open the wallet link directly.
+1. Regardless of the entry point, the wallet expiry should be handled by the application:
+   - Display a message to the user that the wallet link has expired.
+   - Provide a way to retry the issuance or presentation.
+1. Subscribe to the issuance or presentation events (or alternatively poll for completion).
+1. Handle the issuance or presentation events (or completion):
+   - Issuance or presentation link is opened by the wallet, such as the Microsoft Authenticator app.
+   - Issuance or presentation completes successfully.
+   - Issuance or presentation fails to complete successfully.
 
 ### Other user-interface steps
 
 Issuance may require additional steps, such as:
 
-- Photo capture prior to issuance where the credential requires a photo.
+- Photo capture prior to issuance where the credential requires a photo for use with Face Check.
 - PIN code entry between the issuance link being opened and the credential being added to the wallet.
 
 ## Sample code
@@ -54,7 +58,7 @@ The following React code snippets demonstrate how to handle wallet links your ap
 - Open the link on mobile devices.
 - Link to the Microsoft Authenticator web page on desktop, the App Store or Google Play Store on mobile.
 - Display and handle expiry of the wallet link.
-- Provide a way to retry the if the link expires.
+- Provide a way to retry the link if it expires.
 
 ```tsx title="Sample component to handle wallet links for desktop and mobile devices"
 export function AuthenticatorResponse({ url, qrCode, expiry, __typename }) {
