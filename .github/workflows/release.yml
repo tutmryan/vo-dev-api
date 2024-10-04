@@ -145,6 +145,9 @@ jobs:
           - instance: demo.openlearning
             resourceGroup: vo-demo-openlearning-instance
             resourcePrefix: vo-demo-openlearning
+          - instance: demo.increment
+            resourceGroup: vo-demo-increment-instance
+            resourcePrefix: vo-demo-increment
     environment:
       name: ${{ matrix.instance }}
       url: ${{ matrix.instance }}.verifiedorchestration.com
