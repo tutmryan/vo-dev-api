@@ -1,9 +1,9 @@
-import ngrok from 'ngrok'
 import fs from 'fs'
+import ngrok from 'ngrok'
 import * as Path from 'node:path'
-import YAML from 'yaml'
 import readline from 'node:readline'
 import open from 'open'
+import YAML from 'yaml'
 
 const pathToApi = `${process.cwd()}`
 const pathToAdminUi = `${process.cwd()}/../verified-orchestration-admin`
@@ -12,6 +12,8 @@ const pathToPortalUi = `${process.cwd()}/../verified-orchestration-portal`
 const getNgrokConfigPath = () => {
   if (process.platform === 'darwin') {
     return `${process.env.HOME}/Library/Application Support/ngrok/ngrok.yml`
+  } else if (process.platform === 'linux') {
+    return `${process.env.HOME}/.config/ngrok/ngrok.yml`
   } else if (process.platform === 'win32') {
     return `${process.env.HOMEPATH}/AppData/Local/ngrok/ngrok.yml`
   }
