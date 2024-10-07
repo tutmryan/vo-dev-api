@@ -126,6 +126,10 @@ export type Config = {
     credentials: ClientCredentials
     secret?: string
   }
+  limitedDemo: {
+    credentials: ClientCredentials
+    secret?: string
+  }
   verifiedIdAdmin: {
     baseUrl: string
     scope: string

@@ -120,6 +120,19 @@ The following app registrations are created for the internal operations of the V
   - VerifiableCredential.LimitedAsyncIssuance
 - grant admin consent for the added permissions
 
+## Create an app registration for acquiring demo anonymous presentation tokens
+
+- create app registration named `Verified Orchestration Limited Demo Client` (with `(non prod)` suffix for the non prod environment)
+- choose `Single tenant` option for `Supported account types`
+- click "Register" to create the app registration
+- create a client secret for the Verified Orchestration API to generate a token
+  - set it to expires in 24 months
+  - store it in BitWarden, `Limited Demo Client (non prod) => Client Secret` for the non prod environment
+  - set `[NON_PROD | PROD]_LIMITED_DEMO_CLIENT_SECRET` secret in the GitHub organisation
+- add the following application permissions from `Verified Orchestration Internal` API
+  - VerifiableCredential.LimitedAccess
+- grant admin consent for the added permissions
+
 ## Create an app registration for Verified ID callback token generation
 
 - create app registration named `Verified Orchestration VID Callback Client` (with `(non prod)` suffix for the non prod environment)
