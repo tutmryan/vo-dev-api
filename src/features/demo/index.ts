@@ -1,7 +1,8 @@
 import bearerTokenMiddleware from '@makerx/express-bearer'
 import { getClientCredentialsToken } from '@makerx/node-common'
+import cors from 'cors'
 import type { RequestHandler } from 'express'
-import { bearer, limitedDemoAuth } from '../../config'
+import { bearer, limitedDemoAuth, presentationDemoCors } from '../../config'
 import { dispatchWithoutContext, findUpdateOrCreateUserEntity } from '../../context'
 import { logger } from '../../logger'
 import { User } from '../../user'
@@ -9,6 +10,8 @@ import { invariant } from '../../util/invariant'
 import { AcquireLimitedAccessTokenCommand } from '../limited-access-tokens/commands/acquire-limited-access-token-command'
 
 export const demoPresentationTokenRoute = '/demo/presentation/token'
+
+const demoCors = cors(presentationDemoCors)
 
 const demoClientAuthHandler: RequestHandler = async (req, res, next) => {
   // Obtain an auth token for the demo client
@@ -34,6 +37,7 @@ const acquireLimitedAccessTokenHandler: RequestHandler = async (req, res) => {
 }
 
 export const demoPresentationTokenHandlers: RequestHandler[] = [
+  demoCors,
   demoClientAuthHandler,
   bearerTokenMiddleware({
     config: bearer,

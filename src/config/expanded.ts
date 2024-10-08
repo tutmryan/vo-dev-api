@@ -28,6 +28,11 @@ export const cors: CorsOptions = {
   ...rawCors,
   origin,
 }
+// presentation demo cors - only allow portal origin
+export const presentationDemoCors: CorsOptions = {
+  ...cors,
+  origin: rawCors.origin === true ? true : [new RegExp(`^https://${config.get('instance')}\\.portal\\.verifiedorchestration\\.com$`)],
+}
 
 // internal client credentials configs
 export const callbackAuth: ClientCredentialsConfig = {
