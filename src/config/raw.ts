@@ -128,6 +128,7 @@ export type Config = {
     secret?: string
   }
   limitedDemo: {
+    oid: string
     credentials: ClientCredentials
     secret?: string
   }
