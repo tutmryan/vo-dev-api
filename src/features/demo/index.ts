@@ -8,11 +8,11 @@ export const anonymousPresentationAccessTokenRoute = '/demo/presentation/token'
 
 const allowedPresentationCredentialTypes = ['VerifiableCredential']
 
-export async function acquireAnonymousDemoPresentationToken(input: AcquireLimitedAccessTokenInput) {
+export async function acquireAnonymousDemoPresentationToken(request: AcquireLimitedAccessTokenInput) {
   const token = await getClientCredentialsToken(limitedAccessAuth)
 
   await setLimitedAccessData(token.access_token, {
-    ...input,
+    ...request,
     allowAnonymousPresentation: true,
     requestableCredentials: allowedPresentationCredentialTypes.map((type) => ({ credentialType: type })),
     userId: '',
