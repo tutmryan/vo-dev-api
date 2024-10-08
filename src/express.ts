@@ -28,7 +28,7 @@ import {
   presentationCallbackRoute,
 } from './config'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
-import { acquireAnonymousDemoPresentationToken, anonymousPresentationAccessTokenRoute } from './features/demo'
+import { demoPresentationTokenHandlers, demoPresentationTokenRoute } from './features/demo'
 import { logger } from './logger'
 import { addVoyager } from './voyager'
 
@@ -114,7 +114,8 @@ export const getExpressApp = (): Express => {
   }
 
   if (demoEnabled) {
-    app.post(anonymousPresentationAccessTokenRoute, acquireAnonymousDemoPresentationToken)
+    app.get(demoPresentationTokenRoute, ...demoPresentationTokenHandlers)
+    logger.info(`Added ${demoPresentationTokenRoute}`)
   }
 
   // add a health check endpoint

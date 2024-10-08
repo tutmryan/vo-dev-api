@@ -4,7 +4,7 @@ import { createSubscriptionContextFactory, extractTokenFromConnectionParams } fr
 import type { JwtPayload } from 'jsonwebtoken'
 import type { DataSource } from 'typeorm'
 import { logging, platformConsumerApps } from './config'
-import type { DispatchContext } from './cqs'
+import type { CommandLike, DispatchContext } from './cqs'
 import { dispatch } from './cqs'
 import { dataSource } from './data'
 import { getLimitedAccessData, LimitedAccessTokenAcquisitionRoles } from './features/limited-access-tokens'
@@ -132,7 +132,15 @@ export const findUpdateOrCreateUserEntity = async (claims: JwtPayload): Promise<
     isApp,
   }
 
-  // we don't have a graphql context yet, so create just enough to dispatch the FindUpdateOrCreateUser command
+  return dispatchWithoutContext(undefined, FindUpdateOrCreateUser, input)
+}
+
+// When we don't have a graphql context, dispatch with just enough context to run the command
+export const dispatchWithoutContext = async <T extends CommandLike>(
+  partialContext: Partial<DispatchContext> | undefined,
+  command: T,
+  ...args: Parameters<T>
+): Promise<Awaited<ReturnType<T>>> => {
   const context: DispatchContext = {
     dataSource,
     user: undefined,
@@ -140,8 +148,9 @@ export const findUpdateOrCreateUserEntity = async (claims: JwtPayload): Promise<
     requestInfo: {} as any as RequestInfo,
     services: {} as any as Services,
     dataLoaders: {} as any as DataLoaders,
+    ...partialContext,
   }
-  return dispatch(context, FindUpdateOrCreateUser, input)
+  return dispatch(context, command, ...args)
 }
 
 const augmentContext = (context: BaseContext) => {

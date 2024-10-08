@@ -122,6 +122,11 @@ const config: EnvVarSubstitution<Config> = {
     },
     secret: 'LIMITED_DEMO_SECRET',
   },
+  limitedDemo: {
+    credentials: {
+      clientSecret: 'LIMITED_DEMO_CLIENT_SECRET',
+    },
+  },
   callbackCredentials: {
     clientId: 'VID_CALLBACK_CLIENT_ID',
     clientSecret: 'VID_CALLBACK_CLIENT_SECRET',
