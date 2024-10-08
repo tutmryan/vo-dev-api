@@ -196,6 +196,7 @@ jobs:
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
           face-check-enabled: ${{ vars.FACE_CHECK_ENABLED }}
+          demo-enabled: ${{ vars.DEMO_ENABLED  }}
           identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
           platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 
@@ -356,6 +357,7 @@ jobs:
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
           face-check-enabled: ${{ vars.FACE_CHECK_ENABLED }}
+          demo-enabled: ${{ vars.DEMO_ENABLED  }}
           identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
           platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 

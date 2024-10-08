@@ -37,6 +37,7 @@ export const email = config.get('email')
 export const events = config.has('events') ? config.get('events') : undefined
 export const devToolsEnabled = config.get('devToolsEnabled')
 export const faceCheckEnabled = config.get('faceCheckEnabled')
+export const demoEnabled = config.get('demoEnabled')
 export const authorityId = config.get('authorityId')
 export const issuanceCallbackRoute = config.get('issuanceCallbackRoute')
 export const presentationCallbackRoute = config.get('presentationCallbackRoute')

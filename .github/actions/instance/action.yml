@@ -345,6 +345,7 @@ runs:
           vidAuthorityId=${{ steps.create-vid-authority.outputs.authorityId != '' && steps.create-vid-authority.outputs.authorityId || steps.check-vid-authority.outputs.authorityId}}
           devToolsEnabled=${{ inputs.dev-tools-enabled }}
           faceCheckEnabled=${{ inputs.face-check-enabled }}
+          demoEnabled=${{ inputs.demo-enabled }}
           identityIssuers="${{ inputs.identity-issuers }}"
           platformConsumerApps="${{ inputs.platform-consumer-apps }}"
           additionalAuthTenantIds="${{ inputs.additional-auth-tenant-ids }}"
@@ -532,6 +533,7 @@ runs:
         GRAPHQL_ENDPOINT: https://${{ inputs.instance }}.api.${{ inputs.domain }}
         ADMIN_URL: https://${{ inputs.instance }}.${{ inputs.domain }}
         DEV_TOOLS_ENABLED: ${{ inputs.dev-tools-enabled }}
+        DEMO_ENABLED : ${{ inputs.demo-enabled }}
         API_CLIENT_ID: ${{ steps.add-instance-app-registration.outputs.instanceAppId }}
         INSTANCE: ${{ inputs.instance }}
       run: |

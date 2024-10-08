@@ -32,6 +32,7 @@ const config: EnvVarSubstitution<Config> = {
   instance: 'INSTANCE',
   devToolsEnabled: json('DEV_TOOLS_ENABLED'),
   faceCheckEnabled: json('FACE_CHECK_ENABLED'),
+  demoEnabled: json('DEMO_ENABLED'),
   authorityId: 'VID_AUTHORITY_ID',
   database: {
     host: 'DATABASE_HOST',
@@ -117,9 +118,9 @@ const config: EnvVarSubstitution<Config> = {
   },
   limitedAsyncIssuance: {
     credentials: {
-      clientSecret: 'LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET',
+      clientSecret: 'LIMITED_DEMO_CLIENT_SECRET',
     },
-    secret: 'LIMITED_ASYNC_ISSUANCE_SECRET',
+    secret: 'LIMITED_DEMO_SECRET',
   },
   callbackCredentials: {
     clientId: 'VID_CALLBACK_CLIENT_ID',

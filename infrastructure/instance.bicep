@@ -427,6 +427,8 @@ param homeTenantVidServiceClientSecret string
 param devToolsEnabled string
 @description('The flag indicating whether the face check features (i.e. issuing credentials with face check photo, .etc) are available')
 param faceCheckEnabled string
+@description('The flag indicating whether the demo features (i.e limited presentation token, presentation demo page, .etc) are deployed')
+param demoEnabled string
 @description('JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant')
 param additionalAuthTenantIds string
 
@@ -1011,6 +1013,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
     DEV_TOOLS_ENABLED: devToolsEnabled
     FACE_CHECK_ENABLED: faceCheckEnabled
+    DEMO_ENABLED : devToolsEnabled
     IDENTITY_ISSUERS: identityIssuers
     PLATFORM_CONSUMER_APPS: platformConsumerApps
     ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds
