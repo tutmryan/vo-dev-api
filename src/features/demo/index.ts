@@ -1,5 +1,5 @@
 import { getClientCredentialsToken } from '@makerx/node-common'
-import { limitedAccessAuth } from '../../config'
+import { limitedAccessAuth, limitedDemoAuth } from '../../config'
 import { AcquireLimitedAccessTokenInput } from '../../generated/graphql'
 import { setLimitedAccessData } from '../limited-access-tokens'
 
@@ -9,7 +9,7 @@ export const anonymousPresentationAccessTokenRoute = '/demo/presentation/token'
 const allowedPresentationCredentialTypes = ['VerifiableCredential']
 
 export async function acquireAnonymousDemoPresentationToken(request: AcquireLimitedAccessTokenInput) {
-  const token = await getClientCredentialsToken(limitedAccessAuth)
+  const token = await getClientCredentialsToken(limitedDemoAuth)
 
   await setLimitedAccessData(token.access_token, {
     ...request,

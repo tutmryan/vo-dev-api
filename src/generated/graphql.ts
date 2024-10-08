@@ -1,17 +1,17 @@
 /* eslint-disable */
-import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { GraphQLContext } from '../context';
+import { TemplateEntity } from '../features/templates/entities/template-entity';
+import { ContractEntity } from '../features/contracts/entities/contract-entity';
+import { UserEntity } from '../features/users/entities/user-entity';
+import { IssuanceEntity } from '../features/issuance/entities/issuance-entity';
+import { PresentationEntity } from '../features/presentation/entities/presentation-entity';
+import { IdentityEntity } from '../features/identity/entities/identity-entity';
+import { PartnerEntity } from '../features/partners/entities/partner-entity';
 import { ApprovalRequestEntity } from '../features/approval-request/entities/approval-request-entity';
 import { AsyncIssuanceEntity } from '../features/async-issuance/entities/async-issuance-entity';
 import { CommunicationEntity } from '../features/communication/entities/communication-entity';
-import { ContractEntity } from '../features/contracts/entities/contract-entity';
-import { IdentityEntity } from '../features/identity/entities/identity-entity';
-import { IssuanceEntity } from '../features/issuance/entities/issuance-entity';
-import { PartnerEntity } from '../features/partners/entities/partner-entity';
-import { PresentationEntity } from '../features/presentation/entities/presentation-entity';
-import { TemplateEntity } from '../features/templates/entities/template-entity';
-import { UserEntity } from '../features/users/entities/user-entity';
+import { GraphQLContext } from '../context';
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
