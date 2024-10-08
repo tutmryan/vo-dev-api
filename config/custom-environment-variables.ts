@@ -118,9 +118,9 @@ const config: EnvVarSubstitution<Config> = {
   },
   limitedAsyncIssuance: {
     credentials: {
-      clientSecret: 'LIMITED_DEMO_CLIENT_SECRET',
+      clientSecret: 'LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET',
     },
-    secret: 'LIMITED_DEMO_SECRET',
+    secret: 'LIMITED_ASYNC_ISSUANCE_SECRET',
   },
   limitedDemo: {
     credentials: {
