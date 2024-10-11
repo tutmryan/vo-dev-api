@@ -32,6 +32,13 @@ For webstorm users, the VO recommendation is to enable 'Optimize imports' on sav
 
 **Note**: Please be aware that if you're using localhost, the [Credentials page](http://localhost:5173/contracts) may not display the logo images for the credentials. This issue arises from the https image URL derived from the local Azurite, which triggers a `self-signed certificate` error in the browser due to untrusted certificate. To resolve this, you can use the following workaround: Right-click on the image and choose the 'Open Image in New Tab' option. In the new tab, bypass the security risk warning to load the image. After performing these steps, the credential logos should be displayed correctly, as your browser will have added the local server to its list of exceptions in the certificate manager.
 
+## Open Telemetry (Local Development)
+
+After running the `npm run start:db` task, docker compose will have added a few additional services to the local environment. Some of these services are used for Open Telemetry, and the data can be viewed by using one of these UIs:
+
+- Aspire: http://localhost:4001/
+- Seq: http://localhost:4002/
+
 ## Azure Storage Explorer
 
 To view the local storage account, you can use the [Azure Storage Explorer](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-emulator). It has built-in support for connecting to Azurite, the local storage emulator. One thing to note is that the certificates need to be manually imported before a successful connection can be made. This can be done by going to `Edit -> SSL Certificates -> Import` and selecting the `local-cert/127.0.0.1.pem` file.
