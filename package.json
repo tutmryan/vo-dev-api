@@ -8,8 +8,8 @@
   },
   "scripts": {
     "postinstall": "patch-package",
-    "start": "cross-env NODE_EXTRA_CA_CERTS=./local-cert/127.0.0.1.pem ts-node --transpile-only -r dotenv/config ./src/main.tracing.dev",
-    "debug": "cross-env NODE_EXTRA_CA_CERTS=./local-cert/127.0.0.1.pem ts-node-dev --transpile-only --watch ./src/**/*.graphql,.env -r dotenv/config ./src/main.tracing.dev",
+    "start": "cross-env NODE_EXTRA_CA_CERTS=./local-dev/cert/127.0.0.1.pem ts-node --transpile-only -r dotenv/config ./src/main.tracing.dev",
+    "debug": "cross-env NODE_EXTRA_CA_CERTS=./local-dev/cert/127.0.0.1.pem ts-node-dev --transpile-only --watch ./src/**/*.graphql,.env -r dotenv/config ./src/main.tracing.dev",
     "dev": "run-p gql:generate:watch debug",
     "typeorm": "dotenv -e .env -- ts-node ./node_modules/typeorm/cli.js",
     "db:init-localdev": "dotenv -e .env -- ts-node --transpile-only ./scripts/localdev-database-setup",
