@@ -4,7 +4,7 @@ services:
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     ports:
-      - 1433:1433
+      - "1433:1433"
     restart: always
     environment:
       ACCEPT_EULA: Y
@@ -14,14 +14,37 @@ services:
     container_name: cache
     restart: always
     ports:
-      - 6380:6379
+      - "6380:6379"
   azurite:
     image: mcr.microsoft.com/azure-storage/azurite
     container_name: azurite
     # just run the blob service for now
     command: "azurite-blob --blobHost 0.0.0.0 --blobPort 10000 --cert /workspace/127.0.0.1.pem --key /workspace/127.0.0.1-key.pem"
     volumes:
-      - ./local-cert:/workspace
+      - ./local-dev/cert:/workspace
     restart: always
     ports:
-      - 10000:10000
+      - "10000:10000"
+  collector:
+    image: otel/opentelemetry-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./local-dev/otel/collector-config.yaml:/etc/otel-collector-config.yaml:cached
+    ports:
+      - 4317:4317
+  seq:
+    image: datalust/seq
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "4002:80"
+  aspire-dashboard:
+    image: mcr.microsoft.com/dotnet/nightly/aspire-dashboard:latest
+    restart: unless-stopped
+    ports:
+      - "4001:18888"
+    environment:
+      DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS: 'true'
+      Dashboard__ApplicationName: 'VO-Logs'
