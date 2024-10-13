@@ -60,7 +60,7 @@ const sendEmail = async (to: MailTo, data: MailDataRequired) => {
       logger.warn(`Blocked sending email to ${blocked.map((e) => maskEmail(isObject(e) ? e.email : e)).join(', ')}`)
     }
     if (!allowed.length) {
-      logger.warn('No emails are allowed to be sent')
+      logger.warn('All recipients were blocked')
       return
     }
 
