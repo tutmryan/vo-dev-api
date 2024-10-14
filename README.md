@@ -21,6 +21,7 @@ For webstorm users, the VO recommendation is to enable 'Optimize imports' on sav
 - `npm i`
 - `cp .env.template .env`
 - fill in `.env` secrets from 1password vault
+- add your email (if needed) and phone number to the `# Email and SMS config` section in the `.env` file
 - run tasks: Start DB & Migrate DB
 - F5
 
