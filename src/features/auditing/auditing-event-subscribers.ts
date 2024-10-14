@@ -23,7 +23,8 @@ export class AuditingEventSubscriber implements EntitySubscriberInterface {
     data: object | undefined | AuditOptimisationControl,
   ) {
     if (data && 'handoffInsert' in data) {
-      data.handoffInsert({ entityId, userId, action, auditDateTime: new Date(), auditData: JSON.stringify(data, getReplacer()) })
+      const { handoffInsert, ...rawData } = data
+      handoffInsert({ entityId, userId, action, auditDateTime: new Date(), auditData: JSON.stringify(rawData, getReplacer()) })
       return
     }
 
