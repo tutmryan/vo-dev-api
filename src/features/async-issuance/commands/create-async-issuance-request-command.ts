@@ -31,7 +31,29 @@ import { AsyncIssuanceAudit } from '../entities/async-issuance-audit'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
 // This controls the number of records that are inserted in a single batch
-const INSERT_BATCH_SIZE = 100
+const INSERT_BATCH_SIZE = 250
+
+// Note:
+//    1. `additionalData` is how the `EntityManager.save()` method is able to pass data to listeners/subscribers, but the other non-save
+//        methods don't have support for this. So mimic the `queryRunner.data = this.options.data` from the TypeORM source code.
+//    2. The `EntityManager.save()` method supports batching, but we don't want to check if the data is already saved, as we know it isn't.
+//       Meaning the additional check for whether the entities exist in the database is not needed.
+async function batchInsert<T extends ObjectLiteral>(
+  data: Partial<T>[],
+  repo: VerifiedOrchestrationRepository<T>,
+  batchSize: number,
+  additionalData?: object,
+) {
+  const chunks = Array.from({ length: Math.ceil(data.length / batchSize) }, (_, i) => data.slice(i * batchSize, (i + 1) * batchSize))
+  for (const chunk of chunks) {
+    await repo.insert(
+      chunk.map((c) => {
+        if (additionalData) Object.assign(c, additionalData)
+        return c
+      }),
+    )
+  }
+}
 
 registerFeatureCheck(CreateAsyncIssuanceRequestCommand, async (...[, input]) => isFaceCheckPhotoEnabled(input))
 
@@ -198,7 +220,7 @@ export async function CreateAsyncIssuanceRequestCommand(
   }
 
   // Save the requests
-  const dataToSave = requestInput.map((asyncIssuanceInput) => {
+  const asyncIssuancesToSave = requestInput.map((asyncIssuanceInput) => {
     const { contractId, identityId, identity, expiry } = asyncIssuanceInput
     const asyncIssuance = new AsyncIssuanceEntity({
       id: randomUUID(),
@@ -210,30 +232,9 @@ export async function CreateAsyncIssuanceRequestCommand(
     return { asyncIssuance, asyncIssuanceInput }
   })
 
-  // Note:
-  //    1. `additionalData` is how the EntityManager.save method is able to pass data to listeners/subscribers, but the
-  //        insert method does not support this.
-  //    2. The `EntityManager.save` method supports batching, but we don't want to check if the data is already saved, as we know it isn't.
-  async function batchInsert<T extends ObjectLiteral>(
-    data: Partial<T>[],
-    repo: VerifiedOrchestrationRepository<T>,
-    batchSize: number,
-    additionalData?: object,
-  ) {
-    const chunks = Array.from({ length: Math.ceil(data.length / batchSize) }, (_, i) => data.slice(i * batchSize, (i + 1) * batchSize))
-    for (const chunk of chunks) {
-      await repo.insert(
-        chunk.map((c) => {
-          if (additionalData) Object.assign(c, additionalData)
-          return c
-        }),
-      )
-    }
-  }
-
   const auditEntriesToSave: AuditData[] = []
   await batchInsert(
-    dataToSave.map(({ asyncIssuance }) => asyncIssuance),
+    asyncIssuancesToSave.map(({ asyncIssuance }) => asyncIssuance),
     entityManager.getRepository(AsyncIssuanceEntity),
     INSERT_BATCH_SIZE,
     {
@@ -241,12 +242,12 @@ export async function CreateAsyncIssuanceRequestCommand(
     } satisfies AuditOptimisationControl,
   )
 
-  invariant(auditEntriesToSave.length === dataToSave.length, 'Audit data was not saved correctly')
+  invariant(auditEntriesToSave.length === asyncIssuancesToSave.length, 'Audit data was not saved correctly')
 
   if (auditEntriesToSave.length > 0) {
-    // Optimised, as the user is the same for all entries
+    // Optimisation: The user is the same for all entries
     const auditUser = await users.load(auditEntriesToSave[0]!.userId)
-    const data = auditEntriesToSave.map((auditData) => ({
+    const auditRecordsToSave = auditEntriesToSave.map((auditData) => ({
       id: randomUUID(),
       entityId: auditData.entityId,
       auditData: auditData.auditData,
@@ -254,12 +255,12 @@ export async function CreateAsyncIssuanceRequestCommand(
       user: auditUser,
       auditDateTime: auditData.auditDateTime,
     }))
-    await batchInsert(data, entityManager.getRepository(AsyncIssuanceAudit), INSERT_BATCH_SIZE)
+    await batchInsert(auditRecordsToSave, entityManager.getRepository(AsyncIssuanceAudit), INSERT_BATCH_SIZE)
   }
 
-  // Save to secure PII storage
+  // Save PII data for the async issuance requests to a secure location
   await Promise.all(
-    dataToSave.map(async ({ asyncIssuance, asyncIssuanceInput }) =>
+    asyncIssuancesToSave.map(async ({ asyncIssuance, asyncIssuanceInput }) =>
       asyncIssuances.uploadAsyncIssuance(asyncIssuance.id, asyncIssuanceInput),
     ),
   )
