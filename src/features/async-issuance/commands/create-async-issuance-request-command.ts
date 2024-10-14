@@ -23,6 +23,7 @@ import { isValidEmail } from '../../../util/validation'
 import { validateIssuanceClaims, validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { createOrUpdateIdentity } from '../../identity'
+import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
 registerFeatureCheck(CreateAsyncIssuanceRequestCommand, async (...[, input]) => isFaceCheckPhotoEnabled(input))
@@ -75,8 +76,17 @@ export async function CreateAsyncIssuanceRequestCommand(
     (
       await dataSource
         .getRepository(ContractEntity)
-        .find({ comment: 'FindContractsById', where: { id: In([...new Set(requestInput.map((input) => input.contractId))]) } })
-    ).map((contract) => [contract.id, contract]),
+        .find({ comment: 'FindContractsById', where: { id: In([...new Set(requestInput.map((i) => i.contractId))]) } })
+    ).map((contract) => [contract.id.toLowerCase(), contract]),
+  )
+
+  const referencedIdentities = new Map(
+    (
+      await dataSource.getRepository(IdentityEntity).find({
+        comment: 'FindIdentitiesById',
+        where: { id: In([...new Set(requestInput.filter((i) => !!i.identityId).map((i) => i.identityId))]) },
+      })
+    ).map((identity) => [identity.id.toLowerCase(), identity]),
   )
 
   // Validate the input
@@ -101,7 +111,7 @@ export async function CreateAsyncIssuanceRequestCommand(
       validateIssuanceClaims(claims)
 
       // locate and validate the contract
-      const contract = referencedContracts.get(contractId)
+      const contract = referencedContracts.get(contractId.toLowerCase())
       invariant(contract, 'Contract could not be found')
       invariant(contract.externalId, 'Contract must be provisioned before issuance')
       invariant(!contract.isDeprecated, 'Contract must not be deprecated')
@@ -111,8 +121,7 @@ export async function CreateAsyncIssuanceRequestCommand(
 
       // find the identity if specified by ID
       if (identityId) {
-        const existingIdentity = await identities.load(identityId)
-        invariant(existingIdentity, 'Identity could not be found')
+        invariant(referencedIdentities.has(identityId.toLowerCase()), 'Identity could not be found')
       }
 
       // build the list of identities to create
