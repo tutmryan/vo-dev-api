@@ -2,11 +2,13 @@ import { randomUUID } from 'crypto'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import { omit } from 'lodash'
 import { In } from 'typeorm'
+import type { ObjectLiteral } from 'typeorm/common/ObjectLiteral'
 import { calculateExpiryFromNow, convertAsyncIssuanceRequestExpiryToDays } from '..'
 import { addToJobQueue } from '../../../background-jobs/queue'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { dataSource } from '../../../data'
+import type { VerifiedOrchestrationRepository } from '../../../data/entity-manager'
 import type {
   AsyncIssuanceContactInput,
   AsyncIssuanceErrorResponse,
@@ -20,11 +22,16 @@ import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { isValidEmail } from '../../../util/validation'
+import type { AuditData, AuditOptimisationControl } from '../../auditing/auditing-event-subscribers'
 import { validateIssuanceClaims, validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
+import { AsyncIssuanceAudit } from '../entities/async-issuance-audit'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
+
+// This controls the number of records that are inserted in a single batch
+const INSERT_BATCH_SIZE = 100
 
 registerFeatureCheck(CreateAsyncIssuanceRequestCommand, async (...[, input]) => isFaceCheckPhotoEnabled(input))
 
@@ -60,7 +67,7 @@ export async function CreateAsyncIssuanceRequestCommand(
   const {
     user,
     entityManager,
-    dataLoaders: { identities },
+    dataLoaders: { users },
     services: { asyncIssuances },
   } = this
 
@@ -191,28 +198,71 @@ export async function CreateAsyncIssuanceRequestCommand(
   }
 
   // Save the requests
-  for (const [index, asyncIssuanceInput] of requestInput.entries()) {
+  const dataToSave = requestInput.map((asyncIssuanceInput) => {
     const { contractId, identityId, identity, expiry } = asyncIssuanceInput
+    const asyncIssuance = new AsyncIssuanceEntity({
+      id: randomUUID(),
+      contractId,
+      identityId: getIdentityId({ identityId, identity }),
+      expiryPeriodInDays: convertAsyncIssuanceRequestExpiryToDays(expiry),
+    })
+    response.asyncIssuanceRequestIds.push(asyncIssuance.id)
+    return { asyncIssuance, asyncIssuanceInput }
+  })
 
-    try {
-      const issuanceRequest = await entityManager.getRepository(AsyncIssuanceEntity).save(
-        new AsyncIssuanceEntity({
-          id: randomUUID(),
-          contractId,
-          identityId: getIdentityId({ identityId, identity }),
-          expiryPeriodInDays: convertAsyncIssuanceRequestExpiryToDays(expiry),
+  // Note:
+  //    1. `additionalData` is how the EntityManager.save method is able to pass data to listeners/subscribers, but the
+  //        insert method does not support this.
+  //    2. The `EntityManager.save` method supports batching, but we don't want to check if the data is already saved, as we know it isn't.
+  async function batchInsert<T extends ObjectLiteral>(
+    data: Partial<T>[],
+    repo: VerifiedOrchestrationRepository<T>,
+    batchSize: number,
+    additionalData?: object,
+  ) {
+    const chunks = Array.from({ length: Math.ceil(data.length / batchSize) }, (_, i) => data.slice(i * batchSize, (i + 1) * batchSize))
+    for (const chunk of chunks) {
+      await repo.insert(
+        chunk.map((c) => {
+          if (additionalData) Object.assign(c, additionalData)
+          return c
         }),
       )
-      await asyncIssuances.uploadAsyncIssuance(issuanceRequest.id, asyncIssuanceInput)
-      response.asyncIssuanceRequestIds.push(issuanceRequest.id)
-    } catch (error) {
-      logger.error(`Saving async issuance request ${index + 1} of ${requestInput.length} failed`, {
-        error,
-        asyncIssuanceInput: loggableAsyncIssuanceInput(asyncIssuanceInput),
-      })
-      throw error
     }
   }
+
+  const auditEntriesToSave: AuditData[] = []
+  await batchInsert(
+    dataToSave.map(({ asyncIssuance }) => asyncIssuance),
+    entityManager.getRepository(AsyncIssuanceEntity),
+    INSERT_BATCH_SIZE,
+    {
+      handoffInsert: (auditData) => auditEntriesToSave.push(auditData),
+    } satisfies AuditOptimisationControl,
+  )
+
+  invariant(auditEntriesToSave.length === dataToSave.length, 'Audit data was not saved correctly')
+
+  if (auditEntriesToSave.length > 0) {
+    // Optimised, as the user is the same for all entries
+    const auditUser = await users.load(auditEntriesToSave[0]!.userId)
+    const data = auditEntriesToSave.map((auditData) => ({
+      id: randomUUID(),
+      entityId: auditData.entityId,
+      auditData: auditData.auditData,
+      action: auditData.action,
+      user: auditUser,
+      auditDateTime: auditData.auditDateTime,
+    }))
+    await batchInsert(data, entityManager.getRepository(AsyncIssuanceAudit), INSERT_BATCH_SIZE)
+  }
+
+  // Save to secure PII storage
+  await Promise.all(
+    dataToSave.map(async ({ asyncIssuance, asyncIssuanceInput }) =>
+      asyncIssuances.uploadAsyncIssuance(asyncIssuance.id, asyncIssuanceInput),
+    ),
+  )
 
   // Note: We're using the requests IDs to avoid the job queue from referencing PII data directly via the payload data
   await addToJobQueue({
