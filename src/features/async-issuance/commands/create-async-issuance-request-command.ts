@@ -1,10 +1,12 @@
 import { randomUUID } from 'crypto'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import { omit } from 'lodash'
+import { In } from 'typeorm'
 import { calculateExpiryFromNow, convertAsyncIssuanceRequestExpiryToDays } from '..'
 import { addToJobQueue } from '../../../background-jobs/queue'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
+import { dataSource } from '../../../data'
 import type {
   AsyncIssuanceContactInput,
   AsyncIssuanceErrorResponse,
@@ -19,6 +21,7 @@ import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { isValidEmail } from '../../../util/validation'
 import { validateIssuanceClaims, validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
+import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { createOrUpdateIdentity } from '../../identity'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
@@ -56,7 +59,7 @@ export async function CreateAsyncIssuanceRequestCommand(
   const {
     user,
     entityManager,
-    dataLoaders: { contracts, identities },
+    dataLoaders: { identities },
     services: { asyncIssuances },
   } = this
 
@@ -67,6 +70,14 @@ export async function CreateAsyncIssuanceRequestCommand(
   }
 
   const identitiesToCreate: IdentityInput[] = []
+
+  const referencedContracts = new Map(
+    (
+      await dataSource
+        .getRepository(ContractEntity)
+        .find({ comment: 'FindContractsById', where: { id: In([...new Set(requestInput.map((input) => input.contractId))]) } })
+    ).map((contract) => [contract.id, contract]),
+  )
 
   // Validate the input
   for (const [index, asyncIssuanceInput] of requestInput.entries()) {
@@ -90,7 +101,7 @@ export async function CreateAsyncIssuanceRequestCommand(
       validateIssuanceClaims(claims)
 
       // locate and validate the contract
-      const contract = await contracts.load(contractId)
+      const contract = referencedContracts.get(contractId)
       invariant(contract, 'Contract could not be found')
       invariant(contract.externalId, 'Contract must be provisioned before issuance')
       invariant(!contract.isDeprecated, 'Contract must not be deprecated')
