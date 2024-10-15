@@ -7,7 +7,7 @@ import config from './raw'
  * The raw config does not express all fully built configurations,
  * such as auth configs which have lots of strings that must be concatenated with tenant ids and scopes.
  *
- * We prefer *not* to build such config by hand, we prefer to configure the miniumum set of variables per instance.
+ * We prefer *not* to build such config by hand, we prefer to configure the minimum set of variables per instance.
  *
  * So instead of using the raw config throughout, we create and export fully built configs from ./expanded.ts.
  *
@@ -50,3 +50,4 @@ export const limitedAsyncIssuance = config.get('limitedAsyncIssuance')
 export const limitedDemo = config.get('limitedDemo')
 export const verifiedIdAdmin = config.get('verifiedIdAdmin')
 export const verifiedIdRequest = config.get('verifiedIdRequest')
+export const localDev = config.has('localDev') ? config.get('localDev') : undefined

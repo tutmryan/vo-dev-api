@@ -137,6 +137,16 @@ const config: EnvVarSubstitution<Config> = {
   },
   platformConsumerApps: json('PLATFORM_CONSUMER_APPS'),
   localDevPortalTunnelUri: 'LOCAL_DEV_PORTAL_TUNNEL_URI',
+  localDev: {
+    email: {
+      disabled: json('LOCAL_DEV_EMAIL_DISABLED'),
+      allowList: json('LOCAL_DEV_EMAIL_ALLOW_LIST'),
+    },
+    sms: {
+      disabled: json('LOCAL_DEV_SMS_DISABLED'),
+      allowList: json('LOCAL_DEV_SMS_ALLOW_LIST'),
+    },
+  },
 }
 
 export default config

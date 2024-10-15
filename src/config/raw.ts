@@ -147,6 +147,16 @@ export type Config = {
   platformConsumerApps: Record<string, string>
   identityIssuers: Record<string, string>
   localDevPortalTunnelUri: string
+  localDev: {
+    email: {
+      disabled: boolean
+      allowList: string[]
+    }
+    sms: {
+      disabled: boolean
+      allowList: string[]
+    }
+  }
 }
 
 const typedConfig = createTypedConfig<Config>(config)
