@@ -1,0 +1,24 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+exporters:
+  debug:
+  otlphttp/seq:
+    endpoint: http://seq/ingest/otlp
+  otlp/aspire:
+    endpoint: aspire-dashboard:18889
+    tls:
+      insecure: true
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [debug, otlphttp/seq, otlp/aspire]
+    metrics:
+      receivers: [otlp]
+      exporters: [debug, otlp/aspire]
+    logs:
+      receivers: [otlp]
+      exporters: [debug, otlphttp/seq, otlp/aspire]

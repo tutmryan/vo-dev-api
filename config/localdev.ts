@@ -79,6 +79,13 @@ const config: DeepPartial<Config> = {
   limitedPhotoCapture,
   limitedAsyncIssuance,
   limitedDemo,
+  localDev: {
+    email: {
+      disabled: true,
+      allowList: [],
+    },
+    sms: { disabled: true, allowList: [] },
+  },
 }
 
 module.exports = config
