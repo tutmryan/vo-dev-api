@@ -41,7 +41,9 @@ export async function bulkCreateOrUpdateIdentity(
     ['identifier', 'issuer'],
     inputs.map(({ identifier, issuer }) => [identifier, issuer]),
   )
-  const existingEntitiesMap = new Map(existingEntities.map((identity) => [identityInputKey(identity), identity]))
+  const existingEntitiesMap: Map<string, IdentityEntity> = new Map(
+    existingEntities.map((identity) => [identityInputKey(identity), identity]),
+  )
 
   // Updates
   const identitiesToUpdate = inputs
@@ -57,7 +59,7 @@ export async function bulkCreateOrUpdateIdentity(
     })
     .filter(NotFalsy)
   if (identitiesToUpdate.length > 0) {
-    // This could be optimised. However, the easy optimisation methods require handling the audit data differently, and given the
+    // This could be optimised. However, the easy optimisation methods, such as update, don't audit data correctly, and given the
     // probability of this being a rare operation, it's not worth the complexity.
     for (const identity of identitiesToUpdate) {
       const identityToUpdate = await repo.findOneByOrFail({ id: identity.id })
