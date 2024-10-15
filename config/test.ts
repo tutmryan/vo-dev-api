@@ -62,6 +62,7 @@ const config: DeepPartial<Config> = {
     credentials: {},
   },
   limitedDemo: {
+    oid: 'TEST_LIMITED_DEMO_OID',
     credentials: {},
   },
 }
