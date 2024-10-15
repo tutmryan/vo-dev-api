@@ -368,6 +368,21 @@ resource limitedAsyncIssuanceSecretSecretExisting 'Microsoft.KeyVault/vaults/sec
   parent: keyVault
 }
 
+@description('The client secret of the limited demo client in Azure AD')
+@secure()
+param limitedDemoClientSecret string
+
+resource limitedDemoClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-DEMO-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedDemoClientSecret
+  }
+}
+
 @description('The client secret of the docs site app registration in Azure AD')
 @secure()
 param docsSiteClientSecret string
@@ -484,7 +499,7 @@ var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
 
 @description('The shared action group for alerts, if action group for alerts has not been set up yet this param value will be empty')
 param actionGroupAlertName string
-var actionGroupAlertId = resourceId(sharedResourceGroupName,'Microsoft.Insights/actionGroups', actionGroupAlertName)
+var actionGroupAlertId = resourceId(sharedResourceGroupName, 'Microsoft.Insights/actionGroups', actionGroupAlertName)
 
 resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   name: '${resourcePrefix}-redis-${uniqueSuffix}'
@@ -537,7 +552,7 @@ resource redisCacheDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01
   }
 }
 
-resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if(!empty(actionGroupAlertName)){
+resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
   name: '${resourcePrefix}-redis-metric-alert'
   location: 'global'
   properties: {
@@ -550,7 +565,7 @@ resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if(!emp
     evaluationFrequency: 'PT1M'
     windowSize: 'PT5M'
     criteria: {
-       'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
+      'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
       allOf: [
         {
           threshold: 80
@@ -1014,7 +1029,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
     DEV_TOOLS_ENABLED: devToolsEnabled
     FACE_CHECK_ENABLED: faceCheckEnabled
-    DEMO_ENABLED : demoEnabled
+    DEMO_ENABLED: demoEnabled
     IDENTITY_ISSUERS: identityIssuers
     PLATFORM_CONSUMER_APPS: platformConsumerApps
     ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds
@@ -1155,9 +1170,8 @@ resource apiAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if 
     }
     actions: [
       {
-        actionGroupId:  actionGroupAlertId
+        actionGroupId: actionGroupAlertId
       }
     ]
   }
 }
-
