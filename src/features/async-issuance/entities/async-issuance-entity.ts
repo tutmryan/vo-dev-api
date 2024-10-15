@@ -16,7 +16,7 @@ export type FailedStates = EndsWithFailed<AsyncIssuanceEntity['state']>
 
 export const failedStates: FailedStates[] = ['contact-failed', 'issuance-failed', 'issuance-verification-failed'] as const
 
-const indexFor = (fields: [keyof AsyncIssuanceEntity]) => fields
+const indexFor = (fields: (keyof AsyncIssuanceEntity)[]) => fields
 
 export type ValidCancellationStates = Exclude<AsyncIssuanceEntity['state'], 'issued'>
 

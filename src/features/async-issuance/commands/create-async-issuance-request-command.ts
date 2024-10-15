@@ -1,63 +1,35 @@
+import { isNotFalsy } from '@makerx/node-common'
 import { randomUUID } from 'crypto'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import { omit } from 'lodash'
-import { In } from 'typeorm'
-import type { ObjectLiteral } from 'typeorm/common/ObjectLiteral'
 import { calculateExpiryFromNow, convertAsyncIssuanceRequestExpiryToDays } from '..'
 import { addToJobQueue } from '../../../background-jobs/queue'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { dataSource } from '../../../data'
-import type { VerifiedOrchestrationRepository } from '../../../data/entity-manager'
+import { batchInsert, bulkFindBy, DEFAULT_INSERT_BATCH_SIZE } from '../../../data/bulk-operations'
 import type {
   AsyncIssuanceContactInput,
   AsyncIssuanceErrorResponse,
   AsyncIssuanceRequestInput,
   AsyncIssuanceResponse,
   IdentityInput,
-  Maybe,
 } from '../../../generated/graphql'
 import { ContactMethod, FaceCheckPhotoSupport } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
+import { throwError } from '../../../util/throw-error'
 import { userInvariant } from '../../../util/user-invariant'
 import { isValidEmail } from '../../../util/validation'
 import type { AuditData, AuditOptimisationControl } from '../../auditing/auditing-event-subscribers'
 import { validateIssuanceClaims, validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
-import { createOrUpdateIdentity } from '../../identity'
+import { bulkCreateOrUpdateIdentity, identityInputKey } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { AsyncIssuanceAudit } from '../entities/async-issuance-audit'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
-// This controls the number of records that are inserted in a single batch
-const INSERT_BATCH_SIZE = 250
-
-// Note:
-//    1. `additionalData` is how the `EntityManager.save()` method is able to pass data to listeners/subscribers, but the other non-save
-//        methods don't have support for this. So mimic the `queryRunner.data = this.options.data` from the TypeORM source code.
-//    2. The `EntityManager.save()` method supports batching, but we don't want to check if the data is already saved, as we know it isn't.
-//       Meaning the additional check for whether the entities exist in the database is not needed.
-async function batchInsert<T extends ObjectLiteral>(
-  data: Partial<T>[],
-  repo: VerifiedOrchestrationRepository<T>,
-  batchSize: number,
-  additionalData?: object,
-) {
-  const chunks = Array.from({ length: Math.ceil(data.length / batchSize) }, (_, i) => data.slice(i * batchSize, (i + 1) * batchSize))
-  for (const chunk of chunks) {
-    await repo.insert(
-      chunk.map((c) => {
-        if (additionalData) Object.assign(c, additionalData)
-        return c
-      }),
-    )
-  }
-}
-
 registerFeatureCheck(CreateAsyncIssuanceRequestCommand, async (...[, input]) => isFaceCheckPhotoEnabled(input))
-
-const identityInputKey = ({ issuer, identifier }: IdentityInput) => issuer + identifier
 
 const loggableAsyncIssuanceInput = (input: AsyncIssuanceRequestInput) => omit(input, ['contact'])
 
@@ -99,22 +71,27 @@ export async function CreateAsyncIssuanceRequestCommand(
     errors: [],
   }
 
-  const identitiesToCreate: IdentityInput[] = []
+  const identitiesToCreateOrUpdate: IdentityInput[] = []
 
   const referencedContracts = new Map(
     (
-      await dataSource
-        .getRepository(ContractEntity)
-        .find({ comment: 'FindContractsById', where: { id: In([...new Set(requestInput.map((i) => i.contractId))]) } })
+      await bulkFindBy(
+        dataSource.getRepository(ContractEntity),
+        'id',
+        [...new Set(requestInput.map((i) => i.contractId))],
+        'FindIdentitiesById',
+      )
     ).map((contract) => [contract.id.toLowerCase(), contract]),
   )
 
   const referencedIdentities = new Map(
     (
-      await dataSource.getRepository(IdentityEntity).find({
-        comment: 'FindIdentitiesById',
-        where: { id: In([...new Set(requestInput.filter((i) => !!i.identityId).map((i) => i.identityId))]) },
-      })
+      await bulkFindBy(
+        dataSource.getRepository(IdentityEntity),
+        'id',
+        [...new Set(requestInput.map((i) => i.identityId ?? null).filter(isNotFalsy))],
+        'FindIdentitiesById',
+      )
     ).map((identity) => [identity.id.toLowerCase(), identity]),
   )
 
@@ -154,7 +131,7 @@ export async function CreateAsyncIssuanceRequestCommand(
       }
 
       // build the list of identities to create
-      if (identity) identitiesToCreate.push(identity)
+      if (identity) identitiesToCreateOrUpdate.push(identity)
 
       // validate the face check/photo capture input
       if (contract.faceCheckSupport === FaceCheckPhotoSupport.Required) {
@@ -193,27 +170,7 @@ export async function CreateAsyncIssuanceRequestCommand(
     return errorResponse
   }
 
-  // create identities, deduplicating (for performance) via identity key
-  const createdIdentityIds = new Map<string, string>()
-
-  for (const identityInput of identitiesToCreate) {
-    const key = identityInputKey(identityInput)
-    if (createdIdentityIds.has(key)) continue
-
-    const { id } = await createOrUpdateIdentity(entityManager, identityInput)
-    createdIdentityIds.set(key, id)
-  }
-
-  // function to return the provided ID or created identity ID
-  const getIdentityId = ({ identityId, identity }: { identityId?: Maybe<string>; identity?: Maybe<IdentityInput> }) => {
-    if (identityId) return identityId
-
-    invariant(identity, 'Neither identity ID nor identity input provided')
-    const id = createdIdentityIds.get(identityInputKey(identity))
-
-    invariant(id, 'Identity was not created')
-    return id
-  }
+  const identityMap = await bulkCreateOrUpdateIdentity(entityManager, identitiesToCreateOrUpdate)
 
   const response: AsyncIssuanceResponse = {
     asyncIssuanceRequestIds: [],
@@ -222,10 +179,13 @@ export async function CreateAsyncIssuanceRequestCommand(
   // Save the requests
   const asyncIssuancesToSave = requestInput.map((asyncIssuanceInput) => {
     const { contractId, identityId, identity, expiry } = asyncIssuanceInput
+
+    invariant(identity || identityId, 'Identity or identity ID must be provided')
+
     const asyncIssuance = new AsyncIssuanceEntity({
       id: randomUUID(),
       contractId,
-      identityId: getIdentityId({ identityId, identity }),
+      identityId: identityId ? identityId : identityMap.get(identityInputKey(identity!)) ?? throwError('Identity not found'),
       expiryPeriodInDays: convertAsyncIssuanceRequestExpiryToDays(expiry),
     })
     response.asyncIssuanceRequestIds.push(asyncIssuance.id)
@@ -236,7 +196,7 @@ export async function CreateAsyncIssuanceRequestCommand(
   await batchInsert(
     asyncIssuancesToSave.map(({ asyncIssuance }) => asyncIssuance),
     entityManager.getRepository(AsyncIssuanceEntity),
-    INSERT_BATCH_SIZE,
+    DEFAULT_INSERT_BATCH_SIZE,
     {
       handoffInsert: (auditData) => auditEntriesToSave.push(auditData),
     } satisfies AuditOptimisationControl,
@@ -255,7 +215,7 @@ export async function CreateAsyncIssuanceRequestCommand(
       user: auditUser,
       auditDateTime: auditData.auditDateTime,
     }))
-    await batchInsert(auditRecordsToSave, entityManager.getRepository(AsyncIssuanceAudit), INSERT_BATCH_SIZE)
+    await batchInsert(auditRecordsToSave, entityManager.getRepository(AsyncIssuanceAudit), DEFAULT_INSERT_BATCH_SIZE)
   }
 
   // Save PII data for the async issuance requests to a secure location
