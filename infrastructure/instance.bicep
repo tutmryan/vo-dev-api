@@ -1004,6 +1004,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     LIMITED_PHOTO_CAPTURE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedPhotoCaptureSecret) ? limitedPhotoCaptureSecretSecretExisting : limitedPhotoCaptureSecretSecret).properties.secretUri})'
     LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAsyncIssuanceClientSecretSecret.properties.secretUri})'
     LIMITED_ASYNC_ISSUANCE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAsyncIssuanceSecret) ? limitedAsyncIssuanceSecretSecretExisting : limitedAsyncIssuanceSecretSecret).properties.secretUri})'
+    LIMITED_DEMO_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedDemoClientSecretSecret.properties.secretUri})'
     HOME_TENANT_NAME: homeTenantName
     HOME_TENANT_ID: homeTenantId
     HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId
@@ -1013,7 +1014,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
     DEV_TOOLS_ENABLED: devToolsEnabled
     FACE_CHECK_ENABLED: faceCheckEnabled
-    DEMO_ENABLED : devToolsEnabled
+    DEMO_ENABLED : demoEnabled
     IDENTITY_ISSUERS: identityIssuers
     PLATFORM_CONSUMER_APPS: platformConsumerApps
     ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds
