@@ -219,11 +219,15 @@ export async function CreateAsyncIssuanceRequestCommand(
   }
 
   // Save PII data for the async issuance requests to a secure location
-  await Promise.all(
-    asyncIssuancesToSave.map(async ({ asyncIssuance, asyncIssuanceInput }) =>
-      asyncIssuances.uploadAsyncIssuance(asyncIssuance.id, asyncIssuanceInput),
-    ),
-  )
+  // Upload in batches of ## to avoid flooding the network interface
+  const batchSize = 40
+  for (let i = 0; i < asyncIssuancesToSave.length; i += batchSize) {
+    await Promise.all(
+      asyncIssuancesToSave
+        .slice(i, i + batchSize)
+        .map(async ({ asyncIssuance, asyncIssuanceInput }) => asyncIssuances.uploadAsyncIssuance(asyncIssuance.id, asyncIssuanceInput)),
+    )
+  }
 
   // Note: We're using the requests IDs to avoid the job queue from referencing PII data directly via the payload data
   await addToJobQueue({
