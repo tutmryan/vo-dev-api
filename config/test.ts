@@ -61,6 +61,9 @@ const config: DeepPartial<Config> = {
   limitedAsyncIssuance: {
     credentials: {},
   },
+  limitedDemo: {
+    credentials: {},
+  },
 }
 
 module.exports = config

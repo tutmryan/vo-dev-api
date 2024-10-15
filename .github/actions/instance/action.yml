@@ -289,6 +289,7 @@ runs:
         LIMITED-APPROVAL-SECRET:hex:16
         LIMITED-PHOTO-CAPTURE-SECRET:hex:16
         LIMITED-ASYNC-ISSUANCE-SECRET:hex:16
+        LIMITED-DEMO-SECRET:hex:16
         PRIVATE-STORAGE-ENCRYPTION-KEY:hex:32
 
     - name: Check if a action group for alerts has been created
@@ -336,6 +337,7 @@ runs:
           limitedPhotoCaptureSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-PHOTO-CAPTURE-SECRET }}
           limitedAsyncIssuanceClientSecret=${{ inputs.limited-async-issuance-client-secret }}
           limitedAsyncIssuanceSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-ASYNC-ISSUANCE-SECRET }}
+          limitedDemoSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-DEMO-SECRET }}
           homeTenantId=${{ inputs.home-tenant-id }}
           homeTenantName=${{ inputs.home-tenant-name }}
           homeTenantGraphClientId=${{ inputs.home-tenant-graph-client-id }}
