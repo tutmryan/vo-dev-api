@@ -1,5 +1,6 @@
 import type { ObjectLiteral } from 'typeorm/common/ObjectLiteral'
 import type { FindOptionsWhere } from 'typeorm/find-options/FindOptionsWhere'
+import { chunkify } from '../util/chunkify'
 import type { VerifiedOrchestrationRepository } from './entity-manager'
 import { In } from 'typeorm'
 
@@ -17,7 +18,7 @@ export async function batchInsert<T extends ObjectLiteral>(
   batchSize: number,
   additionalData?: object,
 ) {
-  const chunks = Array.from({ length: Math.ceil(data.length / batchSize) }, (_, i) => data.slice(i * batchSize, (i + 1) * batchSize))
+  const chunks = chunkify(data, batchSize)
   for (const chunk of chunks) {
     await repo.insert(
       chunk.map((c) => {
@@ -36,9 +37,7 @@ export async function bulkFindBy<T extends ObjectLiteral, TK extends keyof T>(
   values: Array<T[TK]>,
   comment?: string,
 ) {
-  const chunks = Array.from({ length: Math.ceil(values.length / DB_MAX_PARAMETERS) }, (_, i) =>
-    values.slice(i * DB_MAX_PARAMETERS, (i + 1) * DB_MAX_PARAMETERS),
-  )
+  const chunks = chunkify(values, DB_MAX_PARAMETERS)
   const results = await Promise.all(
     chunks.map((chunk) =>
       repo.find({
@@ -57,9 +56,7 @@ export async function bulkFindByTuple<T extends ObjectLiteral, TK extends keyof 
   comment?: string,
 ) {
   const dbMaxParameters = DB_MAX_PARAMETERS / 2 // 2 values per tuple
-  const chunks = Array.from({ length: Math.ceil(values.length / dbMaxParameters) }, (_, i) =>
-    values.slice(i * dbMaxParameters, (i + 1) * dbMaxParameters),
-  )
+  const chunks = chunkify(values, dbMaxParameters)
   const results = await Promise.all(
     chunks.map((chunk) =>
       repo.find({
