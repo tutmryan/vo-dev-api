@@ -1,7 +1,6 @@
 import { bulkFindByTuple, bulkInsert } from '../../data/bulk-operations'
 import type { VerifiedOrchestrationEntityManager } from '../../data/entity-manager'
 import type { IdentityInput } from '../../generated/graphql'
-import { NotFalsy } from '../../util/type-helpers'
 import { IdentityAudit } from './entities/identity-audit'
 import { IdentityEntity } from './entities/identity-entity'
 
