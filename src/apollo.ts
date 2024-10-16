@@ -91,7 +91,12 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
   app.use(
     '/graphql',
     rateLimiterMiddleware,
-    json({ limit: '1mb' }),
+    (req, res, next) => {
+      const isAuthenticated = req.user !== undefined
+      // Increase the body limit for authenticated users, because they can be trusted more to not DDOS the server
+      const jsonHandler = json({ limit: isAuthenticated ? '10mb' : '1mb' })
+      jsonHandler(req, res, next)
+    },
     expressMiddleware(server, {
       context: async ({ req }) => createContext({ req, claims: req.user }),
     }),

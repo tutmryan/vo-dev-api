@@ -2,6 +2,8 @@ import { Column, Entity, Index } from 'typeorm'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 
+export const identityColumnsOf = (fields: (keyof IdentityEntity)[]) => fields
+
 @Entity('identity')
 @Index(['issuer', 'identifier'], { unique: true })
 export class IdentityEntity extends AuditedAndTrackedEntity {

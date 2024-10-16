@@ -729,7 +729,29 @@ export type ContactInput = {
    * The value of the contact method, either an email address or phone number for SMS.
    *
    * Item of note:
+   *
    * - For phone numbers, the value must be in international E.164 format.
+   * - Email addresses to the following domains will be ignored and are meant for use while testing.
+   *   - `@example.com`
+   *   - `@example.org`
+   *   - `@example.net`
+   *   - `@example.edu`
+   * - SMS messages to the following numbers will be ignore and are meant for use while testing.
+   *   - `+61491570006` (AU)
+   *   - `+61491570157`
+   *   - `+61491570737`
+   *   - `+61491573087`
+   *   - `+61491578957`
+   *   - `+15005550109` (US)
+   *   - `+15005550119`
+   *   - `+15005550129`
+   *   - `+15005550139`
+   *   - `+15005550149`
+   *   - `+4477009000009` (UK)
+   *   - `+4477009000019`
+   *   - `+4477009000029`
+   *   - `+4477009000039`
+   *   - `+4477009000049`
    */
   value: Scalars['String']['input'];
 };

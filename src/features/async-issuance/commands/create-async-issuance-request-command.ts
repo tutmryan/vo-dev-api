@@ -1,3 +1,4 @@
+import { isNotFalsy } from '@makerx/node-common'
 import { randomUUID } from 'crypto'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import { omit } from 'lodash'
@@ -5,26 +6,29 @@ import { calculateExpiryFromNow, convertAsyncIssuanceRequestExpiryToDays } from 
 import { addToJobQueue } from '../../../background-jobs/queue'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
+import { dataSource } from '../../../data'
+import { bulkFindBy, bulkInsert } from '../../../data/bulk-operations'
 import type {
   AsyncIssuanceContactInput,
   AsyncIssuanceErrorResponse,
   AsyncIssuanceRequestInput,
   AsyncIssuanceResponse,
   IdentityInput,
-  Maybe,
 } from '../../../generated/graphql'
 import { ContactMethod, FaceCheckPhotoSupport } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
+import { throwError } from '../../../util/throw-error'
 import { userInvariant } from '../../../util/user-invariant'
 import { isValidEmail } from '../../../util/validation'
 import { validateIssuanceClaims, validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
-import { createOrUpdateIdentity } from '../../identity'
+import { ContractEntity } from '../../contracts/entities/contract-entity'
+import { bulkCreateOrUpdateIdentity, identityInputKey } from '../../identity'
+import { IdentityEntity } from '../../identity/entities/identity-entity'
+import { AsyncIssuanceAudit } from '../entities/async-issuance-audit'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
 registerFeatureCheck(CreateAsyncIssuanceRequestCommand, async (...[, input]) => isFaceCheckPhotoEnabled(input))
-
-const identityInputKey = ({ issuer, identifier }: IdentityInput) => issuer + identifier
 
 const loggableAsyncIssuanceInput = (input: AsyncIssuanceRequestInput) => omit(input, ['contact'])
 
@@ -56,7 +60,6 @@ export async function CreateAsyncIssuanceRequestCommand(
   const {
     user,
     entityManager,
-    dataLoaders: { contracts, identities },
     services: { asyncIssuances },
   } = this
 
@@ -66,7 +69,29 @@ export async function CreateAsyncIssuanceRequestCommand(
     errors: [],
   }
 
-  const identitiesToCreate: IdentityInput[] = []
+  const identitiesToCreateOrUpdate: IdentityInput[] = []
+
+  const referencedContracts = new Map(
+    (
+      await bulkFindBy(
+        dataSource.getRepository(ContractEntity),
+        'id',
+        [...new Set(requestInput.map((i) => i.contractId))],
+        'FindIdentitiesById',
+      )
+    ).map((contract) => [contract.id.toLowerCase(), contract]),
+  )
+
+  const referencedIdentities = new Map(
+    (
+      await bulkFindBy(
+        dataSource.getRepository(IdentityEntity),
+        'id',
+        [...new Set(requestInput.map((i) => i.identityId ?? null).filter(isNotFalsy))],
+        'FindIdentitiesById',
+      )
+    ).map((identity) => [identity.id.toLowerCase(), identity]),
+  )
 
   // Validate the input
   for (const [index, asyncIssuanceInput] of requestInput.entries()) {
@@ -90,7 +115,7 @@ export async function CreateAsyncIssuanceRequestCommand(
       validateIssuanceClaims(claims)
 
       // locate and validate the contract
-      const contract = await contracts.load(contractId)
+      const contract = referencedContracts.get(contractId.toLowerCase())
       invariant(contract, 'Contract could not be found')
       invariant(contract.externalId, 'Contract must be provisioned before issuance')
       invariant(!contract.isDeprecated, 'Contract must not be deprecated')
@@ -100,12 +125,11 @@ export async function CreateAsyncIssuanceRequestCommand(
 
       // find the identity if specified by ID
       if (identityId) {
-        const existingIdentity = await identities.load(identityId)
-        invariant(existingIdentity, 'Identity could not be found')
+        invariant(referencedIdentities.has(identityId.toLowerCase()), 'Identity could not be found')
       }
 
       // build the list of identities to create
-      if (identity) identitiesToCreate.push(identity)
+      if (identity) identitiesToCreateOrUpdate.push(identity)
 
       // validate the face check/photo capture input
       if (contract.faceCheckSupport === FaceCheckPhotoSupport.Required) {
@@ -144,54 +168,46 @@ export async function CreateAsyncIssuanceRequestCommand(
     return errorResponse
   }
 
-  // create identities, deduplicating (for performance) via identity key
-  const createdIdentityIds = new Map<string, string>()
-
-  for (const identityInput of identitiesToCreate) {
-    const key = identityInputKey(identityInput)
-    if (createdIdentityIds.has(key)) continue
-
-    const { id } = await createOrUpdateIdentity(entityManager, identityInput)
-    createdIdentityIds.set(key, id)
-  }
-
-  // function to return the provided ID or created identity ID
-  const getIdentityId = ({ identityId, identity }: { identityId?: Maybe<string>; identity?: Maybe<IdentityInput> }) => {
-    if (identityId) return identityId
-
-    invariant(identity, 'Neither identity ID nor identity input provided')
-    const id = createdIdentityIds.get(identityInputKey(identity))
-
-    invariant(id, 'Identity was not created')
-    return id
-  }
+  const identityMap = await bulkCreateOrUpdateIdentity(entityManager, identitiesToCreateOrUpdate)
 
   const response: AsyncIssuanceResponse = {
     asyncIssuanceRequestIds: [],
   }
 
   // Save the requests
-  for (const [index, asyncIssuanceInput] of requestInput.entries()) {
+  const asyncIssuancesToSave = requestInput.map((asyncIssuanceInput) => {
     const { contractId, identityId, identity, expiry } = asyncIssuanceInput
 
-    try {
-      const issuanceRequest = await entityManager.getRepository(AsyncIssuanceEntity).save(
-        new AsyncIssuanceEntity({
-          id: randomUUID(),
-          contractId,
-          identityId: getIdentityId({ identityId, identity }),
-          expiryPeriodInDays: convertAsyncIssuanceRequestExpiryToDays(expiry),
-        }),
-      )
-      await asyncIssuances.uploadAsyncIssuance(issuanceRequest.id, asyncIssuanceInput)
-      response.asyncIssuanceRequestIds.push(issuanceRequest.id)
-    } catch (error) {
-      logger.error(`Saving async issuance request ${index + 1} of ${requestInput.length} failed`, {
-        error,
-        asyncIssuanceInput: loggableAsyncIssuanceInput(asyncIssuanceInput),
-      })
-      throw error
-    }
+    invariant(identity || identityId, 'Identity or identity ID must be provided')
+
+    const asyncIssuance = new AsyncIssuanceEntity({
+      id: randomUUID(),
+      contractId,
+      identityId: identityId ? identityId : identityMap.get(identityInputKey(identity!)) ?? throwError('Identity not found'),
+      expiryPeriodInDays: convertAsyncIssuanceRequestExpiryToDays(expiry),
+    })
+    response.asyncIssuanceRequestIds.push(asyncIssuance.id)
+    return { asyncIssuance, asyncIssuanceInput }
+  })
+
+  await bulkInsert(
+    asyncIssuancesToSave.map(({ asyncIssuance }) => asyncIssuance),
+    AsyncIssuanceEntity,
+    entityManager,
+    {
+      entityAuditTarget: AsyncIssuanceAudit,
+    },
+  )
+
+  // Save PII data for the async issuance requests to a secure location
+  // Upload in batches of ## to avoid flooding the network interface
+  const batchSize = 40
+  for (let i = 0; i < asyncIssuancesToSave.length; i += batchSize) {
+    await Promise.all(
+      asyncIssuancesToSave
+        .slice(i, i + batchSize)
+        .map(async ({ asyncIssuance, asyncIssuanceInput }) => asyncIssuances.uploadAsyncIssuance(asyncIssuance.id, asyncIssuanceInput)),
+    )
   }
 
   // Note: We're using the requests IDs to avoid the job queue from referencing PII data directly via the payload data
