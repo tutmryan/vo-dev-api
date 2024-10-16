@@ -6,7 +6,7 @@ import { Lazy } from './lazy'
 
 // 🚨🚨 Do not update this without updating the docs-site documentation and schema.graphql code docs 🚨🚨
 // Set uses a hash table internally, so it's O(1) for lookups and not O(n) like an array
-const RESERVED_MOBILES_FOR_TESTING = new Set([
+export const RESERVED_MOBILES_FOR_TESTING = new Set([
   // AU https://www.acma.gov.au/phone-numbers-use-tv-shows-films-and-creative-works
   '+61491570006',
   '+61491570157',

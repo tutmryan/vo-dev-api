@@ -16,7 +16,9 @@ type MailTo = MailDataRequired['to']
 
 // IANA reserved domains https://en.wikipedia.org/wiki/Example.com, https://www.iana.org/domains/reserved
 // 🚨🚨 Do not update this without updating the docs-site documentation and schema.graphql code docs 🚨🚨
-const IANA_RESERVED_DOMAINS = ['*@example.com', '*@example.net', '*@example.org', '*@example.edu']
+export const IANA_RESERVED_DOMAINS = ['@example.com', '@example.net', '@example.org', '@example.edu']
+
+const blockFilterList = IANA_RESERVED_DOMAINS.map((i) => `*${i}`)
 
 export const extractEmails = (to: MailTo, filterMode: 'allow' | 'block', filterList: string[]) => {
   const blocked = new Array<EmailData>()
@@ -76,7 +78,7 @@ const sendEmail = async (to: MailTo, data: MailDataRequired) => {
     to = allowed
   }
 
-  const { blocked, allowed } = extractEmails(to, 'block', IANA_RESERVED_DOMAINS)
+  const { blocked, allowed } = extractEmails(to, 'block', blockFilterList)
 
   if (blocked.length) {
     logger.warn(
