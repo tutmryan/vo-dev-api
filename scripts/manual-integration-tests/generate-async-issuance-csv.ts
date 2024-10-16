@@ -4,7 +4,8 @@ import * as os from 'node:os'
 import * as Path from 'node:path'
 import { dataSource, dataSourceConfig } from '../../src/data'
 import { ContractEntity } from '../../src/features/contracts/entities/contract-entity'
-import { randomPhoneNumber } from '../../src/test/data-generators'
+import { IANA_RESERVED_DOMAINS } from '../../src/util/email'
+import { RESERVED_MOBILES_FOR_TESTING } from '../../src/util/sms'
 
 // ----------------------------------------------------------------------------------
 // This script generates a CSV file with random data for testing bulk async issuance
@@ -14,42 +15,49 @@ import { randomPhoneNumber } from '../../src/test/data-generators'
 
 // -- Configuration
 
-const contractId = '9650DFB2-10EF-4996-BAFE-23AA463115A5'
-const rowsToGenerate = 500
-let outputFilePath = Path.join(os.homedir(), `/downloads/test-file-for-async-issuance-${rowsToGenerate}-1.csv`)
-let duplicateCount = 1
-
-while (fs.existsSync(outputFilePath)) {
-  duplicateCount++
-  outputFilePath = Path.join(os.homedir(), `/downloads/test-file-for-async-issuance-${rowsToGenerate}-${duplicateCount}.csv`)
-}
+const contractId = '4EF81A0B-D981-4401-9C9A-06029FDA80C0'
+const rowsToGenerate = [250, 500, 750, 1000, 2000, 5000, 10000, 20000, 50000, 100000]
 
 // --- Script
 
 const header = `"ID","Issuer Name","Recipient Name","Notification Method (email | sms)","Notification Value","Verification Method (email | sms)","Verification Value","Issuance Expiry (oneDay | oneMonth | oneWeek | threeDays | threeMonths | twoWeeks)","(Optional) - Credential Expiry Date"`
 
-async function generateAsyncIssuanceCsv() {
-  console.log(dataSourceConfig)
-  await dataSource.initialize()
+const generateRandomEmail = () => `${casual.username}@${casual.random_element(IANA_RESERVED_DOMAINS)}.com`
+const generateRandomPhoneNumber = () => casual.random_element([...RESERVED_MOBILES_FOR_TESTING.values()])
 
+async function generateAsyncIssuanceCsv() {
+  await dataSource.initialize()
   const contract = await dataSource.getRepository(ContractEntity).findOneByOrFail({ id: contractId })
 
   const additionalClaimColumns = contract.display.claims.filter((c) => !c.value).map((c) => c.label)
   const additionalClaimHeaders = additionalClaimColumns.map((c) => `"${c}"`).join(',')
 
-  // write the header to the file
-  fs.existsSync(outputFilePath) && fs.unlinkSync(outputFilePath)
+  for (const rows of rowsToGenerate) {
+    console.log(`Generating ${rows} rows`)
 
-  fs.writeFileSync(outputFilePath, `${header},${additionalClaimHeaders}\n`)
+    let outputFilePath = Path.join(os.homedir(), `/downloads/test-file-for-async-issuance-${rows}-1.csv`)
+    let duplicateCount = 1
 
-  for (let i = 0; i < rowsToGenerate; i++) {
-    const row =
-      `"${i + 1}","manual","${casual.name}","email","${casual.email}","sms",${randomPhoneNumber()},"oneWeek",,` +
-      additionalClaimColumns.map(() => `"${casual.word}"`).join(',')
-    fs.appendFileSync(outputFilePath, `${row}\n`)
+    while (fs.existsSync(outputFilePath)) {
+      duplicateCount++
+      outputFilePath = Path.join(os.homedir(), `/downloads/test-file-for-async-issuance-${rows}-${duplicateCount}.csv`)
+    }
+
+    // write the header to the file
+    fs.existsSync(outputFilePath) && fs.unlinkSync(outputFilePath)
+
+    fs.writeFileSync(outputFilePath, `${header},${additionalClaimHeaders}\n`)
+
+    for (let i = 0; i < rows; i++) {
+      const row =
+        `"${casual.integer(100_000_000_000, 999_999_999_999)}","manual","${casual.name}","email","${generateRandomEmail()}","sms",${generateRandomPhoneNumber()},"oneWeek",,` +
+        additionalClaimColumns.map(() => `"${casual.word}"`).join(',')
+      fs.appendFileSync(outputFilePath, `${row}\n`)
+    }
+
+    console.log(`File written to ${outputFilePath}`)
   }
 
-  console.log(`File written to ${outputFilePath}`)
   process.exit(0)
 }
 
