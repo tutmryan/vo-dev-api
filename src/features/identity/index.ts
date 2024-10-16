@@ -1,12 +1,8 @@
-import { randomUUID } from 'crypto'
-import { batchInsert, bulkFindByTuple, DEFAULT_INSERT_BATCH_SIZE } from '../../data/bulk-operations'
+import { bulkFindByTuple, bulkInsert } from '../../data/bulk-operations'
 import type { VerifiedOrchestrationEntityManager } from '../../data/entity-manager'
 import type { IdentityInput } from '../../generated/graphql'
-import { invariant } from '../../util/invariant'
 import { NotFalsy } from '../../util/type-helpers'
-import { AsyncIssuanceAudit } from '../async-issuance/entities/async-issuance-audit'
-import type { AuditData, AuditOptimisationControl } from '../auditing/auditing-event-subscribers'
-import { UserEntity } from '../users/entities/user-entity'
+import { IdentityAudit } from './entities/identity-audit'
 import { IdentityEntity } from './entities/identity-entity'
 
 export const identityInputKey = ({ issuer, identifier }: IdentityInput) => issuer + identifier
@@ -46,49 +42,21 @@ export async function bulkCreateOrUpdateIdentity(
   )
 
   // Updates
-  const identitiesToUpdate = inputs
-    .map((input) => {
-      const identityKey = identityInputKey(input)
-      const existing = existingEntitiesMap.get(identityKey)
-      return existing && existing.name !== input.name
-        ? {
-            id: existing.id,
-            name: input.name,
-          }
-        : null
-    })
-    .filter(NotFalsy)
-  if (identitiesToUpdate.length > 0) {
-    // This could be optimised. However, the easy optimisation methods, such as update, don't audit data correctly, and given the
-    // probability of this being a rare operation, it's not worth the complexity.
-    for (const identity of identitiesToUpdate) {
-      const identityToUpdate = await repo.findOneByOrFail({ id: identity.id })
-      identityToUpdate.name = identity.name
-      await repo.save(identityToUpdate)
+  for (const input of inputs) {
+    const existing = existingEntitiesMap.get(identityInputKey(input))
+    if (existing && existing.name !== input.name) {
+      existing.name = input.name
+      // This could be optimised. However, the easy optimisation methods, such as update, don't audit data correctly, and given the
+      // probability of this being a rare operation, it's not worth the complexity.
+      await repo.save(existing)
     }
   }
 
   // Inserts
   const identitiesToAdd = inputs.filter((input) => !existingEntitiesMap.has(identityInputKey(input))).map((i) => new IdentityEntity(i))
-  if (identitiesToAdd.length > 0) {
-    const auditEntriesToSave: AuditData[] = []
-    await batchInsert(identitiesToAdd, repo, DEFAULT_INSERT_BATCH_SIZE, {
-      handoffInsert: (auditData) => auditEntriesToSave.push(auditData),
-    } satisfies AuditOptimisationControl)
-
-    // Optimisation: The user is the same for all entries
-    const auditUser = await entityManager.getRepository(UserEntity).findOneOrFail({ where: { id: auditEntriesToSave[0]!.userId } })
-    const auditRecordsToSave = auditEntriesToSave.map((auditData) => ({
-      id: randomUUID(),
-      entityId: auditData.entityId,
-      auditData: auditData.auditData,
-      action: auditData.action,
-      user: auditUser,
-      auditDateTime: auditData.auditDateTime,
-    }))
-    invariant(auditRecordsToSave.length === auditEntriesToSave.length, 'Audit data was not saved correctly')
-    await batchInsert(auditRecordsToSave, entityManager.getRepository(AsyncIssuanceAudit), DEFAULT_INSERT_BATCH_SIZE)
-  }
+  await bulkInsert(identitiesToAdd, IdentityEntity, entityManager, {
+    entityAuditTarget: IdentityAudit,
+  })
 
   return new Map([...existingEntities, ...identitiesToAdd].map((identity) => [identityInputKey(identity), identity.id]))
 }

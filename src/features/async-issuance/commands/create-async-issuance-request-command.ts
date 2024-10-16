@@ -7,7 +7,7 @@ import { addToJobQueue } from '../../../background-jobs/queue'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { dataSource } from '../../../data'
-import { batchInsert, bulkFindBy, DEFAULT_INSERT_BATCH_SIZE } from '../../../data/bulk-operations'
+import { bulkFindBy, bulkInsert } from '../../../data/bulk-operations'
 import type {
   AsyncIssuanceContactInput,
   AsyncIssuanceErrorResponse,
@@ -21,7 +21,6 @@ import { invariant } from '../../../util/invariant'
 import { throwError } from '../../../util/throw-error'
 import { userInvariant } from '../../../util/user-invariant'
 import { isValidEmail } from '../../../util/validation'
-import type { AuditData, AuditOptimisationControl } from '../../auditing/auditing-event-subscribers'
 import { validateIssuanceClaims, validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { bulkCreateOrUpdateIdentity, identityInputKey } from '../../identity'
@@ -61,7 +60,6 @@ export async function CreateAsyncIssuanceRequestCommand(
   const {
     user,
     entityManager,
-    dataLoaders: { users },
     services: { asyncIssuances },
   } = this
 
@@ -192,31 +190,14 @@ export async function CreateAsyncIssuanceRequestCommand(
     return { asyncIssuance, asyncIssuanceInput }
   })
 
-  const auditEntriesToSave: AuditData[] = []
-  await batchInsert(
+  await bulkInsert(
     asyncIssuancesToSave.map(({ asyncIssuance }) => asyncIssuance),
-    entityManager.getRepository(AsyncIssuanceEntity),
-    DEFAULT_INSERT_BATCH_SIZE,
+    AsyncIssuanceEntity,
+    entityManager,
     {
-      handoffInsert: (auditData) => auditEntriesToSave.push(auditData),
-    } satisfies AuditOptimisationControl,
+      entityAuditTarget: AsyncIssuanceAudit,
+    },
   )
-
-  invariant(auditEntriesToSave.length === asyncIssuancesToSave.length, 'Audit data was not saved correctly')
-
-  if (auditEntriesToSave.length > 0) {
-    // Optimisation: The user is the same for all entries
-    const auditUser = await users.load(auditEntriesToSave[0]!.userId)
-    const auditRecordsToSave = auditEntriesToSave.map((auditData) => ({
-      id: randomUUID(),
-      entityId: auditData.entityId,
-      auditData: auditData.auditData,
-      action: auditData.action,
-      user: auditUser,
-      auditDateTime: auditData.auditDateTime,
-    }))
-    await batchInsert(auditRecordsToSave, entityManager.getRepository(AsyncIssuanceAudit), DEFAULT_INSERT_BATCH_SIZE)
-  }
 
   // Save PII data for the async issuance requests to a secure location
   // Upload in batches of ## to avoid flooding the network interface
