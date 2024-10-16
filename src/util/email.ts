@@ -73,10 +73,10 @@ const sendEmail = async (to: MailTo, data: MailDataRequired) => {
     }
 
     // Override the original recipients with the allowed ones
-    data.to = allowed
+    to = allowed
   }
 
-  const { blocked, allowed } = extractEmails(data.to, 'block', IANA_RESERVED_DOMAINS)
+  const { blocked, allowed } = extractEmails(to, 'block', IANA_RESERVED_DOMAINS)
 
   if (blocked.length) {
     logger.warn(
