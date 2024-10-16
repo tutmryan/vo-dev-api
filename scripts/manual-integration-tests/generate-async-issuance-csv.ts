@@ -5,7 +5,7 @@ import * as Path from 'node:path'
 import { dataSource, dataSourceConfig } from '../../src/data'
 import { ContractEntity } from '../../src/features/contracts/entities/contract-entity'
 import { IANA_RESERVED_DOMAINS } from '../../src/util/email'
-import { RESERVED_MOBILES_FOR_TESTING } from '../../src/util/sms'
+import { RESERVED_TEST_PHONE_NUMBERS } from '../../src/util/sms'
 
 // ----------------------------------------------------------------------------------
 // This script generates a CSV file with random data for testing bulk async issuance
@@ -23,7 +23,7 @@ const rowsToGenerate = [250, 500, 750, 1000, 2000, 5000, 10000, 20000, 50000, 10
 const header = `"ID","Issuer Name","Recipient Name","Notification Method (email | sms)","Notification Value","Verification Method (email | sms)","Verification Value","Issuance Expiry (oneDay | oneMonth | oneWeek | threeDays | threeMonths | twoWeeks)","(Optional) - Credential Expiry Date"`
 
 const generateRandomEmail = () => `${casual.username}@${casual.random_element(IANA_RESERVED_DOMAINS)}.com`
-const generateRandomPhoneNumber = () => casual.random_element([...RESERVED_MOBILES_FOR_TESTING.values()])
+const generateRandomPhoneNumber = () => casual.random_element([...RESERVED_TEST_PHONE_NUMBERS.values()])
 
 async function generateAsyncIssuanceCsv() {
   await dataSource.initialize()
@@ -37,17 +37,16 @@ async function generateAsyncIssuanceCsv() {
 
     let outputFilePath = Path.join(os.homedir(), `/downloads/test-file-for-async-issuance-${rows}-1.csv`)
     let duplicateCount = 1
-
     while (fs.existsSync(outputFilePath)) {
       duplicateCount++
       outputFilePath = Path.join(os.homedir(), `/downloads/test-file-for-async-issuance-${rows}-${duplicateCount}.csv`)
     }
 
-    // write the header to the file
+    // write out the header
     fs.existsSync(outputFilePath) && fs.unlinkSync(outputFilePath)
-
     fs.writeFileSync(outputFilePath, `${header},${additionalClaimHeaders}\n`)
 
+    // write out the rows
     for (let i = 0; i < rows; i++) {
       const row =
         `"${casual.integer(100_000_000_000, 999_999_999_999)}","manual","${casual.name}","email","${generateRandomEmail()}","sms",${generateRandomPhoneNumber()},"oneWeek",,` +

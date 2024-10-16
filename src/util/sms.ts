@@ -6,7 +6,7 @@ import { Lazy } from './lazy'
 
 // 🚨🚨 Do not update this without updating the docs-site documentation and schema.graphql code docs 🚨🚨
 // Set uses a hash table internally, so it's O(1) for lookups and not O(n) like an array
-export const RESERVED_MOBILES_FOR_TESTING = new Set([
+export const RESERVED_TEST_PHONE_NUMBERS = new Set([
   // AU https://www.acma.gov.au/phone-numbers-use-tv-shows-films-and-creative-works
   '+61491570006',
   '+61491570157',
@@ -49,7 +49,7 @@ export function sendSms(to: string, message: string) {
     }
   }
 
-  if (RESERVED_MOBILES_FOR_TESTING.has(to)) {
+  if (RESERVED_TEST_PHONE_NUMBERS.has(to)) {
     logger.warn(`Blocked sending sms to ${maskPhone(to)} as it is a reserved number for testing`)
     return
   }
