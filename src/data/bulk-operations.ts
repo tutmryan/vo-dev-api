@@ -26,16 +26,9 @@ async function doBatchInsert<T extends ObjectLiteral>(
 ) {
   const chunks = chunkify(data, batchSize)
   for (const chunk of chunks) {
-    await repo.insert(
-      chunk.map((c) => {
-        if (additionalData) Object.assign(c, additionalData)
-        return c
-      }),
-    )
+    await repo.insert(additionalData ? chunk.map((c) => Object.assign(c, additionalData)) : chunk)
   }
 }
-
-const DB_MAX_PARAMETERS = 2000 // The max is 2100, but we want to err on the side of caution
 
 export async function bulkInsert<
   T extends VerifiedOrchestrationEntity & ObjectLiteral,
@@ -84,6 +77,8 @@ export async function bulkInsert<
     }
   }
 }
+
+const DB_MAX_PARAMETERS = 2000 // The max is 2100, but we want to err on the side of caution
 
 export async function bulkFindBy<T extends ObjectLiteral, TK extends keyof T>(
   repo: VerifiedOrchestrationRepository<T>,
