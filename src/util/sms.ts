@@ -20,11 +20,11 @@ export const RESERVED_TEST_PHONE_NUMBERS = new Set([
   '+15005550149',
   '+15005550159',
   // UK https://www.ofcom.org.uk/phones-and-broadband/phone-numbers/numbers-for-drama
-  '+447700900018',
-  '+447700900028',
-  '+447700900038',
-  '+447700900048',
-  '+447700900058',
+  '+447709000018',
+  '+447709000028',
+  '+447709000038',
+  '+447709000048',
+  '+447709000058',
 ])
 
 const client = Lazy(() => {
