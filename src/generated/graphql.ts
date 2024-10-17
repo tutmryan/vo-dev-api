@@ -1785,7 +1785,13 @@ export type Mutation = {
   capturePhoto?: Maybe<Scalars['Void']['output']>;
   /** Creates a new approval request. */
   createApprovalRequest: ApprovalRequestResponse;
-  /** Creates one or more async issuance requests. */
+  /**
+   * Creates one or more async issuance requests.
+   *
+   * **Critical items** of note:
+   *
+   * - This mutation has a hard limit of **1000 requests** per call. Verified Orchestration **strongly** recommends implementing a batching strategy when an unknown number of requests will be issued.
+   */
   createAsyncIssuanceRequest: AsyncIssuanceRequestResponse;
   /** Creates a new contract */
   createContract: Contract;

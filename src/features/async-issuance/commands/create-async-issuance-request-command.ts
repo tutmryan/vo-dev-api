@@ -65,6 +65,8 @@ export async function CreateAsyncIssuanceRequestCommand(
 
   userInvariant(user)
 
+  invariant(requestInput.length <= 1000, 'Cannot create more than 1000 async issuance requests at once')
+
   const errorResponse: AsyncIssuanceErrorResponse = {
     errors: [],
   }

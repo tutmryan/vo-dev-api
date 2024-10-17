@@ -40,6 +40,13 @@ Remote issuance is easier to implement than in-person issuance, since no user-in
 
 Remote issuance supports bulk credential issuing to many recipients, either via app integration with the Verified Orchestration API or manually via the Admin UI.
 
+:::warning
+Both the Admin portal and the API have a hard limit of creating no more than 1000 remote issuances at one time.
+
+ - When using the Admin portal, you can split the CSV file into multiple files and upload them separately.
+ - When using the API, you can make multiple requests with a maximum of 1000 remote issuances per request.
+:::
+
 ## Manual remote issuance
 
 The Admin UI provides the ability to:
