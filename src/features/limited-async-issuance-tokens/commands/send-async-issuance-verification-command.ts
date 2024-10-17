@@ -30,9 +30,9 @@ export async function SendAsyncIssuanceVerificationCommand(
   const verification = asyncIssuanceRequest.contact.verification ?? asyncIssuanceRequest.contact.notification
 
   // avoid execution if the async issuance is throttled
-  const isThrottled = await isAsyncIssuanceVerificationThrottled(asyncIssuanceEntity.id)
+  const isThrottled = await isAsyncIssuanceVerificationThrottled(asyncIssuanceRequestId)
   if (isThrottled) {
-    logger.warn(`Throttling verification for async issuance: ${asyncIssuanceEntity.id}`)
+    logger.warn(`Throttling verification for async issuance: ${asyncIssuanceRequestId}`)
     return { method: verification.method }
   }
 

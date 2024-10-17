@@ -72,7 +72,7 @@ export const getLimitedAsyncIssuanceSessionKey = (token: string) => createKey(to
 const verificationThrottleSeconds = 120 - 1 // 2 minutes - 1 second for buffer
 const verificationThrottleCache = newCacheSection('verificationThrottle')
 function getVerificationThrottleKey(asyncIssuanceId: string) {
-  return `asyncIssuanceVerification:${asyncIssuanceId}`
+  return `asyncIssuanceVerification:${asyncIssuanceId.toLowerCase()}`
 }
 
 export async function throttleVerificationForIssuance(asyncIssuanceId: string) {
