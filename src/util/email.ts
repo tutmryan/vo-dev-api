@@ -14,7 +14,13 @@ const mailClient = Lazy(() => {
 
 type MailTo = MailDataRequired['to']
 
-export const extractAllowedEmails = (to: MailTo, allowList: string[]) => {
+// IANA reserved domains https://en.wikipedia.org/wiki/Example.com, https://www.iana.org/domains/reserved
+// 🚨🚨 Do not update this without updating the docs-site documentation and schema.graphql code docs 🚨🚨
+export const IANA_RESERVED_DOMAINS = ['example.com', 'example.net', 'example.org', 'example.edu']
+
+const blockFilterList = IANA_RESERVED_DOMAINS.map((i) => `*@${i}`)
+
+export const extractEmails = (to: MailTo, filterMode: 'allow' | 'block', filterList: string[]) => {
   const blocked = new Array<EmailData>()
   const allowed = new Array<EmailData>()
 
@@ -24,7 +30,7 @@ export const extractAllowedEmails = (to: MailTo, allowList: string[]) => {
 
   for (const email of Array.isArray(to) ? to : [to]) {
     let matched = false
-    for (const emailMatch of allowList) {
+    for (const emailMatch of filterList) {
       const emailAddress = isObject(email) ? email.email : email
       const domain = emailMatch.slice(2)
       if ((emailMatch.startsWith('*@') && emailAddress.endsWith(domain)) || emailMatch === emailAddress) {
@@ -32,7 +38,11 @@ export const extractAllowedEmails = (to: MailTo, allowList: string[]) => {
         break
       }
     }
-    ;(matched ? allowed : blocked).push(email)
+    if (filterMode === 'allow') {
+      matched ? allowed.push(email) : blocked.push(email)
+    } else {
+      matched ? blocked.push(email) : allowed.push(email)
+    }
   }
 
   return { blocked, allowed }
@@ -54,7 +64,7 @@ const sendEmail = async (to: MailTo, data: MailDataRequired) => {
       return
     }
 
-    const { blocked, allowed } = extractAllowedEmails(to, localDev.email.allowList)
+    const { blocked, allowed } = extractEmails(to, 'allow', localDev.email.allowList)
 
     if (blocked.length) {
       logger.warn(`Blocked sending email to ${blocked.map((e) => maskEmail(isObject(e) ? e.email : e)).join(', ')}`)
@@ -65,8 +75,18 @@ const sendEmail = async (to: MailTo, data: MailDataRequired) => {
     }
 
     // Override the original recipients with the allowed ones
-    data.to = allowed
+    to = allowed
   }
+
+  const { blocked, allowed } = extractEmails(to, 'block', blockFilterList)
+
+  if (blocked.length) {
+    logger.warn(
+      `Blocked sending email to ${blocked.map((e) => maskEmail(isObject(e) ? e.email : e)).join(', ')} as they are reserved for testing`,
+    )
+  }
+
+  data.to = allowed
 
   return await mailClient().send(data)
 }

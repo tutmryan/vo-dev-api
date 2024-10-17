@@ -6,6 +6,12 @@ import { randomUUID } from 'crypto'
 import { getReplacer } from '../../util/replacers'
 import { AuditedAndTrackedEntity } from './entities/audited-and-tracked-entity'
 
+export type AuditData = { entityId: string; userId: string; action: AuditAction; auditDateTime: Date; auditData: string }
+
+export type AuditOptimisationControl = {
+  handoffInsert: (auditData: AuditData) => void
+}
+
 @EventSubscriber()
 export class AuditingEventSubscriber implements EntitySubscriberInterface {
   private async createAuditRecord(
@@ -14,8 +20,14 @@ export class AuditingEventSubscriber implements EntitySubscriberInterface {
     tableName: string,
     entityId: string,
     action: AuditAction,
-    data: object | undefined,
+    data: object | undefined | AuditOptimisationControl,
   ) {
+    if (data && 'handoffInsert' in data) {
+      const { handoffInsert, ...rawData } = data
+      handoffInsert({ entityId, userId, action, auditDateTime: new Date(), auditData: JSON.stringify(rawData, getReplacer()) })
+      return
+    }
+
     await queryRunner.query(
       `
       insert into ${tableName}_audit (id, entity_id, user_id, action, audit_date_time, audit_data)

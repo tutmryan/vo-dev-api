@@ -8,7 +8,7 @@ export abstract class AuditBase extends VerifiedOrchestrationEntity {
   entityId!: string
 
   @Column({ type: 'nvarchar', length: 'MAX' })
-  auditData!: object
+  auditData!: string
 
   @Column({ type: 'nvarchar' })
   action!: AuditAction
@@ -19,4 +19,8 @@ export abstract class AuditBase extends VerifiedOrchestrationEntity {
 
   @Column({ type: 'datetimeoffset' })
   auditDateTime!: Date
+
+  get auditDataObject() {
+    return JSON.parse(this.auditData)
+  }
 }

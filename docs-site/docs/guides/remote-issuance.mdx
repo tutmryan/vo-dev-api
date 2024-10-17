@@ -160,3 +160,43 @@ Once the remote issuance is created, it can be <AdminUrl path="/remote-issuances
 - The recipient's contact details can be revealed and checked for correctness.
 - If required, contact details can be corrected.
 - The remote issuance notification can be resent to the recipient.
+
+## Testing integration
+
+It's often useful to test the remote issuance flow during integration with your application. However, during testing, you may not want to send real SMS or email notifications to recipients.
+
+### Testing with email
+
+The following domains can be used to generate email addresses for testing purposes. These domains will not send emails to real recipients:
+
+- `@example.com`
+- `@example.org`
+- `@example.net`
+- `@example.edu`
+
+Example email addresses that will be ignored: `sally.tester@exmple.com`, `fredrick.tester@example.edu`.
+
+### Testing with SMS
+
+The following phone numbers can be used for testing purposes. These numbers will not send SMS messages to real recipients:
+
+Australia:
+- `+61491570006`
+- `+61491570157`
+- `+61491570737`
+- `+61491573087`
+- `+61491578957`
+
+United States:
+- `+15005550109`
+- `+15005550119`
+- `+15005550129`
+- `+15005550139`
+- `+15005550149`
+
+United Kingdom:
+- `+447700900009`
+- `+4477009000019`
+- `+4477009000029`
+- `+4477009000039`
+- `+4477009000049`

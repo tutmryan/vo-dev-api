@@ -33,3 +33,5 @@ export function isObject(x: unknown): x is object {
 }
 
 export type NonEmptyArray<T> = [T, ...T[]]
+
+export const NotFalsy = <T>(value: T): value is Exclude<T, 0 | '' | false | undefined | null> => Boolean(value)
