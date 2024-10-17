@@ -368,6 +368,21 @@ resource limitedAsyncIssuanceSecretSecretExisting 'Microsoft.KeyVault/vaults/sec
   parent: keyVault
 }
 
+@description('The client secret of the limited demo client in Azure AD')
+@secure()
+param limitedDemoClientSecret string
+
+resource limitedDemoClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-DEMO-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedDemoClientSecret
+  }
+}
+
 @description('The client secret of the docs site app registration in Azure AD')
 @secure()
 param docsSiteClientSecret string
@@ -427,6 +442,8 @@ param homeTenantVidServiceClientSecret string
 param devToolsEnabled string
 @description('The flag indicating whether the face check features (i.e. issuing credentials with face check photo, .etc) are available')
 param faceCheckEnabled string
+@description('The flag indicating whether the demo features (i.e limited presentation token, presentation demo page, .etc) are deployed')
+param demoEnabled string
 @description('JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant')
 param additionalAuthTenantIds string
 
@@ -482,7 +499,7 @@ var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
 
 @description('The shared action group for alerts, if action group for alerts has not been set up yet this param value will be empty')
 param actionGroupAlertName string
-var actionGroupAlertId = resourceId(sharedResourceGroupName,'Microsoft.Insights/actionGroups', actionGroupAlertName)
+var actionGroupAlertId = resourceId(sharedResourceGroupName, 'Microsoft.Insights/actionGroups', actionGroupAlertName)
 
 resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   name: '${resourcePrefix}-redis-${uniqueSuffix}'
@@ -535,7 +552,7 @@ resource redisCacheDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01
   }
 }
 
-resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if(!empty(actionGroupAlertName)){
+resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
   name: '${resourcePrefix}-redis-metric-alert'
   location: 'global'
   properties: {
@@ -548,7 +565,7 @@ resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if(!emp
     evaluationFrequency: 'PT1M'
     windowSize: 'PT5M'
     criteria: {
-       'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
+      'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
       allOf: [
         {
           threshold: 80
@@ -1002,6 +1019,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     LIMITED_PHOTO_CAPTURE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedPhotoCaptureSecret) ? limitedPhotoCaptureSecretSecretExisting : limitedPhotoCaptureSecretSecret).properties.secretUri})'
     LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAsyncIssuanceClientSecretSecret.properties.secretUri})'
     LIMITED_ASYNC_ISSUANCE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAsyncIssuanceSecret) ? limitedAsyncIssuanceSecretSecretExisting : limitedAsyncIssuanceSecretSecret).properties.secretUri})'
+    LIMITED_DEMO_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedDemoClientSecretSecret.properties.secretUri})'
     HOME_TENANT_NAME: homeTenantName
     HOME_TENANT_ID: homeTenantId
     HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId
@@ -1011,6 +1029,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
     DEV_TOOLS_ENABLED: devToolsEnabled
     FACE_CHECK_ENABLED: faceCheckEnabled
+    DEMO_ENABLED: demoEnabled
     IDENTITY_ISSUERS: identityIssuers
     PLATFORM_CONSUMER_APPS: platformConsumerApps
     ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds
@@ -1151,9 +1170,8 @@ resource apiAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if 
     }
     actions: [
       {
-        actionGroupId:  actionGroupAlertId
+        actionGroupId: actionGroupAlertId
       }
     ]
   }
 }
-

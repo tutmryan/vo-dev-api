@@ -12,6 +12,7 @@ const {
   limitedApproval,
   limitedPhotoCapture,
   limitedAsyncIssuance,
+  limitedDemo,
 } = nonprod as Config
 
 const config: DeepPartial<Config> = {
@@ -77,6 +78,7 @@ const config: DeepPartial<Config> = {
   limitedApproval,
   limitedPhotoCapture,
   limitedAsyncIssuance,
+  limitedDemo,
   localDev: {
     email: {
       disabled: true,

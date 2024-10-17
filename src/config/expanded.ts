@@ -28,6 +28,11 @@ export const cors: CorsOptions = {
   ...rawCors,
   origin,
 }
+// presentation demo cors - only allow portal origin
+export const presentationDemoCors: CorsOptions = {
+  ...cors,
+  origin: rawCors.origin === true ? true : [new RegExp(`^https://${config.get('instance')}\\.portal\\.verifiedorchestration\\.com$`)],
+}
 
 // internal client credentials configs
 export const callbackAuth: ClientCredentialsConfig = {
@@ -54,6 +59,11 @@ export const limitedAsyncIssuanceAuth: ClientCredentialsConfig = {
   scope: internalScope,
   tokenUrl: platformTokenUrl,
   ...config.get('limitedAsyncIssuance.credentials'),
+}
+export const limitedDemoAuth: ClientCredentialsConfig = {
+  scope: internalScope,
+  tokenUrl: platformTokenUrl,
+  ...config.get('limitedDemo.credentials'),
 }
 
 // VID service client credentials config
@@ -97,6 +107,10 @@ export const pkce: Config['auth']['pkce'] = merge(
 
 // add default home tenant mapping with configured identityIssuers
 export const identityIssuers = { [config.get('homeTenant.tenantId')]: config.get('homeTenant.name'), ...config.get('identityIssuers') }
+
+// add known internal app client labels
+export const platformConsumerApps = { [config.get('limitedDemo.oid')]: 'Portal Demo', ...config.get('platformConsumerApps') }
+
 export const portalUrl = config.has('instance')
   ? `https://${config.get('instance')}.portal.verifiedorchestration.com`
   : config.has('localDevPortalTunnelUri')

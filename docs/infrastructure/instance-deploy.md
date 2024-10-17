@@ -37,6 +37,7 @@ The environment should have deployment protection rules applied (required review
 
 - AUDIT_LOG_STREAMING_ENABLED (optional feature, use a value of `true` to enable provisioning of the Event Hubs and Stream Analytics job)
 - DEV_TOOLS_ENABLED (optional, use `false` to disable developer tools e.g. in production instances, defaults to `true` if not provided)
+- DEMO_ENABLED (optional, use `false` to disable demo features e.g. in production instances, defaults to `true` if not provided)
 - FACE_CHECK_ENABLED (optional, use `false` to disable Face Check feature e.g issuing credentials with face check photo, creating presentation request with face check; defaults to `true` if not provided)
 
 #### Instance configuration variables

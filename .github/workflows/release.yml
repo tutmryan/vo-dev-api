@@ -196,6 +196,7 @@ jobs:
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
           face-check-enabled: ${{ vars.FACE_CHECK_ENABLED }}
+          demo-enabled: ${{ vars.DEMO_ENABLED  }}
           identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
           platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 
@@ -234,6 +235,7 @@ jobs:
           limited-approval-client-secret: ${{ secrets.NON_PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
           limited-photo-capture-client-secret: ${{ secrets.NON_PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
           limited-async-issuance-client-secret: ${{ secrets.NON_PROD_LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET }}
+          limited-demo-client-secret: ${{ secrets.LIMITED_DEMO_CLIENT_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
@@ -356,6 +358,7 @@ jobs:
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
           face-check-enabled: ${{ vars.FACE_CHECK_ENABLED }}
+          demo-enabled: ${{ vars.DEMO_ENABLED  }}
           identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
           platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 
@@ -395,6 +398,7 @@ jobs:
           limited-approval-client-secret: ${{ secrets.PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
           limited-photo-capture-client-secret: ${{ secrets.PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
           limited-async-issuance-client-secret: ${{ secrets.PROD_LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET }}
+          limited-demo-client-secret: ${{ secrets.LIMITED_DEMO_CLIENT_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}

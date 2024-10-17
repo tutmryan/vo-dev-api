@@ -16,6 +16,10 @@ type Features {
   Indicates whether the face check features (i.e. issuing credentials with face check photo, .etc) are available
   """
   faceCheckEnabled: Boolean!
+  """
+  Indicates whether the demo features (i.e limited presentation token, presentation demo page, .etc) are available.
+  """
+  demoEnabled: Boolean!
 }
 
 """

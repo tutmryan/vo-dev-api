@@ -21,12 +21,14 @@ import {
   bearer,
   cookieSession as cookieSessionConfig,
   cors as corsConfig,
+  demoEnabled,
   devToolsEnabled,
   issuanceCallbackRoute,
   pkce,
   presentationCallbackRoute,
 } from './config'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
+import { demoPresentationTokenHandlers, demoPresentationTokenRoute } from './features/demo'
 import { logger } from './logger'
 import { addVoyager } from './voyager'
 
@@ -109,6 +111,11 @@ export const getExpressApp = (): Express => {
     // add voyager
     addVoyager(app)
     logger.info(`Added /voyager`)
+  }
+
+  if (demoEnabled) {
+    app.get(demoPresentationTokenRoute, ...demoPresentationTokenHandlers)
+    logger.info(`Added ${demoPresentationTokenRoute}`)
   }
 
   // add a health check endpoint

@@ -116,6 +116,9 @@ inputs:
   limited-async-issuance-client-secret:
     description: The client secret of the limited async issuance client in Azure AD
     required: true
+  limited-demo-client-secret:
+    description: The client secret of the limited demo client in Azure AD
+    required: true
   home-tenant-id:
     description: The tenant ID of the home tenant
     required: true
@@ -336,6 +339,7 @@ runs:
           limitedPhotoCaptureSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-PHOTO-CAPTURE-SECRET }}
           limitedAsyncIssuanceClientSecret=${{ inputs.limited-async-issuance-client-secret }}
           limitedAsyncIssuanceSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-ASYNC-ISSUANCE-SECRET }}
+          limitedDemoClientSecret=${{ inputs.limited-demo-client-secret }}
           homeTenantId=${{ inputs.home-tenant-id }}
           homeTenantName=${{ inputs.home-tenant-name }}
           homeTenantGraphClientId=${{ inputs.home-tenant-graph-client-id }}
@@ -345,6 +349,7 @@ runs:
           vidAuthorityId=${{ steps.create-vid-authority.outputs.authorityId != '' && steps.create-vid-authority.outputs.authorityId || steps.check-vid-authority.outputs.authorityId}}
           devToolsEnabled=${{ inputs.dev-tools-enabled }}
           faceCheckEnabled=${{ inputs.face-check-enabled }}
+          demoEnabled=${{ inputs.demo-enabled }}
           identityIssuers="${{ inputs.identity-issuers }}"
           platformConsumerApps="${{ inputs.platform-consumer-apps }}"
           additionalAuthTenantIds="${{ inputs.additional-auth-tenant-ids }}"
@@ -532,6 +537,7 @@ runs:
         GRAPHQL_ENDPOINT: https://${{ inputs.instance }}.api.${{ inputs.domain }}
         ADMIN_URL: https://${{ inputs.instance }}.${{ inputs.domain }}
         DEV_TOOLS_ENABLED: ${{ inputs.dev-tools-enabled }}
+        DEMO_ENABLED : ${{ inputs.demo-enabled }}
         API_CLIENT_ID: ${{ steps.add-instance-app-registration.outputs.instanceAppId }}
         INSTANCE: ${{ inputs.instance }}
       run: |

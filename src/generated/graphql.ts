@@ -1292,6 +1292,8 @@ export type FaceCheckValidationInput = {
 /** Specifies which features are enabled for this API instance. */
 export type Features = {
   __typename?: 'Features';
+  /** Indicates whether the demo features (i.e limited presentation token, presentation demo page, .etc) are available. */
+  demoEnabled: Scalars['Boolean']['output'];
   /** Indicates whether the API dev tools (Apollo sandbox, introspection, PKCE) are available. */
   devToolsEnabled: Scalars['Boolean']['output'];
   /** Indicates whether the face check features (i.e. issuing credentials with face check photo, .etc) are available */
@@ -4292,6 +4294,7 @@ export type FaceCheckValidationResolvers<ContextType = GraphQLContext, ParentTyp
 };
 
 export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Features'] = ResolversParentTypes['Features']> = {
+  demoEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   devToolsEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   faceCheckEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   findTenantIdentities?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;

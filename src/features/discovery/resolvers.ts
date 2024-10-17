@@ -1,10 +1,10 @@
-import { devToolsEnabled, faceCheckEnabled } from '../../config'
+import { demoEnabled, devToolsEnabled, faceCheckEnabled } from '../../config'
 import type { Resolvers } from '../../generated/graphql'
 
 export const resolvers: Resolvers = {
   Query: {
     discovery: (_parent, _args, { services: { homeTenantGraph } }) => ({
-      features: { findTenantIdentities: homeTenantGraph.isConfigured, devToolsEnabled, faceCheckEnabled },
+      features: { findTenantIdentities: homeTenantGraph.isConfigured, devToolsEnabled, faceCheckEnabled, demoEnabled },
     }),
   },
 }

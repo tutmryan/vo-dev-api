@@ -56,6 +56,7 @@ export type Config = {
   instance: string
   devToolsEnabled: boolean
   faceCheckEnabled: boolean
+  demoEnabled: boolean
   authorityId: string
   database: {
     host: string
@@ -123,6 +124,11 @@ export type Config = {
     secret?: string
   }
   limitedAsyncIssuance: {
+    credentials: ClientCredentials
+    secret?: string
+  }
+  limitedDemo: {
+    oid: string
     credentials: ClientCredentials
     secret?: string
   }
