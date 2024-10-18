@@ -148,6 +148,9 @@ jobs:
           - instance: demo.increment
             resourceGroup: vo-demo-increment-instance
             resourcePrefix: vo-demo-increment
+          - instance: demo.altleague
+            resourceGroup: vo-demo-altleague-instance
+            resourcePrefix: vo-demo-altleague
     environment:
       name: ${{ matrix.instance }}
       url: ${{ matrix.instance }}.verifiedorchestration.com
