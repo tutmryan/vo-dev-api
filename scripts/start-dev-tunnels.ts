@@ -3,6 +3,7 @@ import ngrok from 'ngrok'
 import * as Path from 'node:path'
 import readline from 'node:readline'
 import open from 'open'
+import openEditor from 'open-editor'
 import YAML from 'yaml'
 
 const pathToApi = `${process.cwd()}`
@@ -163,6 +164,9 @@ const startNgrok = async () => {
     console.log('Enter `p` to open the Portal UI')
     console.log('Enter `n` to open the ngrok dashboard')
     console.log('')
+    console.log('------------------------------------------------')
+    console.log('Enter `e` to edit the Ngrok configuration file')
+    console.log('')
   }
 
   renderUi()
@@ -188,6 +192,19 @@ const startNgrok = async () => {
       case 'n':
         console.log('Opening Ngrok dashboard...')
         open('http://127.0.0.1:4040/').catch(console.error)
+        break
+      case 'e':
+        console.log('Opening Ngrok configuration file...')
+        openEditor(
+          [
+            {
+              file: ngrokConfigPath,
+            },
+          ],
+          {
+            editor: 'code',
+          },
+        )
         break
     }
   })

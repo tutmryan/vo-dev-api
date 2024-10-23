@@ -37,7 +37,8 @@
     "test": "jest",
     "test:ci:start-db": "docker compose up -d && cross-env NODE_ENV=test ts-node scripts/localdev-database-wait",
     "test:ci": "jest --ci --reporters=default --reporters=jest-junit",
-    "start:dev:tunnels": "cross-env ts-node-dev scripts/start-dev-tunnels"
+    "start:dev:tunnels1": "cross-env ts-node-dev scripts/start-dev-tunnels",
+    "start:dev:tunnels": "bun run ./scripts/start-dev-tunnels"
   },
   "repository": {
     "type": "git",
@@ -80,6 +81,7 @@
     "ngrok": "^5.0.0-beta.2",
     "npm-run-all": "^4.1.5",
     "open": "^8.4.2",
+    "open-editor": "^5.0.0",
     "patch-package": "^8.0.0",
     "prettier-2": "npm:prettier@^2",
     "prompt-sync": "^4.2.0",
@@ -87,7 +89,8 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "typeorm-extension": "^3.5.1",
-    "typescript": "5.5.2"
+    "typescript": "5.5.2",
+    "bun": "^1.1.32"
   },
   "dependencies": {
     "@apollo/server": "^4.10.4",
