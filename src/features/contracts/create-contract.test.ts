@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
-import type { ContractInput } from '../../generated/graphql'
+import { ClaimType, type ContractInput } from '../../generated/graphql'
 import {
   beforeAfterAll,
   executeOperationAnonymous,
@@ -111,8 +111,8 @@ describe('createContract mutation', () => {
             },
             consent: { title: 'Updated Consent title' },
             claims: [
-              { claim: 'claim_one', label: 'Claim 1', type: 'String', value: 'Claim 1' },
-              { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Updated claim 2' },
+              { claim: 'claim_one', label: 'Claim 1', type: ClaimType.String, value: 'Claim 1' },
+              { claim: 'claim_two', label: 'Claim 2', type: ClaimType.String, value: 'Updated claim 2' },
             ],
           },
         },
@@ -131,7 +131,7 @@ describe('createContract mutation', () => {
     const input = getDefaultContractInput()
     input.display.claims.push({
       claim: 'claim_name',
-      type: 'String',
+      type: ClaimType.String,
       value: 'Fixed value',
       label: 'Default claim',
     })
@@ -180,8 +180,8 @@ describe('createContract mutation', () => {
           instructions: 'Consent instructions',
         },
         claims: [
-          { claim: 'claim_one', label: 'Claim 1', type: 'String', value: 'Claim 1' },
-          { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
+          { claim: 'claim_one', label: 'Claim 1', type: ClaimType.String, value: 'Claim 1' },
+          { claim: 'claim_two', label: 'Claim 2', type: ClaimType.String, value: 'Claim 2' },
         ],
       },
     }
@@ -207,7 +207,7 @@ describe('createContract mutation', () => {
     const input = getDefaultContractInput()
     input.display.claims.push({
       claim: StandardClaims.name,
-      type: 'String',
+      type: ClaimType.String,
       label: 'Standard name claim',
     })
 

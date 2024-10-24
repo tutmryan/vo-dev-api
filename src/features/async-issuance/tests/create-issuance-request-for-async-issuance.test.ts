@@ -1,7 +1,7 @@
 import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { addDays, addMinutes } from 'date-fns'
-import { AsyncIssuanceRequestExpiry, ContactMethod, FaceCheckPhotoSupport } from '../../../generated/graphql'
+import { AsyncIssuanceRequestExpiry, ClaimType, ContactMethod, FaceCheckPhotoSupport } from '../../../generated/graphql'
 import { beforeAfterAll, expectResponseUnionToBe } from '../../../test'
 import { executeJob } from '../../../test/background-job'
 import { mockedServices } from '../../../test/mocks'
@@ -65,8 +65,8 @@ describe('createIssuanceRequestForAsyncIssuance mutation', () => {
           faceCheckSupport: useFaceCheck || usePhotoCapture ? FaceCheckPhotoSupport.Required : undefined,
           claims: useClaims
             ? [
-                { claim: 'fixed-claim', label: 'fixed-label', type: 'fixed-value', value: 'fixed-value' },
-                { claim: 'unfixed-claim', label: 'unfixed-label', type: 'unfixed-value', value: undefined },
+                { claim: 'fixed-claim', label: 'fixed-label', type: ClaimType.String, value: 'fixed-value' },
+                { claim: 'unfixed-claim', label: 'unfixed-label', type: ClaimType.String, value: undefined },
               ]
             : undefined,
         })

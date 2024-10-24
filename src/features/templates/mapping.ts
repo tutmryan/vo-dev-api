@@ -3,11 +3,13 @@ import type {
   CreateUpdateTemplateDisplayClaimInput,
   CreateUpdateTemplateDisplayModelInput,
   TemplateDisplayModel,
+  TemplateInput,
   TemplateParentData,
 } from '../../generated/graphql'
 import { downloadToDataUrl } from '../../util/data-url'
 import { findKeysIntersection } from '../../util/intersection'
 import { pruneNil } from '../../util/prune-nil'
+import { convertToClaimValidation } from '../contracts/mapping'
 import type { TemplateEntity } from './entities/template-entity'
 
 /**
@@ -75,4 +77,35 @@ export function toPersistedDisplayModel(
   const persistedModel = omit(toDisplayModel(input), 'card.logo.image')
   if (displayLogoUri) merge(persistedModel, { card: { logo: { uri: displayLogoUri } } })
   return persistedModel as TemplateEntity['display']
+}
+
+export function toTemplateParentDataFromInput(
+  input: TemplateInput,
+): Pick<TemplateParentData, 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes' | 'faceCheckSupport'> {
+  return {
+    isPublic: input.isPublic ?? null,
+    validityIntervalInSeconds: input.validityIntervalInSeconds ?? null,
+    credentialTypes: input.credentialTypes ?? [],
+    faceCheckSupport: input.faceCheckSupport ?? null,
+    display: convertToTemplateDisplayModel(input.display),
+  }
+}
+
+function convertToTemplateDisplayModel(displayInput?: CreateUpdateTemplateDisplayModelInput | null): TemplateDisplayModel | null {
+  if (!displayInput) return null
+
+  return {
+    ...displayInput,
+    card: {
+      ...displayInput.card,
+      logo: {
+        image: displayInput.card?.logo?.image ?? '',
+        description: displayInput.card?.logo?.description ?? '',
+      },
+    },
+    claims: displayInput.claims?.map((claim) => ({
+      ...claim,
+      validation: convertToClaimValidation(claim.validation),
+    })),
+  }
 }

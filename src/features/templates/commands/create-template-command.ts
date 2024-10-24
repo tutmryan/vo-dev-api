@@ -5,7 +5,7 @@ import { isFaceCheckSupportEnabled, registerFeatureCheck } from '../../../cqs/fe
 import { type TemplateInput } from '../../../generated/graphql'
 import { validateTemplateInput } from '../../contracts/validation'
 import { TemplateEntity } from '../entities/template-entity'
-import { ensureNoIntersectingTemplateData, toPersistedDisplayModel, toTemplateParentData } from '../mapping'
+import { ensureNoIntersectingTemplateData, toPersistedDisplayModel, toTemplateParentData, toTemplateParentDataFromInput } from '../mapping'
 
 registerFeatureCheck(CreateTemplateCommand, async (...[, input]) => isFaceCheckSupportEnabled(input))
 
@@ -18,7 +18,7 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
 
   if (parent) {
     const parentData = merge({}, toTemplateParentData(parent), await parent.parentData())
-    await ensureNoIntersectingTemplateData(toTemplateParentData(input), parentData)
+    await ensureNoIntersectingTemplateData(toTemplateParentDataFromInput(input), parentData)
   }
 
   const templateId = randomUUID().toUpperCase()
