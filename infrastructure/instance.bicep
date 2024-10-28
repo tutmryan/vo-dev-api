@@ -857,6 +857,9 @@ resource oidcBlobContainer 'Microsoft.Storage/storageAccounts/blobServices/conta
 resource privateStorageDeletePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2023-01-01' = {
   name: 'default'
   parent: privateStorageAccount
+  dependsOn: [
+    verifiedOrchestrationPrivateStorageBlobService
+  ]
   properties: {
     policy: {
       rules: [
