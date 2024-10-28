@@ -31,6 +31,7 @@ export const revokeIssuances = async (
     services: { verifiedIdAdmin },
     user,
   } = context
+  invariant(user, 'User is required in worker context for revoking issuances')
   const issuances = await dataSource.getRepository(IssuanceEntity).find({ where })
 
   for (let index = 0; index < issuances.length; index++) {

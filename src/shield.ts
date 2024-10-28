@@ -33,6 +33,11 @@ import {
   isValidCreateIssuanceRequestForAsyncIssuanceRequest,
   isValidLimitedAsyncIssuanceIssuanceFilter,
 } from './features/limited-async-issuance-tokens/shield-rules'
+import {
+  isOidcAuthnClient,
+  isValidOidcAuthnPresentationFilter,
+  isValidOidcAuthnPresentationRequest,
+} from './features/oidc-provider/shield-rules'
 import { isValidCapturePhoto, isValidLimitedIssuancePhotoCaptureRequest } from './features/photo-capture/shield-rules'
 import type { Resolvers } from './generated/graphql'
 import { AppRoles, UserRoles } from './roles'
@@ -59,6 +64,7 @@ const fallbackRule = or(
   isLimitedAccessApp,
   isLimitedApprovalApp,
   isLimitedAsyncIssuanceApp,
+  isOidcAuthnClient,
 )
 
 // issuance and presentation access rules
@@ -73,6 +79,7 @@ const isAllowedToViewPresentations = or(
   isPresentationApp,
   isValidLimitedAccessPresentationFilter,
   isValidLimitedApprovalPresentationFilter,
+  isValidOidcAuthnPresentationFilter,
 )
 export const rules: ShieldSchema<Resolvers> = {
   Query: {
@@ -101,6 +108,7 @@ export const rules: ShieldSchema<Resolvers> = {
     createIssuanceRequest: or(isIssuerUser, isIssuanceApp, isValidLimitedIssuanceRequest),
     createIssuanceRequestForAsyncIssuance: isValidCreateIssuanceRequestForAsyncIssuanceRequest,
     createPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedPresentationRequest),
+    createPresentationRequestForAuthn: isValidOidcAuthnPresentationRequest,
     saveIdentity: or(
       isIssuerUser,
       isIssuanceApp,
@@ -133,7 +141,14 @@ export const rules: ShieldSchema<Resolvers> = {
       isCredentialAdminUser,
       and(
         requestIdFilterDefined,
-        or(isUserWithReadPermissions, isPresentationApp, isLimitedPresentationApp, isLimitedAnonymousPresentationApp, isLimitedApprovalApp),
+        or(
+          isUserWithReadPermissions,
+          isPresentationApp,
+          isLimitedPresentationApp,
+          isLimitedAnonymousPresentationApp,
+          isLimitedApprovalApp,
+          isOidcAuthnClient,
+        ),
       ),
     ),
     issuanceEvent: or(
@@ -154,6 +169,7 @@ export const rules: ShieldSchema<Resolvers> = {
       isPresentationApp,
       hasTokenAcquisitionRoleRequiringIdentityAccess,
       isLimitedAccessApp,
+      isOidcAuthnClient,
     ),
   },
   AccessTokenResponse: {

@@ -32,5 +32,8 @@ export async function CreatePresentationRequestForApprovalCommand(
     },
   }
 
-  return await CreatePresentationRequestCommand.apply(this, [presentationRequestInput, getLimitedApprovalKey(user.token)])
+  return await CreatePresentationRequestCommand.apply(this, [
+    presentationRequestInput,
+    { limitedApprovalKey: getLimitedApprovalKey(user.token) },
+  ])
 }

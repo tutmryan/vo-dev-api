@@ -13,6 +13,7 @@ const {
   limitedPhotoCapture,
   limitedAsyncIssuance,
   limitedDemo,
+  limitedOidcClient,
 } = nonprod as Config
 
 const config: DeepPartial<Config> = {
@@ -79,6 +80,7 @@ const config: DeepPartial<Config> = {
   limitedPhotoCapture,
   limitedAsyncIssuance,
   limitedDemo,
+  limitedOidcClient,
   localDev: {
     tunnel: {
       api: '',

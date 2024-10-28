@@ -1,0 +1,160 @@
+<script type="text/javascript">
+  const isMobile = /Android|iPhone/i.test(navigator.userAgent)
+
+  let client
+  window.onload = function () {
+    client = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
+      url: '<%- graphqlUrl %>',
+      accessToken: '<%- presentationAccessToken %>',
+    })
+    const request = <%- JSON.stringify(presentationRequest) %>
+    client
+      .createPresentationRequestForAuthn(request, handlePresentationEvent)
+      .then(handlePresentation)
+      .catch(displayError)
+  }
+
+  function handlePresentation(response) {
+    if ('error' in response) {
+      displayError(response.error)
+      return
+    }
+    displayPresentationResponse(response)
+  }
+
+  function displayPresentationResponse({ requestId, qrCode, url }) {
+    document.querySelector('input[name="requestId"]').value = requestId;
+    if (isMobile) {
+      window.location.href = url
+      displayMobile(url)
+    } else {
+      displayDesktop(qrCode, url)
+    }
+    setTimeout(handleTimeout, 5 * 60 * 1000)
+  }
+
+  function handlePresentationEvent(data) {
+    if (data instanceof Error || data.event.requestStatus === 'presentation_error') {
+      displayError(data ?? { message: 'Presentation failed.' })
+    } else if (data.event.requestStatus === 'request_retrieved') {
+      displayProgress('Scanned, waiting for presentation...')
+    } else {
+      displayFinish()
+      document.querySelector('form').submit();
+    }
+  }
+
+  function displayMobile(url) {
+    hide(document.querySelector('#progress'))
+    show(document.querySelector('#mobile'))
+    document.querySelector('#openUrl').addEventListener('click', () => window.location.href = url)
+  }
+
+  function displayDesktop(qrCode, url) {
+    hide(document.querySelector('#progress'))
+    show(document.querySelector('#desktop'))
+    displayQrCode(qrCode, url)
+  }
+
+  function displayQrCode(src, url) {
+    const el = document.querySelector('#qrCode')
+    el.src = src
+    el.alt = url
+    setTimeout(() => el.style.opacity = 1, 100)
+  }
+
+  function handleTimeout() {
+    hide(document.querySelectorAll('#desktop, #mobile, #progress'))
+    displayError({ message: 'QR code expired, please cancel and try again.' })
+  }
+
+  function displayProgress(progress) {
+    hide(document.querySelectorAll('#desktop, #mobile, #error'))
+    document.querySelector('#progressText').textContent = progress
+    show(document.querySelector('#progress'))
+  }
+
+  function displayFinish() {
+    hide(document.querySelector('#progress, #desktop, #mobile, #error'))
+    show(document.querySelector('#finish'))
+  }
+
+  function displayError(error) {
+    hide(document.querySelectorAll('#desktop, #mobile, #progress'))
+    document.querySelector('#errorText').textContent = `${error?.message ?? error}`
+    show(document.querySelector('#error'))
+  }
+
+  function hide(selectors) {
+    if (!selectors.length) selectors = [selectors]
+    selectors.forEach(el => el.classList.add('d-none'))
+  }
+
+  function show(selectors) {
+    if (!selectors.length) selectors = [selectors]
+    selectors.forEach(el => el.classList.remove('d-none'))
+  }
+
+</script>
+
+<div id="progress" class="alert alert-info d-flex align-items-center" role="alert">
+  <div class="spinner-border spinner-border-md text-primary me-3" role="status"></div>
+  <div class="fw-light" id="progressText">
+    Generating QR code...
+  </div>
+</div>
+
+<div id="desktop" class="d-none">
+  <img id="qrCode" class="rounded mx-auto d-block img-thumbnail mb-3"
+    style="height:auto; width:100%; max-height:100%; object-fit:contain; aspect-ratio:1/1; opacity:0; transition: opacity 1000ms ease-in-out;" />
+  <div class="alert alert-info d-flex align-items-center" role="alert">
+    <div class="text-primary me-3"><i class="bi-info-square text-primary" style="font-size: 2rem;"></i></div>
+    <div class="fw-light">
+      Scan this QR code on your phone to sign in with a credential from <a
+        class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+        href="https://www.microsoft.com/en-au/security/mobile-authenticator-app" target="_blank">Microsoft Authenticator
+      </a>.
+      <br />The QR code will expire in 5 minutes.
+    </div>
+  </div>
+</div>
+
+<div id="mobile" class="d-none">
+  <div class="text-center mb-3"><button id="openUrl" type="button" class="btn btn-primary">Present Credential <i
+        class="ms-2 bi-arrow-up-right-square"></i></button></div>
+  <div class="alert alert-info d-flex align-items-center" role="alert">
+    <div class="text-primary me-3"><i class="bi-info-square text-primary" style="font-size: 2rem;"></i></div>
+    <div class="fw-light">
+      Sign in by presenting a credential from <a
+        class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
+        href="https://www.microsoft.com/en-au/security/mobile-authenticator-app" target="_blank">Microsoft Authenticator
+      </a>.
+      <br />The link will expire in 5 minutes.
+    </div>
+  </div>
+</div>
+
+<div id="finish" class="alert alert-success d-flex align-items-center d-none" role="alert">
+  <div class="spinner-border spinner-border-md text-primary me-3" role="status"></div>
+  <div class="fw-light">
+    Presentation received.
+    <br />Signing you in...
+  </div>
+  <div class="ms-auto"></div>
+  <div class="text-success me-3"><i class="bi-check2-all text-success" style="font-size: 2rem;"></i></div>
+</div>
+
+<div id="error" class="alert alert-danger d-flex align-items-center d-none" role="alert">
+  <div class="text-primary me-3"><i class="bi-exclamation-circle text-danger" style="font-size: 2rem;"></i></div>
+  <div class="fw-light" id="errorText">
+  </div>
+</div>
+
+<form autocomplete="off" action="/oidc/interaction/<%= uid %>/login" method="post">
+  <input type="hidden" name="requestId" />
+</form>
+
+<script type="text/javascript">
+  displayProgress(isMobile ? 'Generating presentation link...' : 'Generating QR code...')
+</script>
+<script type="text/javascript" src="https://unpkg.com/@verified-orchestration/client-js/index.min.js"></script>

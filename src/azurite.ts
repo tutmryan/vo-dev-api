@@ -10,9 +10,15 @@ export async function initializeAzurite() {
   )
   await blobStorageClient.createIfNotExists({ access: 'blob' })
 
-  const privateBlobStorageClient = new ContainerClient(
+  const asyncIssuanceBlobStorageClient = new ContainerClient(
     [privateBlobStorage.url, privateBlobStorage.asyncIssuanceContainer].join('/'),
     new StorageSharedKeyCredential(privateBlobStorage.credentials.accountName, privateBlobStorage.credentials.accountKey),
   )
-  await privateBlobStorageClient.createIfNotExists({ access: 'blob' })
+  await asyncIssuanceBlobStorageClient.createIfNotExists({ access: 'blob' })
+
+  const oidcAccountsBlobStorageClient = new ContainerClient(
+    [privateBlobStorage.url, privateBlobStorage.oidcContainer].join('/'),
+    new StorageSharedKeyCredential(privateBlobStorage.credentials.accountName, privateBlobStorage.credentials.accountKey),
+  )
+  await oidcAccountsBlobStorageClient.createIfNotExists({ access: 'blob' })
 }

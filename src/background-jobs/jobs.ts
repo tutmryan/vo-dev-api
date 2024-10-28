@@ -22,6 +22,11 @@ import type { RevokeIssuancesJobName, RevokeIssuancesJobType } from '../features
 import { revokeIssuancesJobHandler } from '../features/issuance/jobs/revoke-issuances'
 import type { RevokeUserIssuancesJobName, RevokeUserIssuancesJobType } from '../features/issuance/jobs/revoke-user-issuances'
 import { revokeUserIssuancesJobHandler } from '../features/issuance/jobs/revoke-user-issuances'
+import {
+  initializeKeysJobHandler,
+  type InitializeKeysJobName,
+  type InitializeKeysJobType,
+} from '../features/oidc-provider/jobs/initialize-keys-job-handler'
 import type { UserEntity } from '../features/users/entities/user-entity'
 import type { logger } from '../logger'
 import type { Services } from '../services'
@@ -29,19 +34,21 @@ import type { PartialRecord } from '../util/partial-record'
 
 export type WorkerContext = {
   logger: typeof logger
-  user: UserEntity
+  user?: UserEntity
   services: Pick<Services, 'verifiedIdAdmin' | 'asyncIssuances' | 'communications'>
 }
 
-export interface JobPayload {
-  userId: string
-  requestId?: string
-}
+export type JobPayload =
+  | undefined
+  | {
+      userId: string
+      requestId?: string
+    }
 
 export type JobHandler<TPayload extends JobPayload = JobPayload> = (context: WorkerContext, job: Job<TPayload>) => Promise<void>
 
 type HandlerMap<T extends { name: JobNames }> = {
-  [J in T as J['name']]?: JobHandler<any>
+  [J in T as J['name']]?: JobHandler<any | never>
 }
 
 export type JobNames =
@@ -52,6 +59,7 @@ export type JobNames =
   | InvokeApprovalCallbackJobName
   | SendAsyncIssuanceNotificationsJobName
   | CancelAsyncIssuanceRequestsJobName
+  | InitializeKeysJobName
 
 export type JobTypes =
   | RevokeIssuancesJobType
@@ -61,6 +69,7 @@ export type JobTypes =
   | InvokeApprovalCallbackJobType
   | SendAsyncIssuanceNotificationsJobType
   | CancelAsyncIssuanceRequestsJobType
+  | InitializeKeysJobType
 
 export const handlers: HandlerMap<JobTypes> = {
   revokeIssuances: revokeIssuancesJobHandler,
@@ -70,6 +79,7 @@ export const handlers: HandlerMap<JobTypes> = {
   invokeApprovalCallback: invokeApprovalCallbackJobHandler,
   sendAsyncIssuanceNotifications: sendAsyncIssuanceNotificationsJobHandler,
   cancelAsyncIssuanceRequests: cancelAsyncIssuanceRequestsHandler,
+  initializeOidcKeys: initializeKeysJobHandler,
 }
 
 // override default job options for specific job handlers

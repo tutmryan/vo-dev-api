@@ -1,0 +1,44 @@
+"""
+Input type for creating a new presentation request for authorization.
+"""
+input PresentationRequestForAuthnInput {
+  """
+  Optional collection of credentials that can be presented for authentication.
+
+  Items of note:
+  - If provided, values must match what is permitted by the OIDC client configuration.
+  - If not provided, the OIDC client configuration default will be used.
+  """
+  requestedCredentials: [AuthnRequestCredential!]
+}
+
+"""
+Specifes which credential can be presented for authentication.
+"""
+input AuthnRequestCredential {
+  """
+  The verifiable credential type.
+  The type must match the type as defined in the issuer verifiable credential manifest.
+  """
+  type: String!
+  """
+  A collection of issuers' DIDs that could issue the type of verifiable credential that subjects can present.
+  If not specified, the Verified Orchestration platform issuer DID will be used.
+  This field should only be used when requesting credentials from external issuers.
+  """
+  acceptedIssuers: [String!]
+  """
+  Optional settings for presentation validation.
+  """
+  configuration: RequestConfiguration
+}
+
+extend type Mutation {
+  """
+  Creates a new presentation request for authorization.
+
+  Item of note:
+  - This operation is only for use by the OIDC provider login UI.
+  """
+  createPresentationRequestForAuthn(request: PresentationRequestForAuthnInput): PresentationRequestResponse!
+}

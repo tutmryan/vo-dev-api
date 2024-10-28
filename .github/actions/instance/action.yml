@@ -118,6 +118,8 @@ inputs:
     required: true
   limited-demo-client-secret:
     description: The client secret of the limited demo client in Azure AD
+  limited-oidc-client-secret:
+    description: The client secret of the limited OIDC client in Azure AD
     required: true
   home-tenant-id:
     description: The tenant ID of the home tenant
@@ -292,6 +294,7 @@ runs:
         LIMITED-APPROVAL-SECRET:hex:16
         LIMITED-PHOTO-CAPTURE-SECRET:hex:16
         LIMITED-ASYNC-ISSUANCE-SECRET:hex:16
+        LIMITED-OIDC-SECRET:hex:16
         PRIVATE-STORAGE-ENCRYPTION-KEY:hex:32
 
     - name: Check if a action group for alerts has been created
@@ -340,6 +343,8 @@ runs:
           limitedAsyncIssuanceClientSecret=${{ inputs.limited-async-issuance-client-secret }}
           limitedAsyncIssuanceSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-ASYNC-ISSUANCE-SECRET }}
           limitedDemoClientSecret=${{ inputs.limited-demo-client-secret }}
+          limitedOidcClientSecret=${{ inputs.limited-oidc-client-secret }}
+          limitedOidcSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-OIDC-SECRET }}
           homeTenantId=${{ inputs.home-tenant-id }}
           homeTenantName=${{ inputs.home-tenant-name }}
           homeTenantGraphClientId=${{ inputs.home-tenant-graph-client-id }}

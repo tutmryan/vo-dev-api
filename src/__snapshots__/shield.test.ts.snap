@@ -183,6 +183,18 @@ exports[`shield rules are setup correctly 1`] = `
               "cache": "strict"
             }
           ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual"
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
         }
       ]
     },
@@ -395,6 +407,18 @@ exports[`shield rules are setup correctly 1`] = `
               "cache": "strict"
             }
           ]
+        }
+      ]
+    },
+    "createPresentationRequestForAuthn": {
+      "rulesAnd": [
+        {
+          "name": "isOidcAuthnClient",
+          "cache": "contextual"
+        },
+        {
+          "name": "isValidOidcAuthnPresentationRequest",
+          "cache": "strict"
         }
       ]
     },
@@ -663,6 +687,10 @@ exports[`shield rules are setup correctly 1`] = `
                 {
                   "name": "isLimitedApprovalApp",
                   "cache": "contextual"
+                },
+                {
+                  "name": "isOidcAuthnClient",
+                  "cache": "contextual"
                 }
               ]
             }
@@ -841,6 +869,18 @@ exports[`shield rules are setup correctly 1`] = `
               "cache": "strict"
             }
           ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual"
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
         }
       ]
     }
@@ -866,6 +906,10 @@ exports[`shield rules are setup correctly 1`] = `
         },
         {
           "name": "isLimitedAccessApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "isOidcAuthnClient",
           "cache": "contextual"
         }
       ]

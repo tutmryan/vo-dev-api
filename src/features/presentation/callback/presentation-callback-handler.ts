@@ -5,10 +5,12 @@ import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { createVerifiedIdAdminService } from '../../../services'
+import { invariant } from '../../../util/invariant'
 import type { PresentationCallbackHandler } from '../../callback'
 import { StandardClaims } from '../../contracts/claims'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { getLimitedApprovalDataByKey, setLimitedApprovalDataByKey } from '../../limited-approval-tokens'
+import { getInteractionId, getLoginInteractionData, setLoginInteractionData } from '../../oidc-provider/session'
 import { PartnerEntity } from '../../partners/entities/partner-entity'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import type { PresentedData } from '../entities/presentation-entity'
@@ -30,7 +32,7 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     return
   }
 
-  const { limitedApprovalKey, ...presentationRequestDetails } = JSON.parse(requestDetails) as PresentationRequestDetails
+  const { limitedApprovalKey, authnSessionKey, ...presentationRequestDetails } = JSON.parse(requestDetails) as PresentationRequestDetails
 
   // presentation event data will contain everything, including claims
   const topicData: PresentationTopicData = { ...presentationRequestDetails, event }
@@ -97,6 +99,20 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     if (limitedApprovalKey) {
       const limitedApprovalData = await getLimitedApprovalDataByKey(limitedApprovalKey)
       await setLimitedApprovalDataByKey(limitedApprovalKey, { ...limitedApprovalData, presentationId: id })
+    }
+
+    // if this presentation is for a login flow, set the login interaction data to complete along with the presentation ID
+    if (authnSessionKey) {
+      const interactionId = await getInteractionId(authnSessionKey)
+      invariant(interactionId, 'Interaction session not found')
+      const loginInteractionData = await getLoginInteractionData(interactionId)
+      invariant(loginInteractionData, 'Login data for session not found')
+      invariant(
+        loginInteractionData.state === 'in-progress' && loginInteractionData.requestId === event.requestId,
+        'Invalid login interaction state for presentation',
+      )
+      await setLoginInteractionData({ ...loginInteractionData, state: 'complete', presentationId: id })
+      // TODO: save reference to auth client on the presentation
     }
 
     logger.audit('Presentation complete', { presentation: presentationEntity })

@@ -20,6 +20,7 @@ const serviceMock: ServiceMock<BlobStorageContainerService> = {
   getProperties: mockFunction<BlobStorageContainerService['getProperties']>(),
   containerClient: mockFunction<BlobStorageContainerService['containerClient']>(),
   exists: mockFunction<BlobStorageContainerService['exists']>(),
+  listAllBlobsFlat: mockFunction<BlobStorageContainerService['listAllBlobsFlat']>(),
 }
 
 jest.mock('../blob-storage-container-service', () => ({

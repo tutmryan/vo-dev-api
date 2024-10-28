@@ -57,6 +57,7 @@ export type Config = {
   devToolsEnabled: boolean
   faceCheckEnabled: boolean
   demoEnabled: boolean
+  oidcEnabled: boolean
   authorityId: string
   database: {
     host: string
@@ -79,6 +80,7 @@ export type Config = {
     url: string
     credentials?: BlobStorageCredentials
     asyncIssuanceContainer: string
+    oidcContainer: string
     clientEncryptionKey: string
   }
   sms: {
@@ -129,6 +131,10 @@ export type Config = {
   }
   limitedDemo: {
     oid: string
+    credentials: ClientCredentials
+    secret?: string
+  }
+  limitedOidcClient: {
     credentials: ClientCredentials
     secret?: string
   }

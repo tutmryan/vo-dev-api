@@ -15,6 +15,7 @@ const serviceMock: ServiceMock<AsyncIssuanceService> = {
   deleteIfExists: mockFunction<AsyncIssuanceService['deleteIfExists']>(),
   uploadDataUrl: mockFunction<AsyncIssuanceService['uploadDataUrl']>(),
   exists: mockFunction<AsyncIssuanceService['exists']>(),
+  listAllBlobsFlat: mockFunction<AsyncIssuanceService['listAllBlobsFlat']>(),
 }
 
 jest.mock('../async-issuance-service', () => ({

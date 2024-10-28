@@ -16,9 +16,9 @@ import { defaultJobOptions, JobQueueName } from './queue'
 
 type BackgroundJob = Job<JobPayload>
 
-export const createWorkerContext = async (userId: string): Promise<WorkerContext> => ({
+export const createWorkerContext = async (userId?: string): Promise<WorkerContext> => ({
   logger,
-  user: await dataSource.getRepository(UserEntity).findOneByOrFail({ id: userId }),
+  user: userId ? await dataSource.getRepository(UserEntity).findOneByOrFail({ id: userId }) : undefined,
   services: {
     verifiedIdAdmin: createVerifiedIdAdminService(logger),
     asyncIssuances: new AsyncIssuanceService(),
@@ -32,7 +32,7 @@ export const worker = Lazy(() => {
     async (job: BackgroundJob) => {
       const handler = handlers[job.name as JobNames]
       if (handler) {
-        const context = await createWorkerContext(job.data.userId)
+        const context = await createWorkerContext(job.data?.userId)
         await handler(context, job)
       }
     },
@@ -40,7 +40,12 @@ export const worker = Lazy(() => {
   )
 
   worker.on('active', (job: BackgroundJob) => {
-    publishBackgroundJobEvent({ event: { status: BackgroundJobStatus.Active }, jobId: job.id!, jobName: job.name, userId: job.data.userId })
+    publishBackgroundJobEvent({
+      event: { status: BackgroundJobStatus.Active },
+      jobId: job.id!,
+      jobName: job.name,
+      userId: job.data?.userId,
+    })
     logger.info(`Job (id: ${job.id}) is active.`)
   })
 
@@ -49,7 +54,7 @@ export const worker = Lazy(() => {
       event: { status: BackgroundJobStatus.Progress, progress: progress as number },
       jobId: job.id!,
       jobName: job.name,
-      userId: job.data.userId,
+      userId: job.data?.userId,
     })
     logger.info(`Job (id: ${job.id}) is in progress: ${progress}`, progress)
   })
@@ -59,7 +64,7 @@ export const worker = Lazy(() => {
       event: { status: BackgroundJobStatus.Completed, result: result },
       jobId: job.id!,
       jobName: job.name,
-      userId: job.data.userId,
+      userId: job.data?.userId,
     })
     logger.info(`Job (id: ${job.id}) is completed.`, result)
   })
@@ -77,7 +82,7 @@ export const worker = Lazy(() => {
         },
         jobId: job.id!,
         jobName: job.name,
-        userId: job.data.userId,
+        userId: job.data?.userId,
       })
     }
     logger.error(`Job (id: ${job?.id}) failed after attempt ${job?.attemptsMade}.`, error)

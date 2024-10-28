@@ -65,6 +65,9 @@ const config: DeepPartial<Config> = {
     oid: 'TEST_LIMITED_DEMO_OID',
     credentials: {},
   },
+  limitedOidcClient: {
+    credentials: {},
+  },
 }
 
 module.exports = config

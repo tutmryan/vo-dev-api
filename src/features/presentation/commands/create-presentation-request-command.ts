@@ -12,16 +12,16 @@ import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { PartnerEntity } from '../../partners/entities/partner-entity'
 import type { PresentationEntity } from '../entities/presentation-entity'
 
-export type PresentationRequestDetails = Pick<PresentationEntity, 'requestedById' | 'identityId' | 'requestedCredentials'> & {
-  limitedApprovalKey?: string
-}
+export type PresentationRequestDetails = Pick<PresentationEntity, 'requestedById' | 'identityId' | 'requestedCredentials'> &
+  PresentationContext
+type PresentationContext = { limitedApprovalKey?: string; authnSessionKey?: string }
 
 registerFeatureCheck(CreatePresentationRequestCommand, async (...[, input]) => isFaceCheckPresentationEnabled(input))
 
 export async function CreatePresentationRequestCommand(
   this: CommandContext,
   { identityId, identity: identityInput, ...presentationRequest }: PresentationRequestInput,
-  limitedApprovalKey?: string,
+  context?: PresentationContext,
 ) {
   const {
     user,
@@ -86,7 +86,7 @@ export async function CreatePresentationRequestCommand(
     requestedById: user.userEntity.id.toUpperCase(),
     identityId: identity?.id.toUpperCase() ?? null,
     requestedCredentials: presentationRequest.requestedCredentials,
-    limitedApprovalKey,
+    ...context,
   }
   await requestDetailsCache.set(response.requestId, JSON.stringify(requestDetails), {
     ttl: REQUEST_CACHE_TTL,

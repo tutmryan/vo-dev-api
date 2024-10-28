@@ -23,6 +23,14 @@
     "https://json.schemastore.org/github-action.json": "/.github/actions/**/*.yml"
   },
   "files.associations": {
-    "*.mdx": "markdown"
+    "*.mdx": "markdown",
+    "*.ejs": "html"
+  },
+  "emmet.includeLanguages": {
+    "ejs": "html"
+  },
+  "html.format.templating": true,
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
   }
 }

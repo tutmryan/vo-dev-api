@@ -33,6 +33,7 @@ const config: EnvVarSubstitution<Config> = {
   devToolsEnabled: json('DEV_TOOLS_ENABLED'),
   faceCheckEnabled: json('FACE_CHECK_ENABLED'),
   demoEnabled: json('DEMO_ENABLED'),
+  oidcEnabled: json('OIDC_ENABLED'),
   authorityId: 'VID_AUTHORITY_ID',
   database: {
     host: 'DATABASE_HOST',
@@ -126,6 +127,12 @@ const config: EnvVarSubstitution<Config> = {
     credentials: {
       clientSecret: 'LIMITED_DEMO_CLIENT_SECRET',
     },
+  },
+  limitedOidcClient: {
+    credentials: {
+      clientSecret: 'LIMITED_OIDC_CLIENT_SECRET',
+    },
+    secret: 'LIMITED_OIDC_SECRET',
   },
   callbackCredentials: {
     clientId: 'VID_CALLBACK_CLIENT_ID',

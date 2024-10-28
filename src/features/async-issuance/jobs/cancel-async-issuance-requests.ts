@@ -3,6 +3,7 @@ import { type FindOptionsWhere, In } from 'typeorm'
 import type { JobHandler, JobPayload, WorkerContext } from '../../../background-jobs/jobs'
 import type { JobType } from '../../../background-jobs/queue'
 import { dataSource, ISOLATION_LEVEL } from '../../../data'
+import { invariant } from '../../../util/invariant'
 import { addUserToManager } from '../../auditing/user-context-helper'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 import { convertAsyncIssuanceExpiryDaysToRequestExpiry } from '../index'
@@ -21,6 +22,7 @@ const cancelAsyncIssuanceRequests = async (job: Job, context: WorkerContext, whe
     user,
     services: { asyncIssuances },
   } = context
+  invariant(user, 'User is required in worker context for cancelling async issuances')
   const requests = await dataSource.getRepository(AsyncIssuanceEntity).find({ where })
 
   for (let i = 0; i < requests.length; i++) {

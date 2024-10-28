@@ -530,6 +530,23 @@ export type AsyncIssuanceTokenResponse = {
   token: Scalars['String']['output'];
 };
 
+/** Specifes which credential can be presented for authentication. */
+export type AuthnRequestCredential = {
+  /**
+   * A collection of issuers' DIDs that could issue the type of verifiable credential that subjects can present.
+   * If not specified, the Verified Orchestration platform issuer DID will be used.
+   * This field should only be used when requesting credentials from external issuers.
+   */
+  acceptedIssuers?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** Optional settings for presentation validation. */
+  configuration?: InputMaybe<RequestConfiguration>;
+  /**
+   * The verifiable credential type.
+   * The type must match the type as defined in the issuer verifiable credential manifest.
+   */
+  type: Scalars['String']['input'];
+};
+
 /** A configured authority or verifiable credential service instance */
 export type Authority = {
   __typename?: 'Authority';
@@ -1322,7 +1339,7 @@ export type FaceCheckValidationInput = {
 /** Specifies which features are enabled for this API instance. */
 export type Features = {
   __typename?: 'Features';
-  /** Indicates whether the demo features (i.e limited presentation token, presentation demo page, .etc) are available. */
+  /** Indicates whether the demo features (presentation demo page, authn demo page, .etc) are available. */
   demoEnabled: Scalars['Boolean']['output'];
   /** Indicates whether the API dev tools (Apollo sandbox, introspection, PKCE) are available. */
   devToolsEnabled: Scalars['Boolean']['output'];
@@ -1330,6 +1347,8 @@ export type Features = {
   faceCheckEnabled: Scalars['Boolean']['output'];
   /** Indicates whether the API instance is configured to support finding home tenant identities via the findTenantIdentities query. */
   findTenantIdentities: Scalars['Boolean']['output'];
+  /** Indicates whether the OIDC provider is available. */
+  oidcEnabled: Scalars['Boolean']['output'];
 };
 
 /** Float claim validation. */
@@ -1880,6 +1899,13 @@ export type Mutation = {
   createPresentationRequest: PresentationRequestResponse;
   /** The result of this request returns a QR code with a link to start the presentation process, or an error */
   createPresentationRequestForApproval: PresentationRequestResponse;
+  /**
+   * Creates a new presentation request for authorization.
+   *
+   * Item of note:
+   * - This operation is only for use by the OIDC provider login UI.
+   */
+  createPresentationRequestForAuthn: PresentationRequestResponse;
   /** Creates a new template */
   createTemplate: Template;
   /** Deletes an existing contract. Only possible when the contract has not yet been provisioned. */
@@ -2034,6 +2060,11 @@ export type MutationCreatePresentationRequestArgs = {
 export type MutationCreatePresentationRequestForApprovalArgs = {
   approvalRequestId: Scalars['ID']['input'];
   input?: InputMaybe<CreatePresentationRequestForApprovalInput>;
+};
+
+
+export type MutationCreatePresentationRequestForAuthnArgs = {
+  request?: InputMaybe<PresentationRequestForAuthnInput>;
 };
 
 
@@ -2419,6 +2450,18 @@ export enum PresentationOrderBy {
   /** The name of the user (Person or Application) that requested & received the presentation data. */
   RequestedByName = 'requestedByName'
 }
+
+/** Input type for creating a new presentation request for authorization. */
+export type PresentationRequestForAuthnInput = {
+  /**
+   * Optional collection of credentials that can be presented for authentication.
+   *
+   * Items of note:
+   * - If provided, values must match what is permitted by the OIDC client configuration.
+   * - If not provided, the OIDC client configuration default will be used.
+   */
+  requestedCredentials?: InputMaybe<Array<AuthnRequestCredential>>;
+};
 
 /** The presentation request payload contains information about your verifiable credentials presentation request. */
 export type PresentationRequestInput = {
@@ -3791,6 +3834,7 @@ export type ResolversTypes = {
   AsyncIssuanceRequestsWhere: AsyncIssuanceRequestsWhere;
   AsyncIssuanceResponse: ResolverTypeWrapper<AsyncIssuanceResponse>;
   AsyncIssuanceTokenResponse: ResolverTypeWrapper<AsyncIssuanceTokenResponse>;
+  AuthnRequestCredential: AuthnRequestCredential;
   Authority: ResolverTypeWrapper<Authority>;
   BackgroundJobActiveEvent: ResolverTypeWrapper<BackgroundJobActiveEvent>;
   BackgroundJobCompletedEvent: ResolverTypeWrapper<BackgroundJobCompletedEvent>;
@@ -3905,6 +3949,7 @@ export type ResolversTypes = {
   PresentationEventData: ResolverTypeWrapper<Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversTypes['Presentation']> }>;
   PresentationEventWhere: PresentationEventWhere;
   PresentationOrderBy: PresentationOrderBy;
+  PresentationRequestForAuthnInput: PresentationRequestForAuthnInput;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
   PresentationRequestResponse: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['PresentationRequestResponse']>;
@@ -3981,6 +4026,7 @@ export type ResolversParentTypes = {
   AsyncIssuanceRequestsWhere: AsyncIssuanceRequestsWhere;
   AsyncIssuanceResponse: AsyncIssuanceResponse;
   AsyncIssuanceTokenResponse: AsyncIssuanceTokenResponse;
+  AuthnRequestCredential: AuthnRequestCredential;
   Authority: Authority;
   BackgroundJobActiveEvent: BackgroundJobActiveEvent;
   BackgroundJobCompletedEvent: BackgroundJobCompletedEvent;
@@ -4077,6 +4123,7 @@ export type ResolversParentTypes = {
   PresentationEvent: PresentationEvent;
   PresentationEventData: Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversParentTypes['Presentation']> };
   PresentationEventWhere: PresentationEventWhere;
+  PresentationRequestForAuthnInput: PresentationRequestForAuthnInput;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
   PresentationRequestResponse: ResolversUnionTypes<ResolversParentTypes>['PresentationRequestResponse'];
@@ -4426,6 +4473,7 @@ export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends R
   devToolsEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   faceCheckEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   findTenantIdentities?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  oidcEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -4542,6 +4590,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createPhotoCaptureRequest?: Resolver<ResolversTypes['PhotoCaptureRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePhotoCaptureRequestArgs, 'request'>>;
   createPresentationRequest?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestArgs, 'request'>>;
   createPresentationRequestForApproval?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestForApprovalArgs, 'approvalRequestId'>>;
+  createPresentationRequestForAuthn?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, Partial<MutationCreatePresentationRequestForAuthnArgs>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;

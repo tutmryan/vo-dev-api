@@ -13,7 +13,7 @@ import { isLocalDev } from '@makerx/node-common'
 import bodyParser from 'body-parser'
 import cookieSession from 'cookie-session'
 import cors from 'cors'
-import type { Express } from 'express'
+import type { Express, Request } from 'express'
 import express from 'express'
 import helmet from 'helmet'
 import { clone, merge } from 'lodash'
@@ -24,16 +24,20 @@ import {
   demoEnabled,
   devToolsEnabled,
   issuanceCallbackRoute,
+  oidcEnabled,
   pkce,
   presentationCallbackRoute,
 } from './config'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
 import { demoPresentationTokenHandlers, demoPresentationTokenRoute } from './features/demo'
 import { vcLogoProxyHandler, vcLogoProxyTokenRoute } from './features/local-dev/vc-logo-proxy'
+import { addOidcProvider } from './features/oidc-provider'
 import { logger } from './logger'
 import { addVoyager } from './voyager'
 
-export const getExpressApp = (): Express => {
+export const requestOrigin = (req: Request): string => `${req.protocol}://${req.get('Host')}`
+
+export async function getExpressApp(): Promise<Express> {
   const app = express()
   app.set('trust proxy', true)
 
@@ -49,6 +53,7 @@ export const getExpressApp = (): Express => {
               manifestSrc: [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
               frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
               workerSrc: [`'self'`, 'blob:'], // voyager needs blob:
+              formAction: null, // oidc form actions are dynamic - TODO: can't seem to wildcard this to say http://localhost:4000/oidc/interaction/*
             },
           }
         : undefined, // undefined means use default helmet CSP
@@ -63,8 +68,10 @@ export const getExpressApp = (): Express => {
     logger.info(`Added ${vcLogoProxyTokenRoute}`)
   }
 
+  const notOidcRoute = /^\/(?!oidc).*$/
+
   if (devToolsEnabled) {
-    app.use(cookieSession(clone(cookieSessionConfig)))
+    app.use(notOidcRoute, cookieSession(clone(cookieSessionConfig)))
 
     app.get('/user', (req, res) => {
       if (!isAuthenticatedSession(req.session)) return res.status(400).send('Not logged in ¯\\_(ツ)_/¯').end()
@@ -73,9 +80,7 @@ export const getExpressApp = (): Express => {
     logger.info('Added GET /user')
 
     if (pkce.logoutUrl) {
-      app.get('/logout', (req, res) =>
-        res.redirect(`${pkce.logoutUrl}?post_logout_redirect_uri=${req.protocol}://${req.get('Host')}/logged-out`),
-      )
+      app.get('/logout', (req, res) => res.redirect(`${pkce.logoutUrl}?post_logout_redirect_uri=${requestOrigin(req)}/logged-out`))
       app.get('/logged-out', logout)
       logger.info('Added GET /logout and /logged-out')
     }
@@ -100,7 +105,7 @@ export const getExpressApp = (): Express => {
     }
 
     // set a bearer header
-    app.use(copySessionJwtToBearerHeader)
+    app.use(notOidcRoute, copySessionJwtToBearerHeader)
 
     // set up default redirect
     app.get('/', (req, res) => res.redirect('/graphql'))
@@ -108,7 +113,7 @@ export const getExpressApp = (): Express => {
 
     // apply interactive auth to GET requests with `accept: text/html` unless there is an `authorization` header
     const interactiveAuthMiddleware = pkceAuthenticationMiddleware(authConfig)
-    app.get('*', (req, res, next) =>
+    app.get(notOidcRoute, (req, res, next) =>
       !req.headers.authorization && req.headers.accept?.split(',').includes('text/html')
         ? interactiveAuthMiddleware(req, res, next)
         : next(),
@@ -129,6 +134,7 @@ export const getExpressApp = (): Express => {
 
   // add bearer auth to all requests
   app.use(
+    notOidcRoute,
     bearerTokenMiddleware({
       config: bearer,
       tokenIsRequired: false, // introspection requests are anonymous outside prod, so allow requests without tokens to pass through
@@ -144,6 +150,14 @@ export const getExpressApp = (): Express => {
 
   app.post(presentationCallbackRoute, jsonParser, presentationCallbackMiddleware)
   logger.info(`Added POST ${presentationCallbackRoute}`)
+
+  if (oidcEnabled) {
+    // add OIDC provider, but don't wait for it to be ready
+    const oidcRoute = '/oidc'
+    addOidcProvider(app, oidcRoute)
+      .then(() => logger.info(`OIDC provider ready on ${oidcRoute}`))
+      .catch((error) => logger.error('Failed to start OIDC provider', { error }))
+  }
 
   return app
 }

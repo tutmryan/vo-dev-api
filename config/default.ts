@@ -36,6 +36,7 @@ const config: DeepPartial<Config> = {
   },
   privateBlobStorage: {
     asyncIssuanceContainer: 'async-issuance',
+    oidcContainer: 'oidc',
   },
   sms: {
     accountSid: 'AC860727ab860a86187f00a15bb05bd812',
@@ -88,6 +89,7 @@ const config: DeepPartial<Config> = {
   devToolsEnabled: true,
   faceCheckEnabled: true,
   demoEnabled: true,
+  oidcEnabled: true,
 }
 
 module.exports = config

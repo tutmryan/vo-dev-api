@@ -98,6 +98,7 @@ Prefix the variable names with the hosting tenant name, e.g. `[NON_]PROD_AZURE_C
 | `LIMITED_PHOTO_CAPTURE_CLIENT_SECRET`  | The client secret for the limited photo capture client                         |
 | `LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET` | The client secret for the limited async issuance client                        |
 | `LIMITED_DEMO_CLIENT_SECRET`           | The client secret for the limited demo client                                  |
+| `LIMITED_OIDC_CLIENT_SECRET`           | The client secret for the limited OIDC authentication client                   |
 | `VID_CALLBACK_CLIENT_SECRET`           | The client secret for the VID callback client                                  |
 
 To do so:

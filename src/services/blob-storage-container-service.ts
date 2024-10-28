@@ -2,6 +2,7 @@ import { DefaultAzureCredential } from '@azure/identity'
 import type {
   BlobDeleteIfExistsResponse,
   BlobGetPropertiesResponse,
+  BlobItem,
   BlobUploadCommonResponse,
   BlockBlobParallelUploadOptions,
 } from '@azure/storage-blob'
@@ -66,5 +67,14 @@ export class BlobStorageContainerService {
   async getProperties(blobName: string): Promise<BlobGetPropertiesResponse | undefined> {
     const blockBlobClient = this.containerClient().getBlockBlobClient(blobName)
     return blockBlobClient.getProperties()
+  }
+
+  async listAllBlobsFlat(path?: string) {
+    const blobs = this.containerClient().listBlobsFlat({ prefix: path })
+    const all: BlobItem[] = []
+    for await (const blob of blobs) {
+      all.push(blob)
+    }
+    return all
   }
 }

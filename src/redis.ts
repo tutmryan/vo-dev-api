@@ -8,6 +8,7 @@ import { RedisPubSub } from 'graphql-redis-subscriptions'
 import { PubSub } from 'graphql-subscriptions'
 import Redis from 'ioredis'
 import Keyv from 'keyv'
+import { camelCase } from 'lodash'
 import type { IRateLimiterStoreOptions } from 'rate-limiter-flexible'
 import { RateLimiterMemory, RateLimiterRedis } from 'rate-limiter-flexible'
 import { redis as redisConfig } from './config'
@@ -27,9 +28,17 @@ export const redisOptions: RedisOptions = {
   tls: redisConfig.key ? {} : undefined,
 }
 
-function createRedisClient(clientName: 'cache' | 'publisher' | 'subscriber' | 'rate limit', options: RedisOptions = redisOptions) {
-  logger.info(`Creating Redis ${clientName} client`)
-  const client = new Redis(options)
+type ClientNames = 'cache' | 'publisher' | 'subscriber' | 'rate limit' | 'oidc'
+
+function keyPrefix(clientName: ClientNames) {
+  if (clientName === 'publisher' || clientName === 'subscriber') return 'pubsub:'
+  return `${camelCase(clientName)}:`
+}
+
+function createRedisClient(clientName: ClientNames, options: RedisOptions = redisOptions) {
+  const prefix = keyPrefix(clientName)
+  logger.info(`Creating Redis ${clientName} client with keyPrefix '${prefix}'`)
+  const client = new Redis({ ...options, keyPrefix: prefix })
   client.on('connect', () => logger.info(`Connected to Redis ${clientName} client`))
   client.on('warning', (warning) => logger.warn(`Redis ${clientName} client warning`, warning))
   client.on('error', ({ message, stack, ...rest }) => logger.error(`Redis ${clientName} client error`, { message, stack, ...rest }))
@@ -46,3 +55,4 @@ export const cache: KeyValueCache = isRedisEnabled ? createRedisKeyVAdapter() : 
 export const pubsub = isRedisEnabled ? createRedisPubsub() : new PubSub()
 export const rateLimiter = (options: Omit<IRateLimiterStoreOptions, 'storeClient'>) =>
   isRedisEnabled ? new RateLimiterRedis({ ...options, storeClient: redisRateLimitClient() }) : new RateLimiterMemory(options)
+export const oidcProviderClient = isRedisEnabled ? createRedisClient('oidc') : undefined

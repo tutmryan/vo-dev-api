@@ -19,7 +19,7 @@ import { UserEntity } from './features/users/entities/user-entity'
 import type { DataLoaders } from './loaders'
 import { createDataLoaders } from './loaders'
 import { logger } from './logger'
-import { AppRoles, InternalRoles, UserRoles } from './roles'
+import { AppRoles, InternalClientRoles, InternalRoles, UserRoles } from './roles'
 import type { Services } from './services'
 import { createServices } from './services'
 import { User } from './user'
@@ -32,6 +32,13 @@ export type GraphQLContext = BaseContext & {
   services: Services
   dataLoaders: DataLoaders
 }
+
+const allClientRoles = [
+  ...enumStringValues(UserRoles),
+  ...enumStringValues(AppRoles),
+  ...enumStringValues(LimitedAccessTokenAcquisitionRoles),
+  ...enumStringValues(InternalClientRoles),
+]
 
 export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string) => {
   if (!claims || !token) return undefined
@@ -98,18 +105,11 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
     return new User(claims, token, userEntity, undefined, undefined, photoCaptureData, limitedAsyncIssuanceData)
   }
 
-  // If the claims do not include any of the platform roles, return undefined
-  const platformRoles = [
-    ...enumStringValues(UserRoles),
-    ...enumStringValues(AppRoles),
-    ...enumStringValues(LimitedAccessTokenAcquisitionRoles),
-  ]
-  if (platformRoles.every((r) => !claims.roles?.includes(r))) {
-    return undefined
-  }
+  // When there are no recognised roles, do not create a user
+  if (allClientRoles.every((r) => !claims.roles?.includes(r))) return undefined
 
+  // Otherwise, find/create the user
   const userEntity = await findUpdateOrCreateUserEntity(claims)
-
   return new User(claims, token, userEntity)
 }
 

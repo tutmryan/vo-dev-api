@@ -65,6 +65,11 @@ export const limitedDemoAuth: ClientCredentialsConfig = {
   tokenUrl: platformTokenUrl,
   ...config.get('limitedDemo.credentials'),
 }
+export const limitedOidcAuthnAuth: ClientCredentialsConfig = {
+  scope: internalScope,
+  tokenUrl: platformTokenUrl,
+  ...config.get('limitedOidcClient.credentials'),
+}
 
 // VID service client credentials config
 export const hasHomeTenantAuthority = config.has('homeTenant.vidServiceCredentials.clientId')
@@ -111,8 +116,21 @@ export const identityIssuers = { [config.get('homeTenant.tenantId')]: config.get
 // add known internal app client labels
 export const platformConsumerApps = { [config.get('limitedDemo.oid')]: 'Portal Demo', ...config.get('platformConsumerApps') }
 
+// the instance config or undefined for localdev
+export const instance = config.has('instance') ? config.get('instance') : undefined
+
+// URLs for portal and OIDC provider
 export const portalUrl = config.has('instance')
   ? `https://${config.get('instance')}.portal.verifiedorchestration.com`
   : config.has('localDev.tunnel.portal')
     ? config.get('localDev.tunnel.portal')
     : 'http://localhost:5173'
+
+export const apiUrl = instance
+  ? `https://${instance}.api.verifiedorchestration.com`
+  : config.has('localDev.tunnel.api')
+    ? config.get('localDev.tunnel.api')
+    : 'http://localhost:4000'
+
+// OIDC provider API scope (the API origin)
+export const apiScope = new URL(apiUrl).origin

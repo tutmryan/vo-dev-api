@@ -115,7 +115,7 @@ Upon completion of presentation, the `event.requestStatus` will be `presentation
 ```js title="Example handling presentation events and displaying a subset of data"
 function onPresentationEvent(data) {
   if (data instanceof Error || data.event.requestStatus === 'presentation_error') {
-    displayError(data.event.Error ?? { message: 'Presentation failed.' })
+    displayError(data ?? { message: 'Presentation failed.' })
   } else if (data.event.requestStatus === 'request_retrieved') {
     app.innerHTML = 'Scanned, waiting for presentation...'
   } else {
@@ -222,7 +222,7 @@ function displayPresentation(presentation) {
 
       function onPresentationEvent(data) {
         if (data instanceof Error || data.event.requestStatus === 'presentation_error') {
-          displayError(data.event.Error ?? { message: 'Presentation failed.' })
+          displayError(data ?? { message: 'Presentation failed.' })
         } else if (data.event.requestStatus === 'request_retrieved') {
           app.innerHTML = 'Scanned, waiting for presentation...'
         } else {

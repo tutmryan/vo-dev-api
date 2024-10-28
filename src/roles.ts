@@ -6,6 +6,10 @@ export enum UserRoles {
   approvalRequestAdmin = 'VerifiableCredential.ApprovalRequestAdmin',
 }
 
+export enum OidcScopes {
+  issuee = 'VerifiableCredential.Issuee',
+}
+
 export enum AppRoles {
   issue = 'VerifiableCredential.Issue',
   present = 'VerifiableCredential.Present',
@@ -18,4 +22,8 @@ export enum InternalRoles {
   limitedPhotoCapture = 'VerifiableCredential.LimitedPhotoCapture',
   limitedAsyncIssuance = 'VerifiableCredential.LimitedAsyncIssuance',
   callback = 'VerifiableCredential.Request.Callback',
+}
+
+export enum InternalClientRoles {
+  limitedOidcAuthn = 'VerifiableCredential.LimitedOidcAuthn',
 }

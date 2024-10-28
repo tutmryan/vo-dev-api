@@ -4,11 +4,12 @@ import { randomUUID } from 'crypto'
 import { logger } from '../logger'
 import { redisOptions } from '../redis'
 import { Lazy } from '../util/lazy'
-import type { JobTypes } from './jobs'
+import type { JobPayload, JobTypes } from './jobs'
 import { jobOptions } from './jobs'
+import { subscribeToBackgroundJobEvents } from './pubsub'
 
 export const JobQueueName = 'jobQueue'
-export type JobType<TName extends string, TPayload extends { userId: string; requestId?: string }> = {
+export type JobType<TName extends string, TPayload extends JobPayload> = {
   name: TName
   payload: TPayload
 }
@@ -45,9 +46,15 @@ export const jobQueueEvents = Lazy(() => {
   return events
 })
 
-export const addToJobQueue = async (jobType: JobTypes): Promise<string> => {
-  const jobId = randomUUID()
+export const addToJobQueue = async (jobType: JobTypes, jobId: string = randomUUID()): Promise<string> => {
   const options = jobOptions[jobType.name]
   await jobQueue().add(jobType.name, jobType.payload, { jobId, removeOnComplete: true, removeDependencyOnFailure: true, ...options })
   return jobId
+}
+
+export const runDeduplicatedJob = async (jobType: JobTypes, awaitCompletion: boolean): Promise<void> => {
+  const jobId = await addToJobQueue(jobType, jobType.name)
+  if (!awaitCompletion) return
+  const iterator = subscribeToBackgroundJobEvents({ where: { jobId } })
+  await iterator.next()
 }

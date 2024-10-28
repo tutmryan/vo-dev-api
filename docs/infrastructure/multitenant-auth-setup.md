@@ -30,7 +30,7 @@ The following app registrations are created for the internal operations of the V
 
   ```JSON
   {
-    description: "Provides limited access to the Verified Orchestration platform - access tokens with this role are created by the API and given to limited access client. DO NOT GRANT TO OTHER APPLICATIONS.",
+    description: "Provides limited access to the Verified Orchestration platform - access tokens with this role are created by the API and given to limited access clients. DO NOT GRANT TO OTHER APPLICATIONS.",
     displayName: "Limited access [INTERNAL API USE ONLY]",
     value: "VerifiableCredential.LimitedAccess"
   }
@@ -57,6 +57,14 @@ The following app registrations are created for the internal operations of the V
     description: "Provides limited access to async issuance features of the Verified Orchestration platform - access tokens with this role are created by the API and given to limited async issuance clients. DO NOT GRANT TO OTHER APPLICATIONS.",
     displayName: "Limited async issuance [INTERNAL API USE ONLY]",
     value: "VerifiableCredential.LimitedAsyncIssuance"
+  }
+  ```
+
+  ```JSON
+  {
+   description: "Provides limited access to OIDC authentication features of the Verified Orchestration platform - access tokens with this role are created by the API and used within the OIDC authentication flows. DO NOT GRANT TO OTHER APPLICATIONS.",
+   displayName: "Limited OIDC authentication [INTERNAL API USE ONLY]",
+   value: "VerifiableCredential.LimitedOidcAuthn"
   }
   ```
 
@@ -131,6 +139,19 @@ The following app registrations are created for the internal operations of the V
   - set `[NON_PROD | PROD]_LIMITED_DEMO_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.LimitedAccess
+- grant admin consent for the added permissions
+
+## Create an app registration for acquiring limited OIDC authentication tokens
+
+- create app registration named `Verified Orchestration Limited OIDC Authentication Client` (with `(non prod)` suffix for the non prod environment)
+- choose `Single tenant` option for `Supported account types`
+- click "Register" to create the app registration
+- create a client secret for the Verified Orchestration API to generate a token
+  - set it to expires in 24 months
+  - store it in BitWarden, `Limited OIDC Client (non prod) => Client Secret` for the non prod environment
+  - set `[NON_PROD | PROD]_LIMITED_OIDC_CLIENT_SECRET` secret in the GitHub organisation
+- add the following application permissions from `Verified Orchestration Internal` API
+  - VerifiableCredential.LimitedOidcAuthn
 - grant admin consent for the added permissions
 
 ## Create an app registration for Verified ID callback token generation

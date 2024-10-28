@@ -43,6 +43,11 @@ const config: DeepPartial<Config> = {
       clientId: '9af0fe67-f5ca-45bf-99c8-e08ef4458c27',
     },
   },
+  limitedOidcClient: {
+    credentials: {
+      clientId: '27ed68c0-371b-4ccb-aec2-7b4fb97b5885',
+    },
+  },
 }
 
 module.exports = config

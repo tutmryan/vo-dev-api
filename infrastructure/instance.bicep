@@ -383,6 +383,41 @@ resource limitedDemoClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-0
   }
 }
 
+@description('The client secret of the limited OIDC client')
+@secure()
+param limitedOidcClientSecret string
+
+resource limitedOidcClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'LIMITED-OIDC-CLIENT-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedOidcClientSecret
+  }
+}
+
+@description('The secret for limited OIDC data keys')
+@secure()
+param limitedOidcSecret string
+
+resource limitedOidcSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(limitedOidcSecret)) {
+  name: 'LIMITED-OIDC-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: limitedOidcSecret
+  }
+}
+
+resource limitedOidcSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(limitedOidcSecret)) {
+  name: 'LIMITED-OIDC-SECRET'
+  parent: keyVault
+}
+
 @description('The client secret of the docs site app registration in Azure AD')
 @secure()
 param docsSiteClientSecret string
@@ -796,10 +831,23 @@ resource privateStorageClientEncryptionKeySecretExisting 'Microsoft.KeyVault/vau
 resource verifiedOrchestrationPrivateStorageBlobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
   name: 'default'
   parent: privateStorageAccount
+  properties: {
+    lastAccessTimeTrackingPolicy: {
+      enable: true
+    }
+  }
 }
 
 resource asyncIssuanceBlobContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
   name: 'async-issuance'
+  parent: verifiedOrchestrationPrivateStorageBlobService
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
+resource oidcBlobContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+  name: 'oidc'
   parent: verifiedOrchestrationPrivateStorageBlobService
   properties: {
     publicAccess: 'None'
@@ -812,6 +860,27 @@ resource privateStorageDeletePolicy 'Microsoft.Storage/storageAccounts/managemen
   properties: {
     policy: {
       rules: [
+        {
+          name: 'DeleteOidcAccounts'
+          type: 'Lifecycle'
+          definition: {
+            filters: {
+              blobTypes: [
+                'blockBlob'
+              ]
+              prefixMatch: [
+                'oidc/accounts/'
+              ]
+            }
+            actions: {
+              baseBlob: {
+                delete: {
+                  daysAfterLastAccessTimeGreaterThan: 14 // this should match OIDC TTL e.g. session 14 days
+                }
+              }
+            }
+          }
+        }
         {
           name: 'DeleteAfter-1-days'
           type: 'Lifecycle'
@@ -1020,6 +1089,8 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAsyncIssuanceClientSecretSecret.properties.secretUri})'
     LIMITED_ASYNC_ISSUANCE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAsyncIssuanceSecret) ? limitedAsyncIssuanceSecretSecretExisting : limitedAsyncIssuanceSecretSecret).properties.secretUri})'
     LIMITED_DEMO_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedDemoClientSecretSecret.properties.secretUri})'
+    LIMITED_OIDC_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedOidcClientSecretSecret.properties.secretUri})'
+    LIMITED_OIDC_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedOidcSecret) ? limitedOidcSecretSecretExisting : limitedOidcSecretSecret).properties.secretUri})'
     HOME_TENANT_NAME: homeTenantName
     HOME_TENANT_ID: homeTenantId
     HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId

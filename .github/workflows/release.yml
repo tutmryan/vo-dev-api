@@ -239,6 +239,7 @@ jobs:
           limited-photo-capture-client-secret: ${{ secrets.NON_PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
           limited-async-issuance-client-secret: ${{ secrets.NON_PROD_LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET }}
           limited-demo-client-secret: ${{ secrets.NON_PROD_LIMITED_DEMO_CLIENT_SECRET }}
+          limited-oidc-client-secret: ${{ secrets.NON_PROD_LIMITED_OIDC_CLIENT_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
@@ -402,6 +403,7 @@ jobs:
           limited-photo-capture-client-secret: ${{ secrets.PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
           limited-async-issuance-client-secret: ${{ secrets.PROD_LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET }}
           limited-demo-client-secret: ${{ secrets.PROD_LIMITED_DEMO_CLIENT_SECRET }}
+          limited-oidc-client-secret: ${{ secrets.PROD_LIMITED_OIDC_CLIENT_SECRET }}
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
