@@ -641,6 +641,43 @@ export type Callback = {
   url: Scalars['URL']['input'];
 };
 
+/** The type of the claim, providing validation of the claim value. */
+export enum ClaimType {
+  /** The claim value is a boolean value encoded as `true` or `false`. */
+  Boolean = 'boolean',
+  /** The claim value is a date string in full-date ISO 8601 format: `YYYY-MM-DD`. */
+  Date = 'date',
+  /** The claim value is a date-time string in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`. */
+  DateTime = 'dateTime',
+  /** The claim value is an email address. */
+  Email = 'email',
+  /** The claim value is a decimal or floating point number (encoded as a string). */
+  Float = 'float',
+  /** The claim value is a JPEG image encoded as a base64 encoded [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs). */
+  Image = 'image',
+  /** The claim value is a whole number (encoded as a string). */
+  Int = 'int',
+  /** The claim value is one of a list of strings specified via the claim `validation` field. */
+  List = 'list',
+  /** The claim value is a phone number in international E.164 format. */
+  Phone = 'phone',
+  /** The claim value is a string. */
+  String = 'string',
+  /** The claim value is a URL. */
+  Url = 'url'
+}
+
+/** Validation definition for the claim value, according to the claim type. */
+export type ClaimValidation = FloatValidation | IntValidation | ListValidation | RegexValidation | StringValidation;
+
+/** Provides additional validation input for the defined claim type. */
+export type ClaimValidationInput =
+  { float: FloatValidationInput; int?: never; list?: never; regex?: never; string?: never; }
+  |  { float?: never; int: IntValidationInput; list?: never; regex?: never; string?: never; }
+  |  { float?: never; int?: never; list: ListValidationInput; regex?: never; string?: never; }
+  |  { float?: never; int?: never; list?: never; regex: RegexValidationInput; string?: never; }
+  |  { float?: never; int?: never; list?: never; regex?: never; string: StringValidationInput; };
+
 /** Record of a communication sent to a recipient. */
 export type Communication = {
   __typename?: 'Communication';
@@ -867,42 +904,40 @@ export type ContractCount = {
   count: Scalars['NonNegativeInt']['output'];
 };
 
-/** Defines a claim included in a verifiable credential */
+/** Defines a claim included in a verifiable credential. */
 export type ContractDisplayClaim = {
   __typename?: 'ContractDisplayClaim';
-  /** The name of the claim to which the label applies */
+  /** The name of the claim. */
   claim: Scalars['String']['output'];
-  /** The description of the claim */
+  /** The description of the claim. */
   description?: Maybe<Scalars['String']['output']>;
-  /** The label of the claim */
+  /** Indicates a value need not be provided for this claim when issuing this credential. */
+  isOptional?: Maybe<Scalars['Boolean']['output']>;
+  /** The label of the claim. */
   label: Scalars['String']['output'];
-  /**
-   * The type of the claim
-   * Valid values encountered so far are:
-   * - String
-   * - image/jpg;base64url (in the Verified Employee contract)
-   */
-  type: Scalars['String']['output'];
-  /** The value for the claim (optional, only set if the value is fixed) */
+  /** The type of the claim. */
+  type: ClaimType;
+  /** Defines how the value of the claim should be validated. */
+  validation?: Maybe<ClaimValidation>;
+  /** The value for the claim (optional, provides a fixed value for this claim). */
   value?: Maybe<Scalars['String']['output']>;
 };
 
-/** Defines a claim included in a verifiable credential */
+/** Defines a claim included in a verifiable credential. */
 export type ContractDisplayClaimInput = {
-  /** The name of the claim to which the label applies */
+  /** The name of the claim. */
   claim: Scalars['String']['input'];
-  /** The description of the claim */
+  /** The description of the claim. */
   description?: InputMaybe<Scalars['String']['input']>;
-  /** The label of the claim */
+  /** Indicates a value need not be provided for this claim when issuing this credential. */
+  isOptional?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The label of the claim. */
   label: Scalars['String']['input'];
-  /**
-   * The type of the claim
-   * Valid values encountered so far are:
-   * - String
-   * - image/jpg;base64url (in the Verified Employee contract)
-   */
-  type: Scalars['String']['input'];
-  /** The value for the claim (optional, only set if the value is fixed) */
+  /** The type of the claim. */
+  type: ClaimType;
+  /** Defines how the value of the claim should be validated. */
+  validation?: InputMaybe<ClaimValidationInput>;
+  /** The value for the claim (optional, provides a fixed value for this claim). */
   value?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -1105,7 +1140,7 @@ export type ContractPresentationWhere = {
   to?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
-/** Defines the filter criteria used to find contracts */
+/** Defines the filter criteria used to find contracts. */
 export type ContractWhere = {
   /** The ID of the user (Person or Application) that created the contract. */
   createdById?: InputMaybe<Scalars['ID']['input']>;
@@ -1113,17 +1148,17 @@ export type ContractWhere = {
   createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
   /** The end of the createdAt period to include. */
   createdTo?: InputMaybe<Scalars['DateTime']['input']>;
-  /** List only the contracts which include any of these credential types */
+  /** List only the contracts which include any of these credential types. */
   credentialTypes?: InputMaybe<Array<Scalars['String']['input']>>;
-  /** The type of face check photo support */
+  /** The type of face check photo support. */
   faceCheckSupport?: InputMaybe<FaceCheckPhotoSupport>;
-  /** List only the contracts whose deprecation status matches the flag */
+  /** List only the contracts whose deprecation status matches the flag. */
   isDeprecated?: InputMaybe<Scalars['Boolean']['input']>;
-  /** List only contracts that are or are not published in the Verified Credentials Network */
+  /** List only contracts that are or are not published in the Verified Credentials Network. */
   isProvisioned?: InputMaybe<Scalars['Boolean']['input']>;
-  /** List only contracts matching this name */
+  /** List only contracts matching this name. */
   name?: InputMaybe<Scalars['String']['input']>;
-  /** List only contracts from this template */
+  /** List only contracts from this template. */
   templateId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -1160,24 +1195,19 @@ export type CreatePresentationRequestForApprovalInput = {
 
 /** Defines a claim included in a verifiable credential */
 export type CreateUpdateTemplateDisplayClaimInput = {
-  /** The name of the claim to which the label applies */
+  /** The name of the claim. */
   claim: Scalars['String']['input'];
-  /** The description of the claim */
+  /** The description of the claim. */
   description?: InputMaybe<Scalars['String']['input']>;
-  /** The label of the claim */
+  /** Indicates a value need not be provided for this claim when issuing this credential. */
+  isOptional?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The label of the claim. */
   label: Scalars['String']['input'];
-  /**
-   * The type of the claim
-   * Valid values encountered so far are:
-   *   - String
-   *   - image/jpg;base64url (in the Verified Employee contract)
-   */
-  type: Scalars['String']['input'];
-  /**
-   * The value for the claim
-   * If provided, the value is fixed for all credentials referencing this claim
-   * If not provided, the value will need to be dynamically provided before the credential is issued
-   */
+  /** The type of the claim. */
+  type: ClaimType;
+  /** Defines how the value of the claim should be validated. */
+  validation?: InputMaybe<ClaimValidationInput>;
+  /** The value for the claim (optional, provides a fixed value for this claim). */
   value?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -1300,6 +1330,19 @@ export type Features = {
   faceCheckEnabled: Scalars['Boolean']['output'];
   /** Indicates whether the API instance is configured to support finding home tenant identities via the findTenantIdentities query. */
   findTenantIdentities: Scalars['Boolean']['output'];
+};
+
+/** Float claim validation. */
+export type FloatValidation = {
+  __typename?: 'FloatValidation';
+  max?: Maybe<Scalars['Float']['output']>;
+  min?: Maybe<Scalars['Float']['output']>;
+};
+
+/** Float claim validation. */
+export type FloatValidationInput = {
+  max?: InputMaybe<Scalars['Float']['input']>;
+  min?: InputMaybe<Scalars['Float']['input']>;
 };
 
 /** Represents an identity that is issued credentials */
@@ -1434,6 +1477,19 @@ export type IdentityWhere = {
   issuer?: InputMaybe<Scalars['String']['input']>;
   /** The name of the identity to match */
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Int claim validation. */
+export type IntValidation = {
+  __typename?: 'IntValidation';
+  max?: Maybe<Scalars['Int']['output']>;
+  min?: Maybe<Scalars['Int']['output']>;
+};
+
+/** Integer claim validation. */
+export type IntValidationInput = {
+  max?: InputMaybe<Scalars['Int']['input']>;
+  min?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** An instance of a successful contract-to-credential issuance. */
@@ -1727,6 +1783,19 @@ export type IssuerIdentifierInput = {
   identifier: Scalars['String']['input'];
   /** The issuer of the identity */
   issuer: Scalars['String']['input'];
+};
+
+/** List claim validation. */
+export type ListValidation = {
+  __typename?: 'ListValidation';
+  /** The list of valid values for the claim. */
+  values: Array<Scalars['String']['output']>;
+};
+
+/** List claim validation. */
+export type ListValidationInput = {
+  /** The list of valid values for the claim. */
+  values: Array<Scalars['String']['input']>;
 };
 
 export type Mutation = {
@@ -2781,6 +2850,19 @@ export type QueryUserArgs = {
   id: Scalars['ID']['input'];
 };
 
+/** Regular expression claim validation. */
+export type RegexValidation = {
+  __typename?: 'RegexValidation';
+  /** The regular expression pattern to validate the claim value. */
+  pattern: Scalars['String']['output'];
+};
+
+/** Regular expression claim validation. */
+export type RegexValidationInput = {
+  /** The regular expression pattern to validate the claim value. */
+  pattern: Scalars['String']['input'];
+};
+
 /** Provides configuration information about the presentation request */
 export type RequestConfiguration = {
   validation?: InputMaybe<ConfigurationValidation>;
@@ -2899,6 +2981,19 @@ export type SendAsyncIssuanceVerificationResponse = {
   method: ContactMethod;
 };
 
+/** String claim validation. */
+export type StringValidation = {
+  __typename?: 'StringValidation';
+  maxLength?: Maybe<Scalars['PositiveInt']['output']>;
+  minLength?: Maybe<Scalars['PositiveInt']['output']>;
+};
+
+/** String claim validation. */
+export type StringValidationInput = {
+  maxLength?: InputMaybe<Scalars['PositiveInt']['input']>;
+  minLength?: InputMaybe<Scalars['PositiveInt']['input']>;
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   /** Returns event data when the background job progresses from being queued to completed or failed */
@@ -2976,24 +3071,19 @@ export type Template = {
 /** Defines a claim included in a verifiable credential */
 export type TemplateDisplayClaim = {
   __typename?: 'TemplateDisplayClaim';
-  /** The name of the claim to which the label applies */
+  /** The name of the claim. */
   claim: Scalars['String']['output'];
-  /** The description of the claim */
+  /** The description of the claim. */
   description?: Maybe<Scalars['String']['output']>;
-  /** The label of the claim */
+  /** Indicates a value need not be provided for this claim when issuing this credential. */
+  isOptional?: Maybe<Scalars['Boolean']['output']>;
+  /** The label of the claim. */
   label: Scalars['String']['output'];
-  /**
-   * The type of the claim
-   * Valid values encountered so far are:
-   *   - String
-   *   - image/jpg;base64url (in the Verified Employee contract)
-   */
-  type: Scalars['String']['output'];
-  /**
-   * The value for the claim
-   * If provided, the value is fixed for all credentials referencing this claim
-   * If not provided, the value will need to be provided by one of the child template or contract
-   */
+  /** The type of the claim. */
+  type: ClaimType;
+  /** Defines how the value of the claim should be validated. */
+  validation?: Maybe<ClaimValidation>;
+  /** The value for the claim (optional, provides a fixed value for this claim). */
   value?: Maybe<Scalars['String']['output']>;
 };
 
@@ -3359,35 +3449,35 @@ export type UpdateAsyncIssuanceContactMutationVariables = Exact<{
 
 export type UpdateAsyncIssuanceContactMutation = { __typename?: 'Mutation', updateAsyncIssuanceContact: { __typename?: 'AsyncIssuanceContact', notification: { __typename?: 'Contact', value: string, method: ContactMethod }, verification?: { __typename?: 'Contact', value: string, method: ContactMethod } | null } };
 
-export type ContractFragmentFragment = { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> } };
+export type ContractFragmentFragment = { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> } };
 
 export type CreateContractMutationVariables = Exact<{
   input: ContractInput;
 }>;
 
 
-export type CreateContractMutation = { __typename?: 'Mutation', createContract: { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> } } };
+export type CreateContractMutation = { __typename?: 'Mutation', createContract: { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> } } };
 
 export type DeprecateContractMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeprecateContractMutation = { __typename?: 'Mutation', deprecateContract: { __typename?: 'Contract', externalId?: string | null, provisionedAt?: Date | null, lastProvisionedAt?: Date | null, isDeprecated?: boolean | null, deprecatedAt?: Date | null, id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> } } };
+export type DeprecateContractMutation = { __typename?: 'Mutation', deprecateContract: { __typename?: 'Contract', externalId?: string | null, provisionedAt?: Date | null, lastProvisionedAt?: Date | null, isDeprecated?: boolean | null, deprecatedAt?: Date | null, id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> } } };
 
 export type GetContractQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetContractQuery = { __typename?: 'Query', contract: { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> } } };
+export type GetContractQuery = { __typename?: 'Query', contract: { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> } } };
 
 export type ProvisionContractMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ProvisionContractMutation = { __typename?: 'Mutation', provisionContract: { __typename?: 'Contract', externalId?: string | null, provisionedAt?: Date | null, lastProvisionedAt?: Date | null, id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> } } };
+export type ProvisionContractMutation = { __typename?: 'Mutation', provisionContract: { __typename?: 'Contract', externalId?: string | null, provisionedAt?: Date | null, lastProvisionedAt?: Date | null, id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> } } };
 
 export type UpdateContractMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3395,7 +3485,7 @@ export type UpdateContractMutationVariables = Exact<{
 }>;
 
 
-export type UpdateContractMutation = { __typename?: 'Mutation', updateContract: { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> } } };
+export type UpdateContractMutation = { __typename?: 'Mutation', updateContract: { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> } } };
 
 export type HealthcheckQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3510,30 +3600,30 @@ export type PhotoCaptureStatusQueryVariables = Exact<{
 
 export type PhotoCaptureStatusQuery = { __typename?: 'Query', photoCaptureStatus: { __typename?: 'PhotoCaptureEventData', status: PhotoCaptureStatus } };
 
-export type TemplateParentDataFragmentFragment = { __typename?: 'Template', parentData?: { __typename?: 'TemplateParentData', isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> | null } | null } | null };
+export type TemplateParentDataFragmentFragment = { __typename?: 'Template', parentData?: { __typename?: 'TemplateParentData', isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> | null } | null } | null };
 
 export type GetTemplateParentDataQueryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetTemplateParentDataQueryQuery = { __typename?: 'Query', template: { __typename?: 'Template', parentData?: { __typename?: 'TemplateParentData', isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> | null } | null } | null } };
+export type GetTemplateParentDataQueryQuery = { __typename?: 'Query', template: { __typename?: 'Template', parentData?: { __typename?: 'TemplateParentData', isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> | null } | null } | null } };
 
-export type TemplateFragmentFragment = { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, parent?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> | null } | null };
+export type TemplateFragmentFragment = { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, parent?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> | null } | null };
 
 export type CreateTemplateMutationVariables = Exact<{
   input: TemplateInput;
 }>;
 
 
-export type CreateTemplateMutation = { __typename?: 'Mutation', createTemplate: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, parent?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> | null } | null } };
+export type CreateTemplateMutation = { __typename?: 'Mutation', createTemplate: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, parent?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> | null } | null } };
 
 export type GetTemplateQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type GetTemplateQuery = { __typename?: 'Query', template: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, parent?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> | null } | null } };
+export type GetTemplateQuery = { __typename?: 'Query', template: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, parent?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> | null } | null } };
 
 export type UpdateTemplateMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3541,7 +3631,7 @@ export type UpdateTemplateMutationVariables = Exact<{
 }>;
 
 
-export type UpdateTemplateMutation = { __typename?: 'Mutation', updateTemplate: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, parent?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: string, description?: string | null, value?: string | null }> | null } | null } };
+export type UpdateTemplateMutation = { __typename?: 'Mutation', updateTemplate: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, parent?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> | null } | null } };
 
 export type CreatePartnerMutationVariables = Exact<{
   input: CreatePartnerInput;
@@ -3663,6 +3753,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversUnionTypes<_RefType extends Record<string, unknown>> = {
   AsyncIssuanceRequestResponse: ( AsyncIssuanceErrorResponse ) | ( AsyncIssuanceResponse );
   BackgroundJobEvent: ( BackgroundJobActiveEvent ) | ( BackgroundJobCompletedEvent ) | ( BackgroundJobErrorEvent ) | ( BackgroundJobProgressEvent );
+  ClaimValidation: ( FloatValidation ) | ( IntValidation ) | ( ListValidation ) | ( RegexValidation ) | ( StringValidation );
   IssuanceRequestResponse: ( IssuanceResponse ) | ( RequestErrorResponse );
   PresentationRequestResponse: ( PresentationResponse ) | ( RequestErrorResponse );
 };
@@ -3711,6 +3802,9 @@ export type ResolversTypes = {
   BackgroundJobStatus: BackgroundJobStatus;
   CacheControlScope: CacheControlScope;
   Callback: Callback;
+  ClaimType: ClaimType;
+  ClaimValidation: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['ClaimValidation']>;
+  ClaimValidationInput: ClaimValidationInput;
   Communication: ResolverTypeWrapper<CommunicationEntity>;
   CommunicationOrderBy: CommunicationOrderBy;
   CommunicationPurpose: CommunicationPurpose;
@@ -3724,7 +3818,7 @@ export type ResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ContractCount: ResolverTypeWrapper<Omit<ContractCount, 'contract'> & { contract: ResolversTypes['Contract'] }>;
-  ContractDisplayClaim: ResolverTypeWrapper<ContractDisplayClaim>;
+  ContractDisplayClaim: ResolverTypeWrapper<Omit<ContractDisplayClaim, 'validation'> & { validation?: Maybe<ResolversTypes['ClaimValidation']> }>;
   ContractDisplayClaimInput: ContractDisplayClaimInput;
   ContractDisplayConsent: ResolverTypeWrapper<ContractDisplayConsent>;
   ContractDisplayConsentInput: ContractDisplayConsentInput;
@@ -3758,6 +3852,8 @@ export type ResolversTypes = {
   FaceCheckValidation: ResolverTypeWrapper<FaceCheckValidation>;
   FaceCheckValidationInput: FaceCheckValidationInput;
   Features: ResolverTypeWrapper<Features>;
+  FloatValidation: ResolverTypeWrapper<FloatValidation>;
+  FloatValidationInput: FloatValidationInput;
   HexColorCode: ResolverTypeWrapper<Scalars['HexColorCode']['output']>;
   Identity: ResolverTypeWrapper<IdentityEntity>;
   IdentityInput: IdentityInput;
@@ -3766,6 +3862,8 @@ export type ResolversTypes = {
   IdentityOrderBy: IdentityOrderBy;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
+  IntValidation: ResolverTypeWrapper<IntValidation>;
+  IntValidationInput: IntValidationInput;
   Issuance: ResolverTypeWrapper<IssuanceEntity>;
   IssuanceCallbackEvent: ResolverTypeWrapper<IssuanceCallbackEvent>;
   IssuanceEventData: ResolverTypeWrapper<Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversTypes['Issuance']> }>;
@@ -3780,6 +3878,8 @@ export type ResolversTypes = {
   IssuanceWhere: IssuanceWhere;
   IssuerIdentifierInput: IssuerIdentifierInput;
   JSONObject: ResolverTypeWrapper<Scalars['JSONObject']['output']>;
+  ListValidation: ResolverTypeWrapper<ListValidation>;
+  ListValidationInput: ListValidationInput;
   Locale: ResolverTypeWrapper<Scalars['Locale']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
   NetworkContract: ResolverTypeWrapper<NetworkContract>;
@@ -3813,6 +3913,8 @@ export type ResolversTypes = {
   PresentationWhere: PresentationWhere;
   PresentedCredential: ResolverTypeWrapper<PresentedCredential>;
   Query: ResolverTypeWrapper<{}>;
+  RegexValidation: ResolverTypeWrapper<RegexValidation>;
+  RegexValidationInput: RegexValidationInput;
   RequestConfiguration: RequestConfiguration;
   RequestConfigurationValidation: ResolverTypeWrapper<RequestConfigurationValidation>;
   RequestCredential: RequestCredential;
@@ -3824,9 +3926,11 @@ export type ResolversTypes = {
   RequestedCredential: ResolverTypeWrapper<RequestedCredential>;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
   SendAsyncIssuanceVerificationResponse: ResolverTypeWrapper<SendAsyncIssuanceVerificationResponse>;
+  StringValidation: ResolverTypeWrapper<StringValidation>;
+  StringValidationInput: StringValidationInput;
   Subscription: ResolverTypeWrapper<{}>;
   Template: ResolverTypeWrapper<TemplateEntity>;
-  TemplateDisplayClaim: ResolverTypeWrapper<TemplateDisplayClaim>;
+  TemplateDisplayClaim: ResolverTypeWrapper<Omit<TemplateDisplayClaim, 'validation'> & { validation?: Maybe<ResolversTypes['ClaimValidation']> }>;
   TemplateDisplayConsent: ResolverTypeWrapper<TemplateDisplayConsent>;
   TemplateDisplayCredential: ResolverTypeWrapper<TemplateDisplayCredential>;
   TemplateDisplayCredentialLogo: ResolverTypeWrapper<TemplateDisplayCredentialLogo>;
@@ -3886,6 +3990,8 @@ export type ResolversParentTypes = {
   BackgroundJobEventWhere: BackgroundJobEventWhere;
   BackgroundJobProgressEvent: BackgroundJobProgressEvent;
   Callback: Callback;
+  ClaimValidation: ResolversUnionTypes<ResolversParentTypes>['ClaimValidation'];
+  ClaimValidationInput: ClaimValidationInput;
   Communication: CommunicationEntity;
   CommunicationWhere: CommunicationWhere;
   ConfigurationValidation: ConfigurationValidation;
@@ -3895,7 +4001,7 @@ export type ResolversParentTypes = {
   Int: Scalars['Int']['output'];
   Float: Scalars['Float']['output'];
   ContractCount: Omit<ContractCount, 'contract'> & { contract: ResolversParentTypes['Contract'] };
-  ContractDisplayClaim: ContractDisplayClaim;
+  ContractDisplayClaim: Omit<ContractDisplayClaim, 'validation'> & { validation?: Maybe<ResolversParentTypes['ClaimValidation']> };
   ContractDisplayClaimInput: ContractDisplayClaimInput;
   ContractDisplayConsent: ContractDisplayConsent;
   ContractDisplayConsentInput: ContractDisplayConsentInput;
@@ -3926,6 +4032,8 @@ export type ResolversParentTypes = {
   FaceCheckValidation: FaceCheckValidation;
   FaceCheckValidationInput: FaceCheckValidationInput;
   Features: Features;
+  FloatValidation: FloatValidation;
+  FloatValidationInput: FloatValidationInput;
   HexColorCode: Scalars['HexColorCode']['output'];
   Identity: IdentityEntity;
   IdentityInput: IdentityInput;
@@ -3933,6 +4041,8 @@ export type ResolversParentTypes = {
   IdentityIssuer: IdentityIssuer;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
+  IntValidation: IntValidation;
+  IntValidationInput: IntValidationInput;
   Issuance: IssuanceEntity;
   IssuanceCallbackEvent: IssuanceCallbackEvent;
   IssuanceEventData: Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversParentTypes['Issuance']> };
@@ -3944,6 +4054,8 @@ export type ResolversParentTypes = {
   IssuanceWhere: IssuanceWhere;
   IssuerIdentifierInput: IssuerIdentifierInput;
   JSONObject: Scalars['JSONObject']['output'];
+  ListValidation: ListValidation;
+  ListValidationInput: ListValidationInput;
   Locale: Scalars['Locale']['output'];
   Mutation: {};
   NetworkContract: NetworkContract;
@@ -3972,6 +4084,8 @@ export type ResolversParentTypes = {
   PresentationWhere: PresentationWhere;
   PresentedCredential: PresentedCredential;
   Query: {};
+  RegexValidation: RegexValidation;
+  RegexValidationInput: RegexValidationInput;
   RequestConfiguration: RequestConfiguration;
   RequestConfigurationValidation: RequestConfigurationValidation;
   RequestCredential: RequestCredential;
@@ -3983,9 +4097,11 @@ export type ResolversParentTypes = {
   RequestedCredential: RequestedCredential;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
   SendAsyncIssuanceVerificationResponse: SendAsyncIssuanceVerificationResponse;
+  StringValidation: StringValidation;
+  StringValidationInput: StringValidationInput;
   Subscription: {};
   Template: TemplateEntity;
-  TemplateDisplayClaim: TemplateDisplayClaim;
+  TemplateDisplayClaim: Omit<TemplateDisplayClaim, 'validation'> & { validation?: Maybe<ResolversParentTypes['ClaimValidation']> };
   TemplateDisplayConsent: TemplateDisplayConsent;
   TemplateDisplayCredential: TemplateDisplayCredential;
   TemplateDisplayCredentialLogo: TemplateDisplayCredentialLogo;
@@ -4181,6 +4297,10 @@ export type BackgroundJobProgressEventResolvers<ContextType = GraphQLContext, Pa
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type ClaimValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ClaimValidation'] = ResolversParentTypes['ClaimValidation']> = {
+  __resolveType: TypeResolveFn<'FloatValidation' | 'IntValidation' | 'ListValidation' | 'RegexValidation' | 'StringValidation', ParentType, ContextType>;
+};
+
 export type CommunicationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Communication'] = ResolversParentTypes['Communication']> = {
   contactMethod?: Resolver<ResolversTypes['ContactMethod'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
@@ -4238,8 +4358,10 @@ export type ContractCountResolvers<ContextType = GraphQLContext, ParentType exte
 export type ContractDisplayClaimResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayClaim'] = ResolversParentTypes['ContractDisplayClaim']> = {
   claim?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  isOptional?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['ClaimType'], ParentType, ContextType>;
+  validation?: Resolver<Maybe<ResolversTypes['ClaimValidation']>, ParentType, ContextType>;
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -4307,6 +4429,12 @@ export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends R
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type FloatValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['FloatValidation'] = ResolversParentTypes['FloatValidation']> = {
+  max?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  min?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['HexColorCode'], any> {
   name: 'HexColorCode';
 }
@@ -4330,6 +4458,12 @@ export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends R
 export type IdentityIssuerResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IdentityIssuer'] = ResolversParentTypes['IdentityIssuer']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type IntValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IntValidation'] = ResolversParentTypes['IntValidation']> = {
+  max?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  min?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -4379,6 +4513,11 @@ export type IssuanceResponseResolvers<ContextType = GraphQLContext, ParentType e
 export interface JsonObjectScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONObject'], any> {
   name: 'JSONObject';
 }
+
+export type ListValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ListValidation'] = ResolversParentTypes['ListValidation']> = {
+  values?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 
 export interface LocaleScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Locale'], any> {
   name: 'Locale';
@@ -4590,6 +4729,11 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
 };
 
+export type RegexValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RegexValidation'] = ResolversParentTypes['RegexValidation']> = {
+  pattern?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type RequestConfigurationValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestConfigurationValidation'] = ResolversParentTypes['RequestConfigurationValidation']> = {
   allowRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   faceCheck?: Resolver<Maybe<ResolversTypes['FaceCheckValidation']>, ParentType, ContextType>;
@@ -4643,6 +4787,12 @@ export type SendAsyncIssuanceVerificationResponseResolvers<ContextType = GraphQL
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type StringValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['StringValidation'] = ResolversParentTypes['StringValidation']> = {
+  maxLength?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
+  minLength?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type SubscriptionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
   backgroundJobEvent?: SubscriptionResolver<ResolversTypes['BackgroundJobEventData'], "backgroundJobEvent", ParentType, ContextType, Partial<SubscriptionBackgroundJobEventArgs>>;
   issuanceEvent?: SubscriptionResolver<ResolversTypes['IssuanceEventData'], "issuanceEvent", ParentType, ContextType, Partial<SubscriptionIssuanceEventArgs>>;
@@ -4674,8 +4824,10 @@ export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends R
 export type TemplateDisplayClaimResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayClaim'] = ResolversParentTypes['TemplateDisplayClaim']> = {
   claim?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  isOptional?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['ClaimType'], ParentType, ContextType>;
+  validation?: Resolver<Maybe<ResolversTypes['ClaimValidation']>, ParentType, ContextType>;
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -4783,6 +4935,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   BackgroundJobEvent?: BackgroundJobEventResolvers<ContextType>;
   BackgroundJobEventData?: BackgroundJobEventDataResolvers<ContextType>;
   BackgroundJobProgressEvent?: BackgroundJobProgressEventResolvers<ContextType>;
+  ClaimValidation?: ClaimValidationResolvers<ContextType>;
   Communication?: CommunicationResolvers<ContextType>;
   Contact?: ContactResolvers<ContextType>;
   Contract?: ContractResolvers<ContextType>;
@@ -4798,15 +4951,18 @@ export type Resolvers<ContextType = GraphQLContext> = {
   FaceCheckResult?: FaceCheckResultResolvers<ContextType>;
   FaceCheckValidation?: FaceCheckValidationResolvers<ContextType>;
   Features?: FeaturesResolvers<ContextType>;
+  FloatValidation?: FloatValidationResolvers<ContextType>;
   HexColorCode?: GraphQLScalarType;
   Identity?: IdentityResolvers<ContextType>;
   IdentityIssuer?: IdentityIssuerResolvers<ContextType>;
+  IntValidation?: IntValidationResolvers<ContextType>;
   Issuance?: IssuanceResolvers<ContextType>;
   IssuanceCallbackEvent?: IssuanceCallbackEventResolvers<ContextType>;
   IssuanceEventData?: IssuanceEventDataResolvers<ContextType>;
   IssuanceRequestResponse?: IssuanceRequestResponseResolvers<ContextType>;
   IssuanceResponse?: IssuanceResponseResolvers<ContextType>;
   JSONObject?: GraphQLScalarType;
+  ListValidation?: ListValidationResolvers<ContextType>;
   Locale?: GraphQLScalarType;
   Mutation?: MutationResolvers<ContextType>;
   NetworkContract?: NetworkContractResolvers<ContextType>;
@@ -4826,6 +4982,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   PresentationResponse?: PresentationResponseResolvers<ContextType>;
   PresentedCredential?: PresentedCredentialResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  RegexValidation?: RegexValidationResolvers<ContextType>;
   RequestConfigurationValidation?: RequestConfigurationValidationResolvers<ContextType>;
   RequestError?: RequestErrorResolvers<ContextType>;
   RequestErrorResponse?: RequestErrorResponseResolvers<ContextType>;
@@ -4834,6 +4991,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   RequestedConfiguration?: RequestedConfigurationResolvers<ContextType>;
   RequestedCredential?: RequestedCredentialResolvers<ContextType>;
   SendAsyncIssuanceVerificationResponse?: SendAsyncIssuanceVerificationResponseResolvers<ContextType>;
+  StringValidation?: StringValidationResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
   Template?: TemplateResolvers<ContextType>;
   TemplateDisplayClaim?: TemplateDisplayClaimResolvers<ContextType>;

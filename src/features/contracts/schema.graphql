@@ -368,81 +368,245 @@ input ContractDisplayConsentInput {
 }
 
 """
-Defines a claim included in a verifiable credential
+Defines a claim included in a verifiable credential.
 """ # eslint-disable @graphql-eslint/strict-id-in-types
 type ContractDisplayClaim {
   """
-  The label of the claim
+  The label of the claim.
   """
   label: String!
   """
-  The name of the claim to which the label applies
+  The name of the claim.
   """
   claim: String!
   """
-  The type of the claim
-  Valid values encountered so far are:
-  - String
-  - image/jpg;base64url (in the Verified Employee contract)
+  The type of the claim.
   """
-  type: String!
+  type: ClaimType!
   """
-  The description of the claim
+  The description of the claim.
   """
   description: String
   """
-  The value for the claim (optional, only set if the value is fixed)
+  The value for the claim (optional, provides a fixed value for this claim).
   """
   value: String
+  """
+  Indicates a value need not be provided for this claim when issuing this credential.
+  """
+  isOptional: Boolean
+  """
+  Defines how the value of the claim should be validated.
+  """
+  validation: ClaimValidation
 }
 
 """
-Defines a claim included in a verifiable credential
+Defines a claim included in a verifiable credential.
 """ # eslint-disable @graphql-eslint/strict-id-in-types
 input ContractDisplayClaimInput {
   """
-  The label of the claim
+  The label of the claim.
   """
   label: String!
   """
-  The name of the claim to which the label applies
+  The name of the claim.
   """
   claim: String!
   """
-  The type of the claim
-  Valid values encountered so far are:
-  - String
-  - image/jpg;base64url (in the Verified Employee contract)
+  The type of the claim.
   """
-  type: String!
+  type: ClaimType!
   """
-  The description of the claim
+  The description of the claim.
   """
   description: String
   """
-  The value for the claim (optional, only set if the value is fixed)
+  The value for the claim (optional, provides a fixed value for this claim).
   """
   value: String
+  """
+  Indicates a value need not be provided for this claim when issuing this credential.
+  """
+  isOptional: Boolean
+  """
+  Defines how the value of the claim should be validated.
+  """
+  validation: ClaimValidationInput
 }
 
 """
-Defines the filter criteria used to find contracts
+The type of the claim, providing validation of the claim value.
+"""
+enum ClaimType {
+  """
+  The claim value is a string.
+  """
+  string
+  """
+  The claim value is one of a list of strings specified via the claim `validation` field.
+  """
+  list
+  """
+  The claim value is a JPEG image encoded as a base64 encoded [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs).
+  """
+  image
+  """
+  The claim value is a whole number (encoded as a string).
+  """
+  int
+  """
+  The claim value is a decimal or floating point number (encoded as a string).
+  """
+  float
+  """
+  The claim value is a boolean value encoded as `true` or `false`.
+  """
+  boolean
+  """
+  The claim value is a date string in full-date ISO 8601 format: `YYYY-MM-DD`.
+  """
+  date
+  """
+  The claim value is a date-time string in ISO 8601 format: `YYYY-MM-DDTHH:MM:SSZ`.
+  """
+  dateTime
+  """
+  The claim value is an email address.
+  """
+  email
+  """
+  The claim value is a phone number in international E.164 format.
+  """
+  phone
+  """
+  The claim value is a URL.
+  """
+  url
+}
+
+"""
+Provides additional validation input for the defined claim type.
+"""
+input ClaimValidationInput @oneOf {
+  string: StringValidationInput
+  int: IntValidationInput
+  float: FloatValidationInput
+  list: ListValidationInput
+  regex: RegexValidationInput
+}
+
+"""
+String claim validation.
+"""
+input StringValidationInput {
+  minLength: PositiveInt
+  maxLength: PositiveInt
+}
+
+"""
+Integer claim validation.
+"""
+input IntValidationInput {
+  min: Int
+  max: Int
+}
+
+"""
+Float claim validation.
+"""
+input FloatValidationInput {
+  min: Float
+  max: Float
+}
+
+"""
+List claim validation.
+"""
+input ListValidationInput {
+  """
+  The list of valid values for the claim.
+  """
+  values: [String!]!
+}
+
+"""
+Regular expression claim validation.
+"""
+input RegexValidationInput {
+  """
+  The regular expression pattern to validate the claim value.
+  """
+  pattern: String!
+}
+
+"""
+Validation definition for the claim value, according to the claim type.
+"""
+union ClaimValidation = StringValidation | IntValidation | FloatValidation | ListValidation | RegexValidation
+
+"""
+String claim validation.
+"""
+type StringValidation {
+  minLength: PositiveInt
+  maxLength: PositiveInt
+}
+
+"""
+Int claim validation.
+"""
+type IntValidation {
+  min: Int
+  max: Int
+}
+
+"""
+Float claim validation.
+"""
+type FloatValidation {
+  min: Float
+  max: Float
+}
+
+"""
+List claim validation.
+"""
+type ListValidation {
+  """
+  The list of valid values for the claim.
+  """
+  values: [String!]!
+}
+
+"""
+Regular expression claim validation.
+"""
+type RegexValidation {
+  """
+  The regular expression pattern to validate the claim value.
+  """
+  pattern: String!
+}
+
+"""
+Defines the filter criteria used to find contracts.
 """
 input ContractWhere {
   """
-  List only contracts matching this name
+  List only contracts matching this name.
   """
   name: String
   """
-  List only contracts from this template
+  List only contracts from this template.
   """
   templateId: ID
   """
-  List only contracts that are or are not published in the Verified Credentials Network
+  List only contracts that are or are not published in the Verified Credentials Network.
   """
   isProvisioned: Boolean
   """
-  List only the contracts which include any of these credential types
+  List only the contracts which include any of these credential types.
   """
   credentialTypes: [String!]
   """
@@ -458,11 +622,11 @@ input ContractWhere {
   """
   createdTo: DateTime
   """
-  List only the contracts whose deprecation status matches the flag
+  List only the contracts whose deprecation status matches the flag.
   """
   isDeprecated: Boolean
   """
-  The type of face check photo support
+  The type of face check photo support.
   """
   faceCheckSupport: FaceCheckPhotoSupport
 }

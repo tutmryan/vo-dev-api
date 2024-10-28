@@ -1,10 +1,11 @@
 import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { graphql } from '../../../generated'
-import type { ContractInput } from '../../../generated/graphql'
+import { ClaimType, type ContractInput } from '../../../generated/graphql'
 import { executeOperationAsCredentialAdmin, fakeJpegDataURL } from '../../../test'
 import type { DeepPartial } from '../../../util/type-helpers'
 import { resolveToType } from '../../../util/type-helpers'
+import { convertToClaimValidationInput } from '../mapping'
 import { notSupportedCredentialTypes } from '../validation'
 
 export const ContractFragment = graphql(
@@ -144,12 +145,13 @@ export function buildContractInput(args: DeepPartial<ContractInput>): ContractIn
       claims: args.display?.claims
         ? args.display.claims.map((c) => ({
             ...generateClaimAndLabelTitles(),
-            type: 'String',
             ...c,
+            type: c.type || ClaimType.String,
+            validation: convertToClaimValidationInput(c.validation),
           }))
         : resolveToType<ContractInput['display']['claims']>([
-            { claim: 'claim_one', label: 'Claim 1', type: 'String', value: 'Claim 1' },
-            { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
+            { claim: 'claim_one', label: 'Claim 1', type: ClaimType.String, value: 'Claim 1' },
+            { claim: 'claim_two', label: 'Claim 2', type: ClaimType.String, value: 'Claim 2' },
           ]),
     }),
   }

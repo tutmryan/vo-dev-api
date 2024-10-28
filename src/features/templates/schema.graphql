@@ -331,30 +331,33 @@ Defines a claim included in a verifiable credential
 """ # eslint-disable @graphql-eslint/strict-id-in-types
 type TemplateDisplayClaim {
   """
-  The label of the claim
+  The label of the claim.
   """
   label: String!
   """
-  The name of the claim to which the label applies
+  The name of the claim.
   """
   claim: String!
   """
-  The type of the claim
-  Valid values encountered so far are:
-    - String
-    - image/jpg;base64url (in the Verified Employee contract)
+  The type of the claim.
   """
-  type: String!
+  type: ClaimType!
   """
-  The description of the claim
+  The description of the claim.
   """
   description: String
   """
-  The value for the claim
-  If provided, the value is fixed for all credentials referencing this claim
-  If not provided, the value will need to be provided by one of the child template or contract
+  The value for the claim (optional, provides a fixed value for this claim).
   """
   value: String
+  """
+  Indicates a value need not be provided for this claim when issuing this credential.
+  """
+  isOptional: Boolean
+  """
+  Defines how the value of the claim should be validated.
+  """
+  validation: ClaimValidation
 }
 
 """
@@ -362,30 +365,33 @@ Defines a claim included in a verifiable credential
 """ # eslint-disable @graphql-eslint/strict-id-in-types
 input CreateUpdateTemplateDisplayClaimInput {
   """
-  The label of the claim
+  The label of the claim.
   """
   label: String!
   """
-  The name of the claim to which the label applies
+  The name of the claim.
   """
   claim: String!
   """
-  The type of the claim
-  Valid values encountered so far are:
-    - String
-    - image/jpg;base64url (in the Verified Employee contract)
+  The type of the claim.
   """
-  type: String!
+  type: ClaimType!
   """
-  The description of the claim
+  The description of the claim.
   """
   description: String
   """
-  The value for the claim
-  If provided, the value is fixed for all credentials referencing this claim
-  If not provided, the value will need to be dynamically provided before the credential is issued
+  The value for the claim (optional, provides a fixed value for this claim).
   """
   value: String
+  """
+  Indicates a value need not be provided for this claim when issuing this credential.
+  """
+  isOptional: Boolean
+  """
+  Defines how the value of the claim should be validated.
+  """
+  validation: ClaimValidationInput
 }
 
 """

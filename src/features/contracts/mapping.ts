@@ -1,8 +1,14 @@
-import { get, intersection, merge, omit } from 'lodash'
+import { get, intersection, omit } from 'lodash'
+import type { DeepPartial } from 'typeorm'
 import type {
+  ClaimValidation,
+  ClaimValidationInput,
+  ContractDisplayClaim,
   ContractDisplayClaimInput,
   ContractDisplayModelInput,
   ContractInput,
+  InputMaybe,
+  Maybe,
   TemplateDisplayClaim,
   TemplateParentData,
 } from '../../generated/graphql'
@@ -55,11 +61,47 @@ export async function ensureNoOverridingTemplateData(a: ContractInput, b: Templa
   }
 }
 
+function convertToPersistedClaim(claimInput: ContractDisplayClaimInput): ContractDisplayClaim {
+  return {
+    ...claimInput,
+    validation: convertToClaimValidation(claimInput.validation),
+  }
+}
+
 /**
  * Converts a ContractDisplayModelInput to the persisted ContractDisplayModel by omitting the card.logo.image and ensuring card.logo.uri is set
  */
 export function toPersistedDisplayModel(input: ContractDisplayModelInput, displayLogoUrl: string): ContractEntity['display'] {
-  return merge(omit(input, 'card.logo.image'), {
-    card: { logo: { uri: displayLogoUrl } },
-  })
+  const { card, claims, ...rest } = input
+
+  return {
+    ...rest,
+    card: {
+      ...card,
+      logo: {
+        ...omit(card.logo, 'image'),
+        uri: displayLogoUrl,
+      },
+    },
+    claims: claims.map(convertToPersistedClaim),
+  }
+}
+
+export function convertToClaimValidation(validationInput?: InputMaybe<ClaimValidationInput>): Maybe<ClaimValidation> | undefined {
+  if (!validationInput) return undefined
+  const { string, int, float, list, regex } = validationInput
+  return string ?? int ?? float ?? list ?? regex
+}
+
+export function convertToClaimValidationInput(
+  validation?: InputMaybe<DeepPartial<ClaimValidationInput>> | undefined,
+): InputMaybe<ClaimValidationInput> | undefined {
+  if (!validation) return undefined
+  const { string, int, float, list, regex } = validation
+  if (string) return { string }
+  if (int) return { int }
+  if (float) return { float }
+  if (list?.values) return { list: { values: list.values } }
+  if (regex?.pattern) return { regex: { pattern: regex.pattern } }
+  return undefined
 }

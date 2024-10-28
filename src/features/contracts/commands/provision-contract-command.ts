@@ -4,6 +4,7 @@ import { isFaceCheckSupportEnabled, registerFeatureCheck } from '../../../cqs/fe
 import { FaceCheckPhotoSupport } from '../../../generated/graphql'
 import type { Contract, CreateContractInput, UpdateContractInput } from '../../../services/verified-id'
 import {
+  claimTypeString,
   displayClaimPrefix,
   faceCheckPhotoClaimAttestation,
   faceCheckPhotoDisplayClaim,
@@ -72,8 +73,8 @@ function toCreateContractInput({
               ...(faceCheckSupport === FaceCheckPhotoSupport.None
                 ? []
                 : [{ ...faceCheckPhotoClaimAttestation, required: faceCheckSupport === FaceCheckPhotoSupport.Required }]),
-              ...claims.map(({ type, claim }) => ({
-                type: type,
+              ...claims.map(({ claim }) => ({
+                type: claimTypeString,
                 required: true,
                 outputClaim: claim,
                 inputClaim: claim,
@@ -90,10 +91,10 @@ function toCreateContractInput({
         consent,
         card,
         claims: [
-          ...claims.map(({ claim, type, label, description }) => ({
+          ...claims.map(({ claim, label, description }) => ({
             label,
             claim: `${displayClaimPrefix}${claim}`,
-            type,
+            type: claimTypeString,
             description,
           })),
           ...(faceCheckSupport === FaceCheckPhotoSupport.None ? [] : [faceCheckPhotoDisplayClaim]),

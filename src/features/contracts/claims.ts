@@ -1,5 +1,6 @@
 import type {
   AsyncIssuanceRequestInput,
+  ContractDisplayModel,
   ContractDisplayModelInput,
   CreateUpdateTemplateDisplayModelInput,
   IssuanceRequestInput,
@@ -75,7 +76,7 @@ export const validateContractClaims = (
  */
 export const validateIssuanceClaimsAgainstContractClaims = (
   claims?: IssuanceRequestInput['claims'] | AsyncIssuanceRequestInput['claims'],
-  contractClaims?: ContractDisplayModelInput['claims'] | CreateUpdateTemplateDisplayModelInput['claims'],
+  contractClaims?: ContractDisplayModel['claims'] | CreateUpdateTemplateDisplayModelInput['claims'],
 ): void => {
   claims = claims ?? {}
   const requiredClaims = contractClaims?.filter(({ value }) => value === undefined)

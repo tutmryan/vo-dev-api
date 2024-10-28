@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto'
 import { graphql } from '../../../generated'
-import type { TemplateInput } from '../../../generated/graphql'
+import { ClaimType, type TemplateInput } from '../../../generated/graphql'
 import { executeOperationAsCredentialAdmin, fakeJpegDataURL } from '../../../test'
 
 export const TemplateFragment = graphql(
@@ -101,8 +101,8 @@ export function buildTemplateInput(args: Partial<TemplateInput>): TemplateInput 
         ...args.display?.consent,
       },
       claims: args.display?.claims || [
-        { claim: 'claim_one', label: 'Claim 1', type: 'String' },
-        { claim: 'claim_two', label: 'Claim 2', type: 'String', value: 'Claim 2' },
+        { claim: 'claim_one', label: 'Claim 1', type: ClaimType.String },
+        { claim: 'claim_two', label: 'Claim 2', type: ClaimType.String, value: 'Claim 2' },
       ],
     },
   }

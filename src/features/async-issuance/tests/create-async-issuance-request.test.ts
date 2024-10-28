@@ -1,6 +1,6 @@
 import casual from 'casual'
 import { addDays, addMinutes } from 'date-fns'
-import { AsyncIssuanceRequestExpiry, FaceCheckPhotoSupport } from '../../../generated/graphql'
+import { AsyncIssuanceRequestExpiry, ClaimType, FaceCheckPhotoSupport } from '../../../generated/graphql'
 import { beforeAfterAll, expectResponseUnionToBe, expectToBeDefinedAndNotNull, expectToBeUndefined } from '../../../test'
 import { mockedServices } from '../../../test/mocks'
 import { throwError } from '../../../util/throw-error'
@@ -42,8 +42,8 @@ describe('createAsyncIssuanceRequest mutation', () => {
           faceCheckSupport: useFaceCheck || usePhotoCapture ? FaceCheckPhotoSupport.Required : undefined,
           claims: useClaims
             ? [
-                { claim: 'fixed-claim', label: 'fixed-label', type: 'fixed-value', value: 'fixed-value' },
-                { claim: 'unfixed-claim', label: 'unfixed-label', type: 'unfixed-value', value: undefined },
+                { claim: 'fixed-claim', label: 'fixed-label', type: ClaimType.String, value: 'fixed-value' },
+                { claim: 'unfixed-claim', label: 'unfixed-label', type: ClaimType.String, value: undefined },
               ]
             : undefined,
         })
@@ -100,7 +100,7 @@ describe('createAsyncIssuanceRequest mutation', () => {
         const { contract } = await givenContract({
           faceCheckSupport: useMissingFaceCheck || useMissingPhotoCapture ? FaceCheckPhotoSupport.Required : undefined,
           claims: useMissedRequiredClaim
-            ? [{ claim: 'unfixed-claim', label: 'unfixed-label', type: 'unfixed-value', value: undefined }]
+            ? [{ claim: 'unfixed-claim', label: 'unfixed-label', type: ClaimType.String, value: undefined }]
             : undefined,
         })
         const identity = await Promise.all(new Array(numberOfRequests).fill(null).map(() => createIdentity()))

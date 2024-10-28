@@ -1,5 +1,5 @@
 import { randomUUID } from 'crypto'
-import type { TemplateInput } from '../../generated/graphql'
+import { ClaimType, type TemplateInput } from '../../generated/graphql'
 import {
   beforeAfterAll,
   executeOperationAnonymous,
@@ -60,8 +60,8 @@ describe('createTemplate mutation', () => {
         locale: 'en-AU',
         consent: { instructions: 'Parent consent instructions' },
         claims: [
-          { claim: 'parent_claim', label: 'Parent claim', type: 'String' },
-          { claim: 'other_parent_claim', label: 'Other parent claim', type: 'String', value: 'Fixed', description: 'Description' },
+          { claim: 'parent_claim', label: 'Parent claim', type: ClaimType.String },
+          { claim: 'other_parent_claim', label: 'Other parent claim', type: ClaimType.String, value: 'Fixed', description: 'Description' },
         ],
         card: {
           issuedBy: 'Parent template',
@@ -87,7 +87,9 @@ describe('createTemplate mutation', () => {
               instructions: 'Overridden instructions that will cause an error',
               title: 'Fresh title that will not cause an error',
             },
-            claims: [{ claim: 'other_parent_claim', label: 'Other parent claim', type: 'String', value: 'Overridden, will cause error' }],
+            claims: [
+              { claim: 'other_parent_claim', label: 'Other parent claim', type: ClaimType.String, value: 'Overridden, will cause error' },
+            ],
             card: {
               backgroundColor: '#222333',
               issuedBy: 'Overridden issuedBy which will cause an error',
@@ -132,7 +134,7 @@ describe('createTemplate mutation', () => {
           {
             claim: 'firstName',
             label: 'First name',
-            type: 'String',
+            type: ClaimType.String,
           },
         ],
       },
