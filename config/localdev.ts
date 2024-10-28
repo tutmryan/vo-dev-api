@@ -80,6 +80,10 @@ const config: DeepPartial<Config> = {
   limitedAsyncIssuance,
   limitedDemo,
   localDev: {
+    tunnel: {
+      api: '',
+      portal: '',
+    },
     email: {
       disabled: true,
       allowList: [],

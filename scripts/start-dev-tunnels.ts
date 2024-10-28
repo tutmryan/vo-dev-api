@@ -121,11 +121,6 @@ const startNgrok = async () => {
   })
   console.log(`✅ API tunnel created at ${apiUrl}`)
 
-  console.log('Updating the Admin UI .env.local file with the new API URL...')
-  replaceValueInEnvConfigFile('VITE_API_URL', `${apiUrl}/graphql`, pathToAdminUi, '.env.local')
-  console.log('Updating the Portal UI .env.local file with the new API URL...')
-  replaceValueInEnvConfigFile('VITE_VO_API_URL', `${apiUrl}/graphql`, pathToPortalUi, '.env.local')
-
   console.log('Creating tunnel to the Admin UI project...')
   const adminUiUrl = await ngrok.connect({
     proto: 'http',
@@ -140,8 +135,19 @@ const startNgrok = async () => {
   })
   console.log(`✅ Portal UI tunnel created at ${portalUiUrl}`)
 
+  // API
+  console.log('Updating the API .env file with the new API URL...')
+  replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_API', apiUrl, pathToApi, '.env')
   console.log('Updating the API .env file with the new Portal tunnel URL...')
-  replaceValueInEnvConfigFile('LOCAL_DEV_PORTAL_TUNNEL_URI', portalUiUrl, pathToApi, '.env')
+  replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_PORTAL', portalUiUrl, pathToApi, '.env')
+
+  // Admin
+  console.log('Updating the Admin UI .env.local file with the new API URL...')
+  replaceValueInEnvConfigFile('VITE_API_URL', `${apiUrl}/graphql`, pathToAdminUi, '.env.local')
+
+  // Portal
+  console.log('Updating the Portal UI .env.local file with the new API URL...')
+  replaceValueInEnvConfigFile('VITE_VO_API_URL', `${apiUrl}/graphql`, pathToPortalUi, '.env.local')
 
   const renderUi = () => {
     console.log('')
@@ -222,7 +228,8 @@ const graceful = async () => {
   ngrok.kill()
 
   console.log('Removing Ngrok configuration...')
-  replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_URI', '', pathToApi, '.env')
+  replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_API', '', pathToApi, '.env')
+  replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_PORTAL', '', pathToApi, '.env')
   replaceValueInEnvConfigFile('VITE_API_URL', `http://localhost:4000/graphql`, pathToAdminUi, '.env.local')
   replaceValueInEnvConfigFile('VITE_VO_API_URL', `http://localhost:4000/graphql`, pathToPortalUi, '.env.local')
 

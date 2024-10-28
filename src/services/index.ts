@@ -29,16 +29,19 @@ export interface Services {
   communications: CommunicationsService
 }
 
+export const createLogoImagesService = () =>
+  new BlobStorageContainerService({
+    url: blobStorage.url,
+    credentials: blobStorage.credentials,
+    containerName: blobStorage.logoImagesContainer,
+  })
+
 export const createServices = (context: BaseContext): Services => {
   return {
     homeTenantGraph: createGraphService(),
     verifiedIdAdmin: createVerifiedIdAdminService(context.logger, context.requestInfo.correlationId),
     verifiedIdRequest: createVerifiedIdRequestService(context),
-    logoImages: new BlobStorageContainerService({
-      url: blobStorage.url,
-      credentials: blobStorage.credentials,
-      containerName: blobStorage.logoImagesContainer,
-    }),
+    logoImages: createLogoImagesService(),
     asyncIssuances: new AsyncIssuanceService(),
     communications: new CommunicationsService(context.logger),
   }

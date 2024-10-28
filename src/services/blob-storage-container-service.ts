@@ -48,6 +48,11 @@ export class BlobStorageContainerService {
     return blockBlobClient.uploadData(buffer, options)
   }
 
+  async exists(blobName: string): Promise<boolean> {
+    const blockBlobClient = this.containerClient().getBlockBlobClient(blobName)
+    return blockBlobClient.exists()
+  }
+
   async downloadToBuffer(blobName: string): Promise<Buffer | undefined> {
     const blockBlobClient = this.containerClient().getBlockBlobClient(blobName)
     return blockBlobClient.downloadToBuffer()

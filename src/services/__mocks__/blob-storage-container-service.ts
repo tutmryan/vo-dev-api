@@ -19,6 +19,7 @@ const serviceMock: ServiceMock<BlobStorageContainerService> = {
   deleteIfExists: mockFunction<BlobStorageContainerService['deleteIfExists']>(),
   getProperties: mockFunction<BlobStorageContainerService['getProperties']>(),
   containerClient: mockFunction<BlobStorageContainerService['containerClient']>(),
+  exists: mockFunction<BlobStorageContainerService['exists']>(),
 }
 
 jest.mock('../blob-storage-container-service', () => ({
