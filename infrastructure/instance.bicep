@@ -1025,6 +1025,16 @@ resource asyncIssuanceBlobContainerRoleAssignment 'Microsoft.Authorization/roleA
   }
 }
 
+resource oidcBlobContainerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: oidcBlobContainer
+  name: guid(oidcBlobContainer.id, apiAppService.id, storageBlobContributorRoleDefinition.id)
+  properties: {
+    roleDefinitionId: storageBlobContributorRoleDefinition.id
+    principalId: apiAppService.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 @description('The ID of the app service plan to host instance app services')
 param appServicePlanId string
 
