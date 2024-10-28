@@ -29,6 +29,7 @@ import {
 } from './config'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
 import { demoPresentationTokenHandlers, demoPresentationTokenRoute } from './features/demo'
+import { vcLogoProxyHandler, vcLogoProxyTokenRoute } from './features/local-dev/vc-logo-proxy'
 import { logger } from './logger'
 import { addVoyager } from './voyager'
 
@@ -56,6 +57,11 @@ export const getExpressApp = (): Express => {
 
   app.use(cors(corsConfig))
   logger.info(`Using CORS origin: ${corsConfig.origin}`)
+
+  if (isLocalDev) {
+    app.get(vcLogoProxyTokenRoute, vcLogoProxyHandler)
+    logger.info(`Added ${vcLogoProxyTokenRoute}`)
+  }
 
   if (devToolsEnabled) {
     app.use(cookieSession(clone(cookieSessionConfig)))

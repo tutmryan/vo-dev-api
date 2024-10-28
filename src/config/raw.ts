@@ -146,8 +146,11 @@ export type Config = {
   issuanceRequestRegistration: IssuanceRequestRegistration
   platformConsumerApps: Record<string, string>
   identityIssuers: Record<string, string>
-  localDevPortalTunnelUri: string
   localDev: {
+    tunnel: {
+      api: string
+      portal: string
+    }
     email: {
       disabled: boolean
       allowList: string[]

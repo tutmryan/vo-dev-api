@@ -1,8 +1,10 @@
+import { isLocalDev } from '@makerx/node-common'
 import { basename } from 'path'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckSupportEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { FaceCheckPhotoSupport, type ContractInput } from '../../../generated/graphql'
 import { ContractEntity } from '../entities/contract-entity'
+import { convertLocalDevUriToMicrosoftFriendly } from '../index'
 import { ensureNoOverridingTemplateData, toPersistedDisplayModel } from '../mapping'
 import { validateContractInput } from '../validation'
 
@@ -20,9 +22,15 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
   if (template) await ensureNoOverridingTemplateData(input, await template.combinedData())
 
   await this.services.logoImages.deleteIfExists(decodeURIComponent(basename(contract.display.card.logo.uri)))
-  const displayLogoUri = await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image, {
+  let displayLogoUri = await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image, {
     appendExtension: true,
   })
+
+  if (isLocalDev) {
+    // The MS server will not accept the local URL for the logo image. Instead, we will use the local dev proxy to serve
+    // the image when using dev tunnels. Otherwise, we will use the demo's site favicon.
+    displayLogoUri = convertLocalDevUriToMicrosoftFriendly(displayLogoUri)
+  }
 
   await contract.update({
     name: input.name,

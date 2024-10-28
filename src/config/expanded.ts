@@ -113,6 +113,6 @@ export const platformConsumerApps = { [config.get('limitedDemo.oid')]: 'Portal D
 
 export const portalUrl = config.has('instance')
   ? `https://${config.get('instance')}.portal.verifiedorchestration.com`
-  : config.has('localDevPortalTunnelUri')
-    ? config.get('localDevPortalTunnelUri')
+  : config.has('localDev.tunnel.portal')
+    ? config.get('localDev.tunnel.portal')
     : 'http://localhost:5173'
