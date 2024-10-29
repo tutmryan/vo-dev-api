@@ -678,6 +678,8 @@ export enum ClaimType {
   List = 'list',
   /** The claim value is a phone number in international E.164 format. */
   Phone = 'phone',
+  /** The claim value matches a regex pattern. */
+  Regex = 'regex',
   /** The claim value is a string. */
   String = 'string',
   /** The claim value is a URL. */

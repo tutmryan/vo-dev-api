@@ -483,6 +483,10 @@ enum ClaimType {
   The claim value is a URL.
   """
   url
+  """
+  The claim value matches a regex pattern.
+  """
+  regex
 }
 
 """
