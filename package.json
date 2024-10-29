@@ -36,8 +36,7 @@
     "start:built": "cd build && dotenv -e ../.env node ./src/main && cd ..",
     "test": "jest",
     "test:ci:start-db": "docker compose up -d && cross-env NODE_ENV=test ts-node scripts/localdev-database-wait",
-    "test:ci": "jest --ci --reporters=default --reporters=jest-junit",
-    "start:dev:tunnels1": "cross-env ts-node-dev scripts/start-dev-tunnels",
+    "test:ci": "cross-env NODE_OPTIONS=\"--max-old-space-size=4096\" jest --ci --reporters=default --reporters=jest-junit",
     "start:dev:tunnels": "bun run ./scripts/start-dev-tunnels"
   },
   "repository": {
