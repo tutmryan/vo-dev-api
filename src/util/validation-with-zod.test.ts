@@ -1,5 +1,5 @@
 import { ClaimType, ContractDisplayClaimInput } from '../generated/graphql'
-import { validateClaimInput, ValidationError } from './validation'
+import { validateClaimInput, ValidationError } from './validation-with-zod'
 
 function createClaimInput(overrides: Partial<ContractDisplayClaimInput>): ContractDisplayClaimInput {
   return {

@@ -6,7 +6,7 @@ import type {
   IssuanceRequestInput,
 } from '../../generated/graphql'
 import type { AttestationClaimMapping, DisplayClaim } from '../../services/verified-id'
-import { validateClaimInput } from '../../util/validation'
+import { validateClaimInput } from '../../util/validation-with-zod'
 
 export const displayClaimPrefix = 'vc.credentialSubject.'
 export const claimTypeString = 'String'
@@ -63,11 +63,8 @@ export const validateIssuanceClaims = (claims?: IssuanceRequestInput['claims'] |
 }
 
 /**
- * Validates all contract claims, throwing an error if any standard claims are included
+ * Validates all contract claims inputs, throwing an error if any standard claims are included
  * or if any claim fails individual validation.
- *
- * @param claimsInputs - An array of contract display claims to validate.
- * @throws {Error} If any standard claim is found or if a claim fails validation.
  */
 export const validateContractClaims = (
   claimsInputs?: ContractDisplayModelInput['claims'] | CreateUpdateTemplateDisplayModelInput['claims'],
