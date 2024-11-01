@@ -138,6 +138,7 @@ export function routes(app: Express, route: string, provider: Provider): void {
             details: prompt.details,
             params,
             title: 'Authorize',
+            showDebug,
             session: session ? debug(session) : undefined,
             dbg: {
               params: debug(params),
