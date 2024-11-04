@@ -100,13 +100,14 @@ describe('validateClaimInput', () => {
   })
 
   describe('List claim', () => {
-    it.each([{ type: 'validates successfully', value: 'Option1', validation: { list: { values: ['Option1', 'Option2'] } } }])(
-      '$type',
-      ({ value, validation }) => {
-        const input = createClaimInput({ type: ClaimType.List, value, validation })
-        expect(() => validateClaimInput(input)).not.toThrow()
-      },
-    )
+    it('validates successfully', () => {
+      const input = createClaimInput({
+        type: ClaimType.List,
+        value: 'Option1',
+        validation: { list: { values: ['Option1', 'Option2'] } },
+      })
+      expect(() => validateClaimInput(input)).not.toThrow()
+    })
 
     it.each([
       { type: 'throws when value is not in the list', value: 'InvalidOption', validation: { list: { values: ['Option1', 'Option2'] } } },
@@ -118,13 +119,14 @@ describe('validateClaimInput', () => {
   })
 
   describe('Regex claim', () => {
-    it.each([{ type: 'validates successfully', value: 'abc', validation: { regex: { pattern: '^[a-z]+$' } } }])(
-      '$type',
-      ({ value, validation }) => {
-        const input = createClaimInput({ type: ClaimType.Regex, value, validation })
-        expect(() => validateClaimInput(input)).not.toThrow()
-      },
-    )
+    it('validates successfully', () => {
+      const input = createClaimInput({
+        type: ClaimType.Regex,
+        value: 'abc',
+        validation: { regex: { pattern: '^[a-z]+$' } },
+      })
+      expect(() => validateClaimInput(input)).not.toThrow()
+    })
 
     it.each([
       { type: 'throws when validation rules are missing', value: undefined, validation: undefined },
