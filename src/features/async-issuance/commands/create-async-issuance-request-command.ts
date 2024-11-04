@@ -21,7 +21,7 @@ import { invariant } from '../../../util/invariant'
 import { throwError } from '../../../util/throw-error'
 import { userInvariant } from '../../../util/user-invariant'
 import { isValidEmail } from '../../../util/validation'
-import { validateIssuanceClaims, validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
+import { validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { bulkCreateOrUpdateIdentity, identityInputKey } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
@@ -102,7 +102,7 @@ export async function CreateAsyncIssuanceRequestCommand(
         contractId,
         identityId,
         identity,
-        claims,
+        claims: claimsInput,
         faceCheckPhoto: faceCheckPhotoInput,
         photoCapture,
         contact,
@@ -113,17 +113,14 @@ export async function CreateAsyncIssuanceRequestCommand(
       // validate contact
       validateContact(contact)
 
-      // validate issuance claims (excluding contract claims)
-      validateIssuanceClaims(claims)
-
       // locate and validate the contract
       const contract = referencedContracts.get(contractId.toLowerCase())
       invariant(contract, 'Contract could not be found')
       invariant(contract.externalId, 'Contract must be provisioned before issuance')
       invariant(!contract.isDeprecated, 'Contract must not be deprecated')
 
-      // validate that the provided claims include the required contract claims
-      validateIssuanceClaimsAgainstContractClaims(claims, contract.display.claims)
+      // validate that the provided claims include the required contract claims and validate all claim values
+      validateIssuanceClaimsAgainstContractClaims(claimsInput, contract.display.claims)
 
       // find the identity if specified by ID
       if (identityId) {

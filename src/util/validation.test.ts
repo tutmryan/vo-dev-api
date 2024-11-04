@@ -187,13 +187,10 @@ describe('validateClaimInput', () => {
   })
 
   describe('Image claim', () => {
-    it.each([{ type: 'validates base64 image format', value: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/' }])(
-      '$type',
-      ({ value }) => {
-        const input = createClaimInput({ type: ClaimType.Image, value })
-        expect(() => validateClaimInput(input)).not.toThrow()
-      },
-    )
+    it.each([{ type: 'validates base64 image format', value: 'data:image/jpeg;base64,ZmFjZS1jaGVjay0xMjM=' }])('$type', ({ value }) => {
+      const input = createClaimInput({ type: ClaimType.Image, value })
+      expect(() => validateClaimInput(input)).not.toThrow()
+    })
 
     it('throws an error for invalid image format', () => {
       const input = createClaimInput({ type: ClaimType.Image, value: 'invalid_image' })

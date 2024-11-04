@@ -1,4 +1,7 @@
+import { z } from 'zod'
+import { convertToClaimValidation } from '../features/contracts/mapping'
 import type {
+  ContractDisplayClaim,
   ContractDisplayClaimInput,
   FloatValidation,
   IntValidation,
@@ -14,168 +17,144 @@ export class ValidationError extends Error {
   }
 }
 
-export function validateClaimInput(claimInput: ContractDisplayClaimInput) {
-  const { type, value, validation } = claimInput
+const baseStringSchema = z.string()
+const baseIntSchema = z.number().int()
+const baseFloatSchema = z.number()
+const booleanSchema = z.enum(['true', 'false'])
+const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Invalid date format. Expected YYYY-MM-DD.' })
+const dateTimeSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, { message: 'Invalid date-time format. Expected YYYY-MM-DDTHH:MM:SSZ.' })
+const emailSchema = z.string().email({ message: 'Invalid email address.' })
+const imageSchema = z.string().regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/, { message: 'Invalid base64 image.' })
+const phoneSchema = z.string().regex(/^\+[1-9]\d{1,14}$/, { message: 'Invalid E.164 phone number.' })
+const urlSchema = z.string().url({ message: 'Invalid URL.' })
+
+const isValidNumber = (value: number | null | undefined): value is number => {
+  return value !== null && value !== undefined
+}
+
+const stringSchema = (validation?: StringValidation) => {
+  let schema = baseStringSchema
+  if (isValidNumber(validation?.minLength)) {
+    schema = schema.min(validation.minLength, `Minimum length is ${validation.minLength}`)
+  }
+  if (isValidNumber(validation?.maxLength)) {
+    schema = schema.max(validation.maxLength, `Maximum length is ${validation.maxLength}`)
+  }
+  return schema
+}
+
+const intSchema = (validation?: IntValidation) => {
+  let schema = baseIntSchema
+  if (isValidNumber(validation?.min)) {
+    schema = schema.min(validation.min, `Minimum value is ${validation.min}`)
+  }
+  if (isValidNumber(validation?.max)) {
+    schema = schema.max(validation.max, `Maximum value is ${validation.max}`)
+  }
+  return schema
+}
+
+const floatSchema = (validation?: FloatValidation) => {
+  let schema = baseFloatSchema
+  if (isValidNumber(validation?.min)) {
+    schema = schema.min(validation.min, `Minimum value is ${validation.min}`)
+  }
+  if (isValidNumber(validation?.max)) {
+    schema = schema.max(validation.max, `Maximum value is ${validation.max}`)
+  }
+  return schema
+}
+
+const listSchema = (validation: ListValidation) => {
+  return z.enum(validation.values as [string, ...string[]], {
+    message: `Value must be one of: ${validation.values.join(', ')}`,
+  })
+}
+
+const regexSchema = (validation: RegexValidation) => {
+  return z.string().regex(new RegExp(validation.pattern), { message: 'Value does not match the required pattern.' })
+}
+
+function validateClaimRules(type: string, validation?: ContractDisplayClaimInput['validation']) {
+  if (type === 'regex' && (!validation?.regex || !validation.regex.pattern)) {
+    throw new ValidationError('Regex type requires a "pattern" in validation.')
+  }
+  if (type === 'list' && (!validation?.list || validation.list.values.length === 0)) {
+    throw new ValidationError('List type requires a non-empty "values" array in validation.')
+  }
+}
+
+export function validateClaimValue(type: string, value: string, validation?: ContractDisplayClaim['validation']) {
+  let schema
+  let parsedValue: any = value
 
   switch (type) {
     case 'string':
-      validateString(value, validation?.string)
+      schema = stringSchema(validation as StringValidation)
       break
     case 'int':
-      validateInt(value, validation?.int)
+      parsedValue = parseInt(value, 10)
+      if (isNaN(parsedValue)) {
+        throw new ValidationError('Value must be a valid integer.')
+      }
+      schema = intSchema(validation as IntValidation)
       break
     case 'float':
-      validateFloat(value, validation?.float)
+      parsedValue = parseFloat(value)
+      if (isNaN(parsedValue)) {
+        throw new ValidationError('Value must be a valid float.')
+      }
+      schema = floatSchema(validation as FloatValidation)
       break
     case 'list':
-      validateList(value, validation?.list)
+      schema = listSchema(validation as ListValidation)
       break
     case 'regex':
-      validateRegex(value, validation?.regex)
+      schema = regexSchema(validation as RegexValidation)
       break
     case 'boolean':
-      validateBoolean(value)
+      schema = booleanSchema
       break
     case 'date':
-      validateDate(value)
+      schema = dateSchema
       break
     case 'dateTime':
-      validateDateTime(value)
+      schema = dateTimeSchema
       break
     case 'email':
-      validateEmail(value)
+      schema = emailSchema
       break
     case 'image':
-      validateImage(value)
+      schema = imageSchema
       break
     case 'phone':
-      validatePhone(value)
+      schema = phoneSchema
       break
     case 'url':
-      validateUrl(value)
+      schema = urlSchema
       break
     default:
       throw new ValidationError(`Unsupported claim type: ${type}`)
   }
-}
 
-function isValidValue<T>(value: T | null | undefined): value is T {
-  return value != null
-}
-
-function validateString(value?: string | null, validation?: StringValidation) {
-  if (!isValidValue(value)) return
-  if (validation?.minLength != null && value.length < validation.minLength) {
-    throw new ValidationError(`String is too short, minimum length is ${validation.minLength}`)
-  }
-  if (validation?.maxLength != null && value.length > validation.maxLength) {
-    throw new ValidationError(`String is too long, maximum length is ${validation.maxLength}`)
+  const result = schema.safeParse(parsedValue)
+  if (!result.success) {
+    throw new ValidationError(result.error.errors.map((err) => err.message).join(', '))
   }
 }
 
-function validateInt(value?: string | null, validation?: IntValidation) {
-  if (!isValidValue(value)) return
-  const parsedValue = parseInt(value, 10)
-  if (!Number.isInteger(parsedValue)) {
-    throw new ValidationError('Value must be an integer.')
-  }
-  if (validation?.min != null && parsedValue < validation.min) {
-    throw new ValidationError(`Integer is too small, minimum is ${validation.min}`)
-  }
-  if (validation?.max != null && parsedValue > validation.max) {
-    throw new ValidationError(`Integer is too large, maximum is ${validation.max}`)
-  }
+export function validateClaimInput(claimInput: ContractDisplayClaimInput) {
+  const { type, value, validation } = claimInput
+  validateClaimRules(type, validation)
+
+  // Skip value validation for claim inputs if `value` is not provided (e.g., it will be set during consumption)
+  if (!value) return
+
+  validateClaimValue(type, value, convertToClaimValidation(validation))
 }
 
-function validateFloat(value?: string | null, validation?: FloatValidation) {
-  if (!isValidValue(value)) return
-  const parsedValue = parseFloat(value)
-  if (isNaN(parsedValue) || typeof parsedValue !== 'number') {
-    throw new ValidationError('Value must be a float.')
-  }
-  if (validation?.min != null && parsedValue < validation.min) {
-    throw new ValidationError(`Float is too small, minimum is ${validation.min}`)
-  }
-  if (validation?.max != null && parsedValue > validation.max) {
-    throw new ValidationError(`Float is too large, maximum is ${validation.max}`)
-  }
-}
-
-function validateList(value?: string | null, validation?: ListValidation) {
-  if (!validation) {
-    throw new ValidationError('List validation is required for list claim type.')
-  }
-  if (!isValidValue(value)) return
-  if (!validation.values.includes(value)) {
-    throw new ValidationError(`Value must be one of: ${validation.values.join(', ')}`)
-  }
-}
-
-function validateRegex(value?: string | null, validation?: RegexValidation) {
-  if (!validation) {
-    throw new ValidationError('Regex validation is required for regex claim type.')
-  }
-  if (!isValidValue(value)) return
-  const regex = new RegExp(validation.pattern)
-  if (!regex.test(value)) {
-    throw new ValidationError(`Value does not match the pattern: ${validation.pattern}`)
-  }
-}
-
-function validateBoolean(value?: string | null) {
-  if (!isValidValue(value)) return
-  if (value !== 'true' && value !== 'false') {
-    throw new ValidationError('Value must be "true" or "false".')
-  }
-}
-
-function validateDate(value?: string | null) {
-  if (!isValidValue(value)) return
-  const dateRegex = /^\d{4}-\d{2}-\d{2}$/
-  if (!dateRegex.test(value)) {
-    throw new ValidationError('Value must be in full-date ISO 8601 format (YYYY-MM-DD).')
-  }
-}
-
-function validateDateTime(value?: string | null) {
-  if (!isValidValue(value)) return
-  const dateTimeRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/
-  if (!dateTimeRegex.test(value)) {
-    throw new ValidationError('Value must be in ISO 8601 date-time format (YYYY-MM-DDTHH:MM:SSZ).')
-  }
-}
-
-function validateEmail(value?: string | null) {
-  if (!isValidValue(value)) return
-  if (!emailRegex.test(value)) {
-    throw new ValidationError('Value must be a valid email address.')
-  }
-}
-
-function validateImage(value?: string | null) {
-  if (!isValidValue(value)) return
-  const imageRegex = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/
-  if (!imageRegex.test(value)) {
-    throw new ValidationError('Value must be a valid base64-encoded JPEG image.')
-  }
-}
-
-function validatePhone(value?: string | null) {
-  if (!isValidValue(value)) return
-  const phoneRegex = /^\+[1-9]\d{1,14}$/
-  if (!phoneRegex.test(value)) {
-    throw new ValidationError('Value must be a valid phone number in E.164 format.')
-  }
-}
-
-function validateUrl(value?: string | null) {
-  if (!isValidValue(value)) return
-  try {
-    new URL(value)
-  } catch {
-    throw new ValidationError('Value must be a valid URL.')
-  }
-}
 // use the ZOD regex: https://github.com/colinhacks/zod/blob/main/deno/lib/types.ts
 // eslint-disable-next-line no-useless-escape
 const emailRegex = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i

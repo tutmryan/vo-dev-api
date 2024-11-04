@@ -1,12 +1,13 @@
 import type {
   AsyncIssuanceRequestInput,
+  ContractDisplayClaim,
   ContractDisplayModel,
   ContractDisplayModelInput,
   CreateUpdateTemplateDisplayModelInput,
   IssuanceRequestInput,
 } from '../../generated/graphql'
 import type { AttestationClaimMapping, DisplayClaim } from '../../services/verified-id'
-import { validateClaimInput } from '../../util/validation-with-zod'
+import { validateClaimInput, validateClaimValue, ValidationError } from '../../util/validation'
 
 export const displayClaimPrefix = 'vc.credentialSubject.'
 export const claimTypeString = 'String'
@@ -57,7 +58,7 @@ const standardClaimsErrorMessage = `Claims must not include any of: ${standardCl
 /**
  * Throws an error if any of the standard claims are included.
  */
-export const validateIssuanceClaims = (claims?: IssuanceRequestInput['claims'] | AsyncIssuanceRequestInput['claims']): void => {
+const validateStandardIssuanceClaims = (claims?: IssuanceRequestInput['claims'] | AsyncIssuanceRequestInput['claims']): void => {
   if (claims && Object.keys(claims).some((key) => standardClaims.includes(key as StandardClaims)))
     throw new Error(standardClaimsErrorMessage)
 }
@@ -86,8 +87,28 @@ export const validateIssuanceClaimsAgainstContractClaims = (
   contractClaims?: ContractDisplayModel['claims'] | CreateUpdateTemplateDisplayModelInput['claims'],
 ): void => {
   claims = claims ?? {}
-  const requiredClaims = contractClaims?.filter(({ value }) => value === undefined)
-  const missingRequiredClaims = requiredClaims?.filter(({ claim }) => !claims[claim]) ?? []
-  if (missingRequiredClaims.length > 0)
-    throw new Error(`Claims must include: ${missingRequiredClaims.map(({ claim }) => claim).join(', ')}`)
+  validateStandardIssuanceClaims(claims)
+
+  // Keep the old validation behavior (isOptional === undefined)
+  // add new validation (isOptional === false which means its a required claim)
+  // when values in contract is undefined.
+  const missingRequiredClaims =
+    contractClaims?.filter(({ value, isOptional }) => value === undefined && !isOptional).filter(({ claim }) => !claims[claim]) ?? []
+
+  if (missingRequiredClaims.length > 0) {
+    throw new ValidationError(`Claims must include: ${missingRequiredClaims.map(({ claim }) => claim).join(', ')}`)
+  }
+
+  // Now validate the provided values for each claim, respecting the new isOptional flag
+  contractClaims?.forEach(({ claim, type, validation, isOptional }) => {
+    const value = claims[claim]
+
+    // Skip validation if the claim is optional and has no value
+    if (isOptional && (value === undefined || value === null)) return
+
+    // Validate the value if provided, for both required and optional claims
+    if (typeof value === 'string') {
+      validateClaimValue(type, value, validation as ContractDisplayClaim['validation'])
+    }
+  })
 }

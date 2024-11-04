@@ -5,7 +5,14 @@ import { beforeAfterAll, expectResponseUnionToBe, expectToBeDefinedAndNotNull, e
 import { mockedServices } from '../../../test/mocks'
 import { throwError } from '../../../util/throw-error'
 import { createIdentity } from '../../identity/tests/create-identity'
-import { buildContact, executeCreateAsyncIssuanceRequestAsIssuer, faceCheckPhoto, givenContract } from './index'
+import {
+  additonalContractClaims,
+  buildContact,
+  executeCreateAsyncIssuanceRequestAsIssuer,
+  faceCheckPhoto,
+  givenContract,
+  validAdditonalContractClaims,
+} from './index'
 
 describe('createAsyncIssuanceRequest mutation', () => {
   beforeAfterAll()
@@ -25,6 +32,7 @@ describe('createAsyncIssuanceRequest mutation', () => {
       useClaims?: boolean
       useExpiry?: boolean
       useAdditionalClaims?: boolean
+      useAllClaimTypes?: boolean
     }>([
       { type: 'single issuance works', numberOfRequests: 1 },
       { type: 'multiple issuances works' },
@@ -33,10 +41,20 @@ describe('createAsyncIssuanceRequest mutation', () => {
       { type: 'issuance face check works', useFaceCheck: true },
       { type: 'issuance with claims works', useClaims: true },
       { type: 'issuance with additional claims works', useClaims: true, useAdditionalClaims: true },
+      { type: 'issuance with all different claims types works', useClaims: true, useAllClaimTypes: true },
       { type: 'issuance with expiry works', useExpiry: true },
     ])(
       '$type',
-      async ({ numberOfRequests = 2, useSingleFactor, useFaceCheck, usePhotoCapture, useClaims, useExpiry, useAdditionalClaims }) => {
+      async ({
+        numberOfRequests = 2,
+        useSingleFactor,
+        useFaceCheck,
+        usePhotoCapture,
+        useClaims,
+        useExpiry,
+        useAdditionalClaims,
+        useAllClaimTypes,
+      }) => {
         // Arrange
         const { contract } = await givenContract({
           faceCheckSupport: useFaceCheck || usePhotoCapture ? FaceCheckPhotoSupport.Required : undefined,
@@ -44,6 +62,7 @@ describe('createAsyncIssuanceRequest mutation', () => {
             ? [
                 { claim: 'fixed-claim', label: 'fixed-label', type: ClaimType.String, value: 'fixed-value' },
                 { claim: 'unfixed-claim', label: 'unfixed-label', type: ClaimType.String, value: undefined },
+                ...(useAllClaimTypes ? additonalContractClaims : []),
               ]
             : undefined,
         })
@@ -58,7 +77,13 @@ describe('createAsyncIssuanceRequest mutation', () => {
             contact: buildContact(useSingleFactor),
             faceCheckPhoto: useFaceCheck ? faceCheckPhoto : undefined,
             photoCapture: usePhotoCapture ? true : undefined,
-            claims: useClaims ? { 'unfixed-claim': casual.word, ...(useAdditionalClaims ? { random: 'claim' } : {}) } : undefined,
+            claims: useClaims
+              ? {
+                  'unfixed-claim': casual.word,
+                  ...(useAdditionalClaims ? { random: 'claim' } : {}),
+                  ...(useAllClaimTypes ? validAdditonalContractClaims : {}),
+                }
+              : undefined,
             expirationDate: useExpiry ? addDays(addMinutes(new Date(), 1), 1) : undefined,
           })),
         )
@@ -77,14 +102,16 @@ describe('createAsyncIssuanceRequest mutation', () => {
       numberOfRequests?: number
       useInvalidExpiry?: boolean
       useMissedRequiredClaim?: boolean
+      useInvalidClaim?: boolean
       useMissingFaceCheck?: boolean
       useMissingPhotoCapture?: boolean
       useBothFaceCheckAndPhotoCapture?: boolean
     }>([
       { type: 'issuance with invalid expiry fails', useInvalidExpiry: true },
       { type: 'issuance with required claim fails', useMissedRequiredClaim: true },
+      { type: 'issuance with invalid claim fails', useInvalidClaim: true },
       { type: 'issuance with missing required face check fails', useMissingFaceCheck: true },
-      { type: 'issuance with missing required face check fails', useMissingPhotoCapture: true },
+      { type: 'issuance with missing required photo capture check fails', useMissingPhotoCapture: true },
       { type: 'issuance with both face check and photo capture fails', useBothFaceCheckAndPhotoCapture: true },
     ])(
       '$type',
@@ -92,6 +119,7 @@ describe('createAsyncIssuanceRequest mutation', () => {
         numberOfRequests = 2,
         useInvalidExpiry,
         useMissedRequiredClaim,
+        useInvalidClaim,
         useMissingFaceCheck,
         useMissingPhotoCapture,
         useBothFaceCheckAndPhotoCapture,
@@ -99,9 +127,22 @@ describe('createAsyncIssuanceRequest mutation', () => {
         // Arrange
         const { contract } = await givenContract({
           faceCheckSupport: useMissingFaceCheck || useMissingPhotoCapture ? FaceCheckPhotoSupport.Required : undefined,
-          claims: useMissedRequiredClaim
-            ? [{ claim: 'unfixed-claim', label: 'unfixed-label', type: ClaimType.String, value: undefined }]
-            : undefined,
+          claims: [
+            ...(useMissedRequiredClaim
+              ? [{ claim: 'unfixed-claim', label: 'unfixed-label', type: ClaimType.String, value: undefined }]
+              : []),
+            ...(useInvalidClaim
+              ? [
+                  {
+                    claim: 'unfixed-integer-claim',
+                    label: 'unfixed-integer-label',
+                    type: ClaimType.Int,
+                    value: undefined,
+                    isOptional: false,
+                  },
+                ]
+              : []),
+          ],
         })
         const identity = await Promise.all(new Array(numberOfRequests).fill(null).map(() => createIdentity()))
 
@@ -113,7 +154,7 @@ describe('createAsyncIssuanceRequest mutation', () => {
             expiry: AsyncIssuanceRequestExpiry.OneDay,
             expirationDate: useInvalidExpiry ? new Date() : undefined,
             contact: buildContact(),
-            claims: useMissedRequiredClaim ? {} : undefined,
+            claims: useMissedRequiredClaim ? {} : useInvalidClaim ? { 'unfixed-integer-claim': 'abc' } : undefined,
             faceCheckPhoto: useBothFaceCheckAndPhotoCapture ? faceCheckPhoto : undefined,
             photoCapture: useBothFaceCheckAndPhotoCapture ? true : undefined,
           })),
