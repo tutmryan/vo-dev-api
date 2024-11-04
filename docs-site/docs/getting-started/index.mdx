@@ -20,18 +20,23 @@ Finally, to accept and hold credentials, you will need a compatible digital wall
 <table>
   <tr>
     <td colspan="2" align="center">
-      <strong>Microsoft Authenticator</strong>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <img src={require('../../static/img/ms-authenticator-app-icon.png').default} alt="Authenticator app icon" style={{ width: 40, marginRight: 6 }} />
+        <strong>Microsoft Authenticator</strong>
+      </div>
     </td>
   </tr>
   <tr valign="middle">
     <td>
-      <a href="https://apps.apple.com/us/app/microsoft-authenticator/id983156458">
-        <p style={{ marginBottom: 0 }}>Download from the Apple App Store</p>
+      <a href="https://apps.apple.com/us/app/microsoft-authenticator/id983156458" style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: 15 }}>
+        <img src={require('../../static/img/apple-app-store.png').default} alt="Apple app store icon" style={{ width: 180 }} />
+        <p style={{ marginBottom: 0, marginTop: 10 }}>Download from the Apple App Store</p>
       </a>
     </td>
     <td>
-      <a href="https://play.google.com/store/apps/details?id=com.azure.authenticator&pcampaignid=web_share">
-        <p style={{ marginBottom: 0 }}>Download from the Google Play Store</p>
+      <a href="https://play.google.com/store/apps/details?id=com.azure.authenticator&pcampaignid=web_share" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <img src={require('../../static/img/google-play.png').default} alt="Google play store icon" style={{ width: 200 }} />
+        <p style={{ marginBottom: 0, marginTop: 0 }}>Download from the Google Play Store</p>
       </a>
     </td>
 
