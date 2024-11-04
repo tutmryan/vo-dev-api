@@ -1,19 +1,22 @@
 import type { GraphQLContext } from '@makerx/graphql-core'
 import { withFilter } from 'graphql-subscriptions'
-import { BACKGROUND_JOB_EVENTS_TTL, finishedBackgroundJobEvents } from '../cache'
 import { entityManager } from '../data'
 import { UserEntity } from '../features/users/entities/user-entity'
-import type {
-  BackgroundJobEvent,
-  BackgroundJobEventData,
-  InputMaybe,
-  SubscriptionBackgroundJobEventArgs,
-  SubscriptionSubscribeFn,
+import {
+  BackgroundJobStatus,
+  type BackgroundJobEvent,
+  type BackgroundJobEventData,
+  type InputMaybe,
+  type SubscriptionBackgroundJobEventArgs,
+  type SubscriptionSubscribeFn,
 } from '../generated/graphql'
-import { BackgroundJobStatus } from '../generated/graphql'
-import { pubsub } from '../redis'
+import { newCacheSection, ONE_MINUTE_TTL } from '../redis/cache'
+import { pubsub } from '../redis/pubsub'
+import { Lazy } from '../util/lazy'
 
 const BACKGROUND_JOB_TOPIC = 'backgroundJob'
+const BACKGROUND_JOB_EVENTS_TTL = ONE_MINUTE_TTL * 5 // 5 minutes
+const finishedBackgroundJobEvents = Lazy(() => newCacheSection('finishedBackgroundJobEvents', BACKGROUND_JOB_EVENTS_TTL))
 
 export type BackgroundJobTopicData = {
   jobId: string
@@ -22,32 +25,31 @@ export type BackgroundJobTopicData = {
   userId?: string
 }
 
+export const eventIsFinal = ({ status }: BackgroundJobEvent) => [BackgroundJobStatus.Completed, BackgroundJobStatus.Failed].includes(status)
+
 export const publishBackgroundJobEvent = async (data: BackgroundJobTopicData): Promise<void> => {
   // keep a copy of the job finished event in cache so that
   // we can immediately return the event to any subscriber
   // subscribing after the event has happened
-  if (data.event.status === BackgroundJobStatus.Completed || data.event.status === BackgroundJobStatus.Failed) {
-    await finishedBackgroundJobEvents.set(data.jobId, JSON.stringify(data), { ttl: BACKGROUND_JOB_EVENTS_TTL })
-  }
-  return pubsub.publish(BACKGROUND_JOB_TOPIC, data)
+  if (eventIsFinal(data.event)) await finishedBackgroundJobEvents().set(data.jobId, JSON.stringify(data))
+  return pubsub().publish(BACKGROUND_JOB_TOPIC, data)
 }
 
 const getJobFinishedEventFromCache = async (jobId?: InputMaybe<string>): Promise<BackgroundJobTopicData | null> => {
   if (!jobId) return null
-  const cachedValue = await finishedBackgroundJobEvents.get(jobId)
+  const cachedValue = await finishedBackgroundJobEvents().get(jobId)
   return cachedValue ? (JSON.parse(cachedValue) as BackgroundJobTopicData) : null
 }
 
-const eventIsFinal = (data: BackgroundJobTopicData) =>
-  [BackgroundJobStatus.Completed, BackgroundJobStatus.Failed].includes(data.event.status)
-
-export const subscribeToBackgroundJobEvents = (args?: SubscriptionBackgroundJobEventArgs) => {
-  const iterator = pubsub.asyncIterator<BackgroundJobTopicData>(BACKGROUND_JOB_TOPIC)
+export const subscribeToBackgroundJobEvents = (
+  args?: SubscriptionBackgroundJobEventArgs,
+): AsyncIterator<BackgroundJobEventData> & AsyncIterable<BackgroundJobEventData> => {
+  const wrapped = pubsub().asyncIterator<BackgroundJobTopicData>(BACKGROUND_JOB_TOPIC)
 
   let count = 0
   let done = false
 
-  return {
+  const iterator: AsyncIterator<BackgroundJobEventData> = {
     next: async () => {
       // eagerly end iteration
       if (done) return { done: true, value: undefined }
@@ -56,20 +58,22 @@ export const subscribeToBackgroundJobEvents = (args?: SubscriptionBackgroundJobE
       if (count++ === 0 && args?.where?.jobId) {
         // check for cached final event data
         const cachedData = await getJobFinishedEventFromCache(args.where.jobId)
-        if (cachedData && eventIsFinal(cachedData)) {
+        if (cachedData && eventIsFinal(cachedData.event)) {
           done = true
           return { value: cachedData }
         }
       }
 
       // inspect values to eagerly end iteration for jobId subscribers when the event is final
-      const next = await iterator.next.call(iterator)
-      if (!next.done && args?.where?.jobId && eventIsFinal(next.value)) done = true
+      const next = await wrapped.next.call(wrapped)
+      if (!next.done && args?.where?.jobId && eventIsFinal(next.value.event)) done = true
       return next
     },
-    return: iterator.return!.bind(iterator),
-    throw: iterator.throw!.bind(iterator),
+    return: wrapped.return!.bind(wrapped),
+    throw: wrapped.throw!.bind(wrapped),
   }
+
+  return { ...iterator, [Symbol.asyncIterator]: () => iterator }
 }
 
 export const subscribeToBackgroundJobEventsWithFilter = withFilter(

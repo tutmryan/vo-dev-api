@@ -90,7 +90,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
 
   app.use(
     '/graphql',
-    rateLimiterMiddleware,
+    await rateLimiterMiddleware(),
     (req, res, next) => {
       const isAuthenticated = req.user !== undefined
       // Increase the body limit for authenticated users, because they can be trusted more to not DDOS the server

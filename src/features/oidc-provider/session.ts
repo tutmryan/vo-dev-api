@@ -2,19 +2,20 @@ import { getClientCredentialsToken, type AccessTokenResponse } from '@makerx/nod
 import { pick } from 'lodash'
 import { v5 as uuidv5 } from 'uuid'
 import { oidcStorageService } from '.'
-import { newCacheSection } from '../../cache'
 import { limitedOidcAuthnAuth, limitedOidcClient } from '../../config'
 import { dataSource } from '../../data'
 import type { Identity } from '../../generated/graphql'
+import { newCacheSection, ONE_HOUR_TTL } from '../../redis/cache'
 import { invariant } from '../../util/invariant'
+import { Lazy } from '../../util/lazy'
 import { createKey } from '../../util/token'
 import { getPresentationDataFromCache } from '../presentation/callback/cache'
 import { PresentationEntity } from '../presentation/entities/presentation-entity'
 import { findClient } from './clients'
 import type { ExtraParams } from './extra-params'
 
-const loginInteractionCache = newCacheSection('oidcAuthInteraction')
-const sessionInteractionCache = newCacheSection('oidcAuthSession')
+const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
+const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', ONE_HOUR_TTL))
 
 type LoginInteractionData = {
   state: 'started' | 'in-progress' | 'complete'
@@ -36,7 +37,7 @@ export async function acquireLoginPresentationToken({
   invariant(interactionData === undefined, 'Interaction session already exists')
   const token = await getClientCredentialsToken(limitedOidcAuthnAuth)
   const sessionKey = getSessionKey(token.access_token)
-  await sessionInteractionCache.set(sessionKey, interactionId)
+  await sessionInteractionCache().set(sessionKey, interactionId)
   await setLoginInteractionData({ interactionId, state: 'started', clientId, sessionKey })
   return token
 }
@@ -100,8 +101,8 @@ export async function completeLogin({
   invariant(interactionData.requestId === requestId, 'Invalid request id')
 
   // Delete the interaction / session data
-  await loginInteractionCache.delete(interactionId)
-  await sessionInteractionCache.delete(interactionData.sessionKey)
+  await loginInteractionCache().delete(interactionId)
+  await sessionInteractionCache().delete(interactionData.sessionKey)
 
   // Get the presentation data
   const presentation = await dataSource
@@ -139,16 +140,16 @@ export async function completeLogin({
 }
 
 export async function setLoginInteractionData(data: LoginInteractionData): Promise<void> {
-  await loginInteractionCache.set(data.interactionId, JSON.stringify(data))
+  await loginInteractionCache().set(data.interactionId, JSON.stringify(data))
 }
 
 export async function getLoginInteractionData(interactionId: string): Promise<LoginInteractionData | undefined> {
-  const interaction = await loginInteractionCache.get(interactionId)
+  const interaction = await loginInteractionCache().get(interactionId)
   return interaction ? JSON.parse(interaction) : undefined
 }
 
 export async function getInteractionId(sessionKey: string): Promise<string | undefined> {
-  return await sessionInteractionCache.get(sessionKey)
+  return await sessionInteractionCache().get(sessionKey)
 }
 
 export async function getLoginInteractionDataForSession(token: string): Promise<LoginInteractionData | undefined> {

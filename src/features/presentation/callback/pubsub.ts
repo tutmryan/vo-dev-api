@@ -9,7 +9,7 @@ import type {
   SubscriptionSubscribeFn,
 } from '../../../generated/graphql'
 import { PresentationRequestStatus } from '../../../generated/graphql'
-import { pubsub } from '../../../redis'
+import { pubsub } from '../../../redis/pubsub'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import { PresentationEntity } from '../entities/presentation-entity'
 import { getPresentationDataFromCache } from './cache'
@@ -22,14 +22,14 @@ export type PresentationTopicData = PresentationRequestDetails & {
 }
 
 export const publishPresentationEvent = async (data: PresentationTopicData): Promise<void> => {
-  pubsub.publish(PRESENTATION_TOPIC, data)
+  pubsub().publish(PRESENTATION_TOPIC, data)
 }
 
 const eventIsFinal = (data: PresentationTopicData) =>
   [PresentationRequestStatus.PresentationVerified, PresentationRequestStatus.PresentationError].includes(data.event.requestStatus)
 
 export const subscribeToPresentationEvents = (args?: SubscriptionPresentationEventArgs) => {
-  const iterator = pubsub.asyncIterator<PresentationTopicData>(PRESENTATION_TOPIC)
+  const iterator = pubsub().asyncIterator<PresentationTopicData>(PRESENTATION_TOPIC)
 
   let count = 0
   let done = false

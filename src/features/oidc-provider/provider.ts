@@ -4,7 +4,7 @@ import type { Express } from 'express'
 import type { Interaction, KoaContextWithOIDC, Provider, errors } from 'oidc-provider'
 import { apiUrl, cookieSession } from '../../config'
 import { logger } from '../../logger'
-import { oidcProviderClient } from '../../redis'
+import { createRedisClient, isRedisEnabled } from '../../redis'
 import { dynamicImport } from '../../util/dynamic-import'
 import { invariant } from '../../util/invariant'
 import { Lazy } from '../../util/lazy'
@@ -27,6 +27,8 @@ export const oidcProviderModule = Lazy(async () => {
   return { Provider: module.default, errors: module.errors }
 })
 
+const redisClient = Lazy(() => createRedisClient('oidc'))
+
 export async function createProvider(route: string): Promise<Provider> {
   invariant(apiUrl, 'Config item apiUrl is not set')
 
@@ -37,7 +39,7 @@ export async function createProvider(route: string): Promise<Provider> {
 
   const provider = new Provider(issuer, {
     clients,
-    adapter: oidcProviderClient ? (name: string) => new RedisAdapter(name, oidcProviderClient!) : undefined,
+    adapter: (name: string) => (isRedisEnabled ? new RedisAdapter(name, redisClient()) : undefined),
     cookies: {
       keys: [cookieSession.secret],
     },

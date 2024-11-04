@@ -1,12 +1,12 @@
 import { omit } from 'lodash'
 import { In } from 'typeorm'
-import { requestDetailsCache } from '../../../cache'
 import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { createVerifiedIdAdminService } from '../../../services'
 import { invariant } from '../../../util/invariant'
 import type { PresentationCallbackHandler } from '../../callback'
+import { requestDetailsCache } from '../../callback/cache'
 import { StandardClaims } from '../../contracts/claims'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { getLimitedApprovalDataByKey, setLimitedApprovalDataByKey } from '../../limited-approval-tokens'
@@ -26,7 +26,7 @@ async function getPlatformIssuerDid() {
 }
 
 export const presentationCallbackHandler: PresentationCallbackHandler = async (event) => {
-  const requestDetails = await requestDetailsCache.get(event.requestId)
+  const requestDetails = await requestDetailsCache().get(event.requestId)
   if (!requestDetails) {
     logger.error('Failed to locate a matching request details for presentation event', { event })
     return

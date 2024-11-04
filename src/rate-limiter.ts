@@ -5,24 +5,29 @@ import type { RateLimiterAbstract, RateLimiterRes } from 'rate-limiter-flexible'
 import { BurstyRateLimiter } from 'rate-limiter-flexible'
 import type { GraphQLContext } from './context'
 import { logger } from './logger'
-import { rateLimiter } from './redis'
+import { rateLimiter } from './redis/rate-limiter'
 import { invariant } from './util/invariant'
+import { Lazy } from './util/lazy'
 
-const baseRateLimiter = rateLimiter({
-  points: 10,
-  duration: 1,
-  inMemoryBlockOnConsumed: 10,
-  keyPrefix: 'rate-limit-base',
-})
+const baseRateLimiter = Lazy(() =>
+  rateLimiter({
+    points: 10,
+    duration: 1,
+    inMemoryBlockOnConsumed: 10,
+    keyPrefix: 'rate-limit-base',
+  }),
+)
 
-const burstRateLimiter = rateLimiter({
-  points: 100,
-  duration: 5,
-  keyPrefix: 'rate-limit-burst',
-  inMemoryBlockOnConsumed: 100,
-})
+const burstRateLimiter = Lazy(() =>
+  rateLimiter({
+    points: 100,
+    duration: 5,
+    keyPrefix: 'rate-limit-burst',
+    inMemoryBlockOnConsumed: 100,
+  }),
+)
 
-const burstyLimiter = new BurstyRateLimiter(baseRateLimiter, burstRateLimiter)
+const burstyLimiter = Lazy(async () => new BurstyRateLimiter(await baseRateLimiter(), await burstRateLimiter()))
 
 function buildRateLimitErrorLogMetadata(error: any | RateLimiterRes) {
   let logMeta: any = { error }
@@ -69,30 +74,34 @@ function rateLimiterRequestKey(jwtPayload?: JwtPayload, clientIp?: string) {
   return clientIp
 }
 
-export const rateLimiterMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  const key = rateLimiterRequestKey(req.user, clientIp(req))
-  burstyLimiter
-    .consume(key)
-    .then(() => {
-      return next()
-    })
-    .catch((error) => {
-      const loggableErrorData = buildRateLimitErrorLogMetadata(error)
-      logger.warn(`Rate limit exceeded on middleware request limiter for key: ${key}`, {
-        requestInfo: {
-          host: req.hostname,
-          method: req.method,
-          url: req.originalUrl,
-          origin: req.get('Origin') ?? '',
-          referer: req.headers.referer?.toString() ?? '',
-          clientIp: req.ip,
-        },
-        ...loggableErrorData,
+export const rateLimiterMiddleware = async () => {
+  const limiter = await burstyLimiter()
+
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const key = rateLimiterRequestKey(req.user, clientIp(req))
+    limiter
+      .consume(key)
+      .then(() => {
+        return next()
       })
-      if ('msBeforeNext' in error) {
-        const secs = Math.round(error.msBeforeNext / 1000) || 1
-        res.set('Retry-After', String(secs))
-      }
-      res.sendStatus(429)
-    })
+      .catch((error) => {
+        const loggableErrorData = buildRateLimitErrorLogMetadata(error)
+        logger.warn(`Rate limit exceeded on middleware request limiter for key: ${key}`, {
+          requestInfo: {
+            host: req.hostname,
+            method: req.method,
+            url: req.originalUrl,
+            origin: req.get('Origin') ?? '',
+            referer: req.headers.referer?.toString() ?? '',
+            clientIp: req.ip,
+          },
+          ...loggableErrorData,
+        })
+        if ('msBeforeNext' in error) {
+          const secs = Math.round(error.msBeforeNext / 1000) || 1
+          res.set('Retry-After', String(secs))
+        }
+        res.sendStatus(429)
+      })
+  }
 }

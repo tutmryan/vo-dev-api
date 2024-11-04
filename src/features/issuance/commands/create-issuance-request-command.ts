@@ -1,5 +1,4 @@
 import { randomUUID } from 'crypto'
-import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
 import { issuanceRequestRegistration } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
@@ -8,6 +7,7 @@ import type { IssuanceRequest } from '../../../services/verified-id'
 import { parseDataUrl } from '../../../util/data-url'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
+import { requestDetailsCache } from '../../callback/cache'
 import type { StandardClaims } from '../../contracts/claims'
 import { validateIssuanceClaims } from '../../contracts/claims'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
@@ -147,9 +147,7 @@ export async function CreateIssuanceRequestCommand(
     hasFaceCheckPhoto: contract.faceCheckSupport === FaceCheckPhotoSupport.None ? null : !!claims['photo'],
     asyncIssuanceKey,
   }
-  await requestDetailsCache.set(response.requestId, JSON.stringify(requestDetails), {
-    ttl: REQUEST_CACHE_TTL,
-  })
+  await requestDetailsCache().set(response.requestId, JSON.stringify(requestDetails))
 
   return response
 }

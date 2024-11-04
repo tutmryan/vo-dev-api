@@ -6,7 +6,7 @@ import { redisOptions } from '../redis'
 import { Lazy } from '../util/lazy'
 import type { JobPayload, JobTypes } from './jobs'
 import { jobOptions } from './jobs'
-import { subscribeToBackgroundJobEvents } from './pubsub'
+import { eventIsFinal, subscribeToBackgroundJobEvents } from './pubsub'
 
 export const JobQueueName = 'jobQueue'
 export type JobType<TName extends string, TPayload extends JobPayload> = {
@@ -52,9 +52,16 @@ export const addToJobQueue = async (jobType: JobTypes, jobId: string = randomUUI
   return jobId
 }
 
+/**
+ * Runs a deduplicated background job and optionally waits for its completion.
+ * BullMQ deduplicates jobs by job ID, so we simply use the job type name as the job ID.
+ */
 export const runDeduplicatedJob = async (jobType: JobTypes, awaitCompletion: boolean): Promise<void> => {
-  const jobId = await addToJobQueue(jobType, jobType.name)
+  const jobId = jobType.name
+  await addToJobQueue(jobType, jobId)
   if (!awaitCompletion) return
   const iterator = subscribeToBackgroundJobEvents({ where: { jobId } })
-  await iterator.next()
+  for await (const { event } of iterator) {
+    if (eventIsFinal(event)) return
+  }
 }

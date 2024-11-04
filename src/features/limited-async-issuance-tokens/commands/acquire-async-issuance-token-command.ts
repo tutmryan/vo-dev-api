@@ -2,7 +2,6 @@ import { getClientCredentialsToken } from '@makerx/node-common'
 import { randomUUID } from 'crypto'
 import type { LimitedAsyncIssuanceData } from '..'
 import { acquireAsyncIssuanceTokenLimiter, getLimitedAsyncIssuanceData, redeemVerificationCode, setLimitedAsyncIssuanceData } from '..'
-import { requestDetailsCache } from '../../../cache'
 import { limitedAsyncIssuanceAuth } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import type { AsyncIssuanceTokenResponse } from '../../../generated/graphql'
@@ -10,6 +9,7 @@ import { IssuanceRequestStatus } from '../../../generated/graphql'
 import { consumeRateLimit } from '../../../rate-limiter'
 import { invariant } from '../../../util/invariant'
 import { AsyncIssuanceEntity } from '../../async-issuance/entities/async-issuance-entity'
+import { requestDetailsCache } from '../../callback/cache'
 import { publishIssuanceEvent } from '../../issuance/callback/pubsub'
 import type { IssuanceRequestDetails } from '../../issuance/commands/create-issuance-request-command'
 import { createLimitedPhotoCaptureSession } from '../../limited-photo-capture-tokens'
@@ -24,7 +24,12 @@ export async function AcquireAsyncIssuanceTokenCommand(
   const { entityManager, requestInfo } = this
 
   // rate limit by async issuance request id
-  await consumeRateLimit(acquireAsyncIssuanceTokenLimiter, asyncIssuanceRequestId, requestInfo, 'Too many attempts on this issuance')
+  await consumeRateLimit(
+    await acquireAsyncIssuanceTokenLimiter(),
+    asyncIssuanceRequestId,
+    requestInfo,
+    'Too many attempts on this issuance',
+  )
 
   // check + clear verification code
   const isValid = await redeemVerificationCode(asyncIssuanceRequestId, verificationCode)
@@ -77,11 +82,11 @@ export async function AcquireAsyncIssuanceTokenCommand(
 
 async function terminateInProgressIssuanceRequest(issuanceRequestId: string) {
   // look up the issuance request details
-  const requestDetails = await requestDetailsCache.get(issuanceRequestId)
+  const requestDetails = await requestDetailsCache().get(issuanceRequestId)
   invariant(requestDetails, 'Issuance request details not found')
   const issuanceRequestDetails = JSON.parse(requestDetails) as IssuanceRequestDetails
   // delete existing request details
-  await requestDetailsCache.delete(issuanceRequestId)
+  await requestDetailsCache().delete(issuanceRequestId)
   // publish issuance error event to notify subscribers
   await publishIssuanceEvent({
     ...issuanceRequestDetails,

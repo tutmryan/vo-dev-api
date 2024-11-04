@@ -1,7 +1,7 @@
 import type { ClientCredentialsConfig, HttpClientOptions } from '@makerx/node-common'
 import { HttpClient, getClientCredentialsToken } from '@makerx/node-common'
-import { REQUEST_CACHE_TTL, requestCallbackCache } from '../../cache'
 import type { BaseContext } from '../../context'
+import { requestCallbackCache } from '../../features/callback/cache'
 import type {
   Callback,
   IssuanceRequestInput,
@@ -89,7 +89,7 @@ export class VerifiedIdRequestService extends HttpClient<BaseContext> {
     try {
       response = await this.post<IssuanceRequestResponse>('createIssuanceRequest', { data: payload })
       // store a reference to the upstream callback by requestId
-      if (request.callback) await requestCallbackCache.set(response.requestId, JSON.stringify(request.callback), { ttl: REQUEST_CACHE_TTL })
+      if (request.callback) await requestCallbackCache().set(response.requestId, JSON.stringify(request.callback))
       else this.options.logger?.warn('No callback provided for issuance request')
       return response
     } catch (error: any) {
@@ -123,7 +123,7 @@ export class VerifiedIdRequestService extends HttpClient<BaseContext> {
     try {
       response = await this.post<PresentationRequestResponse>('createPresentationRequest', { data: payload })
       // store a reference to the upstream callback by requestId
-      if (request.callback) await requestCallbackCache.set(response.requestId, JSON.stringify(request.callback), { ttl: REQUEST_CACHE_TTL })
+      if (request.callback) await requestCallbackCache().set(response.requestId, JSON.stringify(request.callback))
       else this.options.logger?.warn('No callback provided for presentation request')
       return response
     } catch (error: any) {

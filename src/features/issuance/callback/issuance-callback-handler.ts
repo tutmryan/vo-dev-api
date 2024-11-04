@@ -1,6 +1,5 @@
 import { addSeconds } from 'date-fns'
 import { omit } from 'lodash'
-import { requestDetailsCache } from '../../../cache'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { IssuanceRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
@@ -9,6 +8,7 @@ import { invariant } from '../../../util/invariant'
 import { completeAsyncIssuance } from '../../async-issuance'
 import { addUserToManager } from '../../auditing/user-context-helper'
 import type { IssuanceCallbackHandler } from '../../callback'
+import { requestDetailsCache } from '../../callback/cache'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import type { IssuanceRequestDetails } from '../commands/create-issuance-request-command'
 import { IssuanceEntity } from '../entities/issuance-entity'
@@ -19,7 +19,7 @@ import { publishIssuanceEvent } from './pubsub'
 export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) => {
   const eventReceived = Date.now()
 
-  const requestDetails = await requestDetailsCache.get(event.requestId)
+  const requestDetails = await requestDetailsCache().get(event.requestId)
   if (!requestDetails) {
     logger.error('Failed to locate a matching request details for issuance event', { event })
     return

@@ -8,7 +8,7 @@ import {
   type SubscriptionPhotoCaptureEventArgs,
   type SubscriptionSubscribeFn,
 } from '../../../generated/graphql'
-import { pubsub } from '../../../redis'
+import { pubsub } from '../../../redis/pubsub'
 import { invariant } from '../../../util/invariant'
 import { addPhotoCaptureEventDataToCache, getPhotoCaptureEventDataFromCache } from './cache'
 
@@ -18,13 +18,13 @@ export type PhotoCaptureTopicData = Pick<PhotoCaptureData, 'photoCaptureRequestI
 
 export const publishPhotoCaptureEvent = async (data: PhotoCaptureTopicData): Promise<void> => {
   await addPhotoCaptureEventDataToCache(data)
-  await pubsub.publish(photoCaptureTopic(data.photoCaptureRequestId), data)
+  await pubsub().publish(photoCaptureTopic(data.photoCaptureRequestId), data)
 }
 
 const eventIsFinal = (eventData: PhotoCaptureEventData) => eventData.status === PhotoCaptureStatus.Complete
 
 export const subscribeToPhotoCaptureEvents = (args: SubscriptionPhotoCaptureEventArgs) => {
-  const iterator = pubsub.asyncIterator<PhotoCaptureTopicData>(photoCaptureTopic(args.photoCaptureRequestId))
+  const iterator = pubsub().asyncIterator<PhotoCaptureTopicData>(photoCaptureTopic(args.photoCaptureRequestId))
 
   let count = 0
   let done = false

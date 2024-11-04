@@ -8,7 +8,7 @@ import {
   type SubscriptionIssuanceEventArgs,
   type SubscriptionSubscribeFn,
 } from '../../../generated/graphql'
-import { pubsub } from '../../../redis'
+import { pubsub } from '../../../redis/pubsub'
 import type { IssuanceRequestDetails } from '../commands/create-issuance-request-command'
 import { IssuanceEntity } from '../entities/issuance-entity'
 import { getIssuanceDataFromCache } from './cache'
@@ -21,14 +21,14 @@ export type IssuanceTopicData = IssuanceRequestDetails & {
 }
 
 export const publishIssuanceEvent = async (data: IssuanceTopicData): Promise<void> => {
-  pubsub.publish(ISSUANCE_TOPIC, data)
+  pubsub().publish(ISSUANCE_TOPIC, data)
 }
 
 const eventIsFinal = (data: IssuanceTopicData) =>
   [IssuanceRequestStatus.IssuanceSuccessful, IssuanceRequestStatus.IssuanceError].includes(data.event.requestStatus)
 
 export const subscribeToIssuanceEvents = (args?: SubscriptionIssuanceEventArgs) => {
-  const iterator = pubsub.asyncIterator<IssuanceTopicData>(ISSUANCE_TOPIC)
+  const iterator = pubsub().asyncIterator<IssuanceTopicData>(ISSUANCE_TOPIC)
 
   let count = 0
   let done = false

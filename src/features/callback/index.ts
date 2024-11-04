@@ -1,12 +1,12 @@
 import { extractErrorResponseInfo } from '@makerx/node-common'
 import type { RequestHandler } from 'express'
 import { capitalize, pick } from 'lodash'
-import { requestCallbackCache } from '../../cache'
 import type { Callback, IssuanceCallbackEvent, PresentationCallbackEvent } from '../../generated/graphql'
 import { logger } from '../../logger'
 import { InternalRoles } from '../../roles'
 import { issuanceCallbackHandler } from '../issuance/callback/issuance-callback-handler'
 import { presentationCallbackHandler } from '../presentation/callback/presentation-callback-handler'
+import { requestCallbackCache } from './cache'
 
 export type IssuanceCallbackHandler = (event: IssuanceCallbackEvent) => Promise<void>
 export type PresentationCallbackHandler = (event: PresentationCallbackEvent) => Promise<void>
@@ -56,7 +56,7 @@ function requestCallbackMiddleware(type: 'issuance' | 'presentation', handler: C
     }
 
     // find the consumer callback for this event
-    const callback = await requestCallbackCache.get(event.requestId)
+    const callback = await requestCallbackCache().get(event.requestId)
     if (!callback) {
       logger.warn(`There is no consumer callback for this ${type}`, { requestId: event.requestId })
       res.status(204).end()

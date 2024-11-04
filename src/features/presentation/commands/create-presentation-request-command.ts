@@ -1,11 +1,11 @@
 import { flatten, set } from 'lodash'
 import { In } from 'typeorm'
-import { REQUEST_CACHE_TTL, requestDetailsCache } from '../../../cache'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPresentationEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import type { PresentationRequestInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
+import { requestDetailsCache } from '../../callback/cache'
 import { faceCheckPhotoClaimAttestation } from '../../contracts/claims'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
@@ -88,9 +88,7 @@ export async function CreatePresentationRequestCommand(
     requestedCredentials: presentationRequest.requestedCredentials,
     ...context,
   }
-  await requestDetailsCache.set(response.requestId, JSON.stringify(requestDetails), {
-    ttl: REQUEST_CACHE_TTL,
-  })
+  await requestDetailsCache().set(response.requestId, JSON.stringify(requestDetails))
 
   return response
 }
