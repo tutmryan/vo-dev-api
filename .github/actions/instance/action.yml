@@ -62,6 +62,8 @@ inputs:
     description: The flag indicating whether the dev tools (i.e. Apollo Sandbox, .etc) are deployed
   face-check-enabled:
     description: The flag indicating whether the face check features (i.e. issuing credentials with face check photo, .etc) are available
+  demo-enabled:
+    description: The flag indicating whether the demo features (i.e. limited presentation token, presentation demo page, .etc) are available
   identity-issuers:
     description: Mapping of identity issuer identifiers to labels (JSON Record<string, string>)
   platform-consumer-apps:
