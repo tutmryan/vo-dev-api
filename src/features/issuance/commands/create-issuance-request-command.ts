@@ -120,7 +120,7 @@ export async function CreateIssuanceRequestCommand(
 
   // create the issuance request
   const issuanceRequest: IssuanceRequest = {
-    claims: claims,
+    claims,
     ...rest,
     type: contract.credentialTypes.join(','), // the Azure portal issuance example joins the types with a comma
     authority: (await verifiedIdAdmin.authority()).didModel.did,

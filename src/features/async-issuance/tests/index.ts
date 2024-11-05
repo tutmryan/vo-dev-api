@@ -170,7 +170,7 @@ export const validAdditonalContractClaims: Record<string, unknown> = {
   'unfixed-datetime-claim': '2023-10-28T15:45:00Z',
   'unfixed-email-claim': 'test@example.com',
   'unfixed-image-claim': 'data:image/jpeg;base64,ZmFjZS1jaGVjay0xMjM=',
-  'unfixed-phone-claim': '+1234567890',
+  'unfixed-phone-claim': '+61412345678',
   'unfixed-url-claim': 'https://example.com',
   'unfixed-regex-claim': 'abc123',
   'unfixed-list-claim': 'Option1',

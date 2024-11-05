@@ -201,7 +201,7 @@ describe('validateClaimInput', () => {
   })
 
   describe('Phone claim', () => {
-    it.each([{ type: 'validates correct phone format', value: '+1234567890' }])('$type', ({ value }) => {
+    it.each([{ type: 'validates correct phone format', value: '+61412345678' }])('$type', ({ value }) => {
       const input = createClaimInput({ type: ClaimType.Phone, value })
       expect(() => validateClaimInput(input)).not.toThrow()
     })

@@ -1,3 +1,4 @@
+import validator from 'validator'
 import { z } from 'zod'
 import { convertToClaimValidation } from '../features/contracts/mapping'
 import type {
@@ -18,16 +19,16 @@ export class ValidationError extends Error {
 }
 
 const baseStringSchema = z.string()
-const baseIntSchema = z.number().int()
-const baseFloatSchema = z.number()
+const baseIntSchema = z.coerce.number().int()
+const baseFloatSchema = z.coerce.number()
 const booleanSchema = z.enum(['true', 'false'])
-const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: 'Invalid date format. Expected YYYY-MM-DD.' })
-const dateTimeSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, { message: 'Invalid date-time format. Expected YYYY-MM-DDTHH:MM:SSZ.' })
+const dateSchema = z.string().date('Invalid date format. Expected YYYY-MM-DD.')
+const dateTimeSchema = z.string().datetime('Invalid date-time format. Expected YYYY-MM-DDTHH:MM:SSZ.')
 const emailSchema = z.string().email({ message: 'Invalid email address.' })
 const imageSchema = z.string().regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/, { message: 'Invalid base64 image.' })
-const phoneSchema = z.string().regex(/^\+[1-9]\d{1,14}$/, { message: 'Invalid E.164 phone number.' })
+const phoneSchema = z
+  .string()
+  .refine((value) => validator.isMobilePhone(value, 'any', { strictMode: true }), { message: 'Invalid E.164 phone number.' })
 const urlSchema = z.string().url({ message: 'Invalid URL.' })
 
 const isValidNumber = (value: number | null | undefined): value is number => {
@@ -86,26 +87,17 @@ function validateClaimRules(type: string, validation?: ContractDisplayClaimInput
   }
 }
 
-export function validateClaimValue(type: string, value: string, validation?: ContractDisplayClaim['validation']) {
+export function validateClaimValue(type: string, value: unknown, validation?: ContractDisplayClaim['validation']) {
   let schema
-  let parsedValue: any = value
 
   switch (type) {
     case 'string':
       schema = stringSchema(validation as StringValidation)
       break
     case 'int':
-      parsedValue = parseInt(value, 10)
-      if (isNaN(parsedValue)) {
-        throw new ValidationError('Value must be a valid integer.')
-      }
       schema = intSchema(validation as IntValidation)
       break
     case 'float':
-      parsedValue = parseFloat(value)
-      if (isNaN(parsedValue)) {
-        throw new ValidationError('Value must be a valid float.')
-      }
       schema = floatSchema(validation as FloatValidation)
       break
     case 'list':
@@ -139,7 +131,7 @@ export function validateClaimValue(type: string, value: string, validation?: Con
       throw new ValidationError(`Unsupported claim type: ${type}`)
   }
 
-  const result = schema.safeParse(parsedValue)
+  const result = schema.safeParse(value)
   if (!result.success) {
     throw new ValidationError(result.error.errors.map((err) => err.message).join(', '))
   }
@@ -149,17 +141,15 @@ export function validateClaimInput(claimInput: ContractDisplayClaimInput) {
   const { type, value, validation } = claimInput
   validateClaimRules(type, validation)
 
-  // Skip value validation for claim inputs if `value` is not provided (e.g., it will be set during consumption)
+  // Skip value validation for claim inputs if `value` is not provided (e.g., it will be set during issuance)
   if (!value) return
 
   validateClaimValue(type, value, convertToClaimValidation(validation))
 }
-
-// use the ZOD regex: https://github.com/colinhacks/zod/blob/main/deno/lib/types.ts
-// eslint-disable-next-line no-useless-escape
-const emailRegex = /^(?!\.)(?!.*\.\.)([A-Z0-9_'+\-\.]*)[A-Z0-9_+-]@([A-Z0-9][A-Z0-9\-]*\.)+[A-Z]{2,}$/i
-
 /**
- * Validates an email address using the ZOD regex
+ * Validates an email address using the ZOD emailSchema
  */
-export const isValidEmail = (email: string) => emailRegex.test(email)
+export const isValidEmail = (email: string) => {
+  const result = emailSchema.safeParse(email)
+  return result.success
+}

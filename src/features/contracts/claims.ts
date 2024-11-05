@@ -83,32 +83,28 @@ export const validateContractClaims = (
  * Note: This function is only intended to be used for upfront validation of async issuance requests, since actual issuances are validated according to the published contract by the Microsoft VID service.
  */
 export const validateIssuanceClaimsAgainstContractClaims = (
-  claims?: IssuanceRequestInput['claims'] | AsyncIssuanceRequestInput['claims'],
+  claimsInput?: IssuanceRequestInput['claims'] | AsyncIssuanceRequestInput['claims'],
   contractClaims?: ContractDisplayModel['claims'] | CreateUpdateTemplateDisplayModelInput['claims'],
 ): void => {
-  claims = claims ?? {}
-  validateStandardIssuanceClaims(claims)
+  claimsInput = claimsInput ?? {}
+  validateStandardIssuanceClaims(claimsInput)
 
-  // Keep the old validation behavior (isOptional === undefined)
-  // add new validation (isOptional === false which means its a required claim)
-  // when values in contract is undefined.
   const missingRequiredClaims =
-    contractClaims?.filter(({ value, isOptional }) => value === undefined && !isOptional).filter(({ claim }) => !claims[claim]) ?? []
+    contractClaims
+      ?.filter(({ value: contractValue, isOptional }) => contractValue === undefined && !isOptional)
+      .filter(({ claim: contractClaim }) => !claimsInput[contractClaim]) ?? []
 
   if (missingRequiredClaims.length > 0) {
-    throw new ValidationError(`Claims must include: ${missingRequiredClaims.map(({ claim }) => claim).join(', ')}`)
+    throw new ValidationError(`Claims must include: ${missingRequiredClaims.map(({ claim: contractClaim }) => contractClaim).join(', ')}`)
   }
 
-  // Now validate the provided values for each claim, respecting the new isOptional flag
-  contractClaims?.forEach(({ claim, type, validation, isOptional }) => {
-    const value = claims[claim]
+  // Validate the provided values for each claim
+  contractClaims?.forEach(({ claim: contractClaim, value: contractValue, type, validation, isOptional }) => {
+    const inputValue = claimsInput[contractClaim]
 
-    // Skip validation if the claim is optional and has no value
-    if (isOptional && (value === undefined || value === null)) return
+    // Skip validation if the claim is optional and input has no value OR if contract already has a fixed value
+    if ((isOptional && (inputValue === undefined || inputValue === null)) || contractValue) return
 
-    // Validate the value if provided, for both required and optional claims
-    if (typeof value === 'string') {
-      validateClaimValue(type, value, validation as ContractDisplayClaim['validation'])
-    }
+    validateClaimValue(type, inputValue, validation as ContractDisplayClaim['validation'])
   })
 }
