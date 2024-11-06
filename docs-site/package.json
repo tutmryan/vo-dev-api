@@ -6,7 +6,7 @@
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",
-    "build:pr": "npm run generate-graphql-docs && npx --yes cross-env GRAPHQL_ENDPOINT=https://ci-graphql-endpoint ADMIN_URL=https://ci-admin-url npm run docusaurus build",
+    "build:pr": "npm run generate-graphql-docs && npx --yes cross-env GRAPHQL_ENDPOINT=https://ci-graphql-endpoint ADMIN_URL=https://ci-admin-url PORTAL_URL=https://ci-portal-url npm run docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",

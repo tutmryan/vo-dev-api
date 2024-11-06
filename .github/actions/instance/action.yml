@@ -543,6 +543,7 @@ runs:
       env:
         GRAPHQL_ENDPOINT: https://${{ inputs.instance }}.api.${{ inputs.domain }}
         ADMIN_URL: https://${{ inputs.instance }}.${{ inputs.domain }}
+        PORTAL_URL: https://${{ inputs.instance }}.portal.${{ inputs.domain }}
         DEV_TOOLS_ENABLED: ${{ inputs.dev-tools-enabled }}
         DEMO_ENABLED : ${{ inputs.demo-enabled }}
         API_CLIENT_ID: ${{ steps.add-instance-app-registration.outputs.instanceAppId }}
