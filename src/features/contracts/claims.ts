@@ -84,7 +84,7 @@ export const validateContractClaims = (
  */
 export const validateIssuanceClaimsAgainstContractClaims = (
   claimsInput?: IssuanceRequestInput['claims'] | AsyncIssuanceRequestInput['claims'],
-  contractClaims?: ContractDisplayModel['claims'] | CreateUpdateTemplateDisplayModelInput['claims'],
+  contractClaims?: ContractDisplayModel['claims'],
 ): void => {
   claimsInput = claimsInput ?? {}
   validateStandardIssuanceClaims(claimsInput)

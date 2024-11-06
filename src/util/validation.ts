@@ -25,10 +25,10 @@ const booleanSchema = z.enum(['true', 'false'])
 const dateSchema = z.string().date('Invalid date format. Expected YYYY-MM-DD.')
 const dateTimeSchema = z.string().datetime('Invalid date-time format. Expected YYYY-MM-DDTHH:MM:SSZ.')
 const emailSchema = z.string().email({ message: 'Invalid email address.' })
-const imageSchema = z.string().regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/, { message: 'Invalid base64 image.' })
-const phoneSchema = z
-  .string()
-  .refine((value) => validator.isMobilePhone(value, 'any', { strictMode: true }), { message: 'Invalid E.164 phone number.' })
+const imageSchema = z.string().regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/, { message: 'Invalid base64 jpeg data URL.' })
+const phoneSchema = z.string().refine((value) => validator.isMobilePhone(value, 'any', { strictMode: true }), {
+  message: 'Invalid international E.164 format phone number.',
+})
 const urlSchema = z.string().url({ message: 'Invalid URL.' })
 
 const isValidNumber = (value: number | null | undefined): value is number => {
