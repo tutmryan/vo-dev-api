@@ -73,9 +73,9 @@ function toCreateContractInput({
               ...(faceCheckSupport === FaceCheckPhotoSupport.None
                 ? []
                 : [{ ...faceCheckPhotoClaimAttestation, required: faceCheckSupport === FaceCheckPhotoSupport.Required }]),
-              ...claims.map(({ claim }) => ({
+              ...claims.map(({ claim, isOptional }) => ({
                 type: claimTypeString,
-                required: true,
+                required: !isOptional,
                 outputClaim: claim,
                 inputClaim: claim,
                 indexed: false,
@@ -91,11 +91,12 @@ function toCreateContractInput({
         consent,
         card,
         claims: [
-          ...claims.map(({ claim, label, description }) => ({
+          ...claims.map(({ claim, label, description, isOptional }) => ({
             label,
             claim: `${displayClaimPrefix}${claim}`,
             type: claimTypeString,
             description,
+            required: !isOptional,
           })),
           ...(faceCheckSupport === FaceCheckPhotoSupport.None ? [] : [faceCheckPhotoDisplayClaim]),
           ...standardContractDislayClaims,

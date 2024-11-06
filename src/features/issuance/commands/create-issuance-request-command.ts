@@ -9,7 +9,7 @@ import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { requestDetailsCache } from '../../callback/cache'
 import type { StandardClaims } from '../../contracts/claims'
-import { validateIssuanceClaims } from '../../contracts/claims'
+import { validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
@@ -47,12 +47,13 @@ export async function CreateIssuanceRequestCommand(
 
   userInvariant(user)
 
-  validateIssuanceClaims(claimsInput)
-
   // find the contract
   const contract = await entityManager.getRepository(ContractEntity).findOneByOrFail({ id: contractId })
   invariant(contract.externalId, 'Contract must be provisioned before issuance')
   invariant(!contract.isDeprecated, 'Contract must not be deprecated')
+
+  // validate that the provided claims include the required contract claims
+  validateIssuanceClaimsAgainstContractClaims(claimsInput, contract.display.claims)
 
   // find the provisioned contract
   const provisionedContract = await verifiedIdAdmin.contract(contract.externalId)

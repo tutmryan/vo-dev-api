@@ -11,7 +11,7 @@ import { sendAsyncIssuanceNotificationsJobHandler } from '../jobs/send-async-iss
 import { createIssuanceRequest } from './create-async-issuance'
 import { createIssuanceRequestForAsyncIssuance } from './create-issuance-request-for-async-issuance'
 import { getAsyncIssuance } from './get-async-issunace'
-import { buildContact, faceCheckPhoto, givenContract } from './index'
+import { additonalContractClaims, buildContact, faceCheckPhoto, givenContract, validAdditonalContractClaims } from './index'
 
 describe('createIssuanceRequestForAsyncIssuance mutation', () => {
   beforeAfterAll()
@@ -39,6 +39,7 @@ describe('createIssuanceRequestForAsyncIssuance mutation', () => {
       useFaceCheck?: boolean
       usePhotoCapture?: boolean
       useClaims?: boolean
+      useAllClaimTypes?: boolean
       useExpiry?: boolean
     }>([
       { type: 'multi-factor over email/sms works' },
@@ -48,6 +49,7 @@ describe('createIssuanceRequestForAsyncIssuance mutation', () => {
       { type: 'using face check works', useFaceCheck: true },
       { type: 'using photo capture works', usePhotoCapture: true },
       { type: 'using claims works', useClaims: true },
+      { type: 'using all claims types works', useClaims: true, useAllClaimTypes: true },
       { type: 'using expiry works', useExpiry: true },
     ])(
       '$type',
@@ -58,6 +60,7 @@ describe('createIssuanceRequestForAsyncIssuance mutation', () => {
         useFaceCheck,
         usePhotoCapture,
         useClaims,
+        useAllClaimTypes,
         useExpiry,
       }) => {
         // Arrange
@@ -67,6 +70,7 @@ describe('createIssuanceRequestForAsyncIssuance mutation', () => {
             ? [
                 { claim: 'fixed-claim', label: 'fixed-label', type: ClaimType.String, value: 'fixed-value' },
                 { claim: 'unfixed-claim', label: 'unfixed-label', type: ClaimType.String, value: undefined },
+                ...(useAllClaimTypes ? additonalContractClaims : []),
               ]
             : undefined,
         })
@@ -81,7 +85,12 @@ describe('createIssuanceRequestForAsyncIssuance mutation', () => {
             contact,
             faceCheckPhoto: useFaceCheck ? faceCheckPhoto : undefined,
             photoCapture: usePhotoCapture ? true : undefined,
-            claims: useClaims ? { 'unfixed-claim': casual.word } : undefined,
+            claims: useClaims
+              ? {
+                  'unfixed-claim': casual.word,
+                  ...(useAllClaimTypes ? validAdditonalContractClaims : {}),
+                }
+              : undefined,
             expirationDate: useExpiry ? addDays(addMinutes(new Date(), 1), 1) : undefined,
           },
         ])
