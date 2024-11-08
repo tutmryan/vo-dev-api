@@ -15,6 +15,8 @@
   --ifm-color-primary-lightest: #9ab0fb;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  --ifm-navbar-search-input-icon: url('/img/search-icon.svg');
+  --ifm-navbar-search-input-color: #ffffff;
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -36,7 +38,10 @@ html[data-theme='dark'] {
 .navbar {
   background-color: #406bf7;
   height: 4.75rem;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px -1px, rgba(0, 0, 0, 0.14) 0px 4px 5px 0px, rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;
+  box-shadow:
+    rgba(0, 0, 0, 0.2) 0px 2px 4px -1px,
+    rgba(0, 0, 0, 0.14) 0px 4px 5px 0px,
+    rgba(0, 0, 0, 0.12) 0px 1px 10px 0px;
 }
 
 [data-theme='dark'] .navbar {
@@ -51,4 +56,13 @@ html[data-theme='dark'] {
 .navbar__logo {
   height: 2.25rem;
   padding-left: 1rem;
+}
+
+.navbar__search-input {
+  color: #ffffff;
+  outline-color: transparent;
+}
+
+.navbar__search button {
+  color: #ffffff;
 }
