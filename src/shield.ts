@@ -99,6 +99,7 @@ export const rules: ShieldSchema<Resolvers> = {
     asyncIssuanceRequest: isIssuer,
     asyncIssuanceContact: isIssuerUser,
     approvalRequestTypes: isApprovalRequestAdminUser,
+    identitiesByIdentifiers: or(isIssuanceApp, isLimitedIssuanceApp, hasTokenAcquisitionRoleRequiringIdentityAccess),
   },
   Mutation: {
     '*': isCredentialAdminUser,
