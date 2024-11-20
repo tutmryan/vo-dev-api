@@ -1,15 +1,16 @@
 import { notifyOidcDataChanged } from '..'
 import type { CommandContext } from '../../../cqs'
 import { type OidcClientInput } from '../../../generated/graphql'
-import { invariant } from '../../../util/invariant'
 import { OidcClientEntity } from '../entities/oidc-client-entity'
-import { systemClientInvariant } from './utils'
+import { systemClientInvariant, validateUris } from './utils'
 
 export async function UpdateOidcClientCommand(this: CommandContext, clientId: string, input: OidcClientInput) {
   systemClientInvariant(clientId)
 
-  const { redirectUris, allowAnyPartner, partnerIds, ...rest } = input
-  invariant(redirectUris.length > 0, 'At least one redirect URI is required')
+  const { redirectUris, postLogoutUris, allowAnyPartner, partnerIds, ...rest } = input
+
+  validateUris('redirect', redirectUris)
+  validateUris('log out', postLogoutUris)
 
   const repo = this.entityManager.getRepository(OidcClientEntity)
   const client = await repo.findOneByOrFail({ id: clientId })
@@ -17,6 +18,7 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
   client.update({
     ...rest,
     redirectUris,
+    postLogoutUris,
     allowAnyPartner: allowAnyPartner ?? false,
     partnerIds: partnerIds ?? [],
   })
