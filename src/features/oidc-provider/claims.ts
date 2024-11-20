@@ -1,5 +1,4 @@
 import type { Configuration } from 'oidc-provider'
-import { getResourceScopes } from './resource-indicators'
 
 export const presentationLoginStandardClaims = {
   amr: 'vc_authn',
@@ -36,7 +35,7 @@ const standardClaims = Object.keys(presentationLoginStandardClaims).reduce<Recor
   return acc
 }, {}) as Record<keyof typeof presentationLoginStandardClaims, null>
 
-export const oidcClaims = {
+export const openidClaims = {
   ...standardClaims,
   profile: Object.values(OpenIdProfileClaim),
   vc_info: Object.values(VcInfoClaim),
@@ -44,8 +43,3 @@ export const oidcClaims = {
   vc_vo_presentation: Object.values(VoPresentationClaim),
   vc_vo_identity: Object.values(VoIdentityClaim),
 } satisfies Configuration['claims']
-
-export async function claims() {
-  const resourceScopes = await getResourceScopes()
-  return { ...oidcClaims, ...resourceScopes } satisfies Configuration['claims']
-}

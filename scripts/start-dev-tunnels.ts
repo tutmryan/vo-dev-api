@@ -148,6 +148,7 @@ const startNgrok = async () => {
   // Portal
   console.log('Updating the Portal UI .env.local file with the new API URL...')
   replaceValueInEnvConfigFile('VITE_VO_API_URL', `${apiUrl}/graphql`, pathToPortalUi, '.env.local')
+  replaceValueInEnvConfigFile('VITE_OIDC_AUTHORITY', `${apiUrl}/oidc`, pathToPortalUi, '.env.local')
 
   const renderUi = () => {
     console.log('')

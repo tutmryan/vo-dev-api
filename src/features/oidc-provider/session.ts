@@ -1,18 +1,21 @@
 import { getClientCredentialsToken, type AccessTokenResponse } from '@makerx/node-common'
-import { pick } from 'lodash'
+import { compact, pick } from 'lodash'
+import type { UnknownObject } from 'oidc-provider'
 import { v5 as uuidv5 } from 'uuid'
-import { oidcStorageService } from '.'
+import { oidcProviderModule, oidcStorageService } from '.'
 import { limitedOidcAuthnAuth, limitedOidcClient } from '../../config'
 import { dataSource } from '../../data'
-import type { Identity } from '../../generated/graphql'
+import type { Identity, PresentationRequestForAuthnInput, RequestConfiguration } from '../../generated/graphql'
 import { newCacheSection, ONE_HOUR_TTL } from '../../redis/cache'
+import { getPlatformIssuerDid } from '../../services'
 import { invariant } from '../../util/invariant'
 import { Lazy } from '../../util/lazy'
 import { createKey } from '../../util/token'
+import type { PartnerEntity } from '../partners/entities/partner-entity'
 import { getPresentationDataFromCache } from '../presentation/callback/cache'
 import { PresentationEntity } from '../presentation/entities/presentation-entity'
-import { findClient } from './clients'
-import type { ExtraParams } from './extra-params'
+import type { OidcClientEntity } from './entities/oidc-client-entity'
+import { ExtraParams } from './extra-params'
 
 const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
 const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', ONE_HOUR_TTL))
@@ -42,6 +45,75 @@ export async function acquireLoginPresentationToken({
   return token
 }
 
+export async function buildAuthnPresentationRequest(
+  params: UnknownObject,
+  client: OidcClientEntity,
+  partners: PartnerEntity[],
+): Promise<PresentationRequestForAuthnInput> {
+  const vcTypeParam = params[ExtraParams.vc_type] as string | undefined
+  const vcIssuerParam = params[ExtraParams.vc_issuer] as string | undefined
+
+  const { errors } = await oidcProviderModule()
+
+  // validate type against client configuration
+  if (vcTypeParam && client.credentialTypes && client.credentialTypes.length > 0) {
+    if (!client.credentialTypes.includes(vcTypeParam))
+      throw new errors.InvalidTarget(`Client does not support requested credential type: ${vcTypeParam}`)
+  }
+
+  // validate partner issuer against client + instance partner configuration
+  const isPartnerIssuer = vcIssuerParam && vcIssuerParam !== (await getPlatformIssuerDid())
+  if (isPartnerIssuer) {
+    const partnerDids = partners.map((p) => p.did)
+    const clientPartnerDids =
+      client.partnerIds.length > 0
+        ? compact(client.partnerIds.map((partnerId) => partners.find((p) => p.id === partnerId)?.did))
+        : undefined
+
+    if (clientPartnerDids) {
+      if (!clientPartnerDids.includes(vcIssuerParam))
+        throw new errors.InvalidTarget(`Client does not support requested issuer: ${vcIssuerParam}`)
+    } else if (client.allowAnyPartner) {
+      if (!partnerDids.includes(vcIssuerParam))
+        throw new errors.InvalidTarget(`The requested issuer: ${vcIssuerParam} is not a valid partner`)
+    } else throw new errors.InvalidTarget(`Client does not support requested issuer: ${vcIssuerParam}`)
+  }
+
+  // determine the type of credential to request, either the specified param, single type from client, or 'any'
+  const clientSingleCredentialType = client.credentialTypes?.length === 1 ? client.credentialTypes[0] : undefined
+  const type = vcTypeParam ?? clientSingleCredentialType ?? 'VerifiableCredential'
+
+  // for partner presentations, the type must be valid for the partner configuration
+  if (isPartnerIssuer) {
+    const partner = partners.find((p) => p.did === vcIssuerParam)
+    if (!partner?.credentialTypes.includes(type))
+      throw new errors.InvalidTarget(`The requested credential type '${type}' is not configured for partner issuer: ${vcIssuerParam}`)
+  }
+
+  return {
+    requestedCredentials: [
+      {
+        type,
+        acceptedIssuers: vcIssuerParam ? [vcIssuerParam] : undefined,
+        configuration: buildRequestConfiguration(params),
+      },
+    ],
+  }
+}
+
+const faceCheckMinConfidenceThreshold = 50
+const faceCheckMaxConfidenceThreshold = 70
+
+function buildRequestConfiguration(params: UnknownObject): RequestConfiguration | undefined {
+  const facecheckParam = params[ExtraParams.vc_facecheck] as string | undefined
+  if (facecheckParam === 'true') return { validation: { faceCheck: {} } }
+  const asNumber = Number(facecheckParam)
+  if (Number.isNaN(asNumber)) return undefined
+  if (asNumber >= faceCheckMinConfidenceThreshold && asNumber <= faceCheckMaxConfidenceThreshold)
+    return { validation: { faceCheck: { matchConfidenceThreshold: asNumber } } }
+  return undefined
+}
+
 export type PresentationLoginAccount = {
   accountId: string
   presentationId: string
@@ -58,10 +130,15 @@ export type PresentationLoginAccount = {
 /**
  * Returns a subject identifier (namespaced to the client ID) for the presentation based on either:
  *  - The issuanceId claim, if present
- *  - The value of the client's `unique_claim_for_subject_identifier` configuration, which is required if issuanceId is not present
+ *  - The value of the claim with key specified via auth request param `vc_unique_claim_for_sub`, required if issuanceId is not present, or the single value from the client uniqueClaimsForSub config
  * See https://github.com/bcgov/vc-authn-oidc/blob/main/docs/README.md#subject-identifer-mapping
  */
-async function getSubjectIdentifier(claims: Record<string, unknown>, clientId: string, uniqueClaimForSubParam?: string): Promise<string> {
+async function getSubjectIdentifier(
+  claims: Record<string, unknown>,
+  clientId: string,
+  uniqueClaimForSubParam?: string,
+  clientUniqueClaimsForSub?: string[],
+): Promise<string> {
   // the subject identifier should not be the same for the same presentation across different clients
   // use the client id as the namespace for the uuid
   const uuidNamespace = clientId
@@ -70,30 +147,36 @@ async function getSubjectIdentifier(claims: Record<string, unknown>, clientId: s
   const issuanceId = claims.issuanceId as string | undefined
   if (issuanceId) return uuidv5(issuanceId, uuidNamespace)
 
-  // otherwise, require supplied configuration for the unique claim, either:
-  // - unique_claim_for_sub extra-param auth arg or;
-  // - unique_claim_for_subject_identifier client configuration attribute
-  const uniqueClaimForSubjectIdentifier = uniqueClaimForSubParam ?? (await findClient(clientId))?.unique_claim_for_subject_identifier
+  // otherwise, determine the unique claim to use from the client configuration or the auth request param
+  if (uniqueClaimForSubParam && clientUniqueClaimsForSub && clientUniqueClaimsForSub.length > 0)
+    invariant(
+      clientUniqueClaimsForSub.includes(uniqueClaimForSubParam),
+      `The unique claim '${uniqueClaimForSubParam}' specified in the auth request is not allowed for the client`,
+    )
+  const uniqueClaimForSub = uniqueClaimForSubParam ?? clientUniqueClaimsForSub?.find((claim) => !!claims[claim])
   invariant(
-    uniqueClaimForSubjectIdentifier,
-    'Either unique_claim_for_sub auth param or unique_claim_for_subject_identifier client setting is required for presentations without an issuanceId claim',
+    uniqueClaimForSub,
+    'A valid unique claim for the subject identifier could not be determined from the client configuration nor the `vc_unique_claim_for_sub` auth request parameter',
   )
-  const uniqueClaimValue = claims[uniqueClaimForSubjectIdentifier] as string | undefined
-  invariant(uniqueClaimValue, `The claim: '${uniqueClaimForSubjectIdentifier}' is not in this presentation`)
+  const uniqueClaimValue = claims[uniqueClaimForSub] as string | undefined
+  invariant(uniqueClaimValue, `Unique claim '${uniqueClaimForSub}' is not available in the presentation claims`)
   return uuidv5(uniqueClaimValue, uuidNamespace)
 }
 
-export async function completeLogin({
-  interactionId,
-  requestId,
-  clientId,
-  vc_unique_claim_for_sub,
-}: {
-  interactionId: string
-  requestId: string
-  clientId: string
-  [ExtraParams.vc_unique_claim_for_sub]?: string
-}): Promise<PresentationLoginAccount> {
+export async function completeLogin(
+  {
+    interactionId,
+    requestId,
+    clientId,
+    uniqueClaimForSubParam,
+  }: {
+    interactionId: string
+    requestId: string
+    clientId: string
+    uniqueClaimForSubParam?: string
+  },
+  clientUniqueClaimsForSubjectId: string[],
+): Promise<PresentationLoginAccount> {
   // Verify the login interaction state
   const interactionData = await getLoginInteractionData(interactionId)
   invariant(interactionData, 'Interaction session not found')
@@ -118,7 +201,7 @@ export async function completeLogin({
   // Build the login result
   const { claims: allClaims, type: types, issuer } = credential
   const { issuanceId, photo, ...claims } = allClaims
-  const accountId = await getSubjectIdentifier(allClaims, clientId, vc_unique_claim_for_sub)
+  const accountId = await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
 
   const account: PresentationLoginAccount = {
     accountId,
@@ -137,6 +220,18 @@ export async function completeLogin({
   await oidcStorageService().uploadAccount(accountId, account)
 
   return account
+}
+
+export async function validateLoginSessionForPresentation(authnSessionKey: string, requestId: string): Promise<LoginInteractionData> {
+  const interactionId = await getInteractionId(authnSessionKey)
+  invariant(interactionId, 'Interaction session not found')
+  const loginInteractionData = await getLoginInteractionData(interactionId)
+  invariant(loginInteractionData, 'Login data for session not found')
+  invariant(
+    loginInteractionData.state === 'in-progress' && loginInteractionData.requestId === requestId,
+    'Invalid login interaction state for presentation',
+  )
+  return loginInteractionData
 }
 
 export async function setLoginInteractionData(data: LoginInteractionData): Promise<void> {

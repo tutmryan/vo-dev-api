@@ -44,6 +44,7 @@ const config: DeepPartial<Config> = {
     },
   },
   limitedOidcClient: {
+    oid: 'ac58bad1-0aa7-49f7-abd0-6d99061c2ea3',
     credentials: {
       clientId: '27ed68c0-371b-4ccb-aec2-7b4fb97b5885',
     },

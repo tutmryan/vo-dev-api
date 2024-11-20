@@ -10,6 +10,9 @@ import { PartnerEntity } from '../features/partners/entities/partner-entity';
 import { ApprovalRequestEntity } from '../features/approval-request/entities/approval-request-entity';
 import { AsyncIssuanceEntity } from '../features/async-issuance/entities/async-issuance-entity';
 import { CommunicationEntity } from '../features/communication/entities/communication-entity';
+import { OidcClientEntity } from '../features/oidc-provider/entities/oidc-client-entity';
+import { OidcResourceEntity } from '../features/oidc-provider/entities/oidc-resource-entity';
+import { OidcClientResourceEntity } from '../features/oidc-provider/entities/oidc-client-resource-entity';
 import { GraphQLContext } from '../context';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
@@ -1145,6 +1148,8 @@ export type ContractPresentationWhere = {
   isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the OIDC client that requested authentication resulting in the presentation. */
+  oidcClientId?: InputMaybe<Scalars['ID']['input']>;
   /** The partner who issued the credential that was presented */
   partnerId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
@@ -1306,6 +1311,8 @@ export type Discovery = {
   __typename?: 'Discovery';
   /** Returns the features enabled for this API instance. */
   features: Features;
+  /** Returns the URLs for various features. */
+  urls: FeatureUrls;
 };
 
 /** The type of face check photo support */
@@ -1336,6 +1343,17 @@ export type FaceCheckValidation = {
 export type FaceCheckValidationInput = {
   /** Optional confidence threshold between 50-100. The default is 70. */
   matchConfidenceThreshold?: InputMaybe<Scalars['Int']['input']>;
+};
+
+/** The URLs for various features. */
+export type FeatureUrls = {
+  __typename?: 'FeatureUrls';
+  /** URL of the documentation website */
+  docsUrl: Scalars['URL']['output'];
+  /** URL of the OIDC authority (when enabled) */
+  oidcAuthorityUrl?: Maybe<Scalars['URL']['output']>;
+  /** URL of the portal */
+  portalUrl: Scalars['URL']['output'];
 };
 
 /** Specifies which features are enabled for this API instance. */
@@ -1478,6 +1496,8 @@ export type IdentityPresentationWhere = {
   isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the OIDC client that requested authentication resulting in the presentation. */
+  oidcClientId?: InputMaybe<Scalars['ID']['input']>;
   /** The partner who issued the credential that was presented */
   partnerId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
@@ -1610,6 +1630,8 @@ export type IssuancePresentationWhere = {
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /** Whether face check validation was requested. */
   isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The ID of the OIDC client that requested authentication resulting in the presentation. */
+  oidcClientId?: InputMaybe<Scalars['ID']['input']>;
   /** The partner who issued the credential that was presented */
   partnerId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
@@ -1893,6 +1915,12 @@ export type Mutation = {
    * Returns a URL and optional QR code to start the issuance process or an error.
    */
   createIssuanceRequestForAsyncIssuance: IssuanceRequestResponse;
+  /** Creates a new OIDC client */
+  createOidcClient: OidcClient;
+  /** Creates a new OIDC client resource */
+  createOidcClientResource: OidcClient;
+  /** Creates a new OIDC resource */
+  createOidcResource: OidcResource;
   /** Creates a partner whose credential types can be requested for presentation */
   createPartner: Partner;
   /** Creates a request to support capturing a photo to be used in a subsequent issuance. */
@@ -1912,6 +1940,12 @@ export type Mutation = {
   createTemplate: Template;
   /** Deletes an existing contract. Only possible when the contract has not yet been provisioned. */
   deleteContract?: Maybe<Scalars['Void']['output']>;
+  /** Deletes an OIDC client */
+  deleteOidcClient: OidcClient;
+  /** Deletes an OIDC client resource */
+  deleteOidcClientResource: OidcClient;
+  /** Deletes an OIDC resource */
+  deleteOidcResource: OidcResource;
   /** Deletes an existing template */
   deleteTemplate?: Maybe<Scalars['Void']['output']>;
   /** Deprecates an existing contract. */
@@ -1964,6 +1998,17 @@ export type Mutation = {
   updateAsyncIssuanceContact: AsyncIssuanceContact;
   /** Updates an existing contract */
   updateContract: Contract;
+  /** Updates an existing OIDC client */
+  updateOidcClient: OidcClient;
+  /** Updates an existing OIDC client resource */
+  updateOidcClientResource: OidcClient;
+  /**
+   * Updates an existing OIDC resource.
+   *
+   * Note:
+   * - If scopes are removed from the resource, those scopes will be removed from all clients that have the resource. If no scopes remain on the client resource, the client resource will be deleted.
+   */
+  updateOidcResource: OidcResource;
   /** Updates the name and credential types of a partner */
   updatePartner: Partner;
   /** Updates an existing template */
@@ -2044,6 +2089,22 @@ export type MutationCreateIssuanceRequestForAsyncIssuanceArgs = {
 };
 
 
+export type MutationCreateOidcClientArgs = {
+  input: OidcClientInput;
+};
+
+
+export type MutationCreateOidcClientResourceArgs = {
+  clientId: Scalars['ID']['input'];
+  input: OidcClientResourceInput;
+};
+
+
+export type MutationCreateOidcResourceArgs = {
+  input: OidcResourceInput;
+};
+
+
 export type MutationCreatePartnerArgs = {
   input: CreatePartnerInput;
 };
@@ -2076,6 +2137,22 @@ export type MutationCreateTemplateArgs = {
 
 
 export type MutationDeleteContractArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteOidcClientArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteOidcClientResourceArgs = {
+  clientId: Scalars['ID']['input'];
+  resourceId: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteOidcResourceArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -2158,6 +2235,24 @@ export type MutationUpdateContractArgs = {
 };
 
 
+export type MutationUpdateOidcClientArgs = {
+  id: Scalars['ID']['input'];
+  input: OidcClientInput;
+};
+
+
+export type MutationUpdateOidcClientResourceArgs = {
+  clientId: Scalars['ID']['input'];
+  input: OidcClientResourceInput;
+};
+
+
+export type MutationUpdateOidcResourceArgs = {
+  id: Scalars['ID']['input'];
+  input: OidcResourceInput;
+};
+
+
 export type MutationUpdatePartnerArgs = {
   id: Scalars['ID']['input'];
   input: UpdatePartnerInput;
@@ -2202,6 +2297,264 @@ export type NetworkIssuersWhere = {
   /** Only include issuers that are trusted (by this organisation) */
   isTrusted?: InputMaybe<Scalars['Boolean']['input']>;
   linkedDomainUrlsLike?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** The type of OIDC application. */
+export enum OidcApplicationType {
+  Native = 'native',
+  Web = 'web'
+}
+
+/** Represents an OIDC client. */
+export type OidcClient = {
+  __typename?: 'OidcClient';
+  /** Indicates whether the client allows presentations of credentials from any configured partner. */
+  allowAnyPartner: Scalars['Boolean']['output'];
+  /** The type of OIDC application. */
+  applicationType?: Maybe<OidcApplicationType>;
+  /** The background color, to be displayed during auth interactions, in hexadecimal format. */
+  backgroundColor?: Maybe<Scalars['String']['output']>;
+  /** The URL of the background image to be displayed during auth interactions, can be an image encoded as a data URL. */
+  backgroundImage?: Maybe<Scalars['URL']['output']>;
+  /** When the client was created. */
+  createdAt: Scalars['DateTime']['output'];
+  /** The user who created the client. */
+  createdBy: User;
+  /**
+   * The types of credentials that can be presented for authentication with this client.
+   *
+   * Note:
+   * - If not specified, any credential type can be presented.
+   * - The client can specify the credential type to use for authentication via the `vc_type` auth request parameter.
+   * - If values are defined here and the `vc_type` auth request parameter is provided, it is validated to be from this list.
+   */
+  credentialTypes?: Maybe<Array<Scalars['String']['output']>>;
+  /** When the client was deleted. */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['ID']['output'];
+  /** The URL of the client logo to be displayed during auth interactions, can be an image encoded as a data URL. */
+  logo?: Maybe<Scalars['URL']['output']>;
+  /** The name of the client. */
+  name: Scalars['String']['output'];
+  /** The partners that the client allows presentations of credentials from. */
+  partners: Array<Partner>;
+  /** The URL of a privacy policy for the client, displayed during auth interactions. */
+  policyUrl?: Maybe<Scalars['URL']['output']>;
+  /** The post-logout URIs that the client is allowed to use. */
+  postLogoutUris: Array<Scalars['URL']['output']>;
+  /** Returns the successful credential presentations that were requested for authorization . */
+  presentations: Array<Presentation>;
+  /** The redirect URIs that the client is allowed to use. */
+  redirectUris: Array<Scalars['URL']['output']>;
+  /** The resources that the client has access to, according to the defined resource scopes. */
+  resources?: Maybe<Array<OidcClientResource>>;
+  /** The URL of the terms of service for the client, displayed during auth interactions. */
+  termsOfServiceUrl?: Maybe<Scalars['URL']['output']>;
+  /**
+   * The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
+   *
+   * Note:
+   * - This is not needed for authentication using Verified Orchestration credentials, the issuanceId claim is used.
+   * - The authentication client also can specify the claim to use via the `vc_unique_claim_for_sub` auth request parameter.
+   * - Multiple values can be specified here, if not specified via the client `vc_unique_claim_for_sub` auth request parameter, the first claim that is present in the partner presentation will be used.
+   * - If values are defined here and the `vc_unique_claim_for_sub` auth request parameter is provided, it is validated to be from this list.
+   */
+  uniqueClaimsForSubjectId?: Maybe<Array<Scalars['String']['output']>>;
+  /** When the client was last updated. */
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The user who last updated the client. */
+  updatedBy?: Maybe<User>;
+};
+
+
+/** Represents an OIDC client. */
+export type OidcClientPresentationsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<OidcClientPresentationWhere>;
+};
+
+/** Input type for creating a new OIDC client. */
+export type OidcClientInput = {
+  /** Indicates whether the client allows presentations of credentials from any configured partner. */
+  allowAnyPartner?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The type of OIDC application. */
+  applicationType?: InputMaybe<OidcApplicationType>;
+  /** The background color, to be displayed during auth interactions, in hexadecimal format. */
+  backgroundColor?: InputMaybe<Scalars['String']['input']>;
+  /** The URL of the background image to be displayed during auth interactions, can be an image encoded as a data URL. */
+  backgroundImage?: InputMaybe<Scalars['URL']['input']>;
+  /**
+   * The types of credentials that can be presented for authentication with this client.
+   *
+   * Note:
+   * - If not specified, any credential type can be presented.
+   * - The client can specify the credential type to use for authentication via the `vc_type` auth request parameter.
+   * - If values are defined here and the `vc_type` auth request parameter is provided, it is validated to be from this list.
+   */
+  credentialTypes?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** The URL of the client logo to be displayed during auth interactions, can be an image encoded as a data URL. */
+  logo?: InputMaybe<Scalars['URL']['input']>;
+  /** The name of the client. */
+  name: Scalars['String']['input'];
+  /** The IDs of the partners that the client allows presentations of credentials from. */
+  partnerIds?: InputMaybe<Array<Scalars['ID']['input']>>;
+  /** The URL of a privacy policy for the client, displayed during auth interactions. */
+  policyUrl?: InputMaybe<Scalars['URL']['input']>;
+  /** The post-logout URIs that the client is allowed to use. */
+  postLogoutUris: Array<Scalars['URL']['input']>;
+  /** The redirect URIs that the client is allowed to use. */
+  redirectUris: Array<Scalars['URL']['input']>;
+  /** The URL of the terms of service for the client, displayed during auth interactions. */
+  termsOfServiceUrl?: InputMaybe<Scalars['URL']['input']>;
+  /**
+   * The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
+   *
+   * Note:
+   * - This is not needed for authentication using Verified Orchestration credentials, the issuanceId claim is used.
+   * - The authentication client also can specify the claim to use via the `vc_unique_claim_for_sub` auth request parameter.
+   * - Multiple values can be specified here, if not specified via the client `vc_unique_claim_for_sub` auth request parameter, the first claim that is present in the partner presentation will be used.
+   * - If values are defined here and the `vc_unique_claim_for_sub` auth request parameter is provided, it is validated to be from this list.
+   */
+  uniqueClaimsForSubjectId?: InputMaybe<Array<Scalars['String']['input']>>;
+};
+
+/** Fields that can be used for sorting OIDC clients by. */
+export enum OidcClientOrderBy {
+  /** When the client was created. */
+  CreatedAt = 'createdAt',
+  /** The name of the client. */
+  Name = 'name',
+  /** When the client was last updated. */
+  UpdatedAt = 'updatedAt'
+}
+
+/** Criteria for filtering presentations. */
+export type OidcClientPresentationWhere = {
+  /** The ID of a contract that was presented. */
+  contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the presentedAt period to include. */
+  from?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the identity who presented the credential (if known). */
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** Whether face check validation was requested. */
+  isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The issuance that was presented */
+  issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the OIDC client that requested authentication resulting in the presentation. */
+  oidcClientId?: InputMaybe<Scalars['ID']['input']>;
+  /** The partner who issued the credential that was presented */
+  partnerId?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential presented. */
+  presentedType?: InputMaybe<Scalars['String']['input']>;
+  /** The requestId of the presentation request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that requested & received the presentation data. */
+  requestedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential requested. */
+  requestedType?: InputMaybe<Scalars['String']['input']>;
+  /** The end of the presentedAt period to include. */
+  to?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+/** Represents an OIDC resource that an OIDC client has access to, according to the defined resource scopes. */
+export type OidcClientResource = {
+  __typename?: 'OidcClientResource';
+  /** The resource that the client has access to. */
+  resource: OidcResource;
+  /** The scopes from the resource that the client may request. */
+  resourceScopes: Array<Scalars['String']['output']>;
+};
+
+/** Input type for creating a new OIDC client resource, providing access from a client to a resource according to the defined resource scopes. */
+export type OidcClientResourceInput = {
+  resourceId: Scalars['ID']['input'];
+  /** The scopes from the resource that the client may request. */
+  resourceScopes: Array<Scalars['String']['input']>;
+};
+
+/** Criteria for finding OIDC clients. */
+export type OidcClientWhere = {
+  /** List only the clients which allow any partners. */
+  allowAnyPartner?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The ID of the user (Person or Application) that created the client. */
+  createdById?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the createdAt period to include. */
+  createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the createdAt period to include. */
+  createdTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Whether to include deleted clients in the results. */
+  includeDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  /** List only the clients which are, or are not, deleted. */
+  isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  /** List only clients matching this name. */
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Represents an OIDC resource, usually an API, but could be anything accessed from an OIDC client which needs explicit control. */
+export type OidcResource = {
+  __typename?: 'OidcResource';
+  /** When the resource was created. */
+  createdAt: Scalars['DateTime']['output'];
+  /** The user who created the resource. */
+  createdBy: User;
+  /** When the client was deleted. */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  id: Scalars['ID']['output'];
+  /** The name of the resource. */
+  name: Scalars['String']['output'];
+  /**
+   * The URL that uniquely identifies the resource.
+   *
+   * Note:
+   * - The URL can be an API endpoint such as `https://api.example.net` or a resource indicator such as `urn:example:resource-endpoint`.
+   */
+  resourceIndicator: Scalars['URL']['output'];
+  /** Scopes that clients can request, for example `['api:read', 'api:write']`. */
+  scopes: Array<Scalars['String']['output']>;
+  /** When the resource was last updated. */
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The user who last updated the resource. */
+  updatedBy?: Maybe<User>;
+};
+
+/** Input type for creating a new OIDC resource, usually an API, but could be anything accessed from an OIDC client which needs explicit control. */
+export type OidcResourceInput = {
+  /** The name of the resource. */
+  name: Scalars['String']['input'];
+  /**
+   * The URL that uniquely identifies the resource.
+   *
+   * Note:
+   * - The URL can be an API endpoint such as `https://api.example.net` or a resource indicator such as `urn:example:resource-endpoint`.
+   */
+  resourceIndicator: Scalars['URL']['input'];
+  /** Scopes that clients can request, for example `['api:read', 'api:write']`. */
+  scopes: Array<Scalars['String']['input']>;
+};
+
+/** Fields that can be used for sorting OIDC resources by. */
+export enum OidcResourceOrderBy {
+  CreatedAt = 'createdAt',
+  Name = 'name',
+  ResourceIndicator = 'resourceIndicator',
+  UpdatedAt = 'updatedAt'
+}
+
+/** Criteria for finding OIDC resources. */
+export type OidcResourceWhere = {
+  /** The ID of the user (Person or Application) that created the resource. */
+  createdById?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the createdAt period to include. */
+  createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the createdAt period to include. */
+  createdTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** List only the resources which are, or are not, deleted. */
+  isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  /** List only resources matching this name. */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** List only resources matching this resource indicator. */
+  resourceIndicator?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum OrderDirection {
@@ -2271,6 +2624,8 @@ export type PartnerPresentationWhere = {
   isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the OIDC client that requested authentication resulting in the presentation. */
+  oidcClientId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
   presentedType?: InputMaybe<Scalars['String']['input']>;
   /** The requestId of the presentation request. */
@@ -2370,6 +2725,8 @@ export type Presentation = {
   identity?: Maybe<Identity>;
   /** The issuances that were presented (which may be none, if the presented credentials were from an external issuer) */
   issuances: Array<Issuance>;
+  /** The requesting OIDC client, if this presentation was made for OIDC authentication. */
+  oidcClient?: Maybe<OidcClient>;
   /** The partners who issued the credentials that were presented (which may be none, if the presented credentials were internal) */
   partners: Array<Partner>;
   presentedAt: Scalars['DateTime']['output'];
@@ -2545,6 +2902,8 @@ export type PresentationWhere = {
   isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the OIDC client that requested authentication resulting in the presentation. */
+  oidcClientId?: InputMaybe<Scalars['ID']['input']>;
   /** The partner who issued the credential that was presented */
   partnerId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
@@ -2616,6 +2975,10 @@ export type Query = {
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-issuers
    */
   findNetworkIssuers: Array<NetworkIssuer>;
+  /** Returns OIDC clients, optionally matching the specified criteria */
+  findOidcClients: Array<OidcClient>;
+  /** Returns OIDC resources, optionally matching the specified criteria */
+  findOidcResources: Array<OidcResource>;
   /** Returns partners, optionally matching the specified criteria */
   findPartners: Array<Partner>;
   /** Returns successful credential presentations, optionally matching the specified criteria. */
@@ -2649,6 +3012,10 @@ export type Query = {
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
    */
   networkContracts: Array<NetworkContract>;
+  /** Returns a single OIDC client by ID */
+  oidcClient: OidcClient;
+  /** Returns a single OIDC resource by ID */
+  oidcResource: OidcResource;
   /** Returns a partner by ID */
   partner: Partner;
   /**
@@ -2762,6 +3129,24 @@ export type QueryFindNetworkIssuersArgs = {
 };
 
 
+export type QueryFindOidcClientsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<OidcClientOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<OidcClientWhere>;
+};
+
+
+export type QueryFindOidcResourcesArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<OidcResourceOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<OidcResourceWhere>;
+};
+
+
 export type QueryFindPartnersArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -2844,6 +3229,16 @@ export type QueryIssuanceCountByUserArgs = {
 export type QueryNetworkContractsArgs = {
   issuerId: Scalars['ID']['input'];
   tenantId: Scalars['ID']['input'];
+};
+
+
+export type QueryOidcClientArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryOidcResourceArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3372,6 +3767,8 @@ export type UserPresentationWhere = {
   isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
   /** The issuance that was presented */
   issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the OIDC client that requested authentication resulting in the presentation. */
+  oidcClientId?: InputMaybe<Scalars['ID']['input']>;
   /** The partner who issued the credential that was presented */
   partnerId?: InputMaybe<Scalars['ID']['input']>;
   /** The type of credential presented. */
@@ -3623,6 +4020,114 @@ export type AcquireLimitedPhotoCaptureTokenMutationVariables = Exact<{
 
 export type AcquireLimitedPhotoCaptureTokenMutation = { __typename?: 'Mutation', acquireLimitedPhotoCaptureToken: { __typename?: 'PhotoCaptureTokenResponse', token: string, expires: Date } };
 
+export type OidcClientFragmentFragment = { __typename?: 'OidcClient', id: string, name: string, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, applicationType?: OidcApplicationType | null, redirectUris: Array<string>, postLogoutUris: Array<string>, allowAnyPartner: boolean, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null };
+
+export type CreateOidcClientMutationVariables = Exact<{
+  input: OidcClientInput;
+}>;
+
+
+export type CreateOidcClientMutation = { __typename?: 'Mutation', createOidcClient: { __typename?: 'OidcClient', id: string, name: string, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, applicationType?: OidcApplicationType | null, redirectUris: Array<string>, postLogoutUris: Array<string>, allowAnyPartner: boolean, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type UpdateOidcClientMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: OidcClientInput;
+}>;
+
+
+export type UpdateOidcClientMutation = { __typename?: 'Mutation', updateOidcClient: { __typename?: 'OidcClient', id: string, name: string, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, applicationType?: OidcApplicationType | null, redirectUris: Array<string>, postLogoutUris: Array<string>, allowAnyPartner: boolean, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type DeleteOidcClientMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteOidcClientMutation = { __typename?: 'Mutation', deleteOidcClient: { __typename?: 'OidcClient', id: string, name: string, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, applicationType?: OidcApplicationType | null, redirectUris: Array<string>, postLogoutUris: Array<string>, allowAnyPartner: boolean, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type FindOidcClientsQueryVariables = Exact<{
+  where?: InputMaybe<OidcClientWhere>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<OidcClientOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+}>;
+
+
+export type FindOidcClientsQuery = { __typename?: 'Query', findOidcClients: Array<{ __typename?: 'OidcClient', id: string, name: string, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, applicationType?: OidcApplicationType | null, redirectUris: Array<string>, postLogoutUris: Array<string>, allowAnyPartner: boolean, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null }> };
+
+export type OidcClientQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type OidcClientQuery = { __typename?: 'Query', oidcClient: { __typename?: 'OidcClient', id: string, name: string, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, applicationType?: OidcApplicationType | null, redirectUris: Array<string>, postLogoutUris: Array<string>, allowAnyPartner: boolean, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type OidcResourceFragmentFragment = { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string>, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null };
+
+export type CreateOidcResourceMutationVariables = Exact<{
+  input: OidcResourceInput;
+}>;
+
+
+export type CreateOidcResourceMutation = { __typename?: 'Mutation', createOidcResource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string>, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type UpdateOidcResourceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: OidcResourceInput;
+}>;
+
+
+export type UpdateOidcResourceMutation = { __typename?: 'Mutation', updateOidcResource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string>, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type DeleteOidcResourceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteOidcResourceMutation = { __typename?: 'Mutation', deleteOidcResource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string>, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type FindOidcResourcesQueryVariables = Exact<{
+  where?: InputMaybe<OidcResourceWhere>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<OidcResourceOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+}>;
+
+
+export type FindOidcResourcesQuery = { __typename?: 'Query', findOidcResources: Array<{ __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string>, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null }> };
+
+export type OidcResourceQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type OidcResourceQuery = { __typename?: 'Query', oidcResource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string>, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type CreateOidcClientResourceMutationVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+  input: OidcClientResourceInput;
+}>;
+
+
+export type CreateOidcClientResourceMutation = { __typename?: 'Mutation', createOidcClientResource: { __typename?: 'OidcClient', id: string, name: string, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, applicationType?: OidcApplicationType | null, redirectUris: Array<string>, postLogoutUris: Array<string>, allowAnyPartner: boolean, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type UpdateOidcClientResourceMutationVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+  input: OidcClientResourceInput;
+}>;
+
+
+export type UpdateOidcClientResourceMutation = { __typename?: 'Mutation', updateOidcClientResource: { __typename?: 'OidcClient', id: string, name: string, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, applicationType?: OidcApplicationType | null, redirectUris: Array<string>, postLogoutUris: Array<string>, allowAnyPartner: boolean, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type DeleteOidcClientResourceMutationVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+  resourceId: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteOidcClientResourceMutation = { __typename?: 'Mutation', deleteOidcClientResource: { __typename?: 'OidcClient', id: string, name: string, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, applicationType?: OidcApplicationType | null, redirectUris: Array<string>, postLogoutUris: Array<string>, allowAnyPartner: boolean, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
 export type CreatePhotoCaptureRequestMutationVariables = Exact<{
   request: PhotoCaptureRequest;
 }>;
@@ -3687,6 +4192,8 @@ export type CreatePartnerMutation = { __typename?: 'Mutation', createPartner: { 
 
 export const AsyncIssuanceRequestFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AsyncIssuanceRequestFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AsyncIssuanceRequest"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"isStatusFinal"}},{"kind":"Field","name":{"kind":"Name","value":"failureReason"}},{"kind":"Field","name":{"kind":"Name","value":"expiry"}},{"kind":"Field","name":{"kind":"Name","value":"expiresOn"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"identity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"issuance"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<AsyncIssuanceRequestFragmentFragment, unknown>;
 export const ContractFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ContractFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Contract"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"template"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<ContractFragmentFragment, unknown>;
+export const OidcClientFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<OidcClientFragmentFragment, unknown>;
+export const OidcResourceFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcResourceFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcResource"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<OidcResourceFragmentFragment, unknown>;
 export const TemplateParentDataFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateParentDataFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"parentData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]}}]} as unknown as DocumentNode<TemplateParentDataFragmentFragment, unknown>;
 export const TemplateFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]} as unknown as DocumentNode<TemplateFragmentFragment, unknown>;
 export const CancelApprovalRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CancelApprovalRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cancelApprovalRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<CancelApprovalRequestMutation, CancelApprovalRequestMutationVariables>;
@@ -3719,6 +4226,19 @@ export const CredentialTypesDocument = {"kind":"Document","definitions":[{"kind"
 export const CreatePresentationRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePresentationRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPresentationRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"requestId"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"qrCode"}},{"kind":"Field","name":{"kind":"Name","value":"expiry"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RequestErrorResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"error"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"innererror"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"target"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreatePresentationRequestMutation, CreatePresentationRequestMutationVariables>;
 export const AcquireLimitedApprovalTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AcquireLimitedApprovalToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AcquireLimitedApprovalTokenInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"acquireLimitedApprovalToken"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"expires"}}]}}]}}]} as unknown as DocumentNode<AcquireLimitedApprovalTokenMutation, AcquireLimitedApprovalTokenMutationVariables>;
 export const AcquireLimitedPhotoCaptureTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AcquireLimitedPhotoCaptureToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AcquireLimitedPhotoCaptureTokenInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"acquireLimitedPhotoCaptureToken"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"expires"}}]}}]}}]} as unknown as DocumentNode<AcquireLimitedPhotoCaptureTokenMutation, AcquireLimitedPhotoCaptureTokenMutationVariables>;
+export const CreateOidcClientDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateOidcClient"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClientInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createOidcClient"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<CreateOidcClientMutation, CreateOidcClientMutationVariables>;
+export const UpdateOidcClientDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateOidcClient"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClientInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateOidcClient"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<UpdateOidcClientMutation, UpdateOidcClientMutationVariables>;
+export const DeleteOidcClientDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteOidcClient"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteOidcClient"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<DeleteOidcClientMutation, DeleteOidcClientMutationVariables>;
+export const FindOidcClientsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindOidcClients"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClientWhere"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PositiveInt"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PositiveInt"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClientOrderBy"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderDirection"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OrderDirection"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findOidcClients"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"orderBy"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}}},{"kind":"Argument","name":{"kind":"Name","value":"orderDirection"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderDirection"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<FindOidcClientsQuery, FindOidcClientsQueryVariables>;
+export const OidcClientDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"OidcClient"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"oidcClient"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<OidcClientQuery, OidcClientQueryVariables>;
+export const CreateOidcResourceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateOidcResource"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcResourceInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createOidcResource"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcResourceFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcResourceFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcResource"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<CreateOidcResourceMutation, CreateOidcResourceMutationVariables>;
+export const UpdateOidcResourceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateOidcResource"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcResourceInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateOidcResource"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcResourceFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcResourceFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcResource"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<UpdateOidcResourceMutation, UpdateOidcResourceMutationVariables>;
+export const DeleteOidcResourceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteOidcResource"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteOidcResource"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcResourceFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcResourceFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcResource"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<DeleteOidcResourceMutation, DeleteOidcResourceMutationVariables>;
+export const FindOidcResourcesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindOidcResources"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcResourceWhere"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PositiveInt"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PositiveInt"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcResourceOrderBy"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderDirection"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OrderDirection"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findOidcResources"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"orderBy"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}}},{"kind":"Argument","name":{"kind":"Name","value":"orderDirection"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderDirection"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcResourceFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcResourceFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcResource"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<FindOidcResourcesQuery, FindOidcResourcesQueryVariables>;
+export const OidcResourceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"OidcResource"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"oidcResource"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcResourceFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcResourceFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcResource"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<OidcResourceQuery, OidcResourceQueryVariables>;
+export const CreateOidcClientResourceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateOidcClientResource"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClientResourceInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createOidcClientResource"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"clientId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<CreateOidcClientResourceMutation, CreateOidcClientResourceMutationVariables>;
+export const UpdateOidcClientResourceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateOidcClientResource"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClientResourceInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateOidcClientResource"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"clientId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<UpdateOidcClientResourceMutation, UpdateOidcClientResourceMutationVariables>;
+export const DeleteOidcClientResourceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteOidcClientResource"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"resourceId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteOidcClientResource"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"clientId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}},{"kind":"Argument","name":{"kind":"Name","value":"resourceId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"resourceId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<DeleteOidcClientResourceMutation, DeleteOidcClientResourceMutationVariables>;
 export const CreatePhotoCaptureRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePhotoCaptureRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PhotoCaptureRequest"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPhotoCaptureRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"photoCaptureUrl"}},{"kind":"Field","name":{"kind":"Name","value":"photoCaptureQrCode"}}]}}]}}]} as unknown as DocumentNode<CreatePhotoCaptureRequestMutation, CreatePhotoCaptureRequestMutationVariables>;
 export const CapturePhotoDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CapturePhoto"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"photo"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capturePhoto"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"photoCaptureRequestId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}}},{"kind":"Argument","name":{"kind":"Name","value":"photo"},"value":{"kind":"Variable","name":{"kind":"Name","value":"photo"}}}]}]}}]} as unknown as DocumentNode<CapturePhotoMutation, CapturePhotoMutationVariables>;
 export const PhotoCaptureStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PhotoCaptureStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"photoCaptureStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"photoCaptureRequestId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<PhotoCaptureStatusQuery, PhotoCaptureStatusQueryVariables>;
@@ -3897,6 +4417,7 @@ export type ResolversTypes = {
   FaceCheckResult: ResolverTypeWrapper<FaceCheckResult>;
   FaceCheckValidation: ResolverTypeWrapper<FaceCheckValidation>;
   FaceCheckValidationInput: FaceCheckValidationInput;
+  FeatureUrls: ResolverTypeWrapper<FeatureUrls>;
   Features: ResolverTypeWrapper<Features>;
   FloatValidation: ResolverTypeWrapper<FloatValidation>;
   FloatValidationInput: FloatValidationInput;
@@ -3932,6 +4453,18 @@ export type ResolversTypes = {
   NetworkIssuer: ResolverTypeWrapper<NetworkIssuer>;
   NetworkIssuersWhere: NetworkIssuersWhere;
   NonNegativeInt: ResolverTypeWrapper<Scalars['NonNegativeInt']['output']>;
+  OidcApplicationType: OidcApplicationType;
+  OidcClient: ResolverTypeWrapper<OidcClientEntity>;
+  OidcClientInput: OidcClientInput;
+  OidcClientOrderBy: OidcClientOrderBy;
+  OidcClientPresentationWhere: OidcClientPresentationWhere;
+  OidcClientResource: ResolverTypeWrapper<OidcClientResourceEntity>;
+  OidcClientResourceInput: OidcClientResourceInput;
+  OidcClientWhere: OidcClientWhere;
+  OidcResource: ResolverTypeWrapper<OidcResourceEntity>;
+  OidcResourceInput: OidcResourceInput;
+  OidcResourceOrderBy: OidcResourceOrderBy;
+  OidcResourceWhere: OidcResourceWhere;
   OrderDirection: OrderDirection;
   Partner: ResolverTypeWrapper<PartnerEntity>;
   PartnerOrderBy: PartnerOrderBy;
@@ -4079,6 +4612,7 @@ export type ResolversParentTypes = {
   FaceCheckResult: FaceCheckResult;
   FaceCheckValidation: FaceCheckValidation;
   FaceCheckValidationInput: FaceCheckValidationInput;
+  FeatureUrls: FeatureUrls;
   Features: Features;
   FloatValidation: FloatValidation;
   FloatValidationInput: FloatValidationInput;
@@ -4110,6 +4644,15 @@ export type ResolversParentTypes = {
   NetworkIssuer: NetworkIssuer;
   NetworkIssuersWhere: NetworkIssuersWhere;
   NonNegativeInt: Scalars['NonNegativeInt']['output'];
+  OidcClient: OidcClientEntity;
+  OidcClientInput: OidcClientInput;
+  OidcClientPresentationWhere: OidcClientPresentationWhere;
+  OidcClientResource: OidcClientResourceEntity;
+  OidcClientResourceInput: OidcClientResourceInput;
+  OidcClientWhere: OidcClientWhere;
+  OidcResource: OidcResourceEntity;
+  OidcResourceInput: OidcResourceInput;
+  OidcResourceWhere: OidcResourceWhere;
   Partner: PartnerEntity;
   PartnerPresentationWhere: PartnerPresentationWhere;
   PartnerWhere: PartnerWhere;
@@ -4452,6 +4995,7 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 
 export type DiscoveryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Discovery'] = ResolversParentTypes['Discovery']> = {
   features?: Resolver<ResolversTypes['Features'], ParentType, ContextType>;
+  urls?: Resolver<ResolversTypes['FeatureUrls'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -4467,6 +5011,13 @@ export type FaceCheckResultResolvers<ContextType = GraphQLContext, ParentType ex
 
 export type FaceCheckValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['FaceCheckValidation'] = ResolversParentTypes['FaceCheckValidation']> = {
   matchConfidenceThreshold?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type FeatureUrlsResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['FeatureUrls'] = ResolversParentTypes['FeatureUrls']> = {
+  docsUrl?: Resolver<ResolversTypes['URL'], ParentType, ContextType>;
+  oidcAuthorityUrl?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
+  portalUrl?: Resolver<ResolversTypes['URL'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -4588,6 +5139,9 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationCreateContractArgs, 'input'>>;
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
   createIssuanceRequestForAsyncIssuance?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestForAsyncIssuanceArgs, 'asyncIssuanceRequestId'>>;
+  createOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationCreateOidcClientArgs, 'input'>>;
+  createOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationCreateOidcClientResourceArgs, 'clientId' | 'input'>>;
+  createOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationCreateOidcResourceArgs, 'input'>>;
   createPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationCreatePartnerArgs, 'input'>>;
   createPhotoCaptureRequest?: Resolver<ResolversTypes['PhotoCaptureRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePhotoCaptureRequestArgs, 'request'>>;
   createPresentationRequest?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestArgs, 'request'>>;
@@ -4595,6 +5149,9 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createPresentationRequestForAuthn?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, Partial<MutationCreatePresentationRequestForAuthnArgs>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
+  deleteOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientArgs, 'id'>>;
+  deleteOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientResourceArgs, 'clientId' | 'resourceId'>>;
+  deleteOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationDeleteOidcResourceArgs, 'id'>>;
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;
   deprecateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationDeprecateContractArgs, 'id'>>;
   provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
@@ -4610,6 +5167,9 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
   updateAsyncIssuanceContact?: Resolver<ResolversTypes['AsyncIssuanceContact'], ParentType, ContextType, RequireFields<MutationUpdateAsyncIssuanceContactArgs, 'asyncIssuanceRequestId' | 'contact'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
+  updateOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientArgs, 'id' | 'input'>>;
+  updateOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientResourceArgs, 'clientId' | 'input'>>;
+  updateOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationUpdateOidcResourceArgs, 'id' | 'input'>>;
   updatePartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationUpdatePartnerArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;
 };
@@ -4634,6 +5194,50 @@ export type NetworkIssuerResolvers<ContextType = GraphQLContext, ParentType exte
 export interface NonNegativeIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['NonNegativeInt'], any> {
   name: 'NonNegativeInt';
 }
+
+export type OidcClientResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['OidcClient'] = ResolversParentTypes['OidcClient']> = {
+  allowAnyPartner?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  applicationType?: Resolver<Maybe<ResolversTypes['OidcApplicationType']>, ParentType, ContextType>;
+  backgroundColor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  backgroundImage?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  credentialTypes?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  deletedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  logo?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  partners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType>;
+  policyUrl?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
+  postLogoutUris?: Resolver<Array<ResolversTypes['URL']>, ParentType, ContextType>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<OidcClientPresentationsArgs>>;
+  redirectUris?: Resolver<Array<ResolversTypes['URL']>, ParentType, ContextType>;
+  resources?: Resolver<Maybe<Array<ResolversTypes['OidcClientResource']>>, ParentType, ContextType>;
+  termsOfServiceUrl?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
+  uniqueClaimsForSubjectId?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type OidcClientResourceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['OidcClientResource'] = ResolversParentTypes['OidcClientResource']> = {
+  resource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType>;
+  resourceScopes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type OidcResourceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['OidcResource'] = ResolversParentTypes['OidcResource']> = {
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  deletedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  resourceIndicator?: Resolver<ResolversTypes['URL'], ParentType, ContextType>;
+  scopes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 
 export type PartnerResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Partner'] = ResolversParentTypes['Partner']> = {
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -4681,6 +5285,7 @@ export type PresentationResolvers<ContextType = GraphQLContext, ParentType exten
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<Maybe<ResolversTypes['Identity']>, ParentType, ContextType>;
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType>;
+  oidcClient?: Resolver<Maybe<ResolversTypes['OidcClient']>, ParentType, ContextType>;
   partners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType>;
   presentedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   presentedCredentials?: Resolver<Array<ResolversTypes['PresentedCredential']>, ParentType, ContextType>;
@@ -4754,6 +5359,8 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findIdentities?: Resolver<Array<ResolversTypes['Identity']>, ParentType, ContextType, RequireFields<QueryFindIdentitiesArgs, 'limit'>>;
   findIssuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, RequireFields<QueryFindIssuancesArgs, 'limit'>>;
   findNetworkIssuers?: Resolver<Array<ResolversTypes['NetworkIssuer']>, ParentType, ContextType, RequireFields<QueryFindNetworkIssuersArgs, 'where'>>;
+  findOidcClients?: Resolver<Array<ResolversTypes['OidcClient']>, ParentType, ContextType, RequireFields<QueryFindOidcClientsArgs, 'limit'>>;
+  findOidcResources?: Resolver<Array<ResolversTypes['OidcResource']>, ParentType, ContextType, RequireFields<QueryFindOidcResourcesArgs, 'limit'>>;
   findPartners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType, RequireFields<QueryFindPartnersArgs, 'limit'>>;
   findPresentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<QueryFindPresentationsArgs, 'limit'>>;
   findTemplates?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType, Partial<QueryFindTemplatesArgs>>;
@@ -4769,6 +5376,8 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   issuanceCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByContractArgs>>;
   issuanceCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByUserArgs>>;
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
+  oidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<QueryOidcClientArgs, 'id'>>;
+  oidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<QueryOidcResourceArgs, 'id'>>;
   partner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<QueryPartnerArgs, 'id'>>;
   photoCaptureStatus?: Resolver<ResolversTypes['PhotoCaptureEventData'], ParentType, ContextType, RequireFields<QueryPhotoCaptureStatusArgs, 'photoCaptureRequestId'>>;
   presentation?: Resolver<ResolversTypes['Presentation'], ParentType, ContextType, RequireFields<QueryPresentationArgs, 'id'>>;
@@ -5001,6 +5610,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   EmailAddress?: GraphQLScalarType;
   FaceCheckResult?: FaceCheckResultResolvers<ContextType>;
   FaceCheckValidation?: FaceCheckValidationResolvers<ContextType>;
+  FeatureUrls?: FeatureUrlsResolvers<ContextType>;
   Features?: FeaturesResolvers<ContextType>;
   FloatValidation?: FloatValidationResolvers<ContextType>;
   HexColorCode?: GraphQLScalarType;
@@ -5019,6 +5629,9 @@ export type Resolvers<ContextType = GraphQLContext> = {
   NetworkContract?: NetworkContractResolvers<ContextType>;
   NetworkIssuer?: NetworkIssuerResolvers<ContextType>;
   NonNegativeInt?: GraphQLScalarType;
+  OidcClient?: OidcClientResolvers<ContextType>;
+  OidcClientResource?: OidcClientResourceResolvers<ContextType>;
+  OidcResource?: OidcResourceResolvers<ContextType>;
   Partner?: PartnerResolvers<ContextType>;
   PhotoCaptureEventData?: PhotoCaptureEventDataResolvers<ContextType>;
   PhotoCaptureRequestResponse?: PhotoCaptureRequestResponseResolvers<ContextType>;

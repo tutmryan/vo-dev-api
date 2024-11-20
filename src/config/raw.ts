@@ -135,6 +135,7 @@ export type Config = {
     secret?: string
   }
   limitedOidcClient: {
+    oid: string
     credentials: ClientCredentials
     secret?: string
   }

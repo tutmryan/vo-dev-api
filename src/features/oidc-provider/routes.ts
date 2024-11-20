@@ -6,17 +6,16 @@ import { strict as assert } from 'node:assert'
 import path from 'node:path'
 import { stringify } from 'node:querystring'
 import { inspect } from 'node:util'
-import type Provider from 'oidc-provider'
-import type { Grant, InteractionResults, UnknownObject } from 'oidc-provider'
+import type { Grant, InteractionResults } from 'oidc-provider'
+import { dataRef } from '.'
 import { instance } from '../../config'
 import { requestOrigin } from '../../express'
-import type { PresentationRequestForAuthnInput, RequestConfiguration } from '../../generated/graphql'
 import { logger } from '../../logger'
 import { invariant } from '../../util/invariant'
 import { presentationLoginStandardClaims } from './claims'
-import { ExtraParams } from './extra-params'
 import { createRequestInfo } from './log-events'
-import { acquireLoginPresentationToken, completeLogin } from './session'
+import { voLogoUrl } from './logos'
+import { acquireLoginPresentationToken, buildAuthnPresentationRequest, completeLogin } from './session'
 
 // taken from: https://github.com/panva/node-oidc-provider/blob/main/example/routes/express.js
 // - types hacked in
@@ -24,33 +23,6 @@ import { acquireLoginPresentationToken, completeLogin } from './session'
 // - login complete route modified to complete login based off presentation
 
 const showDebug = isLocalDev || instance === 'dev'
-
-function buildAuthnPresentationRequest(params: UnknownObject): PresentationRequestForAuthnInput {
-  const vcTypeParam = params[ExtraParams.vc_type] as string | undefined
-  const vcIssuerParam = params[ExtraParams.vc_issuer] as string | undefined
-  return {
-    requestedCredentials: [
-      {
-        type: vcTypeParam ?? 'VerifiableCredential',
-        acceptedIssuers: vcIssuerParam ? [vcIssuerParam] : undefined,
-        configuration: buildRequestConfiguration(params),
-      },
-    ],
-  }
-}
-
-const faceCheckMinConfidenceThreshold = 50
-const faceCheckMaxConfidenceThreshold = 70
-
-function buildRequestConfiguration(params: UnknownObject): RequestConfiguration | undefined {
-  const facecheckParam = params[ExtraParams.vc_facecheck] as string | undefined
-  if (facecheckParam === 'true') return { validation: { faceCheck: {} } }
-  const asNumber = Number(facecheckParam)
-  if (Number.isNaN(asNumber)) return undefined
-  if (asNumber >= faceCheckMinConfidenceThreshold && asNumber <= faceCheckMaxConfidenceThreshold)
-    return { validation: { faceCheck: { matchConfidenceThreshold: asNumber } } }
-  return undefined
-}
 
 export function debug(obj: any) {
   if (!showDebug) return ''
@@ -79,7 +51,25 @@ const noCache: RequestHandler = (req, res, next) => {
   next()
 }
 
-export function routes(app: Express, route: string, provider: Provider): void {
+function getProvider() {
+  const provider = dataRef.provider
+  invariant(provider, 'dataRef.provider not set')
+  return provider
+}
+
+function getData() {
+  const data = dataRef.data
+  invariant(data, 'dataRef.data not set')
+  return data
+}
+
+function getClient(clientId: string) {
+  const client = getData().clients.find((c) => c.id.toLowerCase() === clientId)
+  invariant(client, 'client not found')
+  return client
+}
+
+export function routes(app: Express, route: string): void {
   app.set('views', path.join(__dirname, 'views'))
   app.set('view engine', 'ejs')
 
@@ -104,6 +94,8 @@ export function routes(app: Express, route: string, provider: Provider): void {
   // })
 
   app.get(`${route}/interaction/:uid`, noCache, async (req, res, next) => {
+    const provider = getProvider()
+
     try {
       const { uid, prompt, params, session } = await provider.interactionDetails(req, res)
 
@@ -113,16 +105,23 @@ export function routes(app: Express, route: string, provider: Provider): void {
       switch (prompt.name) {
         case 'login': {
           const token = await acquireLoginPresentationToken({ interactionId: uid, clientId: client.clientId })
-          const presentationRequest = buildAuthnPresentationRequest(params)
+          const clientEntity = getClient(client.clientId)
+          // TODO: handle param validation errors with a better UX
+          const presentationRequest = await buildAuthnPresentationRequest(params, clientEntity, getData().partners)
+          const { logo, backgroundColor, backgroundImage } = clientEntity
           return res.render('login', {
             client,
             uid,
             details: prompt.details,
             params,
-            title: 'Sign-in',
+            title: 'Sign in to',
             graphqlUrl: `${requestOrigin(req)}/graphql`,
             presentationAccessToken: token.access_token,
             presentationRequest,
+            voLogoUrl,
+            logoUrl: logo,
+            backgroundColor,
+            backgroundImageUrl: backgroundImage,
             showDebug,
             session: session ? debug(session) : undefined,
             dbg: {
@@ -155,6 +154,8 @@ export function routes(app: Express, route: string, provider: Provider): void {
   })
 
   app.post(`${route}/interaction/:uid/login`, noCache, body, async (req, res, next) => {
+    const provider = getProvider()
+
     try {
       const {
         uid,
@@ -162,8 +163,17 @@ export function routes(app: Express, route: string, provider: Provider): void {
         params,
       } = await provider.interactionDetails(req, res)
       invariant(params.client_id, 'Could not obtain client_id from interaction params')
+      const clientId = params.client_id as string
       assert.equal(name, 'login')
-      const loginResult = await completeLogin({ interactionId: uid, requestId: req.body.requestId, clientId: params.client_id as string })
+      const loginResult = await completeLogin(
+        {
+          interactionId: uid,
+          requestId: req.body.requestId,
+          clientId,
+          uniqueClaimForSubParam: params.vc_unique_claim_for_sub as string | undefined,
+        },
+        getClient(clientId).uniqueClaimsForSubjectId ?? [],
+      )
 
       logger.audit('OIDC login complete', {
         interactionId: uid,
@@ -187,6 +197,8 @@ export function routes(app: Express, route: string, provider: Provider): void {
   })
 
   app.post(`${route}/interaction/:uid/confirm`, noCache, body, async (req, res, next) => {
+    const provider = getProvider()
+
     try {
       const interactionDetails = await provider.interactionDetails(req, res)
       invariant(interactionDetails.session, 'interaction session could not be found')
@@ -241,6 +253,8 @@ export function routes(app: Express, route: string, provider: Provider): void {
   })
 
   app.get(`${route}/interaction/:uid/abort`, noCache, async (req, res, next) => {
+    const provider = getProvider()
+
     try {
       const result = {
         error: 'access_denied',

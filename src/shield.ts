@@ -49,6 +49,7 @@ const isIssuerUser = hasRoleRule(UserRoles.issuer)
 const isCredentialAdminUser = hasRoleRule(UserRoles.credentialAdmin)
 const isPartnerAdminUser = hasRoleRule(UserRoles.partnerAdmin)
 const isApprovalRequestAdminUser = hasRoleRule(UserRoles.approvalRequestAdmin)
+const isOidcAdminUser = hasRoleRule(UserRoles.oidcAdmin)
 
 // general app roles for Issue & Present
 const isIssuanceApp = hasRoleRule(AppRoles.issue, 'isIssuanceApp')
@@ -133,6 +134,15 @@ export const rules: ShieldSchema<Resolvers> = {
     resendAsyncIssuanceNotifications: isAsyncIssuer,
     resendAsyncIssuanceNotification: isAsyncIssuer,
     cancelAsyncIssuanceRequest: isAsyncIssuer,
+    createOidcClient: isOidcAdminUser,
+    updateOidcClient: isOidcAdminUser,
+    deleteOidcClient: isOidcAdminUser,
+    createOidcResource: isOidcAdminUser,
+    updateOidcResource: isOidcAdminUser,
+    deleteOidcResource: isOidcAdminUser,
+    createOidcClientResource: isOidcAdminUser,
+    updateOidcClientResource: isOidcAdminUser,
+    deleteOidcClientResource: isOidcAdminUser,
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
   Subscription: {

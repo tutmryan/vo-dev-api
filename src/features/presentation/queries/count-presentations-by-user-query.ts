@@ -39,6 +39,7 @@ export async function CountPresentationsByUserQuery(
     query.innerJoin('presentation_partners', 'pp', 'p.id = pp.presentation_id')
     query.andWhere('partner_id = :partnerId', { partnerId: criteria.partnerId.toUpperCase() })
   }
+  if (criteria?.oidcClientId) query.andWhere('oidc_client_id = :oidcClientId', { oidcClientId: criteria.oidcClientId.toUpperCase() })
 
   if (criteria?.from && criteria.to)
     query.andWhere('presented_at BETWEEN :from AND :to', { from: criteria.from.toISOString(), to: criteria.to.toISOString() })

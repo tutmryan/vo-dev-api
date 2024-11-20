@@ -45,6 +45,21 @@ const documents = {
     "\n  mutation CreatePresentationRequest($request: PresentationRequestInput!) {\n    createPresentationRequest(request: $request) {\n      ... on PresentationResponse {\n        requestId\n        url\n        qrCode\n        expiry\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n          innererror {\n            code\n            message\n            target\n          }\n        }\n      }\n    }\n  }\n": types.CreatePresentationRequestDocument,
     "\n  mutation AcquireLimitedApprovalToken($input: AcquireLimitedApprovalTokenInput!) {\n    acquireLimitedApprovalToken(input: $input) {\n      token\n      expires\n    }\n  }\n": types.AcquireLimitedApprovalTokenDocument,
     "\n  mutation AcquireLimitedPhotoCaptureToken($input: AcquireLimitedPhotoCaptureTokenInput!) {\n    acquireLimitedPhotoCaptureToken(input: $input) {\n      token\n      expires\n    }\n  }\n": types.AcquireLimitedPhotoCaptureTokenDocument,
+    "\n  fragment OidcClientFragment on OidcClient {\n    id\n    name\n    logo\n    backgroundColor\n    backgroundImage\n    policyUrl\n    termsOfServiceUrl\n    applicationType\n    redirectUris\n    postLogoutUris\n    allowAnyPartner\n    partners {\n      id\n      name\n      did\n      credentialTypes\n      linkedDomainUrls\n    }\n    uniqueClaimsForSubjectId\n    credentialTypes\n    resources {\n      resource {\n        id\n        name\n        resourceIndicator\n        scopes\n      }\n      resourceScopes\n    }\n    createdBy {\n      id\n      name\n    }\n    createdAt\n    updatedBy {\n      id\n      name\n    }\n    updatedAt\n    deletedAt\n  }\n": types.OidcClientFragmentFragmentDoc,
+    "\n  mutation CreateOidcClient($input: OidcClientInput!) {\n    createOidcClient(input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.CreateOidcClientDocument,
+    "\n  mutation UpdateOidcClient($id: ID!, $input: OidcClientInput!) {\n    updateOidcClient(id: $id, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.UpdateOidcClientDocument,
+    "\n  mutation DeleteOidcClient($id: ID!) {\n    deleteOidcClient(id: $id) {\n      ...OidcClientFragment\n    }\n  }\n": types.DeleteOidcClientDocument,
+    "\n  query FindOidcClients(\n    $where: OidcClientWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcClientOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcClients(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcClientFragment\n    }\n  }\n": types.FindOidcClientsDocument,
+    "\n  query OidcClient($id: ID!) {\n    oidcClient(id: $id) {\n      ...OidcClientFragment\n    }\n  }\n": types.OidcClientDocument,
+    "\n  fragment OidcResourceFragment on OidcResource {\n    id\n    name\n    resourceIndicator\n    scopes\n    createdBy {\n      id\n      name\n    }\n    createdAt\n    updatedBy {\n      id\n      name\n    }\n    updatedAt\n    deletedAt\n  }\n": types.OidcResourceFragmentFragmentDoc,
+    "\n  mutation CreateOidcResource($input: OidcResourceInput!) {\n    createOidcResource(input: $input) {\n      ...OidcResourceFragment\n    }\n  }\n": types.CreateOidcResourceDocument,
+    "\n  mutation UpdateOidcResource($id: ID!, $input: OidcResourceInput!) {\n    updateOidcResource(id: $id, input: $input) {\n      ...OidcResourceFragment\n    }\n  }\n": types.UpdateOidcResourceDocument,
+    "\n  mutation DeleteOidcResource($id: ID!) {\n    deleteOidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n": types.DeleteOidcResourceDocument,
+    "\n  query FindOidcResources(\n    $where: OidcResourceWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcResourceOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcResources(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcResourceFragment\n    }\n  }\n": types.FindOidcResourcesDocument,
+    "\n  query OidcResource($id: ID!) {\n    oidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n": types.OidcResourceDocument,
+    "\n  mutation CreateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    createOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.CreateOidcClientResourceDocument,
+    "\n  mutation UpdateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    updateOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.UpdateOidcClientResourceDocument,
+    "\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n": types.DeleteOidcClientResourceDocument,
     "\n  mutation CreatePhotoCaptureRequest($request: PhotoCaptureRequest!) {\n    createPhotoCaptureRequest(request: $request) {\n      id\n      photoCaptureUrl\n      photoCaptureQrCode\n    }\n  }\n": types.CreatePhotoCaptureRequestDocument,
     "\n  mutation CapturePhoto($photoCaptureRequestId: UUID!, $photo: String!) {\n    capturePhoto(photoCaptureRequestId: $photoCaptureRequestId, photo: $photo)\n  }\n": types.CapturePhotoDocument,
     "\n  query PhotoCaptureStatus($photoCaptureRequestId: UUID!) {\n    photoCaptureStatus(photoCaptureRequestId: $photoCaptureRequestId) {\n      status\n    }\n  }\n": types.PhotoCaptureStatusDocument,
@@ -200,6 +215,66 @@ export function graphql(source: "\n  mutation AcquireLimitedApprovalToken($input
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation AcquireLimitedPhotoCaptureToken($input: AcquireLimitedPhotoCaptureTokenInput!) {\n    acquireLimitedPhotoCaptureToken(input: $input) {\n      token\n      expires\n    }\n  }\n"): (typeof documents)["\n  mutation AcquireLimitedPhotoCaptureToken($input: AcquireLimitedPhotoCaptureTokenInput!) {\n    acquireLimitedPhotoCaptureToken(input: $input) {\n      token\n      expires\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment OidcClientFragment on OidcClient {\n    id\n    name\n    logo\n    backgroundColor\n    backgroundImage\n    policyUrl\n    termsOfServiceUrl\n    applicationType\n    redirectUris\n    postLogoutUris\n    allowAnyPartner\n    partners {\n      id\n      name\n      did\n      credentialTypes\n      linkedDomainUrls\n    }\n    uniqueClaimsForSubjectId\n    credentialTypes\n    resources {\n      resource {\n        id\n        name\n        resourceIndicator\n        scopes\n      }\n      resourceScopes\n    }\n    createdBy {\n      id\n      name\n    }\n    createdAt\n    updatedBy {\n      id\n      name\n    }\n    updatedAt\n    deletedAt\n  }\n"): (typeof documents)["\n  fragment OidcClientFragment on OidcClient {\n    id\n    name\n    logo\n    backgroundColor\n    backgroundImage\n    policyUrl\n    termsOfServiceUrl\n    applicationType\n    redirectUris\n    postLogoutUris\n    allowAnyPartner\n    partners {\n      id\n      name\n      did\n      credentialTypes\n      linkedDomainUrls\n    }\n    uniqueClaimsForSubjectId\n    credentialTypes\n    resources {\n      resource {\n        id\n        name\n        resourceIndicator\n        scopes\n      }\n      resourceScopes\n    }\n    createdBy {\n      id\n      name\n    }\n    createdAt\n    updatedBy {\n      id\n      name\n    }\n    updatedAt\n    deletedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateOidcClient($input: OidcClientInput!) {\n    createOidcClient(input: $input) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  mutation CreateOidcClient($input: OidcClientInput!) {\n    createOidcClient(input: $input) {\n      ...OidcClientFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateOidcClient($id: ID!, $input: OidcClientInput!) {\n    updateOidcClient(id: $id, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateOidcClient($id: ID!, $input: OidcClientInput!) {\n    updateOidcClient(id: $id, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteOidcClient($id: ID!) {\n    deleteOidcClient(id: $id) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteOidcClient($id: ID!) {\n    deleteOidcClient(id: $id) {\n      ...OidcClientFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query FindOidcClients(\n    $where: OidcClientWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcClientOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcClients(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  query FindOidcClients(\n    $where: OidcClientWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcClientOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcClients(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcClientFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query OidcClient($id: ID!) {\n    oidcClient(id: $id) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  query OidcClient($id: ID!) {\n    oidcClient(id: $id) {\n      ...OidcClientFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment OidcResourceFragment on OidcResource {\n    id\n    name\n    resourceIndicator\n    scopes\n    createdBy {\n      id\n      name\n    }\n    createdAt\n    updatedBy {\n      id\n      name\n    }\n    updatedAt\n    deletedAt\n  }\n"): (typeof documents)["\n  fragment OidcResourceFragment on OidcResource {\n    id\n    name\n    resourceIndicator\n    scopes\n    createdBy {\n      id\n      name\n    }\n    createdAt\n    updatedBy {\n      id\n      name\n    }\n    updatedAt\n    deletedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateOidcResource($input: OidcResourceInput!) {\n    createOidcResource(input: $input) {\n      ...OidcResourceFragment\n    }\n  }\n"): (typeof documents)["\n  mutation CreateOidcResource($input: OidcResourceInput!) {\n    createOidcResource(input: $input) {\n      ...OidcResourceFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateOidcResource($id: ID!, $input: OidcResourceInput!) {\n    updateOidcResource(id: $id, input: $input) {\n      ...OidcResourceFragment\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateOidcResource($id: ID!, $input: OidcResourceInput!) {\n    updateOidcResource(id: $id, input: $input) {\n      ...OidcResourceFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteOidcResource($id: ID!) {\n    deleteOidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteOidcResource($id: ID!) {\n    deleteOidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query FindOidcResources(\n    $where: OidcResourceWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcResourceOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcResources(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcResourceFragment\n    }\n  }\n"): (typeof documents)["\n  query FindOidcResources(\n    $where: OidcResourceWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcResourceOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcResources(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcResourceFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query OidcResource($id: ID!) {\n    oidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n"): (typeof documents)["\n  query OidcResource($id: ID!) {\n    oidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    createOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  mutation CreateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    createOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    updateOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    updateOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

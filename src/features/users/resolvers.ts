@@ -50,4 +50,10 @@ export const resolvers: Resolvers = {
   AsyncIssuanceRequest: {
     ...createdByUpdatedBy,
   },
+  OidcClient: {
+    ...createdByUpdatedBy,
+  },
+  OidcResource: {
+    ...createdByUpdatedBy,
+  },
 }

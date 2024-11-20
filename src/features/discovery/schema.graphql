@@ -29,6 +29,24 @@ type Features {
 }
 
 """
+The URLs for various features.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type FeatureUrls {
+  """
+  URL of the OIDC authority (when enabled)
+  """
+  oidcAuthorityUrl: URL
+  """
+  URL of the portal
+  """
+  portalUrl: URL!
+  """
+  URL of the documentation website
+  """
+  docsUrl: URL!
+}
+
+"""
 Returns discoverable information about this API instance
 """ # eslint-disable-next-line @graphql-eslint/strict-id-in-types
 type Discovery {
@@ -36,6 +54,10 @@ type Discovery {
   Returns the features enabled for this API instance.
   """
   features: Features!
+  """
+  Returns the URLs for various features.
+  """
+  urls: FeatureUrls!
 }
 
 extend type Query {

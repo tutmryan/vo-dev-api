@@ -3,14 +3,13 @@ import { In } from 'typeorm'
 import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
-import { createVerifiedIdAdminService } from '../../../services'
-import { invariant } from '../../../util/invariant'
+import { getPlatformIssuerDid } from '../../../services'
 import type { PresentationCallbackHandler } from '../../callback'
 import { requestDetailsCache } from '../../callback/cache'
 import { StandardClaims } from '../../contracts/claims'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { getLimitedApprovalDataByKey, setLimitedApprovalDataByKey } from '../../limited-approval-tokens'
-import { getInteractionId, getLoginInteractionData, setLoginInteractionData } from '../../oidc-provider/session'
+import { setLoginInteractionData, validateLoginSessionForPresentation } from '../../oidc-provider/session'
 import { PartnerEntity } from '../../partners/entities/partner-entity'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import type { PresentedData } from '../entities/presentation-entity'
@@ -18,12 +17,6 @@ import { PresentationEntity } from '../entities/presentation-entity'
 import { addPresentationDataToCache } from './cache'
 import type { PresentationTopicData } from './pubsub'
 import { publishPresentationEvent } from './pubsub'
-
-async function getPlatformIssuerDid() {
-  const admin = createVerifiedIdAdminService(logger)
-  const authority = await admin.authority()
-  return authority.didModel.did
-}
 
 export const presentationCallbackHandler: PresentationCallbackHandler = async (event) => {
   const requestDetails = await requestDetailsCache().get(event.requestId)
@@ -73,6 +66,9 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
       if (issuances.length > 0) identityId = issuances[0]!.identityId
     }
 
+    // validate and load the login session data if this presentation is for a login flow
+    const authInteractionData = authnSessionKey ? await validateLoginSessionForPresentation(authnSessionKey, event.requestId) : null
+
     // save presented credential data minus the claims, which is probably PII
     const presentedCredentials: PresentedData[] = event.verifiedCredentialsData
       ? event.verifiedCredentialsData.map((credential) => omit(credential, 'claims'))
@@ -88,6 +84,7 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
       requestedCredentials,
       presentedCredentials,
       partnerIds: partners.map((p) => p.id),
+      oidcClientId: authInteractionData?.clientId ?? null,
     })
 
     const { id } = await entityManager.getRepository(PresentationEntity).save(presentationEntity)
@@ -101,19 +98,8 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
       await setLimitedApprovalDataByKey(limitedApprovalKey, { ...limitedApprovalData, presentationId: id })
     }
 
-    // if this presentation is for a login flow, set the login interaction data to complete along with the presentation ID
-    if (authnSessionKey) {
-      const interactionId = await getInteractionId(authnSessionKey)
-      invariant(interactionId, 'Interaction session not found')
-      const loginInteractionData = await getLoginInteractionData(interactionId)
-      invariant(loginInteractionData, 'Login data for session not found')
-      invariant(
-        loginInteractionData.state === 'in-progress' && loginInteractionData.requestId === event.requestId,
-        'Invalid login interaction state for presentation',
-      )
-      await setLoginInteractionData({ ...loginInteractionData, state: 'complete', presentationId: id })
-      // TODO: save reference to auth client on the presentation
-    }
+    // if this presentation is for a login flow, set the login interaction data to complete with the presentation ID
+    if (authInteractionData) await setLoginInteractionData({ ...authInteractionData, state: 'complete', presentationId: id })
 
     logger.audit('Presentation complete', { presentation: presentationEntity })
   } else if (event.requestStatus === PresentationRequestStatus.PresentationError)

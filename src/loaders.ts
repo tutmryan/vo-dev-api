@@ -3,6 +3,7 @@ import { asyncIssuanceLoader } from './features/async-issuance/loaders'
 import { contractLoader } from './features/contracts/loaders'
 import { identityLoader } from './features/identity/loaders'
 import { issuanceCountByContractLoader, issuanceCountByIdentityLoader, issuanceLoader } from './features/issuance/loaders'
+import { oidcClientLoader, oidcResourceLoader } from './features/oidc-provider/loaders'
 import { partnerLoader } from './features/partners/loaders'
 import { presentationLoader } from './features/presentation/loaders'
 import { templateLoader } from './features/templates/loaders'
@@ -22,4 +23,6 @@ export const createDataLoaders = () => ({
   presentations: presentationLoader(),
   approvalRequests: approvalRequestLoader(),
   asyncIssuances: asyncIssuanceLoader(),
+  oidcClients: oidcClientLoader(),
+  oidcResources: oidcResourceLoader(),
 })

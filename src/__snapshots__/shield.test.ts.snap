@@ -655,6 +655,42 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual"
         }
       ]
+    },
+    "createOidcClient": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
+    "updateOidcClient": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
+    "deleteOidcClient": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
+    "createOidcResource": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
+    "updateOidcResource": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
+    "deleteOidcResource": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
+    "createOidcClientResource": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
+    "updateOidcClientResource": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
+    "deleteOidcClientResource": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
     }
   },
   "Subscription": {

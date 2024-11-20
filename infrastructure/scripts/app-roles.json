@@ -106,5 +106,14 @@
     "description": "Provides access to administer approval requests",
     "displayName": "Approval request admin",
     "value": "VerifiableCredential.ApprovalRequestAdmin"
+  },
+  {
+    "id": "5219f907-82b7-4bef-9cc4-6a9625324bcc",
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to administer OIDC clients and resources",
+    "displayName": "OIDC admin",
+    "value": "VerifiableCredential.OidcAdmin"
   }
 ]

@@ -1,10 +1,10 @@
+import { randomUUID } from 'crypto'
 import type { EntitySubscriberInterface, InsertEvent, QueryRunner, RemoveEvent, UpdateEvent } from 'typeorm'
 import { EventSubscriber } from 'typeorm'
-import type { AuditAction } from './entities/audit-action'
-import { getUserFromManager } from './user-context-helper'
-import { randomUUID } from 'crypto'
 import { getReplacer } from '../../util/replacers'
+import type { AuditAction } from './entities/audit-action'
 import { AuditedAndTrackedEntity } from './entities/audited-and-tracked-entity'
+import { getUserFromManager } from './user-context-helper'
 
 export type AuditData = { entityId: string; userId: string; action: AuditAction; auditDateTime: Date; auditData: string }
 

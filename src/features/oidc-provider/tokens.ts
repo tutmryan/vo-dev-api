@@ -9,7 +9,7 @@ import type {
   KoaContextWithOIDC,
 } from 'oidc-provider'
 import { logger } from '../../logger'
-import { oidcClaims } from './claims'
+import { openidClaims } from './claims'
 
 /**
  * Always issue a refresh token
@@ -49,7 +49,7 @@ export async function extraTokenClaims(ctx: KoaContextWithOIDC, _token: AccessTo
   const requestedOidcClaims = compact(
     scopes
       .map((scope) => {
-        const scopeClaims = oidcClaims[scope as keyof typeof oidcClaims]
+        const scopeClaims = openidClaims[scope as keyof typeof openidClaims]
         if (scopeClaims === null) return scope
         return scopeClaims
       })

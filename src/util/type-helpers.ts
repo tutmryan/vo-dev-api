@@ -35,3 +35,17 @@ export function isObject(x: unknown): x is object {
 export type NonEmptyArray<T> = [T, ...T[]]
 
 export const NotFalsy = <T>(value: T): value is Exclude<T, 0 | '' | false | undefined | null> => Boolean(value)
+
+export type PickOptional<T> = {
+  [P in keyof T as undefined extends T[P] ? P : never]: T[P]
+}
+
+export type PickNotOptional<T> = {
+  [P in keyof T as undefined extends T[P] ? never : P]: T[P]
+}
+
+export type OptionalNullable<T> = {
+  [K in keyof PickOptional<T>]?: T[K] | null
+} & {
+  [K in keyof PickNotOptional<T>]: T[K]
+}

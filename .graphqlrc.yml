@@ -25,6 +25,9 @@ extensions:
                 ApprovalRequest: ../features/approval-request/entities/approval-request-entity#ApprovalRequestEntity
                 AsyncIssuanceRequest: ../features/async-issuance/entities/async-issuance-entity#AsyncIssuanceEntity
                 Communication: ../features/communication/entities/communication-entity#CommunicationEntity
+                OidcClient: ../features/oidc-provider/entities/oidc-client-entity#OidcClientEntity
+                OidcResource: ../features/oidc-provider/entities/oidc-resource-entity#OidcResourceEntity
+                OidcClientResource: ../features/oidc-provider/entities/oidc-client-resource-entity#OidcClientResourceEntity
         config:
           strictScalars: true
           scalars:

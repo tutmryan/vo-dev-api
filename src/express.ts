@@ -153,9 +153,8 @@ export async function getExpressApp(): Promise<Express> {
 
   if (oidcEnabled) {
     // add OIDC provider, but don't wait for it to be ready
-    const oidcRoute = '/oidc'
-    addOidcProvider(app, oidcRoute)
-      .then(() => logger.info(`OIDC provider ready on ${oidcRoute}`))
+    addOidcProvider(app)
+      .then((oidcRoute) => logger.info(`OIDC provider ready on ${oidcRoute}`))
       .catch((error) => logger.error('Failed to start OIDC provider', { error }))
   }
 

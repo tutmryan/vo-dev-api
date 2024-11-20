@@ -82,10 +82,6 @@ const config: DeepPartial<Config> = {
   limitedDemo,
   limitedOidcClient,
   localDev: {
-    tunnel: {
-      api: '',
-      portal: '',
-    },
     email: {
       disabled: true,
       allowList: [],

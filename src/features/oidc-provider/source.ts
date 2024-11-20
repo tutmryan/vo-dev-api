@@ -1,4 +1,5 @@
 import type { KoaContextWithOIDC } from 'oidc-provider'
+import { voLogoUrl } from './logos'
 
 export function logoutSource(ctx: KoaContextWithOIDC, form: string) {
   // @param ctx - koa request context
@@ -31,12 +32,17 @@ export function logoutSource(ctx: KoaContextWithOIDC, form: string) {
       @media (min-width: 575px) {
         .container {
           padding: 30px;
-          width: 550px;
+          width: 450px;
         }
       }
-      .container h1, .container h3 {
-        font-weight: 300;
+      .container h1 {
+        font-weight: 200;
         text-align: center;
+      }
+      .container h2 {
+        font-weight: 400;
+        text-align: center;
+        text-wrap: nowrap;
       }
       .container [type=submit] {
         width: 100%;
@@ -47,11 +53,12 @@ export function logoutSource(ctx: KoaContextWithOIDC, form: string) {
     </style>
   </head>
   <body>
+    <div class="d-flex justify-content-center mb-4"><img src="${voLogoUrl}" alt="Verified Orchestration Logo" style="max-width:10rem"></div>
     <div class="container">
-      <h1>Do you want to sign-out from</h1>
-      <h3>${ctx.host}?</h3>
+      <h1>Sign out from</h1>
+      <h2>${ctx.oidc.client?.clientName ?? ctx.host}</h2>
       ${form}
-      <button autofocus type="submit" form="op.logoutForm" value="yes" name="logout" class="btn btn-primary mt-5">Yes, sign me out</button>
+      <button autofocus type="submit" form="op.logoutForm" value="yes" name="logout" class="btn btn-primary mt-4">Yes, sign me out</button>
       <button type="submit" form="op.logoutForm" class="btn btn-secondary">No, stay signed in</button>
     </div>
   </body>

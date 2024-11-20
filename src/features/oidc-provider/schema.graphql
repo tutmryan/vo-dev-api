@@ -1,3 +1,4 @@
+# eslint-disable @graphql-eslint/naming-convention
 """
 Input type for creating a new presentation request for authorization.
 """
@@ -41,4 +42,429 @@ extend type Mutation {
   - This operation is only for use by the OIDC provider login UI.
   """
   createPresentationRequestForAuthn(request: PresentationRequestForAuthnInput): PresentationRequestResponse!
+
+  """
+  Creates a new OIDC client
+  """
+  createOidcClient(input: OidcClientInput!): OidcClient!
+  """
+  Updates an existing OIDC client
+  """
+  updateOidcClient(id: ID!, input: OidcClientInput!): OidcClient!
+  """
+  Deletes an OIDC client
+  """
+  deleteOidcClient(id: ID!): OidcClient!
+
+  """
+  Creates a new OIDC resource
+  """
+  createOidcResource(input: OidcResourceInput!): OidcResource!
+  """
+  Updates an existing OIDC resource.
+
+  Note:
+  - If scopes are removed from the resource, those scopes will be removed from all clients that have the resource. If no scopes remain on the client resource, the client resource will be deleted.
+  """
+  updateOidcResource(id: ID!, input: OidcResourceInput!): OidcResource!
+  """
+  Deletes an OIDC resource
+  """
+  deleteOidcResource(id: ID!): OidcResource!
+
+  """
+  Creates a new OIDC client resource
+  """
+  createOidcClientResource(clientId: ID!, input: OidcClientResourceInput!): OidcClient!
+  """
+  Updates an existing OIDC client resource
+  """
+  updateOidcClientResource(clientId: ID!, input: OidcClientResourceInput!): OidcClient!
+  """
+  Deletes an OIDC client resource
+  """
+  deleteOidcClientResource(clientId: ID!, resourceId: ID!): OidcClient!
+}
+
+extend type Query {
+  """
+  Returns a single OIDC client by ID
+  """
+  oidcClient(id: ID!): OidcClient!
+  """
+  Returns OIDC clients, optionally matching the specified criteria
+  """
+  findOidcClients(
+    where: OidcClientWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: OidcClientOrderBy
+    orderDirection: OrderDirection
+  ): [OidcClient!]!
+  """
+  Returns a single OIDC resource by ID
+  """
+  oidcResource(id: ID!): OidcResource!
+  """
+  Returns OIDC resources, optionally matching the specified criteria
+  """
+  findOidcResources(
+    where: OidcResourceWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: OidcResourceOrderBy
+    orderDirection: OrderDirection
+  ): [OidcResource!]!
+}
+
+"""
+The type of OIDC application.
+"""
+enum OidcApplicationType {
+  web
+  native
+}
+
+"""
+Input type for creating a new OIDC client.
+"""
+input OidcClientInput {
+  """
+  The name of the client.
+  """
+  name: String!
+  """
+  The URL of the client logo to be displayed during auth interactions, can be an image encoded as a data URL.
+  """
+  logo: URL
+  """
+  The background color, to be displayed during auth interactions, in hexadecimal format.
+  """
+  backgroundColor: String
+  """
+  The URL of the background image to be displayed during auth interactions, can be an image encoded as a data URL.
+  """
+  backgroundImage: URL
+  """
+  The URL of a privacy policy for the client, displayed during auth interactions.
+  """
+  policyUrl: URL
+  """
+  The URL of the terms of service for the client, displayed during auth interactions.
+  """
+  termsOfServiceUrl: URL
+  """
+  The type of OIDC application.
+  """
+  applicationType: OidcApplicationType
+  """
+  The redirect URIs that the client is allowed to use.
+  """
+  redirectUris: [URL!]!
+  """
+  The post-logout URIs that the client is allowed to use.
+  """
+  postLogoutUris: [URL!]!
+  """
+  Indicates whether the client allows presentations of credentials from any configured partner.
+  """
+  allowAnyPartner: Boolean
+  """
+  The IDs of the partners that the client allows presentations of credentials from.
+  """
+  partnerIds: [ID!]
+  """
+  The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
+
+  Note:
+  - This is not needed for authentication using Verified Orchestration credentials, the issuanceId claim is used.
+  - The authentication client also can specify the claim to use via the `vc_unique_claim_for_sub` auth request parameter.
+  - Multiple values can be specified here, if not specified via the client `vc_unique_claim_for_sub` auth request parameter, the first claim that is present in the partner presentation will be used.
+  - If values are defined here and the `vc_unique_claim_for_sub` auth request parameter is provided, it is validated to be from this list.
+  """
+  uniqueClaimsForSubjectId: [String!]
+  """
+  The types of credentials that can be presented for authentication with this client.
+
+  Note:
+  - If not specified, any credential type can be presented.
+  - The client can specify the credential type to use for authentication via the `vc_type` auth request parameter.
+  - If values are defined here and the `vc_type` auth request parameter is provided, it is validated to be from this list.
+  """
+  credentialTypes: [String!]
+}
+
+"""
+Represents an OIDC client.
+"""
+type OidcClient {
+  id: ID!
+  """
+  The name of the client.
+  """
+  name: String!
+  """
+  The URL of the client logo to be displayed during auth interactions, can be an image encoded as a data URL.
+  """
+  logo: URL
+  """
+  The background color, to be displayed during auth interactions, in hexadecimal format.
+  """
+  backgroundColor: String
+  """
+  The URL of the background image to be displayed during auth interactions, can be an image encoded as a data URL.
+  """
+  backgroundImage: URL
+  """
+  The URL of a privacy policy for the client, displayed during auth interactions.
+  """
+  policyUrl: URL
+  """
+  The URL of the terms of service for the client, displayed during auth interactions.
+  """
+  termsOfServiceUrl: URL
+  """
+  The type of OIDC application.
+  """
+  applicationType: OidcApplicationType
+  """
+  The redirect URIs that the client is allowed to use.
+  """
+  redirectUris: [URL!]!
+  """
+  The post-logout URIs that the client is allowed to use.
+  """
+  postLogoutUris: [URL!]!
+  """
+  Indicates whether the client allows presentations of credentials from any configured partner.
+  """
+  allowAnyPartner: Boolean!
+  """
+  The partners that the client allows presentations of credentials from.
+  """
+  partners: [Partner!]!
+  """
+  The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
+
+  Note:
+  - This is not needed for authentication using Verified Orchestration credentials, the issuanceId claim is used.
+  - The authentication client also can specify the claim to use via the `vc_unique_claim_for_sub` auth request parameter.
+  - Multiple values can be specified here, if not specified via the client `vc_unique_claim_for_sub` auth request parameter, the first claim that is present in the partner presentation will be used.
+  - If values are defined here and the `vc_unique_claim_for_sub` auth request parameter is provided, it is validated to be from this list.
+  """
+  uniqueClaimsForSubjectId: [String!]
+  """
+  The types of credentials that can be presented for authentication with this client.
+
+  Note:
+  - If not specified, any credential type can be presented.
+  - The client can specify the credential type to use for authentication via the `vc_type` auth request parameter.
+  - If values are defined here and the `vc_type` auth request parameter is provided, it is validated to be from this list.
+  """
+  credentialTypes: [String!]
+  """
+  The resources that the client has access to, according to the defined resource scopes.
+  """
+  resources: [OidcClientResource!]
+  """
+  The user who created the client.
+  """
+  createdBy: User!
+  """
+  When the client was created.
+  """
+  createdAt: DateTime!
+
+  """
+  The user who last updated the client.
+  """
+  updatedBy: User
+  """
+  When the client was last updated.
+  """
+  updatedAt: DateTime
+  """
+  When the client was deleted.
+  """
+  deletedAt: DateTime
+}
+
+"""
+Criteria for finding OIDC clients.
+"""
+input OidcClientWhere {
+  """
+  List only clients matching this name.
+  """
+  name: String
+  """
+  The ID of the user (Person or Application) that created the client.
+  """
+  createdById: ID
+  """
+  The start of the createdAt period to include.
+  """
+  createdFrom: DateTime
+  """
+  The end of the createdAt period to include.
+  """
+  createdTo: DateTime
+  """
+  List only the clients which are, or are not, deleted.
+  """
+  isDeleted: Boolean
+  """
+  Whether to include deleted clients in the results.
+  """
+  includeDeleted: Boolean
+  """
+  List only the clients which allow any partners.
+  """
+  allowAnyPartner: Boolean
+}
+
+"""
+Fields that can be used for sorting OIDC clients by.
+"""
+enum OidcClientOrderBy {
+  """
+  The name of the client.
+  """
+  name
+  """
+  When the client was created.
+  """
+  createdAt
+  """
+  When the client was last updated.
+  """
+  updatedAt
+}
+
+"""
+Input type for creating a new OIDC client resource, providing access from a client to a resource according to the defined resource scopes.
+"""
+input OidcClientResourceInput {
+  resourceId: ID!
+  """
+  The scopes from the resource that the client may request.
+  """
+  resourceScopes: [String!]!
+}
+
+"""
+Represents an OIDC resource that an OIDC client has access to, according to the defined resource scopes.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type OidcClientResource {
+  """
+  The resource that the client has access to.
+  """
+  resource: OidcResource!
+  """
+  The scopes from the resource that the client may request.
+  """
+  resourceScopes: [String!]!
+}
+
+"""
+Input type for creating a new OIDC resource, usually an API, but could be anything accessed from an OIDC client which needs explicit control.
+"""
+input OidcResourceInput {
+  """
+  The name of the resource.
+  """
+  name: String!
+  """
+  The URL that uniquely identifies the resource.
+
+  Note:
+  - The URL can be an API endpoint such as `https://api.example.net` or a resource indicator such as `urn:example:resource-endpoint`.
+  """
+  resourceIndicator: URL!
+  """
+  Scopes that clients can request, for example `['api:read', 'api:write']`.
+  """
+  scopes: [String!]!
+}
+
+"""
+Represents an OIDC resource, usually an API, but could be anything accessed from an OIDC client which needs explicit control.
+"""
+type OidcResource {
+  id: ID!
+  """
+  The name of the resource.
+  """
+  name: String!
+  """
+  The URL that uniquely identifies the resource.
+
+  Note:
+  - The URL can be an API endpoint such as `https://api.example.net` or a resource indicator such as `urn:example:resource-endpoint`.
+  """
+  resourceIndicator: URL!
+  """
+  Scopes that clients can request, for example `['api:read', 'api:write']`.
+  """
+  scopes: [String!]!
+  """
+  The user who created the resource.
+  """
+  createdBy: User!
+  """
+  When the resource was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who last updated the resource.
+  """
+  updatedBy: User
+  """
+  When the resource was last updated.
+  """
+  updatedAt: DateTime
+  """
+  When the client was deleted.
+  """
+  deletedAt: DateTime
+}
+
+"""
+Criteria for finding OIDC resources.
+"""
+input OidcResourceWhere {
+  """
+  List only resources matching this name.
+  """
+  name: String
+  """
+  List only resources matching this resource indicator.
+  """
+  resourceIndicator: String
+  """
+  The ID of the user (Person or Application) that created the resource.
+  """
+  createdById: ID
+  """
+  The start of the createdAt period to include.
+  """
+  createdFrom: DateTime
+  """
+  The end of the createdAt period to include.
+  """
+  createdTo: DateTime
+  """
+  List only the resources which are, or are not, deleted.
+  """
+  isDeleted: Boolean
+}
+
+"""
+Fields that can be used for sorting OIDC resources by.
+"""
+enum OidcResourceOrderBy {
+  name
+  resourceIndicator
+  createdAt
+  updatedAt
 }

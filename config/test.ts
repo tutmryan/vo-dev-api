@@ -66,6 +66,7 @@ const config: DeepPartial<Config> = {
     credentials: {},
   },
   limitedOidcClient: {
+    oid: 'TEST_LIMITED_OIDC_CLIENT_OID',
     credentials: {},
   },
 }

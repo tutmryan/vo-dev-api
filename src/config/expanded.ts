@@ -114,12 +114,16 @@ export const pkce: Config['auth']['pkce'] = merge(
 export const identityIssuers = { [config.get('homeTenant.tenantId')]: config.get('homeTenant.name'), ...config.get('identityIssuers') }
 
 // add known internal app client labels
-export const platformConsumerApps = { [config.get('limitedDemo.oid')]: 'Portal Demo', ...config.get('platformConsumerApps') }
+export const platformConsumerApps = {
+  [config.get('limitedDemo.oid')]: 'Portal Demo',
+  [config.get('limitedOidcClient.oid')]: 'Authentication Gateway',
+  ...config.get('platformConsumerApps'),
+}
 
 // the instance config or undefined for localdev
 export const instance = config.has('instance') ? config.get('instance') : undefined
 
-// URLs for portal and OIDC provider
+// URLs
 export const portalUrl = config.has('instance')
   ? `https://${config.get('instance')}.portal.verifiedorchestration.com`
   : config.has('localDev.tunnel.portal')
@@ -131,6 +135,10 @@ export const apiUrl = instance
   : config.has('localDev.tunnel.api')
     ? config.get('localDev.tunnel.api')
     : 'http://localhost:4000'
+
+export const oidcAuthorityUrl = `${apiUrl}/oidc`
+
+export const docsUrl = instance ? `https://${instance}.docs.verifiedorchestration.com` : 'http://localhost:3000'
 
 // OIDC provider API scope (the API origin)
 export const apiScope = new URL(apiUrl).origin

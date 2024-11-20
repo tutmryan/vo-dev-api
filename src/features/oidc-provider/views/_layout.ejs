@@ -17,6 +17,7 @@
 
     .login-card {
       padding: 20px 10px;
+      padding-bottom: 10px;
       min-width: 250px;
       max-width: 94%;
       background-color: #F7F7F7;
@@ -29,6 +30,7 @@
     @media (min-width: 575px) {
       .login-card {
         padding: 30px;
+        padding-bottom: 10px;
         width: 500px;
       }
     }
@@ -38,8 +40,14 @@
     }
 
     .login-card h1 {
-      font-weight: 300;
+      font-weight: 200;
       text-align: center;
+    }
+
+    .login-card h2 {
+      font-weight: 400;
+      text-align: center;
+      text-wrap: nowrap;
     }
 
     .login-card [type=submit] {
@@ -54,14 +62,11 @@
       width: 100%;
       text-align: center;
       font-size: 12px;
+      margin-top: 1rem;
     }
 
-    .login-client-image img {
-      margin-bottom: 20px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-      width: 20%;
+    .login-help>a~a {
+      padding-left: 4px;
     }
 
     .login-card input[type=checkbox] {
@@ -113,8 +118,15 @@
 </head>
 
 <body>
+  <div class="d-flex justify-content-center mb-3"><img src="<%- voLogoUrl %>" alt="Verified Orchestration Logo"
+      style="max-width:10rem"></div>
   <div class="login-card">
+    <% if (logoUrl) { %>
+    <div class="d-flex justify-content-center mb-2"><img src="<%- logoUrl %>" alt="<%= client.clientName %>"
+        style="max-width:30%"></div>
+    <% } %>
     <h1><%= title %></h1>
+    <h2><%= client.clientName %></h2>
     <%- body %>
     <div class="text-center">
       <a href="/oidc/interaction/<%= uid %>/abort"
@@ -122,10 +134,14 @@
     </div>
     <div class="login-help">
       <% if (client.tosUri) { %>
-      <a href="<%= client.tosUri %>">[ Terms of Service ]</a>
+      <a href="<%= client.tosUri %>" target="_blank"
+        class="link-secondary link-offset-2 link-opacity-75 link-opacity-100-hover link-underline-opacity-25 link-underline-opacity-100-hover">Terms
+        of Service</a>
       <% } %>
       <% if (client.policyUri) { %>
-      <a href="<%= client.policyUri %>">[ Privacy Policy ]</a>
+      <a href="<%= client.policyUri %>" target="_blank"
+        class="link-secondary link-offset-2 link-opacity-75 link-opacity-100-hover link-underline-opacity-25 link-underline-opacity-100-hover">Privacy
+        Policy</a>
       <% } %>
     </div>
   </div>

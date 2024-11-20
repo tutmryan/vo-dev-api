@@ -25,6 +25,7 @@ export const resolvers: Resolvers = {
   },
   Presentation: {
     presentedCredentials: (presentation, _, { user }) => resolvePresentedCredentials(presentation, user),
+    oidcClient: ({ oidcClientId }, _, { dataLoaders: { oidcClients } }) => (oidcClientId ? oidcClients.load(oidcClientId) : null),
   },
   Contract: {
     presentations: (contract, { where, offset, limit }, context) =>
@@ -47,6 +48,10 @@ export const resolvers: Resolvers = {
   Partner: {
     presentations: (partner, { where, offset, limit }, context) =>
       query(context, FindPresentationsQuery, { partnerId: partner.id, ...where }, offset, limit),
+  },
+  OidcClient: {
+    presentations: (oidcClient, { where, offset, limit }, context) =>
+      query(context, FindPresentationsQuery, { oidcClientId: oidcClient.id, ...where }, offset, limit),
   },
   ApprovalRequest: {
     presentation: ({ presentationId }, _, { dataLoaders: { presentations } }) =>

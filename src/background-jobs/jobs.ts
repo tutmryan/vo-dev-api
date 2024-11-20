@@ -23,12 +23,15 @@ import { revokeIssuancesJobHandler } from '../features/issuance/jobs/revoke-issu
 import type { RevokeUserIssuancesJobName, RevokeUserIssuancesJobType } from '../features/issuance/jobs/revoke-user-issuances'
 import { revokeUserIssuancesJobHandler } from '../features/issuance/jobs/revoke-user-issuances'
 import {
-  initializeKeysJobHandler,
-  type InitializeKeysJobName,
-  type InitializeKeysJobType,
-} from '../features/oidc-provider/jobs/initialize-keys-job-handler'
+  initialiseOidcDataJobHandler,
+  type InitialiseOidcDataJobName,
+  type InitialiseOidcDataJobType,
+} from '../features/oidc-provider/jobs/initialise-data-job-handler'
+import type { InitialiseOidcKeysJobName, InitialiseOidcKeysJobType } from '../features/oidc-provider/jobs/initialise-keys-job-handler'
+import { initializeOidcKeysJobHandler } from '../features/oidc-provider/jobs/initialise-keys-job-handler'
 import type { UserEntity } from '../features/users/entities/user-entity'
 import type { logger } from '../logger'
+import { ONE_MINUTE_TTL } from '../redis/cache'
 import type { Services } from '../services'
 import type { PartialRecord } from '../util/partial-record'
 
@@ -59,7 +62,8 @@ export type JobNames =
   | InvokeApprovalCallbackJobName
   | SendAsyncIssuanceNotificationsJobName
   | CancelAsyncIssuanceRequestsJobName
-  | InitializeKeysJobName
+  | InitialiseOidcKeysJobName
+  | InitialiseOidcDataJobName
 
 export type JobTypes =
   | RevokeIssuancesJobType
@@ -69,7 +73,8 @@ export type JobTypes =
   | InvokeApprovalCallbackJobType
   | SendAsyncIssuanceNotificationsJobType
   | CancelAsyncIssuanceRequestsJobType
-  | InitializeKeysJobType
+  | InitialiseOidcKeysJobType
+  | InitialiseOidcDataJobType
 
 export const handlers: HandlerMap<JobTypes> = {
   revokeIssuances: revokeIssuancesJobHandler,
@@ -79,12 +84,16 @@ export const handlers: HandlerMap<JobTypes> = {
   invokeApprovalCallback: invokeApprovalCallbackJobHandler,
   sendAsyncIssuanceNotifications: sendAsyncIssuanceNotificationsJobHandler,
   cancelAsyncIssuanceRequests: cancelAsyncIssuanceRequestsHandler,
-  initializeOidcKeys: initializeKeysJobHandler,
+  initialiseOidcKeys: initializeOidcKeysJobHandler,
+  initialiseOidcData: initialiseOidcDataJobHandler,
 }
 
 // override default job options for specific job handlers
-export const jobOptions: PartialRecord<JobNames, JobsOptions> = {
+export const jobOptions: PartialRecord<JobNames, JobsOptions & { resultCacheTtl?: number }> = {
   invokeApprovalCallback: {
     attempts: 18, // exponential backoff means final retry (2 ** 18 = 262144s) = 3 days
+  },
+  initialiseOidcData: {
+    resultCacheTtl: ONE_MINUTE_TTL, // 1 minute - we don't need this data cached for longer than it takes to run the deduplicated job; a shorter TTL allows re-initialisation to take place sooner, when necessary, e.g. for localdev after switching ngrok URLs
   },
 }

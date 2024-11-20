@@ -4,6 +4,7 @@ import type { PresentedCredential, RequestCredential } from '../../../generated/
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
+import { OidcClientEntity } from '../../oidc-provider/entities/oidc-client-entity'
 import { PartnerEntity } from '../../partners/entities/partner-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
@@ -15,15 +16,17 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
     args?: Pick<
       PresentationEntity,
       'requestId' | 'identityId' | 'requestedById' | 'issuanceIds' | 'requestedCredentials' | 'presentedCredentials' | 'partnerIds'
-    >,
+    > &
+      Partial<Pick<PresentationEntity, 'oidcClientId'>>,
   ) {
     super()
     if (!args) return
-    const { issuanceIds, partnerIds, ...rest } = args
+    const { issuanceIds, partnerIds, oidcClientId, ...rest } = args
     typeSafeAssign(this, {
       ...rest,
       issuances: Promise.resolve(issuanceIds.map((id) => ({ id }) as IssuanceEntity)),
       partners: Promise.resolve(partnerIds.map((id) => ({ id }) as PartnerEntity)),
+      oidcClientId: oidcClientId ?? null,
     })
   }
 
@@ -80,4 +83,10 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   set presentedCredentials(presentedCredentials: PresentedData[]) {
     this.presentedCredentialsJson = JSON.stringify(presentedCredentials)
   }
+
+  @ManyToOne(() => OidcClientEntity)
+  oidcClient!: Promise<OidcClientEntity | null>
+
+  @Column({ nullable: true })
+  oidcClientId!: string | null
 }

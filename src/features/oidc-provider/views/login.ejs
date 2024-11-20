@@ -8,10 +8,10 @@
       accessToken: '<%- presentationAccessToken %>',
     })
     const request = <%- JSON.stringify(presentationRequest) %>
-    client
-      .createPresentationRequestForAuthn(request, handlePresentationEvent)
-      .then(handlePresentation)
-      .catch(displayError)
+      client
+        .createPresentationRequestForAuthn(request, handlePresentationEvent)
+        .then(handlePresentation)
+        .catch(displayError)
   }
 
   function handlePresentation(response) {
@@ -34,8 +34,11 @@
   }
 
   function handlePresentationEvent(data) {
-    if (data instanceof Error || data.event.requestStatus === 'presentation_error') {
-      displayError(data ?? { message: 'Presentation failed.' })
+    if (data instanceof Error) {
+      displayError(data)
+    } else if (data.event.requestStatus === 'presentation_error') {
+      const { code, message } = data.event.error
+      displayError(data.event.error ? `${code}: ${message}` : 'Presentation failed.')
     } else if (data.event.requestStatus === 'request_retrieved') {
       displayProgress('Scanned, waiting for presentation...')
     } else {

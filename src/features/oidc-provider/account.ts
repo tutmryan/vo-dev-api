@@ -3,11 +3,13 @@ import type { Account, FindAccount } from 'oidc-provider'
 import { oidcStorageService } from '.'
 import { logger } from '../../logger'
 import { OpenIdProfileClaim, VcInfoClaim, VcPresentedAttributesClaim, VoIdentityClaim, VoPresentationClaim } from './claims'
+import { checkIssuanceIsNotRevoked } from './data'
 import type { PresentationLoginAccount } from './session'
 
 export const findAccount: FindAccount = async (_ctx, id) => {
   try {
     const account = await oidcStorageService().downloadAccount(id)
+    if (account && account.issuanceId) await checkIssuanceIsNotRevoked(account.issuanceId)
     return {
       accountId: id,
       async claims(_use, _scope) {

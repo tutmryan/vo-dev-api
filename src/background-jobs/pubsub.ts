@@ -13,6 +13,8 @@ import {
 import { newCacheSection, ONE_MINUTE_TTL } from '../redis/cache'
 import { pubsub } from '../redis/pubsub'
 import { Lazy } from '../util/lazy'
+import type { JobNames } from './jobs'
+import { jobOptions } from './jobs'
 
 const BACKGROUND_JOB_TOPIC = 'backgroundJob'
 const BACKGROUND_JOB_EVENTS_TTL = ONE_MINUTE_TTL * 5 // 5 minutes
@@ -31,7 +33,8 @@ export const publishBackgroundJobEvent = async (data: BackgroundJobTopicData): P
   // keep a copy of the job finished event in cache so that
   // we can immediately return the event to any subscriber
   // subscribing after the event has happened
-  if (eventIsFinal(data.event)) await finishedBackgroundJobEvents().set(data.jobId, JSON.stringify(data))
+  const ttl = jobOptions[data.jobName as JobNames]?.resultCacheTtl
+  if (eventIsFinal(data.event)) await finishedBackgroundJobEvents().set(data.jobId, JSON.stringify(data), ttl)
   return pubsub().publish(BACKGROUND_JOB_TOPIC, data)
 }
 

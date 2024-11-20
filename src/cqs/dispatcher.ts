@@ -1,4 +1,4 @@
-import type { CommandContext, TransactionalCommandContext, QueryContext } from '.'
+import type { CommandContext, QueryContext, TransactionalCommandContext } from '.'
 import type { GraphQLContext } from '../context'
 import { entityManager, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../data'
 import { addUserToManager } from '../features/auditing/user-context-helper'

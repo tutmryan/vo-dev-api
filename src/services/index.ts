@@ -12,6 +12,8 @@ import {
   vidServiceAuth,
 } from '../config'
 import type { BaseContext } from '../context'
+import { logger } from '../logger'
+import { Lazy } from '../util/lazy'
 import { AsyncIssuanceService } from './async-issuance-service'
 import { BlobStorageContainerService } from './blob-storage-container-service'
 import { CommunicationsService } from './communications-service'
@@ -65,6 +67,12 @@ export function createVerifiedIdAdminService(logger: BaseContext['logger'], corr
     authorityId,
   )
 }
+
+export const getPlatformIssuerDid = Lazy(async () => {
+  const admin = createVerifiedIdAdminService(logger)
+  const authority = await admin.authority()
+  return authority.didModel.did
+})
 
 function createVerifiedIdRequestService(context: BaseContext) {
   const { baseUrl, scope } = verifiedIdRequest

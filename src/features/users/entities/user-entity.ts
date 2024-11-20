@@ -1,4 +1,5 @@
 import { Column, Entity, Index } from 'typeorm'
+import { homeTenant } from '../../../config'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 
@@ -38,4 +39,16 @@ export class UserEntity extends VerifiedOrchestrationEntity {
 
     return false
   }
+}
+
+export const SYSTEM_USER_OID = 'faa690ac-d8d0-4ff8-aa38-2a9c53084ca9'
+
+export function createSystemUser() {
+  return new UserEntity({
+    oid: SYSTEM_USER_OID,
+    tenantId: homeTenant.tenantId,
+    email: null,
+    name: 'System',
+    isApp: true,
+  })
 }

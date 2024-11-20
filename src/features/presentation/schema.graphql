@@ -332,6 +332,10 @@ type Presentation {
   The credentials that were presented (excluding claims data)
   """
   presentedCredentials: [PresentedCredential!]!
+  """
+  The requesting OIDC client, if this presentation was made for OIDC authentication.
+  """
+  oidcClient: OidcClient
 }
 
 """
@@ -358,6 +362,10 @@ input ContractPresentationWhere {
   The partner who issued the credential that was presented
   """
   partnerId: ID
+  """
+  The ID of the OIDC client that requested authentication resulting in the presentation.
+  """
+  oidcClientId: ID
   """
   The start of the presentedAt period to include.
   """
@@ -418,6 +426,10 @@ input IdentityPresentationWhere {
   """
   partnerId: ID
   """
+  The ID of the OIDC client that requested authentication resulting in the presentation.
+  """
+  oidcClientId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -464,6 +476,10 @@ input UserPresentationWhere {
   """
   partnerId: ID
   """
+  The ID of the OIDC client that requested authentication resulting in the presentation.
+  """
+  oidcClientId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -506,6 +522,10 @@ input IssuancePresentationWhere {
   """
   partnerId: ID
   """
+  The ID of the OIDC client that requested authentication resulting in the presentation.
+  """
+  oidcClientId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -544,6 +564,10 @@ input PartnerPresentationWhere {
   """
   requestedById: ID
   """
+  The ID of the OIDC client that requested authentication resulting in the presentation.
+  """
+  oidcClientId: ID
+  """
   The ID of a contract used to make the presentation request.
   """
   contractId: ID
@@ -551,6 +575,59 @@ input PartnerPresentationWhere {
   The issuance that was presented
   """
   issuanceId: ID
+  """
+  The start of the presentedAt period to include.
+  """
+  from: DateTime
+  """
+  The end of the presentedAt period to include.
+  """
+  to: DateTime
+  """
+  The type of credential requested.
+  """
+  requestedType: String
+  """
+  The type of credential presented.
+  """
+  presentedType: String
+  """
+  Whether face check validation was requested.
+  """
+  isFaceCheckRequested: Boolean
+}
+"""
+Criteria for filtering presentations.
+"""
+input OidcClientPresentationWhere {
+  """
+  The requestId of the presentation request.
+  """
+  requestId: ID
+  """
+  The ID of the identity who presented the credential (if known).
+  """
+  identityId: ID
+  """
+  The ID of a contract that was presented.
+  """
+  contractId: ID
+  """
+  The ID of the user (Person or Application) that requested & received the presentation data.
+  """
+  requestedById: ID
+  """
+  The issuance that was presented
+  """
+  issuanceId: ID
+  """
+  The partner who issued the credential that was presented
+  """
+  partnerId: ID
+  """
+  The ID of the OIDC client that requested authentication resulting in the presentation.
+  """
+  oidcClientId: ID
   """
   The start of the presentedAt period to include.
   """
@@ -601,6 +678,10 @@ input PresentationWhere {
   The partner who issued the credential that was presented
   """
   partnerId: ID
+  """
+  The ID of the OIDC client that requested authentication resulting in the presentation.
+  """
+  oidcClientId: ID
   """
   The start of the presentedAt period to include.
   """
@@ -660,6 +741,13 @@ extend type Partner {
   Returns the successful credential presentations of credentails issued by this partner.
   """
   presentations(where: PartnerPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+}
+
+extend type OidcClient {
+  """
+  Returns the successful credential presentations that were requested for authorization .
+  """
+  presentations(where: OidcClientPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
 }
 
 """
