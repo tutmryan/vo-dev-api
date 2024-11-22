@@ -28,7 +28,7 @@ import {
   type InitialiseOidcDataJobType,
 } from '../features/oidc-provider/jobs/initialise-data-job-handler'
 import type { InitialiseOidcKeysJobName, InitialiseOidcKeysJobType } from '../features/oidc-provider/jobs/initialise-keys-job-handler'
-import { initializeOidcKeysJobHandler } from '../features/oidc-provider/jobs/initialise-keys-job-handler'
+import { initialiseOidcKeysJobHandler } from '../features/oidc-provider/jobs/initialise-keys-job-handler'
 import type { UserEntity } from '../features/users/entities/user-entity'
 import type { logger } from '../logger'
 import { ONE_MINUTE_TTL } from '../redis/cache'
@@ -84,7 +84,7 @@ export const handlers: HandlerMap<JobTypes> = {
   invokeApprovalCallback: invokeApprovalCallbackJobHandler,
   sendAsyncIssuanceNotifications: sendAsyncIssuanceNotificationsJobHandler,
   cancelAsyncIssuanceRequests: cancelAsyncIssuanceRequestsHandler,
-  initialiseOidcKeys: initializeOidcKeysJobHandler,
+  initialiseOidcKeys: initialiseOidcKeysJobHandler,
   initialiseOidcData: initialiseOidcDataJobHandler,
 }
 
@@ -94,6 +94,17 @@ export const jobOptions: PartialRecord<JobNames, JobsOptions & { resultCacheTtl?
     attempts: 18, // exponential backoff means final retry (2 ** 18 = 262144s) = 3 days
   },
   initialiseOidcData: {
-    resultCacheTtl: ONE_MINUTE_TTL, // 1 minute - we don't need this data cached for longer than it takes to run the deduplicated job; a shorter TTL allows re-initialisation to take place sooner, when necessary, e.g. for localdev after switching ngrok URLs
+    resultCacheTtl: ONE_MINUTE_TTL,
+    deduplication: {
+      id: 'initialiseOidcData',
+      ttl: ONE_MINUTE_TTL,
+    },
+  },
+  initialiseOidcKeys: {
+    resultCacheTtl: ONE_MINUTE_TTL,
+    deduplication: {
+      id: 'initialiseOidcKeys',
+      ttl: ONE_MINUTE_TTL,
+    },
   },
 }

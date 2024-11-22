@@ -155,7 +155,7 @@ export async function getExpressApp(): Promise<Express> {
     // add OIDC provider, but don't wait for it to be ready
     addOidcProvider(app)
       .then((oidcRoute) => logger.info(`OIDC provider ready on ${oidcRoute}`))
-      .catch((error) => logger.error('Failed to start OIDC provider', { error }))
+      .catch((error) => logger.error('Failed to start OIDC provider', { error: error.toString() }))
   }
 
   return app

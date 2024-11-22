@@ -54,14 +54,19 @@ export const addToJobQueue = async (jobType: JobTypes, jobId: string = randomUUI
 
 /**
  * Runs a deduplicated background job and optionally waits for its completion.
- * BullMQ deduplicates jobs by job ID, so we simply use the job type name as the job ID.
+ * BullMQ deduplicates jobs by job ID, so we use the job type name as the job ID and await completion via the name.
  */
 export const runDeduplicatedJob = async (jobType: JobTypes, awaitCompletion: boolean): Promise<void> => {
+  logger.info(`Running deduplicated job: ${jobType.name}`)
   const jobId = jobType.name
   await addToJobQueue(jobType, jobId)
   if (!awaitCompletion) return
   const iterator = subscribeToBackgroundJobEvents({ where: { jobId } })
+  logger.info(`Waiting for deduplicated job completion: ${jobType.name}`)
   for await (const { event } of iterator) {
-    if (eventIsFinal(event)) return
+    if (eventIsFinal(event)) {
+      logger.info(`Deduplicated job completed: ${jobType.name}`)
+      return
+    }
   }
 }
