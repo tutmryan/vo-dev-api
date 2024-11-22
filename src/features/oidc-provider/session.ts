@@ -95,7 +95,7 @@ export async function buildAuthnPresentationRequest(
       {
         type,
         acceptedIssuers: vcIssuerParam ? [vcIssuerParam] : undefined,
-        configuration: buildRequestConfiguration(params),
+        configuration: buildRequestConfiguration(params, client),
       },
     ],
   }
@@ -103,15 +103,16 @@ export async function buildAuthnPresentationRequest(
 
 const faceCheckMinConfidenceThreshold = 50
 const faceCheckMaxConfidenceThreshold = 70
+const faceCheckOn: RequestConfiguration = { validation: { faceCheck: {} } }
 
-function buildRequestConfiguration(params: UnknownObject): RequestConfiguration | undefined {
-  const facecheckParam = params[ExtraParams.vc_facecheck] as string | undefined
-  if (facecheckParam === 'true') return { validation: { faceCheck: {} } }
-  const asNumber = Number(facecheckParam)
-  if (Number.isNaN(asNumber)) return undefined
-  if (asNumber >= faceCheckMinConfidenceThreshold && asNumber <= faceCheckMaxConfidenceThreshold)
+function buildRequestConfiguration(params: UnknownObject, client: OidcClientEntity): RequestConfiguration | undefined {
+  const faceCheckParam = params[ExtraParams.vc_facecheck] as string | undefined
+  const faceCheckClientDefault = client.requireFaceCheck ? faceCheckOn : undefined
+  if (faceCheckParam === 'true') return faceCheckOn
+  const asNumber = Number(faceCheckParam)
+  if (!Number.isNaN(asNumber) && asNumber >= faceCheckMinConfidenceThreshold && asNumber <= faceCheckMaxConfidenceThreshold)
     return { validation: { faceCheck: { matchConfidenceThreshold: asNumber } } }
-  return undefined
+  return faceCheckClientDefault
 }
 
 export type PresentationLoginAccount = {

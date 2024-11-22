@@ -1,4 +1,3 @@
-import { devToolsEnabled } from '../../../config'
 import { invariant } from '../../../util/invariant'
 import { apiResourceId, portalClientId } from '../data'
 
@@ -19,9 +18,6 @@ export function validateUris(type: 'redirect' | 'log out', uris: Array<string | 
     const hostname = typeof uri === 'string' ? new URL(uri).hostname : uri.hostname
     const isLocalhost = hostname === 'localhost'
 
-    if (!devToolsEnabled) {
-      invariant(isHttps, 'Redirect URIs must use HTTPS')
-      invariant(!isLocalhost, 'Redirect URIs cannot use localhost')
-    }
+    if (!isHttps) invariant(isLocalhost, `http: URLs can only be used with localhost`)
   })
 }

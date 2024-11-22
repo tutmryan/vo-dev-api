@@ -20,6 +20,7 @@ type OptionalArgs = Pick<
   | 'termsOfServiceUrl'
   | 'partnerIds'
   | 'allowAnyPartner'
+  | 'requireFaceCheck'
 >
 type CreateOrUpdateArgs = RequiredArgs & Partial<OptionalArgs>
 
@@ -30,6 +31,7 @@ function inflateArgs(args: CreateOrUpdateArgs): RequiredArgs & OptionalArgs {
     postLogoutUris: args.postLogoutUris,
     partnerIds: args.partnerIds ?? [],
     allowAnyPartner: args.allowAnyPartner !== undefined ? args.allowAnyPartner : false,
+    requireFaceCheck: args.requireFaceCheck !== undefined ? args.requireFaceCheck : false,
     applicationType: args.applicationType ?? null,
     credentialTypes: args.credentialTypes ?? null,
     uniqueClaimsForSubjectId: args.uniqueClaimsForSubjectId ?? null,
@@ -123,6 +125,12 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
   set postLogoutUris(value: string[]) {
     this.postLogoutUrisJson = JSON.stringify(value)
   }
+
+  /**
+   * Require the client to use face check for all auth presentations.
+   */
+  @Column({ type: 'bit', default: false })
+  requireFaceCheck!: boolean
 
   /**
    * Allow the client to auth using presentations from any partner.

@@ -7,7 +7,7 @@ import { systemClientInvariant, validateUris } from './utils'
 export async function UpdateOidcClientCommand(this: CommandContext, clientId: string, input: OidcClientInput) {
   systemClientInvariant(clientId)
 
-  const { redirectUris, postLogoutUris, allowAnyPartner, partnerIds, ...rest } = input
+  const { redirectUris, postLogoutUris, requireFaceCheck, allowAnyPartner, partnerIds, ...rest } = input
 
   validateUris('redirect', redirectUris)
   validateUris('log out', postLogoutUris)
@@ -19,6 +19,7 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
     ...rest,
     redirectUris,
     postLogoutUris,
+    requireFaceCheck: requireFaceCheck ?? false,
     allowAnyPartner: allowAnyPartner ?? false,
     partnerIds: partnerIds ?? [],
   })

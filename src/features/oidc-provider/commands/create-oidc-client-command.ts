@@ -5,7 +5,7 @@ import { OidcClientEntity } from '../entities/oidc-client-entity'
 import { validateUris } from './utils'
 
 export async function CreateOidcClientCommand(this: CommandContext, input: OidcClientInput) {
-  const { redirectUris, postLogoutUris, allowAnyPartner, partnerIds, ...rest } = input
+  const { redirectUris, postLogoutUris, requireFaceCheck, allowAnyPartner, partnerIds, ...rest } = input
 
   validateUris('redirect', redirectUris)
   validateUris('log out', postLogoutUris)
@@ -15,6 +15,7 @@ export async function CreateOidcClientCommand(this: CommandContext, input: OidcC
       ...rest,
       redirectUris,
       postLogoutUris,
+      requireFaceCheck: requireFaceCheck ?? false,
       allowAnyPartner: allowAnyPartner ?? false,
       partnerIds: partnerIds ?? [],
     }),

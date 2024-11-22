@@ -1,9 +1,8 @@
 import type { Constructor } from '@graphql-tools/utils'
-import { isLocalDev } from '@makerx/node-common'
 import type { Express, RequestHandler } from 'express'
 import { debounce } from 'lodash'
 import type { Interaction, KoaContextWithOIDC, Provider, errors } from 'oidc-provider'
-import { apiUrl, cookieSession, devToolsEnabled } from '../../config'
+import { apiUrl, cookieSession } from '../../config'
 import { logger } from '../../logger'
 import { createRedisClient, isRedisEnabled } from '../../redis'
 import { pubsub } from '../../redis/pubsub'
@@ -81,18 +80,18 @@ async function createProvider() {
     jwks: { keys: jwksKeys },
   })
 
-  // https://github.com/panva/node-oidc-provider/blob/main/recipes/implicit_http_localhost.md#allowing-http-andor-localhost-for-implicit-response-type-web-clients
-  // for localdev, allow HTTP and localhost
-  if (isLocalDev || devToolsEnabled) {
-    // @ts-expect-error - private method
-    const { invalidate: orig } = provider.Client.Schema.prototype
-    // @ts-expect-error - private method
-    provider.Client.Schema.prototype.invalidate = function invalidate(message, code) {
-      if (code === 'implicit-force-https' || code === 'implicit-forbid-localhost') {
-        return
-      }
-      orig.call(this, message)
+  // allow http + localhost for redirect URIs
+  // as per: https://github.com/panva/node-oidc-provider/blob/main/recipes/implicit_http_localhost.md#allowing-http-andor-localhost-for-implicit-response-type-web-clients
+  // we allow http + localhost, but only together, otherwise require https and forbid localhost
+  // however validation of client redirect URIs is controlled at the API layer - this override point doesn't support validating the entire URI
+  // @ts-expect-error - private method
+  const { invalidate: orig } = provider.Client.Schema.prototype
+  // @ts-expect-error - private method
+  provider.Client.Schema.prototype.invalidate = function invalidate(message, code) {
+    if (code === 'implicit-force-https' || code === 'implicit-forbid-localhost') {
+      return
     }
+    orig.call(this, message)
   }
 
   provider.proxy = true

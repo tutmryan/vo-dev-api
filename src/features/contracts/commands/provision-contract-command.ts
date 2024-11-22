@@ -1,9 +1,10 @@
 import { omit } from 'lodash'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckSupportEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
-import { FaceCheckPhotoSupport } from '../../../generated/graphql'
+import { ClaimType, FaceCheckPhotoSupport } from '../../../generated/graphql'
 import type { Contract, CreateContractInput, UpdateContractInput } from '../../../services/verified-id'
 import {
+  claimTypeImage,
   claimTypeString,
   displayClaimPrefix,
   faceCheckPhotoClaimAttestation,
@@ -73,8 +74,8 @@ function toCreateContractInput({
               ...(faceCheckSupport === FaceCheckPhotoSupport.None
                 ? []
                 : [{ ...faceCheckPhotoClaimAttestation, required: faceCheckSupport === FaceCheckPhotoSupport.Required }]),
-              ...claims.map(({ claim, isOptional }) => ({
-                type: claimTypeString,
+              ...claims.map(({ claim, isOptional, type }) => ({
+                type: type === ClaimType.Image ? claimTypeImage : claimTypeString,
                 required: !isOptional,
                 outputClaim: claim,
                 inputClaim: claim,
@@ -91,10 +92,10 @@ function toCreateContractInput({
         consent,
         card,
         claims: [
-          ...claims.map(({ claim, label, description, isOptional }) => ({
+          ...claims.map(({ claim, label, description, isOptional, type }) => ({
             label,
             claim: `${displayClaimPrefix}${claim}`,
-            type: claimTypeString,
+            type: type === ClaimType.Image ? claimTypeImage : claimTypeString,
             description,
             required: !isOptional,
           })),

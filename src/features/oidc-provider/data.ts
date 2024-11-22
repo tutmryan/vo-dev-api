@@ -80,22 +80,47 @@ export async function loadExistingData(): Promise<SourceOidcData> {
 const portalDemoRedirectUri = `${portalUrl}/demo/authn`
 
 function portalClientUrisAreCorrect(client: OidcClientEntity) {
-  if (client.redirectUris[0] !== portalUrl) return false
-  if (client.postLogoutUris[0] !== portalUrl) return false
-  if (client.redirectUris[1] !== portalDemoRedirectUri) return false
-  if (client.postLogoutUris[1] !== portalDemoRedirectUri) return false
+  if (client.redirectUris[0] !== portalUrl) {
+    logger.warn(`Portal client redirect URI[0] is incorrect, expected ${portalUrl}, got ${client.redirectUris[0]}`)
+    return false
+  }
+  if (client.postLogoutUris[0] !== portalUrl) {
+    logger.warn(`Portal client postLogout URI[0] is incorrect, expected ${portalUrl}, got ${client.postLogoutUris[0]}`)
+    return false
+  }
+  if (client.redirectUris[1] !== portalDemoRedirectUri) {
+    logger.warn(`Portal client redirect URI[1] is incorrect, expected ${portalDemoRedirectUri}, got ${client.redirectUris[1]}`)
+    return false
+  }
+  if (client.postLogoutUris[1] !== portalDemoRedirectUri) {
+    logger.warn(`Portal client postLogout URI[1] is incorrect, expected ${portalDemoRedirectUri}, got ${client.postLogoutUris[1]}`)
+    return false
+  }
   return true
 }
+
 function apiResourceHasCorrectScope(resource: OidcResourceEntity) {
-  return resource.resourceIndicator === apiScope
+  if (resource.resourceIndicator !== apiScope) {
+    logger.warn(`API resource scope is incorrect, expected ${apiScope}, got ${resource.resourceIndicator}`)
+    return false
+  }
+  return true
 }
 
 function dataIsInitialised([clients, resources]: SourceOidcData) {
   const portalClient = clients.find((c) => c.id.toLowerCase() === portalClientId)
+  if (!portalClient) {
+    logger.warn(`Portal client is missing`)
+    return false
+  }
   const apiResource = resources.find((r) => r.id.toLowerCase() === apiResourceId)
-  if (!portalClient || !apiResource) return false
+  if (!apiResource) {
+    logger.warn(`API resource is missing`)
+    return false
+  }
   if (!portalClientUrisAreCorrect(portalClient)) return false
   if (!apiResourceHasCorrectScope(apiResource)) return false
+  logger.info('OIDC data is initialised ✅')
   return true
 }
 

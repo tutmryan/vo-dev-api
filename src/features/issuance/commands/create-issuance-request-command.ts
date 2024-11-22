@@ -155,20 +155,6 @@ export async function CreateIssuanceRequestCommand(
 
 const invalidFaceCheckError = 'Face check photo must be a valid image/jpeg data URL with base64 encoding'
 
-export function tryConvertFaceCheckPhoto(faceCheckPhoto: string):
-  | {
-      data: string
-      success: true
-      error?: undefined
-    }
-  | { data?: undefined; success: false; error: string } {
-  try {
-    return { data: convertFaceCheckPhoto(faceCheckPhoto), success: true }
-  } catch {
-    return { success: false, error: invalidFaceCheckError }
-  }
-}
-
 // validates face check photo input and returns base64url encoded image data
 export function convertFaceCheckPhoto(faceCheckPhoto: string) {
   const { encoding, data } = parseFaceCheckPhotoDataUrl(faceCheckPhoto)

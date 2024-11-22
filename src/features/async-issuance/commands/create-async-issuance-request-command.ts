@@ -25,6 +25,7 @@ import { validateIssuanceClaimsAgainstContractClaims } from '../../contracts/cla
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { bulkCreateOrUpdateIdentity, identityInputKey } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
+import { parseFaceCheckPhotoDataUrl } from '../../issuance/commands/create-issuance-request-command'
 import { AsyncIssuanceAudit } from '../entities/async-issuance-audit'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
@@ -150,6 +151,11 @@ export async function CreateAsyncIssuanceRequestCommand(
         (!faceCheckPhotoInput && !photoCapture) || (faceCheckPhotoInput && !photoCapture) || (!faceCheckPhotoInput && photoCapture),
         'Face check photo cannot be provided when using a photo capture request',
       )
+
+      // validate face check photo, if provided
+      if (faceCheckPhotoInput) {
+        parseFaceCheckPhotoDataUrl(faceCheckPhotoInput)
+      }
 
       if (expirationDate) {
         invariant(calculateExpiryFromNow(expiry) < expirationDate, 'Credential expiry must fall after the period to claim it')

@@ -166,6 +166,10 @@ input OidcClientInput {
   """
   postLogoutUris: [URL!]!
   """
+  Indicates this client must use face check with every authentication presentation.
+  """
+  requireFaceCheck: Boolean
+  """
   Indicates whether the client allows presentations of credentials from any configured partner.
   """
   allowAnyPartner: Boolean
@@ -235,6 +239,10 @@ type OidcClient {
   The post-logout URIs that the client is allowed to use.
   """
   postLogoutUris: [URL!]!
+  """
+  Indicates this client must use face check with every authentication presentation.
+  """
+  requireFaceCheck: Boolean!
   """
   Indicates whether the client allows presentations of credentials from any configured partner.
   """

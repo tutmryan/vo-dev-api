@@ -24,6 +24,17 @@
       "dependsOn": ["Start DB"]
     },
     {
+      "label": "Revert last DB migration",
+      "type": "npm",
+      "script": "db:migrate:revert",
+      "path": "${workspaceFolder}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "dependsOn": ["Start DB"]
+    },
+    {
       "label": "Reset DB",
       "type": "npm",
       "script": "db:reset",

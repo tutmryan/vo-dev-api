@@ -16,6 +16,7 @@ graphql(`
     applicationType
     redirectUris
     postLogoutUris
+    requireFaceCheck
     allowAnyPartner
     partners {
       id
@@ -164,8 +165,9 @@ export const oidcResourceQuery = graphql(`
 export function createOidcClientInput(input: Partial<OidcClientInput> = {}): OidcClientInput {
   return {
     name: casual.name,
-    redirectUris: [casual.url.toLowerCase()],
-    postLogoutUris: [casual.url.toLowerCase()],
+    redirectUris: [casual.url.toLowerCase().replace('http', 'https')],
+    postLogoutUris: [casual.url.toLowerCase().replace('http', 'https')],
+    requireFaceCheck: casual.boolean,
     allowAnyPartner: casual.boolean,
     logo: casual.url.toLowerCase(),
     backgroundColor: casual.rgb_hex,
