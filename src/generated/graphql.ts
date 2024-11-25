@@ -3001,6 +3001,8 @@ export type Query = {
   identitiesByIdentifiers: Array<Maybe<Identity>>;
   /** Returns an identity by ID */
   identity: Identity;
+  /** Returns an identity by issuer identitifer */
+  identityByIdentifier: Identity;
   /** Returns the distinct set of issuers from all identities */
   identityIssuers: Array<IdentityIssuer>;
   /** Returns an issuance by ID */
@@ -3203,6 +3205,11 @@ export type QueryIdentitiesByIdentifiersArgs = {
 
 export type QueryIdentityArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryIdentityByIdentifierArgs = {
+  issuerId: IssuerIdentifierInput;
 };
 
 
@@ -5375,6 +5382,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   identities?: Resolver<Array<Maybe<ResolversTypes['Identity']>>, ParentType, ContextType, Partial<QueryIdentitiesArgs>>;
   identitiesByIdentifiers?: Resolver<Array<Maybe<ResolversTypes['Identity']>>, ParentType, ContextType, Partial<QueryIdentitiesByIdentifiersArgs>>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityArgs, 'id'>>;
+  identityByIdentifier?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityByIdentifierArgs, 'issuerId'>>;
   identityIssuers?: Resolver<Array<ResolversTypes['IdentityIssuer']>, ParentType, ContextType>;
   issuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<QueryIssuanceArgs, 'id'>>;
   issuanceCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryIssuanceCountArgs>>;

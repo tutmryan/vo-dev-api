@@ -168,6 +168,10 @@ type Query {
   """
   identity(id: ID!): Identity!
   """
+  Returns an identity by issuer identitifer
+  """
+  identityByIdentifier(issuerId: IssuerIdentifierInput!): Identity!
+  """
   Returns a list of identities for the given IDs
   """
   identities(ids: [ID!]): [Identity]!

@@ -310,8 +310,40 @@ exports[`shield rules are setup correctly 1`] = `
       "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
       "cache": "contextual"
     },
+    "identityByIdentifier": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "hasLimitedAccessData-limitedIssuance",
+              "cache": "contextual"
+            }
+          ]
+        },
+        {
+          "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",
+          "cache": "contextual"
+        }
+      ]
+    },
     "identitiesByIdentifiers": {
       "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
         {
           "name": "isIssuanceApp",
           "cache": "contextual"
