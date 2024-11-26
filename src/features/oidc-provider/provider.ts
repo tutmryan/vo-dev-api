@@ -48,6 +48,7 @@ async function createProvider() {
 
   const provider = new Provider(issuer, {
     clients: clientMetadata,
+    clientAuthMethods: ['none'],
     adapter: (name: string) => (isRedisEnabled ? new RedisAdapter(name, redisClient()) : undefined),
     cookies: {
       keys: [cookieSession.secret],

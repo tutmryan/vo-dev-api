@@ -44,6 +44,7 @@ const toOidcClientMetadata = ({
   postLogoutUris,
   termsOfServiceUrl,
   policyUrl,
+  applicationType,
 }: OidcClientEntity): ClientMetadata => ({
   client_id: id.toLowerCase(),
   client_name: name,
@@ -54,6 +55,7 @@ const toOidcClientMetadata = ({
   token_endpoint_auth_method: 'none',
   tos_uri: termsOfServiceUrl ?? undefined,
   policy_uri: policyUrl ?? undefined,
+  application_type: applicationType ?? undefined,
 })
 
 type SourceOidcData = [OidcClientEntity[], OidcResourceEntity[], PartnerEntity[]]
