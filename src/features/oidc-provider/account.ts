@@ -1,8 +1,16 @@
 import { omit } from 'lodash'
-import type { Account, FindAccount } from 'oidc-provider'
+import type { Account, AccountClaims, FindAccount } from 'oidc-provider'
 import { oidcStorageService } from '.'
 import { logger } from '../../logger'
-import { OpenIdProfileClaim, VcInfoClaim, VcPresentedAttributesClaim, VoIdentityClaim, VoPresentationClaim } from './claims'
+import {
+  faceCheckAmr,
+  OpenIdProfileClaim,
+  presentationLoginStandardClaims,
+  VcInfoClaim,
+  VcPresentedAttributesClaim,
+  VoIdentityClaim,
+  VoPresentationClaim,
+} from './claims'
 import { checkIssuanceIsNotRevoked } from './data'
 import type { PresentationLoginAccount } from './session'
 
@@ -23,12 +31,13 @@ export const findAccount: FindAccount = async (_ctx, id) => {
   }
 }
 
-export function accountToClaims(account: PresentationLoginAccount) {
+export function accountToClaims(account: PresentationLoginAccount): AccountClaims {
   const { accountId: sub, presentationId, issuanceId, identity, did, credentialType, credentialClaims } = account
   const hasIdentity = !!identity
   const presentationClaimData = hasIdentity ? omit(credentialClaims, 'name') : credentialClaims
-  return {
+  const claims: AccountClaims = {
     sub,
+    ...presentationLoginStandardClaims,
     [OpenIdProfileClaim.Name]: identity?.name ?? credentialClaims?.name,
     [VcInfoClaim.Issuer]: did,
     [VcInfoClaim.Type]: credentialType,
@@ -41,6 +50,8 @@ export function accountToClaims(account: PresentationLoginAccount) {
     [VoIdentityClaim.IdentityIssuer]: identity?.issuer,
     [VoIdentityClaim.IdentityIdentifier]: identity?.identifier,
   }
+  if (account.faceCheckMatchConfidenceScore) claims.amr = [...presentationLoginStandardClaims['amr'], faceCheckAmr]
+  return claims
 }
 
 export const deleteAccount = async (accountId: string) => {

@@ -46,14 +46,6 @@ export async function extraTokenClaims(ctx: KoaContextWithOIDC, _token: AccessTo
   // add OIDC claims to the access token
   const scopes = [...authorizationCode.scopes]
   const accountClaims = await account.claims('access_token', scopes.join(' '), {}, [])
-  const requestedOidcClaims = compact(
-    scopes
-      .map((scope) => {
-        const scopeClaims = openidClaims[scope as keyof typeof openidClaims]
-        if (scopeClaims === null) return scope
-        return scopeClaims
-      })
-      .flat(),
-  )
+  const requestedOidcClaims = compact(scopes.map((scope) => openidClaims[scope as keyof typeof openidClaims]).flat())
   return pick(accountClaims, requestedOidcClaims)
 }

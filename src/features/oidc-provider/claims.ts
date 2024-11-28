@@ -33,13 +33,8 @@ export enum VoPresentationClaim {
   FaceCheckMatchConfidenceScore = 'vc_vo_facecheck_match_confidence_score',
 }
 
-const standardClaims = Object.keys(presentationLoginStandardClaims).reduce<Record<string, null>>((acc, key) => {
-  acc[key] = null
-  return acc
-}, {}) as Record<keyof typeof presentationLoginStandardClaims, null>
-
 export const openidClaims = {
-  ...standardClaims,
+  openid: ['sub', ...Object.keys(presentationLoginStandardClaims)],
   profile: Object.values(OpenIdProfileClaim),
   vc_info: Object.values(VcInfoClaim),
   vc_presented_attributes: Object.values(VcPresentedAttributesClaim),
