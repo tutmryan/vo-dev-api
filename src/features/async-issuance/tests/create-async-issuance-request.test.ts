@@ -11,7 +11,7 @@ import {
   executeCreateAsyncIssuanceRequestAsIssuer,
   faceCheckPhoto,
   givenContract,
-  validAdditonalContractClaims,
+  validAdditonalClaimsInput,
 } from './index'
 
 describe('createAsyncIssuanceRequest mutation', () => {
@@ -60,8 +60,8 @@ describe('createAsyncIssuanceRequest mutation', () => {
           faceCheckSupport: useFaceCheck || usePhotoCapture ? FaceCheckPhotoSupport.Required : undefined,
           claims: useClaims
             ? [
-                { claim: 'fixed-claim', label: 'fixed-label', type: ClaimType.String, value: 'fixed-value' },
-                { claim: 'unfixed-claim', label: 'unfixed-label', type: ClaimType.String, value: undefined },
+                { claim: 'default-value-claim', label: 'default-value-label', type: ClaimType.Text, value: 'default-value-value' },
+                { claim: 'no-default-value-claim', label: 'no-default-value-label', type: ClaimType.Text, value: undefined },
                 ...(useAllClaimTypes ? additonalContractClaims : []),
               ]
             : undefined,
@@ -79,9 +79,9 @@ describe('createAsyncIssuanceRequest mutation', () => {
             photoCapture: usePhotoCapture ? true : undefined,
             claims: useClaims
               ? {
-                  'unfixed-claim': casual.word,
+                  'no-default-value-claim': casual.word,
                   ...(useAdditionalClaims ? { random: 'claim' } : {}),
-                  ...(useAllClaimTypes ? validAdditonalContractClaims : {}),
+                  ...(useAllClaimTypes ? validAdditonalClaimsInput : {}),
                 }
               : undefined,
             expirationDate: useExpiry ? addDays(addMinutes(new Date(), 1), 1) : undefined,
@@ -119,7 +119,7 @@ describe('createAsyncIssuanceRequest mutation', () => {
         numberOfRequests = 2,
         useInvalidExpiry,
         useMissedRequiredClaim,
-        useInvalidClaim,
+        useInvalidClaim: useInvalidClaimValue,
         useMissingFaceCheck,
         useMissingPhotoCapture,
         useBothFaceCheckAndPhotoCapture,
@@ -129,14 +129,14 @@ describe('createAsyncIssuanceRequest mutation', () => {
           faceCheckSupport: useMissingFaceCheck || useMissingPhotoCapture ? FaceCheckPhotoSupport.Required : undefined,
           claims: [
             ...(useMissedRequiredClaim
-              ? [{ claim: 'unfixed-claim', label: 'unfixed-label', type: ClaimType.String, value: undefined }]
+              ? [{ claim: 'no-default-value-claim', label: 'no-default-value-label', type: ClaimType.Text, value: undefined }]
               : []),
-            ...(useInvalidClaim
+            ...(useInvalidClaimValue
               ? [
                   {
-                    claim: 'unfixed-integer-claim',
-                    label: 'unfixed-integer-label',
-                    type: ClaimType.Int,
+                    claim: 'no-default-value-number-claim',
+                    label: 'no-default-value-number-label',
+                    type: ClaimType.Number,
                     value: undefined,
                     isOptional: false,
                   },
@@ -154,7 +154,7 @@ describe('createAsyncIssuanceRequest mutation', () => {
             expiry: AsyncIssuanceRequestExpiry.OneDay,
             expirationDate: useInvalidExpiry ? new Date() : undefined,
             contact: buildContact(),
-            claims: useMissedRequiredClaim ? {} : useInvalidClaim ? { 'unfixed-integer-claim': 'abc' } : undefined,
+            claims: useMissedRequiredClaim ? {} : useInvalidClaimValue ? { 'no-default-value-number-claim': 'abc' } : undefined,
             faceCheckPhoto: useBothFaceCheckAndPhotoCapture ? faceCheckPhoto : undefined,
             photoCapture: useBothFaceCheckAndPhotoCapture ? true : undefined,
           })),

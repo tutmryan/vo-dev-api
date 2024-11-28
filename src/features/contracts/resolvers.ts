@@ -38,4 +38,21 @@ export const resolvers: Resolvers = {
   ContractDisplayCredentialLogo: {
     image: ({ uri }) => downloadToDataUrl(uri, { redirect: 'error' }),
   },
+  ClaimValidation: {
+    __resolveType(obj) {
+      if ('values' in obj) {
+        return 'ListValidation'
+      }
+      if ('min' in obj || 'max' in obj || 'precision' in obj) {
+        return 'NumberValidation'
+      }
+      if ('pattern' in obj) {
+        return 'RegexValidation'
+      }
+      if ('minLength' in obj || 'maxLength' in obj) {
+        return 'TextValidation'
+      }
+      return null
+    },
+  },
 }

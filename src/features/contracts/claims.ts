@@ -99,13 +99,13 @@ export const validateIssuanceClaimsAgainstContractClaims = (
     throw new ValidationError(`Claims must include: ${missingRequiredClaims.map(({ claim: contractClaim }) => contractClaim).join(', ')}`)
   }
 
-  // Validate the provided values for each claim
-  contractClaims?.forEach(({ claim: contractClaim, value: contractValue, type, validation, isOptional }) => {
+  // Validate the provided input values for each claim
+  contractClaims?.forEach(({ claim: contractClaim, type, validation, isFixed }) => {
+    // Skip validation if the contract already has a fixed value
+    if (isFixed) return
+
     const inputValue = claimsInput[contractClaim]
 
-    // Skip validation if the claim is optional and input has no value OR if contract already has a fixed value
-    if ((isOptional && (inputValue === undefined || inputValue === null)) || contractValue) return
-
-    validateClaimValue(type, inputValue, validation as ContractDisplayClaim['validation'])
+    if (inputValue) validateClaimValue(type, inputValue, validation as ContractDisplayClaim['validation'])
   })
 }

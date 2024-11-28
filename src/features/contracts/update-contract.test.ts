@@ -99,7 +99,7 @@ describe('updateContract mutation', () => {
     input.display.locale = 'en-GB'
     input.display.card.textColor = '#123123'
     input.display.card.logo.image = fakeJpegDataURL()
-    input.display.claims = [{ claim: 'claim_name', label: 'Claim', type: ClaimType.String, value: 'Updated claim value' }]
+    input.display.claims = [{ claim: 'claim_name', label: 'Claim', type: ClaimType.Text, value: 'Updated claim value' }]
     input.display.consent.title = 'Updated consent title'
     input.credentialTypes = notSupportedCredentialTypes
 
@@ -128,7 +128,7 @@ describe('updateContract mutation', () => {
     input.display.locale = 'en-GB'
     input.display.card.textColor = '#123123'
     input.display.card.logo.image = fakeJpegDataURL()
-    input.display.claims = [{ claim: 'claim_name', label: 'Claim', type: ClaimType.String, value: 'Updated claim value' }]
+    input.display.claims = [{ claim: 'claim_name', label: 'Claim', type: ClaimType.Text, value: 'Updated claim value' }]
     input.display.consent.title = 'Updated consent title'
 
     const { errors } = await executeOperationAsCredentialAdmin({

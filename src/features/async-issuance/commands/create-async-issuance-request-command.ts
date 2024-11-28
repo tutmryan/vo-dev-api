@@ -25,7 +25,7 @@ import { validateIssuanceClaimsAgainstContractClaims } from '../../contracts/cla
 import { ContractEntity } from '../../contracts/entities/contract-entity'
 import { bulkCreateOrUpdateIdentity, identityInputKey } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
-import { parseFaceCheckPhotoDataUrl } from '../../issuance/commands/create-issuance-request-command'
+import { validateFaceCheckPhoto } from '../../issuance/commands/create-issuance-request-command'
 import { AsyncIssuanceAudit } from '../entities/async-issuance-audit'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
@@ -154,7 +154,7 @@ export async function CreateAsyncIssuanceRequestCommand(
 
       // validate face check photo, if provided
       if (faceCheckPhotoInput) {
-        parseFaceCheckPhotoDataUrl(faceCheckPhotoInput)
+        validateFaceCheckPhoto(faceCheckPhotoInput)
       }
 
       if (expirationDate) {

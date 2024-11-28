@@ -85,7 +85,7 @@ describe('template.parentData field', () => {
         ...parentTemplateInput.display,
         locale: 'en-AU',
         consent: { instructions: 'Parent consent instructions' },
-        claims: [{ claim: 'parent_claim', label: 'Parent claim', type: ClaimType.String }],
+        claims: [{ claim: 'parent_claim', label: 'Parent claim', type: ClaimType.Text }],
         card: {
           issuedBy: 'Parent template',
           logo: {
@@ -132,7 +132,7 @@ describe('template.parentData field', () => {
               "claim": "parent_claim",
               "description": null,
               "label": "Parent claim",
-              "type": "string",
+              "type": "text",
               "value": null,
             },
           ],
@@ -157,7 +157,7 @@ describe('template.parentData field', () => {
       display: {
         ...rootTemplateInput.display,
         consent: { instructions: 'Root template consent instructions' },
-        claims: [{ claim: 'standard_claim', label: 'Standard claim', type: ClaimType.String }],
+        claims: [{ claim: 'standard_claim', label: 'Standard claim', type: ClaimType.Text }],
         card: {
           textColor: '#112233',
           issuedBy: 'Root template Pty Ltd',
@@ -175,8 +175,8 @@ describe('template.parentData field', () => {
         ...parentTemplateInput.display,
         consent: { title: 'Parent template consent title' },
         claims: [
-          { claim: 'parent_template_claim', label: 'Parent template claim', type: ClaimType.String },
-          { claim: 'standard_claim', label: 'Standard claim', type: ClaimType.String, value: 'Standard claim value' },
+          { claim: 'parent_template_claim', label: 'Parent template claim', type: ClaimType.Text },
+          { claim: 'standard_claim', label: 'Standard claim', type: ClaimType.Text, value: 'Standard claim value' },
         ],
         card: {
           backgroundColor: '#321321',
@@ -223,14 +223,14 @@ describe('template.parentData field', () => {
               "claim": "parent_template_claim",
               "description": null,
               "label": "Parent template claim",
-              "type": "string",
+              "type": "text",
               "value": null,
             },
             {
               "claim": "standard_claim",
               "description": null,
               "label": "Standard claim",
-              "type": "string",
+              "type": "text",
               "value": "Standard claim value",
             },
           ],

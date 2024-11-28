@@ -4,12 +4,13 @@ import { convertToClaimValidation } from '../features/contracts/mapping'
 import type {
   ContractDisplayClaim,
   ContractDisplayClaimInput,
-  FloatValidation,
-  IntValidation,
   ListValidation,
+  NumberValidation,
   RegexValidation,
-  StringValidation,
+  TextValidation,
 } from '../generated/graphql'
+
+export const MAX_PRECISION = 10
 
 export class ValidationError extends Error {
   constructor(message: string) {
@@ -18,9 +19,8 @@ export class ValidationError extends Error {
   }
 }
 
-const baseStringSchema = z.string()
-const baseIntSchema = z.coerce.number().int()
-const baseFloatSchema = z.coerce.number()
+const baseTextSchema = z.string()
+const baseNumberSchema = z.coerce.number()
 const booleanSchema = z.enum(['true', 'false'])
 const dateSchema = z.string().date('Invalid date format. Expected YYYY-MM-DD.')
 const dateTimeSchema = z.string().datetime('Invalid date-time format. Expected YYYY-MM-DDTHH:MM:SSZ.')
@@ -35,8 +35,8 @@ const isValidNumber = (value: number | null | undefined): value is number => {
   return value !== null && value !== undefined
 }
 
-const stringSchema = (validation?: StringValidation) => {
-  let schema = baseStringSchema
+const textSchema = (validation?: TextValidation) => {
+  let schema = baseTextSchema
   if (isValidNumber(validation?.minLength)) {
     schema = schema.min(validation.minLength, `Minimum length is ${validation.minLength}`)
   }
@@ -46,28 +46,29 @@ const stringSchema = (validation?: StringValidation) => {
   return schema
 }
 
-const intSchema = (validation?: IntValidation) => {
-  let schema = baseIntSchema
+const numberSchema = (validation?: NumberValidation) => {
+  let schema = baseNumberSchema
+
   if (isValidNumber(validation?.min)) {
     schema = schema.min(validation.min, `Minimum value is ${validation.min}`)
   }
+
   if (isValidNumber(validation?.max)) {
     schema = schema.max(validation.max, `Maximum value is ${validation.max}`)
   }
+
+  if (isValidNumber(validation?.precision)) {
+    return schema.refine(
+      (val) => {
+        const decimalPlaces = val.toString().split('.')[1]?.length || 0
+        return decimalPlaces <= validation.precision!
+      },
+      { message: `Maximum precision is ${validation.precision} decimal places` },
+    )
+  }
+
   return schema
 }
-
-const floatSchema = (validation?: FloatValidation) => {
-  let schema = baseFloatSchema
-  if (isValidNumber(validation?.min)) {
-    schema = schema.min(validation.min, `Minimum value is ${validation.min}`)
-  }
-  if (isValidNumber(validation?.max)) {
-    schema = schema.max(validation.max, `Maximum value is ${validation.max}`)
-  }
-  return schema
-}
-
 const listSchema = (validation: ListValidation) => {
   return z.enum(validation.values as [string, ...string[]], {
     message: `Value must be one of: ${validation.values.join(', ')}`,
@@ -79,11 +80,61 @@ const regexSchema = (validation: RegexValidation) => {
 }
 
 function validateClaimRules(type: string, validation?: ContractDisplayClaimInput['validation']) {
-  if (type === 'regex' && (!validation?.regex || !validation.regex.pattern)) {
-    throw new ValidationError('Regex type requires a "pattern" in validation.')
-  }
-  if (type === 'list' && (!validation?.list || validation.list.values.length === 0)) {
-    throw new ValidationError('List type requires a non-empty "values" array in validation.')
+  switch (type) {
+    case 'regex':
+      if (!validation?.regex || !validation.regex.pattern) {
+        throw new ValidationError('Regex type requires a "pattern" in validation.')
+      }
+      try {
+        new RegExp(validation.regex.pattern)
+      } catch (e) {
+        throw new ValidationError(`Invalid regex pattern: "${validation.regex.pattern}".`)
+      }
+      break
+
+    case 'list':
+      if (!validation?.list || validation.list.values.length === 0) {
+        throw new ValidationError('List type requires a non-empty "values" array in validation.')
+      }
+      break
+
+    case 'text':
+      if (validation?.text) {
+        const { minLength, maxLength } = validation.text
+
+        if (isValidNumber(minLength) && minLength < 0) {
+          throw new ValidationError('Text validation "minLength" must be greater than or equal to 0.')
+        }
+
+        if (isValidNumber(maxLength) && maxLength < 0) {
+          throw new ValidationError('Text validation "maxLength" must be greater than or equal to 0.')
+        }
+
+        if (isValidNumber(minLength) && isValidNumber(maxLength) && maxLength < minLength) {
+          throw new ValidationError('Text validation "maxLength" must be greater than or equal to "minLength".')
+        }
+      }
+      break
+
+    case 'number':
+      if (validation?.number) {
+        const { min, max, precision } = validation.number
+        if (isValidNumber(min) && isValidNumber(max) && max < min) {
+          throw new ValidationError('Number validation "max" must be greater than or equal to "min".')
+        }
+        if (isValidNumber(precision)) {
+          if (precision > MAX_PRECISION) {
+            throw new ValidationError(`Number validation "precision" must not exceed ${MAX_PRECISION} decimal places.`)
+          }
+          if (precision < 0) {
+            throw new ValidationError('Number validation "precision" must be greater than or equal to 0.')
+          }
+        }
+      }
+      break
+
+    default:
+      break
   }
 }
 
@@ -91,14 +142,11 @@ export function validateClaimValue(type: string, value: unknown, validation?: Co
   let schema
 
   switch (type) {
-    case 'string':
-      schema = stringSchema(validation as StringValidation)
+    case 'text':
+      schema = textSchema(validation as TextValidation)
       break
-    case 'int':
-      schema = intSchema(validation as IntValidation)
-      break
-    case 'float':
-      schema = floatSchema(validation as FloatValidation)
+    case 'number':
+      schema = numberSchema(validation as NumberValidation)
       break
     case 'list':
       schema = listSchema(validation as ListValidation)
@@ -133,18 +181,24 @@ export function validateClaimValue(type: string, value: unknown, validation?: Co
 
   const result = schema.safeParse(value)
   if (!result.success) {
-    throw new ValidationError(result.error.errors.map((err) => err.message).join(', '))
+    const errorMessage = result.error.errors.map((err) => `[Claim Type: ${type}] ${err.message}`).join(', ')
+    throw new ValidationError(errorMessage)
   }
 }
 
 export function validateClaimInput(claimInput: ContractDisplayClaimInput) {
-  const { type, value, validation } = claimInput
+  const { type, value, validation, isFixed } = claimInput
+
+  if (isFixed && !value) {
+    throw new ValidationError(`Fixed claims must have a defined value. Missing value for claim of type "${type}".`)
+  }
+
   validateClaimRules(type, validation)
 
   // Skip value validation for claim inputs if `value` is not provided (e.g., it will be set during issuance)
-  if (!value) return
-
-  validateClaimValue(type, value, convertToClaimValidation(validation))
+  if (value) {
+    validateClaimValue(type, value, convertToClaimValidation(validation))
+  }
 }
 /**
  * Validates an email address using the ZOD emailSchema

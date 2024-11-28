@@ -11,7 +11,7 @@ import { sendAsyncIssuanceNotificationsJobHandler } from '../jobs/send-async-iss
 import { createIssuanceRequest } from './create-async-issuance'
 import { createIssuanceRequestForAsyncIssuance } from './create-issuance-request-for-async-issuance'
 import { getAsyncIssuance } from './get-async-issunace'
-import { additonalContractClaims, buildContact, faceCheckPhoto, givenContract, validAdditonalContractClaims } from './index'
+import { additonalContractClaims, buildContact, faceCheckPhoto, givenContract, validAdditonalClaimsInput } from './index'
 
 describe('createIssuanceRequestForAsyncIssuance mutation', () => {
   beforeAfterAll()
@@ -68,8 +68,8 @@ describe('createIssuanceRequestForAsyncIssuance mutation', () => {
           faceCheckSupport: useFaceCheck || usePhotoCapture ? FaceCheckPhotoSupport.Required : undefined,
           claims: useClaims
             ? [
-                { claim: 'fixed-claim', label: 'fixed-label', type: ClaimType.String, value: 'fixed-value' },
-                { claim: 'unfixed-claim', label: 'unfixed-label', type: ClaimType.String, value: undefined },
+                { claim: 'default-value-claim', label: 'default-value-label', type: ClaimType.Text, value: 'default-value-value' },
+                { claim: 'no-default-value-claim', label: 'no-default-value-label', type: ClaimType.Text, value: undefined },
                 ...(useAllClaimTypes ? additonalContractClaims : []),
               ]
             : undefined,
@@ -87,8 +87,8 @@ describe('createIssuanceRequestForAsyncIssuance mutation', () => {
             photoCapture: usePhotoCapture ? true : undefined,
             claims: useClaims
               ? {
-                  'unfixed-claim': casual.word,
-                  ...(useAllClaimTypes ? validAdditonalContractClaims : {}),
+                  'no-default-value-claim': casual.word,
+                  ...(useAllClaimTypes ? validAdditonalClaimsInput : {}),
                 }
               : undefined,
             expirationDate: useExpiry ? addDays(addMinutes(new Date(), 1), 1) : undefined,

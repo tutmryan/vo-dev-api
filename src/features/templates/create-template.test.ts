@@ -60,8 +60,8 @@ describe('createTemplate mutation', () => {
         locale: 'en-AU',
         consent: { instructions: 'Parent consent instructions' },
         claims: [
-          { claim: 'parent_claim', label: 'Parent claim', type: ClaimType.String },
-          { claim: 'other_parent_claim', label: 'Other parent claim', type: ClaimType.String, value: 'Fixed', description: 'Description' },
+          { claim: 'parent_claim', label: 'Parent claim', type: ClaimType.Text },
+          { claim: 'other_parent_claim', label: 'Other parent claim', type: ClaimType.Text, value: 'Fixed', description: 'Description' },
         ],
         card: {
           issuedBy: 'Parent template',
@@ -88,7 +88,7 @@ describe('createTemplate mutation', () => {
               title: 'Fresh title that will not cause an error',
             },
             claims: [
-              { claim: 'other_parent_claim', label: 'Other parent claim', type: ClaimType.String, value: 'Overridden, will cause error' },
+              { claim: 'other_parent_claim', label: 'Other parent claim', type: ClaimType.Text, value: 'Overridden, will cause error' },
             ],
             card: {
               backgroundColor: '#222333',
@@ -134,7 +134,7 @@ describe('createTemplate mutation', () => {
           {
             claim: 'firstName',
             label: 'First name',
-            type: ClaimType.String,
+            type: ClaimType.Text,
           },
         ],
       },

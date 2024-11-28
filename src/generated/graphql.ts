@@ -697,34 +697,31 @@ export enum ClaimType {
   DateTime = 'dateTime',
   /** The claim value is an email address. */
   Email = 'email',
-  /** The claim value is a decimal or floating point number (encoded as a string). */
-  Float = 'float',
   /** The claim value is a JPEG image encoded as a base64 encoded [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs). */
   Image = 'image',
-  /** The claim value is a whole number (encoded as a string). */
-  Int = 'int',
   /** The claim value is one of a list of strings specified via the claim `validation` field. */
   List = 'list',
+  /** The claim value is a numeric type, supporting both integers and decimals (encoded as a string). */
+  Number = 'number',
   /** The claim value is a phone number in international E.164 format. */
   Phone = 'phone',
   /** The claim value matches a regex pattern. */
   Regex = 'regex',
-  /** The claim value is a string. */
-  String = 'string',
+  /** The claim value is text. */
+  Text = 'text',
   /** The claim value is a URL. */
   Url = 'url'
 }
 
 /** Validation definition for the claim value, according to the claim type. */
-export type ClaimValidation = FloatValidation | IntValidation | ListValidation | RegexValidation | StringValidation;
+export type ClaimValidation = ListValidation | NumberValidation | RegexValidation | TextValidation;
 
 /** Provides additional validation input for the defined claim type. */
 export type ClaimValidationInput =
-  { float: FloatValidationInput; int?: never; list?: never; regex?: never; string?: never; }
-  |  { float?: never; int: IntValidationInput; list?: never; regex?: never; string?: never; }
-  |  { float?: never; int?: never; list: ListValidationInput; regex?: never; string?: never; }
-  |  { float?: never; int?: never; list?: never; regex: RegexValidationInput; string?: never; }
-  |  { float?: never; int?: never; list?: never; regex?: never; string: StringValidationInput; };
+  { list: ListValidationInput; number?: never; regex?: never; text?: never; }
+  |  { list?: never; number: NumberValidationInput; regex?: never; text?: never; }
+  |  { list?: never; number?: never; regex: RegexValidationInput; text?: never; }
+  |  { list?: never; number?: never; regex?: never; text: TextValidationInput; };
 
 /** Record of a communication sent to a recipient. */
 export type Communication = {
@@ -959,6 +956,8 @@ export type ContractDisplayClaim = {
   claim: Scalars['String']['output'];
   /** The description of the claim. */
   description?: Maybe<Scalars['String']['output']>;
+  /** Indicates the value is fixed for this claim when issuing this credential */
+  isFixed?: Maybe<Scalars['Boolean']['output']>;
   /** Indicates a value need not be provided for this claim when issuing this credential. */
   isOptional?: Maybe<Scalars['Boolean']['output']>;
   /** The label of the claim. */
@@ -967,7 +966,7 @@ export type ContractDisplayClaim = {
   type: ClaimType;
   /** Defines how the value of the claim should be validated. */
   validation?: Maybe<ClaimValidation>;
-  /** The value for the claim (optional, provides a fixed value for this claim). */
+  /** The value for the claim (optional, provides a default value for this claim). */
   value?: Maybe<Scalars['String']['output']>;
 };
 
@@ -977,6 +976,8 @@ export type ContractDisplayClaimInput = {
   claim: Scalars['String']['input'];
   /** The description of the claim. */
   description?: InputMaybe<Scalars['String']['input']>;
+  /** Indicates the value is fixed for this claim when issuing this credential */
+  isFixed?: InputMaybe<Scalars['Boolean']['input']>;
   /** Indicates a value need not be provided for this claim when issuing this credential. */
   isOptional?: InputMaybe<Scalars['Boolean']['input']>;
   /** The label of the claim. */
@@ -1249,6 +1250,8 @@ export type CreateUpdateTemplateDisplayClaimInput = {
   claim: Scalars['String']['input'];
   /** The description of the claim. */
   description?: InputMaybe<Scalars['String']['input']>;
+  /** Indicates the value is fixed for this claim when issuing this credential */
+  isFixed?: InputMaybe<Scalars['Boolean']['input']>;
   /** Indicates a value need not be provided for this claim when issuing this credential. */
   isOptional?: InputMaybe<Scalars['Boolean']['input']>;
   /** The label of the claim. */
@@ -1397,19 +1400,6 @@ export type Features = {
   oidcEnabled: Scalars['Boolean']['output'];
 };
 
-/** Float claim validation. */
-export type FloatValidation = {
-  __typename?: 'FloatValidation';
-  max?: Maybe<Scalars['Float']['output']>;
-  min?: Maybe<Scalars['Float']['output']>;
-};
-
-/** Float claim validation. */
-export type FloatValidationInput = {
-  max?: InputMaybe<Scalars['Float']['input']>;
-  min?: InputMaybe<Scalars['Float']['input']>;
-};
-
 /** Represents an identity that is issued credentials */
 export type Identity = {
   __typename?: 'Identity';
@@ -1544,19 +1534,6 @@ export type IdentityWhere = {
   issuer?: InputMaybe<Scalars['String']['input']>;
   /** The name of the identity to match */
   name?: InputMaybe<Scalars['String']['input']>;
-};
-
-/** Int claim validation. */
-export type IntValidation = {
-  __typename?: 'IntValidation';
-  max?: Maybe<Scalars['Int']['output']>;
-  min?: Maybe<Scalars['Int']['output']>;
-};
-
-/** Integer claim validation. */
-export type IntValidationInput = {
-  max?: InputMaybe<Scalars['Int']['input']>;
-  min?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** An instance of a successful contract-to-credential issuance. */
@@ -2323,6 +2300,21 @@ export type NetworkIssuersWhere = {
   /** Only include issuers that are trusted (by this organisation) */
   isTrusted?: InputMaybe<Scalars['Boolean']['input']>;
   linkedDomainUrlsLike?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Number claim validation. */
+export type NumberValidation = {
+  __typename?: 'NumberValidation';
+  max?: Maybe<Scalars['Int']['output']>;
+  min?: Maybe<Scalars['Int']['output']>;
+  precision?: Maybe<Scalars['Int']['output']>;
+};
+
+/** Number claim validation. */
+export type NumberValidationInput = {
+  max?: InputMaybe<Scalars['Int']['input']>;
+  min?: InputMaybe<Scalars['Int']['input']>;
+  precision?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** The type of OIDC application. */
@@ -3469,19 +3461,6 @@ export type SendAsyncIssuanceVerificationResponse = {
   method: ContactMethod;
 };
 
-/** String claim validation. */
-export type StringValidation = {
-  __typename?: 'StringValidation';
-  maxLength?: Maybe<Scalars['PositiveInt']['output']>;
-  minLength?: Maybe<Scalars['PositiveInt']['output']>;
-};
-
-/** String claim validation. */
-export type StringValidationInput = {
-  maxLength?: InputMaybe<Scalars['PositiveInt']['input']>;
-  minLength?: InputMaybe<Scalars['PositiveInt']['input']>;
-};
-
 export type Subscription = {
   __typename?: 'Subscription';
   /** Returns event data when the background job progresses from being queued to completed or failed */
@@ -3563,6 +3542,8 @@ export type TemplateDisplayClaim = {
   claim: Scalars['String']['output'];
   /** The description of the claim. */
   description?: Maybe<Scalars['String']['output']>;
+  /** Indicates the value is fixed for this claim when issuing this credential */
+  isFixed?: Maybe<Scalars['Boolean']['output']>;
   /** Indicates a value need not be provided for this claim when issuing this credential. */
   isOptional?: Maybe<Scalars['Boolean']['output']>;
   /** The label of the claim. */
@@ -3687,6 +3668,19 @@ export type TenantIdentity = {
 export type TenantIdentityWhere = {
   /** The partial name of the user to match */
   nameStartsWith: Scalars['String']['input'];
+};
+
+/** Text claim validation. */
+export type TextValidation = {
+  __typename?: 'TextValidation';
+  maxLength?: Maybe<Scalars['PositiveInt']['output']>;
+  minLength?: Maybe<Scalars['PositiveInt']['output']>;
+};
+
+/** Text claim validation. */
+export type TextValidationInput = {
+  maxLength?: InputMaybe<Scalars['PositiveInt']['input']>;
+  minLength?: InputMaybe<Scalars['PositiveInt']['input']>;
 };
 
 /** The input for updating an existing approval request. */
@@ -4366,7 +4360,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversUnionTypes<_RefType extends Record<string, unknown>> = {
   AsyncIssuanceRequestResponse: ( AsyncIssuanceErrorResponse ) | ( AsyncIssuanceResponse );
   BackgroundJobEvent: ( BackgroundJobActiveEvent ) | ( BackgroundJobCompletedEvent ) | ( BackgroundJobErrorEvent ) | ( BackgroundJobProgressEvent );
-  ClaimValidation: ( FloatValidation ) | ( IntValidation ) | ( ListValidation ) | ( RegexValidation ) | ( StringValidation );
+  ClaimValidation: ( ListValidation ) | ( NumberValidation ) | ( RegexValidation ) | ( TextValidation );
   IssuanceRequestResponse: ( IssuanceResponse ) | ( RequestErrorResponse );
   PresentationRequestResponse: ( PresentationResponse ) | ( RequestErrorResponse );
 };
@@ -4468,8 +4462,6 @@ export type ResolversTypes = {
   FaceCheckValidationInput: FaceCheckValidationInput;
   FeatureUrls: ResolverTypeWrapper<FeatureUrls>;
   Features: ResolverTypeWrapper<Features>;
-  FloatValidation: ResolverTypeWrapper<FloatValidation>;
-  FloatValidationInput: FloatValidationInput;
   HexColorCode: ResolverTypeWrapper<Scalars['HexColorCode']['output']>;
   Identity: ResolverTypeWrapper<IdentityEntity>;
   IdentityInput: IdentityInput;
@@ -4478,8 +4470,6 @@ export type ResolversTypes = {
   IdentityOrderBy: IdentityOrderBy;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
-  IntValidation: ResolverTypeWrapper<IntValidation>;
-  IntValidationInput: IntValidationInput;
   Issuance: ResolverTypeWrapper<IssuanceEntity>;
   IssuanceCallbackEvent: ResolverTypeWrapper<IssuanceCallbackEvent>;
   IssuanceEventData: ResolverTypeWrapper<Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversTypes['Issuance']> }>;
@@ -4502,6 +4492,8 @@ export type ResolversTypes = {
   NetworkIssuer: ResolverTypeWrapper<NetworkIssuer>;
   NetworkIssuersWhere: NetworkIssuersWhere;
   NonNegativeInt: ResolverTypeWrapper<Scalars['NonNegativeInt']['output']>;
+  NumberValidation: ResolverTypeWrapper<NumberValidation>;
+  NumberValidationInput: NumberValidationInput;
   OidcApplicationType: OidcApplicationType;
   OidcClient: ResolverTypeWrapper<OidcClientEntity>;
   OidcClientInput: OidcClientInput;
@@ -4555,8 +4547,6 @@ export type ResolversTypes = {
   RequestedCredential: ResolverTypeWrapper<RequestedCredential>;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
   SendAsyncIssuanceVerificationResponse: ResolverTypeWrapper<SendAsyncIssuanceVerificationResponse>;
-  StringValidation: ResolverTypeWrapper<StringValidation>;
-  StringValidationInput: StringValidationInput;
   Subscription: ResolverTypeWrapper<{}>;
   Template: ResolverTypeWrapper<TemplateEntity>;
   TemplateDisplayClaim: ResolverTypeWrapper<Omit<TemplateDisplayClaim, 'validation'> & { validation?: Maybe<ResolversTypes['ClaimValidation']> }>;
@@ -4569,6 +4559,8 @@ export type ResolversTypes = {
   TemplateWhere: TemplateWhere;
   TenantIdentity: ResolverTypeWrapper<TenantIdentity>;
   TenantIdentityWhere: TenantIdentityWhere;
+  TextValidation: ResolverTypeWrapper<TextValidation>;
+  TextValidationInput: TextValidationInput;
   URL: ResolverTypeWrapper<Scalars['URL']['output']>;
   UUID: ResolverTypeWrapper<Scalars['UUID']['output']>;
   UpdateApprovalRequestInput: UpdateApprovalRequestInput;
@@ -4664,8 +4656,6 @@ export type ResolversParentTypes = {
   FaceCheckValidationInput: FaceCheckValidationInput;
   FeatureUrls: FeatureUrls;
   Features: Features;
-  FloatValidation: FloatValidation;
-  FloatValidationInput: FloatValidationInput;
   HexColorCode: Scalars['HexColorCode']['output'];
   Identity: IdentityEntity;
   IdentityInput: IdentityInput;
@@ -4673,8 +4663,6 @@ export type ResolversParentTypes = {
   IdentityIssuer: IdentityIssuer;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
-  IntValidation: IntValidation;
-  IntValidationInput: IntValidationInput;
   Issuance: IssuanceEntity;
   IssuanceCallbackEvent: IssuanceCallbackEvent;
   IssuanceEventData: Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversParentTypes['Issuance']> };
@@ -4694,6 +4682,8 @@ export type ResolversParentTypes = {
   NetworkIssuer: NetworkIssuer;
   NetworkIssuersWhere: NetworkIssuersWhere;
   NonNegativeInt: Scalars['NonNegativeInt']['output'];
+  NumberValidation: NumberValidation;
+  NumberValidationInput: NumberValidationInput;
   OidcClient: OidcClientEntity;
   OidcClientInput: OidcClientInput;
   OidcClientPresentationWhere: OidcClientPresentationWhere;
@@ -4739,8 +4729,6 @@ export type ResolversParentTypes = {
   RequestedCredential: RequestedCredential;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
   SendAsyncIssuanceVerificationResponse: SendAsyncIssuanceVerificationResponse;
-  StringValidation: StringValidation;
-  StringValidationInput: StringValidationInput;
   Subscription: {};
   Template: TemplateEntity;
   TemplateDisplayClaim: Omit<TemplateDisplayClaim, 'validation'> & { validation?: Maybe<ResolversParentTypes['ClaimValidation']> };
@@ -4753,6 +4741,8 @@ export type ResolversParentTypes = {
   TemplateWhere: TemplateWhere;
   TenantIdentity: TenantIdentity;
   TenantIdentityWhere: TenantIdentityWhere;
+  TextValidation: TextValidation;
+  TextValidationInput: TextValidationInput;
   URL: Scalars['URL']['output'];
   UUID: Scalars['UUID']['output'];
   UpdateApprovalRequestInput: UpdateApprovalRequestInput;
@@ -4940,7 +4930,7 @@ export type BackgroundJobProgressEventResolvers<ContextType = GraphQLContext, Pa
 };
 
 export type ClaimValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ClaimValidation'] = ResolversParentTypes['ClaimValidation']> = {
-  __resolveType: TypeResolveFn<'FloatValidation' | 'IntValidation' | 'ListValidation' | 'RegexValidation' | 'StringValidation', ParentType, ContextType>;
+  __resolveType: TypeResolveFn<'ListValidation' | 'NumberValidation' | 'RegexValidation' | 'TextValidation', ParentType, ContextType>;
 };
 
 export type CommunicationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Communication'] = ResolversParentTypes['Communication']> = {
@@ -5000,6 +4990,7 @@ export type ContractCountResolvers<ContextType = GraphQLContext, ParentType exte
 export type ContractDisplayClaimResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayClaim'] = ResolversParentTypes['ContractDisplayClaim']> = {
   claim?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  isFixed?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   isOptional?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['ClaimType'], ParentType, ContextType>;
@@ -5080,12 +5071,6 @@ export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends R
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type FloatValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['FloatValidation'] = ResolversParentTypes['FloatValidation']> = {
-  max?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  min?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['HexColorCode'], any> {
   name: 'HexColorCode';
 }
@@ -5109,12 +5094,6 @@ export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends R
 export type IdentityIssuerResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IdentityIssuer'] = ResolversParentTypes['IdentityIssuer']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type IntValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IntValidation'] = ResolversParentTypes['IntValidation']> = {
-  max?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  min?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -5244,6 +5223,13 @@ export type NetworkIssuerResolvers<ContextType = GraphQLContext, ParentType exte
 export interface NonNegativeIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['NonNegativeInt'], any> {
   name: 'NonNegativeInt';
 }
+
+export type NumberValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['NumberValidation'] = ResolversParentTypes['NumberValidation']> = {
+  max?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  min?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  precision?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 
 export type OidcClientResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['OidcClient'] = ResolversParentTypes['OidcClient']> = {
   allowAnyPartner?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -5499,12 +5485,6 @@ export type SendAsyncIssuanceVerificationResponseResolvers<ContextType = GraphQL
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type StringValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['StringValidation'] = ResolversParentTypes['StringValidation']> = {
-  maxLength?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
-  minLength?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type SubscriptionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
   backgroundJobEvent?: SubscriptionResolver<ResolversTypes['BackgroundJobEventData'], "backgroundJobEvent", ParentType, ContextType, Partial<SubscriptionBackgroundJobEventArgs>>;
   issuanceEvent?: SubscriptionResolver<ResolversTypes['IssuanceEventData'], "issuanceEvent", ParentType, ContextType, Partial<SubscriptionIssuanceEventArgs>>;
@@ -5536,6 +5516,7 @@ export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends R
 export type TemplateDisplayClaimResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayClaim'] = ResolversParentTypes['TemplateDisplayClaim']> = {
   claim?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  isFixed?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   isOptional?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   type?: Resolver<ResolversTypes['ClaimType'], ParentType, ContextType>;
@@ -5589,6 +5570,12 @@ export type TenantIdentityResolvers<ContextType = GraphQLContext, ParentType ext
   issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   userType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type TextValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TextValidation'] = ResolversParentTypes['TextValidation']> = {
+  maxLength?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
+  minLength?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -5664,11 +5651,9 @@ export type Resolvers<ContextType = GraphQLContext> = {
   FaceCheckValidation?: FaceCheckValidationResolvers<ContextType>;
   FeatureUrls?: FeatureUrlsResolvers<ContextType>;
   Features?: FeaturesResolvers<ContextType>;
-  FloatValidation?: FloatValidationResolvers<ContextType>;
   HexColorCode?: GraphQLScalarType;
   Identity?: IdentityResolvers<ContextType>;
   IdentityIssuer?: IdentityIssuerResolvers<ContextType>;
-  IntValidation?: IntValidationResolvers<ContextType>;
   Issuance?: IssuanceResolvers<ContextType>;
   IssuanceCallbackEvent?: IssuanceCallbackEventResolvers<ContextType>;
   IssuanceEventData?: IssuanceEventDataResolvers<ContextType>;
@@ -5681,6 +5666,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   NetworkContract?: NetworkContractResolvers<ContextType>;
   NetworkIssuer?: NetworkIssuerResolvers<ContextType>;
   NonNegativeInt?: GraphQLScalarType;
+  NumberValidation?: NumberValidationResolvers<ContextType>;
   OidcClient?: OidcClientResolvers<ContextType>;
   OidcClientResource?: OidcClientResourceResolvers<ContextType>;
   OidcResource?: OidcResourceResolvers<ContextType>;
@@ -5707,7 +5693,6 @@ export type Resolvers<ContextType = GraphQLContext> = {
   RequestedConfiguration?: RequestedConfigurationResolvers<ContextType>;
   RequestedCredential?: RequestedCredentialResolvers<ContextType>;
   SendAsyncIssuanceVerificationResponse?: SendAsyncIssuanceVerificationResponseResolvers<ContextType>;
-  StringValidation?: StringValidationResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
   Template?: TemplateResolvers<ContextType>;
   TemplateDisplayClaim?: TemplateDisplayClaimResolvers<ContextType>;
@@ -5717,6 +5702,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   TemplateDisplayModel?: TemplateDisplayModelResolvers<ContextType>;
   TemplateParentData?: TemplateParentDataResolvers<ContextType>;
   TenantIdentity?: TenantIdentityResolvers<ContextType>;
+  TextValidation?: TextValidationResolvers<ContextType>;
   URL?: GraphQLScalarType;
   UUID?: GraphQLScalarType;
   User?: UserResolvers<ContextType>;

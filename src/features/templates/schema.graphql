@@ -355,6 +355,10 @@ type TemplateDisplayClaim {
   """
   isOptional: Boolean
   """
+  Indicates the value is fixed for this claim when issuing this credential
+  """
+  isFixed: Boolean
+  """
   Defines how the value of the claim should be validated.
   """
   validation: ClaimValidation
@@ -388,6 +392,10 @@ input CreateUpdateTemplateDisplayClaimInput {
   Indicates a value need not be provided for this claim when issuing this credential.
   """
   isOptional: Boolean
+  """
+  Indicates the value is fixed for this claim when issuing this credential
+  """
+  isFixed: Boolean
   """
   Defines how the value of the claim should be validated.
   """

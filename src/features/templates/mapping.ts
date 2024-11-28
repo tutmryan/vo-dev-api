@@ -15,9 +15,16 @@ import type { TemplateEntity } from './entities/template-entity'
 /**
  * Creates a TemplateDisplayModel based on input, extracting only the properties that are defined and removing nill values
  */
-export function toDisplayModel(input?: Omit<CreateUpdateTemplateDisplayModelInput, '__typename'> | null): TemplateDisplayModel | null {
+function toDisplayModel(input?: CreateUpdateTemplateDisplayModelInput | null): TemplateDisplayModel | null {
   if (!input) return null
-  return pruneNil(pick(input, ['card', 'claims', 'consent', 'locale']))
+
+  const claims = input.claims?.map((claim) => {
+    if (!claim.validation) return claim
+    const validation = convertToClaimValidation(claim.validation)
+    return { ...claim, validation }
+  })
+
+  return pruneNil({ ...input, claims })
 }
 
 /**

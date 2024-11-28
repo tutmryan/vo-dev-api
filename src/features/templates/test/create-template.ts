@@ -101,8 +101,8 @@ export function buildTemplateInput(args: Partial<TemplateInput>): TemplateInput 
         ...args.display?.consent,
       },
       claims: args.display?.claims || [
-        { claim: 'claim_one', label: 'Claim 1', type: ClaimType.String },
-        { claim: 'claim_two', label: 'Claim 2', type: ClaimType.String, value: 'Claim 2' },
+        { claim: 'claim_one', label: 'Claim 1', type: ClaimType.Text },
+        { claim: 'claim_two', label: 'Claim 2', type: ClaimType.Text, value: 'Claim 2' },
       ],
     },
   }

@@ -1,5 +1,12 @@
 import { randomUUID } from 'crypto'
-import { ContractInput, FaceCheckPhotoSupport, type IssuanceRequestInput, type PhotoCaptureRequest } from '../../../generated/graphql'
+import {
+  ClaimType,
+  ContractDisplayClaimInput,
+  ContractInput,
+  FaceCheckPhotoSupport,
+  type IssuanceRequestInput,
+  type PhotoCaptureRequest,
+} from '../../../generated/graphql'
 import { beforeAfterAll, executeOperationAsLimitedAccessClient } from '../../../test'
 import { mockedServices } from '../../../test/mocks'
 import { NonNullableFields, WithRequired } from '../../../util/type-helpers'
@@ -7,25 +14,40 @@ import { buildContractInput, createContract } from '../../contracts/test/create-
 import { provisionContract } from '../../contracts/test/provision-contract'
 import { createIdentity } from '../../identity/tests/create-identity'
 import { capturePhoto, createPhotoCaptureRequest } from '../../photo-capture/test'
-import { convertFaceCheckPhoto } from '../commands/create-issuance-request-command'
+import { convertFaceCheckPhoto, convertImageClaimInput } from '../commands/create-issuance-request-command'
 import { createIssuanceRequest, createIssuanceRequestMutation } from './create-issuance'
 
 const credentialType = 'issuance-test'
 const externalContractId = randomUUID()
-const faceCheckPhoto = 'data:image/jpeg;base64,ZmFjZS1jaGVjay0xMjM='
-const photoCapturePhoto = 'data:image/jpeg;base64,cGhvdG8tY2FwdHVyZS0xMjM='
+const faceCheckPhoto = 'data:image/jpeg;base64,ZmFjZS1jaGVjay1mYWNlY2hlY2twZWl4YW1wbGU='
+const photoCapturePhoto = 'data:image/jpeg;base64,cGhvdG8tY2FwdHVyZS1waG90b2NhcHR1cmVleGFtcGxl='
+const contractPhoto = 'data:image/jpeg;base64,Y29udHJhY3QtcGhvdG8tZXhhbXBsZWNvbnRyYWN0='
+const inputPhoto = 'data:image/jpeg;base64,aW5wdXQtcGhvdG8tZXhhbXBsZWlucHV0='
 
 async function givenContract({ faceCheckSupport }: { faceCheckSupport?: ContractInput['faceCheckSupport'] }) {
-  const contract = await createContract(
-    buildContractInput({
-      templateId: null,
-      faceCheckSupport,
-      credentialTypes: [credentialType],
-    }),
-  )
+  const input = buildContractInput({
+    templateId: null,
+    faceCheckSupport,
+    credentialTypes: [credentialType],
+  })
+
+  const contract = await createContract(input)
 
   await provisionContract(contract.id, externalContractId)
 
+  return { contract }
+}
+
+async function givenContractWithClaims(claims: Array<ContractDisplayClaimInput>) {
+  const contractInput = buildContractInput({
+    display: {
+      claims,
+    },
+    credentialTypes: [credentialType],
+  })
+
+  const contract = await createContract(contractInput)
+  await provisionContract(contract.id, randomUUID())
   return { contract }
 }
 
@@ -126,7 +148,6 @@ describe('createIssuanceRequest mutation', () => {
       contractId: contract.id,
       identityId: identity.id,
     })
-    withMockedServices()
 
     // Act
     const { errors, data } = await executeOperationAsLimitedAccessClient(
@@ -255,6 +276,117 @@ describe('createIssuanceRequest mutation', () => {
           photoCaptureRequestId: randomUUID(),
         },
       )
+    })
+  })
+
+  describe('claims handling', () => {
+    beforeEach(() => {
+      withMockedServices()
+    })
+    it.each([
+      {
+        description: 'overrides non-fixed claims with default values',
+        contractClaims: [
+          { label: 'text', claim: 'text', type: ClaimType.Text, value: 'defaultText', isFixed: false },
+          { label: 'number', claim: 'number', type: ClaimType.Number, value: '30' },
+        ],
+        claimsInput: { text: 'Input text', number: '25' },
+        expectedClaims: {
+          text: 'Input text', // Overridden because it's not fixed
+          number: '25', // Overridden because isFixed is undefined (treated as false)
+        },
+      },
+      {
+        description: 'does not override fixed claims',
+        contractClaims: [
+          { label: 'text', claim: 'text', type: ClaimType.Text, value: 'fixedValue', isFixed: true },
+          { label: 'number', claim: 'number', type: ClaimType.Number, value: '30' },
+        ],
+        claimsInput: { text: 'Input Name', number: 25 },
+        expectedClaims: {
+          text: 'fixedValue', // Not overridden because it's fixed
+          number: 25,
+        },
+      },
+      {
+        description: 'converts image claims to Base64Url for all contract defined images and claim input',
+        contractClaims: [
+          { label: 'default-photo', claim: 'default_photo', type: ClaimType.Image, value: contractPhoto, isFixed: true },
+          { label: 'another-photo', claim: 'another_photo', type: ClaimType.Image, value: undefined, isFixed: false },
+        ],
+        claimsInput: { another_photo: inputPhoto },
+        expectedClaims: {
+          default_photo: convertImageClaimInput(contractPhoto, 'default_photo'),
+          another_photo: convertImageClaimInput(inputPhoto, 'another_photo'),
+        },
+      },
+    ])('$description', async ({ contractClaims, claimsInput, expectedClaims }) => {
+      // Arrange
+      const { contract } = await givenContractWithClaims(contractClaims)
+      const identity = await createIdentity()
+
+      // Act
+      const { errors, data } = await executeOperationAsLimitedAccessClient(
+        {
+          query: createIssuanceRequestMutation,
+          variables: {
+            request: {
+              contractId: contract.id,
+              claims: claimsInput,
+            },
+          },
+        },
+        { identityId: identity.id, issuableContractIds: [contract.id] },
+      )
+
+      // Assert
+      expect(errors).toBeUndefined()
+      expect(data).toBeDefined()
+
+      const issuanceRequest = mockedServices.requestService.createIssuanceRequest.getLastCallArg()
+      expect(issuanceRequest.claims).toMatchObject(expectedClaims)
+    })
+
+    it.each([
+      {
+        description: 'should return an error when a claim input does not match the expected contract claim type',
+        contractClaims: [{ label: 'age', claim: 'age', type: ClaimType.Number, value: '30', isFixed: false }],
+        claimsInput: { age: 'NotANumber' },
+        expectedError: 'Expected number',
+      },
+      {
+        description: 'should return an error when required claims are missing',
+        contractClaims: [
+          { label: 'age', claim: 'age', type: ClaimType.Number, value: undefined, isOptional: false },
+          { label: 'First Name', claim: 'firstName', type: ClaimType.Text, value: undefined, isOptional: false },
+        ],
+        claimsInput: { firstName: 'John' }, // Missing "age"
+        expectedError: 'Claims must include: age',
+      },
+    ])('$description', async ({ contractClaims, claimsInput, expectedError }) => {
+      // Arrange
+      const { contract } = await givenContractWithClaims(contractClaims)
+      const identity = await createIdentity()
+
+      // Act
+      const { errors, data } = await executeOperationAsLimitedAccessClient(
+        {
+          query: createIssuanceRequestMutation,
+          variables: {
+            request: {
+              contractId: contract.id,
+              claims: claimsInput,
+            },
+          },
+        },
+        { identityId: identity.id, issuableContractIds: [contract.id] },
+      )
+
+      // Assert
+      expect(errors).toBeDefined()
+      expect(errors?.length).toBeGreaterThan(0)
+      expect(errors?.[0]?.message).toContain(expectedError)
+      expect(data).toBeNull()
     })
   })
 })

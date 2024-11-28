@@ -111,8 +111,8 @@ describe('createContract mutation', () => {
             },
             consent: { title: 'Updated Consent title' },
             claims: [
-              { claim: 'claim_one', label: 'Claim 1', type: ClaimType.String, value: 'Claim 1' },
-              { claim: 'claim_two', label: 'Claim 2', type: ClaimType.String, value: 'Updated claim 2' },
+              { claim: 'claim_one', label: 'Claim 1', type: ClaimType.Text, value: 'Claim 1' },
+              { claim: 'claim_two', label: 'Claim 2', type: ClaimType.Text, value: 'Updated claim 2' },
             ],
           },
         },
@@ -131,7 +131,7 @@ describe('createContract mutation', () => {
     const input = getDefaultContractInput()
     input.display.claims.push({
       claim: 'claim_name',
-      type: ClaimType.String,
+      type: ClaimType.Text,
       value: 'Fixed value',
       label: 'Default claim',
     })
@@ -180,8 +180,8 @@ describe('createContract mutation', () => {
           instructions: 'Consent instructions',
         },
         claims: [
-          { claim: 'claim_one', label: 'Claim 1', type: ClaimType.String, value: 'Claim 1' },
-          { claim: 'claim_two', label: 'Claim 2', type: ClaimType.String, value: 'Claim 2' },
+          { claim: 'claim_one', label: 'Claim 1', type: ClaimType.Text, value: 'Claim 1' },
+          { claim: 'claim_two', label: 'Claim 2', type: ClaimType.Text, value: 'Claim 2' },
         ],
       },
     }
@@ -207,7 +207,7 @@ describe('createContract mutation', () => {
     const input = getDefaultContractInput()
     input.display.claims.push({
       claim: StandardClaims.name,
-      type: ClaimType.String,
+      type: ClaimType.Text,
       label: 'Standard name claim',
     })
 

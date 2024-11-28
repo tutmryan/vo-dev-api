@@ -34,7 +34,7 @@ describe('updateTemplate mutation', () => {
             logo: { image: fakeJpegDataURL() },
           },
           consent: { title: 'Parent template consent title' },
-          claims: [{ claim: 'parent_claim', label: 'Parent claim', type: ClaimType.String, value: 'value' }],
+          claims: [{ claim: 'parent_claim', label: 'Parent claim', type: ClaimType.Text, value: 'value' }],
         },
       })
     }
@@ -121,8 +121,8 @@ describe('updateTemplate mutation', () => {
               title: 'Error as it is set on the parent',
             },
             claims: [
-              { claim: 'parent_claim', label: 'Parent claim', type: ClaimType.String, value: 'Overridden, will cause error' },
-              { claim: 'template_claim', label: 'Template claim', type: ClaimType.String, value: 'No error' },
+              { claim: 'parent_claim', label: 'Parent claim', type: ClaimType.Text, value: 'Overridden, will cause error' },
+              { claim: 'template_claim', label: 'Template claim', type: ClaimType.Text, value: 'No error' },
             ],
           },
         },
@@ -156,7 +156,7 @@ describe('updateTemplate mutation', () => {
               textColor: '#123123',
               logo: { image: fakePngDataURL() },
             },
-            claims: [{ claim: 'claim', label: 'Claim', type: ClaimType.String, value: 'Claim' }],
+            claims: [{ claim: 'claim', label: 'Claim', type: ClaimType.Text, value: 'Claim' }],
             consent: { title: 'Consent title' },
           },
         },
@@ -190,7 +190,7 @@ describe('updateTemplate mutation', () => {
               "claim": "claim",
               "description": null,
               "label": "Claim",
-              "type": "string",
+              "type": "text",
               "value": "Claim",
             },
           ],

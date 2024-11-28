@@ -89,18 +89,17 @@ export function toPersistedDisplayModel(input: ContractDisplayModelInput, displa
 
 export function convertToClaimValidation(validationInput?: InputMaybe<ClaimValidationInput>): Maybe<ClaimValidation> | undefined {
   if (!validationInput) return undefined
-  const { string, int, float, list, regex } = validationInput
-  return string ?? int ?? float ?? list ?? regex
+  const { text, number, list, regex } = validationInput
+  return text ?? number ?? list ?? regex
 }
 
 export function convertToClaimValidationInput(
   validation?: InputMaybe<DeepPartial<ClaimValidationInput>> | undefined,
 ): InputMaybe<ClaimValidationInput> | undefined {
   if (!validation) return undefined
-  const { string, int, float, list, regex } = validation
-  if (string) return { string }
-  if (int) return { int }
-  if (float) return { float }
+  const { text, number, list, regex } = validation
+  if (text) return { text }
+  if (number) return { number }
   if (list?.values) return { list: { values: list.values } }
   if (regex?.pattern) return { regex: { pattern: regex.pattern } }
   return undefined

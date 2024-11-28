@@ -388,13 +388,17 @@ type ContractDisplayClaim {
   """
   description: String
   """
-  The value for the claim (optional, provides a fixed value for this claim).
+  The value for the claim (optional, provides a default value for this claim).
   """
   value: String
   """
   Indicates a value need not be provided for this claim when issuing this credential.
   """
   isOptional: Boolean
+  """
+  Indicates the value is fixed for this claim when issuing this credential
+  """
+  isFixed: Boolean
   """
   Defines how the value of the claim should be validated.
   """
@@ -430,6 +434,10 @@ input ContractDisplayClaimInput {
   """
   isOptional: Boolean
   """
+  Indicates the value is fixed for this claim when issuing this credential
+  """
+  isFixed: Boolean
+  """
   Defines how the value of the claim should be validated.
   """
   validation: ClaimValidationInput
@@ -440,9 +448,9 @@ The type of the claim, providing validation of the claim value.
 """
 enum ClaimType {
   """
-  The claim value is a string.
+  The claim value is text.
   """
-  string
+  text
   """
   The claim value is one of a list of strings specified via the claim `validation` field.
   """
@@ -452,13 +460,9 @@ enum ClaimType {
   """
   image
   """
-  The claim value is a whole number (encoded as a string).
+  The claim value is a numeric type, supporting both integers and decimals (encoded as a string).
   """
-  int
-  """
-  The claim value is a decimal or floating point number (encoded as a string).
-  """
-  float
+  number
   """
   The claim value is a boolean value encoded as `true` or `false`.
   """
@@ -493,35 +497,27 @@ enum ClaimType {
 Provides additional validation input for the defined claim type.
 """
 input ClaimValidationInput @oneOf {
-  string: StringValidationInput
-  int: IntValidationInput
-  float: FloatValidationInput
+  text: TextValidationInput
+  number: NumberValidationInput
   list: ListValidationInput
   regex: RegexValidationInput
 }
 
 """
-String claim validation.
+Text claim validation.
 """
-input StringValidationInput {
+input TextValidationInput {
   minLength: PositiveInt
   maxLength: PositiveInt
 }
 
 """
-Integer claim validation.
+Number claim validation.
 """
-input IntValidationInput {
+input NumberValidationInput {
   min: Int
   max: Int
-}
-
-"""
-Float claim validation.
-"""
-input FloatValidationInput {
-  min: Float
-  max: Float
+  precision: Int
 }
 
 """
@@ -547,30 +543,23 @@ input RegexValidationInput {
 """
 Validation definition for the claim value, according to the claim type.
 """
-union ClaimValidation = StringValidation | IntValidation | FloatValidation | ListValidation | RegexValidation
+union ClaimValidation = TextValidation | NumberValidation | ListValidation | RegexValidation
 
 """
-String claim validation.
+Text claim validation.
 """
-type StringValidation {
+type TextValidation {
   minLength: PositiveInt
   maxLength: PositiveInt
 }
 
 """
-Int claim validation.
+Number claim validation.
 """
-type IntValidation {
+type NumberValidation {
   min: Int
   max: Int
-}
-
-"""
-Float claim validation.
-"""
-type FloatValidation {
-  min: Float
-  max: Float
+  precision: Int
 }
 
 """

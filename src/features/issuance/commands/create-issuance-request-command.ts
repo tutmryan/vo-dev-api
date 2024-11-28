@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto'
 import { issuanceRequestRegistration } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
-import { FaceCheckPhotoSupport, type IssuanceRequestInput } from '../../../generated/graphql'
+import { ClaimType, FaceCheckPhotoSupport, type IssuanceRequestInput } from '../../../generated/graphql'
 import type { IssuanceRequest } from '../../../services/verified-id'
 import { parseDataUrl } from '../../../util/data-url'
 import { invariant } from '../../../util/invariant'
@@ -52,7 +52,7 @@ export async function CreateIssuanceRequestCommand(
   invariant(contract.externalId, 'Contract must be provisioned before issuance')
   invariant(!contract.isDeprecated, 'Contract must not be deprecated')
 
-  // validate that the provided claims include the required contract claims
+  // validate that the provided claims include the required contract claims and validate all claim values
   validateIssuanceClaimsAgainstContractClaims(claimsInput, contract.display.claims)
 
   // find the provisioned contract
@@ -88,10 +88,32 @@ export async function CreateIssuanceRequestCommand(
   else if (!identityInput) throw new Error('Either identityId or identity must be provided')
   else identity = await createOrUpdateIdentity(entityManager, identityInput)
 
-  // build claims data, starting with any claims defined on the contract with (default) values
-  let claims: Record<string, any> = contract.display.claims.filter(({ value }) => !!value).map(({ claim, value }) => ({ [claim]: value }))
-  // add issuance request claims input, overriding any contract-defined claim values
-  if (claimsInput) Object.entries(claimsInput).forEach(([claim, value]) => (claims[claim] = value))
+  // Build the claims data, starting with any claims defined on the contract with (default) values
+  const claimsData: Record<string, any> = {}
+
+  // Populate relevant claims fields from the contract
+  contract.display.claims.forEach(({ claim, type, value, isFixed }) => {
+    claimsData[claim] = { type, value, isFixed: !!isFixed }
+  })
+
+  // Assign issuance request claims input to value, overriding any contract-defined claim values unless isFixed
+  if (claimsInput) {
+    Object.entries(claimsInput).forEach(([claim, inputValue]) => {
+      claimsData[claim] = {
+        ...claimsData[claim],
+        value: claimsData[claim]?.isFixed ? claimsData[claim].value : inputValue,
+      }
+    })
+  }
+
+  // Flatten and process photo claims
+  let claims: Record<string, any> = Object.fromEntries(
+    Object.entries(claimsData).map(([claim, { type, value }]) => [
+      claim,
+      type === ClaimType.Image && value ? convertImageClaimInput(value, claim) : value,
+    ]),
+  )
+
   // add face check photo claim, if supplied & allowed by the contract
   if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None) claims['photo'] = convertFaceCheckPhoto(faceCheckPhoto)
 
@@ -154,22 +176,36 @@ export async function CreateIssuanceRequestCommand(
 }
 
 const invalidFaceCheckError = 'Face check photo must be a valid image/jpeg data URL with base64 encoding'
+const invalidImageClaimError = (claim: string) => `Image claim '${claim}' must be a valid image/jpeg data URL with base64 encoding`
 
-// validates face check photo input and returns base64url encoded image data
-export function convertFaceCheckPhoto(faceCheckPhoto: string) {
-  const { encoding, data } = parseFaceCheckPhotoDataUrl(faceCheckPhoto)
+// validates image claim input and returns the base64url encoded image data (to be used as the claim value)
+function convertImageClaimInputToClaimValue(imageDataUrl: string, errorMessage: string) {
+  const { encoding, data } = parseImageClaimDataUrl(imageDataUrl, errorMessage)
   const buffer = Buffer.from(data, encoding)
   return buffer.toString('base64url')
 }
 
-// validates face check photo input
-export function parseFaceCheckPhotoDataUrl(faceCheckPhoto: string) {
+// parses and validates image claim input (jpeg data URL with base64 encoding)
+function parseImageClaimDataUrl(imageDataUrl: string, errorMessage: string) {
   try {
-    return parseDataUrl(faceCheckPhoto, {
+    return parseDataUrl(imageDataUrl, {
       validMimeTypes: ['image/jpeg'],
       validEncodings: ['base64'],
     })
   } catch {
-    throw new Error(invalidFaceCheckError)
+    throw new Error(errorMessage)
   }
 }
+
+// validates face check photo input and returns base64url encoded image data
+export const convertFaceCheckPhoto = (photo: string) => convertImageClaimInputToClaimValue(photo, invalidFaceCheckError)
+
+// validates image claim input and returns the base64url encoded image data (to be used as the claim value)
+export const convertImageClaimInput = (image: string, claim: string) =>
+  convertImageClaimInputToClaimValue(image, invalidImageClaimError(claim))
+
+// parses and validates face check photo input (jpeg data URL with base64 encoding)
+export const validateFaceCheckPhoto = (photo: string) => parseImageClaimDataUrl(photo, invalidFaceCheckError)
+
+// parses and validates image claim input (jpeg data URL with base64 encoding)
+export const validateImageClaimInput = (image: string, claim: string) => parseImageClaimDataUrl(image, invalidImageClaimError(claim))

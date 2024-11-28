@@ -146,12 +146,12 @@ export function buildContractInput(args: DeepPartial<ContractInput>): ContractIn
         ? args.display.claims.map((c) => ({
             ...generateClaimAndLabelTitles(),
             ...c,
-            type: c.type || ClaimType.String,
+            type: c.type || ClaimType.Text,
             validation: convertToClaimValidationInput(c.validation),
           }))
         : resolveToType<ContractInput['display']['claims']>([
-            { claim: 'claim_one', label: 'Claim 1', type: ClaimType.String, value: 'Claim 1' },
-            { claim: 'claim_two', label: 'Claim 2', type: ClaimType.String, value: 'Claim 2' },
+            { claim: 'claim_one', label: 'Claim 1', type: ClaimType.Text, value: 'Claim 1' },
+            { claim: 'claim_two', label: 'Claim 2', type: ClaimType.Text, value: 'Claim 2' },
           ]),
     }),
   }
