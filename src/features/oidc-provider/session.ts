@@ -5,7 +5,7 @@ import { v5 as uuidv5 } from 'uuid'
 import { oidcProviderModule, oidcStorageService } from '.'
 import { limitedOidcAuthnAuth, limitedOidcClient } from '../../config'
 import { dataSource } from '../../data'
-import type { Identity, PresentationRequestForAuthnInput, RequestConfiguration } from '../../generated/graphql'
+import type { ClaimConstraint, Identity, PresentationRequestForAuthnInput, RequestConfiguration } from '../../generated/graphql'
 import { newCacheSection, ONE_HOUR_TTL } from '../../redis/cache'
 import { getPlatformIssuerDid } from '../../services'
 import { invariant } from '../../util/invariant'
@@ -19,6 +19,8 @@ import { ExtraParams } from './extra-params'
 
 const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
 const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', ONE_HOUR_TTL))
+
+const claimConstraintOperators = ['values', 'contains', 'startsWith'] as const
 
 type LoginInteractionData = {
   state: 'started' | 'in-progress' | 'complete'
@@ -90,12 +92,37 @@ export async function buildAuthnPresentationRequest(
       throw new errors.InvalidTarget(`The requested credential type '${type}' is not configured for partner issuer: ${vcIssuerParam}`)
   }
 
+  // validate constraint params
+  const constraintName = params[ExtraParams.vc_constraint_name] as string | undefined
+  const constraintOperator = params[ExtraParams.vc_constraint_operator] as (typeof claimConstraintOperators)[number] | undefined
+  const constraintValue = params[ExtraParams.vc_constraint_value] as string | undefined
+  const constraintValues = constraintValue && constraintOperator === 'values' ? constraintValue.split(',') : undefined
+
+  // assign constraints, if provided
+  let constraints: ClaimConstraint[] | undefined
+
+  if (constraintName) {
+    if (!constraintOperator)
+      throw new errors.InvalidTarget(`Claim constraint operator is required via ${ExtraParams.vc_constraint_operator} param`)
+    if (!claimConstraintOperators.includes(constraintOperator))
+      throw new errors.InvalidTarget(`Invalid claim constraint operator: ${constraintOperator}`)
+    if (!constraintValue) throw new errors.InvalidTarget(`Claim constraint value is required via ${ExtraParams.vc_constraint_value} param`)
+
+    constraints = [
+      {
+        claimName: constraintName,
+        [constraintOperator]: constraintOperator === 'values' ? constraintValues : constraintValue,
+      },
+    ]
+  }
+
   return {
     requestedCredentials: [
       {
         type,
         acceptedIssuers: vcIssuerParam ? [vcIssuerParam] : undefined,
         configuration: buildRequestConfiguration(params, client),
+        constraints,
       },
     ],
   }

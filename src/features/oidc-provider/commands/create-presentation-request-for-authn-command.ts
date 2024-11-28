@@ -59,6 +59,7 @@ export async function CreatePresentationRequestForAuthnCommand(
         configuration: request?.requestedCredentials?.[0]?.configuration,
         type: request?.requestedCredentials?.[0]?.type ?? 'VerifiableCredential',
         acceptedIssuers: request?.requestedCredentials?.[0]?.acceptedIssuers ?? undefined,
+        constraints: request?.requestedCredentials?.[0]?.constraints ?? undefined,
       },
     ],
   }

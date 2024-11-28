@@ -12,7 +12,7 @@ import { instance } from '../../config'
 import { requestOrigin } from '../../express'
 import { logger } from '../../logger'
 import { invariant } from '../../util/invariant'
-import { presentationLoginStandardClaims } from './claims'
+import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
 import { createRequestInfo } from './log-events'
 import { voLogoUrl } from './logos'
 import { acquireLoginPresentationToken, buildAuthnPresentationRequest, completeLogin } from './session'
@@ -183,10 +183,14 @@ export function routes(app: Express, route: string): void {
         request: createRequestInfo(req),
       })
 
+      const amr: string[] = [...presentationLoginStandardClaims.amr]
+      if (loginResult.faceCheckMatchConfidenceScore) amr.push(faceCheckAmr)
+
       const result: InteractionResults = {
         login: {
           accountId: loginResult.accountId,
-          amr: [presentationLoginStandardClaims.amr],
+          amr,
+          acr: presentationLoginStandardClaims.acr,
         },
       }
 

@@ -1,8 +1,11 @@
 import type { Configuration } from 'oidc-provider'
 
 export const presentationLoginStandardClaims = {
-  amr: 'vc_authn',
+  amr: ['vc_authn', 'pop'],
+  acr: 'possession',
 } as const
+
+export const faceCheckAmr = 'face'
 
 export enum VcInfoClaim {
   Issuer = 'vc_issuer',

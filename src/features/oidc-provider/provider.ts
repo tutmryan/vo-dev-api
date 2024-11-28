@@ -10,7 +10,7 @@ import { dynamicImport } from '../../util/dynamic-import'
 import { invariant } from '../../util/invariant'
 import { Lazy } from '../../util/lazy'
 import { findAccount } from './account'
-import { openidClaims } from './claims'
+import { openidClaims, presentationLoginStandardClaims } from './claims'
 import type { OidcData } from './data'
 import { loadOidcData } from './data'
 import { events } from './events'
@@ -53,6 +53,7 @@ async function createProvider() {
     cookies: {
       keys: [cookieSession.secret],
     },
+    acrValues: [presentationLoginStandardClaims.acr],
     claims: { ...openidClaims, ...resourceScopes },
     conformIdTokenClaims: false,
     extraTokenClaims,

@@ -544,6 +544,17 @@ export type AuthnRequestCredential = {
   /** Optional settings for presentation validation. */
   configuration?: InputMaybe<RequestConfiguration>;
   /**
+   * Optional collection of claim constraints that must be met when a wallet selects the candidate credentials.
+   *
+   * This enables requesting a credential with specific claim value.
+   * Constraints specified will use the AND logic, ie if you specify three constraints, all of them have to be met.
+   *
+   * For each constraint in the collection, you must select one operator of values, contains or startsWith.
+   * Values cannot be regular expressions.
+   * All comparisons are case-insensitive.
+   */
+  constraints?: InputMaybe<Array<ClaimConstraint>>;
+  /**
    * The verifiable credential type.
    * The type must match the type as defined in the issuer verifiable credential manifest.
    */
@@ -659,6 +670,21 @@ export type Callback = {
    * Accepted formats IPv4, IPv6 or DNS resolvable hostname
    */
   url: Scalars['URL']['input'];
+};
+
+/**
+ * A constraint to apply to one claim in the verifiable credential.
+ * Choose one operator of `values`, `contains` or `startsWith`.
+ */
+export type ClaimConstraint = {
+  /** Name of the claim for the constraint. This is the claim name in the verifiable credential. See outputClaim in claimMapping type. */
+  claimName: Scalars['String']['input'];
+  /** The constraint evaluates to true if the claim value contains the specified value. */
+  contains?: InputMaybe<Scalars['String']['input']>;
+  /** The constraint evaluates to true if the claim value starts with the specified value. */
+  startsWith?: InputMaybe<Scalars['String']['input']>;
+  /** Set of values that should match the claim value. If you specify multiple values, like ["red", "green", "blue"] it is a match if the claim value in the credential has any of the values in the collection. */
+  values?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 /** The type of the claim, providing validation of the claim value. */
@@ -3343,6 +3369,17 @@ export type RequestCredential = {
   acceptedIssuers?: InputMaybe<Array<Scalars['String']['input']>>;
   /** Optional settings for presentation validation. */
   configuration?: InputMaybe<RequestConfiguration>;
+  /**
+   * Optional collection of claim constraints that must be met when a wallet selects the candidate credentials.
+   *
+   * This enables requesting a credential with specific claim value.
+   * Constraints specified will use the AND logic, ie if you specify three constraints, all of them have to be met.
+   *
+   * For each constraint in the collection, you must select one operator of values, contains or startsWith.
+   * Values cannot be regular expressions.
+   * All comparisons are case-insensitive.
+   */
+  constraints?: InputMaybe<Array<ClaimConstraint>>;
   /** Provide information about the purpose of requesting this verifiable credential. */
   purpose?: InputMaybe<Scalars['String']['input']>;
   /**
@@ -4379,6 +4416,7 @@ export type ResolversTypes = {
   BackgroundJobStatus: BackgroundJobStatus;
   CacheControlScope: CacheControlScope;
   Callback: Callback;
+  ClaimConstraint: ClaimConstraint;
   ClaimType: ClaimType;
   ClaimValidation: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['ClaimValidation']>;
   ClaimValidationInput: ClaimValidationInput;
@@ -4582,6 +4620,7 @@ export type ResolversParentTypes = {
   BackgroundJobEventWhere: BackgroundJobEventWhere;
   BackgroundJobProgressEvent: BackgroundJobProgressEvent;
   Callback: Callback;
+  ClaimConstraint: ClaimConstraint;
   ClaimValidation: ResolversUnionTypes<ResolversParentTypes>['ClaimValidation'];
   ClaimValidationInput: ClaimValidationInput;
   Communication: CommunicationEntity;

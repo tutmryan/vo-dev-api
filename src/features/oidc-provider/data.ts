@@ -32,7 +32,7 @@ export async function loadOidcData(): Promise<OidcData> {
     clients,
     clientMetadata: clients.map(toOidcClientMetadata),
     resources,
-    resourceScopes: resources.reduce<Record<string, string[]>>((acc, r) => ({ ...acc, [r.id]: r.scopes }), {}),
+    resourceScopes: resources.reduce<Record<string, string[]>>((acc, r) => ({ ...acc, [r.resourceIndicator]: r.scopes }), {}),
     partners,
   }
 }

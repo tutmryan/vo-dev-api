@@ -63,6 +63,29 @@ input RequestConfiguration {
 }
 
 """
+A constraint to apply to one claim in the verifiable credential.
+Choose one operator of `values`, `contains` or `startsWith`.
+"""
+input ClaimConstraint {
+  """
+  Name of the claim for the constraint. This is the claim name in the verifiable credential. See outputClaim in claimMapping type.
+  """
+  claimName: String!
+  """
+  Set of values that should match the claim value. If you specify multiple values, like ["red", "green", "blue"] it is a match if the claim value in the credential has any of the values in the collection.
+  """
+  values: [String!]
+  """
+  The constraint evaluates to true if the claim value contains the specified value.
+  """
+  contains: String
+  """
+  The constraint evaluates to true if the claim value starts with the specified value.
+  """
+  startsWith: String
+}
+
+"""
 The configuration information used on the presentation request
 """
 type RequestedConfiguration {
@@ -150,6 +173,17 @@ input RequestCredential {
   Optional settings for presentation validation.
   """
   configuration: RequestConfiguration
+  """
+  Optional collection of claim constraints that must be met when a wallet selects the candidate credentials.
+
+  This enables requesting a credential with specific claim value.
+  Constraints specified will use the AND logic, ie if you specify three constraints, all of them have to be met.
+
+  For each constraint in the collection, you must select one operator of values, contains or startsWith.
+  Values cannot be regular expressions.
+  All comparisons are case-insensitive.
+  """
+  constraints: [ClaimConstraint!]
 }
 
 """
