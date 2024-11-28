@@ -70,13 +70,15 @@ async function loadOrInitialise(): Promise<SourceOidcData> {
 }
 
 export async function loadExistingData(): Promise<SourceOidcData> {
-  const clientRepo = dataSource.getRepository(OidcClientEntity)
-  const resourceRepo = dataSource.getRepository(OidcResourceEntity)
-  const partnerRepo = dataSource.getRepository(PartnerEntity)
-  const clients = await clientRepo.find({ relations: { resources: true, partners: true } })
-  const resources = await resourceRepo.find()
-  const partners = await partnerRepo.find()
-  return [clients, resources, partners]
+  return await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
+    const clientRepo = entityManager.getRepository(OidcClientEntity)
+    const resourceRepo = entityManager.getRepository(OidcResourceEntity)
+    const partnerRepo = entityManager.getRepository(PartnerEntity)
+    const clients = await clientRepo.find({ relations: { resources: true, partners: true } })
+    const resources = await resourceRepo.find()
+    const partners = await partnerRepo.find()
+    return [clients, resources, partners]
+  })
 }
 
 const portalDemoRedirectUri = `${portalUrl}/demo/authn`
@@ -196,10 +198,15 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
       )
     }
   })
+
+  // TODO: use this 1s constant delay to confirm the initialisation is properly awaited before data read
+  await new Promise((resolve) => setTimeout(resolve, 1000))
 }
 
 export async function checkIssuanceIsNotRevoked(issuanceId: string) {
-  const isRevoked = await dataSource.getRepository(IssuanceEntity).existsBy({ id: issuanceId, isRevoked: true })
+  const isRevoked = await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
+    return await entityManager.getRepository(IssuanceEntity).existsBy({ id: issuanceId, isRevoked: true })
+  })
   if (isRevoked) {
     const { errors } = await oidcProviderModule()
     throw new errors.AccessDenied('Credential has been revoked')
