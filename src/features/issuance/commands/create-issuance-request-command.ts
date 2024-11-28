@@ -137,6 +137,7 @@ export async function CreateIssuanceRequestCommand(
   const standardClaims: StandardClaimsData = {
     issuanceId: randomUUID(),
     name: identity.name,
+    identityId: identity.id,
   }
   claims = { ...claims, ...standardClaims }
 

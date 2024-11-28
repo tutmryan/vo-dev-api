@@ -31,11 +31,13 @@ export const faceCheckPhotoDisplayClaim: DisplayClaim = {
 export enum StandardClaims {
   issuanceId = 'issuanceId',
   name = 'name',
+  identityId = 'identityId',
 }
 
 export const standardClaimLabels: Record<StandardClaims, string> = {
   [StandardClaims.issuanceId]: 'Credential ID',
   [StandardClaims.name]: 'Issued to',
+  [StandardClaims.identityId]: 'Identity ID',
 }
 
 export const standardClaims = Object.values(StandardClaims)
