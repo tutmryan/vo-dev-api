@@ -7,6 +7,5 @@ export type InitialiseOidcDataJobId = InitialiseOidcDataJobName
 export type InitialiseOidcDataJobPayload = undefined
 export type InitialiseOidcDataJobType = JobType<InitialiseOidcDataJobName, InitialiseOidcDataJobPayload>
 
-export const initialiseOidcDataJobHandler: JobHandler<InitialiseOidcDataJobPayload> = async (_context, _job) => {
-  await initialiseDataFromDeduplicatedBackgroundJob()
-}
+export const initialiseOidcDataJobHandler: JobHandler<InitialiseOidcDataJobPayload> = async (_context, _job) =>
+  initialiseDataFromDeduplicatedBackgroundJob()

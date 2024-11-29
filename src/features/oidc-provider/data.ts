@@ -69,8 +69,8 @@ async function loadOrInitialise(): Promise<SourceOidcData> {
   return initialised
 }
 
-export async function loadExistingData(): Promise<SourceOidcData> {
-  return await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
+export function loadExistingData(): Promise<SourceOidcData> {
+  return dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
     const clientRepo = entityManager.getRepository(OidcClientEntity)
     const resourceRepo = entityManager.getRepository(OidcResourceEntity)
     const partnerRepo = entityManager.getRepository(PartnerEntity)
@@ -198,9 +198,6 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
       )
     }
   })
-
-  // TODO: use this 1s constant delay to confirm the initialisation is properly awaited before data read
-  await new Promise((resolve) => setTimeout(resolve, 1000))
 }
 
 export async function checkIssuanceIsNotRevoked(issuanceId: string) {

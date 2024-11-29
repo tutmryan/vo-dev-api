@@ -7,6 +7,5 @@ export type InitialiseOidcKeysJobId = InitialiseOidcKeysJobName
 export type InitialiseOidcKeysJobPayload = undefined
 export type InitialiseOidcKeysJobType = JobType<InitialiseOidcKeysJobName, InitialiseOidcKeysJobPayload>
 
-export const initialiseOidcKeysJobHandler: JobHandler<InitialiseOidcKeysJobPayload> = async (_context, _job) => {
-  await oidcStorageService().initialiseKeysFromDeduplicatedBackgroundJob()
-}
+export const initialiseOidcKeysJobHandler: JobHandler<InitialiseOidcKeysJobPayload> = async (_context, _job) =>
+  oidcStorageService().initialiseKeysFromDeduplicatedBackgroundJob()
