@@ -198,9 +198,6 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
       )
     }
   })
-
-  // TODO: use this 1s constant delay to confirm the initialisation is properly awaited before data read
-  await new Promise((resolve) => setTimeout(resolve, 1000))
 }
 
 export async function checkIssuanceIsNotRevoked(issuanceId: string) {

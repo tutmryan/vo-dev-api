@@ -31,9 +31,19 @@ export const worker = Lazy(() => {
     JobQueueName,
     async (job: BackgroundJob) => {
       const handler = handlers[job.name as JobNames]
-      if (handler) {
+      if (!handler) {
+        logger.error(`No handler found for job: ${job.name}`)
+        return
+      }
+      const started = Date.now()
+      logger.info(`Running job handler: ${job.name}`)
+      try {
         const context = await createWorkerContext(job.data?.userId)
         await handler(context, job)
+        logger.info(`Job handler ${job.name} completed in ${Date.now() - started}ms`)
+      } catch (error) {
+        logger.error(`Job handler ${job.name} failed after ${Date.now() - started}ms`, { error })
+        throw error
       }
     },
     { concurrency: 2, connection: redisOptions },
