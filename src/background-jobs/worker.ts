@@ -43,9 +43,7 @@ export const worker = Lazy(() => {
         logger.info(`Job handler ${job.name} completed in ${Date.now() - started}ms`)
       } catch (error) {
         logger.error(`Job handler ${job.name} failed after ${Date.now() - started}ms`, { error })
-        // Exceptions thrown from a worker must be an `Error` for BullMQ to handle them correctly
-        // https://docs.bullmq.io/guide/retrying-failing-jobs
-        throw new Error(`Job handler ${job.name} failed`, { cause: error })
+        throw error
       }
     },
     { concurrency: 2, connection: redisOptions },
