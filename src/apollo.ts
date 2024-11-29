@@ -13,7 +13,6 @@ import type { Express } from 'express'
 import { json } from 'express'
 import { createApollo4QueryValidationPlugin } from 'graphql-constraint-directive/apollo4'
 import type http from 'http'
-import { useBackgroundJob } from './background-jobs'
 import { bearer, devToolsEnabled, logging } from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
@@ -57,7 +56,7 @@ const plugins = (httpServer: http.Server, serverCleanup?: () => Promise<void>): 
   return plugins
 }
 
-export const startApolloServer = async (app: Express, httpServer: http.Server) => {
+export const startApolloServer = async (app: Express, httpServer: http.Server, ...serverCleanup: Array<() => Promise<any>>) => {
   logger.info('Building schema')
   const schema = createSchema()
 
@@ -73,15 +72,12 @@ export const startApolloServer = async (app: Express, httpServer: http.Server) =
     verifyToken: (host, token) => verifyForHost(host, token, bearer),
   })
 
-  logger.info('Starting background job processing')
-  const jobRunnerCleanup = useBackgroundJob()
-
   logger.info('Starting apollo server')
   const server = new ApolloServer<GraphQLContext>({
     logger,
     schema,
     plugins: plugins(httpServer, async () => {
-      await Promise.all([wsServerCleanup.dispose(), jobRunnerCleanup.dispose()])
+      await Promise.all([wsServerCleanup.dispose(), ...serverCleanup.map((cleanup) => cleanup())])
     }),
     introspection: devToolsEnabled,
     csrfPrevention: true,
