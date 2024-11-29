@@ -85,34 +85,35 @@ export function toPersistedDisplayModel(
   if (displayLogoUri) merge(persistedModel, { card: { logo: { uri: displayLogoUri } } })
   return persistedModel as TemplateEntity['display']
 }
-
+/**
+ * Creates a new object with only properties from TemplateParentData
+ */
 export function toTemplateParentDataFromInput(
   input: TemplateInput,
 ): Pick<TemplateParentData, 'isPublic' | 'validityIntervalInSeconds' | 'display' | 'credentialTypes' | 'faceCheckSupport'> {
-  return {
-    isPublic: input.isPublic ?? null,
-    validityIntervalInSeconds: input.validityIntervalInSeconds ?? null,
-    credentialTypes: input.credentialTypes ?? [],
-    faceCheckSupport: input.faceCheckSupport ?? null,
-    display: convertToTemplateDisplayModel(input.display),
-  }
+  return omitBy(
+    {
+      ...pick(input, ['isPublic', 'validityIntervalInSeconds', 'credentialTypes', 'faceCheckSupport']),
+      display: input.display ? convertToTemplateDisplayModel(input.display) : undefined,
+    },
+    isNil,
+  )
 }
 
+/**
+ * Creates a TemplateDisplayModel based on input, resolving claim validation
+ */
 function convertToTemplateDisplayModel(displayInput?: CreateUpdateTemplateDisplayModelInput | null): TemplateDisplayModel | null {
   if (!displayInput) return null
 
-  return {
-    ...displayInput,
-    card: {
-      ...displayInput.card,
-      logo: {
-        image: displayInput.card?.logo?.image ?? '',
-        description: displayInput.card?.logo?.description ?? '',
-      },
+  return omitBy(
+    {
+      ...displayInput,
+      claims: displayInput.claims?.map((claim) => ({
+        ...claim,
+        validation: claim.validation ? convertToClaimValidation(claim.validation) : undefined,
+      })),
     },
-    claims: displayInput.claims?.map((claim) => ({
-      ...claim,
-      validation: convertToClaimValidation(claim.validation),
-    })),
-  }
+    isNil,
+  )
 }

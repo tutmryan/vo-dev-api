@@ -2,6 +2,7 @@ import { dispatch, query } from '../../cqs/dispatcher'
 import { type Resolvers } from '../../generated/graphql'
 import { downloadToDataUrl } from '../../util/data-url'
 import { resolveUpdatedAt } from '../auditing/updated-at-resolver'
+import { getValidationTypeName } from '../contracts/mapping'
 import { CreateTemplateCommand } from './commands/create-template-command'
 import { DeleteTemplateCommand } from './commands/delete-template-command'
 import { UpdateTemplateCommand } from './commands/update-template-command'
@@ -27,5 +28,14 @@ export const resolvers: Resolvers = {
   },
   TemplateDisplayCredentialLogo: {
     image: ({ uri }) => (uri ? downloadToDataUrl(uri, { redirect: 'error' }) : null),
+  },
+  TemplateDisplayModel: {
+    claims: ({ claims }) => {
+      return (claims ?? []).map(({ validation, type, ...rest }) => {
+        const validationTypeName = getValidationTypeName(type)
+        if (validationTypeName && validation) validation.__typename = validationTypeName
+        return { validation, type, ...rest }
+      })
+    },
   },
 }

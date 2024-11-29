@@ -7,6 +7,7 @@ import { DeleteContractCommand } from './commands/delete-contract-command'
 import { DeprecateContractCommand } from './commands/deprecate-contract-command'
 import { ProvisionContractCommand } from './commands/provision-contract-command'
 import { UpdateContractCommand } from './commands/update-contract-command'
+import { getValidationTypeName } from './mapping'
 import { FindContractsQuery } from './queries/find-contracts-query'
 
 export const resolvers: Resolvers = {
@@ -38,21 +39,13 @@ export const resolvers: Resolvers = {
   ContractDisplayCredentialLogo: {
     image: ({ uri }) => downloadToDataUrl(uri, { redirect: 'error' }),
   },
-  ClaimValidation: {
-    __resolveType(obj) {
-      if ('values' in obj) {
-        return 'ListValidation'
-      }
-      if ('min' in obj || 'max' in obj || 'precision' in obj) {
-        return 'NumberValidation'
-      }
-      if ('pattern' in obj) {
-        return 'RegexValidation'
-      }
-      if ('minLength' in obj || 'maxLength' in obj) {
-        return 'TextValidation'
-      }
-      return null
+  ContractDisplayModel: {
+    claims: ({ claims }) => {
+      return claims.map(({ validation, type, ...rest }) => {
+        const validationTypeName = getValidationTypeName(type)
+        if (validationTypeName && validation) validation.__typename = validationTypeName
+        return { validation, type, ...rest }
+      })
     },
   },
 }

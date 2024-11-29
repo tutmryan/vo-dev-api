@@ -1,16 +1,17 @@
 import { get, intersection, omit } from 'lodash'
 import type { DeepPartial } from 'typeorm'
-import type {
-  ClaimValidation,
-  ClaimValidationInput,
-  ContractDisplayClaim,
-  ContractDisplayClaimInput,
-  ContractDisplayModelInput,
-  ContractInput,
-  InputMaybe,
-  Maybe,
-  TemplateDisplayClaim,
-  TemplateParentData,
+import {
+  ClaimType,
+  type ClaimValidation,
+  type ClaimValidationInput,
+  type ContractDisplayClaim,
+  type ContractDisplayClaimInput,
+  type ContractDisplayModelInput,
+  type ContractInput,
+  type InputMaybe,
+  type Maybe,
+  type TemplateDisplayClaim,
+  type TemplateParentData,
 } from '../../generated/graphql'
 import { downloadToDataUrl } from '../../util/data-url'
 import { findKeysOverriding } from '../../util/intersection'
@@ -102,5 +103,19 @@ export function convertToClaimValidationInput(
   if (number) return { number }
   if (list?.values) return { list: { values: list.values } }
   if (regex?.pattern) return { regex: { pattern: regex.pattern } }
+  return undefined
+}
+
+export function getValidationTypeName(type: ClaimType) {
+  switch (type) {
+    case ClaimType.List:
+      return 'ListValidation'
+    case ClaimType.Number:
+      return 'NumberValidation'
+    case ClaimType.Regex:
+      return 'RegexValidation'
+    case ClaimType.Text:
+      return 'TextValidation'
+  }
   return undefined
 }
