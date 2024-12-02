@@ -45,7 +45,7 @@ export const worker = Lazy(() => {
         logger.error(`Job handler ${job.name} failed after ${Date.now() - started}ms`, { error })
         // Exceptions thrown from a worker must be an `Error` for BullMQ to handle them correctly
         // https://docs.bullmq.io/guide/retrying-failing-jobs
-        throw new Error(`Job handler ${job.name} failed`)
+        throw new Error(`Job handler ${job.name} failed`, { cause: error })
       }
     },
     { concurrency: 2, connection: redisOptions },
@@ -97,11 +97,11 @@ export const worker = Lazy(() => {
         userId: job.data?.userId,
       })
     }
-    logger.error(`Job (id: ${job?.id}) failed after attempt ${job?.attemptsMade}.`, error)
+    logger.error(`Job (id: ${job?.id}) failed after attempt ${job?.attemptsMade}.`, { error })
   })
 
-  worker.on('error', (err) => {
-    logger.error('Background worker failed', { err })
+  worker.on('error', (error) => {
+    logger.error('Background worker failed', { error })
   })
 
   return worker

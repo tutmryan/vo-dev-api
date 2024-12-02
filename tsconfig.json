@@ -1,11 +1,14 @@
 {
   "extends": "@makerx/ts-config",
   "compilerOptions": {
-    "target": "ES2021",
+    // https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping
+    "target": "ES2022",
+    "lib": ["ES2023"],
     "outDir": "./build",
     "rootDir": ".",
     "esModuleInterop": true,
-    "noUncheckedIndexedAccess": true
+    "noUncheckedIndexedAccess": true,
+    "useDefineForClassFields": false // required for typeorm decorator fields to work properly, as per ES2021 behavior
   },
   "include": ["src", "config", "test", "scripts", "migrate-db", "jest.*.ts"]
 }
