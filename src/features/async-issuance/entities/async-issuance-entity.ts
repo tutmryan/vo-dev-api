@@ -1,4 +1,4 @@
-import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm'
+import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm'
 import { calculateExpiryFromNow, convertAsyncIssuanceExpiryDaysToRequestExpiry, ExpiryPeriodsInDays } from '..'
 import { AsyncIssuanceRequestExpiry, AsyncIssuanceRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
@@ -26,7 +26,7 @@ const cannotModifyInFinalStateMessage = 'Async issuance cannot be modified'
 @Index(indexFor(['expiresOn']))
 @Index(indexFor(['state']))
 export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
-  constructor(args?: Pick<AsyncIssuanceEntity, 'id' | 'contractId' | 'identityId' | 'expiryPeriodInDays'>) {
+  constructor(args?: Pick<AsyncIssuanceEntity, 'id' | 'contractId' | 'identityId' | 'expiryPeriodInDays' | 'postIssuanceRedirectUrl'>) {
     super()
     if (!args) return
     typeSafeAssign(this, {
@@ -65,6 +65,14 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
 
   @OneToMany(() => CommunicationEntity, (communication) => communication.asyncIssuance)
   communications!: Promise<CommunicationEntity[]>
+
+  @Column({ type: 'nvarchar', nullable: true, name: 'post_issuance_redirect_url' })
+  postIssuanceRedirectUrl!: string | null
+  @BeforeInsert()
+  @BeforeUpdate()
+  private setPostIssuanceRedirectUrl() {
+    this.postIssuanceRedirectUrl = this.postIssuanceRedirectUrl?.toString() ?? null
+  }
 
   get status(): AsyncIssuanceRequestStatus {
     if (this.state === 'issued') return AsyncIssuanceRequestStatus.Issued

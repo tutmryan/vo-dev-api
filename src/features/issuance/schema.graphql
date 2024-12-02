@@ -198,6 +198,14 @@ type IssuanceResponse {
   A QR code that user can scan to start the issuance flow.
   """
   qrCode: String
+  """
+  The URL to redirect the issuee to after the issuance process is completed.
+
+  Items of note:
+
+  - _Optional:_ When no redirect URL is set, the issuee will remain on the success page.
+  """
+  postIssuanceRedirectUrl: URL
 }
 
 """

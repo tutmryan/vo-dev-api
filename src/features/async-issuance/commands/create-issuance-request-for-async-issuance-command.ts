@@ -51,6 +51,8 @@ export async function CreateIssuanceRequestForAsyncIssuanceCommand(
         await setLimitedAsyncIssuanceData(user.token, limitedAsyncIssuanceData)
       }
 
+      response.postIssuanceRedirectUrl = asyncIssuance.postIssuanceRedirectUrl
+
       return response
     })
   } catch (error) {

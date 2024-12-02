@@ -193,6 +193,15 @@ input AsyncIssuanceRequestInput {
   - When the contract **requires no** face check, neither the **faceCheckPhoto** nor the **photoCapture** property can be set.
   """
   photoCapture: Boolean
+
+  """
+  The URL to redirect the issuee to after the issuance process is completed.
+
+  Items of note:
+
+  - _Optional:_ When no redirect URL is set, the issuee will remain on the success page.
+  """
+  postIssuanceRedirectUrl: URL
 }
 
 """

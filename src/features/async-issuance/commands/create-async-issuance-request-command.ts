@@ -190,6 +190,7 @@ export async function CreateAsyncIssuanceRequestCommand(
       contractId,
       identityId: identityId ? identityId : identityMap.get(identityInputKey(identity!)) ?? throwError('Identity not found'),
       expiryPeriodInDays: convertAsyncIssuanceRequestExpiryToDays(expiry),
+      postIssuanceRedirectUrl: asyncIssuanceInput.postIssuanceRedirectUrl ?? null,
     })
     response.asyncIssuanceRequestIds.push(asyncIssuance.id)
     return { asyncIssuance, asyncIssuanceInput }
