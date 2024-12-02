@@ -8,7 +8,7 @@ import {
   type SubscriptionIssuanceEventArgs,
   type SubscriptionSubscribeFn,
 } from '../../../generated/graphql'
-import { pubsub } from '../../../redis/pubsub'
+import { pubsub, subscribeToCachedEvents } from '../../../redis/pubsub'
 import type { IssuanceRequestDetails } from '../commands/create-issuance-request-command'
 import { IssuanceEntity } from '../entities/issuance-entity'
 import { getIssuanceDataFromCache } from './cache'
@@ -21,41 +21,20 @@ export type IssuanceTopicData = IssuanceRequestDetails & {
 }
 
 export const publishIssuanceEvent = async (data: IssuanceTopicData): Promise<void> => {
-  pubsub().publish(ISSUANCE_TOPIC, data)
+  pubsub().publish(`${ISSUANCE_TOPIC}.${data.event.requestId}`, data)
 }
 
 const eventIsFinal = (data: IssuanceTopicData) =>
   [IssuanceRequestStatus.IssuanceSuccessful, IssuanceRequestStatus.IssuanceError].includes(data.event.requestStatus)
 
 export const subscribeToIssuanceEvents = (args?: SubscriptionIssuanceEventArgs) => {
-  const iterator = pubsub().asyncIterator<IssuanceTopicData>(ISSUANCE_TOPIC)
-
-  let count = 0
-  let done = false
-
-  return {
-    next: async () => {
-      // eagerly end iteration
-      if (done) return { done: true, value: undefined }
-
-      // when subscribing by requestId
-      if (count++ === 0 && args?.where?.requestId) {
-        // check for cached final event data
-        const cachedData = await getIssuanceDataFromCache(args.where.requestId)
-        if (cachedData && eventIsFinal(cachedData)) {
-          done = true
-          return { value: cachedData }
-        }
-      }
-
-      // inspect values to eagerly end iteration for requestId subscribers when the event is final
-      const next = await iterator.next.call(iterator)
-      if (!next.done && args?.where?.requestId && eventIsFinal(next.value)) done = true
-      return next
-    },
-    return: iterator.return!.bind(iterator),
-    throw: iterator.throw!.bind(iterator),
-  }
+  const requestIdArg = args?.where?.requestId
+  return subscribeToCachedEvents<IssuanceTopicData>({
+    eventId: requestIdArg ?? undefined,
+    topic: ISSUANCE_TOPIC,
+    getFromCache: getIssuanceDataFromCache,
+    eventIsFinal,
+  })
 }
 
 export const subscribeToIssuanceEventsWithFilter = withFilter(

@@ -9,7 +9,7 @@ import type {
   SubscriptionSubscribeFn,
 } from '../../../generated/graphql'
 import { PresentationRequestStatus } from '../../../generated/graphql'
-import { pubsub } from '../../../redis/pubsub'
+import { pubsub, subscribeToCachedEvents } from '../../../redis/pubsub'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import { PresentationEntity } from '../entities/presentation-entity'
 import { getPresentationDataFromCache } from './cache'
@@ -22,41 +22,20 @@ export type PresentationTopicData = PresentationRequestDetails & {
 }
 
 export const publishPresentationEvent = async (data: PresentationTopicData): Promise<void> => {
-  pubsub().publish(PRESENTATION_TOPIC, data)
+  pubsub().publish(`${PRESENTATION_TOPIC}.${data.event.requestId}`, data)
 }
 
 const eventIsFinal = (data: PresentationTopicData) =>
   [PresentationRequestStatus.PresentationVerified, PresentationRequestStatus.PresentationError].includes(data.event.requestStatus)
 
 export const subscribeToPresentationEvents = (args?: SubscriptionPresentationEventArgs) => {
-  const iterator = pubsub().asyncIterator<PresentationTopicData>(PRESENTATION_TOPIC)
-
-  let count = 0
-  let done = false
-
-  return {
-    next: async () => {
-      // eagerly end iteration
-      if (done) return { done: true, value: undefined }
-
-      // when subscribing by requestId
-      if (count++ === 0 && args?.where?.requestId) {
-        // check for cached final event data
-        const cachedData = await getPresentationDataFromCache(args.where.requestId)
-        if (cachedData && eventIsFinal(cachedData)) {
-          done = true
-          return { value: cachedData }
-        }
-      }
-
-      // inspect values to eagerly end iteration for requestId subscribers when the event is final
-      const next = await iterator.next.call(iterator)
-      if (!next.done && args?.where?.requestId && eventIsFinal(next.value)) done = true
-      return next
-    },
-    return: iterator.return!.bind(iterator),
-    throw: iterator.throw!.bind(iterator),
-  }
+  const requestIdArg = args?.where?.requestId
+  return subscribeToCachedEvents<PresentationTopicData>({
+    eventId: requestIdArg ?? undefined,
+    topic: PRESENTATION_TOPIC,
+    getFromCache: getPresentationDataFromCache,
+    eventIsFinal,
+  })
 }
 
 export const subscribeToPresentationEventsWithFilter = withFilter(

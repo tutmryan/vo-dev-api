@@ -63,8 +63,8 @@ export const runDeduplicatedJob = async (jobType: JobTypes, awaitCompletion: boo
   if (!awaitCompletion) return
   const iterator = subscribeToBackgroundJobEvents({ where: { jobId } })
   logger.info(`Waiting for deduplicated job completion: ${jobType.name}`)
-  for await (const { event } of iterator) {
-    if (eventIsFinal(event)) {
+  for await (const data of iterator) {
+    if (eventIsFinal(data)) {
       logger.info(`Deduplicated job completed: ${jobType.name}`)
       return
     }
