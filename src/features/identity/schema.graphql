@@ -50,17 +50,17 @@ input IdentityInput {
   """
   The issuer of the identity
   """
-  issuer: String!
+  issuer: String! @constraint(minLength: 1)
 
   """
   The unique identifier of the identity in the issuer
   """
-  identifier: String!
+  identifier: String! @constraint(minLength: 1)
 
   """
   The name of the identity
   """
-  name: String!
+  name: String! @constraint(minLength: 1)
 }
 
 """

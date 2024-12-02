@@ -1,4 +1,4 @@
-import validator from 'validator'
+import { isValidPhoneNumber } from 'libphonenumber-js'
 import { z } from 'zod'
 import { convertToClaimValidation } from '../features/contracts/mapping'
 import type {
@@ -26,7 +26,7 @@ const dateSchema = z.string().date('Invalid date format. Expected YYYY-MM-DD.')
 const dateTimeSchema = z.string().datetime('Invalid date-time format. Expected YYYY-MM-DDTHH:MM:SSZ.')
 const emailSchema = z.string().email({ message: 'Invalid email address.' })
 const imageSchema = z.string().regex(/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/, { message: 'Invalid base64 jpeg data URL.' })
-const phoneSchema = z.string().refine((value) => validator.isMobilePhone(value, 'any', { strictMode: true }), {
+const phoneSchema = z.string().refine((value) => isValidPhoneNumber(value), {
   message: 'Invalid international E.164 format phone number.',
 })
 const urlSchema = z.string().url({ message: 'Invalid URL.' })
