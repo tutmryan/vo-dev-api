@@ -72,6 +72,7 @@ The [async issuance request input](/docs/reference/types/inputs/async-issuance-r
    1. A callback URI if issuance event data should also be sent to a server-side endpoint.
    1. An expiration date for explicit control over when a credential expires, regardless of when it is issued.
    1. A request to capture a photo of the recipient during issuance if the credential requires a face check photo and the photo is not included with the claim data provided.
+   1. A post issuance redirect url where the user will be redirected to after a successful issuance
 
 :::note
 **PII** (personally identifiable information) is deleted after the remote issuance is completed, is cancelled or at expiry.
