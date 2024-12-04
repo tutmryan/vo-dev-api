@@ -21,6 +21,7 @@ We recommend creating Microsoft Entra groups mapped to each Verified Orchestrati
 - [Credential admin](#credential-admin)
 - [Partner admin](#partner-admin)
 - [Approval request admin](#approval-request-admin)
+- [OIDC admin](#oidc-admin)
 
 A tenant administrator can set up group-to-role mapping and add/remove users from the groups.
 
@@ -35,6 +36,8 @@ Permissions:
 - view issuances
 - view presentations
 - view identities
+- view partners
+- view authentication clients
 
 ## Issuer
 
@@ -95,3 +98,13 @@ Permissions:
 - view and filter the list of approval requests
 - view approval request details including actioned approval data
 - cancel pending approval requests
+
+## OIDC admin
+
+App role value: `VerifiableCredential.OidcAdmin`
+
+Permissions:
+
+- all the permissions of [Reader](#reader) role, and
+- add, edit and delete authentication clients
+- add, edit and delete authentication resources

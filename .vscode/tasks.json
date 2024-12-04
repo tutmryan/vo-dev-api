@@ -124,6 +124,17 @@
         "cwd": "${workspaceFolder}"
       },
       "problemMatcher": []
+    },
+    {
+      "label": "Start docs site",
+      "type": "npm",
+      "script": "start",
+      "path": "${workspaceFolder}/docs-site",
+      "isBackground": true,
+      "options": {
+        "cwd": "${workspaceFolder}/docs-site"
+      },
+      "problemMatcher": []
     }
   ]
 }

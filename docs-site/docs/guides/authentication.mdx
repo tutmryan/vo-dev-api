@@ -1,0 +1,230 @@
+---
+sidebar_position: 10
+---
+
+import ThemedImage from '@theme/ThemedImage'
+import { AdminUrl } from '@site/src/components/admin-url'
+import { ApiUrl } from '@site/src/components/api-url'
+
+# Authentication
+
+Your Verified Orchestration instance includes an OpenID Connect (OIDC) authentication provider, allowing applications to use credential presentation for authentication.
+
+This feature supports:
+
+- Administrative control over authentication clients:
+  - What types of credentials can be presented
+  - Use of partner credentials for authentication
+  - Use of face check for biometric authentication
+- Dynamic control over authentication within applications:
+  - What partner credentials can be presented
+  - What credential types can be presented
+  - Whether face check is required for biometric authentication
+  - Arbitrary constraints on claims, e.g. limiting authentication to a specific identity
+- Configuration of resources to protect access to backend services e.g. APIs:
+  - Define resources with scopes
+  - Configuration of client access to resources
+
+## Administration of clients and resources
+
+To administer authentication, you must be granted access to user role `VerifiableCredential.OidcAdmin`.
+
+The <AdminUrl path='/oidc'>Admin UI authentication page</AdminUrl> displays the:
+
+1. OpenID Connect provider details:
+   - Authority URL
+   - Discovery URL
+1. List of authentication clients
+1. List of resources
+
+## Create an authentication client
+
+Each application that requires authentication needs an authentication client.
+
+1. Navigate to the <AdminUrl path='/oidc'>Admin UI authentication page</AdminUrl>.
+1. Click the **Add** button above the client list.
+1. Type a **Name** for the client. This name is shown to users when they sign-in and sign-out.
+1. Type one or more **Redirect URIs** the client is allowed to use.
+1. Type one or more **Log out URIs** the client is allowed to use.
+
+### Demo 🎥
+
+<iframe
+  width="100%"
+  height="500"
+  src="https://www.youtube.com/embed/Fs7Rwkzm0nM"
+  title="Authentication: create a client"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerPolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+## Add authentication to an application
+
+Exactly how you add authentication to an application depends on the application's technology stack and which authentication library you choose to use.
+
+The Verified Orchestration OIDC provider currently only supports the **Authorization Code Grant with Proof Key for Code Exchange (PKCE)** flow for web clients.
+
+The authentication client view page contains code samples for both front-end authentication using [react-oidc-context](https://github.com/authts/react-oidc-context) and server-side authentication using [openid-client](https://github.com/panva/openid-client).
+
+You can copy the sample code and paste it into your application. Any library supporting the PKCE flow should work with Verified Orchestration authentication. Choose the most appropriate library for your stack and reference the code samples for example configuration.
+
+### Demo 🎥
+
+This demo shows how to add authentication to a React application using the `react-oidc-context` library.
+
+<iframe
+  width="100%"
+  height="500"
+  src="https://www.youtube.com/embed/0kWm6dgwifk"
+  title="Authentication: add authentication to a React application"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerPolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+### Server-side authentication
+
+Server side authentication implementations vary wildly depending on the technology stack. The server-side authentication code sample can be pasted straight into an Express.js application, for a basic working example of server-side PKCE.
+
+## Control authentication within an application
+
+The Verified Orchestration OIDC provider allows you to control authentication behaviour within an application by providing additional parameters.
+
+The following parameter configuration forces the user to present a credential of type `passport` from a partner issuer, requires a biometric face check and constrains the presentation to a single passport number:
+
+```tsx
+const signInWithPassport = useCallback(
+  () =>
+    signinRedirect({
+      redirect_uri: window.location.origin + window.location.pathname,
+      extraQueryParams: {
+        vc_type: 'passport',
+        vc_issuer: 'did:web:example.country.gov',
+        vc_unique_claim_for_sub: 'passportNumber',
+        vc_facecheck: true,
+        constraint_name: 'passportNumber',
+        constraint_operator: 'values',
+        constraint_value: '123456789',
+      },
+    }),
+  [signinRedirect],
+```
+
+### Authentication control parameters
+
+| Parameter                 | Description                                                                                                                                                                                                                                          |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vc_type`                 | The type of credential to be presented.<br /><br />Note: If a single type is configured with the client, it need not be specified.                                                                                                                   |
+| `vc_facecheck`            | Whether face check is required for biometric authentication.<br /><br />Note: If forced via client configuration, it need not be specified.                                                                                                          |
+| `vc_issuer`               | The partner issuer DID (authenticating using partner credentials).<br /><br />Note: `vc_unique_claim_for_sub` must also be supplied or values configured with the client.                                                                            |
+| `vc_unique_claim_for_sub` | The claim from which a unique identifier can be derived when authenticating using partner credentials.<br /><br />Note: Only required for partner credentials when values are not configured with the client or one specific claim needs to be used. |
+| `constraint_name`         | The claim key to apply the constraint specified by `constraint_operator` and `constraint_value`.                                                                                                                                                     |
+| `constraint_operator`     | The constraint operator, either `contains`, `startsWith` or `values`.                                                                                                                                                                                |
+| `constraint_value`        | The constraint operator. If `values` is used, several values can be specified using a comma to separate, e.g. `123,456,789`.                                                                                                                         |
+
+### Demo 🎥
+
+This demo shows use of various authentication control parameters.
+
+<iframe
+  width="100%"
+  height="500"
+  src="https://www.youtube.com/embed/dzYjhXcbPjY"
+  title="Authentication: control authentication within an application"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerPolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+## Protect resources
+
+Resources can be defined with scopes to control access from clients. This provides the ability to protect access to backend services, e.g. APIs.
+
+### Add a resource
+
+1. Navigate to the <AdminUrl path='/oidc'>Admin UI authentication page</AdminUrl>.
+1. Click the **Add** button above the resource list.
+1. Type a **Name** for the resource.
+1. Type the **Redirect indicator URI**.
+1. Type one or more **Scopes** to use for resource authorization.
+
+### Configure client resource access
+
+1. Navigate to the <AdminUrl path='/oidc'>Admin UI authentication page</AdminUrl>.
+1. Click the **Details** button for the client you want to configure.
+1. Click the **Add resource** button.
+1. Select the **Resource** you want to add.
+1. Select the **Scopes** that this client can request.
+1. Click **Add**.
+
+### Request resource access
+
+1. When authenticating, specify the `resource` parameter with the **Resource indicator URI**.
+1. Specify one or more resource scopes in the `scope` parameter.
+1. The client will receive an access token with the requested scopes and the audience claim `aud` set to the resource indicator. This access token can be used to access the resource (e.g. API).
+
+```tsx
+const settings: OidcClientSettings = {
+  client_id: '2f93583c-dd81-40b5-8c86-37d5c090f6e1',
+  authority: 'https://demo.api.verifiedorchestration.com/oidc',
+  redirect_uri: 'http://localhost:5173/',
+  post_logout_redirect_uri: 'http://localhost:5173/',
+  resource: 'https://example.com/api',
+  scope: 'openid profile offline_access vc_info vc_presented_attributes vc_vo_presentation vc_vo_identity api:read api:write',
+}
+```
+
+### Demo 🎥
+
+This demo shows how to set up resources, configure access for a client and obtain an access token for the resource.
+
+<iframe
+  width="100%"
+  height="500"
+  src="https://www.youtube.com/embed/rMm94ajd828"
+  title="Authentication: control access to resources"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  referrerPolicy="strict-origin-when-cross-origin"
+  allowFullScreen
+></iframe>
+
+## Scopes and claims
+
+Claims are organised by scopes, which are used to request specific information about the credential presentation.
+
+The full list of scopes is available from the <ApiUrl path="/oidc/.well-known/openid-configuration">OpenID discovery document</ApiUrl>.
+
+The Verified Orchestration OIDC provider supports standard scopes: `openid`, `profile`, and `offline_access`.
+
+Additionally, credential info is available via the following scopes:
+
+| Claim                     | Description                                   |
+| ------------------------- | --------------------------------------------- |
+| `vc_info`                 | Standard verifiable credential info           |
+| `vc_presented_attributes` | Claim values from the credential presentation |
+| `vc_vo_presentation`      | Verified Orchestration presentation details   |
+| `vc_vo_identity`          | Verified Orchestration identity details       |
+
+### Claims
+
+The following table describes all claims available and the scope required to access them:
+
+| Scope                                    | Claim                     | Description                                                                                                                                                                                                                                                                                |
+| ---------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `sub`                                    | `openid`                  | The subject identifier, derived from the Verified Orchestration issuance ID.<br /><br />Or, for partner credential presentations:<br /> - the value of the `vc_unique_claim_for_sub` parameter<br /> - the first matching **Unique claim for subject identifier** configured on the client |
+| `name`                                   | `profile`                 | The Verified Orchestration identity name (n/a for partner presentations).                                                                                                                                                                                                                  |
+| `vc_issuer`                              | `vc_info`                 | The issuer DID of the verifiable credential.                                                                                                                                                                                                                                               |
+| `vc_type`                                | `vc_info`                 | The type of the verifiable credential.                                                                                                                                                                                                                                                     |
+| `vc_revocation_status`                   | `vc_info`                 | The revocation status of the verifiable credential, either `VALID` or `REVOKED`.                                                                                                                                                                                                           |
+| `vc_presented_attributes`                | `vc_presented_attributes` | All claims from the verifiable credential presentation as a single object.                                                                                                                                                                                                                 |
+| `vc_vo_presentation_id`                  | `vc_vo_presentation`      | The Verified Orchestration presentation ID.                                                                                                                                                                                                                                                |
+| `vc_vo_issuance_id`                      | `vc_vo_presentation`      | The Verified Orchestration issuance ID.                                                                                                                                                                                                                                                    |
+| `vc_vo_facecheck_match_confidence_score` | `vc_vo_presentation`      | The confidence score of the face check match, when available.                                                                                                                                                                                                                              |
+| `vc_vo_identity_id`                      | `vc_vo_identity`          | The Verified Orchestration identity ID. Useful for referencing the identity reference in the Verified Orchestration platform.                                                                                                                                                              |
+| `vc_vo_identity_issuer`                  | `vc_vo_identity`          | The identity `issuer` value. Useful for referencing the source identity store.                                                                                                                                                                                                             |
+| `vc_vo_identity_identifier`              | `vc_vo_identity`          | The identity `identifier` value. Useful for referencing the identity in the source identity store.                                                                                                                                                                                         |

@@ -1,5 +1,5 @@
 ---
-sidebar_position: 9
+sidebar_position: 11
 ---
 
 import ThemedImage from '@theme/ThemedImage'
@@ -102,7 +102,7 @@ The GitHub application can then allow the deployment to proceed or cancel the de
 ```
 
 :::tip
-The `callbackSecret` is a shared secret between the GitHub application and the Verified Orchestration platform. It is returned from the call to  the `CreateApprovalRequest` mutation when creating the approval request, and can be used to verify the authenticity of the callback data.
+The `callbackSecret` is a shared secret between the GitHub application and the Verified Orchestration platform. It is returned from the call to the `CreateApprovalRequest` mutation when creating the approval request, and can be used to verify the authenticity of the callback data.
 
 Additionally, the GitHub application can call the [actionedApprovalData](/docs/reference/api/queries/actioned-approval-data) query to obtain the actioned approval data by supplying the `approvalRequestId`.
 :::
