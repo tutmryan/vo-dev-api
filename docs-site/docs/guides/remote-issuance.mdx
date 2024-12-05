@@ -1,5 +1,5 @@
 ---
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 import ThemedImage from '@theme/ThemedImage'
@@ -13,12 +13,12 @@ The issuance flow is as follows:
 
 - The recipient receives an email or SMS containing a link to receive the credential via the Verified Orchestration Portal website.
 - The recipient opens the link and is verified by an SMS or email as second-factor authentication via an OTP (one-time passcode).
-  - *If the recipient is not verified, the issuance is not completed*
+  - _If the recipient is not verified, the issuance is not completed_
 - Optionally, a guided photo-capture flow is used to capture a photo of the recipient for credential presentation in combination with Face Check.
 - The recipient adds the credential to their wallet.
-  - *On a desktop, the recipient is prompted to scan the QR code to complete the issuance on their mobile device.*
-  - *On a mobile device, the wallet is opened via a deep link, and recipient is prompted to save their verifiable credential.*
-    - *If the recipient does not have a wallet, they will be prompted to install the Microsoft Authenticator app.*
+  - _On a desktop, the recipient is prompted to scan the QR code to complete the issuance on their mobile device._
+  - _On a mobile device, the wallet is opened via a deep link, and recipient is prompted to save their verifiable credential._
+    - _If the recipient does not have a wallet, they will be prompted to install the Microsoft Authenticator app._
 
 :::note
 A verifiable credential with Face Check requires presentation via the Microsoft Authenticator app and will not work with other wallet apps.
@@ -43,9 +43,9 @@ Remote issuance supports bulk credential issuing to many recipients, either via 
 :::warning
 Both the Admin portal and the API have a hard limit of creating no more than 1000 remote issuances at one time.
 
- - When using the Admin portal, you can split the CSV file into multiple files and upload them separately.
- - When using the API, you can make multiple requests with a maximum of 1000 remote issuances per request.
-:::
+- When using the Admin portal, you can split the CSV file into multiple files and upload them separately.
+- When using the API, you can make multiple requests with a maximum of 1000 remote issuances per request.
+  :::
 
 ## Manual remote issuance
 
@@ -150,7 +150,7 @@ The issuance link can be opened on a desktop or on a mobile device. Regardless o
 - They then are prompted to enter a verification code that was sent via SMS or email (The method will depend on the supplied contact details at the time of creation).
 - If photo capture was requested at time of creation, the recipient will be guided to capture a photo.
 - If using a mobile device, the recipient will be prompted to open Microsoft Authenticator.
-   - If the recipient does not have Microsoft Authenticator installed, they will be prompted to install it.
+  - If the recipient does not have Microsoft Authenticator installed, they will be prompted to install it.
 - Otherwise, the recipient will be prompted to scan the QR code with their mobile device.
 - The flow ends with the recipient adding the issued credential to their wallet.
 
@@ -189,6 +189,7 @@ Example email addresses that will be ignored: `sally.tester@exmple.com`, `fredri
 The following phone numbers can be used for testing purposes. These numbers will not send SMS messages to real recipients:
 
 Australia:
+
 - `+61491570006`
 - `+61491570157`
 - `+61491570737`
@@ -196,6 +197,7 @@ Australia:
 - `+61491578957`
 
 United States:
+
 - `+15005550109`
 - `+15005550119`
 - `+15005550129`
@@ -203,6 +205,7 @@ United States:
 - `+15005550149`
 
 United Kingdom:
+
 - `+447709000018`
 - `+447709000028`
 - `+447709000038`

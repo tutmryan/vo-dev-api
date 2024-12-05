@@ -1,0 +1,151 @@
+---
+sidebar_position: 3
+---
+
+import { AdminUrl } from '@site/src/components/admin-url'
+
+# Integration options
+
+The Verified Orchestration platform offers integration options to suit different use cases. The following sections describes options and considerations by function and architecture.
+
+## Issuance
+
+[Issuance](./issuance.mdx) is the process of creating and delivering a credential to the recipient's wallet (Microsoft Authenticator). The Verified Orchestration platform supports issuance in the following ways:
+
+### In person issuance via the Admin UI
+
+A credential administrator can issue a credential on-the-spot to a recipient using the Admin UI. The recipient must scan the QR code with their mobile device to receive the credential.
+
+This option is available by clicking the 'Issue' button when viewing a the credential in the Admin UI, then selecting the 'In person' delivery method.
+
+Considerations:
+
+- Not automated, credential data is manually entered.
+- Requires the recipient to be present in person or via screen share to receive the credential.
+- Issuee identity can be selected from a linked Entra home tenant, an existing issuee identity or manually entered.
+
+### In person issuance embedded in your applications
+
+You integrate [issuance](./issuance.mdx) into your own application user interface.
+
+Considerations:
+
+- Provides the most control over the issuance process.
+- Provides the most flexibility in terms of user interface and user experience.
+- Requires the most development effort, requires user interface components and API calls.
+- Implementors can use the [JavaScript client](./integration/javascript-client/) library and [limited access tokens](./limited-access-tokens/) to simplify the user interface implementation.
+- Always requires a [secure backend](./limited-access-tokens/secure-backend-api.mdx) to protect the issuance process.
+
+### Remote issuance via the Admin UI
+
+[Remote issuance](./remote-issuance.mdx) allows you to issue credentials to recipients who are not present at the time of issuance. The recipient receives an email or SMS containing a link to receive the credential via the Portal website. An OTP (one time passcode) is used to verify the recipient.
+
+This option is available by clicking the 'Issue' button when viewing a the credential in the Admin UI, then selecting the 'Remote' delivery method.
+
+Considerations:
+
+- Same as in person issuance, but the recipient does not need to be present and the credential is available to be redeemed for a fixed period of between 1 day and 3 months.
+- Requires the recipient to have an email address and ideally a mobile phone number for OTP verification over a second factor.
+- The Portal UI handles the issuance process, including photo capture and [wallet link handling](./wallet-link-handling.mdx).
+
+### Bulk remote issuance via the Admin UI
+
+Bulk remote issuance allows you to issue credentials to many recipients at once. This option is available by clicking the 'Bulk issue' button when viewing a the credential in the Admin UI and uploading one or more CSV files.
+
+### Remote issuance embedded in your applications
+
+Same as remote issuance via the Admin UI, but programmatically via the Verified Orchestration API.
+
+Considerations:
+
+- Suitable for single or bulk issuance.
+- Requires the recipients to have an email address and ideally a mobile phone number for OTP verification over a second factor.
+- Suitable for automated server-side integrations, does not require a user interface component.
+- Relatively easier to implement than integrating in-person issuance into your applications.
+- For large scale issuance, batches must be limited to 1000 or less per request.
+
+## Presentation
+
+Presentation is the process of presenting a credential to a verifier. The Verified Orchestration platform supports presentation in the following ways:
+
+### Presentation embedded in your applications
+
+You integrate the presentation flow into your own application user interface and receive the presented credential data in your application.
+
+Considerations:
+
+- Provides the most control over the presentation process.
+- Provides the most flexibility in terms of user interface and user experience.
+- Requires the most development effort, requires user interface components and API calls.
+- Implementors can use the [JavaScript client](./integration/javascript-client/) library and [Limited access tokens](./limited-access-tokens/) to simplify the user interface implementation.
+- Use of [Limited access tokens](./limited-access-tokens/) supports anonymous presentation of credentials in unauthenticated apps, otherwise apps should be authenticated and control access to presentations.
+- Always requires a [secure backend](./limited-access-tokens/secure-backend-api.mdx) alongside the user-interface to (at minimum) acquire a front-end limited access token and (optionally) receive the presentation data.
+
+### Presentation as authentication
+
+Use the OpenID Connect Provider to [authenticate](./authentication.mdx) by presentation of a credential for authentication and resource (API) access.
+
+Considerations:
+
+- Suitable for applications that need protected areas or APIs to be accessed by users holding a credential.
+- Simple to implement through OIDC libraries or integration to identity providers such as Okta, Entra B2C and Entra External ID.
+- Suitable for using credential presentations as a second factor in multi-factor authentication where the authentication provider supports an additional OIDC flow such as Entra's External Authentication Method (EAM).
+- Both credential and identity information can be used from then authentication response to control protected access.
+- Applications have a high level of control over the authentication process, e.g. presentation constraints and requiring biometric face check.
+- The OpenID Connect provider establishes a session, so authentication has an extended lifetime and is shared across multiple applications without re-presentation (effectively SSO).
+
+### Presentation for approving workflows
+
+Use the [approvals](./approvals.mdx) feature to facilitate workflows that require approval from a human via the presentation of credentials.
+
+Considerations:
+
+- Easy to implement from server-side applications with no user interface.
+- Only suitable for workflows that require human approval.
+- Supports a strong level of control over the presentation process, e.g. presentation constraints and requiring biometric face check.
+
+### Presentation via the Admin UI
+
+It is possible to manually run credential presentations using the <AdminUrl path="/presentation-builder">presentation builder</AdminUrl>, however the tool's primary purpose is building and testing presentation requests.
+
+## Applications without a user interface
+
+Applications that do not have a user interface can integrate with the Verified Orchestration platform.
+
+Functions might include:
+
+- Remote issuance of credentials to recipients.
+- Orchestrating approval workflows.
+- Automating credential and template management.
+- Automating revocation of credentials e.g. identity off-boarding.
+
+Considerations:
+
+- Authentication will be via client credentials, as an application, using application roles.
+
+## Applications with a user interface
+
+### Server-side rendered applications
+
+Server-side rendered applications may perform all operations via API calls executed on the server. Consideration should be given to the development effort of implementing in-person issuance and presentations which require multiple API operations plus either call-back, polling or websockets to receive event data.
+
+When a hybrid approach is possible, consider acquiring [limited access tokens](./limited-access-tokens/) server-side and running issuance and presentations client-side, directly against the API, optionally via the [JavaScript client](./integration/javascript-client/) library which orchestrates multiple API calls including photo capture and can use polling or websockets to receive events.
+
+### Single Page or Mobile Applications
+
+Single Page or Mobile Applications will need at least a minimal secure server-side API to acquire [limited access tokens](./limited-access-tokens/) or perform other operations against the Verified Orchestration API.
+
+Once a limited access token is acquired, the application can run issuance and presentation operations client-side, directly against the API using the limited access token, optionally via the [JavaScript client](./integration/javascript-client/) library which orchestrates multiple API calls including photo capture and can use polling or websockets to receive events.
+
+All other types of operations must be run via server-side and be properly protected via authenticated access.
+
+## Considerations for all applications
+
+- Consider the effort required to implement a purely backend or API driven integration to Verified Orchestration vs a hybrid approach where issuance and presentation operations are executed from the client using limited access tokens.
+- Consider presentations embedded in your application vs using the OpenID Connect Provider for authentication based on presentations.
+- Consider use of callbacks, or queries to keep potentially sensitive presentation data server-side, for example:
+  - Receive the status of issuance or presentation events client-side to update the user interface.
+  - Receive or query potentially sensitive credential data server-side.
+- For applications that support authenticated home Entra tenant users, [On-Behalf-Of (OBO) authentication flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) can be used to run administrative API operations as the logged in user, for example executing revocation of all credentials for an issuee from your own off-boarding app instead of using the Verified Orchestration Admin UI.
+- Anonymous presentations can be run using limited access tokens
+- All other operations should be properly protected via authenticated access

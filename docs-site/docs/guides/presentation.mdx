@@ -1,5 +1,5 @@
 ---
-sidebar_position: 7
+sidebar_position: 8
 ---
 
 import ThemedImage from '@theme/ThemedImage'
@@ -32,6 +32,7 @@ To create a presentation request definition and explore the presentation API, us
 The [presentation request input](/docs/reference/types/inputs/presentation-request-input) specifies:
 
 1. One or more requested credentials. For partner types, the issuer must be specified, otherwise just the credential type is required.
+   - Optionally, include [constraints](/docs/reference/types/inputs/claim-constraint) to narrow what credential can be presented
 1. The name of the requesting client application (for display in the wallet prompt)
 1. The identity to whom the credential will be issued (recipient / issuee)
 1. Other optional input:
