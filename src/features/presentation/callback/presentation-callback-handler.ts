@@ -99,7 +99,8 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     }
 
     // if this presentation is for a login flow, set the login interaction data to complete with the presentation ID
-    if (authInteractionData) await setLoginInteractionData({ ...authInteractionData, state: 'complete', presentationId: id })
+    if (authInteractionData && authInteractionData.state !== 'pre-start')
+      await setLoginInteractionData({ ...authInteractionData, state: 'complete', presentationId: id })
 
     logger.audit('Presentation complete', { presentation: presentationEntity })
   } else if (event.requestStatus === PresentationRequestStatus.PresentationError)

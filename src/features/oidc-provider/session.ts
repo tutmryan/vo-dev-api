@@ -22,14 +22,27 @@ const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', ON
 
 const claimConstraintOperators = ['values', 'contains', 'startsWith'] as const
 
-type LoginInteractionData = {
+type LoginInteractionDataPostStart = {
   state: 'started' | 'in-progress' | 'complete'
   interactionId: string
   clientId: string
   sessionKey: string
   requestId?: string
   presentationId?: string
+  eam?: {
+    sub: string
+    iss: string
+    state: string
+    nonce: string
+  }
 }
+
+type LoginInteractionDataPreStart = {
+  state: 'pre-start'
+  interactionId: string
+} & Partial<Omit<LoginInteractionDataPostStart, 'interactionId' | 'state'>>
+
+type LoginInteractionData = LoginInteractionDataPostStart | LoginInteractionDataPreStart
 
 export async function acquireLoginPresentationToken({
   interactionId,
@@ -39,11 +52,11 @@ export async function acquireLoginPresentationToken({
   clientId: string
 }): Promise<AccessTokenResponse> {
   const interactionData = await getLoginInteractionData(interactionId)
-  invariant(interactionData === undefined, 'Interaction session already exists')
+  invariant(interactionData === undefined || interactionData.state === 'pre-start', 'Interaction session already exists')
   const token = await getClientCredentialsToken(limitedOidcAuthnAuth)
   const sessionKey = getSessionKey(token.access_token)
   await sessionInteractionCache().set(sessionKey, interactionId)
-  await setLoginInteractionData({ interactionId, state: 'started', clientId, sessionKey })
+  await setLoginInteractionData({ ...(interactionData ?? {}), interactionId, state: 'started', clientId, sessionKey })
   return token
 }
 
