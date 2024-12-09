@@ -15,6 +15,7 @@ import type { PartnerEntity } from '../partners/entities/partner-entity'
 import { getPresentationDataFromCache } from '../presentation/callback/cache'
 import { PresentationEntity } from '../presentation/entities/presentation-entity'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
+import { buildEamIdentityConstraint } from './entra-eam'
 import { ExtraParams } from './extra-params'
 
 const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
@@ -60,10 +61,18 @@ export async function acquireLoginPresentationToken({
   return token
 }
 
+export type Constraint = {
+  constraintName: string | undefined
+  constraintOperator: (typeof claimConstraintOperators)[number] | undefined
+  constraintValue: string | undefined
+  constraintValues: string[] | undefined
+}
+
 export async function buildAuthnPresentationRequest(
   params: UnknownObject,
   client: OidcClientEntity,
   partners: PartnerEntity[],
+  loginInteractionData: LoginInteractionData,
 ): Promise<PresentationRequestForAuthnInput> {
   const vcTypeParam = params[ExtraParams.vc_type] as string | undefined
   const vcIssuerParam = params[ExtraParams.vc_issuer] as string | undefined
@@ -105,11 +114,18 @@ export async function buildAuthnPresentationRequest(
       throw new errors.InvalidTarget(`The requested credential type '${type}' is not configured for partner issuer: ${vcIssuerParam}`)
   }
 
+  function getConstraint(): Constraint {
+    const constraintValue = params[ExtraParams.vc_constraint_value] as string | undefined
+    return {
+      constraintName: params[ExtraParams.vc_constraint_name] as string | undefined,
+      constraintOperator: params[ExtraParams.vc_constraint_operator] as (typeof claimConstraintOperators)[number] | undefined,
+      constraintValue,
+      constraintValues: constraintValue && constraintOperator === 'values' ? constraintValue.split(',') : undefined,
+    }
+  }
+
   // validate constraint params
-  const constraintName = params[ExtraParams.vc_constraint_name] as string | undefined
-  const constraintOperator = params[ExtraParams.vc_constraint_operator] as (typeof claimConstraintOperators)[number] | undefined
-  const constraintValue = params[ExtraParams.vc_constraint_value] as string | undefined
-  const constraintValues = constraintValue && constraintOperator === 'values' ? constraintValue.split(',') : undefined
+  const { constraintName, constraintOperator, constraintValue, constraintValues } = getConstraint()
 
   // assign constraints, if provided
   let constraints: ClaimConstraint[] | undefined
@@ -127,6 +143,10 @@ export async function buildAuthnPresentationRequest(
         [constraintOperator]: constraintOperator === 'values' ? constraintValues : constraintValue,
       },
     ]
+  }
+
+  if (loginInteractionData.eam) {
+    constraints = [...(constraints ?? []), await buildEamIdentityConstraint(params, errors)]
   }
 
   return {
@@ -166,6 +186,7 @@ export type PresentationLoginAccount = {
   credentialClaims?: Record<string, unknown>
   revocationStatus?: string
   faceCheckMatchConfidenceScore?: number
+  nonce?: string
 }
 
 /**
@@ -242,7 +263,10 @@ export async function completeLogin(
   // Build the login result
   const { claims: allClaims, type: types, issuer } = credential
   const { issuanceId, photo, ...claims } = allClaims
-  const accountId = await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
+
+  const accountId = interactionData.eam
+    ? interactionData.eam.sub
+    : await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
 
   const account: PresentationLoginAccount = {
     accountId,
@@ -255,6 +279,7 @@ export async function completeLogin(
     credentialClaims: claims,
     revocationStatus: credential.credentialState.revocationStatus as string | undefined,
     faceCheckMatchConfidenceScore: credential.faceCheck?.matchConfidenceScore,
+    nonce: interactionData.eam?.nonce,
   }
 
   // Persist the account
