@@ -115,6 +115,18 @@ const oidcRouteHandler: RequestHandler = async (req, res) => {
 
 export const dataRef: { provider?: Provider; data?: OidcData } = {}
 
+export function getProvider() {
+  const provider = dataRef.provider
+  invariant(provider, 'dataRef.provider not set')
+  return provider
+}
+
+export function getData() {
+  const data = dataRef.data
+  invariant(data, 'dataRef.data not set')
+  return data
+}
+
 export async function addOidcProvider(app: Express): Promise<string> {
   await createProvider()
   routes(app, oidcRoute)

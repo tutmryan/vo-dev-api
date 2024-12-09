@@ -7,7 +7,6 @@ import path from 'node:path'
 import { stringify } from 'node:querystring'
 import { inspect } from 'node:util'
 import type { Grant, InteractionResults } from 'oidc-provider'
-import { dataRef } from '.'
 import { instance } from '../../config'
 import { requestOrigin } from '../../express'
 import { logger } from '../../logger'
@@ -16,6 +15,7 @@ import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
 import { createRequestInfo } from './log-events'
 import { voLogoUrl } from './logos'
 import { acquireLoginPresentationToken, buildAuthnPresentationRequest, completeLogin } from './session'
+import { getData, getProvider } from './provider'
 
 // taken from: https://github.com/panva/node-oidc-provider/blob/main/example/routes/express.js
 // - types hacked in
@@ -49,18 +49,6 @@ const body = urlencoded({ extended: false })
 const noCache: RequestHandler = (req, res, next) => {
   res.set('cache-control', 'no-store')
   next()
-}
-
-function getProvider() {
-  const provider = dataRef.provider
-  invariant(provider, 'dataRef.provider not set')
-  return provider
-}
-
-function getData() {
-  const data = dataRef.data
-  invariant(data, 'dataRef.data not set')
-  return data
 }
 
 function getClient(clientId: string) {
