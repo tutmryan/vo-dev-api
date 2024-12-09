@@ -1190,6 +1190,18 @@ resource workbook 'Microsoft.Insights/workbooks@2023-06-01' = {
   }
 }
 
+@description('Shared locations for availability tests')
+var availabilityTestLocations = [
+  { Id: 'emea-au-syd-edge' } // Australia East
+  { Id: 'apac-hk-hkn-azr' } // East Asia
+  { Id: 'apac-sg-sin-azr' } // Southeast Asia
+  { Id: 'emea-nl-ams-azr' } // West Europe
+  { Id: 'emea-gb-db3-azr' } // North Europe
+  { Id: 'us-va-ash-azr' } // East US
+  { Id: 'us-ca-sjc-azr' } // West US
+  { Id: 'latam-br-gru-edge' } // Brazil South
+]
+
 resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
   name: '${resourcePrefix}-api-availability-test'
   location: location
@@ -1202,16 +1214,7 @@ resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
     Enabled: true
     Frequency: 300
     Kind: 'standard'
-    Locations: [
-      { Id: 'emea-au-syd-edge' } // Australia East
-      { Id: 'apac-hk-hkn-azr' } // East Asia
-      { Id: 'apac-sg-sin-azr' } // Southeast Asia
-      { Id: 'emea-nl-ams-azr' } // West Europe
-      { Id: 'emea-gb-db3-azr' } // North Europe
-      { Id: 'us-va-ash-azr' } // East US
-      { Id: 'us-ca-sjc-azr' } // West US
-      { Id: 'latam-br-gru-edge' } // Brazil South
-    ]
+    Locations: availabilityTestLocations
     Name: '${resourcePrefix}-api-availability-webtest'
     Request: {
       HttpVerb: 'GET'
@@ -1249,6 +1252,72 @@ resource apiAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if 
     criteria: {
       'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
       webTestId: apiAvailabilityTest.id
+      componentId: apiAppInsights.id
+      failedLocationCount: 6
+    }
+    actions: [
+      {
+        actionGroupId: actionGroupAlertId
+      }
+    ]
+  }
+}
+
+resource oidcAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
+  name: '${resourcePrefix}-oidc-availability-test'
+  location: location
+  kind: 'standard'
+  tags: {
+    'hidden-link:${apiAppInsights.id}': 'Resource'
+  }
+  properties: {
+    Description: 'Availability test for the OIDC endpoint'
+    Enabled: true
+    Frequency: 300
+    Kind: 'standard'
+    Locations: availabilityTestLocations
+    Name: '${resourcePrefix}-oidc-availability-webtest'
+    Request: {
+      HttpVerb: 'GET'
+      ParseDependentRequests: false
+      RequestUrl: 'https://${apiAppService.properties.defaultHostName}/oidc/.well-known/openid-configuration'
+    }
+    RetryEnabled: true
+    SyntheticMonitorId: '${resourcePrefix}-oidc-availability-webtest'
+    Timeout: 30
+    ValidationRules: {
+      ExpectedHttpStatusCode: 200
+      SSLCheck: true
+      SSLCertRemainingLifetimeCheck: 7
+      ContentValidation: {
+        ContentMatch: '"issuer"' //Validate JSON by checking the presence of the key "issuer"
+        IgnoreCase: true
+        PassIfTextFound: true
+      }
+    }
+  }
+}
+
+resource oidcAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
+  name: '${resourcePrefix}-oidc-availability-alert'
+  location: 'global'
+  tags: {
+    'hidden-link:${apiAppInsights.id}': 'Resource'
+    'hidden-link:${oidcAvailabilityTest.id}': 'Resource'
+  }
+  properties: {
+    description: 'Triggers when OIDC healthchecks fail'
+    severity: 0
+    enabled: true
+    scopes: [
+      apiAppInsights.id
+      oidcAvailabilityTest.id
+    ]
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT5M'
+    criteria: {
+      'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
+      webTestId: oidcAvailabilityTest.id
       componentId: apiAppInsights.id
       failedLocationCount: 6
     }
