@@ -12,10 +12,11 @@ import { requestOrigin } from '../../express'
 import { logger } from '../../logger'
 import { invariant } from '../../util/invariant'
 import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
+import { eamPresentationLoginStandardClaims } from './entra-eam'
 import { createRequestInfo } from './log-events'
 import { voLogoUrl } from './logos'
-import { acquireLoginPresentationToken, buildAuthnPresentationRequest, completeLogin } from './session'
 import { getData, getProvider } from './provider'
+import { acquireLoginPresentationToken, buildAuthnPresentationRequest, completeLogin, getLoginInteractionData } from './session'
 
 // taken from: https://github.com/panva/node-oidc-provider/blob/main/example/routes/express.js
 // - types hacked in
@@ -46,7 +47,7 @@ export function debug(obj: any) {
 
 const body = urlencoded({ extended: false })
 
-const noCache: RequestHandler = (req, res, next) => {
+const noCache: RequestHandler = (_req, res, next) => {
   res.set('cache-control', 'no-store')
   next()
 }
@@ -61,11 +62,11 @@ export function routes(app: Express, route: string): void {
   app.set('views', path.join(__dirname, 'views'))
   app.set('view engine', 'ejs')
 
-  app.use((req, res, next) => {
+  app.use((_req, res, next) => {
     const orig = res.render
     // you'll probably want to use a full blown render engine capable of layouts
     res.render = (view, locals) => {
-      app.render(view, locals, (err, html) => {
+      app.render(view, locals, (_err, html) => {
         const options: any = {
           ...locals,
           body: html,
@@ -90,12 +91,15 @@ export function routes(app: Express, route: string): void {
       const client = await provider.Client.find(params.client_id as string)
       invariant(client, 'client not found')
 
+      const loginInteractionData = await getLoginInteractionData(uid)
+      invariant(loginInteractionData, 'login interaction data not found')
+
       switch (prompt.name) {
         case 'login': {
           const token = await acquireLoginPresentationToken({ interactionId: uid, clientId: client.clientId })
           const clientEntity = getClient(client.clientId)
           // TODO: handle param validation errors with a better UX
-          const presentationRequest = await buildAuthnPresentationRequest(params, clientEntity, getData().partners)
+          const presentationRequest = await buildAuthnPresentationRequest(params, clientEntity, getData().partners, loginInteractionData)
           const { logo, backgroundColor, backgroundImage } = clientEntity
           return res.render('login', {
             client,
@@ -159,6 +163,10 @@ export function routes(app: Express, route: string): void {
       invariant(params.client_id, 'Could not obtain client_id from interaction params')
       const clientId = params.client_id as string
       assert.equal(name, 'login')
+
+      const loginInteractionData = await getLoginInteractionData(uid)
+      invariant(loginInteractionData, 'login interaction data not found')
+
       const loginResult = await completeLogin(
         {
           interactionId: uid,
@@ -177,14 +185,16 @@ export function routes(app: Express, route: string): void {
         request: createRequestInfo(req),
       })
 
-      const amr: string[] = [...presentationLoginStandardClaims.amr]
+      const amr: string[] = !loginInteractionData.eam
+        ? [...presentationLoginStandardClaims.amr]
+        : [...eamPresentationLoginStandardClaims.amr]
       if (loginResult.faceCheckMatchConfidenceScore) amr.push(faceCheckAmr)
 
       const result: InteractionResults = {
         login: {
           accountId: loginResult.accountId,
           amr,
-          acr: presentationLoginStandardClaims.acr,
+          acr: !loginInteractionData.eam ? presentationLoginStandardClaims.acr : eamPresentationLoginStandardClaims.acr,
         },
       }
 
