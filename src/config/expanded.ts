@@ -84,6 +84,8 @@ export const vidServiceAuth: Omit<ClientCredentialsConfig, 'scope'> = hasHomeTen
       ...internalClientCredentials,
     }
 
+// auth configs
+export const authTenantIds = [...config.get('auth.additionalAuthTenantIds'), homeTenantId, platformTenantId]
 export const pkce: Config['auth']['pkce'] = merge(
   {
     scopes: [`${apiCredentials.clientId}/.default`, 'profile'],
