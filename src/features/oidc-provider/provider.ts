@@ -1,7 +1,7 @@
 import type { Constructor } from '@graphql-tools/utils'
 import type { Express, RequestHandler } from 'express'
 import { debounce } from 'lodash'
-import type { Interaction, KoaContextWithOIDC, Provider, errors } from 'oidc-provider'
+import type { Interaction, KoaContextWithOIDC, Provider, Configuration, Errors } from 'oidc-provider'
 import { apiUrl, cookieSession } from '../../config'
 import { logger } from '../../logger'
 import { createRedisClient, isRedisEnabled } from '../../redis'
@@ -9,10 +9,12 @@ import { pubsub } from '../../redis/pubsub'
 import { dynamicImport } from '../../util/dynamic-import'
 import { invariant } from '../../util/invariant'
 import { Lazy } from '../../util/lazy'
+import { throwError } from '../../util/throw-error'
 import { findAccount } from './account'
 import { openidClaims, presentationLoginStandardClaims } from './claims'
 import type { OidcData } from './data'
 import { loadOidcData } from './data'
+import { eamExtraParams, hookForEamCustomSpec } from './entra-eam'
 import { extraParams } from './extra-params'
 import { loadExistingGrant, useGrantedResource } from './grants'
 import { keys } from './keys'
@@ -25,7 +27,7 @@ import { logoutSource } from './source'
 import { extraTokenClaims, issueRefreshToken } from './tokens'
 
 export const oidcProviderModule = Lazy(async () => {
-  const module = await dynamicImport<{ default: Constructor<Provider>; errors: typeof errors }>('oidc-provider')
+  const module = await dynamicImport<{ default: Constructor<Provider>; errors: Errors }>('oidc-provider')
   return { Provider: module.default, errors: module.errors }
 })
 
@@ -49,9 +51,9 @@ async function createProvider() {
   const provider = new Provider(issuer, {
     clients: clientMetadata,
     clientAuthMethods: ['none'],
-    adapter: (name: string) => (isRedisEnabled ? new RedisAdapter(name, redisClient()) : undefined),
+    adapter: (name: string) => (isRedisEnabled ? new RedisAdapter(name, redisClient()) : throwError('Redis is required of OIDC')),
     cookies: {
-      keys: [cookieSession.secret],
+      keys: [cookieSession.secret ?? throwError('cookieSession.secret is required')],
     },
     acrValues: [presentationLoginStandardClaims.acr],
     claims: { ...openidClaims, ...resourceScopes },
@@ -59,7 +61,6 @@ async function createProvider() {
     extraTokenClaims,
     issueRefreshToken,
     loadExistingGrant: loadExistingGrant(clients, resources),
-    useGrantedResource,
     findAccount,
     features: {
       userinfo: { enabled: false },
@@ -68,6 +69,7 @@ async function createProvider() {
       resourceIndicators: {
         enabled: true,
         getResourceServerInfo: getResourceServerInfo(clients, resources),
+        useGrantedResource,
       },
     },
     interactions: {
@@ -75,14 +77,14 @@ async function createProvider() {
         return `${oidcRoute}/interaction/${interaction.uid}`
       },
     },
-    extraParams,
+    extraParams: { ...extraParams, ...eamExtraParams },
     jwks: { keys: jwksKeys },
     // Expire browser sessions immediately, as this behaviour is problematic for VC based OIDC
     expiresWithSession: () => false,
     ttl: {
       Session: 1,
     },
-  })
+  } satisfies Configuration)
 
   // allow http + localhost for redirect URIs
   // as per: https://github.com/panva/node-oidc-provider/blob/main/recipes/implicit_http_localhost.md#allowing-http-andor-localhost-for-implicit-response-type-web-clients
@@ -105,6 +107,8 @@ async function createProvider() {
 
   dataRef.provider = provider
   dataRef.data = data
+
+  hookForEamCustomSpec()
 }
 
 let providerHandler: ReturnType<Provider['callback']> | undefined
