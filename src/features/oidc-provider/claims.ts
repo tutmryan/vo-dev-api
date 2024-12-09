@@ -1,7 +1,7 @@
 import type { Configuration } from 'oidc-provider'
 
 export const presentationLoginStandardClaims = {
-  amr: ['vc_authn', 'pop'],
+  amr: ['vc_authn'],
   acr: 'possession',
 } as const
 
