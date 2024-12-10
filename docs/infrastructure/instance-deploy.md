@@ -80,8 +80,42 @@ The app registration created for the instance would need a logo and the publishe
 1. Refer to the "Setting up a new instance" section in [Admin Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-admin/blob/main/README.md#setting-up-a-new-instance)
 1. Refer to the "Setting up a new instance" section in [Portal Readme.md](https://github.com/VerifiedOrchestration/verified-orchestration-portal/blob/main/README.md#setting-up-a-new-instance)
 
+## Handling failed deployments
+
+Before commencing any destructive remediation work:
+- **Do not delete the resource group** of the failed deployment (the KV has purge protection, there is no known situation this will help)
+- Any **click-ops must be performed as a pair** using screen sharing for peer review
+- **If you are not confident in the outcome, do not proceed**, seek help from a peer and take the time required to gain confidence in any proposed remediation
+
+### Failure between creation of instance app registration and persistence of secrets
+
+A failed initial deployment may result in creation of the instance app registration + secrets and failure to persist those secrets in the Key vault.
+
+Attempting redeployment in this state will continue to fail with 2x the following error message, vaguely indicating that the two expected secrets are missing:
+```The specified resource does not exist```
+
+This error will appear twice in the deployment error details shown in the deployment task output in the resource group in Azure.
+
+#### Recommended recovery
+Either:
+- Delete the app registration
+- Delete the secrets from the app registration
+
+### Transient DNS timing issues
+
+Setup of resources with custom DNS entries generally requires more than one DNS entry to be created and queryable before resource deployment can be successfully made.
+
+For this reason, most deployment tasks attempt to create the pre-requisite DNS entries early, allowing maximum time between creation of the entry and the resource which depends on it.
+
+However, fairly frequently, one will fail with a message such as:
+```CNAME Record is invalid.  Please ensure the CNAME record has been created.```
+
+#### Recommended recovery
+Re-running the deployment a second time usually results in a successful deployment.
+
 ## Steps to tear down an instance
 
+Note: click-ops must be performed as a pair using screen sharing for peer review, do not perform tear-down operations alone.
 1. Deprecate all contracts which would revoke all issuances as the Verified ID authority cannot be deleted
 1. Delete the instance resource group e.g. vo-{name}-instance
 1. Delete the instance database from the shared infrastructure resource group named vo-{name}-sql-db
