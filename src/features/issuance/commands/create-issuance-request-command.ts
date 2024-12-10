@@ -4,6 +4,7 @@ import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { ClaimType, FaceCheckPhotoSupport, type IssuanceRequestInput } from '../../../generated/graphql'
 import type { IssuanceRequest } from '../../../services/verified-id'
+import { validateIssuanceRequestBodySize } from '../../../services/verified-id/utils'
 import { parseDataUrl } from '../../../util/data-url'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
@@ -150,6 +151,9 @@ export async function CreateIssuanceRequestCommand(
     manifest: provisionedContract.manifestUrl,
     registration: issuanceRequestRegistration,
   }
+
+  // validate the size of the request
+  validateIssuanceRequestBodySize(issuanceRequest)
 
   // send it
   const response = await request.createIssuanceRequest(issuanceRequest)

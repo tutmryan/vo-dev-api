@@ -111,6 +111,10 @@ mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
 }
 ```
 
+:::info[Note]
+For each issuance request, the payload size must not exceed the limit of 1 MB as defined by the [Microsoft VID service](https://learn.microsoft.com/en-us/entra/verified-id/verifiable-credentials-faq#what-are-the-size-limitations-for-a-verifiable-credential-in-verified-id)
+:::
+
 ## Display QR code or open link
 
 Once the issuance request is created, it must be opened by Microsoft Authenticator (or custom wallet application) to complete issuance.

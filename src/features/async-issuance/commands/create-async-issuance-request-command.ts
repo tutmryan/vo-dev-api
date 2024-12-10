@@ -17,6 +17,7 @@ import type {
 } from '../../../generated/graphql'
 import { ContactMethod, FaceCheckPhotoSupport } from '../../../generated/graphql'
 import { logger } from '../../../logger'
+import { validateIssuanceRequestBodySize } from '../../../services/verified-id/utils'
 import { invariant } from '../../../util/invariant'
 import { throwError } from '../../../util/throw-error'
 import { userInvariant } from '../../../util/user-invariant'
@@ -110,6 +111,9 @@ export async function CreateAsyncIssuanceRequestCommand(
         expiry,
         expirationDate,
       } = asyncIssuanceInput
+
+      // validate the size of the request
+      validateIssuanceRequestBodySize(asyncIssuanceInput)
 
       // validate contact
       validateContact(contact)
