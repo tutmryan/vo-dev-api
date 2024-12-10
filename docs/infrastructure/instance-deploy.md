@@ -33,6 +33,15 @@ The environment should have deployment protection rules applied (required review
 - VID_AUTHORITY_DOMAIN (optional, only required for VO hosted authorities)
 - ADDITIONAL_AUTH_TENANT_IDS (optional)
 
+#### Use of VID_AUTHORITY_NAME:
+- For VO hosted authorities, `VID_AUTHORITY_NAME` must be set to a title-case version of the instance name e.g.  `Customer Sandbox` or `Customer`
+- For customer hosted authorities, `VID_AUTHORITY_NAME` must not be set
+
+#### Use of VID_AUTHORITY_DOMAIN:
+- For VO hosted authorities, `VID_AUTHORITY_DOMAIN` must be set to `<instance>.did.verifiedorchestration.com`
+- For VO hosted authorities with custom DNS, `VID_AUTHORITY_DOMAIN` must be set to the customer’s supplied custom DID domain. After provisioning, supply the 2 DNS entries to the customer before re-running the pipeline to verify the authority once the DNS entries are complete.
+- For customer hosted authorities, `VID_AUTHORITY_DOMAIN` must not be set
+
 #### Feature flag variables
 
 - AUDIT_LOG_STREAMING_ENABLED (optional feature, use a value of `true` to enable provisioning of the Event Hubs and Stream Analytics job)
