@@ -286,12 +286,6 @@ jobs:
           - instance: partner
             resourceGroup: vo-partner-instance
             resourcePrefix: vo-partner
-          - instance: sandbox.pentest
-            resourceGroup: vo-sandbox-pentest-instance
-            resourcePrefix: vo-sandbox-pentest
-          - instance: pentest
-            resourceGroup: vo-pentest-instance
-            resourcePrefix: vo-pentest
           - instance: sandbox.dribl
             resourceGroup: vo-sandbox-dribl-instance
             resourcePrefix: vo-sandbox-dribl
@@ -313,6 +307,12 @@ jobs:
           - instance: sandbox.openlearning
             resourceGroup: vo-sandbox-openlearning-instance
             resourcePrefix: vo-sandbox-openlearning
+          - instance: sandbox.nelnet
+            resourceGroup: vo-sandbox-nelnet-instance
+            resourcePrefix: vo-sandbox-nelnet
+          - instance: nelnet
+            resourceGroup: vo-nelnet-instance
+            resourcePrefix: vo-nelnet
 
     environment:
       name: ${{ matrix.instance }}
