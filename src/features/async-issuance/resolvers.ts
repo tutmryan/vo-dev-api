@@ -42,4 +42,8 @@ export const resolvers: Resolvers = {
   AsyncIssuanceRequestResponse: {
     __resolveType: (response) => ('errors' in response ? 'AsyncIssuanceErrorResponse' : 'AsyncIssuanceResponse'),
   },
+  Identity: {
+    asyncIssuanceRequests: (identity, { where, offset, limit }, context) =>
+      query(context, FindAsyncIssuancesQuery, { identityId: identity.id, ...where }, offset, limit),
+  },
 }

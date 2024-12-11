@@ -9,7 +9,7 @@ import {
   OrderDirection,
 } from '../../../generated/graphql'
 import { assertExhaustive } from '../../../util/type-helpers'
-import { LessThanOrEqualTimestamp, OptionalRange } from '../../../util/typeorm'
+import { LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp, OptionalRange } from '../../../util/typeorm'
 import { AsyncIssuanceEntity, failedStates } from '../entities/async-issuance-entity'
 
 export async function FindAsyncIssuancesQuery(
@@ -28,6 +28,7 @@ export async function FindAsyncIssuancesQuery(
     switch (criteria.status) {
       case AsyncIssuanceRequestStatus.Pending:
         where.state = In(['pending', 'contacted'])
+        where.expiresOn = MoreThanOrEqualTimestamp(new Date())
         break
       case AsyncIssuanceRequestStatus.Expired:
         where.expiresOn = LessThanOrEqualTimestamp(new Date())

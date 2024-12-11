@@ -1411,6 +1411,8 @@ export type Features = {
 /** Represents an identity that is issued credentials */
 export type Identity = {
   __typename?: 'Identity';
+  /** Returns the async issuance requests for this identity, optionally matching the specified criteria. */
+  asyncIssuanceRequests: Array<AsyncIssuanceRequest>;
   /** When the identity was created. */
   createdAt: Scalars['DateTime']['output'];
   /** The user who created the identity. */
@@ -1439,6 +1441,16 @@ export type Identity = {
 
 
 /** Represents an identity that is issued credentials */
+export type IdentityAsyncIssuanceRequestsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<AsyncIssuanceRequestsOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<IdentityAsyncIssuanceRequestsWhere>;
+};
+
+
+/** Represents an identity that is issued credentials */
 export type IdentityIssuancesArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -1451,6 +1463,18 @@ export type IdentityPresentationsArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
   where?: InputMaybe<IdentityPresentationWhere>;
+};
+
+/** Represents the criteria for filtering async issuances requests for an identity. */
+export type IdentityAsyncIssuanceRequestsWhere = {
+  /** Return async issuance requests for the specified contract. */
+  contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** Return async issuance requests created after this point. */
+  createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Return async issuance requests created before this point. */
+  createdTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Return async issuance requests with the specified status. */
+  status?: InputMaybe<AsyncIssuanceRequestStatus>;
 };
 
 /** Input type representing an identity that is issued credentials */
@@ -4480,6 +4504,7 @@ export type ResolversTypes = {
   Features: ResolverTypeWrapper<Features>;
   HexColorCode: ResolverTypeWrapper<Scalars['HexColorCode']['output']>;
   Identity: ResolverTypeWrapper<IdentityEntity>;
+  IdentityAsyncIssuanceRequestsWhere: IdentityAsyncIssuanceRequestsWhere;
   IdentityInput: IdentityInput;
   IdentityIssuanceWhere: IdentityIssuanceWhere;
   IdentityIssuer: ResolverTypeWrapper<IdentityIssuer>;
@@ -4674,6 +4699,7 @@ export type ResolversParentTypes = {
   Features: Features;
   HexColorCode: Scalars['HexColorCode']['output'];
   Identity: IdentityEntity;
+  IdentityAsyncIssuanceRequestsWhere: IdentityAsyncIssuanceRequestsWhere;
   IdentityInput: IdentityInput;
   IdentityIssuanceWhere: IdentityIssuanceWhere;
   IdentityIssuer: IdentityIssuer;
@@ -5092,6 +5118,7 @@ export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<Resolv
 }
 
 export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Identity'] = ResolversParentTypes['Identity']> = {
+  asyncIssuanceRequests?: Resolver<Array<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<IdentityAsyncIssuanceRequestsArgs, 'limit'>>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
