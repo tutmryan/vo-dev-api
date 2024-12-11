@@ -16,7 +16,7 @@ import type { OidcData } from './data'
 import { loadOidcData } from './data'
 import { eamExtraParams, hookForEamCustomSpec } from './entra-eam'
 import { extraParams } from './extra-params'
-import { loadExistingGrant, useGrantedResource } from './grants'
+import { loadExistingGrant } from './grants'
 import { keys } from './keys'
 import { logEvents } from './log-events'
 import { middleware } from './middleware'
@@ -69,7 +69,6 @@ async function createProvider() {
       resourceIndicators: {
         enabled: true,
         getResourceServerInfo: getResourceServerInfo(clients, resources),
-        useGrantedResource,
       },
     },
     interactions: {
