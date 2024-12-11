@@ -88,7 +88,6 @@ const config: DeepPartial<Config> = {
   },
   devToolsEnabled: true,
   faceCheckEnabled: true,
-  demoEnabled: true,
   oidcEnabled: true,
 }
 

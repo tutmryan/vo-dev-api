@@ -142,3 +142,6 @@ export const docsUrl = instance ? `https://${instance}.docs.verifiedorchestratio
 
 // OIDC provider API scope (the API origin)
 export const apiScope = new URL(apiUrl).origin
+
+// default demoEnabled to devToolsEnabled to align without having to set both flags in every environment
+export const demoEnabled = config.has('demoEnabled') ? config.get('demoEnabled') : config.get('devToolsEnabled')
