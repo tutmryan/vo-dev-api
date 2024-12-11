@@ -1,6 +1,5 @@
 import 'oidc-provider'
-import type { errors } from 'oidc-provider'
-import { OIDCProviderError } from 'oidc-provider'
+import type { errors, interactionPolicy as origInteractionPolicy, OIDCProviderError } from 'oidc-provider'
 
 declare module 'oidc-provider' {
   export interface ClientMetadata {}
@@ -11,6 +10,14 @@ declare module 'oidc-provider' {
   }
   class UseDpopNonce extends OIDCProviderError {
     constructor(description?: string, detail?: string)
+  }
+
+  // The definitely typed file for oidc-provider exports interactionPolicy as a namespace, but it's actually an object.
+  // Adds missing static properties to the Check class.
+  export type interactionPolicy = {
+    Check: typeof origInteractionPolicy.Check
+    Prompt: typeof origInteractionPolicy.Prompt
+    base: () => origInteractionPolicy.DefaultPolicy
   }
 
   // The definitely typed file for oidc-provider exports errors as a namespace, but that makes it difficult to import all the errors at once.

@@ -1,7 +1,7 @@
 import type { RouterContext } from '@koa/router'
 import type { JWK, JWTPayload, JWTVerifyGetKey, KeyLike } from 'jose'
 import { createLocalJWKSet, createRemoteJWKSet, decodeJwt, decodeProtectedHeader, jwtVerify } from 'jose'
-import type { Configuration, Errors, OIDCContext, UnknownObject } from 'oidc-provider'
+import type { interactionPolicy, Configuration, Errors, OIDCContext, UnknownObject } from 'oidc-provider'
 import { authTenantIds } from '../../config'
 import { dataSource } from '../../data'
 import type { ClaimConstraint } from '../../generated/graphql'
@@ -252,4 +252,25 @@ export const hookForEamCustomSpec = () => {
       },
     })
   })
+}
+
+export const addEamOverridePolicyStep = async (policy: interactionPolicy.DefaultPolicy): Promise<interactionPolicy.DefaultPolicy> => {
+  const loginPolicy = policy.get('login')
+  invariant(loginPolicy, 'login policy not found in the interaction policy')
+
+  const { interactionPolicy } = await oidcProviderModule()
+
+  loginPolicy.checks.add(
+    new interactionPolicy.Check('eam-force-prompt', 'EAM force prompt', async (ctx) => {
+      const { oidc } = ctx
+
+      if (oidc.route === 'authorization' && isEamRequest(oidc.params!, oidc.client!.clientId)) {
+        return interactionPolicy.Check.REQUEST_PROMPT
+      }
+
+      return interactionPolicy.Check.NO_NEED_TO_PROMPT
+    }),
+  )
+
+  return policy
 }

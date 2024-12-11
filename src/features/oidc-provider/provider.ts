@@ -1,7 +1,7 @@
 import type { Constructor } from '@graphql-tools/utils'
 import type { Express, RequestHandler } from 'express'
 import { debounce } from 'lodash'
-import type { Interaction, KoaContextWithOIDC, Provider, Configuration, Errors } from 'oidc-provider'
+import type { Interaction, KoaContextWithOIDC, Provider, Configuration, Errors, interactionPolicy } from 'oidc-provider'
 import { apiUrl, cookieSession } from '../../config'
 import { logger } from '../../logger'
 import { createRedisClient, isRedisEnabled } from '../../redis'
@@ -14,7 +14,7 @@ import { findAccount } from './account'
 import { openidClaims, presentationLoginStandardClaims } from './claims'
 import type { OidcData } from './data'
 import { loadOidcData } from './data'
-import { eamExtraParams, hookForEamCustomSpec } from './entra-eam'
+import { eamExtraParams, hookForEamCustomSpec, addEamOverridePolicyStep } from './entra-eam'
 import { extraParams } from './extra-params'
 import { loadExistingGrant } from './grants'
 import { keys } from './keys'
@@ -27,8 +27,10 @@ import { logoutSource } from './source'
 import { extraTokenClaims, issueRefreshToken } from './tokens'
 
 export const oidcProviderModule = Lazy(async () => {
-  const module = await dynamicImport<{ default: Constructor<Provider>; errors: Errors }>('oidc-provider')
-  return { Provider: module.default, errors: module.errors }
+  const module = await dynamicImport<{ default: Constructor<Provider>; errors: Errors; interactionPolicy: interactionPolicy }>(
+    'oidc-provider',
+  )
+  return { Provider: module.default, errors: module.errors, interactionPolicy: module.interactionPolicy }
 })
 
 const redisClient = Lazy(() => createRedisClient('oidc'))
@@ -45,7 +47,7 @@ async function createProvider() {
   const issuer = `${apiUrl}${oidcRoute}`
   logger.info(`Creating OIDC provider for: ${issuer}`)
 
-  const [{ Provider }, jwksKeys, data] = await Promise.all([oidcProviderModule(), keys(), loadOidcData()])
+  const [{ Provider, interactionPolicy }, jwksKeys, data] = await Promise.all([oidcProviderModule(), keys(), loadOidcData()])
   const { clients, clientMetadata, resources, resourceScopes } = data
 
   const provider = new Provider(issuer, {
@@ -75,6 +77,7 @@ async function createProvider() {
       url(_ctx: KoaContextWithOIDC, interaction: Interaction) {
         return `${oidcRoute}/interaction/${interaction.uid}`
       },
+      policy: await addEamOverridePolicyStep(interactionPolicy.base()),
     },
     extraParams: { ...extraParams, ...eamExtraParams },
     jwks: { keys: jwksKeys },
