@@ -15,7 +15,7 @@ import type { PartnerEntity } from '../partners/entities/partner-entity'
 import { getPresentationDataFromCache } from '../presentation/callback/cache'
 import { PresentationEntity } from '../presentation/entities/presentation-entity'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
-import { buildEamIdentityConstraint } from './entra-eam'
+import { buildEamIdentityConstraint } from './integrations/entra-eam'
 import { ExtraParams } from './extra-params'
 
 const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
@@ -30,11 +30,13 @@ type LoginInteractionDataPostStart = {
   sessionKey: string
   requestId?: string
   presentationId?: string
-  eam?: {
-    sub: string
-    iss: string
-    state: string
-    nonce: string
+  integrations?: {
+    entraEam?: {
+      sub: string
+      iss: string
+      state: string
+      nonce: string
+    }
   }
 }
 
@@ -145,7 +147,8 @@ export async function buildAuthnPresentationRequest(
     ]
   }
 
-  if (loginInteractionData.eam) {
+  if (loginInteractionData.integrations?.entraEam) {
+    // Entra EAM integration to constrain presentation to the user's identity
     constraints = [...(constraints ?? []), await buildEamIdentityConstraint(params, errors)]
   }
 
@@ -264,9 +267,10 @@ export async function completeLogin(
   const { claims: allClaims, type: types, issuer } = credential
   const { issuanceId, photo, ...claims } = allClaims
 
-  const accountId = interactionData.eam
-    ? interactionData.eam.sub
-    : await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
+  const accountId = !interactionData.integrations?.entraEam
+    ? await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
+    : // Entra EAM requires the sub to be the passed in sub
+      interactionData.integrations.entraEam.sub
 
   const account: PresentationLoginAccount = {
     accountId,
@@ -279,7 +283,7 @@ export async function completeLogin(
     credentialClaims: claims,
     revocationStatus: credential.credentialState.revocationStatus as string | undefined,
     faceCheckMatchConfidenceScore: credential.faceCheck?.matchConfidenceScore,
-    nonce: interactionData.eam?.nonce,
+    nonce: interactionData.integrations?.entraEam?.nonce,
   }
 
   // Persist the account

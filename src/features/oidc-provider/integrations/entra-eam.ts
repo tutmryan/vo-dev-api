@@ -2,18 +2,18 @@ import type { RouterContext } from '@koa/router'
 import type { JWK, JWTPayload, JWTVerifyGetKey, KeyLike } from 'jose'
 import { createLocalJWKSet, createRemoteJWKSet, decodeJwt, decodeProtectedHeader, jwtVerify } from 'jose'
 import type { interactionPolicy, Configuration, Errors, OIDCContext, UnknownObject } from 'oidc-provider'
-import { authTenantIds } from '../../config'
-import { dataSource } from '../../data'
-import type { ClaimConstraint } from '../../generated/graphql'
-import { logger } from '../../logger'
-import { newCacheSection, ONE_HOUR_TTL } from '../../redis/cache'
-import { invariant } from '../../util/invariant'
-import { Lazy } from '../../util/lazy'
-import { throwError } from '../../util/throw-error'
-import { IdentityEntity } from '../identity/entities/identity-entity'
-import { paramsToAuthParamsSpec, wrapOidcPipelineStep } from './integration-hook'
-import { getData, getProvider, oidcProviderModule } from './provider'
-import { getLoginInteractionData, setLoginInteractionData } from './session'
+import { authTenantIds } from '../../../config'
+import { dataSource } from '../../../data'
+import type { ClaimConstraint } from '../../../generated/graphql'
+import { logger } from '../../../logger'
+import { newCacheSection, ONE_HOUR_TTL } from '../../../redis/cache'
+import { invariant } from '../../../util/invariant'
+import { Lazy } from '../../../util/lazy'
+import { throwError } from '../../../util/throw-error'
+import { IdentityEntity } from '../../identity/entities/identity-entity'
+import { paramsToAuthParamsSpec, wrapOidcPipelineStep } from '../integration-hook'
+import { getData, getProvider, oidcProviderModule } from '../provider'
+import { getLoginInteractionData, setLoginInteractionData } from '../session'
 
 enum ExtraParams {
   client_request_id = 'client-request-id',
@@ -242,13 +242,17 @@ export const hookForEamCustomSpec = () => {
       ...(interactionData ?? {}),
       interactionId: oidc.entities.Interaction.uid,
       state: 'pre-start',
-      eam: {
-        sub:
-          (oidc.entities.IdTokenHint.payload.sub as string | undefined) ?? throwError('sub not found in IdTokenHint during EAM auth flow'),
-        iss:
-          (oidc.entities.IdTokenHint.payload.iss as string | undefined) ?? throwError('iss not found in IdTokenHint during EAM auth flow'),
-        state: (oidc.params.state as string | undefined) ?? throwError('state not found in params during EAM auth flow'),
-        nonce: (oidc.params.nonce as string | undefined) ?? throwError('nonce not found in params during EAM auth flow'),
+      integrations: {
+        entraEam: {
+          sub:
+            (oidc.entities.IdTokenHint.payload.sub as string | undefined) ??
+            throwError('sub not found in IdTokenHint during EAM auth flow'),
+          iss:
+            (oidc.entities.IdTokenHint.payload.iss as string | undefined) ??
+            throwError('iss not found in IdTokenHint during EAM auth flow'),
+          state: (oidc.params.state as string | undefined) ?? throwError('state not found in params during EAM auth flow'),
+          nonce: (oidc.params.nonce as string | undefined) ?? throwError('nonce not found in params during EAM auth flow'),
+        },
       },
     })
   })

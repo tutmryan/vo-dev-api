@@ -12,7 +12,7 @@ import { requestOrigin } from '../../express'
 import { logger } from '../../logger'
 import { invariant } from '../../util/invariant'
 import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
-import { eamPresentationLoginStandardClaims } from './entra-eam'
+import { eamPresentationLoginStandardClaims } from './integrations/entra-eam'
 import { createRequestInfo } from './log-events'
 import { voLogoUrl } from './logos'
 import { getData, getProvider } from './provider'
@@ -185,7 +185,7 @@ export function routes(app: Express, route: string): void {
         request: createRequestInfo(req),
       })
 
-      const amr: string[] = !loginInteractionData.eam
+      const amr: string[] = !loginInteractionData.integrations?.entraEam
         ? [...presentationLoginStandardClaims.amr]
         : [...eamPresentationLoginStandardClaims.amr]
       if (loginResult.faceCheckMatchConfidenceScore) amr.push(faceCheckAmr)
@@ -194,7 +194,7 @@ export function routes(app: Express, route: string): void {
         login: {
           accountId: loginResult.accountId,
           amr,
-          acr: !loginInteractionData.eam ? presentationLoginStandardClaims.acr : eamPresentationLoginStandardClaims.acr,
+          acr: !loginInteractionData.integrations?.entraEam ? presentationLoginStandardClaims.acr : eamPresentationLoginStandardClaims.acr,
         },
       }
 
