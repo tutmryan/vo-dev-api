@@ -149,11 +149,11 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
   // MS Docs say the value they send is the client ID registered in EAM, which is actually the spec (if we had issued it). However, the App ID registered for EAM is supplied in practice.
   if (decodedIdTokenHint.aud === clientId) return false
 
-  // It is extremely unlikely that this is not an EAM request at this point
+  // It is extremely unlikely that this is not an EAM request at this point. And if it isn't, it's an invalid request so breaking it by assuming it is EAM is fine
   return true
 }
 
-export const hookForEamCustomSpec = () => {
+export const hookAndApplyCustomEntraEamSpec = () => {
   // Override the authorization -> checkIdTokenHint pipeline step to apply custom logic for EAM requests
   wrapOidcPipelineStep('authorization', ['POST'], 'checkIdTokenHint', async (ctx, next, original) => {
     const { oidc } = ctx as RouterContext & { oidc: OIDCContext }
