@@ -13,15 +13,14 @@ declare module 'oidc-provider' {
   }
 
   // The definitely typed file for oidc-provider exports interactionPolicy as a namespace, but it's actually an object.
-  // Adds missing static properties to the Check class.
+  // The base method cannot be reached from the namespace too, so we need to export it correctly.
   export type interactionPolicy = {
     Check: typeof origInteractionPolicy.Check
     Prompt: typeof origInteractionPolicy.Prompt
     base: () => origInteractionPolicy.DefaultPolicy
   }
 
-  // The definitely typed file for oidc-provider exports errors as a namespace, but that makes it difficult to import all the errors at once.
-  // This is a workaround to export all the errors as a single object, which is closer to how the errors are exported in the oidc-provider codebase.
+  // The definitely typed file for oidc-provider exports errors as a namespace, but it's actually an object.
   export type Errors = {
     // The base error class that extends the built-in Error class.
     OIDCProviderError: typeof errors.OIDCProviderError
