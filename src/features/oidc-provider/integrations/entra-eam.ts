@@ -258,7 +258,9 @@ export const hookAndApplyCustomEntraEamSpec = () => {
   })
 }
 
-export const addEamOverridePolicyStep = async (policy: interactionPolicy.DefaultPolicy): Promise<interactionPolicy.DefaultPolicy> => {
+export const addEntraEamAlwaysPromptPolicyStep = async (
+  policy: interactionPolicy.DefaultPolicy,
+): Promise<interactionPolicy.DefaultPolicy> => {
   const loginPolicy = policy.get('login')
   invariant(loginPolicy, 'login policy not found in the interaction policy')
 

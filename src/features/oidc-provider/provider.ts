@@ -14,7 +14,7 @@ import { findAccount } from './account'
 import { openidClaims, presentationLoginStandardClaims } from './claims'
 import type { OidcData } from './data'
 import { loadOidcData } from './data'
-import { eamExtraParams, hookAndApplyCustomEntraEamSpec, addEamOverridePolicyStep } from './integrations/entra-eam'
+import { eamExtraParams, hookAndApplyCustomEntraEamSpec, addEntraEamAlwaysPromptPolicyStep } from './integrations/entra-eam'
 import { extraParams } from './extra-params'
 import { loadExistingGrant } from './grants'
 import { keys } from './keys'
@@ -78,7 +78,7 @@ async function createProvider() {
         return `${oidcRoute}/interaction/${interaction.uid}`
       },
       // interactionPolicy.base() was lifted from https://github.com/panva/node-oidc-provider/tree/main/docs#interactions / modifying the default interaction policy
-      policy: await addEamOverridePolicyStep(interactionPolicy.base()),
+      policy: await addEntraEamAlwaysPromptPolicyStep(interactionPolicy.base()),
     },
     extraParams: { ...extraParams, ...eamExtraParams },
     jwks: { keys: jwksKeys },
