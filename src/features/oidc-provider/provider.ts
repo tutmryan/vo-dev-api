@@ -121,7 +121,7 @@ const oidcRouteHandler: RequestHandler = async (req, res) => {
   return providerHandler(req, res)
 }
 
-export const dataRef: { provider?: Provider; data?: OidcData } = {}
+const dataRef: { provider?: Provider; data?: OidcData } = {}
 
 export function getProvider() {
   const provider = dataRef.provider
