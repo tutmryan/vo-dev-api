@@ -74,7 +74,7 @@ export async function buildAuthnPresentationRequest(
   params: UnknownObject,
   client: OidcClientEntity,
   partners: PartnerEntity[],
-  loginInteractionData: LoginInteractionData,
+  loginInteractionData?: LoginInteractionData,
 ): Promise<PresentationRequestForAuthnInput> {
   const vcTypeParam = params[ExtraParams.vc_type] as string | undefined
   const vcIssuerParam = params[ExtraParams.vc_issuer] as string | undefined
@@ -147,7 +147,7 @@ export async function buildAuthnPresentationRequest(
     ]
   }
 
-  if (loginInteractionData.integrations?.entraEam) {
+  if (loginInteractionData?.integrations?.entraEam) {
     // Entra EAM integration to constrain presentation to the user's identity
     constraints = [...(constraints ?? []), await buildEamIdentityConstraint(params, errors)]
   }

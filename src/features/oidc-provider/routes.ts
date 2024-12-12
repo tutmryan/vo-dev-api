@@ -92,7 +92,6 @@ export function routes(app: Express, route: string): void {
       invariant(client, 'client not found')
 
       const loginInteractionData = await getLoginInteractionData(uid)
-      invariant(loginInteractionData, 'login interaction data not found')
 
       switch (prompt.name) {
         case 'login': {
