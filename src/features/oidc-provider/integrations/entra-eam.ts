@@ -266,6 +266,8 @@ export const addEntraEamAlwaysPromptPolicyStep = async (
 
   const { interactionPolicy } = await oidcProviderModule()
 
+  // The interaction step confirms prompt behaviour by running all checks and looking for one or more REQUEST_PROMPT (true) results
+  // Ref: https://github.com/panva/node-oidc-provider/blob/cca48753c3a8079a59fa7837fdcfaa4ea2d9b946/lib/actions/authorization/interactions.js#L28
   loginPolicy.checks.add(
     new interactionPolicy.Check('eam-force-prompt', 'EAM force prompt', async (ctx) => {
       const { oidc } = ctx
