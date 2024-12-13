@@ -453,6 +453,8 @@ resource vidAuthorityIdSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
 
 @description('The instance, used to construct known URLs by convention')
 param instance string
+@description('The domain, used to construct known URLs by convention')
+param domain string
 @description('The value to use for API cors.origin setting (RegExp string[] of additional origins)')
 param corsOrigin string
 @description('Mapping of identity issuer identifiers to labels (JSON Record<string, string>)')
@@ -1219,7 +1221,7 @@ resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
     Request: {
       HttpVerb: 'GET'
       ParseDependentRequests: false
-      RequestUrl: 'https://${apiAppService.properties.defaultHostName}/health'
+      RequestUrl: 'https://${instance}.api.${domain}/health'
     }
     RetryEnabled: true
     SyntheticMonitorId: '${resourcePrefix}-api-availability-webtest'
@@ -1280,7 +1282,7 @@ resource oidcAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
     Request: {
       HttpVerb: 'GET'
       ParseDependentRequests: false
-      RequestUrl: 'https://${apiAppService.properties.defaultHostName}/oidc/.well-known/openid-configuration'
+      RequestUrl: 'https://${instance}.api.${domain}/oidc/.well-known/openid-configuration'
     }
     RetryEnabled: true
     SyntheticMonitorId: '${resourcePrefix}-oidc-availability-webtest'

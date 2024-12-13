@@ -327,6 +327,7 @@ runs:
           appServicePlanId=${{ inputs.app-service-plan-id }}
           nodeEnv=${{ inputs.node-env }}
           instance=${{ inputs.instance }}
+          domain=${{ inputs.domain }}
           corsOrigin="${{ inputs.cors-origin }}"
           apiCookieSecret=${{ steps.prepare-new-secrets.outputs.API-COOKIE-SECRET }}
           privateStorageClientEncryptionKey=${{ steps.prepare-new-secrets.outputs.PRIVATE-STORAGE-ENCRYPTION-KEY }}
