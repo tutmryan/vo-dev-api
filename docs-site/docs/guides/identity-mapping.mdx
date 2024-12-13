@@ -30,7 +30,7 @@ This allows identity-linked issuances and presentations to be resolved by identi
 />
 
 :::tip
-In the Admin UI, identity references are labelled as "Issuees".
+In the Composer, identity references are labelled as "Issuees".
 :::
 
 ## How does it work?
@@ -54,7 +54,7 @@ The table below demonstrates how an Entra identity store user can be mapped to a
 
 ### What each identity reference looks like
 
-A name is a convenient way to make identity references easily recognisable without querying your organisation's identity stores. Providing the name is optional. However, when a name is supplied, the Admin UI will use it for display when creating or viewing issuances, remote issuances, and presentations.
+A name is a convenient way to make identity references easily recognisable without querying your organisation's identity stores. Providing the name is optional. However, when a name is supplied, the Composer will use it for display when creating or viewing issuances, remote issuances, and presentations.
 
 Identity input has the following properties:
 
@@ -63,7 +63,7 @@ Identity input has the following properties:
 - **Name**: An optional human-readable name for quick identification of the identity.
 
 :::tip
-Custom labels can be configured for each identity store's issuer ID. This is a convenient way to make each identity store easier to distinguish between. When set, the Admin UI displays these human-readable labels instead of the issuer ID. See the [instance configuration guide](/docs/guides/instance-configuration) for more information.
+Custom labels can be configured for each identity store's issuer ID. This is a convenient way to make each identity store easier to distinguish between. When set, the Composer displays these human-readable labels instead of the issuer ID. See the [instance configuration guide](/docs/guides/instance-configuration) for more information.
 :::
 
 ### How to create identity references
@@ -154,7 +154,7 @@ We recommend using an email address as a globally unique identifier, and `manual
 ```
 
 :::tip
-The Admin UI has special handling of identity references featuring `manual` as the issuer, with these being shown and label as 'Manually Issued'.
+The Composer has special handling of identity references featuring `manual` as the issuer, with these being shown and label as 'Manually Issued'.
 :::
 
 ## Using identity references
@@ -162,7 +162,7 @@ The Admin UI has special handling of identity references featuring `manual` as t
 Once identity references are saved:
 
 - They can be used as an API entry point to find related data.
-- The Admin UI supports searching for issuances, remote issuances and presentations by linked identities.
+- The Composer supports searching for issuances, remote issuances and presentations by linked identities.
 - Admin users can find identities or list identities via the <AdminUrl path="/identities">Issuees page</AdminUrl>.
 
 ### Querying related data

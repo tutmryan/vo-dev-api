@@ -12,11 +12,11 @@ The Verified Orchestration platform offers integration options to suit different
 
 [Issuance](./issuance.mdx) is the process of creating and delivering a credential to the recipient's wallet (Microsoft Authenticator). The Verified Orchestration platform supports issuance in the following ways:
 
-### In person issuance via the Admin UI
+### In person issuance via the Composer
 
-A credential administrator can issue a credential on-the-spot to a recipient using the Admin UI. The recipient must scan the QR code with their mobile device to receive the credential.
+A credential administrator can issue a credential on-the-spot to a recipient using the Composer. The recipient must scan the QR code with their mobile device to receive the credential.
 
-This option is available by clicking the 'Issue' button when viewing a the credential in the Admin UI, then selecting the 'In person' delivery method.
+This option is available by clicking the 'Issue' button when viewing a the credential in the Composer, then selecting the 'In person' delivery method.
 
 Considerations:
 
@@ -36,11 +36,11 @@ Considerations:
 - Implementors can use the [JavaScript client](./integration/javascript-client/) library and [limited access tokens](./limited-access-tokens/) to simplify the user interface implementation.
 - Always requires a [secure backend](./limited-access-tokens/secure-backend-api.mdx) to protect the issuance process.
 
-### Remote issuance via the Admin UI
+### Remote issuance via the Composer
 
 [Remote issuance](./remote-issuance.mdx) allows you to issue credentials to recipients who are not present at the time of issuance. The recipient receives an email or SMS containing a link to receive the credential via the Portal website. An OTP (one time passcode) is used to verify the recipient.
 
-This option is available by clicking the 'Issue' button when viewing a the credential in the Admin UI, then selecting the 'Remote' delivery method.
+This option is available by clicking the 'Issue' button when viewing a the credential in the Composer, then selecting the 'Remote' delivery method.
 
 Considerations:
 
@@ -48,13 +48,13 @@ Considerations:
 - Requires the recipient to have an email address and ideally a mobile phone number for OTP verification over a second factor.
 - The Portal UI handles the issuance process, including photo capture and [wallet link handling](./wallet-link-handling.mdx).
 
-### Bulk remote issuance via the Admin UI
+### Bulk remote issuance via the Composer
 
-Bulk remote issuance allows you to issue credentials to many recipients at once. This option is available by clicking the 'Bulk issue' button when viewing a the credential in the Admin UI and uploading one or more CSV files.
+Bulk remote issuance allows you to issue credentials to many recipients at once. This option is available by clicking the 'Bulk issue' button when viewing a the credential in the Composer and uploading one or more CSV files.
 
 ### Remote issuance embedded in your applications
 
-Same as remote issuance via the Admin UI, but programmatically via the Verified Orchestration API.
+Same as remote issuance via the Composer, but programmatically via the Verified Orchestration API.
 
 Considerations:
 
@@ -104,7 +104,7 @@ Considerations:
 - Only suitable for workflows that require human approval.
 - Supports a strong level of control over the presentation process, e.g. presentation constraints and requiring biometric face check.
 
-### Presentation via the Admin UI
+### Presentation via the Composer
 
 It is possible to manually run credential presentations using the <AdminUrl path="/presentation-builder">presentation builder</AdminUrl>, however the tool's primary purpose is building and testing presentation requests.
 
@@ -146,6 +146,6 @@ All other types of operations must be run via server-side and be properly protec
 - Consider use of callbacks, or queries to keep potentially sensitive presentation data server-side, for example:
   - Receive the status of issuance or presentation events client-side to update the user interface.
   - Receive or query potentially sensitive credential data server-side.
-- For applications that support authenticated home Entra tenant users, [On-Behalf-Of (OBO) authentication flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) can be used to run administrative API operations as the logged in user, for example executing revocation of all credentials for an issuee from your own off-boarding app instead of using the Verified Orchestration Admin UI.
+- For applications that support authenticated home Entra tenant users, [On-Behalf-Of (OBO) authentication flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) can be used to run administrative API operations as the logged in user, for example executing revocation of all credentials for an issuee from your own off-boarding app instead of using the Verified Orchestration Composer.
 - Anonymous presentations can be run using limited access tokens
 - All other operations should be properly protected via authenticated access

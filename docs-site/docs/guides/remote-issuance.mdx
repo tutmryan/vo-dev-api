@@ -11,7 +11,7 @@ Remote issuance allows you to issue credentials to recipients who are not presen
 
 The issuance flow is as follows:
 
-- The recipient receives an email or SMS containing a link to receive the credential via the Verified Orchestration Portal website.
+- The recipient receives an email or SMS containing a link to receive the credential via the Verified Orchestration Concierge website.
 - The recipient opens the link and is verified by an SMS or email as second-factor authentication via an OTP (one-time passcode).
   - _If the recipient is not verified, the issuance is not completed_
 - Optionally, a guided photo-capture flow is used to capture a photo of the recipient for credential presentation in combination with Face Check.
@@ -38,22 +38,22 @@ Remote issuance is easier to implement than in-person issuance, since no user-in
 
 ## Bulk remote issuance
 
-Remote issuance supports bulk credential issuing to many recipients, either via app integration with the Verified Orchestration API or manually via the Admin UI.
+Remote issuance supports bulk credential issuing to many recipients, either via app integration with the Verified Orchestration API or manually via the Composer.
 
 :::warning
-Both the Admin portal and the API have a hard limit of creating no more than 1000 remote issuances at one time.
+Both the Composer and the API have a hard limit of creating no more than 1000 remote issuances at one time.
 
-- When using the Admin portal, you can split the CSV file into multiple files and upload them separately.
+- When using the the Composer, you can split the CSV file into multiple files and upload them separately.
 - When using the API, you can make multiple requests with a maximum of 1000 remote issuances per request.
   :::
 
 ## Manual remote issuance
 
-The Admin UI provides the ability to:
+The Composer provides the ability to:
 
 - Create remote issuances by clicking 'Issue Credential' when viewing a verifiable credential.
 - Create bulk remote issuances from a CSV file by clicking 'Bulk Issue Credential' when viewing a verifiable credential.
-- The 'Remote Issuances' section of the Admin UI allows you to list, filter, cancel, or view the details of remote issuances.
+- The 'Remote Issuances' section of the Composer allows you to list, filter, cancel, or view the details of remote issuances.
 
 ## Create remote issuance request
 
@@ -160,7 +160,7 @@ A verifiable credential with Face Check requires presentation via the Microsoft 
 
 ## Administration of remote issuances
 
-Once the remote issuance is created, it can be <AdminUrl path="/remote-issuances">viewed</AdminUrl> and managed via the Admin UI.
+Once the remote issuance is created, it can be <AdminUrl path="/remote-issuances">viewed</AdminUrl> and managed via the Composer.
 
 - The <AdminUrl path="/remote-issuances">Remote Issuances</AdminUrl> page lists all remote issuances, with the ability to filter by status, recipient, credential and date of creation.
 - Pending remote issuances can be cancelled by selecting one or more in the list, or from the details page when viewing a single remote issuance.
