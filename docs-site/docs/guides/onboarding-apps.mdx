@@ -20,35 +20,78 @@ The name of the Verified Orchestration platform application in Azure AD is: **Ve
 
 ## Access models
 
-Primary access to Verified Orchestration platform is via a client secret. A second access model caters for apps which do not have the ability to securely store a secret. Limited access tokens can be used in this case.
+Primary access to the Verified Orchestration platform is via client credentials. A second access model, [limited access tokens](./limited-access-tokens/), supports controlled access by apps which do not have the ability to securely store a secret.
 
-### Limited access token model
+## Conventional access via client credentials
 
-This model is best suited for the client apps which do not have the ability to securely store a secret such as Single Page Applications (SPA), mobile apps, etc. The following application permissions from Verified Orchestration API are applicable to this access model.
+This model is suitable for apps which can securely store a secret, such as APIs, automation workflows, etc. The following application roles apply to this access model:
 
-- **VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations**<br/>
-  Acquire limited access token: anonymous presentations
-- **VerifiableCredential.AcquireLimitedAccessToken.Issue**<br/>
-  Acquire limited access token: issue
-- **VerifiableCredential.AcquireLimitedAccessToken.ListContracts**<br/>
-  Acquire limited access token: list contracts
-- **VerifiableCredential.AcquireLimitedAccessToken.Present**<br/>
-  Acquire limited access token: present
+- [Issue](#issue)
+- [Present](#present)
+- [Request approval](#request-approval)
+
+### Issue
+
+Application role: `VerifiableCredential.Issue`
+
+Permissions:
+
+- Create and read issuance data
+- Create and read identity data
+- Create photo capture requests
+- Read contract data
+
+### Present
+
+Application role: `VerifiableCredential.Present`
+
+Permissions:
+
+- Create and read presentation data
+- Read identity data
+- Read contract data
+
+### Request approval
+
+Application role: `VerifiableCredential.RequestApproval`
+
+Permissions:
+
+- Create approval requests
+- Manage approval requests (update, cancel) that were created by the app
+
+## Limited access token model
+
+Limited access tokens support controlled access in client apps which do not have the ability to securely store a secret, such as Single Page Applications (SPA), mobile apps, etc. The following application roles allow a secure backend app to acquire limited access tokens to be used in such client apps.
+
+### Acquire anonymous presentation token
+
+Application role: `VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations`
+
+Permissions:
+
+- Create and read identity data
+- Acquire a limited access token with the ability to: perform anonymous presentations
+
+### Acquire issue token
+
+Application role: `VerifiableCredential.AcquireLimitedAccessToken.Issue`
+
+Permissions:
+
+- Create and read identity data
+- Acquire a limited access token with the ability to: issue credentials and read issuance data
+
+### Acquire list contracts token
+
+Application role: `VerifiableCredential.AcquireLimitedAccessToken.ListContracts`
+
+Permissions:
+
+- Create and read identity data
+- Acquire a limited access token with the ability to: list contracts
 
 For more information on how the limited access token works, refer to the [Limited access tokens guide](./limited-access-tokens/).
-
-### Conventional access token model
-
-This model is also available for the apps which can securely store a secret such as APIs, automation workflows, etc. The following application permissions from Verified Orchestration API are applicable to this access model.
-
-- **VerifiableCredential.Issue**<br/>
-  Credential issuance
-- **VerifiableCredential.Present**<br/>
-  Credential presentation
-- **VerifiableCredential.RequestApproval**<br/>
-  Create and manage approval requests
-
-These permissions can be granted to the App registration depending on the requirements of the consumer app.
 
 ## Authorization
 

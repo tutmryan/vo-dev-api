@@ -46,4 +46,8 @@ export const resolvers: Resolvers = {
     asyncIssuanceRequests: (identity, { where, offset, limit }, context) =>
       query(context, FindAsyncIssuancesQuery, { identityId: identity.id, ...where }, offset, limit),
   },
+  Contract: {
+    asyncIssuanceRequests: (contract, { where, offset, limit }, context) =>
+      query(context, FindAsyncIssuancesQuery, { contractId: contract.id, ...where }, offset, limit),
+  },
 }

@@ -612,7 +612,7 @@ extend type Contract {
   """
   Returns the successful credential issuances for this contract.
   """
-  issuances(where: ContractIssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
+  issuances(where: ContractIssuanceWhere, offset: PositiveInt, limit: PositiveInt = 100): [Issuance!]!
   """
   Returns the total number of credential issuances for this contract.
   """
@@ -627,7 +627,7 @@ extend type Identity {
   """
   Returns the successful credential issuances for this identity.
   """
-  issuances(where: IdentityIssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
+  issuances(where: IdentityIssuanceWhere, offset: PositiveInt, limit: PositiveInt = 100): [Issuance!]!
   """
   Returns the total number of credential issuances for this identity.
   """
@@ -638,7 +638,7 @@ extend type User {
   """
   Returns the successful credential issuances this user has made (issuance.issuedBy => user).
   """
-  issuances(where: UserIssuanceWhere, offset: PositiveInt, limit: PositiveInt): [Issuance!]!
+  issuances(where: UserIssuanceWhere, offset: PositiveInt, limit: PositiveInt = 100): [Issuance!]!
 }
 
 """

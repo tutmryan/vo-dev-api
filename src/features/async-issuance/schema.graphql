@@ -474,6 +474,28 @@ input IdentityAsyncIssuanceRequestsWhere {
 }
 
 """
+Represents the criteria for filtering async issuances requests for a contract.
+"""
+input ContractAsyncIssuanceRequestsWhere {
+  """
+  Return async issuance requests with the specified status.
+  """
+  status: AsyncIssuanceRequestStatus
+  """
+  Return async issuance requests for the specified identity.
+  """
+  identityId: ID
+  """
+  Return async issuance requests created after this point.
+  """
+  createdFrom: DateTime
+  """
+  Return async issuance requests created before this point.
+  """
+  createdTo: DateTime
+}
+
+"""
 Fields that can be used for sorting async issuance requests by.
 """
 enum AsyncIssuanceRequestsOrderBy {
@@ -516,4 +538,11 @@ extend type Identity {
   Returns the async issuance requests for this identity, optionally matching the specified criteria.
   """
   asyncIssuanceRequests(where: IdentityAsyncIssuanceRequestsWhere, offset: PositiveInt, limit: PositiveInt = 100): [AsyncIssuanceRequest!]!
+}
+
+extend type Contract {
+  """
+  Returns the async issuance requests for this contract, optionally matching the specified criteria.
+  """
+  asyncIssuanceRequests(where: ContractAsyncIssuanceRequestsWhere, offset: PositiveInt, limit: PositiveInt = 100): [AsyncIssuanceRequest!]!
 }

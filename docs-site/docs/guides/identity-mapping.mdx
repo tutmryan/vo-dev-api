@@ -163,50 +163,147 @@ Once identity references are saved:
 
 - They can be used as an API entry point to find related data.
 - The Composer supports searching for issuances, remote issuances and presentations by linked identities.
-- Admin users can find identities or list identities via the <AdminUrl path="/identities">Issuees page</AdminUrl>.
+- Admin users can find, list and filter identities via the quick search or <AdminUrl path="/identities">Issuees page</AdminUrl>.
 
-### Querying related data
+### Querying identity data
 
-Identities can be queried to return one or many by using either the Verified Orchestration identity ID or your organisation's own identity data. When using your own organisation's own identity data, you will construct and pass one or more identity references which the Verified Orchestration API will use to find the corresponding identity.
+Identities can be queried to return one or many by using either the Verified Orchestration identity ID or your organisation's own identity data (issuer and identifier unique key).
 
 The following queries are available:
 
 - [identity](/docs/reference/api/queries/identity) finds a single identity by ID
 - [identities](/docs/reference/api/queries/identities) finds multiple identities by ID
-- [identitiesByIdentifier](/docs/reference/api/queries/identities-by-identifiers) finds one or more identities by issuer and identifier unique key
+- [identityByIdentifier](/docs/reference/api/queries/identity-by-identifier) finds one identity by issuer and identifier unique key
+- [identitiesByIdentifiers](/docs/reference/api/queries/identities-by-identifiers) finds one or more identities by issuer and identifier unique key
 - [findIdentities](/docs/reference/api/queries/find-identities) finds identities by issuer and name partial match
 
-```graphql title="Example query to find an identity and view issuances and presentations"
-query Identity($identityId: ID!, $limit: PositiveInt) {
+You can also simply upsert and query identities in a single operation:
+
+- [saveIdentity](/docs/reference/api/mutations/save-identity) performs an efficient upsert operation to save or update an identity by issuer and identifier unique key, data can be returned in the same operation
+
+### Example identity operations
+
+```graphql title="Upsert an identity, query active issuances, pending remote issuances"
+mutation UpsertIdentityWithIssuances($input: IdentityInput!) {
+  saveIdentity(input: $input) {
+    id
+    issuer
+    issuerLabel
+    identifier
+    name
+    issuances(where: { status: active }) {
+      id
+      issuedAt
+      status
+      hasFaceCheckPhoto
+      contract {
+        id
+        name
+      }
+    }
+    asyncIssuanceRequests(where: { status: pending }) {
+      id
+      createdAt
+      createdBy {
+        id
+        name
+        isApp
+      }
+      expiresOn
+      status
+      contract {
+        id
+        name
+      }
+    }
+  }
+}
+```
+
+```graphql title="Query an identity by ID with presentations"
+query IdentityWithPresentations($identityId: ID!) {
   identity(id: $identityId) {
     id
     issuer
     issuerLabel
     identifier
     name
-    issuanceCount
-    issuances(limit: $limit) {
-      contract {
-        name
-      }
-      issuedAt
-      issuedBy {
-        name
-        isApp
-      }
-      status
-      hasFaceCheckPhoto
-    }
-    presentations(limit: $limit) {
+    presentations {
       presentedAt
       presentedCredentials {
         issuer
         type
         issuer
+        faceCheck {
+          matchConfidenceScore
+        }
       }
       requestedBy {
+        id
         name
         isApp
+      }
+    }
+  }
+}
+```
+
+```graphql title="Query an identity by issuer and identifier unique key"
+query IdentityWithIssuances($issuerId: IssuerIdentifierInput!) {
+  identityByIdentifier(issuerId: $issuerId) {
+    id
+    issuer
+    issuerLabel
+    identifier
+    name
+    issuances(where: { status: active }) {
+      id
+      issuedAt
+      status
+      contract {
+        id
+        name
+      }
+    }
+    asyncIssuanceRequests(where: { status: pending }) {
+      id
+      createdAt
+      expiresOn
+      status
+      contract {
+        id
+        name
+      }
+    }
+  }
+}
+```
+
+```graphql title="Query a set of identities by issuer and identifier unique key"
+query IdentitiesWithIssuances($issuerIds: [IssuerIdentifierInput!]!) {
+  identitiesByIdentifiers(filters: $issuerIds) {
+    id
+    issuer
+    issuerLabel
+    identifier
+    name
+    issuances(where: { status: active }) {
+      id
+      issuedAt
+      status
+      contract {
+        id
+        name
+      }
+    }
+    asyncIssuanceRequests(where: { status: pending }) {
+      id
+      createdAt
+      expiresOn
+      status
+      contract {
+        id
+        name
       }
     }
   }

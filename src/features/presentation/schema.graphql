@@ -742,7 +742,7 @@ extend type Contract {
   """
   Returns the successful credential presentations for this contract.
   """
-  presentations(where: ContractPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+  presentations(where: ContractPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
   """
   Returns the weekly average of credential presentations for this contract.
   """
@@ -753,35 +753,35 @@ extend type Identity {
   """
   Returns the successful credential presentations for this identity.
   """
-  presentations(where: IdentityPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+  presentations(where: IdentityPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
 extend type User {
   """
   Returns the successful credential presentations this user has requested (presentation.requestedBy => user).
   """
-  presentations(where: UserPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+  presentations(where: UserPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
 extend type Issuance {
   """
   Returns the successful credential presentations for this issuance.
   """
-  presentations(where: IssuancePresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+  presentations(where: IssuancePresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
 extend type Partner {
   """
   Returns the successful credential presentations of credentails issued by this partner.
   """
-  presentations(where: PartnerPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+  presentations(where: PartnerPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
 extend type OidcClient {
   """
   Returns the successful credential presentations that were requested for authorization .
   """
-  presentations(where: OidcClientPresentationWhere, offset: PositiveInt, limit: PositiveInt): [Presentation!]!
+  presentations(where: OidcClientPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
 """

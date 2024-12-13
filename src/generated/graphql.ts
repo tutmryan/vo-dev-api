@@ -855,6 +855,8 @@ export enum ContactMethod {
 /** Defines a contract that can be used to issue credentials */
 export type Contract = {
   __typename?: 'Contract';
+  /** Returns the async issuance requests for this contract, optionally matching the specified criteria. */
+  asyncIssuanceRequests: Array<AsyncIssuanceRequest>;
   /** When the contract was created. */
   createdAt: Scalars['DateTime']['output'];
   /** The user who created the contract. */
@@ -922,6 +924,14 @@ export type Contract = {
 
 
 /** Defines a contract that can be used to issue credentials */
+export type ContractAsyncIssuanceRequestsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<ContractAsyncIssuanceRequestsWhere>;
+};
+
+
+/** Defines a contract that can be used to issue credentials */
 export type ContractIssuanceWeeklyAverageArgs = {
   where: ContractIssuanceWeeklyAverageWhere;
 };
@@ -946,6 +956,18 @@ export type ContractPresentationsArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
   where?: InputMaybe<ContractPresentationWhere>;
+};
+
+/** Represents the criteria for filtering async issuances requests for a contract. */
+export type ContractAsyncIssuanceRequestsWhere = {
+  /** Return async issuance requests created after this point. */
+  createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Return async issuance requests created before this point. */
+  createdTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** Return async issuance requests for the specified identity. */
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** Return async issuance requests with the specified status. */
+  status?: InputMaybe<AsyncIssuanceRequestStatus>;
 };
 
 /** Represents a count of occurrences of a contract. */
@@ -1444,8 +1466,6 @@ export type Identity = {
 export type IdentityAsyncIssuanceRequestsArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
-  orderBy?: InputMaybe<AsyncIssuanceRequestsOrderBy>;
-  orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<IdentityAsyncIssuanceRequestsWhere>;
 };
 
@@ -4466,6 +4486,7 @@ export type ResolversTypes = {
   Contract: ResolverTypeWrapper<ContractEntity>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
+  ContractAsyncIssuanceRequestsWhere: ContractAsyncIssuanceRequestsWhere;
   ContractCount: ResolverTypeWrapper<Omit<ContractCount, 'contract'> & { contract: ResolversTypes['Contract'] }>;
   ContractDisplayClaim: ResolverTypeWrapper<Omit<ContractDisplayClaim, 'validation'> & { validation?: Maybe<ResolversTypes['ClaimValidation']> }>;
   ContractDisplayClaimInput: ContractDisplayClaimInput;
@@ -4664,6 +4685,7 @@ export type ResolversParentTypes = {
   Contract: ContractEntity;
   Int: Scalars['Int']['output'];
   Float: Scalars['Float']['output'];
+  ContractAsyncIssuanceRequestsWhere: ContractAsyncIssuanceRequestsWhere;
   ContractCount: Omit<ContractCount, 'contract'> & { contract: ResolversParentTypes['Contract'] };
   ContractDisplayClaim: Omit<ContractDisplayClaim, 'validation'> & { validation?: Maybe<ResolversParentTypes['ClaimValidation']> };
   ContractDisplayClaimInput: ContractDisplayClaimInput;
@@ -4993,6 +5015,7 @@ export type ContactResolvers<ContextType = GraphQLContext, ParentType extends Re
 };
 
 export type ContractResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Contract'] = ResolversParentTypes['Contract']> = {
+  asyncIssuanceRequests?: Resolver<Array<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<ContractAsyncIssuanceRequestsArgs, 'limit'>>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
@@ -5007,12 +5030,12 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   isPublic?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issuanceCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   issuanceWeeklyAverage?: Resolver<ResolversTypes['Float'], ParentType, ContextType, RequireFields<ContractIssuanceWeeklyAverageArgs, 'where'>>;
-  issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<ContractIssuancesArgs>>;
+  issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, RequireFields<ContractIssuancesArgs, 'limit'>>;
   lastProvisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastProvisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   presentationWeeklyAverage?: Resolver<ResolversTypes['Float'], ParentType, ContextType, RequireFields<ContractPresentationWeeklyAverageArgs, 'where'>>;
-  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<ContractPresentationsArgs>>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<ContractPresentationsArgs, 'limit'>>;
   provisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   provisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   template?: Resolver<Maybe<ResolversTypes['Template']>, ParentType, ContextType>;
@@ -5124,11 +5147,11 @@ export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends R
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   issuanceCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<IdentityIssuancesArgs>>;
+  issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, RequireFields<IdentityIssuancesArgs, 'limit'>>;
   issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   issuerLabel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<IdentityPresentationsArgs>>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<IdentityPresentationsArgs, 'limit'>>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -5150,7 +5173,7 @@ export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends R
   isRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   issuedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   issuedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<IssuancePresentationsArgs>>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<IssuancePresentationsArgs, 'limit'>>;
   revokedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   revokedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['IssuanceStatus'], ParentType, ContextType>;
@@ -5290,7 +5313,7 @@ export type OidcClientResolvers<ContextType = GraphQLContext, ParentType extends
   partners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType>;
   policyUrl?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
   postLogoutUris?: Resolver<Array<ResolversTypes['URL']>, ParentType, ContextType>;
-  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<OidcClientPresentationsArgs>>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<OidcClientPresentationsArgs, 'limit'>>;
   redirectUris?: Resolver<Array<ResolversTypes['URL']>, ParentType, ContextType>;
   requireFaceCheck?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   resources?: Resolver<Maybe<Array<ResolversTypes['OidcClientResource']>>, ParentType, ContextType>;
@@ -5329,7 +5352,7 @@ export type PartnerResolvers<ContextType = GraphQLContext, ParentType extends Re
   issuerId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   linkedDomainUrls?: Resolver<Maybe<Array<ResolversTypes['URL']>>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<PartnerPresentationsArgs>>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<PartnerPresentationsArgs, 'limit'>>;
   tenantId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
@@ -5444,7 +5467,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findOidcResources?: Resolver<Array<ResolversTypes['OidcResource']>, ParentType, ContextType, RequireFields<QueryFindOidcResourcesArgs, 'limit'>>;
   findPartners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType, RequireFields<QueryFindPartnersArgs, 'limit'>>;
   findPresentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<QueryFindPresentationsArgs, 'limit'>>;
-  findTemplates?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType, Partial<QueryFindTemplatesArgs>>;
+  findTemplates?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType, RequireFields<QueryFindTemplatesArgs, 'limit'>>;
   findTenantIdentities?: Resolver<Array<ResolversTypes['TenantIdentity']>, ParentType, ContextType, RequireFields<QueryFindTenantIdentitiesArgs, 'limit' | 'where'>>;
   findUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryFindUsersArgs, 'limit'>>;
   healthcheck?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
@@ -5635,9 +5658,9 @@ export type UserResolvers<ContextType = GraphQLContext, ParentType extends Resol
   email?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isApp?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, Partial<UserIssuancesArgs>>;
+  issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, RequireFields<UserIssuancesArgs, 'limit'>>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, Partial<UserPresentationsArgs>>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<UserPresentationsArgs, 'limit'>>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
