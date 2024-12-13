@@ -10,25 +10,26 @@ Releases are usually deployed in stages to:
 
 Once QA has been performed and a proposed release is agreed:
 
-- Create a new release in GitHub (one for each component being released)
-- For the title, use version number (which is the default)
-- Use versioning `v${YYYY}.${minor}.${patch}` e.g. `v2024.0.0`, `v2024.1.0` or `v2024.1.1` (patch)
-  - Use the current year
-  - Increment the minor version when creating a new release from main
-  - Increment the patch when creating a new release from a prior release
-- Generate release notes
-- Curate [release notes](#release-notes))
-- Ensure customer communications are completed with release notes, and any notification period is awaited before deployment at agreed time
+1. Create a new release in GitHub (one for each component being released)
+1. For the title, use version number (which is the default)
+1. Use versioning `v${YYYY}.${minor}.${patch}` e.g. `v2024.0.0`, `v2024.1.0` or `v2024.1.1` (patch)
+  1. Use the current year
+  1. Increment the minor version when creating a new release from main
+  1. Increment the patch when creating a new release from a prior release
+1. Generate release notes
+1. Curate [release notes](#release-notes))
+1. Ensure customer communications are completed with release notes, and any notification period is awaited before deployment at agreed time
 
 ## Release notes
 
 Curate the release notes into a format which will make sense to a customer.
 
-- Break into sections for:
-  - New features
-  - Enhancements
-  - Fixes
-- Balance detail with customer relevency
+Break into sections for:
+ 1. New features
+ 1. Enhancements
+ 1. Fixes
+
+Balance detail with customer relevency.
 
 ### Example
 
@@ -54,10 +55,10 @@ Curate the release notes into a format which will make sense to a customer.
 
 ## Hotfix procedure
 
-- Fix bug
-- PR and merge to main
-- Test, confirm
-- Create branch from target release (usually the most recent release)
-- Cherrypick fix commit(s) to release branch
-- Create release in the usual way, incrementing only the patch version number from the target release
-- Verify fix as appropriate before broad rollout
+1. Fix bug
+1. PR and merge to main
+1. Test, confirm
+1. Create **branch from target release tag** (usually the most recent release)
+1. Cherrypick fix commit(s) to release branch
+1. Create release in the usual way, **incrementing only the patch version number** from the target release version
+1. Verify fix as appropriate before broad rollout
