@@ -19,6 +19,7 @@ Once QA has been performed and a proposed release is agreed:
 1. Generate release notes
 1. Curate [release notes](#release-notes))
 1. Ensure customer communications are completed with release notes, and any notification period is awaited before deployment at agreed time
+1. To release, run the Release workflow against the new release tag 
 
 ## Release notes
 
