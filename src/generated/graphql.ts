@@ -1372,6 +1372,8 @@ export type Discovery = {
   features: Features;
   /** Returns the URLs for various features. */
   urls: FeatureUrls;
+  /** Returns the version of the API. */
+  version: Scalars['String']['output'];
 };
 
 /** The type of face check photo support */
@@ -5102,6 +5104,7 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 export type DiscoveryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Discovery'] = ResolversParentTypes['Discovery']> = {
   features?: Resolver<ResolversTypes['Features'], ParentType, ContextType>;
   urls?: Resolver<ResolversTypes['FeatureUrls'], ParentType, ContextType>;
+  version?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

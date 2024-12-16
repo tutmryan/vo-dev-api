@@ -58,6 +58,10 @@ type Discovery {
   Returns the URLs for various features.
   """
   urls: FeatureUrls!
+  """
+  Returns the version of the API.
+  """
+  version: String!
 }
 
 extend type Query {

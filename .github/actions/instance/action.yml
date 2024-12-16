@@ -307,6 +307,16 @@ runs:
         -ActionGroupName '${{ inputs.shared-action-group-alert-name }}'
         -SharedResourceGroupName '${{ inputs.shared-resource-group-name }}'
 
+    - name: Set Release Version
+      id: set-release-version
+      shell: bash
+      run: |
+        if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          echo "RELEASE_VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        else
+          echo "RELEASE_VERSION=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
+        fi
+
     - name: Instance infrastructure
       id: instance-infra
       uses: azure/arm-deploy@v1
@@ -327,6 +337,7 @@ runs:
           appServicePlanId=${{ inputs.app-service-plan-id }}
           nodeEnv=${{ inputs.node-env }}
           instance=${{ inputs.instance }}
+          releaseVersion="${{ env.RELEASE_VERSION }}"
           domain=${{ inputs.domain }}
           corsOrigin="${{ inputs.cors-origin }}"
           apiCookieSecret=${{ steps.prepare-new-secrets.outputs.API-COOKIE-SECRET }}

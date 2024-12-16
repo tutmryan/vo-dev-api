@@ -30,6 +30,7 @@ const config: EnvVarSubstitution<Config> = {
     },
   },
   instance: 'INSTANCE',
+  version: 'VERSION',
   devToolsEnabled: json('DEV_TOOLS_ENABLED'),
   faceCheckEnabled: json('FACE_CHECK_ENABLED'),
   demoEnabled: json('DEMO_ENABLED'),

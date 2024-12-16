@@ -54,6 +54,7 @@ export type Config = {
    * The instance label, used to generate URLs according to convention
    */
   instance: string
+  version: string
   devToolsEnabled: boolean
   faceCheckEnabled: boolean
   demoEnabled: boolean

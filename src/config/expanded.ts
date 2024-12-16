@@ -123,6 +123,9 @@ export const platformConsumerApps = {
 // the instance config or undefined for localdev
 export const instance = config.has('instance') ? config.get('instance') : undefined
 
+// the version of the instance set to 'localdev' for localdev
+export const version = config.has('version') ? config.get('version') : 'localdev'
+
 // URLs
 export const portalUrl = config.has('instance')
   ? `https://${config.get('instance')}.portal.verifiedorchestration.com`

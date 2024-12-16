@@ -1,4 +1,4 @@
-import { demoEnabled, devToolsEnabled, docsUrl, faceCheckEnabled, oidcAuthorityUrl, oidcEnabled, portalUrl } from '../../config'
+import { demoEnabled, devToolsEnabled, docsUrl, faceCheckEnabled, oidcAuthorityUrl, oidcEnabled, portalUrl, version } from '../../config'
 import type { Resolvers } from '../../generated/graphql'
 
 export const resolvers: Resolvers = {
@@ -10,6 +10,7 @@ export const resolvers: Resolvers = {
         portalUrl,
         oidcAuthorityUrl: oidcEnabled ? oidcAuthorityUrl : undefined,
       },
+      version,
     }),
   },
 }

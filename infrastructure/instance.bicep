@@ -453,6 +453,8 @@ resource vidAuthorityIdSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
 
 @description('The instance, used to construct known URLs by convention')
 param instance string
+@description('The release version of the instance')
+param releaseVersion string
 @description('The domain, used to construct known URLs by convention')
 param domain string
 @description('The value to use for API cors.origin setting (RegExp string[] of additional origins)')
@@ -1079,6 +1081,7 @@ resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
     APPINSIGHTS_INSTRUMENTATION_KEY: apiAppInsights.properties.InstrumentationKey
     APPLICATIONINSIGHTS_CONNECTION_STRING: apiAppInsights.properties.ConnectionString
     INSTANCE: instance
+    VERSION: releaseVersion
     CORS_ORIGIN: corsOrigin
     COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiCookieSecret) ? apiCookieSecretSecretExisting : apiCookieSecretSecret).properties.secretUri})'
     SMS_SECRET: '@Microsoft.KeyVault(SecretUri=${smsSecretSecret.properties.secretUri})'
