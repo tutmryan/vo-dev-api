@@ -1,7 +1,6 @@
 import { BullMQInstrumentation } from '@jenniferplusplus/opentelemetry-instrumentation-bullmq'
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express'
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql'
-import { IORedisInstrumentation } from '@opentelemetry/instrumentation-ioredis'
 import TediousInstrumentation from '@opentelemetry/instrumentation-tedious'
 import { UndiciInstrumentation } from '@opentelemetry/instrumentation-undici'
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston'
@@ -27,7 +26,6 @@ export const instrumentations = [
   }),
   new WSInstrumentation(),
   new TediousInstrumentation(),
-  new IORedisInstrumentation(),
   new BullMQInstrumentation(),
   new UndiciInstrumentation(),
 ]

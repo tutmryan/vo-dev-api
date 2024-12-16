@@ -119,7 +119,6 @@
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.52.1",
     "@opentelemetry/instrumentation-express": "^0.40.1",
     "@opentelemetry/instrumentation-graphql": "^0.41.0",
-    "@opentelemetry/instrumentation-ioredis": "^0.41.0",
     "@opentelemetry/instrumentation-tedious": "^0.11.0",
     "@opentelemetry/instrumentation-undici": "^0.3.0",
     "@opentelemetry/instrumentation-winston": "^0.38.0",
