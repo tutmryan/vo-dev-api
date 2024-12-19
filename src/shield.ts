@@ -45,15 +45,17 @@ import { hasAnyRoleRuleWithName, hasRoleRule } from './util/shield-utils'
 
 const isUserWithReadPermissions = hasAnyRoleRuleWithName('isUserWithReadPermissions', ...Object.values(UserRoles))
 
+// user roles
 const isIssuerUser = hasRoleRule(UserRoles.issuer)
 const isCredentialAdminUser = hasRoleRule(UserRoles.credentialAdmin)
 const isPartnerAdminUser = hasRoleRule(UserRoles.partnerAdmin)
 const isApprovalRequestAdminUser = hasRoleRule(UserRoles.approvalRequestAdmin)
 const isOidcAdminUser = hasRoleRule(UserRoles.oidcAdmin)
 
-// general app roles for Issue & Present
+// app roles
 const isIssuanceApp = hasRoleRule(AppRoles.issue, 'isIssuanceApp')
 const isPresentationApp = hasRoleRule(AppRoles.present, 'isPresentationApp')
+const isContractAdminApp = hasRoleRule(AppRoles.contractAdmin, 'isContractAdminApp')
 
 const isIssuer = or(isIssuerUser, isIssuanceApp, isLimitedIssuanceApp)
 const isAsyncIssuer = or(isIssuerUser, isIssuanceApp)
@@ -62,6 +64,7 @@ const fallbackRule = or(
   isUserWithReadPermissions,
   isIssuanceApp,
   isPresentationApp,
+  isContractAdminApp,
   isLimitedAccessApp,
   isLimitedApprovalApp,
   isLimitedAsyncIssuanceApp,
@@ -82,15 +85,20 @@ const isAllowedToViewPresentations = or(
   isValidLimitedApprovalPresentationFilter,
   isValidOidcAuthnPresentationFilter,
 )
+const isAllowedToViewAsyncIssuanceRequests = or(isUserWithReadPermissions, isIssuanceApp)
 export const rules: ShieldSchema<Resolvers> = {
   Query: {
     '*': isUserWithReadPermissions,
     healthcheck: allow,
-    contract: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isValidLimitedContractRequest),
-    findContracts: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isLimitedListContractsApp),
+    template: or(isUserWithReadPermissions, isContractAdminApp),
+    findTemplates: or(isUserWithReadPermissions, isContractAdminApp),
+    templateCombinedData: or(isUserWithReadPermissions, isContractAdminApp),
+    contract: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isContractAdminApp, isValidLimitedContractRequest),
+    findContracts: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isContractAdminApp, isLimitedListContractsApp),
     findApprovalRequests: isApprovalRequestAdminUser,
     identity: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isValidLimitedIdentityRequest),
     findIssuances: isAllowedToViewIssuances,
+    findAsyncIssuanceRequests: isAllowedToViewAsyncIssuanceRequests,
     findPresentations: isAllowedToViewPresentations,
     findNetworkIssuers: isPartnerAdminUser,
     networkContracts: isPartnerAdminUser,
@@ -115,6 +123,14 @@ export const rules: ShieldSchema<Resolvers> = {
   },
   Mutation: {
     '*': isCredentialAdminUser,
+    createTemplate: or(isCredentialAdminUser, isContractAdminApp),
+    updateTemplate: or(isCredentialAdminUser, isContractAdminApp),
+    deleteTemplate: or(isCredentialAdminUser, isContractAdminApp),
+    createContract: or(isCredentialAdminUser, isContractAdminApp),
+    updateContract: or(isCredentialAdminUser, isContractAdminApp),
+    deleteContract: or(isCredentialAdminUser, isContractAdminApp),
+    provisionContract: or(isCredentialAdminUser, isContractAdminApp),
+    deprecateContract: or(isCredentialAdminUser, isContractAdminApp),
     acquireLimitedAccessToken: and(hasTokenAcquisitionRole, isValidAcquireLimitedAccessTokenRequest),
     acquireLimitedApprovalToken: allow,
     acquireLimitedPhotoCaptureToken: allow,
@@ -182,6 +198,7 @@ export const rules: ShieldSchema<Resolvers> = {
   },
   Contract: {
     issuances: isAllowedToViewIssuances,
+    asyncIssuanceRequests: isAllowedToViewAsyncIssuanceRequests,
     presentations: isAllowedToViewPresentations,
   },
   Identity: {
@@ -193,6 +210,9 @@ export const rules: ShieldSchema<Resolvers> = {
       isLimitedAccessApp,
       isOidcAuthnClient,
     ),
+    issuances: isAllowedToViewIssuances,
+    asyncIssuanceRequests: isAllowedToViewAsyncIssuanceRequests,
+    presentations: isAllowedToViewPresentations,
   },
   AccessTokenResponse: {
     '*': hasTokenAcquisitionRole,

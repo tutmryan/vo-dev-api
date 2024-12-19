@@ -127,4 +127,26 @@ describe('provisionContract mutation', () => {
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toMatchInlineSnapshot(`"Contract has been deprecated, it cannot be published again"`)
   })
+
+  it('works with the ContractAdmin application role', async () => {
+    // Arrange
+    const { contract } = await givenContract()
+    const externalContractId = randomUUID()
+    mockedServices.adminService.createContract.resolveWith(
+      mockedServices.adminService.createContract.buildResolve({ id: externalContractId }),
+    )
+
+    // Act
+    const { data, errors } = await executeOperationAsCredentialAdmin({
+      query: provisionContractMutation,
+      variables: {
+        id: contract.id,
+      },
+    })
+
+    // Assert
+    expect(errors).toBeUndefined()
+    expect(data).toBeDefined()
+    expect(data!.provisionContract.externalId).toBe(externalContractId)
+  })
 })

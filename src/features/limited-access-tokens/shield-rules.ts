@@ -8,16 +8,9 @@ import type {
   QueryContractArgs,
   QueryIdentityArgs,
 } from '../../generated/graphql'
-import { InternalRoles } from '../../roles'
+import { InternalRoles, LimitedAccessTokenAcquisitionRoles } from '../../roles'
 import { invariant } from '../../util/invariant'
 import { hasAnyRoleRuleWithName, hasRoleRule } from '../../util/shield-utils'
-
-export enum LimitedAccessTokenAcquisitionRoles {
-  issuance = 'VerifiableCredential.AcquireLimitedAccessToken.Issue',
-  presentation = 'VerifiableCredential.AcquireLimitedAccessToken.Present',
-  listContracts = 'VerifiableCredential.AcquireLimitedAccessToken.ListContracts',
-  anonymousPresentations = 'VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations',
-}
 
 export const hasTokenAcquisitionRole = hasAnyRoleRuleWithName(
   'hasLimitedAccessTokenAcquisitionRole',

@@ -1,9 +1,11 @@
 import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
 import { ClaimType, type TemplateFragmentFragment } from '../../generated/graphql'
+import { AppRoles } from '../../roles'
 import {
   beforeAfterAll,
   executeOperationAnonymous,
+  executeOperationAsApp,
   executeOperationAsCredentialAdmin,
   expectUnauthorizedError,
   fakeJpegDataURL,
@@ -210,5 +212,30 @@ describe('updateContract mutation', () => {
     // Assert
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toMatchInlineSnapshot(`"Contract has been deprecated, it cannot be updated"`)
+  })
+
+  it('works with the ContractAdmin application role', async () => {
+    // Arrange
+    const { contract } = await givenContract({})
+
+    // Act
+    const input = getUpdateContractInput(contract)
+    input.name = 'Updated contract name'
+
+    const { data, errors } = await executeOperationAsApp(
+      {
+        query: updateContractMutation,
+        variables: {
+          id: contract.id,
+          input,
+        },
+      },
+      AppRoles.contractAdmin,
+    )
+
+    // Assert
+    expect(errors).toBeUndefined()
+    expect(data).toBeDefined()
+    expect(data!.updateContract.name).toBe(input.name)
   })
 })

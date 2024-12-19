@@ -1,9 +1,11 @@
 import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
 import { ClaimType, type ContractInput } from '../../generated/graphql'
+import { AppRoles } from '../../roles'
 import {
   beforeAfterAll,
   executeOperationAnonymous,
+  executeOperationAsApp,
   executeOperationAsCredentialAdmin,
   expectUnauthorizedError,
   fakeJpegDataURL,
@@ -239,5 +241,25 @@ describe('createContract mutation', () => {
         },
       ]
     `)
+  })
+
+  it('works with the ContractAdmin application role', async () => {
+    // Arrange
+    const input = getDefaultContractInput()
+
+    // Act
+    const { data, errors } = await executeOperationAsApp(
+      {
+        query: createContractMutation,
+        variables: {
+          input,
+        },
+      },
+      AppRoles.contractAdmin,
+    )
+
+    // Assert
+    expect(errors).toBeUndefined()
+    expect(data).toBeDefined()
   })
 })

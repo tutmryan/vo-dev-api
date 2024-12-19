@@ -63,6 +63,15 @@
     "value": "VerifiableCredential.RequestApproval"
   },
   {
+    "id": "137a06ee-22db-486f-be90-4edd4871cb51",
+    "allowedMemberTypes": ["Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to create, modify and delete contracts and templates; plus provision and deprecate contracts.",
+    "displayName": "Contract admin",
+    "value": "VerifiableCredential.ContractAdmin"
+  },
+  {
     "id": "db1fb18e-e4d8-4798-9330-2e28175d2cdd",
     "allowedMemberTypes": ["User"],
     "isEnabled": true,

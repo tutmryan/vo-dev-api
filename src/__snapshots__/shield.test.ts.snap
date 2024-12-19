@@ -10,6 +10,42 @@ exports[`shield rules are setup correctly 1`] = `
     "healthcheck": {
       "rules": []
     },
+    "template": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "findTemplates": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "templateCombinedData": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
     "contract": {
       "rulesOr": [
         {
@@ -22,6 +58,10 @@ exports[`shield rules are setup correctly 1`] = `
         },
         {
           "name": "isPresentationApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
           "cache": "contextual"
         },
         {
@@ -50,6 +90,10 @@ exports[`shield rules are setup correctly 1`] = `
         },
         {
           "name": "isPresentationApp",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
           "cache": "contextual"
         },
         {
@@ -139,6 +183,18 @@ exports[`shield rules are setup correctly 1`] = `
               "cache": "strict"
             }
           ]
+        }
+      ]
+    },
+    "findAsyncIssuanceRequests": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
         }
       ]
     },
@@ -371,6 +427,102 @@ exports[`shield rules are setup correctly 1`] = `
     "*": {
       "name": "hasRole-VerifiableCredential.CredentialAdmin",
       "cache": "contextual"
+    },
+    "createTemplate": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "updateTemplate": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "deleteTemplate": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "createContract": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "updateContract": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "deleteContract": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "provisionContract": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "deprecateContract": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
     },
     "acquireLimitedAccessToken": {
       "rulesAnd": [
@@ -920,6 +1072,18 @@ exports[`shield rules are setup correctly 1`] = `
         }
       ]
     },
+    "asyncIssuanceRequests": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        }
+      ]
+    },
     "presentations": {
       "rulesOr": [
         {
@@ -1003,6 +1167,118 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "name": "isOidcAuthnClient",
           "cache": "contextual"
+        }
+      ]
+    },
+    "issuances": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
+              "rulesOr": [
+                {
+                  "name": "isRequestIdFilterDefined",
+                  "cache": "strict"
+                },
+                {
+                  "name": "isValidLimitedIdentitierFilter",
+                  "cache": "strict"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
+        }
+      ]
+    },
+    "asyncIssuanceRequests": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "presentations": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isPresentationApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
+              "rulesOr": [
+                {
+                  "name": "isRequestIdFilterDefined",
+                  "cache": "strict"
+                },
+                {
+                  "name": "isValidLimitedIdentitierFilter",
+                  "cache": "strict"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual"
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
         }
       ]
     }

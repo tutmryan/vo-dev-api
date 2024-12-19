@@ -1,9 +1,11 @@
 import { randomUUID } from 'crypto'
 import { omit } from 'lodash'
 import { ClaimType, type TemplateFragmentFragment } from '../../generated/graphql'
+import { AppRoles } from '../../roles'
 import {
   beforeAfterAll,
   executeOperationAnonymous,
+  executeOperationAsApp,
   executeOperationAsCredentialAdmin,
   expectUnauthorizedError,
   fakeJpegDataURL,
@@ -206,5 +208,30 @@ describe('updateTemplate mutation', () => {
         "validityIntervalInSeconds": 1000,
       }
     `)
+  })
+
+  it('works with the ContractAdmin application role', async () => {
+    // Arrange
+    const { template } = await givenTemplate({})
+
+    // Act
+    const { data, errors } = await executeOperationAsApp(
+      {
+        query: updateTemplateMutation,
+        variables: {
+          id: template.id,
+          input: {
+            ...getUpdateTemplateInput(template),
+            name: 'Updated SUT template',
+          },
+        },
+      },
+      AppRoles.contractAdmin,
+    )
+
+    // Assert
+    expect(errors).toBeUndefined()
+    expect(data).toBeDefined()
+    expect(data!.updateTemplate.name).toBe('Updated SUT template')
   })
 })

@@ -15,6 +15,14 @@ export enum AppRoles {
   issue = 'VerifiableCredential.Issue',
   present = 'VerifiableCredential.Present',
   requestApproval = 'VerifiableCredential.RequestApproval',
+  contractAdmin = 'VerifiableCredential.ContractAdmin',
+}
+
+export enum LimitedAccessTokenAcquisitionRoles {
+  issuance = 'VerifiableCredential.AcquireLimitedAccessToken.Issue',
+  presentation = 'VerifiableCredential.AcquireLimitedAccessToken.Present',
+  listContracts = 'VerifiableCredential.AcquireLimitedAccessToken.ListContracts',
+  anonymousPresentations = 'VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations',
 }
 
 export enum InternalRoles {

@@ -1,8 +1,10 @@
 import { randomUUID } from 'crypto'
 import { ClaimType, type TemplateInput } from '../../generated/graphql'
+import { AppRoles } from '../../roles'
 import {
   beforeAfterAll,
   executeOperationAnonymous,
+  executeOperationAsApp,
   executeOperationAsCredentialAdmin,
   expectUnauthorizedError,
   fakeJpegDataURL,
@@ -154,5 +156,25 @@ describe('createTemplate mutation', () => {
 
     expect(data!.createTemplate.id).toBeDefined()
     expect(data!.createTemplate).toMatchObject(input)
+  })
+
+  it('works with the ContractAdmin application role', async () => {
+    // Arrange
+    const input: TemplateInput = buildTemplateInput({})
+
+    // Act
+    const { data, errors } = await executeOperationAsApp(
+      {
+        query: createTemplateMutation,
+        variables: {
+          input,
+        },
+      },
+      AppRoles.contractAdmin,
+    )
+
+    // Assert
+    expect(errors).toBeUndefined()
+    expect(data).toBeDefined()
   })
 })
