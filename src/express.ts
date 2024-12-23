@@ -15,6 +15,7 @@ import cookieSession from 'cookie-session'
 import cors from 'cors'
 import type { Express, Request } from 'express'
 import express from 'express'
+import type { HelmetOptions } from 'helmet'
 import helmet from 'helmet'
 import { clone, merge } from 'lodash'
 import {
@@ -37,6 +38,13 @@ import { addVoyager } from './voyager'
 
 export const requestOrigin = (req: Request): string => `${req.protocol}://${req.get('Host')}`
 
+const oidcOnlyCsp = {
+  directives: {
+    scriptSrc: [`'self'`, `https: 'unsafe-inline'`, `https: 'unpkg.com'`],
+    formAction: null, // oidc form actions are dynamic - can't seem to wildcard this to a path blob expression
+  },
+} satisfies HelmetOptions['contentSecurityPolicy']
+
 export async function getExpressApp(): Promise<Express> {
   const app = express()
   app.set('trust proxy', true)
@@ -49,14 +57,16 @@ export async function getExpressApp(): Promise<Express> {
             // override helmet defaults with apollo sandbox + voyager config
             directives: {
               imgSrc: [`'self'`, 'data:', 'apollo-server-landing-page.cdn.apollographql.com'],
-              scriptSrc: [`'self'`, `https: 'unsafe-inline'`, `https: 'unsafe-eval'`], // voyager needs unsafe-eval
+              scriptSrc: [...oidcOnlyCsp.directives.scriptSrc, `https: 'unsafe-eval'`], // voyager needs unsafe-eval
               manifestSrc: [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
               frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
               workerSrc: [`'self'`, 'blob:'], // voyager needs blob:
-              formAction: null, // oidc form actions are dynamic - TODO: can't seem to wildcard this to say http://localhost:4000/oidc/interaction/*
+              formAction: oidcOnlyCsp.directives.formAction,
             },
           }
-        : undefined, // undefined means use default helmet CSP
+        : oidcEnabled
+          ? oidcOnlyCsp
+          : undefined, // undefined means use default helmet CSP
     }),
   )
 
