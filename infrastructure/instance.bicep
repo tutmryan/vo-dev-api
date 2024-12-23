@@ -1207,6 +1207,13 @@ var availabilityTestLocations = [
   { Id: 'latam-br-gru-edge' } // Brazil South
 ]
 
+@description('Common validation rules for web tests')
+var commonValidationRules = {
+  ExpectedHttpStatusCode: 200
+  SSLCertRemainingLifetimeCheck: 7
+  SSLCheck: true
+}
+
 resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
   name: '${resourcePrefix}-api-availability-test'
   location: location
@@ -1229,11 +1236,7 @@ resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
     RetryEnabled: true
     SyntheticMonitorId: '${resourcePrefix}-api-availability-webtest'
     Timeout: 30
-    ValidationRules: {
-      ExpectedHttpStatusCode: 200
-      SSLCertRemainingLifetimeCheck: 7
-      SSLCheck: true
-    }
+    ValidationRules: commonValidationRules
   }
 }
 
@@ -1268,6 +1271,120 @@ resource apiAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if 
   }
 }
 
+resource msGraphServiceHealthTest 'Microsoft.Insights/webtests@2022-06-15' = {
+  name: '${resourcePrefix}-msgraphservice-health-test'
+  location: location
+  kind: 'standard'
+  tags: {
+    'hidden-link:${apiAppInsights.id}': 'Resource'
+  }
+  properties: {
+    Description: 'Health check for MS Graph service'
+    Enabled: true
+    Frequency: 300
+    Kind: 'standard'
+    Locations: availabilityTestLocations
+    Name: '${resourcePrefix}-msgraphservice-health-webtest'
+    Request: {
+      HttpVerb: 'GET'
+      ParseDependentRequests: false
+      RequestUrl: 'https://${instance}.api.${domain}/health/services/ms-graph'
+    }
+    RetryEnabled: true
+    SyntheticMonitorId: '${resourcePrefix}-msgraphservice-health-webtest'
+    Timeout: 30
+    ValidationRules: commonValidationRules
+  }
+}
+
+resource msGraphServiceHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
+  name: '${resourcePrefix}-msgraphservice-health-alert'
+  location: 'global'
+  tags: {
+    'hidden-link:${apiAppInsights.id}': 'Resource'
+    'hidden-link:${msGraphServiceHealthTest.id}': 'Resource'
+  }
+  properties: {
+    description: 'Triggers when MS Graph service health check fails'
+    severity: 1
+    enabled: true
+    scopes: [
+      apiAppInsights.id
+      msGraphServiceHealthTest.id
+    ]
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT5M'
+    criteria: {
+      'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
+      webTestId: msGraphServiceHealthTest.id
+      componentId: apiAppInsights.id
+      failedLocationCount: 6
+    }
+    actions: [
+      {
+        actionGroupId: actionGroupAlertId
+      }
+    ]
+  }
+}
+
+resource vidServiceHealthTest 'Microsoft.Insights/webtests@2022-06-15' = {
+  name: '${resourcePrefix}-vidservice-health-test'
+  location: location
+  kind: 'standard'
+  tags: {
+    'hidden-link:${apiAppInsights.id}': 'Resource'
+  }
+  properties: {
+    Description: 'Health check for Verified ID service'
+    Enabled: true
+    Frequency: 300
+    Kind: 'standard'
+    Locations: availabilityTestLocations
+    Name: '${resourcePrefix}-vidservice-health-webtest'
+    Request: {
+      HttpVerb: 'GET'
+      ParseDependentRequests: false
+      RequestUrl: 'https://${instance}.api.${domain}/health/services/verified-id'
+    }
+    RetryEnabled: true
+    SyntheticMonitorId: '${resourcePrefix}-vidservice-health-webtest'
+    Timeout: 30
+    ValidationRules: commonValidationRules
+  }
+}
+
+resource vidServiceHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
+  name: '${resourcePrefix}-vidservice-health-alert'
+  location: 'global'
+  tags: {
+    'hidden-link:${apiAppInsights.id}': 'Resource'
+    'hidden-link:${vidServiceHealthTest.id}': 'Resource'
+  }
+  properties: {
+    description: 'Triggers when Verified ID service health check fails'
+    severity: 1
+    enabled: true
+    scopes: [
+      apiAppInsights.id
+      vidServiceHealthTest.id
+    ]
+    evaluationFrequency: 'PT5M'
+    windowSize: 'PT5M'
+    criteria: {
+      'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
+      webTestId: vidServiceHealthTest.id
+      componentId: apiAppInsights.id
+      failedLocationCount: 6
+    }
+    actions: [
+      {
+        actionGroupId: actionGroupAlertId
+      }
+    ]
+  }
+}
+
 resource oidcAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
   name: '${resourcePrefix}-oidc-availability-test'
   location: location
@@ -1291,11 +1408,9 @@ resource oidcAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
     SyntheticMonitorId: '${resourcePrefix}-oidc-availability-webtest'
     Timeout: 30
     ValidationRules: {
-      ExpectedHttpStatusCode: 200
-      SSLCheck: true
-      SSLCertRemainingLifetimeCheck: 7
+      ...commonValidationRules
       ContentValidation: {
-        ContentMatch: '"issuer"' //Validate JSON by checking the presence of the key "issuer"
+        ContentMatch: '"issuer"' // Validate JSON by checking the presence of the key "issuer"
         IgnoreCase: true
         PassIfTextFound: true
       }

@@ -54,6 +54,22 @@ function createGraphService() {
   return new GraphService({ tenantName, auth: { tenantId, ...graphCredentials } })
 }
 
+export async function testGraphService(): Promise<boolean> {
+  const graphService = createGraphService()
+
+  if (!graphService.isConfigured) {
+    return true // Considered 'OK' if the service is not configured
+  }
+
+  try {
+    await graphService.findUsers({ nameStartsWith: 'a' }, 1)
+    return true
+  } catch (error) {
+    logger.error('Test for MS Graph service integration failed', { error })
+    return false
+  }
+}
+
 export function createVerifiedIdAdminService(logger: BaseContext['logger'], correlationId?: string) {
   const { baseUrl, scope } = verifiedIdAdmin
 
@@ -73,6 +89,16 @@ export const getPlatformIssuerDid = Lazy(async () => {
   const authority = await admin.authority()
   return authority.didModel.did
 })
+
+export async function testVidService(): Promise<boolean> {
+  try {
+    await getPlatformIssuerDid()
+    return true
+  } catch (error) {
+    logger.error('Test for VID service integration failed', { error })
+    return false
+  }
+}
 
 function createVerifiedIdRequestService(context: BaseContext) {
   const { baseUrl, scope } = verifiedIdRequest
