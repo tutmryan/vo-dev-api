@@ -40,7 +40,7 @@ export const requestOrigin = (req: Request): string => `${req.protocol}://${req.
 
 const oidcOnlyCsp = {
   directives: {
-    scriptSrc: [`'self'`, `https: 'unsafe-inline'`, `https: 'unpkg.com'`],
+    scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
     formAction: null, // oidc form actions are dynamic - can't seem to wildcard this to a path blob expression
   },
 } satisfies HelmetOptions['contentSecurityPolicy']
