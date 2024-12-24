@@ -49,7 +49,7 @@ export async function FindAsyncIssuancesQuery(
 
   if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
   if (criteria?.contractId) where.contractId = criteria.contractId.toUpperCase()
-  if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
+  if (criteria?.createdById) where.createdById = criteria.createdById.toUpperCase()
 
   where.createdAt = OptionalRange(criteria?.createdFrom, criteria?.createdTo)
 

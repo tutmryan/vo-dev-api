@@ -502,6 +502,8 @@ export enum AsyncIssuanceRequestsOrderBy {
 export type AsyncIssuanceRequestsWhere = {
   /** Return async issuance requests for the specified contract. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** Return async issuance requests created by the specified user. */
+  createdById?: InputMaybe<Scalars['ID']['input']>;
   /** Return async issuance requests created after this point. */
   createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
   /** Return async issuance requests created before this point. */
