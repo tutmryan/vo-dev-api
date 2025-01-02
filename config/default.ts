@@ -40,7 +40,7 @@ const config: DeepPartial<Config> = {
   },
   sms: {
     accountSid: 'AC860727ab860a86187f00a15bb05bd812',
-    from: '+61483984493',
+    from: { AU: '+61483984493', US: '+15709124097' },
   },
   email: {
     from: {

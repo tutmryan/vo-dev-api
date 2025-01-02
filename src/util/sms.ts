@@ -1,4 +1,5 @@
 import { isLocalDev } from '@makerx/node-common'
+import parsePhoneNumberFromString from 'libphonenumber-js'
 import twilio from 'twilio'
 import { localDev, sms } from '../config'
 import { logger } from '../logger'
@@ -33,13 +34,18 @@ const client = Lazy(() => {
 
 const maskPhone = (phone: string) => phone.slice(0, -4).replace(/./g, '*') + phone.slice(-4)
 
+const getRegion = (to: string) => {
+  const phoneNumber = parsePhoneNumberFromString(to)
+  return phoneNumber?.country ?? 'AU'
+}
+
 export function sendSms(to: string, message: string) {
   if (isLocalDev) {
     if (!localDev) {
       logger.warn('Local dev is detected but no local dev config is provided. No sms will be sent until this is fixed.')
       return
     }
-    if (localDev.email.disabled) {
+    if (localDev.sms.disabled) {
       logger.debug('SMS sending is disabled by the local dev config')
       return
     }
@@ -54,9 +60,12 @@ export function sendSms(to: string, message: string) {
     return
   }
 
+  const toRegion = getRegion(to)
+  const from = sms.from[toRegion] ?? sms.from['AU']
+
   return client().messages.create({
     body: message,
-    from: sms.from,
+    from,
     to,
   })
 }

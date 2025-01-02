@@ -88,7 +88,7 @@ export type Config = {
     accountSid: string
     sid: string
     secret: string
-    from: string
+    from: Record<string, string> & { AU: string }
   }
   email: Pick<MailDataRequired, 'from'> & {
     apiKey: string
