@@ -22,6 +22,7 @@ export async function FindContractsQuery(
   if (criteria?.templateId) where.templateId = criteria.templateId
   if (criteria?.isProvisioned !== null && criteria?.isProvisioned !== undefined)
     where.provisionedAt = criteria.isProvisioned ? Not(IsNull()) : IsNull()
+  if (criteria?.isPublic !== null && criteria?.isPublic !== undefined) where.isPublic = criteria.isPublic
 
   let whereAny: FindOptionsWhere<ContractEntity>[] | undefined
   if (criteria?.credentialTypes)

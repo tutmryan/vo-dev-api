@@ -1237,8 +1237,10 @@ export type ContractWhere = {
   faceCheckSupport?: InputMaybe<FaceCheckPhotoSupport>;
   /** List only the contracts whose deprecation status matches the flag. */
   isDeprecated?: InputMaybe<Scalars['Boolean']['input']>;
-  /** List only contracts that are or are not published in the Verified Credentials Network. */
+  /** List only contracts that are provisioned in the Verified Credentials Network. */
   isProvisioned?: InputMaybe<Scalars['Boolean']['input']>;
+  /** List only contracts that are published in the Verified Credentials Network. */
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   /** List only contracts matching this name. */
   name?: InputMaybe<Scalars['String']['input']>;
   /** List only contracts from this template. */

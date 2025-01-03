@@ -595,9 +595,13 @@ input ContractWhere {
   """
   templateId: ID
   """
-  List only contracts that are or are not published in the Verified Credentials Network.
+  List only contracts that are or are not provisioned in the Verified Credentials Network.
   """
   isProvisioned: Boolean
+  """
+  List only contracts that are or are not published in the Verified Credentials Network.
+  """
+  isPublic: Boolean
   """
   List only the contracts which include any of these credential types.
   """
