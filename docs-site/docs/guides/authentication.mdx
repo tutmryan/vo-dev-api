@@ -203,7 +203,7 @@ The Verified Orchestration OIDC provider supports standard scopes: `openid`, `pr
 
 Additionally, credential info is available via the following scopes:
 
-| Claim                     | Description                                   |
+| Scope                     | Description                                   |
 | ------------------------- | --------------------------------------------- |
 | `vc_info`                 | Standard verifiable credential info           |
 | `vc_presented_attributes` | Claim values from the credential presentation |
@@ -214,7 +214,7 @@ Additionally, credential info is available via the following scopes:
 
 The following table describes all claims available and the scope required to access them:
 
-| Scope                                    | Claim                     | Description                                                                                                                                                                                                                                                                                |
+| Claim                                    | Scope                     | Description                                                                                                                                                                                                                                                                                |
 | ---------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `sub`                                    | `openid`                  | The subject identifier, derived from the Verified Orchestration issuance ID.<br /><br />Or, for partner credential presentations:<br /> - the value of the `vc_unique_claim_for_sub` parameter<br /> - the first matching **Unique claim for subject identifier** configured on the client |
 | `name`                                   | `profile`                 | The Verified Orchestration identity name (n/a for partner presentations).                                                                                                                                                                                                                  |

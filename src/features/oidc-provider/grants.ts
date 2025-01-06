@@ -60,7 +60,7 @@ export function loadExistingGrant(clients: OidcClientEntity[], resources: OidcRe
       if (isFirstParty(ctx.oidc.client)) {
         // grant all the OIDC scopes and configured resource scopes to avoid consent prompt
         const oidcScopes = Object.keys(openidClaims).join(' ')
-        grant.addOIDCScope(`openid ${oidcScopes}`)
+        grant.addOIDCScope(oidcScopes)
 
         // if the client has access to resources, grant those scopes as well
         const clientId = ctx.oidc.client.clientId

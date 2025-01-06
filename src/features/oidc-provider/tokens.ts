@@ -7,6 +7,7 @@ import type {
   ClientCredentials,
   DeviceCode,
   KoaContextWithOIDC,
+  RefreshToken,
 } from 'oidc-provider'
 import { logger } from '../../logger'
 import { openidClaims } from './claims'
@@ -32,8 +33,10 @@ export async function issueRefreshToken(
  */
 export async function extraTokenClaims(ctx: KoaContextWithOIDC, _token: AccessToken | ClientCredentials) {
   const authorizationCode = (ctx.oidc as any).authorizationCode as AuthorizationCode | undefined
-  if (!authorizationCode) {
-    logger.warn('No authorization code found in context, cannot add extra token claims')
+  const refreshToken = (ctx.oidc as any).refreshToken as RefreshToken | undefined
+
+  if (!authorizationCode && !refreshToken) {
+    logger.warn('No authorization code or refresh token found in context, cannot add extra token claims')
     return undefined
   }
 
@@ -43,8 +46,13 @@ export async function extraTokenClaims(ctx: KoaContextWithOIDC, _token: AccessTo
     return undefined
   }
 
-  // add OIDC claims to the access token
-  const scopes = [...authorizationCode.scopes]
+  const scopesToUse = authorizationCode ? authorizationCode.scopes : refreshToken?.scopes
+  if (!scopesToUse) {
+    logger.warn('No scopes found in authorization code or refresh token, cannot add extra token claims')
+    return undefined
+  }
+
+  const scopes = [...scopesToUse]
   const accountClaims = await account.claims('access_token', scopes.join(' '), {}, [])
   const requestedOidcClaims = compact(scopes.map((scope) => openidClaims[scope as keyof typeof openidClaims]).flat())
   return pick(accountClaims, requestedOidcClaims)
