@@ -228,3 +228,39 @@ The following table describes all claims available and the scope required to acc
 | `vc_vo_identity_id`                      | `vc_vo_identity`          | The Verified Orchestration identity ID. Useful for referencing the identity reference in the Verified Orchestration platform.                                                                                                                                                              |
 | `vc_vo_identity_issuer`                  | `vc_vo_identity`          | The identity `issuer` value. Useful for referencing the source identity store.                                                                                                                                                                                                             |
 | `vc_vo_identity_identifier`              | `vc_vo_identity`          | The identity `identifier` value. Useful for referencing the identity in the source identity store.                                                                                                                                                                                         |
+
+## Customize and brand your authentication client
+
+You have the option to customize the appearance of your authentication client to align with your application’s branding by configuring a background color or adding a background image for a more personalized user experience.
+
+### Customization options
+
+- **Background Color**: Set a color to match your application's theme using a color picker or hexadecimal code.
+- **Background Image**: Upload a background image to add a personal touch or a brand-specific aesthetic.
+
+### How to customize
+
+1. Navigate to the <AdminUrl path='/oidc'>Composer authentication page</AdminUrl>.
+1. Select the client you want to customize and click the **Details** button.
+1. Click the **Edit** button.
+1. Choose a **Background Color** and upload a **Background Image**.
+1. Save the changes.
+
+### Customization guidelines
+
+To ensure a seamless and professional appearance when customizing your authentication client, follow these guidelines for configuring background images and colors.
+
+| **Property**         | **Guideline**                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------ |
+| **Resolution**       | 1920×1080 (16:9)                                                                                 |
+| **File Format**      | JPEG or PNG                                                                                      |
+| **File Size**        | ≤ 500 KB                                                                                         |
+| **Aspect Ratio**     | Maintain a 16:9 aspect ratio for best fit.                                                       |
+| **Content Position** | Keep critical content centered to avoid cropping.                                                |
+| **Fallback Color**   | Ensure the background color matches your brand palette to maintain a consistent visual identity. |
+
+### Recommendations
+
+- **Background Image**: Use high-resolution images with a 16:9 aspect ratio to ensure the image displays properly across different screen sizes.
+- **Safe Margins**: Keep important content, such as logos or text, away from the edges to prevent it from being cropped on various devices.
+- **Fallback Color**: Choose a fallback background color that complements your background image.
