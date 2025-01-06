@@ -9,7 +9,7 @@ import { getProvider } from './provider'
 
 type Steps =
   | 'noCache'
-  | 'sessionMiddleware'
+  | 'sessionHandler'
   | 'deviceUserFlowErrors'
   | 'getResume'
   | 'deviceUserFlow'
