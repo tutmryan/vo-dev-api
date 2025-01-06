@@ -224,8 +224,8 @@ export const hookAndApplyCustomEntraEamSpec = () => {
   provider.on('interaction.started', async (ctx) => {
     const { oidc } = ctx
 
-    invariant(oidc.params, 'Params not found post interaction.started event during EAM auth flow')
-    invariant(oidc.client, 'Client not found post interaction.started event during EAM auth flow')
+    invariant(oidc.params, 'Params not found post interaction.started event')
+    invariant(oidc.client, 'Client not found post interaction.started event')
 
     // Is this an EAM request?
     if (!isEamRequest(oidc.params, oidc.client.clientId)) {
