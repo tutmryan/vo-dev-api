@@ -136,15 +136,9 @@ jobs:
           - instance: dev
             resourceGroup: vo-dev-instance
             resourcePrefix: vo-dev
-          - instance: demo.nelnet
-            resourceGroup: vo-demo-nelnet-instance
-            resourcePrefix: vo-demo-nelnet
           - instance: demo.komainu
             resourceGroup: vo-demo-komainu-instance
             resourcePrefix: vo-demo-komainu
-          - instance: demo.openlearning
-            resourceGroup: vo-demo-openlearning-instance
-            resourcePrefix: vo-demo-openlearning
           - instance: demo.increment
             resourceGroup: vo-demo-increment-instance
             resourcePrefix: vo-demo-increment
