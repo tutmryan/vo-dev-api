@@ -39,6 +39,11 @@ const entraOidcMetadataUris = [
   'https://login.partner.microsoftonline.cn/common/v2.0/.well-known/openid-configuration', // MS Azure - China
 ]
 
+const isMsLoginUri = (uri: string) =>
+  uri.startsWith('https://login.microsoftonline.com') ||
+  uri.startsWith('https://login.microsoftonline.us') ||
+  uri.startsWith('https://login.partner.microsoftonline.cn')
+
 const extractLoggable = (params: UnknownObject) => {
   return {
     clientRequestId: params[ExtraParams.client_request_id],
@@ -142,8 +147,7 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
   const decodedIdTokenHint = decodeJwt(params.id_token_hint as string)
 
   // Confirm the EAM specific parameters (Object ID, Tenant ID, and Issuer)
-  if (!decodedIdTokenHint.oid || !decodedIdTokenHint.tid || !decodedIdTokenHint.iss?.startsWith('https://login.microsoftonline.com'))
-    return false
+  if (!decodedIdTokenHint.oid || !decodedIdTokenHint.tid || !isMsLoginUri(decodedIdTokenHint.iss ?? '')) return false
 
   // As this token wasn't issued by the client (us), the aud should not match the client ID
   // MS Docs say the value they send is the client ID registered in EAM, which is actually the spec (if we had issued it). However, the App ID registered for EAM is supplied in practice.
