@@ -2,7 +2,7 @@ import type { RouterContext } from '@koa/router'
 import type { JWK, JWTPayload, JWTVerifyGetKey, KeyLike } from 'jose'
 import { createLocalJWKSet, createRemoteJWKSet, decodeJwt, decodeProtectedHeader, jwtVerify } from 'jose'
 import type { interactionPolicy, Configuration, Errors, OIDCContext, UnknownObject } from 'oidc-provider'
-import { authTenantIds } from '../../../config'
+import { eamFriendlyTenants } from '../../../config'
 import { dataSource } from '../../../data'
 import type { ClaimConstraint } from '../../../generated/graphql'
 import { logger } from '../../../logger'
@@ -191,7 +191,7 @@ export const hookAndApplyCustomEntraEamSpec = () => {
       throw new errors.InvalidRequest('id_token_hint does not contain an alg header')
     }
 
-    const tenantId = authTenantIds.find((tid) => tid.toLowerCase() === decodedIdTokenHint.tid)
+    const tenantId = eamFriendlyTenants.find((tid) => tid.toLowerCase() === decodedIdTokenHint.tid)
 
     if (!tenantId) {
       logger.error(`Tenant ID not found in the authTenantIds`, { params: extractLoggable(oidc.params!) })
