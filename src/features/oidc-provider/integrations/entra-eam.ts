@@ -262,6 +262,8 @@ export const hookAndApplyCustomEntraEamSpec = () => {
   })
 }
 
+// Note: another way to force login could be to use the method from 'check_max_age.js' from the source library,
+// which evaluates to if (!ctx.oidc.prompts.had('login')) ctx.oidc.prompts.add('login')
 export const addEntraEamAlwaysPromptPolicyStep = async (
   policy: interactionPolicy.DefaultPolicy,
 ): Promise<interactionPolicy.DefaultPolicy> => {
