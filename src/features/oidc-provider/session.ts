@@ -17,6 +17,8 @@ import { PresentationEntity } from '../presentation/entities/presentation-entity
 import type { OidcClientEntity } from './entities/oidc-client-entity'
 import { ExtraParams } from './extra-params'
 
+export const sessionCookieName = '_session'
+
 const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
 const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', ONE_HOUR_TTL))
 

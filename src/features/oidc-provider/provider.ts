@@ -18,9 +18,11 @@ import { extraParams } from './extra-params'
 import { loadExistingGrant, useGrantedResource } from './grants'
 import { keys } from './keys'
 import { logEvents } from './log-events'
+import { middleware } from './middleware'
 import RedisAdapter from './redis-adapter'
 import { getResourceServerInfo } from './resource-indicators'
 import { routes } from './routes'
+import { sessionCookieName } from './session'
 import { logoutSource } from './source'
 import { extraTokenClaims, issueRefreshToken } from './tokens'
 
@@ -52,6 +54,9 @@ async function createProvider() {
     adapter: (name: string) => (isRedisEnabled ? new RedisAdapter(name, redisClient()) : undefined),
     cookies: {
       keys: [cookieSession.secret],
+      names: {
+        session: sessionCookieName,
+      },
     },
     acrValues: [presentationLoginStandardClaims.acr],
     claims: { ...openidClaims, ...resourceScopes },
@@ -96,6 +101,7 @@ async function createProvider() {
   provider.proxy = true
   events(provider)
   logEvents(provider)
+  provider.use(middleware)
   providerHandler = provider.callback()
 
   dataRef.provider = provider
