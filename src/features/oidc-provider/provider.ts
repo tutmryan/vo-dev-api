@@ -53,7 +53,7 @@ async function createProvider() {
   const provider = new Provider(issuer, {
     clients: clientMetadata,
     clientAuthMethods: ['none'],
-    adapter: (name: string) => (isRedisEnabled ? new RedisAdapter(name, redisClient()) : throwError('Redis is required of OIDC')),
+    ...(isRedisEnabled ? { adapter: (name) => new RedisAdapter(name, redisClient()) } : {}),
     cookies: {
       keys: [cookieSession.secret ?? throwError('cookieSession.secret is required')],
     },
