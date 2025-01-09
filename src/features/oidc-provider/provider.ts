@@ -13,7 +13,6 @@ import { findAccount } from './account'
 import { openidClaims, presentationLoginStandardClaims } from './claims'
 import type { OidcData } from './data'
 import { loadOidcData } from './data'
-import { events } from './events'
 import { extraParams } from './extra-params'
 import { loadExistingGrant, useGrantedResource } from './grants'
 import { keys } from './keys'
@@ -22,7 +21,6 @@ import { middleware } from './middleware'
 import RedisAdapter from './redis-adapter'
 import { getResourceServerInfo } from './resource-indicators'
 import { routes } from './routes'
-import { sessionCookieName } from './session'
 import { logoutSource } from './source'
 import { extraTokenClaims, issueRefreshToken } from './tokens'
 
@@ -54,9 +52,6 @@ async function createProvider() {
     adapter: (name: string) => (isRedisEnabled ? new RedisAdapter(name, redisClient()) : undefined),
     cookies: {
       keys: [cookieSession.secret],
-      names: {
-        session: sessionCookieName,
-      },
     },
     acrValues: [presentationLoginStandardClaims.acr],
     claims: { ...openidClaims, ...resourceScopes },
@@ -82,6 +77,11 @@ async function createProvider() {
     },
     extraParams,
     jwks: { keys: jwksKeys },
+    // Expire browser sessions immediately, as this behaviour is problematic for VC based OIDC
+    expiresWithSession: () => false,
+    ttl: {
+      Session: 1,
+    },
   })
 
   // allow http + localhost for redirect URIs
@@ -99,7 +99,6 @@ async function createProvider() {
   }
 
   provider.proxy = true
-  events(provider)
   logEvents(provider)
   provider.use(middleware)
   providerHandler = provider.callback()

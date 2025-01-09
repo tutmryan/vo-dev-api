@@ -1,9 +1,10 @@
 import type Provider from 'oidc-provider'
 import type { OIDCContext } from 'oidc-provider'
 import { logger } from '../../logger'
-import { sessionCookieName } from './session'
+import { deleteAccount } from './account'
 
 type Middleware = Parameters<Provider['use']>[0]
+type Context = Parameters<Middleware>[0]
 
 export const middleware: Middleware = async (ctx, next) => {
   // logger.verbose(`pre OIDC middleware: ${ctx.method} ${ctx.path}`)
@@ -11,18 +12,21 @@ export const middleware: Middleware = async (ctx, next) => {
 
   const oidc = ctx.oidc as OIDCContext | undefined
   if (oidc) {
-    enforceTransientBrowserSession(ctx, oidc)
+    deleteAccountOnLogout(ctx, oidc)
   } else {
     logger.warn(`No OIDC context found for ${ctx.method} ${ctx.path}`)
   }
   // logger.verbose(`post OIDC middleware: ${ctx.method} ${oidc?.route ?? 'unknown'}`)
 }
 
-function enforceTransientBrowserSession(ctx: Parameters<Middleware>[0], oidc: OIDCContext) {
-  if (oidc.route === 'resume' && oidc.params?.code_challenge) {
-    if (ctx.response.headerSent) throw new Error('Response headers already sent, so the auth flow browser session cannot be cleared')
-
-    ctx.cookies.set(sessionCookieName, undefined, { maxAge: 0, overwrite: true })
-    ctx.cookies.set(`${sessionCookieName}.legacy`, undefined, { maxAge: 0, overwrite: true })
+function deleteAccountOnLogout(ctx: Context, oidc: OIDCContext) {
+  if (oidc.route === 'end_session') {
+    const accountId = oidc.entities.IdTokenHint?.payload.sub as string | undefined
+    if (accountId) {
+      logger.audit(`OIDC account ${accountId} logged out, deleting account`)
+      deleteAccount(accountId).catch((error) => {
+        logger.error(`Failed to delete OIDC account ${accountId}`, { error })
+      })
+    }
   }
 }
