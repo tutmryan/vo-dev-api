@@ -117,7 +117,7 @@ jobs:
           if-no-files-found: error
 
   deploy-to-non-prod:
-    name: Deploy to non-production environment
+    name: Deploy to ${{ matrix.instance }} non-prod environment
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -261,7 +261,7 @@ jobs:
           rule-name: ${{ steps.add-temporary-sql-firewall-rule.outputs.rule-name }}
 
   deploy-to-prod:
-    name: Deploy to prod environment
+    name: Deploy to ${{ matrix.instance }} prod environment
     runs-on: ubuntu-latest
     permissions:
       id-token: write
