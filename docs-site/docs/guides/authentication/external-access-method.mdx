@@ -1,0 +1,52 @@
+import { EntraAppRedirectAuth, EntraAppRedirectOidcMeta } from '@site/src/components/eam'
+
+# External Access Method (EAM)
+
+## Important Information
+
+### Tenants
+
+When using External Access Method (EAM) with a tenant that is not your home tenant, it must be known to the Verified Orchestration platform. See [Additional tenant IDs](/docs/guides/instance-configuration#additional-tenant-ids) for more information.
+
+### Identities
+
+When using EAM, the identity of the user is not known to the Verified Orchestration platform. Therefore, the identity must be resolved to an identity known by the platform. This is done by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra during the authentication process. See [Entra user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-user) for more information.
+
+### Credentials
+
+To ensure the credential that is presented belongs to the user going through the EAM process, a presentation constraint is used to enforce the resolved identity ID matches to Identity ID embedded in the credential. See [create presentation request](/docs/guides/presentation#create-presentation-request) for more information.
+
+![Presentation Constraint](../../../static/img/eam-auth-cred-with-id.png)
+
+## Set up Guide
+
+The official documentation for setting up an External Access Method (EAM) can be found [here](https://learn.microsoft.com/en-us/entra/identity/authentication/how-to-authentication-external-method-manage).
+
+Whilst the Microsoft documentation is comprehensive, it can be a little overwhelming. To help with this, the following additional information is provided to help you get started.
+
+### Application Registration
+
+Single Page Applications (SPAs) Redirect URIs should be set to the following:
+
+1. <code><EntraAppRedirectAuth /></code>
+2. <code><EntraAppRedirectOidcMeta /></code>
+3. <code>%Your tenant url%</code> <span class='list-help'>(which will be something like `https://{tenant name}.onmicrosoft.com`)</span>
+
+![SPAs Redirect URIs](../../../static/img/eam-app-redirects.png)
+
+The following token options should **not** be checked
+
+1. Access tokens (used for implicit flows)
+2. ID tokens (used for implicit and hybrid flows)
+
+<span className='soft-border'>
+![SPAs Redirect URIs](../../../static/img/eam-app-token-options.png)
+</span>
+
+### Enterprise Application Registration
+
+The associated Enterprise Application must have a conditional access policy set up to enforce MFA.
+
+<span className='soft-border'>
+![Conditional Access Policy](../../../static/img/eam-ca-policy-options.png)
+</span>
