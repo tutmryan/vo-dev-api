@@ -176,6 +176,14 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
     const { payload, protectedHeader } = await jwtVerify<JWTPayload, KeyLike>(authParams.id_token_hint!, inMemoryKeySetCache.get(jwksUri)!)
     oidc.entity('IdTokenHint', { payload, header: protectedHeader })
 
+    // Although the VO OIDC provider is session-less, we'll force the prompt here.
+    // This ensures the implementation is accurate to a standard EAM flow,
+    const { prompts } = oidc // Do not inline, as this is a getter and a new instance is created each time
+    if (!prompts.has('login')) {
+      prompts.add('login')
+      oidc.params!.prompt = [...prompts].join(' ')
+    }
+
     return next()
   })
 
@@ -215,31 +223,4 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
       },
     })
   })
-}
-
-// Note: another way to force login could be to use the method from 'check_max_age.js' from the source library,
-// which evaluates to if (!ctx.oidc.prompts.had('login')) ctx.oidc.prompts.add('login')
-export const addEntraEamAlwaysPromptPolicyStep = async (
-  policy: interactionPolicy.DefaultPolicy,
-): Promise<interactionPolicy.DefaultPolicy> => {
-  const loginPolicy = policy.get('login')
-  invariant(loginPolicy, 'login policy not found in the interaction policy')
-
-  const { interactionPolicy } = await oidcProviderModule()
-
-  // The interaction step confirms prompt behaviour by running all checks and looking for one or more REQUEST_PROMPT (true) results
-  // Ref: https://github.com/panva/node-oidc-provider/blob/cca48753c3a8079a59fa7837fdcfaa4ea2d9b946/lib/actions/authorization/interactions.js#L28
-  loginPolicy.checks.add(
-    new interactionPolicy.Check('eam-force-prompt', 'EAM force prompt', async (ctx) => {
-      const { oidc } = ctx
-
-      if (oidc.route === 'authorization' && isEamRequest(oidc.params!, oidc.client!.clientId)) {
-        return interactionPolicy.Check.REQUEST_PROMPT
-      }
-
-      return interactionPolicy.Check.NO_NEED_TO_PROMPT
-    }),
-  )
-
-  return policy
 }
