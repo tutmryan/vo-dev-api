@@ -6,11 +6,11 @@ import { EntraAppRedirectAuth, EntraAppRedirectOidcMeta } from '@site/src/compon
 
 ### Tenants
 
-When using External Access Method (EAM) with a tenant that is not your home tenant, it must be known to the Verified Orchestration platform. See [Additional tenant IDs](/docs/guides/instance-configuration#additional-tenant-ids) for more information.
+When using External Access Method (EAM) with a tenant that is not your home tenant, it must be known to the Verified Orchestration platform. See [additional tenant IDs](/docs/guides/instance-configuration#additional-tenant-ids) for more information.
 
 ### Identities
 
-When using EAM, the identity of the user is not known to the Verified Orchestration platform. Therefore, the identity must be resolved to an identity known by the platform. This is done by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra during the authentication process. See [Entra user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-user) for more information.
+When using EAM, the identity of the user is not known to the Verified Orchestration platform. Therefore, the identity must be resolved to an identity known by the platform. This is done by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra during the authentication process. See [entra user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-user) for more information.
 
 ### Credentials
 
