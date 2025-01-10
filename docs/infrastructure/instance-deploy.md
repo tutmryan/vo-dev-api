@@ -134,18 +134,25 @@ Re-running the deployment a second time usually results in a successful deployme
 
 Note: click-ops must be performed as a pair using screen sharing for peer review, do not perform tear-down operations alone.
 
+### Optional prep (if the customer wants)
 1. Deprecate all contracts which would revoke all issuances as the Verified ID authority cannot be deleted
+
+### Main steps
+1. PR to remove matrix entries (3x)
 1. Delete the instance resource group e.g. vo-{name}-instance
 1. Delete the instance database from the shared infrastructure resource group named vo-{name}-sql-db
-1. Remove the auth redirects from the app registration
+1. Delete GitHub environments (3x)
+1. Delete all the instance app registrations:
+   - `Verified Orchestration (<instance>)`
+  
+### DNS cleanup
 1. Delete CNAMEs and TXTs including authority (did.) CNAME and TXT
+
+### Notes
 1. If you plan to re-create the instance:
    - you must purge the deleted keyvault - re-creating the same keyvault name will fail
    - you must delete the sql DB external login for the API identity - re-using the login between same named API identity will fail (TODO ?? confirm)
    - you must invoke Verified ID admin API endpoint to verify well known DID configuration which should invalidate previously verified linked domain. The CI/CD pipeline would detect the unverified status and start the process to get the authority verified.
-1. Delete all the instance app registrations:
-   - `Verified Orchestration (<instance>)`
-   - `Verified Orchestration Migration (<instance>)`
 
 ## Notes on the instance Database setup
 
