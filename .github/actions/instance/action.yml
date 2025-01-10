@@ -533,12 +533,21 @@ runs:
         subscription-id: ${{ inputs.azure-subscription-id }}
         enable-AzPSSession: true
 
-    - name: Deploy API to App Service
-      id: deploy-api
+    - name: Deploy API to staging slot
       uses: azure/webapps-deploy@v2
+      id: deploy-api-slot
       with:
         app-name: ${{ steps.instance-infra.outputs.apiAppServiceName }}
+        slot-name: 'staging'
         package: api/api.zip
+
+    - name: Swap staging slot to production
+      id: swap-api-slot
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/swap-staging-slot.ps1
+        -ResourceGroupName '${{ inputs.resource-group-name }}'
+        -AppServiceName '${{ steps.instance-infra.outputs.apiAppServiceName }}'
 
     - name: Unzip docs site
       shell: bash

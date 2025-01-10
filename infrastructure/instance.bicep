@@ -1042,6 +1042,20 @@ resource oidcBlobContainerRoleAssignment 'Microsoft.Authorization/roleAssignment
 @description('The ID of the app service plan to host instance app services')
 param appServicePlanId string
 
+@description('Common properties for the API app service')
+var apiAppServiceProperties = {
+  serverFarmId: appServicePlanId
+  httpsOnly: true
+  clientAffinityEnabled: false
+  siteConfig: {
+    alwaysOn: true
+    appCommandLine: 'pm2 start ./src/main.tracing.js -i max --no-daemon'
+    ftpsState: 'Disabled'
+    linuxFxVersion: 'NODE|20-lts'
+    minTlsVersion: '1.2'
+  }
+}
+
 resource apiAppService 'Microsoft.Web/sites@2022-03-01' = {
   name: '${resourcePrefix}-api-${uniqueSuffix}'
   location: location
@@ -1049,18 +1063,15 @@ resource apiAppService 'Microsoft.Web/sites@2022-03-01' = {
   identity: {
     type: 'SystemAssigned'
   }
-  properties: {
-    serverFarmId: appServicePlanId
-    httpsOnly: true
-    clientAffinityEnabled: false
-    siteConfig: {
-      alwaysOn: true
-      appCommandLine: 'pm2 start ./src/main.tracing.js -i max --no-daemon'
-      ftpsState: 'Disabled'
-      linuxFxVersion: 'NODE|20-lts'
-      minTlsVersion: '1.2'
-    }
-  }
+  properties: apiAppServiceProperties
+}
+
+resource apiAppServiceSlot 'Microsoft.Web/sites/slots@2022-03-01' = {
+  name: 'staging'
+  parent: apiAppService
+  location: location
+  kind: 'app,linux'
+  properties: apiAppServiceProperties
 }
 
 output apiAppServicePrincipalId string = apiAppService.identity.principalId
@@ -1072,9 +1083,9 @@ param sqlServerName string
 param nodeEnv string
 param apiClientId string
 
-resource apiAppServiceConfig 'Microsoft.Web/sites/config@2022-03-01' = {
+resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' = {
   name: 'appsettings'
-  parent: apiAppService
+  parent: apiAppServiceSlot
   properties: {
     NODE_ENV: nodeEnv
     WEBSITE_RUN_FROM_PACKAGE: '1'
