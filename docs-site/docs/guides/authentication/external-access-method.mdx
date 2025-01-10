@@ -14,7 +14,11 @@ When using EAM, the identity of the user is not known to the Verified Orchestrat
 
 ### Credentials
 
-To ensure the credential that is presented belongs to the user going through the EAM process, a presentation constraint is used to enforce the resolved identity ID matches to Identity ID embedded in the credential. See [create presentation request](/docs/guides/presentation#create-presentation-request) for more information.
+To ensure the credential that is presented belongs to the user going through the EAM process, a presentation constraint is used to enforce the resolved identity ID matches to identity ID embedded in the credential. See [create presentation request](/docs/guides/presentation#create-presentation-request) for more information.
+
+:::note
+Credentials issued prior to **1st Jan 2025** may not contain the identity ID. In this case, the credential cannot be used with EAM until it is re-issued.
+:::
 
 ![Presentation Constraint](../../../static/img/eam-auth-cred-with-id.png)
 
