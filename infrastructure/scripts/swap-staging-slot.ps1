@@ -20,6 +20,21 @@ param(
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
+$slotState = az webapp show `
+  --resource-group $ResourceGroupName `
+  --name $AppServiceName `
+  --slot $SourceSlotName `
+  --query "state" `
+  --output tsv
+
+if ($slotState -ne "Running") {
+  Write-Host "Starting staging slot '$SourceSlotName' for '$AppServiceName'"
+  az webapp start `
+    --resource-group $ResourceGroupName `
+    --name $AppServiceName `
+    --slot $SourceSlotName
+}
+
 Write-Host "Swapping slot '$SourceSlotName' to '$TargetSlotName' for '$AppServiceName'"
 
 az webapp deployment slot swap `
