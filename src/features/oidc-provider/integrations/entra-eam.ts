@@ -1,14 +1,13 @@
 import type { RouterContext } from '@koa/router'
-import type { JWK, JWTPayload, JWTVerifyGetKey, KeyLike } from 'jose'
-import { createLocalJWKSet, createRemoteJWKSet, decodeJwt, decodeProtectedHeader, jwtVerify } from 'jose'
+import { millisecondsInHour } from 'date-fns/constants'
+import type { JWTPayload, KeyLike } from 'jose'
+import { createRemoteJWKSet, decodeJwt, decodeProtectedHeader, jwtVerify } from 'jose'
 import type { interactionPolicy, Configuration, Errors, OIDCContext, UnknownObject } from 'oidc-provider'
 import { eamFriendlyTenants } from '../../../config'
 import { dataSource } from '../../../data'
 import type { ClaimConstraint } from '../../../generated/graphql'
 import { logger } from '../../../logger'
-import { newCacheSection, ONE_HOUR_TTL } from '../../../redis/cache'
 import { invariant } from '../../../util/invariant'
-import { Lazy } from '../../../util/lazy'
 import { throwError } from '../../../util/throw-error'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { paramsToAuthParamsSpec, wrapOidcPipelineStep } from '../integration-hook'
@@ -25,24 +24,21 @@ export const eamExtraParams: Configuration['extraParams'] = {
   },
 }
 
-type OidcMetadata = {
-  uri: string
-  openidConfiguration: {
-    jwks_uri: string
-  }
-}
-
-// Depending on the flavour of Azure, the OIDC metadata URI can be different.
-const entraOidcMetadataUris = [
-  'https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration', // MS Azure
-  'https://login.microsoftonline.us/common/v2.0/.well-known/openid-configuration', // MS Azure - Government
-  'https://login.partner.microsoftonline.cn/common/v2.0/.well-known/openid-configuration', // MS Azure - China
-]
-
 const isMsLoginUri = (uri: string) =>
-  uri.startsWith('https://login.microsoftonline.com') ||
-  uri.startsWith('https://login.microsoftonline.us') ||
-  uri.startsWith('https://login.partner.microsoftonline.cn')
+  uri.startsWith('https://login.microsoftonline.com') || // MS Azure
+  uri.startsWith('https://login.microsoftonline.us') || // MS Azure - Government
+  uri.startsWith('https://login.partner.microsoftonline.cn') // MS Azure - China
+
+const mapMsLoginToAzureJwksUri = (uri: string) => {
+  // MS Azure
+  if (uri.startsWith('https://login.microsoftonline.com')) return 'https://login.microsoftonline.com/common/discovery/v2.0/keys'
+  // MS Azure - Government
+  if (uri.startsWith('https://login.microsoftonline.us')) return 'https://login.microsoftonline.us/common/discovery/v2.0/keys'
+  // MS Azure - China
+  if (uri.startsWith('https://login.partner.microsoftonline.cn'))
+    return 'https://login.partner.microsoftonline.cn/common/discovery/v2.0/keys'
+  return undefined
+}
 
 const extractLoggable = (params: UnknownObject) => {
   return {
@@ -89,45 +85,6 @@ export async function buildEamIdentityConstraint(params: UnknownObject, errors: 
   }
 }
 
-// A TTL of 12 hours was chosen because:
-// - Dotnet defaults to 12 hours
-// - The MS docs state that Entra caches this metadata for 24 hours (Ref: https://learn.microsoft.com/en-us/entra/identity/authentication/concept-authentication-external-method-provider#provider-metadata-caching)
-const eamOidcMetadataCache = Lazy(() => newCacheSection('oidcEam', ONE_HOUR_TTL * 12))
-
-// Cache the Entra keys in memory
-const inMemoryKeySetCache = new Map<string, ReturnType<typeof createRemoteJWKSet>>()
-
-const fetchEntraOidcMetadata = async () => {
-  let cachedRawMetadata = await eamOidcMetadataCache().get('metadata')
-
-  if (!cachedRawMetadata) {
-    // Clear the key cache to force a reload of the JWK set in case the jwks_uri has changed
-    inMemoryKeySetCache.clear()
-    const remoteMetadata = await Promise.all(
-      entraOidcMetadataUris.map(async (uri) => {
-        const openidConfiguration = await fetch(uri).then((res) => res.json())
-        return { uri, openidConfiguration }
-      }),
-    )
-    cachedRawMetadata = JSON.stringify(remoteMetadata)
-    await eamOidcMetadataCache().set('metadata', cachedRawMetadata)
-  }
-
-  const allMetadata = JSON.parse(cachedRawMetadata) as OidcMetadata[]
-
-  // Ensure that we're tracking and caching the JWK set for each metadata URI
-  for (const metaData of allMetadata) {
-    if (!inMemoryKeySetCache.has(metaData.uri)) {
-      inMemoryKeySetCache.set(metaData.uri, createRemoteJWKSet(new URL(metaData.openidConfiguration.jwks_uri)))
-    }
-  }
-
-  return allMetadata.map((metaData) => ({
-    ...metaData,
-    jwkSet: inMemoryKeySetCache.get(metaData.uri)!,
-  }))
-}
-
 export const isEamRequest = (params: UnknownObject, clientId: string) => {
   // Confirm the basic OIDC parameters line up with expected EAM values
   if (
@@ -144,6 +101,9 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
   // Client request ID is used by Entra to track login activity
   if (!params['client-request-id']) return false
 
+  // Confirm the redirect URI is a valid MS login URI
+  if (mapMsLoginToAzureJwksUri((params.redirect_uri as string | undefined) ?? '') === undefined) return false
+
   const decodedIdTokenHint = decodeJwt(params.id_token_hint as string)
 
   // Confirm the EAM specific parameters (Object ID, Tenant ID, and Issuer)
@@ -157,6 +117,9 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
   return true
 }
 
+// Cache the Entra keys in memory
+const inMemoryKeySetCache = new Map<string, ReturnType<typeof createRemoteJWKSet>>()
+
 export const hookAndApplyCustomEntraEamSpec = () => {
   // Override the authorization -> checkIdTokenHint pipeline step to apply custom logic for EAM requests
   wrapOidcPipelineStep('authorization', ['POST'], 'checkIdTokenHint', async (ctx, next, original) => {
@@ -169,7 +132,7 @@ export const hookAndApplyCustomEntraEamSpec = () => {
       throw new errors.InvalidClient('Client not found')
     }
 
-    const clientId = oidc.client!.clientId.toLowerCase()
+    const clientId = oidc.client.clientId.toLowerCase()
     const client = clients.find((c) => c.id.toLowerCase() === clientId)
 
     if (!client) {
@@ -192,31 +155,25 @@ export const hookAndApplyCustomEntraEamSpec = () => {
     }
 
     const tenantId = eamFriendlyTenants.find((tid) => tid.toLowerCase() === decodedIdTokenHint.tid)
-
     if (!tenantId) {
       logger.error(`Tenant ID not found in the authTenantIds`, { params: extractLoggable(oidc.params!) })
       throw new errors.InvalidRequest('Tenant ID is not registered for use with this instance of VO.')
     }
 
-    const eamOidcConfigs = await fetchEntraOidcMetadata()
-
-    let keys: JWK[] = []
-    for (const eamOidcConfig of eamOidcConfigs) {
-      if (!eamOidcConfig.jwkSet.fresh) await eamOidcConfig.jwkSet.reload()
-      keys = [...keys, ...(eamOidcConfig.jwkSet.jwks()?.keys ?? [])]
+    const jwksUri = mapMsLoginToAzureJwksUri(authParams.redirect_uri)!
+    if (!inMemoryKeySetCache.has(jwksUri)) {
+      inMemoryKeySetCache.set(
+        jwksUri,
+        createRemoteJWKSet(new URL(jwksUri), {
+          // The default is 10 minutes, however that's a little short for the EAM use-case.
+          // Given the MS advice is to refresh hourly, and that this is an MS OIDC implementation, we'll use an hour.
+          // https://learn.microsoft.com/en-us/entra/identity-platform/signing-key-rollover#general-considerations
+          cacheMaxAge: millisecondsInHour,
+        }),
+      )
     }
-    // Deduplicate keys on the kty and kid fields
-    // This is done because we're treating all the Entra OIDC metadata URIs as a single source of truth
-    keys = keys.filter((key, index) => keys.findIndex((k) => k.kty === key.kty && k.kid === key.kid) === index)
 
-    const { payload, protectedHeader } = await jwtVerify<JWTPayload, KeyLike>(
-      authParams.id_token_hint!,
-      createLocalJWKSet({ keys }) as JWTVerifyGetKey,
-      {
-        issuer: `https://login.microsoftonline.com/${tenantId}/v2.0`,
-      },
-    )
-
+    const { payload, protectedHeader } = await jwtVerify<JWTPayload, KeyLike>(authParams.id_token_hint!, inMemoryKeySetCache.get(jwksUri)!)
     oidc.entity('IdTokenHint', { payload, header: protectedHeader })
 
     return next()
