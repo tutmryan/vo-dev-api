@@ -106,13 +106,13 @@ async function createProvider() {
   provider.proxy = true
   logEvents(provider)
   provider.use(middleware)
-  providerHandler = provider.callback()
+  // Integrations
+  hookAndApplyCustomEntraEamSpec(provider)
 
+  // Post set up
+  providerHandler = provider.callback()
   dataRef.provider = provider
   dataRef.data = data
-
-  // Integrations
-  hookAndApplyCustomEntraEamSpec()
 }
 
 let providerHandler: ReturnType<Provider['callback']> | undefined

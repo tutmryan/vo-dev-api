@@ -2,7 +2,7 @@ import type { RouterContext } from '@koa/router'
 import { millisecondsInHour } from 'date-fns/constants'
 import type { JWTPayload, KeyLike } from 'jose'
 import { createRemoteJWKSet, decodeJwt, decodeProtectedHeader, jwtVerify } from 'jose'
-import type { interactionPolicy, Configuration, Errors, OIDCContext, UnknownObject } from 'oidc-provider'
+import type { interactionPolicy, Configuration, Errors, OIDCContext, UnknownObject, Provider } from 'oidc-provider'
 import { eamFriendlyTenants } from '../../../config'
 import { dataSource } from '../../../data'
 import type { ClaimConstraint } from '../../../generated/graphql'
@@ -11,7 +11,7 @@ import { invariant } from '../../../util/invariant'
 import { throwError } from '../../../util/throw-error'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { paramsToAuthParamsSpec, wrapOidcPipelineStep } from '../integration-hook'
-import { getData, getProvider, oidcProviderModule } from '../provider'
+import { getData, oidcProviderModule } from '../provider'
 import { getLoginInteractionData, setLoginInteractionData } from '../session'
 
 enum ExtraParams {
@@ -120,9 +120,9 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
 // Cache the Entra keys in memory
 const inMemoryKeySetCache = new Map<string, ReturnType<typeof createRemoteJWKSet>>()
 
-export const hookAndApplyCustomEntraEamSpec = () => {
+export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
   // Override the authorization -> checkIdTokenHint pipeline step to apply custom logic for EAM requests
-  wrapOidcPipelineStep('authorization', ['POST'], 'checkIdTokenHint', async (ctx, next, original) => {
+  wrapOidcPipelineStep(provider, 'authorization', ['POST'], 'checkIdTokenHint', async (ctx, next, original) => {
     const { oidc } = ctx as RouterContext & { oidc: OIDCContext }
     const { clients } = getData()
     const { errors } = await oidcProviderModule()
@@ -178,8 +178,6 @@ export const hookAndApplyCustomEntraEamSpec = () => {
 
     return next()
   })
-
-  const provider = getProvider()
 
   // Save the EAM sub and state to the interaction data
   provider.on('interaction.started', async (ctx) => {

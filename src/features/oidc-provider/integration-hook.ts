@@ -5,7 +5,6 @@ import type Application from 'koa'
 import type { Errors, Provider } from 'oidc-provider'
 import { logger } from '../../logger'
 import { invariant } from '../../util/invariant'
-import { getProvider } from './provider'
 
 type Steps =
   | 'noCache'
@@ -75,12 +74,13 @@ const buildContext = (provider: Provider) => {
 }
 
 export const wrapOidcPipelineStep = (
+  provider: Provider,
   action: 'authorization',
   methods: Methods,
   step: Steps,
   wrapper: (ctx: RouterContext, next: Next, original: Middleware) => Promise<void>,
 ) => {
-  const { router } = buildContext(getProvider())
+  const { router } = buildContext(provider)
 
   const routes = router.stack.filter((r) => {
     if (r.opts.name !== action) return false
