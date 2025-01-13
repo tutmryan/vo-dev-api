@@ -47,7 +47,7 @@ async function createProvider() {
   const issuer = `${apiUrl}${oidcRoute}`
   logger.info(`Creating OIDC provider for: ${issuer}`)
 
-  const [{ Provider, interactionPolicy }, jwksKeys, data] = await Promise.all([oidcProviderModule(), keys(), loadOidcData()])
+  const [{ Provider }, jwksKeys, data] = await Promise.all([oidcProviderModule(), keys(), loadOidcData()])
   const { clients, clientMetadata, resources, resourceScopes } = data
 
   const provider = new Provider(issuer, {
