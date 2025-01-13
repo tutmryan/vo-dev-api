@@ -1,4 +1,6 @@
-import { EntraAppRedirectAuth, EntraAppRedirectOidcMeta } from '@site/src/components/eam'
+import { EntraAppRedirectAuth, EntraAppRedirectOidcMeta } from '@site/src/components/EAM'
+import { Help } from '@site/src/components/Help'
+import { ImgBorder } from '@site/src/components/ImgBorder'
 
 # External Access Method (EAM)
 
@@ -34,7 +36,7 @@ Single Page Applications (SPAs) Redirect URIs should be set to the following:
 
 1. <code><EntraAppRedirectAuth /></code>
 2. <code><EntraAppRedirectOidcMeta /></code>
-3. <code>%Your tenant url%</code> <span class='list-help'>(which will be something like `https://{tenant name}.onmicrosoft.com`)</span>
+3. <code>%Your tenant url%</code> <Help>(which will be something like `https://{tenant name}.onmicrosoft.com`)</Help>
 
 ![SPAs Redirect URIs](../../../static/img/eam-app-redirects.png)
 
@@ -43,14 +45,14 @@ The following token options should **not** be checked
 1. Access tokens (used for implicit flows)
 2. ID tokens (used for implicit and hybrid flows)
 
-<span className='soft-border'>
-![SPAs Redirect URIs](../../../static/img/eam-app-token-options.png)
-</span>
+<ImgBorder>
+  ![SPAs Redirect URIs](../../../static/img/eam-app-token-options.png)
+</ImgBorder>
 
 ### Enterprise Application Registration
 
 The associated Enterprise Application must have a conditional access policy set up to enforce MFA.
 
-<span className='soft-border'>
-![Conditional Access Policy](../../../static/img/eam-ca-policy-options.png)
-</span>
+<ImgBorder>
+  ![Conditional Access Policy](../../../static/img/eam-ca-policy-options.png)
+</ImgBorder>

@@ -1,0 +1,10 @@
+.imgBorder img {
+  border-color: #F3F3F3;
+  border-width: 1px;
+  border-style: solid;
+  padding: .7em;
+}
+
+[data-theme='dark'] .imgBorder img {
+  border-color: #3e3e3e;
+}
