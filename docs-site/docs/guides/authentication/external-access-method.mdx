@@ -30,7 +30,7 @@ The official documentation for setting up an External Access Method (EAM) can be
 
 Whilst the Microsoft documentation is comprehensive, it can be a little overwhelming. To help with this, the following additional information is provided to help you get started.
 
-### Application Registration
+### Entra ID - Application Registration
 
 Single Page Applications (SPAs) Redirect URIs should be set to the following:
 
@@ -49,10 +49,35 @@ The following token options should **not** be checked
   ![SPAs Redirect URIs](../../../static/img/eam-app-token-options.png)
 </ImgBorder>
 
-### Enterprise Application Registration
+### Entra ID - Enterprise Application Registration
 
 The associated Enterprise Application must have a conditional access policy set up to enforce MFA.
 
 <ImgBorder>
   ![Conditional Access Policy](../../../static/img/eam-ca-policy-options.png)
 </ImgBorder>
+
+### VO Platform - OIDC Client Registration
+
+As Entra ID's EAM uses OIDC to provide the second factor authentication, a OIDC client registration on the VO platform must be registered and with the following details:
+
+One of the following URIs must be used as the `Redirect URI`, but depending on the Azure instance you are using, the URI will be different. For most, the first URI will be the correct one to use.
+
+- https://login.microsoftonline.com/common/federation/externalauthprovider (Azure)
+- https://login.microsoftonline.us/common/federation/externalauthprovider (Azure US - Government)
+- https://login.partner.microsoftonline.cn/common/federation/externalauthprovider (Azure - China)
+
+### Entra ID - Authentication methods
+
+When setting up the authentication method you will be asked for these important details:
+
+1. Client ID
+    1. The client ID of the Authentication Client registered in Orchestrator.
+2. Discovery Endpoint
+    1. The discovery endpoint of the Orchestrator instance. Which is, <code><EntraAppRedirectOidcMeta /></code>.
+3. App ID
+    1. The ID of the Application registered in Entra.
+
+:::warning[Caution]
+Admin consent for the application is required in the tenant that uses the EAM. If consent isn't granted, the following error appears when an admin tries to use the EAM: AADSTS900491: Service principal `your App ID` not found.
+:::
