@@ -1,4 +1,4 @@
-import { codeExpiryMinutes, isAsyncIssuanceVerificationThrottled, setVerificationCode, throttleVerificationForIssuance } from '..'
+import { codeExpiryMinutes, isThrottledOrSetThrottle, setVerificationCode } from '..'
 import type { TransactionalCommandContext } from '../../../cqs'
 import type { SendAsyncIssuanceVerificationResponse } from '../../../generated/graphql'
 import { CommunicationError } from '../../../services/communications-service'
@@ -29,19 +29,16 @@ export async function SendAsyncIssuanceVerificationCommand(
   invariant(asyncIssuanceRequest, 'Failed to download async issuance details')
   const verification = asyncIssuanceRequest.contact.verification ?? asyncIssuanceRequest.contact.notification
 
-  // avoid execution if the async issuance is throttled
-  const isThrottled = await isAsyncIssuanceVerificationThrottled(asyncIssuanceRequestId)
+  // atomic check & set throttle, to prevent race conditions
+  const isThrottled = await isThrottledOrSetThrottle(asyncIssuanceRequestId)
   if (isThrottled) {
-    logger.warn(`Throttling verification for async issuance: ${asyncIssuanceRequestId}`)
+    logger.warn(`Throttled verification for async issuance: ${asyncIssuanceRequestId}`)
     return { method: verification.method }
   }
 
   // generate a code
   const verificationCode = randomDigits(6)
   await setVerificationCode(asyncIssuanceRequestId, verificationCode)
-
-  // throttle further verification attempts for this issuance
-  await throttleVerificationForIssuance(asyncIssuanceRequestId)
 
   // send verification
   try {

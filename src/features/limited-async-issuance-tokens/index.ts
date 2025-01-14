@@ -1,3 +1,4 @@
+import KeyvRedis from '@keyv/redis'
 import { limitedAsyncIssuance } from '../../config'
 import { newCacheSection, ONE_HOUR_TTL } from '../../redis/cache'
 import { rateLimiter } from '../../redis/rate-limiter'
@@ -82,18 +83,28 @@ function getVerificationThrottleKey(asyncIssuanceId: string) {
   return `asyncIssuanceVerification:${asyncIssuanceId.toLowerCase()}`
 }
 
-export async function throttleVerificationForIssuance(asyncIssuanceId: string) {
-  const throttleKey = getVerificationThrottleKey(asyncIssuanceId)
-  await verificationThrottleCache().set(throttleKey, true.toString())
-}
-
 export async function clearVerificationThrottleForIssuance(asyncIssuanceId: string) {
   const throttleKey = getVerificationThrottleKey(asyncIssuanceId)
   await verificationThrottleCache().delete(throttleKey)
 }
 
-export async function isAsyncIssuanceVerificationThrottled(asyncIssuanceId: string) {
+export async function isThrottledOrSetThrottle(asyncIssuanceId: string): Promise<boolean> {
+  const keyv = verificationThrottleCache()
+  const store = keyv.opts.store
   const throttleKey = getVerificationThrottleKey(asyncIssuanceId)
-  const throttleEntry = await verificationThrottleCache().get(throttleKey)
-  return !!throttleEntry
+
+  if (store instanceof KeyvRedis) {
+    const redisClient = store.redis
+    // Atomic
+    const result = await redisClient.set(throttleKey, true.toString(), 'NX', 'PX', VERIFICATION_THROTTLE_TTL)
+    return result === null
+  } else {
+    // Non-atomic fallback for other store types (e.g., memory, SQLite, etc.). This is prone to race conditions
+    const existing = await keyv.get(throttleKey)
+    if (existing) {
+      return true
+    }
+    await keyv.set(throttleKey, true.toString())
+    return false
+  }
 }
