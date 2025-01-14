@@ -4,6 +4,7 @@ import { oidcStorageService } from '.'
 import { logger } from '../../logger'
 import {
   faceCheckAmr,
+  OpenIdEmailClaim,
   OpenIdProfileClaim,
   presentationLoginStandardClaims,
   VcInfoClaim,
@@ -39,6 +40,7 @@ export function accountToClaims(account: PresentationLoginAccount): AccountClaim
     sub,
     ...presentationLoginStandardClaims,
     [OpenIdProfileClaim.Name]: identity?.name ?? credentialClaims?.name,
+    [OpenIdEmailClaim.Email]: credentialClaims?.email,
     [VcInfoClaim.Issuer]: did,
     [VcInfoClaim.Type]: credentialType,
     [VcInfoClaim.RevocationStatus]: account.revocationStatus,

@@ -174,7 +174,7 @@ const settings: OidcClientSettings = {
   redirect_uri: 'http://localhost:5173/',
   post_logout_redirect_uri: 'http://localhost:5173/',
   resource: 'https://example.com/api',
-  scope: 'openid profile offline_access vc_info vc_presented_attributes vc_vo_presentation vc_vo_identity api:read api:write',
+  scope: 'openid profile offline_access email vc_info vc_presented_attributes vc_vo_presentation vc_vo_identity api:read api:write',
 }
 ```
 
@@ -199,7 +199,7 @@ Claims are organised by scopes, which are used to request specific information a
 
 The full list of scopes is available from the <ApiUrl path="/oidc/.well-known/openid-configuration">OpenID discovery document</ApiUrl>.
 
-The Verified Orchestration OIDC provider supports standard scopes: `openid`, `profile`, and `offline_access`.
+The Verified Orchestration OIDC provider supports standard scopes: `openid`, `profile`, `email`\* and `offline_access`.
 
 Additionally, credential info is available via the following scopes:
 
@@ -210,6 +210,12 @@ Additionally, credential info is available via the following scopes:
 | `vc_vo_presentation`      | Verified Orchestration presentation details   |
 | `vc_vo_identity`          | Verified Orchestration identity details       |
 
+:::note
+
+\* The `email` scope only results in a claim value when an `email` claim is present in the verifiable credential presentation.
+
+:::
+
 ### Claims
 
 The following table describes all claims available and the scope required to access them:
@@ -218,6 +224,7 @@ The following table describes all claims available and the scope required to acc
 | ---------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `sub`                                    | `openid`                  | The subject identifier, derived from the Verified Orchestration issuance ID.<br /><br />Or, for partner credential presentations:<br /> - the value of the `vc_unique_claim_for_sub` parameter<br /> - the first matching **Unique claim for subject identifier** configured on the client |
 | `name`                                   | `profile`                 | The Verified Orchestration identity name (n/a for partner presentations).                                                                                                                                                                                                                  |
+| `email`                                  | `email`                   | The value of the `email` claim from the verifiable credential presentation, if present.                                                                                                                                                                                                    |
 | `vc_issuer`                              | `vc_info`                 | The issuer DID of the verifiable credential.                                                                                                                                                                                                                                               |
 | `vc_type`                                | `vc_info`                 | The type of the verifiable credential.                                                                                                                                                                                                                                                     |
 | `vc_revocation_status`                   | `vc_info`                 | The revocation status of the verifiable credential, either `VALID` or `REVOKED`.                                                                                                                                                                                                           |

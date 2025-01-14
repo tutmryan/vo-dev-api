@@ -21,6 +21,10 @@ export enum OpenIdProfileClaim {
   Name = 'name',
 }
 
+export enum OpenIdEmailClaim {
+  Email = 'email',
+}
+
 export enum VoIdentityClaim {
   IdentityId = 'vc_vo_identity_id',
   IdentityIssuer = 'vc_vo_identity_issuer',
@@ -35,6 +39,7 @@ export enum VoPresentationClaim {
 
 export const openidClaims = {
   openid: ['sub', ...Object.keys(presentationLoginStandardClaims)],
+  email: Object.values(OpenIdEmailClaim),
   profile: Object.values(OpenIdProfileClaim),
   vc_info: Object.values(VcInfoClaim),
   vc_presented_attributes: Object.values(VcPresentedAttributesClaim),
