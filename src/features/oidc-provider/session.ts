@@ -15,7 +15,7 @@ import type { PartnerEntity } from '../partners/entities/partner-entity'
 import { getPresentationDataFromCache } from '../presentation/callback/cache'
 import { PresentationEntity } from '../presentation/entities/presentation-entity'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
-import { buildEamIdentityConstraint } from './integrations/entra-eam'
+import { whenEamAddPresentationConstraints, whenEamGetAccountId } from './integrations/entra-eam'
 import { ExtraParams } from './extra-params'
 
 const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
@@ -36,6 +36,8 @@ type LoginInteractionDataPostStart = {
       iss: string
       state: string
       nonce: string
+      clientRequestId?: string
+      identityId?: string
     }
   }
 }
@@ -45,7 +47,7 @@ type LoginInteractionDataPreStart = {
   interactionId: string
 } & Partial<Omit<LoginInteractionDataPostStart, 'interactionId' | 'state'>>
 
-type LoginInteractionData = LoginInteractionDataPostStart | LoginInteractionDataPreStart
+export type LoginInteractionData = LoginInteractionDataPostStart | LoginInteractionDataPreStart
 
 export async function acquireLoginPresentationToken({
   interactionId,
@@ -147,10 +149,8 @@ export async function buildAuthnPresentationRequest(
     ]
   }
 
-  if (loginInteractionData?.integrations?.entraEam) {
-    // Entra EAM integration to constrain presentation to the user's identity
-    constraints = [...(constraints ?? []), await buildEamIdentityConstraint(params, errors)]
-  }
+  // Integration hooks
+  constraints = whenEamAddPresentationConstraints(loginInteractionData, constraints)
 
   return {
     requestedCredentials: [
@@ -189,7 +189,6 @@ export type PresentationLoginAccount = {
   credentialClaims?: Record<string, unknown>
   revocationStatus?: string
   faceCheckMatchConfidenceScore?: number
-  nonce?: string
 }
 
 /**
@@ -267,10 +266,12 @@ export async function completeLogin(
   const { claims: allClaims, type: types, issuer } = credential
   const { issuanceId, photo, ...claims } = allClaims
 
-  const accountId = !interactionData.integrations?.entraEam
-    ? await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
-    : // Entra EAM requires the sub to be the passed in sub
-      interactionData.integrations.entraEam.sub
+  // Integrations hooks
+  let accountId = whenEamGetAccountId(interactionData)
+
+  if (!accountId) {
+    accountId = await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
+  }
 
   const account: PresentationLoginAccount = {
     accountId,
@@ -283,7 +284,6 @@ export async function completeLogin(
     credentialClaims: claims,
     revocationStatus: credential.credentialState.revocationStatus as string | undefined,
     faceCheckMatchConfidenceScore: credential.faceCheck?.matchConfidenceScore,
-    nonce: interactionData.integrations?.entraEam?.nonce,
   }
 
   // Persist the account

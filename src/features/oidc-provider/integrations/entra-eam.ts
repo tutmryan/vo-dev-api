@@ -2,7 +2,7 @@ import type { RouterContext } from '@koa/router'
 import { millisecondsInHour } from 'date-fns/constants'
 import type { JWTPayload, KeyLike } from 'jose'
 import { createRemoteJWKSet, decodeJwt, decodeProtectedHeader, jwtVerify } from 'jose'
-import type { Configuration, Errors, OIDCContext, UnknownObject, Provider } from 'oidc-provider'
+import type { Configuration, OIDCContext, UnknownObject, Provider } from 'oidc-provider'
 import { eamFriendlyTenants } from '../../../config'
 import { dataSource } from '../../../data'
 import type { ClaimConstraint } from '../../../generated/graphql'
@@ -11,16 +11,18 @@ import { invariant } from '../../../util/invariant'
 import { throwError } from '../../../util/throw-error'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { paramsToAuthParamsSpec, wrapOidcPipelineStep } from '../integration-hook'
+import { oauthErrors } from '../oauth'
 import { getData, oidcProviderModule } from '../provider'
+import type { LoginInteractionData } from '../session'
 import { getLoginInteractionData, setLoginInteractionData } from '../session'
 
 enum ExtraParams {
-  client_request_id = 'client-request-id',
+  clientRequestId = 'client-request-id',
 }
 
 export const eamExtraParams: Configuration['extraParams'] = {
-  async [ExtraParams.client_request_id](ctx, value, _client) {
-    if (ctx.oidc.params) ctx.oidc.params[ExtraParams.client_request_id] = value
+  async [ExtraParams.clientRequestId](ctx, value, _client) {
+    if (ctx.oidc.params) ctx.oidc.params[ExtraParams.clientRequestId] = value
   },
 }
 
@@ -42,7 +44,7 @@ const mapMsLoginToAzureJwksUri = (uri: string) => {
 
 const extractLoggable = (params: UnknownObject) => {
   return {
-    clientRequestId: params[ExtraParams.client_request_id],
+    clientRequestId: params[ExtraParams.clientRequestId],
     idTokenHint: params.id_token_hint,
     redirectUri: params.redirect_uri,
     responseMode: params.response_mode,
@@ -51,38 +53,60 @@ const extractLoggable = (params: UnknownObject) => {
   }
 }
 
-export const eamPresentationLoginStandardClaims = {
+const eamPresentationLoginStandardClaims = {
   // Note: EAM only allows a single amr value
   amr: ['pop'],
   // Note: sending only 'possession' as the acr value does not work
   acr: 'possessionorinherence',
 } as const
 
-export async function buildEamIdentityConstraint(params: UnknownObject, errors: Errors): Promise<ClaimConstraint> {
-  invariant(params.id_token_hint && typeof params.id_token_hint === 'string', 'id_token_hint is required for EAM clients')
+export function whenEamAddPresentationConstraints(loginData?: LoginInteractionData, constraints?: ClaimConstraint[]) {
+  // Ignore non-EAM requests
+  if (!loginData?.integrations?.entraEam) return constraints
 
-  const decodedIdTokenHint = decodeJwt(params.id_token_hint)
-  const objectId = (decodedIdTokenHint.oid as string | undefined) ?? ''
-  const tenantId = (decodedIdTokenHint.tid as string | undefined) ?? ''
+  invariant(loginData.integrations.entraEam.identityId, 'Identity ID not found during EAM identity constraint build')
 
-  invariant(objectId && tenantId, 'Both oid and tid are required to be present in the id_token_hint during an EAM flow')
-
-  const identity = await dataSource.getRepository(IdentityEntity).findOne({
-    where: {
-      identifier: objectId,
-      issuer: tenantId,
+  return [
+    ...(constraints ?? []),
+    {
+      claimName: 'identityId',
+      values: [loginData.integrations.entraEam.identityId],
     },
-  })
+  ]
+}
 
-  if (!identity) {
-    logger.error(`Identity not found matching object ${objectId} and tenant ${tenantId}`, { params: extractLoggable(params) })
-    throw new errors.AccessDenied('Identity not found')
-  }
+export function whenEamGetAccountId(loginData?: LoginInteractionData) {
+  // Ignore non-EAM requests
+  if (!loginData?.integrations?.entraEam) return undefined
 
-  return {
-    claimName: 'identityId',
-    values: [identity.id],
-  }
+  return loginData.integrations.entraEam.sub
+}
+
+export function isEamRequestAndLoginShouldFail(loginData?: LoginInteractionData) {
+  // Ignore non-EAM requests
+  if (!loginData?.integrations?.entraEam) return false
+
+  // Fail the login if the identity ID is not set
+  return loginData.integrations.entraEam.identityId === undefined
+}
+
+export const eamLoginFailResult = {
+  error: oauthErrors.accessDenied,
+  error_description: 'No identity could be matched to the Entra user.',
+}
+
+export function whenEamApplyAmr(loginData: LoginInteractionData, amr: string[]) {
+  // Ignore non-EAM requests
+  if (!loginData.integrations?.entraEam) return amr
+
+  return [...eamPresentationLoginStandardClaims.amr]
+}
+
+export function whenEamApplyAcr(loginData: LoginInteractionData, acr: string) {
+  // Ignore non-EAM requests
+  if (!loginData.integrations?.entraEam) return acr
+
+  return eamPresentationLoginStandardClaims.acr as string
 }
 
 export const isEamRequest = (params: UnknownObject, clientId: string) => {
@@ -99,7 +123,7 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
 
   // Confirm the EAM specific parameters
   // Client request ID is used by Entra to track login activity
-  if (!params['client-request-id']) return false
+  if (!params[ExtraParams.clientRequestId]) return false
 
   // Confirm the redirect URI is a valid MS login URI
   if (mapMsLoginToAzureJwksUri((params.redirect_uri as string | undefined) ?? '') === undefined) return false
@@ -200,10 +224,20 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
     }
 
     invariant(oidc.entities.Interaction, 'Interaction entity not found post interaction.started event during EAM auth flow')
-    invariant(oidc.entities.IdTokenHint, 'IdTokenHint entity not found post interaction.started event during EAM auth flow')
-
     const interactionData = await getLoginInteractionData(oidc.entities.Interaction.uid)
     if (interactionData) invariant(interactionData.state !== 'pre-start', 'Interaction data was in an incorrect state for EAM auth flow')
+
+    invariant(oidc.entities.IdTokenHint, 'IdTokenHint entity not found post interaction.started event during EAM auth flow')
+    const objectId = (oidc.entities.IdTokenHint.payload.oid as string | undefined) ?? ''
+    const tenantId = (oidc.entities.IdTokenHint.payload.tid as string | undefined) ?? ''
+
+    invariant(objectId && tenantId, 'Both oid and tid are required to be present in the id_token_hint during an EAM flow')
+    const identity = await dataSource.getRepository(IdentityEntity).findOne({
+      where: {
+        identifier: objectId,
+        issuer: tenantId,
+      },
+    })
 
     await setLoginInteractionData({
       ...(interactionData ?? {}),
@@ -219,6 +253,10 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
             throwError('iss not found in IdTokenHint during EAM auth flow'),
           state: (oidc.params.state as string | undefined) ?? throwError('state not found in params during EAM auth flow'),
           nonce: (oidc.params.nonce as string | undefined) ?? throwError('nonce not found in params during EAM auth flow'),
+          clientRequestId:
+            (oidc.params[ExtraParams.clientRequestId] as string | undefined) ??
+            throwError('client_request_id not found in params during EAM auth flow'),
+          identityId: identity?.id,
         },
       },
     })

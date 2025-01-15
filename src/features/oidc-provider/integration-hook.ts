@@ -67,8 +67,8 @@ const buildContext = (provider: Provider) => {
   const app: Application = provider.app
   const dispatch = app.middleware.find((m) => m.name === 'dispatch')
 
-  invariant(dispatch, 'Cannot hook EAM to apply custom spec - Dispatch middleware not found.')
-  invariant('router' in dispatch, 'Cannot hook EAM to apply custom spec - Dispatch middleware does not have a router.')
+  invariant(dispatch, 'Cannot hook to apply custom spec - Dispatch middleware not found.')
+  invariant('router' in dispatch, 'Cannot hook to apply custom spec - Dispatch middleware does not have a router.')
 
   return { app, dispatch, router: dispatch.router as Router }
 }
@@ -87,13 +87,13 @@ export const wrapOidcPipelineStep = (
     return methods === '*' || r.methods.some((m) => methods.includes(m as Verbs))
   })
 
-  invariant(routes.length > 0, `Cannot hook EAM to apply custom spec - No routes found for action '${action}'.`)
+  invariant(routes.length > 0, `Cannot hook to apply custom spec - No routes found for action '${action}'.`)
 
   for (const route of routes) {
     const indexOfStep = route.stack.findIndex((m) => m.name === step)
     const originalStep = route.stack[indexOfStep]
 
-    invariant(originalStep, `Cannot hook EAM to apply custom spec - Step '${step}' not found in route.`)
+    invariant(originalStep, `Cannot hook to apply custom spec - Step '${step}' not found in route.`)
 
     route.stack.splice(indexOfStep, 1, async (ctx, next) => {
       return await wrapper(ctx, next, originalStep)

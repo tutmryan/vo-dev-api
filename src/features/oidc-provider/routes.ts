@@ -12,7 +12,7 @@ import { requestOrigin } from '../../express'
 import { logger } from '../../logger'
 import { invariant } from '../../util/invariant'
 import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
-import { eamPresentationLoginStandardClaims } from './integrations/entra-eam'
+import { eamLoginFailResult, isEamRequestAndLoginShouldFail, whenEamApplyAcr, whenEamApplyAmr } from './integrations/entra-eam'
 import { createRequestInfo } from './log-events'
 import { voLogoUrl } from './logos'
 import { getData, getProvider } from './provider'
@@ -64,7 +64,7 @@ export function routes(app: Express, route: string): void {
 
   app.use((_req, res, next) => {
     const orig = res.render
-    // you'll probably want to use a full blown render engine capable of layouts
+    // you'll probably want to use a fully blown render engine capable of layouts
     res.render = (view, locals) => {
       app.render(view, locals, (_err, html) => {
         const options: any = {
@@ -97,6 +97,13 @@ export function routes(app: Express, route: string): void {
         case 'login': {
           const token = await acquireLoginPresentationToken({ interactionId: uid, clientId: client.clientId })
           const clientEntity = getClient(client.clientId)
+
+          // Integration hooks
+          if (isEamRequestAndLoginShouldFail(loginInteractionData)) {
+            await provider.interactionFinished(req, res, eamLoginFailResult, { mergeWithLastSubmission: false })
+            return
+          }
+
           // TODO: handle param validation errors with a better UX
           const presentationRequest = await buildAuthnPresentationRequest(params, clientEntity, getData().partners, loginInteractionData)
           const { logo, backgroundColor, backgroundImage } = clientEntity
@@ -184,16 +191,21 @@ export function routes(app: Express, route: string): void {
         request: createRequestInfo(req),
       })
 
-      const amr: string[] = !loginInteractionData.integrations?.entraEam
-        ? [...presentationLoginStandardClaims.amr]
-        : [...eamPresentationLoginStandardClaims.amr]
+      let amr: string[] = [...presentationLoginStandardClaims.amr]
+
       if (loginResult.faceCheckMatchConfidenceScore) amr.push(faceCheckAmr)
+
+      let acr = presentationLoginStandardClaims.acr as string
+
+      // Integration hooks
+      amr = whenEamApplyAmr(loginInteractionData, amr)
+      acr = whenEamApplyAcr(loginInteractionData, acr)
 
       const result: InteractionResults = {
         login: {
           accountId: loginResult.accountId,
           amr,
-          acr: !loginInteractionData.integrations?.entraEam ? presentationLoginStandardClaims.acr : eamPresentationLoginStandardClaims.acr,
+          acr,
         },
       }
 
