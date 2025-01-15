@@ -1,8 +1,8 @@
-import bearerTokenMiddleware from '@makerx/express-bearer'
+import { multiIssuerBearerTokenMiddleware } from '@makerx/express-bearer'
 import { getClientCredentialsToken } from '@makerx/node-common'
 import cors from 'cors'
 import type { RequestHandler } from 'express'
-import { bearer, limitedDemoAuth, presentationDemoCors } from '../../config'
+import { issuerOptions, limitedDemoAuth, presentationDemoCors } from '../../config'
 import { dispatchWithoutContext, findUpdateOrCreateUserEntity } from '../../context'
 import { logger } from '../../logger'
 import { User } from '../../user'
@@ -49,8 +49,8 @@ const acquireLimitedAccessTokenHandler: RequestHandler = async (req, res) => {
 export const demoPresentationTokenHandlers: RequestHandler[] = [
   demoCors,
   demoClientAuthHandler,
-  bearerTokenMiddleware({
-    config: bearer,
+  multiIssuerBearerTokenMiddleware({
+    issuerOptions,
     logger,
     tokenIsRequired: true,
   }),

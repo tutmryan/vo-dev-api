@@ -131,12 +131,18 @@ export function routes(app: Express, route: string): void {
           })
         }
         case 'consent': {
+          const clientEntity = getClient(client.clientId)
+          const { logo, backgroundColor, backgroundImage } = clientEntity
           return res.render('interaction', {
             client,
             uid,
             details: prompt.details,
             params,
             title: 'Authorize',
+            voLogoUrl,
+            logoUrl: logo,
+            backgroundColor,
+            backgroundImageUrl: backgroundImage,
             showDebug,
             session: session ? debug(session) : undefined,
             dbg: {

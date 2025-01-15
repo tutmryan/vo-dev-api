@@ -14,7 +14,7 @@ export async function ResendAsyncNotificationCommand(
 
   try {
     return await inTransaction((entityManager) => {
-      return sendAsyncIssuanceNotification({ logger, services, user: user.userEntity }, entityManager, asyncIssuanceRequestId)
+      return sendAsyncIssuanceNotification({ logger, services, user: user.entity }, entityManager, asyncIssuanceRequestId)
     })
   } catch (error) {
     await inTransaction(async (entityManager) => {

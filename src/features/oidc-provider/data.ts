@@ -1,6 +1,6 @@
 import type { ClientMetadata } from 'oidc-provider'
 import { runDeduplicatedJob } from '../../background-jobs'
-import { apiScope, portalUrl } from '../../config'
+import { apiUrl, portalUrl } from '../../config'
 import { dataSource, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../../data'
 import { OidcApplicationType } from '../../generated/graphql'
 import { logger } from '../../logger'
@@ -81,15 +81,16 @@ export function loadExistingData(): Promise<SourceOidcData> {
   })
 }
 
+const portalRedirectUri = new URL(portalUrl).toString()
 const portalDemoRedirectUri = `${portalUrl}/demo/authn`
 
 function portalClientUrisAreCorrect(client: OidcClientEntity) {
-  if (client.redirectUris[0] !== portalUrl) {
-    logger.warn(`Portal client redirect URI[0] is incorrect, expected ${portalUrl}, got ${client.redirectUris[0]}`)
+  if (client.redirectUris[0] !== portalRedirectUri) {
+    logger.warn(`Portal client redirect URI[0] is incorrect, expected ${portalRedirectUri}, got ${client.redirectUris[0]}`)
     return false
   }
-  if (client.postLogoutUris[0] !== portalUrl) {
-    logger.warn(`Portal client postLogout URI[0] is incorrect, expected ${portalUrl}, got ${client.postLogoutUris[0]}`)
+  if (client.postLogoutUris[0] !== portalRedirectUri) {
+    logger.warn(`Portal client postLogout URI[0] is incorrect, expected ${portalRedirectUri}, got ${client.postLogoutUris[0]}`)
     return false
   }
   if (client.redirectUris[1] !== portalDemoRedirectUri) {
@@ -104,8 +105,8 @@ function portalClientUrisAreCorrect(client: OidcClientEntity) {
 }
 
 function apiResourceHasCorrectScope(resource: OidcResourceEntity) {
-  if (resource.resourceIndicator !== apiScope) {
-    logger.warn(`API resource scope is incorrect, expected ${apiScope}, got ${resource.resourceIndicator}`)
+  if (resource.resourceIndicator !== apiUrl) {
+    logger.warn(`API resource scope is incorrect, expected ${apiUrl}, got ${resource.resourceIndicator}`)
     return false
   }
   return true
@@ -147,13 +148,13 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
     // update URLs if they have changed
     let updatedConfig = false
     if (portalClient && !portalClientUrisAreCorrect(portalClient)) {
-      portalClient.redirectUris = [portalUrl, portalDemoRedirectUri]
-      portalClient.postLogoutUris = [portalUrl, portalDemoRedirectUri]
+      portalClient.redirectUris = [portalRedirectUri, portalDemoRedirectUri]
+      portalClient.postLogoutUris = [portalRedirectUri, portalDemoRedirectUri]
       await clientRepo.save(portalClient)
       updatedConfig = true
     }
     if (apiResource && !apiResourceHasCorrectScope(apiResource)) {
-      apiResource.resourceIndicator = apiScope
+      apiResource.resourceIndicator = apiUrl
       await resourceRepo.save(apiResource)
       updatedConfig = true
     }
@@ -170,7 +171,7 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
         new OidcResourceEntity({
           id: apiResourceId,
           name: 'Verified Orchestration API',
-          resourceIndicator: apiScope,
+          resourceIndicator: apiUrl,
           scopes: [OidcScopes.issuee],
         }),
       )
@@ -179,10 +180,10 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
       await clientRepo.save(
         new OidcClientEntity({
           id: portalClientId,
-          name: 'Verified Orchestration Portal',
+          name: 'Verified Orchestration Concierge',
           applicationType: OidcApplicationType.Web,
-          redirectUris: [portalUrl, portalDemoRedirectUri],
-          postLogoutUris: [portalUrl, portalDemoRedirectUri],
+          redirectUris: [portalRedirectUri, portalDemoRedirectUri],
+          postLogoutUris: [portalRedirectUri, portalDemoRedirectUri],
           allowAnyPartner: true,
           policyUrl: portalClientPolicyUrl,
           termsOfServiceUrl: portalClientTermsOfServiceUrl,

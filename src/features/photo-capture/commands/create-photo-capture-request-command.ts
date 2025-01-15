@@ -29,7 +29,7 @@ export async function CreatePhotoCaptureRequestCommand(
 
   // persist photo capture data in cache for subsequent retrieval
   const photoCaptureRequestId = randomUUID()
-  await setPhotoCaptureData(photoCaptureRequestId, { ...request, identityId, photoCaptureRequestId, userId: user.userEntity.id })
+  await setPhotoCaptureData(photoCaptureRequestId, { ...request, identityId, photoCaptureRequestId, userId: user.entity.id })
 
   // generate URL and QR code for photo capture
   const photoCaptureUrl = `${portalUrl}/photo-capture/${photoCaptureRequestId}`

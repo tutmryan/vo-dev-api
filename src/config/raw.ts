@@ -36,7 +36,7 @@ export type Config = {
   }
   cookieSession: CookieSessionInterfaces.CookieSessionOptions
   auth: {
-    bearer: BearerConfig
+    bearer: Omit<BearerConfig, 'jwksUri'>
     pkce: {
       credentials: ClientCredentials
       logoutUrl?: string

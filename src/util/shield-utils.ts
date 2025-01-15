@@ -1,6 +1,8 @@
 import { rule } from 'graphql-shield'
 import type { ShieldRule } from 'graphql-shield/typings/types'
+import { apiUrl } from '../config'
 import type { GraphQLContext } from '../context'
+import type { OidcScopes } from '../roles'
 
 type Primitive = string | number | symbol | bigint | boolean | null | undefined
 export type ShieldSchema<TResolver> = TResolver extends Primitive
@@ -35,4 +37,12 @@ export function hasAnyScopeRule(...scopes: string[]) {
   return rule(`hasScope-${scopes.join(',')}`, { cache: 'contextual' })(
     (_, __, { user }: GraphQLContext) => user?.scopes.some((scope) => scopes.includes(scope)) === true,
   )
+}
+
+export function hasApiResourceScopeRule(scope: OidcScopes) {
+  return rule(`hasApiResourceScope-${scope}`, { cache: 'contextual' })((_, __, { user }: GraphQLContext) => {
+    if (!user) return false
+    if (user.claims.aud !== apiUrl) return false
+    return user.scopes.includes(scope)
+  })
 }

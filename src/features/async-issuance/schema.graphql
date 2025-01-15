@@ -304,8 +304,10 @@ extend type Mutation {
   Creates an issuance request for the specified async issuance request.
 
   Returns a URL and optional QR code to start the issuance process or an error.
+
+  Authenticated identities can optionally provide a photo to be used in the issuance as a [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) using base64 encoding.
   """
-  createIssuanceRequestForAsyncIssuance(asyncIssuanceRequestId: UUID!): IssuanceRequestResponse!
+  createIssuanceRequestForAsyncIssuance(asyncIssuanceRequestId: UUID!, photo: String): IssuanceRequestResponse!
 }
 
 """
@@ -390,11 +392,21 @@ type AsyncIssuanceRequest {
   """
   The point in the future which the issuees can no longer complete the issuance process.
 
-  Items to note:
+  Items of note:
 
   - The period started upon receipt of the request.
   """
   expiresOn: DateTime!
+
+  """
+  When set to true, the issuee is required to capture their photo during the issuance process.
+
+  Items of note:
+
+  - This field will only return a value while the issuance is pending.
+  - This field is relatively expensive to query and should only be queried for single or small numbers of async issuance requests, to determine issuance requirements.
+  """
+  photoCapture: Boolean
 
   """
   The user who created the async issuance request.

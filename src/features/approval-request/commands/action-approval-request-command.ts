@@ -24,7 +24,7 @@ export async function ActionApprovalRequestCommand(this: CommandContext, id: str
 
   const approvedRequest = await repo.findOneByOrFail({ id })
   if (approvedRequest.callbackInput)
-    await addToJobQueue({ name: 'invokeApprovalCallback', payload: { userId: user.userEntity.id, approvedRequestId: approvedRequest.id } })
+    await addToJobQueue({ name: 'invokeApprovalCallback', payload: { userId: user.entity.id, approvedRequestId: approvedRequest.id } })
 
   return approvedRequest
 }

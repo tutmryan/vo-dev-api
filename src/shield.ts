@@ -1,8 +1,16 @@
 import type { ShieldSchema } from '@makerx/graphql-core'
 import { isDev, isLocalDev } from '@makerx/node-common'
 import { GraphQLError } from 'graphql'
-import { allow, and, or, shield } from 'graphql-shield'
+import { allow, and, not, or, rule, shield } from 'graphql-shield'
 import type { IRules } from 'graphql-shield/typings/types'
+import { apiUrl } from './config'
+import type { GraphQLContext } from './context'
+import {
+  asyncIssuanceIsToAuthenticatedUser,
+  identityIsAuthenticatedUser,
+  issuanceIsToAuthenticatedUser,
+  presentationIsByAuthenticatedUser,
+} from './features/identity/shield-rules'
 import {
   hasTokenAcquisitionRole,
   hasTokenAcquisitionRoleRequiringIdentityAccess,
@@ -40,8 +48,16 @@ import {
 } from './features/oidc-provider/shield-rules'
 import { isValidCapturePhoto, isValidLimitedIssuancePhotoCaptureRequest } from './features/photo-capture/shield-rules'
 import type { Resolvers } from './generated/graphql'
-import { AppRoles, UserRoles } from './roles'
+import { AppRoles, OidcScopes, UserRoles } from './roles'
 import { hasAnyRoleRuleWithName, hasRoleRule } from './util/shield-utils'
+
+function hasApiResourceScopeRule(scope: OidcScopes) {
+  return rule(`hasApiResourceScope-${scope}`, { cache: 'contextual' })((_, __, { user }: GraphQLContext) => {
+    if (!user) return false
+    if (user.claims.aud !== apiUrl) return false
+    return user.scopes.includes(scope)
+  })
+}
 
 const isUserWithReadPermissions = hasAnyRoleRuleWithName('isUserWithReadPermissions', ...Object.values(UserRoles))
 
@@ -57,6 +73,9 @@ const isIssuanceApp = hasRoleRule(AppRoles.issue, 'isIssuanceApp')
 const isPresentationApp = hasRoleRule(AppRoles.present, 'isPresentationApp')
 const isContractAdminApp = hasRoleRule(AppRoles.contractAdmin, 'isContractAdminApp')
 
+// api resource scope rules
+const isIssuee = hasApiResourceScopeRule(OidcScopes.issuee)
+
 const isIssuer = or(isIssuerUser, isIssuanceApp, isLimitedIssuanceApp)
 const isAsyncIssuer = or(isIssuerUser, isIssuanceApp)
 
@@ -69,6 +88,7 @@ const fallbackRule = or(
   isLimitedApprovalApp,
   isLimitedAsyncIssuanceApp,
   isOidcAuthnClient,
+  isIssuee,
 )
 
 // issuance and presentation access rules
@@ -89,6 +109,7 @@ const isAllowedToViewAsyncIssuanceRequests = or(isUserWithReadPermissions, isIss
 export const rules: ShieldSchema<Resolvers> = {
   Query: {
     '*': isUserWithReadPermissions,
+    discovery: or(isUserWithReadPermissions, isIssuee),
     healthcheck: allow,
     template: or(isUserWithReadPermissions, isContractAdminApp),
     findTemplates: or(isUserWithReadPermissions, isContractAdminApp),
@@ -97,6 +118,7 @@ export const rules: ShieldSchema<Resolvers> = {
     findContracts: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isContractAdminApp, isLimitedListContractsApp),
     findApprovalRequests: isApprovalRequestAdminUser,
     identity: or(isUserWithReadPermissions, isIssuanceApp, isPresentationApp, isValidLimitedIdentityRequest),
+    issuance: or(isAllowedToViewIssuances, isIssuee),
     findIssuances: isAllowedToViewIssuances,
     findAsyncIssuanceRequests: isAllowedToViewAsyncIssuanceRequests,
     findPresentations: isAllowedToViewPresentations,
@@ -105,7 +127,7 @@ export const rules: ShieldSchema<Resolvers> = {
     approvalRequest: or(isApprovalRequestAdminUser, and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId)),
     actionedApprovalData: or(isApprovalRequestAdminUser, isApprovalRequestApp),
     photoCaptureStatus: or(isIssuer, isLimitedAsyncIssuancePhotoCaptureUser),
-    asyncIssuanceRequest: isIssuer,
+    asyncIssuanceRequest: or(isAllowedToViewAsyncIssuanceRequests, isIssuee),
     asyncIssuanceContact: isIssuerUser,
     approvalRequestTypes: isApprovalRequestAdminUser,
     identityByIdentifier: or(
@@ -120,6 +142,7 @@ export const rules: ShieldSchema<Resolvers> = {
       isLimitedIssuanceApp,
       hasTokenAcquisitionRoleRequiringIdentityAccess,
     ),
+    me: allow,
   },
   Mutation: {
     '*': isCredentialAdminUser,
@@ -135,7 +158,7 @@ export const rules: ShieldSchema<Resolvers> = {
     acquireLimitedApprovalToken: allow,
     acquireLimitedPhotoCaptureToken: allow,
     createIssuanceRequest: or(isIssuerUser, isIssuanceApp, isValidLimitedIssuanceRequest),
-    createIssuanceRequestForAsyncIssuance: isValidCreateIssuanceRequestForAsyncIssuanceRequest,
+    createIssuanceRequestForAsyncIssuance: or(isIssuee, isValidCreateIssuanceRequestForAsyncIssuanceRequest),
     createPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedPresentationRequest),
     createPresentationRequestForAuthn: isValidOidcAuthnPresentationRequest,
     saveIdentity: or(
@@ -192,7 +215,7 @@ export const rules: ShieldSchema<Resolvers> = {
     issuanceEvent: or(
       isIssuerUser,
       isCredentialAdminUser,
-      and(requestIdFilterDefined, or(isIssuanceApp, isLimitedIssuanceApp, isLimitedAsyncIssuanceApp)),
+      and(requestIdFilterDefined, or(isIssuanceApp, isLimitedIssuanceApp, isLimitedAsyncIssuanceApp, isIssuee)),
     ),
     photoCaptureEvent: or(isIssuer, isLimitedAsyncIssuancePhotoCaptureUser),
   },
@@ -209,10 +232,17 @@ export const rules: ShieldSchema<Resolvers> = {
       hasTokenAcquisitionRoleRequiringIdentityAccess,
       isLimitedAccessApp,
       isOidcAuthnClient,
+      isIssuee,
     ),
-    issuances: isAllowedToViewIssuances,
-    asyncIssuanceRequests: isAllowedToViewAsyncIssuanceRequests,
-    presentations: isAllowedToViewPresentations,
+    issuances: or(isAllowedToViewIssuances, and(isIssuee, identityIsAuthenticatedUser)),
+    asyncIssuanceRequests: or(isAllowedToViewAsyncIssuanceRequests, and(isIssuee, identityIsAuthenticatedUser)),
+    presentations: or(isAllowedToViewPresentations, and(isIssuee, identityIsAuthenticatedUser)),
+  },
+  Issuance: {
+    '*': and(fallbackRule, or(and(isIssuee, issuanceIsToAuthenticatedUser), not(isIssuee))),
+  },
+  Presentation: {
+    '*': and(fallbackRule, or(and(isIssuee, presentationIsByAuthenticatedUser), not(isIssuee))),
   },
   AccessTokenResponse: {
     '*': hasTokenAcquisitionRole,
@@ -239,7 +269,7 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': or(isIssuer, isLimitedAsyncIssuancePhotoCaptureUser),
   },
   AsyncIssuanceRequest: {
-    '*': isAsyncIssuer,
+    '*': or(isAsyncIssuer, and(isIssuee, asyncIssuanceIsToAuthenticatedUser)),
   },
   AsyncIssuanceContact: {
     '*': isIssuerUser,

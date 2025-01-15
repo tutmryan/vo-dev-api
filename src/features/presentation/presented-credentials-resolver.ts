@@ -1,5 +1,6 @@
+import type { GraphQLContext } from '../../context'
 import type { PresentedCredential } from '../../generated/graphql'
-import type { User } from '../../user'
+import { userIsUserEntity } from '../../util/user-invariant'
 import { PRESENTATION_DATA_TTL, getPresentationDataFromCache } from './callback/cache'
 import type { PresentationEntity } from './entities/presentation-entity'
 
@@ -12,7 +13,7 @@ import type { PresentationEntity } from './entities/presentation-entity'
  */
 export const resolvePresentedCredentials = async (
   presentationEntity: PresentationEntity,
-  user: User | undefined,
+  user: GraphQLContext['user'],
 ): Promise<PresentedCredential[]> => {
   const persistedCredentials = presentationEntity.presentedCredentials.map((c) => ({ ...c, claims: {} }))
 
@@ -31,5 +32,5 @@ export const resolvePresentedCredentials = async (
 const hasPresentedCredentialsTTLExpired = (presentationEntity: PresentationEntity) =>
   presentationEntity.presentedAt.getTime() + PRESENTATION_DATA_TTL * 1000 <= Date.now()
 
-const didCurrentUserRequestPresentation = (presentationEntity: PresentationEntity, user: User | undefined) =>
-  user && user.userEntity.id === presentationEntity.requestedById
+const didCurrentUserRequestPresentation = (presentationEntity: PresentationEntity, user: GraphQLContext['user']) =>
+  userIsUserEntity(user) && user.entity.id === presentationEntity.requestedById

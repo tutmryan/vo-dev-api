@@ -1,5 +1,5 @@
 import { dispatch, dispatchTransactional, query } from '../../cqs'
-import { type Resolvers } from '../../generated/graphql'
+import { AsyncIssuanceRequestStatus, type Resolvers } from '../../generated/graphql'
 import { createdByUpdatedBy } from '../users/resolvers'
 import { CancelAsyncIssuanceRequestCommand } from './commands/cancel-async-issuance-request-command'
 import { CancelAsyncIssuanceRequestsCommand } from './commands/cancel-async-issuance-requests-command'
@@ -11,6 +11,14 @@ import { UpdateAsyncIssuanceContactCommand } from './commands/update-async-issua
 import { FindAsyncIssuanceContactQuery } from './queries/async-issuance-contact-query'
 import { FindAsyncIssuancesQuery } from './queries/find-async-issuances-query'
 
+const resolvePhotoCapture: Required<Resolvers>['AsyncIssuanceRequest']['photoCapture'] = async (parent, _, { services }) => {
+  if (parent.status !== AsyncIssuanceRequestStatus.Pending) return null
+  const data = await services.asyncIssuances.downloadAsyncIssuance(parent.id, parent.expiry)
+  const value = data?.photoCapture
+  if (value === undefined) return null
+  return value
+}
+
 export const resolvers: Resolvers = {
   Query: {
     asyncIssuanceRequest: (_, { id }, { dataLoaders }) => dataLoaders.asyncIssuances.load(id),
@@ -20,8 +28,8 @@ export const resolvers: Resolvers = {
   },
   Mutation: {
     createAsyncIssuanceRequest: (_, { request }, context) => dispatch(context, CreateAsyncIssuanceRequestCommand, request),
-    createIssuanceRequestForAsyncIssuance: (_, { asyncIssuanceRequestId }, context) =>
-      dispatchTransactional(context, CreateIssuanceRequestForAsyncIssuanceCommand, asyncIssuanceRequestId),
+    createIssuanceRequestForAsyncIssuance: (_, { asyncIssuanceRequestId, photo }, context) =>
+      dispatchTransactional(context, CreateIssuanceRequestForAsyncIssuanceCommand, asyncIssuanceRequestId, photo ?? undefined),
     updateAsyncIssuanceContact: (_, { asyncIssuanceRequestId, contact }, context) =>
       dispatch(context, UpdateAsyncIssuanceContactCommand, asyncIssuanceRequestId, contact),
     resendAsyncIssuanceNotifications: (_, { asyncIssuanceRequestIds }, context) =>
@@ -38,6 +46,7 @@ export const resolvers: Resolvers = {
     contract: async (parent, _, { dataLoaders }) => dataLoaders.contracts.load(parent.contractId),
     issuance: async (parent, _, { dataLoaders }) => (parent.issuanceId ? dataLoaders.issuances.load(parent.issuanceId) : null),
     ...createdByUpdatedBy,
+    photoCapture: resolvePhotoCapture,
   },
   AsyncIssuanceRequestResponse: {
     __resolveType: (response) => ('errors' in response ? 'AsyncIssuanceErrorResponse' : 'AsyncIssuanceResponse'),

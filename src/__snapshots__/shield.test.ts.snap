@@ -7,6 +7,18 @@ exports[`shield rules are setup correctly 1`] = `
       "name": "isUserWithReadPermissions",
       "cache": "contextual"
     },
+    "discovery": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+          "cache": "contextual"
+        }
+      ]
+    },
     "healthcheck": {
       "rules": []
     },
@@ -139,6 +151,58 @@ exports[`shield rules are setup correctly 1`] = `
               "cache": "strict"
             }
           ]
+        }
+      ]
+    },
+    "issuance": {
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual"
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual"
+                },
+                {
+                  "rulesOr": [
+                    {
+                      "name": "isRequestIdFilterDefined",
+                      "cache": "strict"
+                    },
+                    {
+                      "name": "isValidLimitedIdentitierFilter",
+                      "cache": "strict"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAsyncIssuanceApp",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "isRequestIdFilterDefined",
+                  "cache": "strict"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+          "cache": "contextual"
         }
       ]
     },
@@ -337,24 +401,20 @@ exports[`shield rules are setup correctly 1`] = `
     "asyncIssuanceRequest": {
       "rulesOr": [
         {
-          "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
-        },
-        {
-          "name": "isIssuanceApp",
-          "cache": "contextual"
-        },
-        {
-          "rulesAnd": [
+          "rulesOr": [
             {
-              "name": "isLimitedAccessApp",
+              "name": "isUserWithReadPermissions",
               "cache": "contextual"
             },
             {
-              "name": "hasLimitedAccessData-limitedIssuance",
+              "name": "isIssuanceApp",
               "cache": "contextual"
             }
           ]
+        },
+        {
+          "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+          "cache": "contextual"
         }
       ]
     },
@@ -421,6 +481,9 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual"
         }
       ]
+    },
+    "me": {
+      "rules": []
     }
   },
   "Mutation": {
@@ -575,14 +638,22 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "createIssuanceRequestForAsyncIssuance": {
-      "rulesAnd": [
+      "rulesOr": [
         {
-          "name": "isLimitedAsyncIssuanceApp",
+          "name": "hasApiResourceScope-VerifiableCredential.Issuee",
           "cache": "contextual"
         },
         {
-          "name": "hasCorrectCreateIssuanceRequestForAsyncIssuanceArgs",
-          "cache": "strict"
+          "rulesAnd": [
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "hasCorrectCreateIssuanceRequestForAsyncIssuanceArgs",
+              "cache": "strict"
+            }
+          ]
         }
       ]
     },
@@ -979,6 +1050,10 @@ exports[`shield rules are setup correctly 1`] = `
                 {
                   "name": "isLimitedAsyncIssuanceApp",
                   "cache": "contextual"
+                },
+                {
+                  "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+                  "cache": "contextual"
                 }
               ]
             }
@@ -1167,33 +1242,53 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "name": "isOidcAuthnClient",
           "cache": "contextual"
+        },
+        {
+          "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+          "cache": "contextual"
         }
       ]
     },
     "issuances": {
       "rulesOr": [
         {
-          "name": "isUserWithReadPermissions",
-          "cache": "contextual"
-        },
-        {
-          "name": "isIssuanceApp",
-          "cache": "contextual"
-        },
-        {
-          "rulesAnd": [
+          "rulesOr": [
             {
-              "name": "isLimitedAccessApp",
+              "name": "isUserWithReadPermissions",
               "cache": "contextual"
             },
             {
-              "rulesOr": [
+              "name": "isIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "rulesAnd": [
                 {
-                  "name": "isRequestIdFilterDefined",
-                  "cache": "strict"
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual"
                 },
                 {
-                  "name": "isValidLimitedIdentitierFilter",
+                  "rulesOr": [
+                    {
+                      "name": "isRequestIdFilterDefined",
+                      "cache": "strict"
+                    },
+                    {
+                      "name": "isValidLimitedIdentitierFilter",
+                      "cache": "strict"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAsyncIssuanceApp",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "isRequestIdFilterDefined",
                   "cache": "strict"
                 }
               ]
@@ -1203,11 +1298,11 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "rulesAnd": [
             {
-              "name": "isLimitedAsyncIssuanceApp",
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
               "cache": "contextual"
             },
             {
-              "name": "isRequestIdFilterDefined",
+              "name": "identityIsAuthenticatedUser",
               "cache": "strict"
             }
           ]
@@ -1217,39 +1312,83 @@ exports[`shield rules are setup correctly 1`] = `
     "asyncIssuanceRequests": {
       "rulesOr": [
         {
-          "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual"
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual"
+            }
+          ]
         },
         {
-          "name": "isIssuanceApp",
-          "cache": "contextual"
+          "rulesAnd": [
+            {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            },
+            {
+              "name": "identityIsAuthenticatedUser",
+              "cache": "strict"
+            }
+          ]
         }
       ]
     },
     "presentations": {
       "rulesOr": [
         {
-          "name": "isUserWithReadPermissions",
-          "cache": "contextual"
-        },
-        {
-          "name": "isPresentationApp",
-          "cache": "contextual"
-        },
-        {
-          "rulesAnd": [
+          "rulesOr": [
             {
-              "name": "isLimitedAccessApp",
+              "name": "isUserWithReadPermissions",
               "cache": "contextual"
             },
             {
-              "rulesOr": [
+              "name": "isPresentationApp",
+              "cache": "contextual"
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual"
+                },
+                {
+                  "rulesOr": [
+                    {
+                      "name": "isRequestIdFilterDefined",
+                      "cache": "strict"
+                    },
+                    {
+                      "name": "isValidLimitedIdentitierFilter",
+                      "cache": "strict"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedApprovalApp",
+                  "cache": "contextual"
+                },
                 {
                   "name": "isRequestIdFilterDefined",
                   "cache": "strict"
+                }
+              ]
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isOidcAuthnClient",
+                  "cache": "contextual"
                 },
                 {
-                  "name": "isValidLimitedIdentitierFilter",
+                  "name": "isRequestIdFilterDefined",
                   "cache": "strict"
                 }
               ]
@@ -1259,24 +1398,152 @@ exports[`shield rules are setup correctly 1`] = `
         {
           "rulesAnd": [
             {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            },
+            {
+              "name": "identityIsAuthenticatedUser",
+              "cache": "strict"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "Issuance": {
+    "*": {
+      "rulesAnd": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual"
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isPresentationApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isContractAdminApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
               "name": "isLimitedApprovalApp",
               "cache": "contextual"
             },
             {
-              "name": "isRequestIdFilterDefined",
-              "cache": "strict"
-            }
-          ]
-        },
-        {
-          "rulesAnd": [
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual"
+            },
             {
               "name": "isOidcAuthnClient",
               "cache": "contextual"
             },
             {
-              "name": "isRequestIdFilterDefined",
-              "cache": "strict"
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            }
+          ]
+        },
+        {
+          "rulesOr": [
+            {
+              "rulesAnd": [
+                {
+                  "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "issuanceIsToAuthenticatedUser",
+                  "cache": "strict"
+                }
+              ]
+            },
+            {
+              "ruleNot": [
+                {
+                  "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+                  "cache": "contextual"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "Presentation": {
+    "*": {
+      "rulesAnd": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual"
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isPresentationApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isContractAdminApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual"
+            },
+            {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            }
+          ]
+        },
+        {
+          "rulesOr": [
+            {
+              "rulesAnd": [
+                {
+                  "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "presentationIsByAuthenticatedUser",
+                  "cache": "strict"
+                }
+              ]
+            },
+            {
+              "ruleNot": [
+                {
+                  "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+                  "cache": "contextual"
+                }
+              ]
             }
           ]
         }
@@ -1393,12 +1660,28 @@ exports[`shield rules are setup correctly 1`] = `
     "*": {
       "rulesOr": [
         {
-          "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
+          "rulesOr": [
+            {
+              "name": "hasRole-VerifiableCredential.Issuer",
+              "cache": "contextual"
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual"
+            }
+          ]
         },
         {
-          "name": "isIssuanceApp",
-          "cache": "contextual"
+          "rulesAnd": [
+            {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            },
+            {
+              "name": "asyncIssuanceIsToAuthenticatedUser",
+              "cache": "strict"
+            }
+          ]
         }
       ]
     }

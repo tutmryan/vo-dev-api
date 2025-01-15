@@ -1,0 +1,11 @@
+"""
+Me is a union type representing all possible authenticated callers.
+"""
+union Me = User | Identity
+
+extend type Query {
+  """
+  Returns the authenticated caller, either a `User` (app or person) or the `Identity` of a credential issuee.
+  """
+  me: Me
+}

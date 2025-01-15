@@ -1,7 +1,6 @@
 import { getClientCredentialsToken } from '@makerx/node-common'
 import { randomUUID } from 'crypto'
-import type { LimitedAsyncIssuanceData } from '..'
-import { acquireAsyncIssuanceTokenLimiter, getLimitedAsyncIssuanceData, redeemVerificationCode, setLimitedAsyncIssuanceData } from '..'
+import { acquireAsyncIssuanceTokenLimiter, redeemVerificationCode } from '..'
 import { limitedAsyncIssuanceAuth } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import type { AsyncIssuanceTokenResponse } from '../../../generated/graphql'
@@ -9,6 +8,8 @@ import { IssuanceRequestStatus } from '../../../generated/graphql'
 import { consumeRateLimit } from '../../../rate-limiter'
 import { invariant } from '../../../util/invariant'
 import { AsyncIssuanceEntity } from '../../async-issuance/entities/async-issuance-entity'
+import type { AsyncIssuanceSessionData } from '../../async-issuance/session'
+import { getAsyncIssuanceData, setAsyncIssuanceSessionData } from '../../async-issuance/session'
 import { requestDetailsCache } from '../../callback/cache'
 import { publishIssuanceEvent } from '../../issuance/callback/pubsub'
 import type { IssuanceRequestDetails } from '../../issuance/commands/create-issuance-request-command'
@@ -44,14 +45,14 @@ export async function AcquireAsyncIssuanceTokenCommand(
   invariant(asyncIssuanceRequest, 'Async issuance request data not found')
 
   // terminate any existing in-progress issuance request
-  const existingSessionData = await getLimitedAsyncIssuanceData(asyncIssuanceRequestId)
+  const existingSessionData = await getAsyncIssuanceData(asyncIssuanceRequestId)
   if (existingSessionData?.issuanceRequestId) terminateInProgressIssuanceRequest(existingSessionData.issuanceRequestId)
 
   // acquire a token
   const token = await getClientCredentialsToken(limitedAsyncIssuanceAuth)
 
   // store the async issuance data required to apply operation authorisation against the token for subsequent retrieval (by token)
-  const limitedAsyncIssuanceData: LimitedAsyncIssuanceData = {
+  const limitedAsyncIssuanceData: AsyncIssuanceSessionData = {
     asyncIssuanceRequestId,
     contractId: entity.contractId,
     identityId: entity.identityId,
@@ -59,7 +60,7 @@ export async function AcquireAsyncIssuanceTokenCommand(
     photoCapture: asyncIssuanceRequest.photoCapture ?? false,
     photoCaptureRequestId: asyncIssuanceRequest.photoCapture ? randomUUID() : undefined,
   }
-  await setLimitedAsyncIssuanceData(token.access_token, limitedAsyncIssuanceData)
+  await setAsyncIssuanceSessionData(token.access_token, limitedAsyncIssuanceData)
 
   // create a photo capture session if this async issuance requires it
   if (limitedAsyncIssuanceData.photoCaptureRequestId) {

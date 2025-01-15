@@ -14,6 +14,6 @@ export async function DeprecateContractCommand(this: CommandContext, id: string)
   if (contract.isDeprecated) return contract
   if (!contract.provisionedAt) throw new Error('Contract has not been provisioned yet, it can be deleted instead')
 
-  contract.markAsDeprecated(user.userEntity)
+  contract.markAsDeprecated(user.entity)
   return await repo.save(contract)
 }

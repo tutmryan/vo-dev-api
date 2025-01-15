@@ -20,7 +20,7 @@ export async function CancelApprovalRequestCommand(this: CommandContext, id: str
 
   // admins can cancel any request, otherwise only the creator can cancel
   const isPermittedToCancel =
-    user.roles.includes(UserRoles.approvalRequestAdmin) || approvalRequest.createdById.toLowerCase() === user.userEntity.id.toLowerCase()
+    user.roles.includes(UserRoles.approvalRequestAdmin) || approvalRequest.createdById.toLowerCase() === user.entity.id.toLowerCase()
   invariant(
     isPermittedToCancel,
     `User does not have permission to cancel this approval request. Only the creator of the request or an admin can cancel it.`,
@@ -31,5 +31,5 @@ export async function CancelApprovalRequestCommand(this: CommandContext, id: str
   await entityManager.getRepository(ApprovalRequestEntity).save(approvalRequest)
 
   if (approvalRequest.callbackInput)
-    await addToJobQueue({ name: 'invokeApprovalCallback', payload: { userId: user.userEntity.id, approvedRequestId: approvalRequest.id } })
+    await addToJobQueue({ name: 'invokeApprovalCallback', payload: { userId: user.entity.id, approvedRequestId: approvalRequest.id } })
 }

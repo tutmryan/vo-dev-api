@@ -13,7 +13,7 @@ export async function AcquireLimitedAccessTokenCommand(
 
   const token = await getClientCredentialsToken(limitedAccessAuth)
 
-  await setLimitedAccessData(token.access_token, { ...input, userId: this.user.userEntity.id })
+  await setLimitedAccessData(token.access_token, { ...input, userId: this.user.entity.id })
 
   return {
     token: token.access_token,

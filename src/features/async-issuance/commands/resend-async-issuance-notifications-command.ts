@@ -9,7 +9,7 @@ export async function ResendAsyncIssuanceNotificationsCommand(this: CommandConte
 
   const jobId = await addToJobQueue({
     name: 'sendAsyncIssuanceNotifications',
-    payload: { userId: user.userEntity.id, asyncIssuanceRequestIds: asyncIssuanceRequestId },
+    payload: { userId: user.entity.id, asyncIssuanceRequestIds: asyncIssuanceRequestId },
   })
   return jobId
 }

@@ -3,14 +3,16 @@ import { createContextFactory } from '@makerx/graphql-core'
 import { createSubscriptionContextFactory, extractTokenFromConnectionParams } from '@makerx/graphql-core/subscriptions'
 import type { JwtPayload } from 'jsonwebtoken'
 import type { DataSource } from 'typeorm'
-import { logging, platformConsumerApps } from './config'
+import { logging, oidcAuthorityUrl, platformConsumerApps } from './config'
 import type { CommandLike, DispatchContext } from './cqs'
 import { dispatch } from './cqs'
 import { dataSource } from './data'
+import { getAsyncIssuanceDataForSession } from './features/async-issuance/session'
+import { IdentityEntity } from './features/identity/entities/identity-entity'
 import { getLimitedAccessData } from './features/limited-access-tokens'
 import { getLimitedApprovalData } from './features/limited-approval-tokens'
-import { getLimitedAsyncIssuanceDataForSession } from './features/limited-async-issuance-tokens'
 import { getLimitedPhotoCaptureSession } from './features/limited-photo-capture-tokens'
+import { VoIdentityClaim } from './features/oidc-provider/claims'
 import type { PhotoCaptureData } from './features/photo-capture'
 import { getPhotoCaptureData } from './features/photo-capture'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
@@ -26,7 +28,7 @@ import { User } from './user'
 import { enumStringValues } from './util/enum-util'
 import { invariant } from './util/invariant'
 
-export type BaseContext = GraphQLContextBase<typeof logger, RequestInfo, User | undefined>
+export type BaseContext = GraphQLContextBase<typeof logger, RequestInfo, User<UserEntity> | User<IdentityEntity> | undefined>
 export type GraphQLContext = BaseContext & {
   dataSource: DataSource
   services: Services
@@ -40,8 +42,20 @@ const allClientRoles = [
   ...enumStringValues(InternalClientRoles),
 ]
 
-export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string) => {
+export const findUpdateOrCreateUser = async (
+  claims?: JwtPayload,
+  token?: string,
+): Promise<User<UserEntity> | User<IdentityEntity> | undefined> => {
   if (!claims || !token) return undefined
+
+  // Special case: when called with an OIDC token
+  if (claims.iss === oidcAuthorityUrl) {
+    // - load the identity that acquired token
+    const identityIdClaim = claims[VoIdentityClaim.IdentityId] as string | undefined
+    invariant(identityIdClaim, `${VoIdentityClaim.IdentityId} claim is required`)
+    const identityEntity = await dataSource.getRepository(IdentityEntity).findOneOrFail({ where: { id: identityIdClaim } })
+    return new User(claims, token, identityEntity)
+  }
 
   const tenantId = claims['tid'] as string
   invariant(tenantId, '`tid` claim is required')
@@ -88,7 +102,7 @@ export const findUpdateOrCreateUser = async (claims?: JwtPayload, token?: string
   const isLimitedAsyncIssuanceClient = Array.isArray(claims.roles) && claims.roles.includes(InternalRoles.limitedAsyncIssuance)
   if (isLimitedAsyncIssuanceClient) {
     // load async issuance data
-    const limitedAsyncIssuanceData = await getLimitedAsyncIssuanceDataForSession(token)
+    const limitedAsyncIssuanceData = await getAsyncIssuanceDataForSession(token)
     invariant(limitedAsyncIssuanceData, 'Invalid token')
 
     // optionally load photo capture data during photo capture session

@@ -327,7 +327,7 @@ export type AsyncIssuanceRequest = {
   /**
    * The point in the future which the issuees can no longer complete the issuance process.
    *
-   * Items to note:
+   * Items of note:
    *
    * - The period started upon receipt of the request.
    */
@@ -362,6 +362,15 @@ export type AsyncIssuanceRequest = {
    * - When not set, the issuance has not been successfully claimed by the issuee.
    */
   issuance?: Maybe<Issuance>;
+  /**
+   * When set to true, the issuee is required to capture their photo during the issuance process.
+   *
+   * Items of note:
+   *
+   * - This field will only return a value while the issuance is pending.
+   * - This field is relatively expensive to query and should only be queried for single or small numbers of async issuance requests, to determine issuance requirements.
+   */
+  photoCapture?: Maybe<Scalars['Boolean']['output']>;
   /** The status of the async issuance request. */
   status: AsyncIssuanceRequestStatus;
   /** When the async issuance request was last updated. */
@@ -1910,6 +1919,9 @@ export type ListValidationInput = {
   values: Array<Scalars['String']['input']>;
 };
 
+/** Me is a union type representing all possible authenticated callers. */
+export type Me = Identity | User;
+
 export type Mutation = {
   __typename?: 'Mutation';
   /**
@@ -1982,6 +1994,8 @@ export type Mutation = {
    * Creates an issuance request for the specified async issuance request.
    *
    * Returns a URL and optional QR code to start the issuance process or an error.
+   *
+   * Authenticated identities can optionally provide a photo to be used in the issuance as a [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) using base64 encoding.
    */
   createIssuanceRequestForAsyncIssuance: IssuanceRequestResponse;
   /** Creates a new OIDC client */
@@ -2155,6 +2169,7 @@ export type MutationCreateIssuanceRequestArgs = {
 
 export type MutationCreateIssuanceRequestForAsyncIssuanceArgs = {
   asyncIssuanceRequestId: Scalars['UUID']['input'];
+  photo?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3097,6 +3112,8 @@ export type Query = {
   issuanceCountByContract: Array<ContractCount>;
   /** Returns the issuance count, grouped by User, optionally matching the specified criteria. */
   issuanceCountByUser: Array<UserCount>;
+  /** Returns the authenticated caller, either a `User` (app or person) or the `Identity` of a credential issuee. */
+  me?: Maybe<Me>;
   /**
    * Lists the credential contract types for the specified network issuer
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
@@ -4428,6 +4445,7 @@ export type ResolversUnionTypes<_RefType extends Record<string, unknown>> = {
   BackgroundJobEvent: ( BackgroundJobActiveEvent ) | ( BackgroundJobCompletedEvent ) | ( BackgroundJobErrorEvent ) | ( BackgroundJobProgressEvent );
   ClaimValidation: ( ListValidation ) | ( NumberValidation ) | ( RegexValidation ) | ( TextValidation );
   IssuanceRequestResponse: ( IssuanceResponse ) | ( RequestErrorResponse );
+  Me: ( IdentityEntity ) | ( UserEntity );
   PresentationRequestResponse: ( PresentationResponse ) | ( RequestErrorResponse );
 };
 
@@ -4555,6 +4573,7 @@ export type ResolversTypes = {
   ListValidation: ResolverTypeWrapper<ListValidation>;
   ListValidationInput: ListValidationInput;
   Locale: ResolverTypeWrapper<Scalars['Locale']['output']>;
+  Me: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['Me']>;
   Mutation: ResolverTypeWrapper<{}>;
   NetworkContract: ResolverTypeWrapper<NetworkContract>;
   NetworkIssuer: ResolverTypeWrapper<NetworkIssuer>;
@@ -4747,6 +4766,7 @@ export type ResolversParentTypes = {
   ListValidation: ListValidation;
   ListValidationInput: ListValidationInput;
   Locale: Scalars['Locale']['output'];
+  Me: ResolversUnionTypes<ResolversParentTypes>['Me'];
   Mutation: {};
   NetworkContract: NetworkContract;
   NetworkIssuer: NetworkIssuer;
@@ -4934,6 +4954,7 @@ export type AsyncIssuanceRequestResolvers<ContextType = GraphQLContext, ParentTy
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
   isStatusFinal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issuance?: Resolver<Maybe<ResolversTypes['Issuance']>, ParentType, ContextType>;
+  photoCapture?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['AsyncIssuanceRequestStatus'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
@@ -5227,6 +5248,10 @@ export interface LocaleScalarConfig extends GraphQLScalarTypeConfig<ResolversTyp
   name: 'Locale';
 }
 
+export type MeResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Me'] = ResolversParentTypes['Me']> = {
+  __resolveType: TypeResolveFn<'Identity' | 'User', ParentType, ContextType>;
+};
+
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   acquireAsyncIssuanceToken?: Resolver<ResolversTypes['AsyncIssuanceTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireAsyncIssuanceTokenArgs, 'asyncIssuanceRequestId' | 'verificationCode'>>;
   acquireLimitedAccessToken?: Resolver<ResolversTypes['AccessTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireLimitedAccessTokenArgs, 'input'>>;
@@ -5487,6 +5512,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   issuanceCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryIssuanceCountArgs>>;
   issuanceCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByContractArgs>>;
   issuanceCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByUserArgs>>;
+  me?: Resolver<Maybe<ResolversTypes['Me']>, ParentType, ContextType>;
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
   oidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<QueryOidcClientArgs, 'id'>>;
   oidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<QueryOidcResourceArgs, 'id'>>;
@@ -5736,6 +5762,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   JSONObject?: GraphQLScalarType;
   ListValidation?: ListValidationResolvers<ContextType>;
   Locale?: GraphQLScalarType;
+  Me?: MeResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   NetworkContract?: NetworkContractResolvers<ContextType>;
   NetworkIssuer?: NetworkIssuerResolvers<ContextType>;

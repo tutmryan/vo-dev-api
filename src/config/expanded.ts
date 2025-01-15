@@ -1,3 +1,4 @@
+import type { MultiIssuerBearerAuthOptions } from '@makerx/express-bearer'
 import { type ClientCredentialsConfig } from '@makerx/node-common'
 import type { CorsOptions } from 'cors'
 import { merge } from 'lodash'
@@ -83,18 +84,6 @@ export const vidServiceAuth: Omit<ClientCredentialsConfig, 'scope'> = hasHomeTen
       ...internalClientCredentials,
     }
 
-// auth configs
-const authTenantIds = [...config.get('auth.additionalAuthTenantIds'), homeTenantId, platformTenantId]
-export const bearer: Config['auth']['bearer'] = merge(
-  {
-    jwksUri: `https://login.microsoftonline.com/${homeTenantId}/discovery/v2.0/keys`,
-    verifyOptions: {
-      issuer: authTenantIds.map((tenantId) => `https://sts.windows.net/${tenantId}/`),
-      audience: [apiCredentials.clientId, config.get('internalClient.uri')],
-    },
-  },
-  config.get('auth.bearer'),
-)
 export const pkce: Config['auth']['pkce'] = merge(
   {
     scopes: [`${apiCredentials.clientId}/.default`, 'profile'],
@@ -139,12 +128,35 @@ export const apiUrl = instance
     ? config.get('localDev.tunnel.api')
     : 'http://localhost:4000'
 
-export const oidcAuthorityUrl = `${apiUrl}/oidc`
-
 export const docsUrl = instance ? `https://${instance}.docs.verifiedorchestration.com` : 'http://localhost:3000'
-
-// OIDC provider API scope (the API origin)
-export const apiScope = new URL(apiUrl).origin
 
 // default demoEnabled to devToolsEnabled to align without having to set both flags in every environment
 export const demoEnabled = config.has('demoEnabled') ? config.get('demoEnabled') : config.get('devToolsEnabled')
+
+// bearer token auth config - supports Azure tenants and OIDC
+export const oidcAuthorityUrl = `${apiUrl}/oidc`
+const authTenantIds = [platformTenantId, homeTenantId, ...config.get('auth.additionalAuthTenantIds')]
+const authTenantIssuers = authTenantIds.map((tenantId) => `https://sts.windows.net/${tenantId}/`)
+export const issuerOptions = authTenantIssuers.reduce<MultiIssuerBearerAuthOptions['issuerOptions']>((acc, issuer) => {
+  acc[issuer] = merge(
+    {
+      jwksUri: `https://login.microsoftonline.com/${homeTenantId}/discovery/v2.0/keys`,
+      verifyOptions: {
+        issuer,
+        audience: [apiCredentials.clientId, config.get('internalClient.uri')],
+      },
+    },
+    config.get('auth.bearer'),
+  )
+  return acc
+}, {})
+issuerOptions[oidcAuthorityUrl] = merge(
+  {
+    jwksUri: `${oidcAuthorityUrl}/jwks`,
+    verifyOptions: {
+      issuer: oidcAuthorityUrl,
+      audience: apiUrl,
+    },
+  },
+  config.get('auth.bearer'),
+)

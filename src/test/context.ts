@@ -4,11 +4,11 @@ import { randomUUID } from 'crypto'
 import type { GraphQLContext } from '../context'
 import { findUpdateOrCreateUser, findUpdateOrCreateUserEntity } from '../context'
 import { dataSource } from '../data'
+import type { AsyncIssuanceSessionData } from '../features/async-issuance/session'
+import { setAsyncIssuanceSessionData } from '../features/async-issuance/session'
 import { setLimitedAccessData } from '../features/limited-access-tokens'
 import type { LimitedApprovalData } from '../features/limited-approval-tokens'
 import { setLimitedApprovalData } from '../features/limited-approval-tokens'
-import type { LimitedAsyncIssuanceData } from '../features/limited-async-issuance-tokens'
-import { setLimitedAsyncIssuanceData } from '../features/limited-async-issuance-tokens'
 import { createLimitedPhotoCaptureSession } from '../features/limited-photo-capture-tokens'
 import { setPhotoCaptureData, type PhotoCaptureData } from '../features/photo-capture'
 import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
@@ -59,7 +59,7 @@ export const createContext = async (
   limitedAccessInput?: AcquireLimitedAccessTokenInput,
   limitedApprovalInput?: LimitedApprovalOperationInput,
   limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
-  limitedAsyncIssuanceData?: LimitedAsyncIssuanceData,
+  limitedAsyncIssuanceData?: AsyncIssuanceSessionData,
 ): Promise<GraphQLContext> => {
   // create a user
   const token = randomUUID()
@@ -76,7 +76,7 @@ export const createContext = async (
       )
       await createLimitedPhotoCaptureSession(token, limitedPhotoCaptureData.photoCaptureRequestId)
     }
-    if (limitedAsyncIssuanceData) await setLimitedAsyncIssuanceData(token, limitedAsyncIssuanceData)
+    if (limitedAsyncIssuanceData) await setAsyncIssuanceSessionData(token, limitedAsyncIssuanceData)
   }
 
   // create the context

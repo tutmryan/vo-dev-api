@@ -1,4 +1,5 @@
-import type { User } from '../../user'
+import { User } from '../../user'
+import { UserEntity } from '../users/entities/user-entity'
 import { PRESENTATION_DATA_TTL } from './callback/cache'
 import type { PresentationEntity } from './entities/presentation-entity'
 import { resolvePresentedCredentials } from './presented-credentials-resolver'
@@ -79,4 +80,8 @@ const givenAPresentationEntity = (args: Partial<PresentationEntity>) => {
   } as PresentationEntity
 }
 
-const givenAUser = (userId: string): User => ({ userEntity: { id: userId } }) as User
+const givenAUser = (userId: string): User<UserEntity> => {
+  const entity = new UserEntity()
+  entity.id = userId
+  return new User({}, '', entity)
+}

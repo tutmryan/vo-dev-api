@@ -32,6 +32,6 @@ export async function RevokeIssuanceCommand(this: CommandContext, id: string) {
   invariant(credential, 'Credential with issuance id as an index claim could not be found')
   await verifiedIdAdmin.revokeCredential(contractExternalId, credential.id)
 
-  issuance.markAsRevoked(user.userEntity)
+  issuance.markAsRevoked(user.entity)
   return await issuanceRepository.save(issuance)
 }

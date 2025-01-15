@@ -4,7 +4,7 @@ import type { TypedDocumentNode } from '@graphql-typed-document-node/core'
 import type { JwtPayload } from '@makerx/graphql-core'
 import type { DocumentNode, FormattedExecutionResult } from 'graphql'
 import type { GraphQLContext } from '../context'
-import type { LimitedAsyncIssuanceData } from '../features/limited-async-issuance-tokens'
+import type { AsyncIssuanceSessionData } from '../features/async-issuance/session'
 import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
 import type { AppRoles } from '../roles'
 import { InternalRoles, UserRoles } from '../roles'
@@ -26,7 +26,7 @@ export const executeOperation = async <TData = Record<string, unknown>, TVariabl
   limitedAccessData?: AcquireLimitedAccessTokenInput,
   limitedApprovalData?: LimitedApprovalOperationInput,
   limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
-  limitedAsyncIssuanceData?: LimitedAsyncIssuanceData,
+  limitedAsyncIssuanceData?: AsyncIssuanceSessionData,
 ): Promise<FormattedExecutionResult<TData>> => {
   const response = await server.executeOperation(request, {
     contextValue: await createContext(
@@ -129,7 +129,7 @@ export const executeOperationAsLimitedAsyncIssuanceClient = async <
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
   limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
-  limitedAsyncIssuanceData?: LimitedAsyncIssuanceData,
+  limitedAsyncIssuanceData?: AsyncIssuanceSessionData,
 ): Promise<FormattedExecutionResult<TData>> =>
   executeOperation(
     request,

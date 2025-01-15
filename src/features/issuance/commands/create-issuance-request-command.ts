@@ -7,7 +7,7 @@ import type { IssuanceRequest } from '../../../services/verified-id'
 import { validateIssuanceRequestBodySize } from '../../../services/verified-id/utils'
 import { parseDataUrl } from '../../../util/data-url'
 import { invariant } from '../../../util/invariant'
-import { userInvariant } from '../../../util/user-invariant'
+import { anyUserInvariant, userIsIdentityEntity } from '../../../util/user-invariant'
 import { requestDetailsCache } from '../../callback/cache'
 import type { StandardClaims } from '../../contracts/claims'
 import { validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
@@ -21,7 +21,7 @@ export type IssuanceRequestDetails = Pick<IssuanceEntity, 'id' | 'issuedById' | 
   Pick<IssuanceRequestInput, 'expirationDate' | 'photoCaptureRequestId'> &
   AsyncIssuanceRequestDetails
 
-type AsyncIssuanceRequestDetails = { asyncIssuanceKey?: string }
+type AsyncIssuanceRequestDetails = { asyncIssuanceKey?: string; asyncIssuanceCreatedById?: string }
 
 type StandardClaimsData = Record<StandardClaims, string>
 
@@ -37,6 +37,7 @@ export async function CreateIssuanceRequestCommand(
     faceCheckPhoto,
     photoCaptureRequestId,
     asyncIssuanceKey,
+    asyncIssuanceCreatedById,
     ...rest
   }: IssuanceRequestInput & AsyncIssuanceRequestDetails,
 ) {
@@ -46,7 +47,9 @@ export async function CreateIssuanceRequestCommand(
     services: { verifiedIdRequest: request, verifiedIdAdmin },
   } = this
 
-  userInvariant(user)
+  anyUserInvariant(user)
+
+  if (userIsIdentityEntity(user)) invariant(asyncIssuanceCreatedById, 'asyncIssuanceCreatedById is required')
 
   // find the contract
   const contract = await entityManager.getRepository(ContractEntity).findOneByOrFail({ id: contractId })
@@ -164,10 +167,12 @@ export async function CreateIssuanceRequestCommand(
   // if this was a photo capture, remove the cache, as the photo data is designed to be used a single time
   if (photoCaptureRequestId) await deletePhotoCaptureRequest(photoCaptureRequestId)
 
+  const issuedById = asyncIssuanceCreatedById ?? user.entity.id.toUpperCase()
+
   // cache issuance details for use in the callback
   const requestDetails: IssuanceRequestDetails = {
     id: standardClaims.issuanceId.toUpperCase(),
-    issuedById: user.userEntity.id.toUpperCase(),
+    issuedById,
     identityId: identity.id.toUpperCase(),
     contractId: contract.id.toUpperCase(),
     expirationDate: issuanceRequest.expirationDate,

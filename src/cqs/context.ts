@@ -7,7 +7,7 @@ export type CommandContext = Readonly<Pick<GraphQLContext, 'user' | 'logger' | '
 }
 
 export type TransactionalCommandContext = Omit<CommandContext, 'entityManager'> & {
-  inTransaction: <T>(fn: (entityManager: CommandContext['entityManager']) => Promise<T>) => Promise<T>
+  inTransaction: <T>(fn: (entityManager: CommandContext['entityManager']) => Promise<T>, userManagerUserId?: string) => Promise<T>
 }
 
 export type QueryContext = Readonly<Pick<GraphQLContext, 'user' | 'logger' | 'services' | 'dataLoaders'>> & {

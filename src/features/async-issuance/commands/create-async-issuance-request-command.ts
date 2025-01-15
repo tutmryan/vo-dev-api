@@ -223,7 +223,7 @@ export async function CreateAsyncIssuanceRequestCommand(
   // Note: We're using the requests IDs to avoid the job queue from referencing PII data directly via the payload data
   await addToJobQueue({
     name: 'sendAsyncIssuanceNotifications',
-    payload: { userId: user.userEntity.id, asyncIssuanceRequestIds: response.asyncIssuanceRequestIds },
+    payload: { userId: user.entity.id, asyncIssuanceRequestIds: response.asyncIssuanceRequestIds },
   })
 
   logger.info(`Validated and saved ${response.asyncIssuanceRequestIds.length} async issuance requests`)

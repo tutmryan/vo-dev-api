@@ -5,7 +5,7 @@ import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/dis
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
-import { verifyForHost } from '@makerx/express-bearer'
+import { verifyMultiIssuer } from '@makerx/express-bearer'
 import { graphqlOperationLoggingPlugin, introspectionControlPlugin } from '@makerx/graphql-apollo-server'
 import { useSubscriptionsServer } from '@makerx/graphql-core/subscriptions'
 import { isProduction } from '@makerx/node-common'
@@ -13,7 +13,7 @@ import type { Express } from 'express'
 import { json } from 'express'
 import { createApollo4QueryValidationPlugin } from 'graphql-constraint-directive/apollo4'
 import type http from 'http'
-import { bearer, devToolsEnabled, logging } from './config'
+import { devToolsEnabled, issuerOptions, logging } from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
 import type { Logger } from './logger'
@@ -69,7 +69,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server, .
     createSubscriptionContext,
     jwtClaimsToLog: logging.userClaimsToLog,
     requireAuth: true,
-    verifyToken: (host, token) => verifyForHost(host, token, bearer),
+    verifyToken: (host, token) => verifyMultiIssuer(host, token, { issuerOptions }),
   })
 
   logger.info('Starting apollo server')

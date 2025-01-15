@@ -1,8 +1,8 @@
 import type { VerifiedOrchestrationEntityManager } from '../../../data/entity-manager'
 import { AsyncIssuanceService } from '../../../services/async-issuance-service'
 import { invariant } from '../../../util/invariant'
+import { getAsyncIssuanceDataBySessionKey } from '../../async-issuance/session'
 import type { IssuanceEntity } from '../../issuance/entities/issuance-entity'
-import { getLimitedAsyncIssuanceDataBySessionKey } from '../../limited-async-issuance-tokens'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 
 export async function completeAsyncIssuance(
@@ -13,7 +13,7 @@ export async function completeAsyncIssuance(
   const asyncIssuanceRepo = entityManager.getRepository(AsyncIssuanceEntity)
 
   // look up the data by key
-  const asyncIssuanceData = await getLimitedAsyncIssuanceDataBySessionKey(asyncIssuanceKey)
+  const asyncIssuanceData = await getAsyncIssuanceDataBySessionKey(asyncIssuanceKey)
   invariant(asyncIssuanceData, 'Async issuance data not found')
 
   // update and persist the async issuance

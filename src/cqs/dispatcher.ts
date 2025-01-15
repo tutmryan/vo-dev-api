@@ -2,6 +2,7 @@ import type { CommandContext, QueryContext, TransactionalCommandContext } from '
 import type { GraphQLContext } from '../context'
 import { entityManager, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../data'
 import { addUserToManager } from '../features/auditing/user-context-helper'
+import { userIsUserEntity } from '../util/user-invariant'
 import { performFeatureCheck } from './feature-map'
 
 export type CommandLike = (this: CommandContext, ...args: any) => any
@@ -16,8 +17,8 @@ export const dispatch = async <T extends CommandLike>(
   ...args: Parameters<T>
 ): Promise<Awaited<ReturnType<T>>> => {
   return await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
-    if (user) {
-      addUserToManager(entityManager, user.userEntity.id)
+    if (userIsUserEntity(user)) {
+      addUserToManager(entityManager, user.entity.id)
     }
 
     const ctx: CommandContext = {
@@ -48,11 +49,10 @@ export const dispatchTransactional = async <T extends TransactionalCommandLike>(
     dataLoaders,
     requestInfo,
     contextType: 'command',
-    inTransaction: async (fn) => {
+    inTransaction: async (fn, userManagerUserId) => {
       return await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
-        if (user) {
-          addUserToManager(entityManager, user.userEntity.id)
-        }
+        if (userManagerUserId) addUserToManager(entityManager, userManagerUserId)
+        else if (userIsUserEntity(user)) addUserToManager(entityManager, user.entity.id)
         return await fn(entityManager)
       })
     },

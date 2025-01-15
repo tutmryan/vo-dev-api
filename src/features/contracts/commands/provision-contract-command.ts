@@ -3,6 +3,7 @@ import type { CommandContext } from '../../../cqs'
 import { isFaceCheckSupportEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { ClaimType, FaceCheckPhotoSupport } from '../../../generated/graphql'
 import type { Contract, CreateContractInput, UpdateContractInput } from '../../../services/verified-id'
+import { userInvariant } from '../../../util/user-invariant'
 import {
   claimTypeImage,
   claimTypeString,
@@ -25,6 +26,8 @@ registerFeatureCheck(ProvisionContractCommand, async (context: CommandContext, i
 export async function ProvisionContractCommand(this: CommandContext, id: string) {
   const repository = this.entityManager.getRepository(ContractEntity)
 
+  userInvariant(this.user)
+
   const contract = await repository.findOneByOrFail({ id })
 
   let provisionedContract: Contract | undefined = undefined
@@ -34,7 +37,7 @@ export async function ProvisionContractCommand(this: CommandContext, id: string)
 
     contract.markAsProvisioned({
       externalId: provisionedContract.id,
-      user: this.user!.userEntity,
+      user: this.user!.entity,
     })
   } else {
     if (contract.isDeprecated) throw new Error('Contract has been deprecated, it cannot be published again')
@@ -42,7 +45,7 @@ export async function ProvisionContractCommand(this: CommandContext, id: string)
     const updateContractInput = toUpdateContractInput(contract)
     await this.services.verifiedIdAdmin.updateContract(contract.externalId, updateContractInput)
 
-    contract.markAsReprovisioned(this.user!.userEntity)
+    contract.markAsReprovisioned(this.user!.entity)
   }
 
   return await repository.save(contract)

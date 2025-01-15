@@ -1,7 +1,7 @@
 import { graphql } from '../../../generated'
 import { executeOperationAsLimitedAsyncIssuanceClient, type LimitedPhotoCaptureOperationInput } from '../../../test'
 import { resolveToType } from '../../../util/type-helpers'
-import type { LimitedAsyncIssuanceData } from '../../limited-async-issuance-tokens'
+import type { AsyncIssuanceSessionData } from '../../async-issuance/session'
 import { validPhotoDataUrl } from '../../photo-capture/test'
 
 export const createIssuanceRequestForAsyncIssuanceMutation = graphql(`
@@ -34,7 +34,7 @@ export const createIssuanceRequestForAsyncIssuanceMutation = graphql(`
 
 export async function createIssuanceRequestForAsyncIssuance(
   asyncIssuanceRequestId: string,
-  limitedAsyncIssuanceData: LimitedAsyncIssuanceData,
+  limitedAsyncIssuanceData: AsyncIssuanceSessionData,
 ) {
   const limitedPhotoCaptureData = limitedAsyncIssuanceData.photoCaptureRequestId
     ? resolveToType<LimitedPhotoCaptureOperationInput>({

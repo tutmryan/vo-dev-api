@@ -1,6 +1,6 @@
 import type { Configuration } from '@azure/msal-node'
 import { ConfidentialClientApplication } from '@azure/msal-node'
-import { bearerTokenMiddleware } from '@makerx/express-bearer'
+import { multiIssuerBearerTokenMiddleware } from '@makerx/express-bearer'
 import type { AuthConfig } from '@makerx/express-msal'
 import {
   copySessionJwtToBearerHeader,
@@ -19,12 +19,12 @@ import type { HelmetOptions } from 'helmet'
 import helmet from 'helmet'
 import { clone, merge } from 'lodash'
 import {
-  bearer,
   cookieSession as cookieSessionConfig,
   cors as corsConfig,
   demoEnabled,
   devToolsEnabled,
   issuanceCallbackRoute,
+  issuerOptions,
   oidcEnabled,
   pkce,
   presentationCallbackRoute,
@@ -154,8 +154,8 @@ export async function getExpressApp(): Promise<Express> {
   // add bearer auth to all requests
   app.use(
     notOidcRoute,
-    bearerTokenMiddleware({
-      config: bearer,
+    multiIssuerBearerTokenMiddleware({
+      issuerOptions,
       tokenIsRequired: false, // introspection requests are anonymous outside prod, so allow requests without tokens to pass through
       logger,
     }),
