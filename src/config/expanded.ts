@@ -84,8 +84,6 @@ export const vidServiceAuth: Omit<ClientCredentialsConfig, 'scope'> = hasHomeTen
       ...internalClientCredentials,
     }
 
-// auth configs
-export const authTenantIds = [...config.get('auth.additionalAuthTenantIds'), homeTenantId, platformTenantId]
 export const pkce: Config['auth']['pkce'] = merge(
   {
     scopes: [`${apiCredentials.clientId}/.default`, 'profile'],
@@ -162,3 +160,6 @@ issuerOptions[oidcAuthorityUrl] = merge(
   },
   config.get('auth.bearer'),
 )
+
+// OIDC EAM friendly tenants
+export const eamFriendlyTenants = [...config.get('auth.additionalAuthTenantIds'), homeTenantId]
