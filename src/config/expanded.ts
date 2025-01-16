@@ -160,3 +160,6 @@ issuerOptions[oidcAuthorityUrl] = merge(
   },
   config.get('auth.bearer'),
 )
+
+// OIDC EAM friendly tenants
+export const eamFriendlyTenants = [...config.get('auth.additionalAuthTenantIds'), homeTenantId]

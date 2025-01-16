@@ -1,7 +1,7 @@
 import type { Constructor } from '@graphql-tools/utils'
 import type { Express, RequestHandler } from 'express'
 import { debounce } from 'lodash'
-import type { Interaction, KoaContextWithOIDC, Provider, errors } from 'oidc-provider'
+import type { Interaction, KoaContextWithOIDC, Provider, Configuration, Errors, interactionPolicy } from 'oidc-provider'
 import { apiUrl, cookieSession } from '../../config'
 import { logger } from '../../logger'
 import { createRedisClient, isRedisEnabled } from '../../redis'
@@ -9,12 +9,14 @@ import { pubsub } from '../../redis/pubsub'
 import { dynamicImport } from '../../util/dynamic-import'
 import { invariant } from '../../util/invariant'
 import { Lazy } from '../../util/lazy'
+import { throwError } from '../../util/throw-error'
 import { findAccount } from './account'
 import { openidClaims, presentationLoginStandardClaims } from './claims'
 import type { OidcData } from './data'
 import { loadOidcData } from './data'
+import { eamExtraParams, hookAndApplyCustomEntraEamSpec } from './integrations/entra-eam'
 import { extraParams } from './extra-params'
-import { loadExistingGrant, useGrantedResource } from './grants'
+import { loadExistingGrant } from './grants'
 import { keys } from './keys'
 import { logEvents } from './log-events'
 import { middleware } from './middleware'
@@ -25,8 +27,10 @@ import { logoutSource } from './source'
 import { extraTokenClaims, issueRefreshToken } from './tokens'
 
 export const oidcProviderModule = Lazy(async () => {
-  const module = await dynamicImport<{ default: Constructor<Provider>; errors: typeof errors }>('oidc-provider')
-  return { Provider: module.default, errors: module.errors }
+  const module = await dynamicImport<{ default: Constructor<Provider>; errors: Errors; interactionPolicy: interactionPolicy }>(
+    'oidc-provider',
+  )
+  return { Provider: module.default, errors: module.errors, interactionPolicy: module.interactionPolicy }
 })
 
 const redisClient = Lazy(() => createRedisClient('oidc'))
@@ -49,9 +53,9 @@ async function createProvider() {
   const provider = new Provider(issuer, {
     clients: clientMetadata,
     clientAuthMethods: ['none'],
-    adapter: (name: string) => (isRedisEnabled ? new RedisAdapter(name, redisClient()) : undefined),
+    ...(isRedisEnabled ? { adapter: (name) => new RedisAdapter(name, redisClient()) } : {}),
     cookies: {
-      keys: [cookieSession.secret],
+      keys: [cookieSession.secret ?? throwError('cookieSession.secret is required')],
     },
     acrValues: [presentationLoginStandardClaims.acr],
     claims: { ...openidClaims, ...resourceScopes },
@@ -59,7 +63,6 @@ async function createProvider() {
     extraTokenClaims,
     issueRefreshToken,
     loadExistingGrant: loadExistingGrant(clients, resources),
-    useGrantedResource,
     findAccount,
     features: {
       userinfo: { enabled: false },
@@ -75,14 +78,14 @@ async function createProvider() {
         return `${oidcRoute}/interaction/${interaction.uid}`
       },
     },
-    extraParams,
+    extraParams: { ...extraParams, ...eamExtraParams },
     jwks: { keys: jwksKeys },
     // Expire browser sessions immediately, as this behaviour is problematic for VC based OIDC
     expiresWithSession: () => false,
     ttl: {
       Session: 1,
     },
-  })
+  } satisfies Configuration)
 
   // allow http + localhost for redirect URIs
   // as per: https://github.com/panva/node-oidc-provider/blob/main/recipes/implicit_http_localhost.md#allowing-http-andor-localhost-for-implicit-response-type-web-clients
@@ -101,8 +104,11 @@ async function createProvider() {
   provider.proxy = true
   logEvents(provider)
   provider.use(middleware)
-  providerHandler = provider.callback()
+  // Integrations
+  hookAndApplyCustomEntraEamSpec(provider)
 
+  // Post set up
+  providerHandler = provider.callback()
   dataRef.provider = provider
   dataRef.data = data
 }
@@ -113,7 +119,19 @@ const oidcRouteHandler: RequestHandler = async (req, res) => {
   return providerHandler(req, res)
 }
 
-export const dataRef: { provider?: Provider; data?: OidcData } = {}
+const dataRef: { provider?: Provider; data?: OidcData } = {}
+
+export function getProvider() {
+  const provider = dataRef.provider
+  invariant(provider, 'dataRef.provider not set')
+  return provider
+}
+
+export function getData() {
+  const data = dataRef.data
+  invariant(data, 'dataRef.data not set')
+  return data
+}
 
 export async function addOidcProvider(app: Express): Promise<string> {
   await createProvider()

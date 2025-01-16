@@ -1,23 +1,8 @@
-import type {
-  AuthorizationCode,
-  BackchannelAuthenticationRequest,
-  Client,
-  Configuration,
-  DeviceCode,
-  KoaContextWithOIDC,
-  RefreshToken,
-} from 'oidc-provider'
+import type { Client, Configuration } from 'oidc-provider'
 import { invariant } from '../../util/invariant'
 import { openidClaims } from './claims'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
 import type { OidcResourceEntity } from './entities/oidc-resource-entity'
-
-export function useGrantedResource(
-  _ctx: KoaContextWithOIDC,
-  _model: AuthorizationCode | RefreshToken | DeviceCode | BackchannelAuthenticationRequest,
-) {
-  return true
-}
 
 function isFirstParty(_client: Client) {
   return true

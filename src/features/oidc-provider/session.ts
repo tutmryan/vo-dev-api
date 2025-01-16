@@ -15,6 +15,7 @@ import type { PartnerEntity } from '../partners/entities/partner-entity'
 import { getPresentationDataFromCache } from '../presentation/callback/cache'
 import { PresentationEntity } from '../presentation/entities/presentation-entity'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
+import { whenEamAddPresentationConstraints, whenEamGetAccountId } from './integrations/entra-eam'
 import { ExtraParams } from './extra-params'
 
 const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
@@ -22,14 +23,31 @@ const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', ON
 
 const claimConstraintOperators = ['values', 'contains', 'startsWith'] as const
 
-type LoginInteractionData = {
+type LoginInteractionDataPostStart = {
   state: 'started' | 'in-progress' | 'complete'
   interactionId: string
   clientId: string
   sessionKey: string
   requestId?: string
   presentationId?: string
+  integrations?: {
+    entraEam?: {
+      sub: string
+      iss: string
+      state: string
+      nonce: string
+      clientRequestId?: string
+      identityId?: string
+    }
+  }
 }
+
+type LoginInteractionDataPreStart = {
+  state: 'pre-start'
+  interactionId: string
+} & Partial<Omit<LoginInteractionDataPostStart, 'interactionId' | 'state'>>
+
+export type LoginInteractionData = LoginInteractionDataPostStart | LoginInteractionDataPreStart
 
 export async function acquireLoginPresentationToken({
   interactionId,
@@ -39,18 +57,26 @@ export async function acquireLoginPresentationToken({
   clientId: string
 }): Promise<AccessTokenResponse> {
   const interactionData = await getLoginInteractionData(interactionId)
-  invariant(interactionData === undefined, 'Interaction session already exists')
+  invariant(interactionData === undefined || interactionData.state === 'pre-start', 'Interaction session already exists')
   const token = await getClientCredentialsToken(limitedOidcAuthnAuth)
   const sessionKey = getSessionKey(token.access_token)
   await sessionInteractionCache().set(sessionKey, interactionId)
-  await setLoginInteractionData({ interactionId, state: 'started', clientId, sessionKey })
+  await setLoginInteractionData({ ...(interactionData ?? {}), interactionId, state: 'started', clientId, sessionKey })
   return token
+}
+
+export type Constraint = {
+  constraintName: string | undefined
+  constraintOperator: (typeof claimConstraintOperators)[number] | undefined
+  constraintValue: string | undefined
+  constraintValues: string[] | undefined
 }
 
 export async function buildAuthnPresentationRequest(
   params: UnknownObject,
   client: OidcClientEntity,
   partners: PartnerEntity[],
+  loginInteractionData?: LoginInteractionData,
 ): Promise<PresentationRequestForAuthnInput> {
   const vcTypeParam = params[ExtraParams.vc_type] as string | undefined
   const vcIssuerParam = params[ExtraParams.vc_issuer] as string | undefined
@@ -92,11 +118,18 @@ export async function buildAuthnPresentationRequest(
       throw new errors.InvalidTarget(`The requested credential type '${type}' is not configured for partner issuer: ${vcIssuerParam}`)
   }
 
+  function getConstraint(): Constraint {
+    const constraintValue = params[ExtraParams.vc_constraint_value] as string | undefined
+    return {
+      constraintName: params[ExtraParams.vc_constraint_name] as string | undefined,
+      constraintOperator: params[ExtraParams.vc_constraint_operator] as (typeof claimConstraintOperators)[number] | undefined,
+      constraintValue,
+      constraintValues: constraintValue && constraintOperator === 'values' ? constraintValue.split(',') : undefined,
+    }
+  }
+
   // validate constraint params
-  const constraintName = params[ExtraParams.vc_constraint_name] as string | undefined
-  const constraintOperator = params[ExtraParams.vc_constraint_operator] as (typeof claimConstraintOperators)[number] | undefined
-  const constraintValue = params[ExtraParams.vc_constraint_value] as string | undefined
-  const constraintValues = constraintValue && constraintOperator === 'values' ? constraintValue.split(',') : undefined
+  const { constraintName, constraintOperator, constraintValue, constraintValues } = getConstraint()
 
   // assign constraints, if provided
   let constraints: ClaimConstraint[] | undefined
@@ -115,6 +148,9 @@ export async function buildAuthnPresentationRequest(
       },
     ]
   }
+
+  // Integration hooks
+  constraints = whenEamAddPresentationConstraints(loginInteractionData, constraints)
 
   return {
     requestedCredentials: [
@@ -229,7 +265,13 @@ export async function completeLogin(
   // Build the login result
   const { claims: allClaims, type: types, issuer } = credential
   const { issuanceId, photo, ...claims } = allClaims
-  const accountId = await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
+
+  // Integrations hooks
+  let accountId = whenEamGetAccountId(interactionData)
+
+  if (!accountId) {
+    accountId = await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
+  }
 
   const account: PresentationLoginAccount = {
     accountId,
