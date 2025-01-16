@@ -14,6 +14,18 @@ When using External Access Method (EAM) with a tenant that is not your home tena
 
 When using EAM, the identity of the user is not known to the Verified Orchestration platform. Therefore, the identity must be resolved to an identity known by the platform. This is done by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra during the authentication process. See [entra user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-user) for more information.
 
+:::warning[Caution]
+
+If the identity cannot be resolved during an EAM second factor auth flow, the following error will be displayed to the user by Microsoft.
+
+```
+Cannot complete external authentication: provider returned 'access_denied' error.
+```
+<ImgBorder>
+  ![Conditional Access Policy](../../../static/img/eam-auth-flow-unmatched-identity-error.png)
+</ImgBorder>
+:::
+
 ### Credentials
 
 To ensure the credential that is presented belongs to the user going through the EAM process, a presentation constraint is used to enforce the resolved identity ID matches to identity ID embedded in the credential. See [create presentation request](/docs/guides/presentation#create-presentation-request) for more information.
@@ -27,6 +39,18 @@ Credentials issued prior to **1st Jan 2025** may not contain the identity ID. In
 ## Set up Guide
 
 The official documentation for setting up an External Access Method (EAM) can be found [here](https://learn.microsoft.com/en-us/entra/identity/authentication/how-to-authentication-external-method-manage).
+
+The general flow is:
+
+1. Register an enterprise application/application in Azure AD.
+    1. The application will be used to store the redirect URIs.
+    2. The enterprise application will be used to enforce MFA by a Conditional Access Policy.
+2. Register an OIDC client in the VO platform.
+    1. The client ID will be used in the EAM configuration.
+    2. The redirect URI allows the VO platform to redirect back to the EAM.
+3. Register an authentication method in Entra ID.
+    1. An external authentication method is created with the OIDC configuration.
+    2. The client ID, discovery endpoint, and app ID are used to
 
 Whilst the Microsoft documentation is comprehensive, it can be a little overwhelming. To help with this, the following additional information is provided to help you get started.
 
@@ -77,6 +101,10 @@ When setting up the authentication method you will be asked for these important 
     1. The discovery endpoint of the Orchestrator instance. Which is, <code><EntraAppRedirectOidcMeta /></code>.
 3. App ID
     1. The ID of the Application registered in Entra.
+
+<ImgBorder>
+  ![External Authentication Method - OIDC Configuration](../../../static/img/eam-authentication-method-external-oidc-config.png)
+</ImgBorder>
 
 :::warning[Caution]
 Admin consent for the application is required in the tenant that uses the EAM. If consent isn't granted, the following error appears when an admin tries to use the EAM: AADSTS900491: Service principal `your App ID` not found.
