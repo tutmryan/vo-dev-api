@@ -8,15 +8,15 @@ import { ImgBorder } from '@site/src/components/ImgBorder'
 
 ### Tenants
 
-When using External Access Method (EAM) with a tenant that is not your home tenant, it must be known to the Verified Orchestration platform. See [additional tenant IDs](/docs/guides/instance-configuration#additional-tenant-ids) for more information.
+When using External Access Method (EAM) with a tenant other than your home tenant, the Verified Orchestration platform must know about it. For more information, see [additional tenant IDs](/docs/guides/instance-configuration#additional-tenant-ids).
 
 ### Identities
 
-When using EAM, the identity of the user is not known to the Verified Orchestration platform. Therefore, the identity must be resolved to an identity known by the platform. This is done by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra during the authentication process. See [entra user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-user) for more information.
+When using EAM, the user's identity is unknown to the Verified Orchestration platform. Therefore, the user's identity must be resolved to an identity known by the platform. The identity resolution happens by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra ID during the authentication process. See [entra user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-user) for more information.
 
 :::warning[Caution]
 
-If the identity cannot be resolved during an EAM second factor auth flow, the following error will be displayed to the user by Microsoft.
+If the user's identity cannot be resolved during an EAM second-factor auth flow, the following error will be displayed to the user by Microsoft.
 
 ```
 Cannot complete external authentication: provider returned 'access_denied' error.
@@ -28,7 +28,7 @@ Cannot complete external authentication: provider returned 'access_denied' error
 
 ### Credentials
 
-To ensure the credential that is presented belongs to the user going through the EAM process, a presentation constraint is used to enforce the resolved identity ID matches to identity ID embedded in the credential. See [create presentation request](/docs/guides/presentation#create-presentation-request) for more information.
+To ensure the credential presented belongs to the user progressing through the EAM process, a presentation constraint is used to enforce the resolved identity ID matches to identity ID embedded in the credential. See [create presentation request](/docs/guides/presentation#create-presentation-request) for more information.
 
 :::note
 Credentials issued prior to **1st Jan 2025** may not contain the identity ID. In this case, the credential cannot be used with EAM until it is re-issued.
@@ -52,7 +52,7 @@ The general flow is:
     1. An external authentication method is created with the OIDC configuration.
     2. The client ID, discovery endpoint, and app ID are used to
 
-Whilst the Microsoft documentation is comprehensive, it can be a little overwhelming. To help with this, the following additional information is provided to help you get started.
+Whilst the Microsoft documentation is comprehensive, it can be a little overwhelming. To help the following additional information is provided.
 
 ### Entra ID - Application Registration
 
@@ -83,7 +83,7 @@ The associated Enterprise Application must have a conditional access policy set 
 
 ### VO Platform - OIDC Client Registration
 
-As Entra ID's EAM uses OIDC to provide the second factor authentication, a OIDC client registration on the VO platform must be registered and with the following details:
+As Entra ID's EAM uses OIDC to provide the second-factor authentication, a OIDC client registration on the VO platform must be registered and with the following details:
 
 One of the following URIs must be used as the `Redirect URI`, but depending on the Azure instance you are using, the URI will be different. For most, the first URI will be the correct one to use.
 
@@ -93,7 +93,7 @@ One of the following URIs must be used as the `Redirect URI`, but depending on t
 
 ### Entra ID - Authentication methods
 
-When setting up the authentication method you will be asked for these important details:
+When setting up the authentication method, you will be asked for these important details:
 
 1. Client ID
     1. The client ID of the Authentication Client registered in Orchestrator.
