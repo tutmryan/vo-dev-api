@@ -12,7 +12,7 @@ When using External Access Method (EAM) with a tenant other than your home tenan
 
 ### Identities
 
-When using EAM, the user's identity is unknown to the Verified Orchestration platform. Therefore, the user's identity must be resolved to an identity known by the platform. The identity resolution happens by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra ID during the authentication process. See [entra user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-user) for more information.
+When using EAM, the user's identity is unknown to the Verified Orchestration platform. Therefore, the user's identity must be resolved to an identity known by the platform. The identity resolution happens by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra ID during the authentication process. See [entra user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-id-user) for more information.
 
 :::warning[Caution]
 
@@ -100,7 +100,7 @@ When setting up the authentication method, you will be asked for these important
 2. Discovery Endpoint
     1. The discovery endpoint of the Orchestrator instance. Which is, <code><EntraAppRedirectOidcMeta /></code>.
 3. App ID
-    1. The ID of the Application registered in Entra.
+    1. The ID of the Application registered in Entra ID.
 
 <ImgBorder>
   ![External Authentication Method - OIDC Configuration](../../../static/img/eam-authentication-method-external-oidc-config.png)

@@ -37,16 +37,16 @@ In the Composer, identity references are labelled as "Issuees".
 
 Verified Orchestration assumes that your organisation has one or more identity stores. With each store having:
 
-- A unique **identifier for the store**. For example in Entra ID, the Tenant ID uniquely identifies the store and is available within an Entra JWT payload as the `tid` claim.
-- A unique **identifier for each identity** within a store. For example in Entra ID, the unique user Object ID is available within an Entra JWT payload as the `oid` claim.
+- A unique **identifier for the store**. For example in Entra ID, the Tenant ID uniquely identifies the store and is available within an Entra ID JWT payload as the `tid` claim.
+- A unique **identifier for each identity** within a store. For example in Entra ID, the unique user Object ID is available within an Entra ID JWT payload as the `oid` claim.
 
 These two values form the unique key which is used to link a Verified Orchestration identity reference back to an identity within your organisation's identity stores.
 
-### Example mapping of an Entra User
+### Example mapping of an Entra ID User
 
-The table below demonstrates how an Entra identity store user can be mapped to a Verified Orchestration identity reference. This reference includes both the Entra user attributes and under which claims the values are stored by an Entra produced JWT.
+The table below demonstrates how an Entra ID identity store user can be mapped to a Verified Orchestration identity reference. This reference includes both the Entra ID user attributes and under which claims the values are stored by an Entra ID produced JWT.
 
-| Entra User Attribute | JWT Payload Claim | Verified Orchestration Identity Field |
+| Entra ID User Attribute | JWT Payload Claim | Verified Orchestration Identity Field |
 | -------------------- | ----------------- | ------------------------------------- |
 | Tenant ID            | `tid`             | `issuer`                              |
 | User Object ID       | `oid`             | `identifier`                          |

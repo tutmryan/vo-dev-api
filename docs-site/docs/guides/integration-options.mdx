@@ -22,7 +22,7 @@ Considerations:
 
 - Not automated, credential data is manually entered.
 - Requires the recipient to be present in person or via screen share to receive the credential.
-- Issuee identity can be selected from a linked Entra home tenant, an existing issuee identity or manually entered.
+- Issuee identity can be selected from a linked Entra ID home tenant, an existing issuee identity or manually entered.
 
 ### In person issuance embedded in your applications
 
@@ -88,7 +88,7 @@ Use the OpenID Connect Provider to [authenticate](./authentication/index.mdx) by
 Considerations:
 
 - Suitable for applications that need protected areas or APIs to be accessed by users holding a credential.
-- Simple to implement through OIDC libraries or integration to identity providers such as Okta, Entra B2C and Entra External ID.
+- Simple to implement through OIDC libraries or integration to identity providers such as Okta, Entra ID B2C and Entra ID External ID.
 - Suitable for using credential presentations as a second factor in multi-factor authentication where the authentication provider supports an additional OIDC flow such as Entra's External Authentication Method (EAM).
 - Both credential and identity information can be used from then authentication response to control protected access.
 - Applications have a high level of control over the authentication process, e.g. presentation constraints and requiring biometric face check.
@@ -146,6 +146,6 @@ All other types of operations must be run via server-side and be properly protec
 - Consider use of callbacks, or queries to keep potentially sensitive presentation data server-side, for example:
   - Receive the status of issuance or presentation events client-side to update the user interface.
   - Receive or query potentially sensitive credential data server-side.
-- For applications that support authenticated home Entra tenant users, [On-Behalf-Of (OBO) authentication flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) can be used to run administrative API operations as the logged in user, for example executing revocation of all credentials for an issuee from your own off-boarding app instead of using the Verified Orchestration Composer.
+- For applications that support authenticated home Entra ID tenant users, [On-Behalf-Of (OBO) authentication flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) can be used to run administrative API operations as the logged in user, for example executing revocation of all credentials for an issuee from your own off-boarding app instead of using the Verified Orchestration Composer.
 - Anonymous presentations can be run using limited access tokens
 - All other operations should be properly protected via authenticated access
