@@ -2,21 +2,23 @@ import { EntraAppRedirectAuth, EntraAppRedirectOidcMeta } from '@site/src/compon
 import { Help } from '@site/src/components/Help'
 import { ImgBorder } from '@site/src/components/ImgBorder'
 
-# External Authentication Method (EAM)
+# Entra ID EAM
+
+An external authentication method (EAM) lets users choose an external provider to meet multifactor authentication (MFA) requirements when they sign in to Microsoft Entra ID. An EAM can satisfy MFA requirements from Conditional Access policies, Microsoft Entra ID Protection risk-based Conditional Access policies, Privileged Identity Management (PIM) activation, and when the application itself requires MFA.
 
 ## Important Information
 
 ### Tenants
 
-When using External Authentication Method (EAM) with a tenant other than your home tenant, the Verified Orchestration platform must know about it. For more information, see [additional tenant IDs](/docs/guides/instance-configuration#additional-tenant-ids).
+When using EAM with a tenant other than your home tenant, the Verified Orchestration (VO) platform must know about it. For more information, see [additional tenant IDs](/docs/guides/instance-configuration#additional-tenant-ids).
 
 ### Identities
 
-When using EAM, the user's identity is unknown to the Verified Orchestration platform. Therefore, the user's identity must be resolved to an identity known by the platform. The identity resolution happens by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra ID during the authentication process. See [Entra ID user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-id-user) for more information.
+When using EAM, the user's identity is unknown to the VO platform. Therefore, the user's identity must be resolved to an identity known by the platform. The identity resolution happens by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra ID during the authentication process. See [Entra ID user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-id-user) for more information.
 
 :::warning[Caution]
 
-If the user's identity cannot be resolved during an EAM second-factor auth flow, the following error will be displayed to the user by Microsoft.
+If the user's identity cannot be resolved during an EAM MFA authentication flow, the following error will be displayed to the user by Microsoft.
 
 ```
 Cannot complete external authentication: provider returned 'access_denied' error.
@@ -38,16 +40,16 @@ Credentials issued prior to **1st Jan 2025** may not contain the identity ID. In
 
 ## Set up Guide
 
-The official documentation for setting up an External Access Method (EAM) can be found [here](https://learn.microsoft.com/en-us/entra/identity/authentication/how-to-authentication-external-method-manage).
+The official documentation for setting up an EAM can be found [here](https://learn.microsoft.com/en-us/entra/identity/authentication/how-to-authentication-external-method-manage).
 
 The general flow is:
 
 1. Register an enterprise application/application in Entra ID.
-    1. The application will be used to store key OIDC URIs as SPA Redirect URIs.
+    1. The application will be used to store key OpenID Connect (OIDC) URIs as Single Page Applications (SPA) Redirect URIs.
     2. The enterprise application will be used to enforce MFA by a Conditional Access Policy.
 2. Register an OIDC client in the VO platform.
     1. The client ID will be used in the EAM OIDC configuration.
-    2. The redirect URI allows the VO platform to redirect back to the EAM.
+    2. The redirect URI allows the VO platform to redirect back to the Microsoft.
 3. Register an authentication method in Entra ID.
     1. An external authentication method is created with the OIDC configuration.
     2. The client ID, discovery endpoint, and app ID are used to link the EAM to the OIDC client and enterprise application.
@@ -56,7 +58,7 @@ Whilst the Microsoft documentation is comprehensive, it can be a little overwhel
 
 ### Entra ID - Application Registration
 
-Single Page Applications (SPAs) Redirect URIs should be set to the following:
+SPA redirect URIs should be set to the following:
 
 1. <code><EntraAppRedirectAuth /></code>
 2. <code><EntraAppRedirectOidcMeta /></code>
@@ -83,7 +85,7 @@ The associated Enterprise Application must have a conditional access policy set 
 
 ### VO Platform - OIDC Client Registration
 
-As Entra ID's EAM uses OIDC to provide the second-factor authentication, a OIDC client registration on the VO platform must be registered and with the following details:
+As Entra ID's EAM uses OIDC to provide the multifactor authentication, a OIDC client registration on the VO platform must be registered and with the following details:
 
 One of the following URIs must be used as the `Redirect URI`, but depending on the Azure instance you are using, the URI will be different. For most, the first URI will be the correct one to use.
 
