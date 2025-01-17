@@ -89,9 +89,9 @@ _Note: this script configures the API, Admin UI, and Portal UI to be exposed to 
 
 ## Using Entra ID EAM with the VO OIDC provider locally
 
-_Note: all EAM cloud infrastructure is set up in the `VO Dev Snadbox` tenant. You will need to PIM into the Global Admin role to make changes._
+_Note 💡: all EAM cloud infrastructure is set up in the `VO Dev Sandbox` tenant. You will need to PIM into the Global Admin role to make changes._
 
-_Note: the configuration in the Sandbox tenant is set up to support only a single dev environment at a time. It is possible to configure the environment to support multiple dev environments, but this is not covered in this guide._
+_Note 🚨: the configuration in the Sandbox tenant is set up to support only a **single dev environment** at a time. It is possible to configure the environment to support multiple dev environments, but this is not covered in this guide. Given this limitation, it's good practise to confirm with team before using._
 
 ### Set up
 To successfully use Entra ID EAM with the VO OIDC provider locally, you will need to follow these steps:
