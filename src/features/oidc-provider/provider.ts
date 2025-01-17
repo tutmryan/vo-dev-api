@@ -1,7 +1,7 @@
 import type { Constructor } from '@graphql-tools/utils'
 import type { Express, RequestHandler } from 'express'
 import { debounce } from 'lodash'
-import type { Interaction, KoaContextWithOIDC, Provider, Configuration, Errors, interactionPolicy } from 'oidc-provider'
+import type { Configuration, Errors, Interaction, interactionPolicy, KoaContextWithOIDC, Provider } from 'oidc-provider'
 import { apiUrl, cookieSession } from '../../config'
 import { logger } from '../../logger'
 import { createRedisClient, isRedisEnabled } from '../../redis'
@@ -14,9 +14,9 @@ import { findAccount } from './account'
 import { openidClaims, presentationLoginStandardClaims } from './claims'
 import type { OidcData } from './data'
 import { loadOidcData } from './data'
-import { eamExtraParams, hookAndApplyCustomEntraEamSpec } from './integrations/entra-eam'
 import { extraParams } from './extra-params'
 import { loadExistingGrant } from './grants'
+import { eamExtraParams, hookAndApplyCustomEntraEamSpec } from './integrations/entra-eam'
 import { keys } from './keys'
 import { logEvents } from './log-events'
 import { middleware } from './middleware'
@@ -47,7 +47,17 @@ async function createProvider() {
   const issuer = `${apiUrl}${oidcRoute}`
   logger.info(`Creating OIDC provider for: ${issuer}`)
 
-  const [{ Provider }, jwksKeys, data] = await Promise.all([oidcProviderModule(), keys(), loadOidcData()])
+  const { Provider } = await oidcProviderModule()
+
+  // Load JWKS keys and OIDC data in parallel, but don't fail fast
+  const [jwksKeysPromise, dataPromise] = await Promise.allSettled([keys(), loadOidcData()])
+
+  if (jwksKeysPromise.status === 'rejected') throw jwksKeysPromise.reason
+  const jwksKeys = jwksKeysPromise.value
+
+  if (dataPromise.status === 'rejected') throw dataPromise.reason
+  const data = dataPromise.value
+
   const { clients, clientMetadata, resources, resourceScopes } = data
 
   const provider = new Provider(issuer, {
