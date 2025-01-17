@@ -61,7 +61,10 @@
     .login-card h2 {
       font-weight: 400;
       text-align: center;
-      text-wrap: nowrap;
+    }
+
+    .login-card h2.title-sm {
+      font-size: 1.4rem;
     }
 
     .login-card [type=submit] {
@@ -131,6 +134,13 @@
   </style>
 </head>
 
+<%
+  let fontClass = '';
+  if (client.clientName.length > 30) {
+    fontClass = 'title-sm';
+  }
+%>
+
 <body>
   <div class="d-flex justify-content-center mb-3"><img src="<%- voLogoUrl %>" alt="Verified Orchestration Logo"
       style="max-width:10rem"></div>
@@ -140,7 +150,7 @@
         style="max-width:30%"></div>
     <% } %>
     <h1><%= title %></h1>
-    <h2><%= client.clientName %></h2>
+    <h2 class="<%= fontClass %>"><%= client.clientName %></h2>
     <%- body %>
     <div class="text-center">
       <a href="/oidc/interaction/<%= uid %>/abort"
