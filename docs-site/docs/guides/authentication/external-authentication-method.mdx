@@ -2,17 +2,17 @@ import { EntraAppRedirectAuth, EntraAppRedirectOidcMeta } from '@site/src/compon
 import { Help } from '@site/src/components/Help'
 import { ImgBorder } from '@site/src/components/ImgBorder'
 
-# External Access Method (EAM)
+# External Authentication Method (EAM)
 
 ## Important Information
 
 ### Tenants
 
-When using External Access Method (EAM) with a tenant other than your home tenant, the Verified Orchestration platform must know about it. For more information, see [additional tenant IDs](/docs/guides/instance-configuration#additional-tenant-ids).
+When using External Authentication Method (EAM) with a tenant other than your home tenant, the Verified Orchestration platform must know about it. For more information, see [additional tenant IDs](/docs/guides/instance-configuration#additional-tenant-ids).
 
 ### Identities
 
-When using EAM, the user's identity is unknown to the Verified Orchestration platform. Therefore, the user's identity must be resolved to an identity known by the platform. The identity resolution happens by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra ID during the authentication process. See [entra user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-id-user) for more information.
+When using EAM, the user's identity is unknown to the Verified Orchestration platform. Therefore, the user's identity must be resolved to an identity known by the platform. The identity resolution happens by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra ID during the authentication process. See [Entra ID user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-id-user) for more information.
 
 :::warning[Caution]
 
@@ -42,17 +42,17 @@ The official documentation for setting up an External Access Method (EAM) can be
 
 The general flow is:
 
-1. Register an enterprise application/application in Azure AD.
-    1. The application will be used to store the redirect URIs.
+1. Register an enterprise application/application in Entra ID.
+    1. The application will be used to store key OIDC URIs as SPA Redirect URIs.
     2. The enterprise application will be used to enforce MFA by a Conditional Access Policy.
 2. Register an OIDC client in the VO platform.
-    1. The client ID will be used in the EAM configuration.
+    1. The client ID will be used in the EAM OIDC configuration.
     2. The redirect URI allows the VO platform to redirect back to the EAM.
 3. Register an authentication method in Entra ID.
     1. An external authentication method is created with the OIDC configuration.
-    2. The client ID, discovery endpoint, and app ID are used to
+    2. The client ID, discovery endpoint, and app ID are used to link the EAM to the OIDC client and enterprise application.
 
-Whilst the Microsoft documentation is comprehensive, it can be a little overwhelming. To help the following additional information is provided.
+Whilst the Microsoft documentation is comprehensive, it can be a little overwhelming. To help the following additional information below is provided.
 
 ### Entra ID - Application Registration
 
@@ -60,7 +60,7 @@ Single Page Applications (SPAs) Redirect URIs should be set to the following:
 
 1. <code><EntraAppRedirectAuth /></code>
 2. <code><EntraAppRedirectOidcMeta /></code>
-3. <code>%Your tenant url%</code> <Help>(which will be something like `https://{tenant name}.onmicrosoft.com`)</Help>
+3. <code>%Your tenant url%</code> <Help>(which should resemble the format of `https://{tenant name}.onmicrosoft.com`)</Help>
 
 ![SPAs Redirect URIs](../../../static/img/eam-app-redirects.png)
 
@@ -93,7 +93,7 @@ One of the following URIs must be used as the `Redirect URI`, but depending on t
 
 ### Entra ID - Authentication methods
 
-When setting up the authentication method, you will be asked for these important details:
+When setting up the authentication method, the following important details are required:
 
 1. Client ID
     1. The client ID of the Authentication Client registered in Orchestrator.
