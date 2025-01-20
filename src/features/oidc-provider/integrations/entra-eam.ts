@@ -211,23 +211,35 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
     return next()
   })
 
-  // Save the EAM sub and state to the interaction data
-  provider.on('interaction.started', async (ctx) => {
-    const { oidc } = ctx
+  // Override the authorization -> interactions pipeline step to save the EAM sub and state to the interaction data
+  wrapOidcPipelineStep(provider, 'authorization', ['POST'], 'interactions', async (ctx, next, original) => {
+    const { oidc } = ctx as RouterContext & { oidc: OIDCContext }
+    const { errors } = await oidcProviderModule()
 
-    invariant(oidc.params, 'Params not found post interaction.started event')
-    invariant(oidc.client, 'Client not found post interaction.started event')
+    if (!oidc.client?.clientId) {
+      logger.error(`Client ID not found in the OIDC context`, { params: extractLoggable(oidc.params!) })
+      throw new errors.InvalidClient('Client not found')
+    }
 
-    // Is this an EAM request?
-    if (!isEamRequest(oidc.params, oidc.client.clientId)) {
+    // Don't intercept non-EAM requests
+    if (!isEamRequest(oidc.params!, oidc.client.clientId)) {
+      return original(ctx, next)
+    }
+
+    // This intercept is a special case, because the provider doesn't call next if the interaction is started
+    await original(ctx, next)
+
+    // Started interactions will redirect, so if we're not redirecting, we should not apply the custom logic
+    if (ctx.response.status !== 303) {
+      logger.warn(`Interactions pipeline step did not redirect`, { params: extractLoggable(oidc.params!) })
       return
     }
 
-    invariant(oidc.entities.Interaction, 'Interaction entity not found post interaction.started event during EAM auth flow')
+    invariant(oidc.entities.Interaction, 'Interaction entity not found post interactions during EAM auth flow')
     const interactionData = await getLoginInteractionData(oidc.entities.Interaction.uid)
     if (interactionData) invariant(interactionData.state !== 'pre-start', 'Interaction data was in an incorrect state for EAM auth flow')
 
-    invariant(oidc.entities.IdTokenHint, 'IdTokenHint entity not found post interaction.started event during EAM auth flow')
+    invariant(oidc.entities.IdTokenHint, 'IdTokenHint entity not found post interactions event during EAM auth flow')
     const objectId = (oidc.entities.IdTokenHint.payload.oid as string | undefined) ?? ''
     const tenantId = (oidc.entities.IdTokenHint.payload.tid as string | undefined) ?? ''
 
@@ -238,6 +250,8 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
         issuer: tenantId,
       },
     })
+
+    invariant(oidc.params, 'Params not found post interactions')
 
     await setLoginInteractionData({
       ...(interactionData ?? {}),
