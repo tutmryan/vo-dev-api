@@ -90,7 +90,7 @@ export const wrapOidcPipelineStep = (
   invariant(routes.length > 0, `Cannot hook to apply custom spec - No routes found for action '${action}'.`)
 
   for (const route of routes) {
-    const indexOfStep = route.stack.findIndex((m) => m.name === step)
+    const indexOfStep = route.stack.findIndex((m) => m.name === step || m.name === `bound ${step}`)
     const originalStep = route.stack[indexOfStep]
 
     invariant(originalStep, `Cannot hook to apply custom spec - Step '${step}' not found in route.`)
