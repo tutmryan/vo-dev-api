@@ -12,6 +12,21 @@ An external authentication method (EAM) lets users choose an external provider t
 
 When using EAM with a tenant other than your home tenant, the Verified Orchestration (VO) platform must know about it. For more information, see [additional tenant IDs](/docs/guides/instance-configuration#additional-tenant-ids).
 
+:::warning[Caution]
+
+If the tenant ID isn't known during, the following error will be displayed to the user by Microsoft.
+
+```
+Cannot complete external authentication: provider returned 'invalid_request' error.
+```
+<details>
+  <summary>View</summary>
+  <ImgBorder>
+    ![Conditional Access Policy](../../../static/img/eam-auth-flow-unknown-tenant-id.png)
+  </ImgBorder>
+</details>
+:::
+
 ### Identities
 
 When using EAM, the user's identity is unknown to the VO platform. Therefore, the user's identity must be resolved to an identity known by the platform. The identity resolution happens by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra ID during the authentication process. See [Entra ID user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-id-user) for more information.
@@ -23,9 +38,12 @@ If the user's identity cannot be resolved during an EAM MFA authentication flow,
 ```
 Cannot complete external authentication: provider returned 'access_denied' error.
 ```
-<ImgBorder>
-  ![Conditional Access Policy](../../../static/img/eam-auth-flow-unmatched-identity-error.png)
-</ImgBorder>
+<details>
+  <summary>View</summary>
+  <ImgBorder>
+    ![Conditional Access Policy](../../../static/img/eam-auth-flow-unmatched-identity-error.png)
+  </ImgBorder>
+</details>
 :::
 
 ### Credentials
