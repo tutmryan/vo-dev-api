@@ -2,7 +2,7 @@
 
 This guide will walk you through the steps to test the Entra ID External Authentication Method (EAM) with the VO platform.
 
-⚠️ For **local development**, please refer to the guide in the main [readme](../../README.md).
+⚠️ For **local development**, please refer to the guide in the main [readme](../../README.md#using-entra-id-eam-with-the-vo-oidc-provider-locally).
 
 ## VO Development Environment
 
