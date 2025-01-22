@@ -267,7 +267,7 @@ export async function completeLogin(
   const { issuanceId, photo, ...claims } = allClaims
 
   // Integrations hooks
-  let accountId = whenEamGetAccountId(interactionData)
+  let accountId = whenEamGetAccountId(interactionData, credential)
 
   if (!accountId) {
     accountId = await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)

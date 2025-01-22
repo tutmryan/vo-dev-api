@@ -5,14 +5,16 @@ import { createRemoteJWKSet, decodeJwt, decodeProtectedHeader, jwtVerify } from 
 import type { Configuration, OIDCContext, UnknownObject, Provider } from 'oidc-provider'
 import { eamFriendlyTenants } from '../../../config'
 import { dataSource } from '../../../data'
-import type { ClaimConstraint } from '../../../generated/graphql'
+import type { ClaimConstraint, PresentedCredential } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
+import { compareIgnoreCase } from '../../../util/string'
 import { throwError } from '../../../util/throw-error'
+import { StandardClaims } from '../../contracts/claims'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { paramsToAuthParamsSpec, wrapOidcPipelineStep } from '../integration-hook'
 import { oauthErrors } from '../oauth'
-import { getData, oidcProviderModule } from '../provider'
+import { oidcProviderModule } from '../provider'
 import type { LoginInteractionData } from '../session'
 import { getLoginInteractionData, setLoginInteractionData } from '../session'
 
@@ -69,15 +71,20 @@ export function whenEamAddPresentationConstraints(loginData?: LoginInteractionDa
   return [
     ...(constraints ?? []),
     {
-      claimName: 'identityId',
+      claimName: StandardClaims.identityId,
       values: [loginData.integrations.entraEam.identityId],
     },
   ]
 }
 
-export function whenEamGetAccountId(loginData?: LoginInteractionData) {
+export function whenEamGetAccountId(loginData: LoginInteractionData, credential: PresentedCredential) {
   // Ignore non-EAM requests
-  if (!loginData?.integrations?.entraEam) return undefined
+  if (!loginData.integrations?.entraEam) return undefined
+
+  invariant(
+    compareIgnoreCase(credential.claims[StandardClaims.identityId], loginData.integrations.entraEam.identityId),
+    'Identity ID mismatch during EAM account ID check',
+  )
 
   return loginData.integrations.entraEam.sub
 }
@@ -135,7 +142,7 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
 
   // As this token wasn't issued by the client (us), the aud should not match the client ID
   // MS Docs say the value they send is the client ID registered in EAM, which is actually the spec (if we had issued it). However, the App ID registered for EAM is supplied in practice.
-  if (decodedIdTokenHint.aud === clientId) return false
+  if (compareIgnoreCase(decodedIdTokenHint.aud, clientId)) return false
 
   // It is extremely unlikely that this is not an EAM request at this point. And if it isn't, it's an invalid request so breaking it by assuming it is EAM is fine
   return true
@@ -148,7 +155,6 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
   // Override the authorization -> checkIdTokenHint pipeline step to apply custom logic for EAM requests
   wrapOidcPipelineStep(provider, 'authorization', ['POST'], 'checkIdTokenHint', async (ctx, next, original) => {
     const { oidc } = ctx as RouterContext & { oidc: OIDCContext }
-    const { clients } = getData()
     const { errors } = await oidcProviderModule()
 
     if (!oidc.client?.clientId) {
@@ -156,16 +162,8 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
       throw new errors.InvalidClient('Client not found')
     }
 
-    const clientId = oidc.client.clientId.toLowerCase()
-    const client = clients.find((c) => c.id.toLowerCase() === clientId)
-
-    if (!client) {
-      logger.error(`Client ID could not be matched to a known client`, { params: extractLoggable(oidc.params!) })
-      throw new errors.InvalidClient('Client not found')
-    }
-
     // Don't intercept non-EAM requests
-    if (!isEamRequest(oidc.params!, clientId)) {
+    if (!isEamRequest(oidc.params!, oidc.client.clientId)) {
       return original(ctx, next)
     }
 
