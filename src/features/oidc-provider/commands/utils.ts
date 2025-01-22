@@ -10,7 +10,9 @@ export function systemResourceInvariant(resourceId: string) {
 }
 
 export function validateUris(type: 'redirect' | 'log out', uris: Array<string | URL>) {
-  invariant(uris.length > 0, `At least one ${type} URI is required`)
+  if (type === 'redirect') {
+    invariant(uris.length > 0, `At least one ${type} URI is required`)
+  }
 
   uris.forEach((uri) => {
     const protocol = typeof uri === 'string' ? new URL(uri).protocol : uri.protocol
