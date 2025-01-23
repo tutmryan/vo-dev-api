@@ -11,12 +11,27 @@ import { UpdateAsyncIssuanceContactCommand } from './commands/update-async-issua
 import { FindAsyncIssuanceContactQuery } from './queries/async-issuance-contact-query'
 import { FindAsyncIssuancesQuery } from './queries/find-async-issuances-query'
 
-const resolvePhotoCapture: Required<Resolvers>['AsyncIssuanceRequest']['photoCapture'] = async (parent, _, { services }) => {
-  if (parent.status !== AsyncIssuanceRequestStatus.Pending) return null
-  const data = await services.asyncIssuances.downloadAsyncIssuance(parent.id, parent.expiry)
+const resolvePhotoCapture: Required<Resolvers>['AsyncIssuanceRequest']['photoCapture'] = async (
+  { status, id, expiry },
+  _,
+  { dataLoaders: { asyncIssuanceContact } },
+) => {
+  if (status !== AsyncIssuanceRequestStatus.Pending) return null
+  const data = await asyncIssuanceContact.load({ id, expiry })
   const value = data?.photoCapture
   if (value === undefined) return null
   return value
+}
+
+const resolveHasContactFieldSet: (
+  contactField: 'notification' | 'verification',
+) => Required<Resolvers>['AsyncIssuanceRequest']['hasContactNotificationSet'] = (contactField) => {
+  return async ({ status, id, expiry }, _, { dataLoaders: { asyncIssuanceContact } }) => {
+    if (status !== AsyncIssuanceRequestStatus.Pending) return null
+    const data = await asyncIssuanceContact.load({ id, expiry })
+    const field = data?.contact?.[contactField]
+    return !!field?.method && !!field.value
+  }
 }
 
 export const resolvers: Resolvers = {
@@ -47,6 +62,8 @@ export const resolvers: Resolvers = {
     issuance: async (parent, _, { dataLoaders }) => (parent.issuanceId ? dataLoaders.issuances.load(parent.issuanceId) : null),
     ...createdByUpdatedBy,
     photoCapture: resolvePhotoCapture,
+    hasContactNotificationSet: resolveHasContactFieldSet('notification'),
+    hasContactVerificationSet: resolveHasContactFieldSet('verification'),
   },
   AsyncIssuanceRequestResponse: {
     __resolveType: (response) => ('errors' in response ? 'AsyncIssuanceErrorResponse' : 'AsyncIssuanceResponse'),

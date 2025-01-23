@@ -68,16 +68,12 @@ Input defining an async issuance issuee contact information.
 """
 input AsyncIssuanceContactInput {
   """
-  How the notification should be sent.
+  How the issuance notification should be sent. When not set, no issuance notification is sent.
   """
-  notification: ContactInput!
+  notification: ContactInput
 
   """
-  How the verification should be sent.
-
-  Items to note:
-
-  - _Optional:_ When no verification contact is set, the notification contact information is used for verification.
+  How the OTP verification code should be sent. When not set, the async issuance can *only* be redeemed by signing-in to the Concierge with an existing credential.
   """
   verification: ContactInput
 }
@@ -87,16 +83,12 @@ An async issuance issuee contact information.
 """ # eslint-disable-next-line @graphql-eslint/strict-id-in-types
 type AsyncIssuanceContact {
   """
-  How the notification will be sent.
+  How the issuance notification should be sent. When not set, no issuance notification is sent.
   """
-  notification: Contact!
+  notification: Contact
 
   """
-  How the verification will be sent.
-
-  Items to note:
-
-  - _Optional:_ When no verification contact is set, the notification contact information is used for verification.
+  How the OTP verification code should be sent. When not set, the async issuance can *only* be redeemed by signing-in to the Concierge with an existing credential.
   """
   verification: Contact
 }
@@ -106,9 +98,9 @@ Represents the input required for creating an async issuance request.
 """
 input AsyncIssuanceRequestInput {
   """
-  The issuee's contact information.
+  The issuee's contact information for notification and OTP verification. When not set, no issuance notification is sent and the issuance can *only* be redeemed by signing-in to the Concierge with an existing credential.
   """
-  contact: AsyncIssuanceContactInput!
+  contact: AsyncIssuanceContactInput
 
   """
   The point in the future which the issuees can no longer complete the issuance process.
@@ -282,7 +274,7 @@ extend type Mutation {
 
   - Information can only be updated when the async issuance request is pending.
   """
-  updateAsyncIssuanceContact(asyncIssuanceRequestId: UUID!, contact: AsyncIssuanceContactInput!): AsyncIssuanceContact!
+  updateAsyncIssuanceContact(asyncIssuanceRequestId: UUID!, contact: AsyncIssuanceContactInput): AsyncIssuanceContact
   """
   Cancel one or more async issuance requests.
 
@@ -404,9 +396,29 @@ type AsyncIssuanceRequest {
   Items of note:
 
   - This field will only return a value while the issuance is pending.
-  - This field is relatively expensive to query and should only be queried for single or small numbers of async issuance requests, to determine issuance requirements.
+  - This field value is derived from contact data, therefore is relatively expensive to query and can only be queried for single async issuance request at a time.
   """
   photoCapture: Boolean
+
+  """
+  Indicates whether this async issuance request has contact notification details set, indicating whether issuance notifications will be sent.
+
+  Items of note:
+
+  - This field will only return a value while the issuance is pending.
+  - This field value is derived from contact data, therefore is relatively expensive to query and can only be queried for single async issuance request at a time.
+  """
+  hasContactNotificationSet: Boolean
+
+  """
+  Indicates whether this async issuance request has contact verification details set, indicating whether issuance via OTP verification is supported.
+
+  Items of note:
+
+  - This field will only return a value while the issuance is pending.
+  - This field value is derived from contact data, therefore is relatively expensive to query and can only be queried for single async issuance request at a time.
+  """
+  hasContactVerificationSet: Boolean
 
   """
   The user who created the async issuance request.
@@ -546,7 +558,7 @@ extend type Query {
   - Returns PII information about the issuee. Use with caution. Intended for verification of async issuance requests by admins only.
   - If the async issuance has been issued, or has expired, this information is no longer available.
   """
-  asyncIssuanceContact(asyncIssuanceRequestId: UUID!): AsyncIssuanceContact!
+  asyncIssuanceContact(asyncIssuanceRequestId: UUID!): AsyncIssuanceContact
 }
 
 extend type Identity {

@@ -3,8 +3,8 @@ sidebar_position: 11
 ---
 
 import ThemedImage from '@theme/ThemedImage'
-import { AdminUrl } from '@site/src/components/admin-url'
-import { ApiUrl } from '@site/src/components/api-url'
+import { AdminLink } from '@site/src/components/admin-link'
+import { ApiLink } from '@site/src/components/api-link'
 
 # Authentication
 
@@ -29,11 +29,13 @@ This feature supports:
 
 To administer authentication, you must be granted access to user role `VerifiableCredential.OidcAdmin`.
 
-The <AdminUrl path='/oidc'>Composer authentication page</AdminUrl> displays the:
+The <AdminLink path='/oidc'>Composer authentication page</AdminLink> displays the:
 
 1. OpenID Connect provider details:
+
 - Authority URL
 - Discovery URL
+
 1. List of authentication clients
 1. List of resources
 
@@ -41,7 +43,7 @@ The <AdminUrl path='/oidc'>Composer authentication page</AdminUrl> displays the:
 
 Each application that requires authentication needs an authentication client.
 
-1. Navigate to the <AdminUrl path='/oidc'>Composer authentication page</AdminUrl>.
+1. Navigate to the <AdminLink path='/oidc'>Composer authentication page</AdminLink>.
 1. Click the **Add** button above the client list.
 1. Type a **Name** for the client. This name is shown to users when they sign-in and sign-out.
 1. Type one or more **Redirect URIs** the client is allowed to use.
@@ -146,7 +148,7 @@ Resources can be defined with scopes to control access from clients. This provid
 
 ### Add a resource
 
-1. Navigate to the <AdminUrl path='/oidc'>Composer authentication page</AdminUrl>.
+1. Navigate to the <AdminLink path='/oidc'>Composer authentication page</AdminLink>.
 1. Click the **Add** button above the resource list.
 1. Type a **Name** for the resource.
 1. Type the **Redirect indicator URI**.
@@ -154,7 +156,7 @@ Resources can be defined with scopes to control access from clients. This provid
 
 ### Configure client resource access
 
-1. Navigate to the <AdminUrl path='/oidc'>Composer authentication page</AdminUrl>.
+1. Navigate to the <AdminLink path='/oidc'>Composer authentication page</AdminLink>.
 1. Click the **Details** button for the client you want to configure.
 1. Click the **Add resource** button.
 1. Select the **Resource** you want to add.
@@ -197,7 +199,7 @@ This demo shows how to set up resources, configure access for a client and obtai
 
 Claims are organised by scopes, which are used to request specific information about the credential presentation.
 
-The full list of scopes is available from the <ApiUrl path="/oidc/.well-known/openid-configuration">OpenID discovery document</ApiUrl>.
+The full list of scopes is available from the <ApiLink path="/oidc/.well-known/openid-configuration">OpenID discovery document</ApiLink>.
 
 The Verified Orchestration OIDC provider supports standard scopes: `openid`, `profile`, `email`\* and `offline_access`.
 
@@ -247,7 +249,7 @@ You have the option to customize the appearance of your authentication client to
 
 ### How to customize
 
-1. Navigate to the <AdminUrl path='/oidc'>Composer authentication page</AdminUrl>.
+1. Navigate to the <AdminLink path='/oidc'>Composer authentication page</AdminLink>.
 1. Select the client you want to customize and click the **Details** button.
 1. Click the **Edit** button.
 1. Choose a **Background Color** and upload a **Background Image**.

@@ -27,7 +27,12 @@ export async function SendAsyncIssuanceVerificationCommand(
   // load async issuance data
   const asyncIssuanceRequest = await asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, asyncIssuanceEntity.expiry)
   invariant(asyncIssuanceRequest, 'Failed to download async issuance details')
-  const verification = asyncIssuanceRequest.contact.verification ?? asyncIssuanceRequest.contact.notification
+
+  // validate verification info
+  const verification = asyncIssuanceRequest.contact?.verification
+
+  // no verification set
+  if (!verification) return { method: null }
 
   // atomic check & set throttle, to prevent race conditions
   const isThrottled = await isThrottledOrSetThrottle(asyncIssuanceRequestId)

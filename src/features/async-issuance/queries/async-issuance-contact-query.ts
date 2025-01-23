@@ -14,5 +14,5 @@ export async function FindAsyncIssuanceContactQuery(this: QueryContext, asyncIss
   const asyncIssuance = await asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, asyncIssuanceEntity.expiry)
   invariant(asyncIssuance, 'Async issuance data was not found')
 
-  return asyncIssuance.contact
+  return asyncIssuance.contact ?? null
 }

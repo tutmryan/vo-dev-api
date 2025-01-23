@@ -1,5 +1,5 @@
-import { ApiUrl } from '@site/src/components/api-url'
-import { AdminUrl } from '@site/src/components/admin-url'
+import { ApiLink } from '@site/src/components/api-link'
+import { AdminLink } from '@site/src/components/admin-link'
 import { RenderIf } from '@site/src/components/render-if'
 
 # Application integration
@@ -26,7 +26,7 @@ Apollo Sandbox is a GraphQL IDE that enables you to explore the Verified Orchest
 
 You will need to be [onboarded as a platform user](../onboarding-users.mdx) to access Apollo Sandbox and the API.
 
-<ApiUrl>Access Apollo Sandbox here</ApiUrl>
+<ApiLink>Access Apollo Sandbox here</ApiLink>
 
 #### Basic Apollo Sandbox usage
 
@@ -46,7 +46,7 @@ Query and Mutation operations work _out of the box_ through cookie authenticatio
 
 To use subscription connections, which do not include cookies, you need to provide an Authorization header for the subscription operation.
 
-1. Copy an Authorization header value from the <AdminUrl>Composer</AdminUrl> using your browser dev tools
+1. Copy an Authorization header value from the <AdminLink>Composer</AdminLink> using your browser dev tools
 1. Insert the Authorization header into the **Headers** section in Apollo Sandbox
 
 You can now subscribe to events and see event data. Typically, an access token is valid for approximately 50 minutes, subject to your tenant configuration.
@@ -57,5 +57,5 @@ You can now subscribe to events and see event data. Typically, an access token i
 
 Voyager is a visualisation tool for GraphQL APIs, ideal for exploring the schema and discerning relationships between types.
 
-<ApiUrl path="/voyager">Access Voyager here</ApiUrl>
+<ApiLink path="/voyager">Access Voyager here</ApiLink>
 </RenderIf>

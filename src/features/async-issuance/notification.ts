@@ -25,12 +25,14 @@ export async function sendAsyncIssuanceNotification(
   // download the async issuance request data
   const request = await asyncIssuances.downloadAsyncIssuance(requestId, entity.expiry)
   invariant(request, 'Async issuance request data not found')
-  const { notification } = request.contact
+
+  // check for notification info, if none is configured, return
+  const notification = request.contact?.notification
+  if (!notification) return entity
 
   // generate the issuance URL
-  const issuanceUrl = `${portalUrl}/issuance/${requestId}`
-
-  const verificationMethod = request.contact.verification?.method ?? request.contact.notification.method
+  const useOtpVerification = !!request.contact?.verification
+  const issuanceUrl = useOtpVerification ? `${portalUrl}/issuance/${requestId}` : `${portalUrl}/issue/${requestId}`
 
   // send issuance notification + update entity state
   const data: IssuanceCommunicationData = {
@@ -43,7 +45,11 @@ export async function sendAsyncIssuanceNotification(
     expiry: startCase(entity.expiry).toLowerCase(),
     identityName: (await entity.identity).name,
     issuer: contract.display.card.issuedBy,
-    verificationMethod: verificationMethod === ContactMethod.Sms ? 'SMS' : 'email',
+    verificationMethod: !request.contact?.verification
+      ? 'none'
+      : request.contact.verification.method === ContactMethod.Email
+        ? 'email'
+        : 'SMS',
   }
 
   await communications.sendIssuance(notification.value, data, entityManager)

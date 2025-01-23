@@ -20,9 +20,9 @@ The response for sending an async issuance verification code.
 """ # eslint-disable-next-line @graphql-eslint/strict-id-in-types
 type SendAsyncIssuanceVerificationResponse {
   """
-  The method by which the verification code was sent.
+  The method by which the verification code was sent, or `null` if verification is not set (the async issuance can *only* be redeemed by signing in to the Concierge with an existing credential credential authentication).
   """
-  method: ContactMethod!
+  method: ContactMethod
 }
 
 extend type Mutation {

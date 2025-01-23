@@ -169,7 +169,7 @@ export const dispatchWithoutContext = async <T extends CommandLike>(
 
 const augmentContext = (context: BaseContext) => {
   const services = createServices(context)
-  const dataLoaders = createDataLoaders()
+  const dataLoaders = createDataLoaders(services)
   return { services, dataSource, dataLoaders }
 }
 

@@ -273,29 +273,17 @@ export type ApprovalTokenResponse = {
 /** An async issuance issuee contact information. */
 export type AsyncIssuanceContact = {
   __typename?: 'AsyncIssuanceContact';
-  /** How the notification will be sent. */
-  notification: Contact;
-  /**
-   * How the verification will be sent.
-   *
-   * Items to note:
-   *
-   * - _Optional:_ When no verification contact is set, the notification contact information is used for verification.
-   */
+  /** How the issuance notification should be sent. When not set, no issuance notification is sent. */
+  notification?: Maybe<Contact>;
+  /** How the OTP verification code should be sent. When not set, the async issuance can *only* be redeemed by signing-in to the Concierge with an existing credential. */
   verification?: Maybe<Contact>;
 };
 
 /** Input defining an async issuance issuee contact information. */
 export type AsyncIssuanceContactInput = {
-  /** How the notification should be sent. */
-  notification: ContactInput;
-  /**
-   * How the verification should be sent.
-   *
-   * Items to note:
-   *
-   * - _Optional:_ When no verification contact is set, the notification contact information is used for verification.
-   */
+  /** How the issuance notification should be sent. When not set, no issuance notification is sent. */
+  notification?: InputMaybe<ContactInput>;
+  /** How the OTP verification code should be sent. When not set, the async issuance can *only* be redeemed by signing-in to the Concierge with an existing credential. */
   verification?: InputMaybe<ContactInput>;
 };
 
@@ -342,6 +330,24 @@ export type AsyncIssuanceRequest = {
    * - The reason is only available when the status is `failed`.
    */
   failureReason?: Maybe<Scalars['String']['output']>;
+  /**
+   * Indicates whether this async issuance request has contact notification details set, indicating whether issuance notifications will be sent.
+   *
+   * Items of note:
+   *
+   * - This field will only return a value while the issuance is pending.
+   * - This field value is derived from contact data, therefore is relatively expensive to query and can only be queried for single async issuance request at a time.
+   */
+  hasContactNotificationSet?: Maybe<Scalars['Boolean']['output']>;
+  /**
+   * Indicates whether this async issuance request has contact verification details set, indicating whether issuance via OTP verification is supported.
+   *
+   * Items of note:
+   *
+   * - This field will only return a value while the issuance is pending.
+   * - This field value is derived from contact data, therefore is relatively expensive to query and can only be queried for single async issuance request at a time.
+   */
+  hasContactVerificationSet?: Maybe<Scalars['Boolean']['output']>;
   /** The ID of the async issuance request. */
   id: Scalars['ID']['output'];
   /** The issuee identity */
@@ -368,7 +374,7 @@ export type AsyncIssuanceRequest = {
    * Items of note:
    *
    * - This field will only return a value while the issuance is pending.
-   * - This field is relatively expensive to query and should only be queried for single or small numbers of async issuance requests, to determine issuance requirements.
+   * - This field value is derived from contact data, therefore is relatively expensive to query and can only be queried for single async issuance request at a time.
    */
   photoCapture?: Maybe<Scalars['Boolean']['output']>;
   /** The status of the async issuance request. */
@@ -411,8 +417,8 @@ export type AsyncIssuanceRequestInput = {
    * - You must fulfill the contract claims definition. Review contract creation for more information.
    */
   claims?: InputMaybe<Scalars['JSONObject']['input']>;
-  /** The issuee's contact information. */
-  contact: AsyncIssuanceContactInput;
+  /** The issuee's contact information for notification and OTP verification. When not set, no issuance notification is sent and the issuance can *only* be redeemed by signing-in to the Concierge with an existing credential. */
+  contact?: InputMaybe<AsyncIssuanceContactInput>;
   /** The ID of the contract you wish to issue. */
   contractId: Scalars['UUID']['input'];
   /**
@@ -1246,9 +1252,9 @@ export type ContractWhere = {
   faceCheckSupport?: InputMaybe<FaceCheckPhotoSupport>;
   /** List only the contracts whose deprecation status matches the flag. */
   isDeprecated?: InputMaybe<Scalars['Boolean']['input']>;
-  /** List only contracts that are provisioned in the Verified Credentials Network. */
+  /** List only contracts that are or are not provisioned in the Verified Credentials Network. */
   isProvisioned?: InputMaybe<Scalars['Boolean']['input']>;
-  /** List only contracts that are published in the Verified Credentials Network. */
+  /** List only contracts that are or are not published in the Verified Credentials Network. */
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   /** List only contracts matching this name. */
   name?: InputMaybe<Scalars['String']['input']>;
@@ -2078,7 +2084,7 @@ export type Mutation = {
    *
    * - Information can only be updated when the async issuance request is pending.
    */
-  updateAsyncIssuanceContact: AsyncIssuanceContact;
+  updateAsyncIssuanceContact?: Maybe<AsyncIssuanceContact>;
   /** Updates an existing contract */
   updateContract: Contract;
   /** Updates an existing OIDC client */
@@ -2309,7 +2315,7 @@ export type MutationUpdateApprovalRequestArgs = {
 
 export type MutationUpdateAsyncIssuanceContactArgs = {
   asyncIssuanceRequestId: Scalars['UUID']['input'];
-  contact: AsyncIssuanceContactInput;
+  contact?: InputMaybe<AsyncIssuanceContactInput>;
 };
 
 
@@ -3048,7 +3054,7 @@ export type Query = {
    * - Returns PII information about the issuee. Use with caution. Intended for verification of async issuance requests by admins only.
    * - If the async issuance has been issued, or has expired, this information is no longer available.
    */
-  asyncIssuanceContact: AsyncIssuanceContact;
+  asyncIssuanceContact?: Maybe<AsyncIssuanceContact>;
   /** Returns an async issuance request by ID. */
   asyncIssuanceRequest: AsyncIssuanceRequest;
   /** Returns the details of the configured instance authority */
@@ -3540,8 +3546,8 @@ export type RequestedCredentialSpecificationInput = {
 /** The response for sending an async issuance verification code. */
 export type SendAsyncIssuanceVerificationResponse = {
   __typename?: 'SendAsyncIssuanceVerificationResponse';
-  /** The method by which the verification code was sent. */
-  method: ContactMethod;
+  /** The method by which the verification code was sent, or `null` if verification is not set (the async issuance can *only* be redeemed by signing in to the Concierge with an existing credential credential authentication). */
+  method?: Maybe<ContactMethod>;
 };
 
 export type Subscription = {
@@ -4014,7 +4020,7 @@ export type UpdateAsyncIssuanceContactMutationVariables = Exact<{
 }>;
 
 
-export type UpdateAsyncIssuanceContactMutation = { __typename?: 'Mutation', updateAsyncIssuanceContact: { __typename?: 'AsyncIssuanceContact', notification: { __typename?: 'Contact', value: string, method: ContactMethod }, verification?: { __typename?: 'Contact', value: string, method: ContactMethod } | null } };
+export type UpdateAsyncIssuanceContactMutation = { __typename?: 'Mutation', updateAsyncIssuanceContact?: { __typename?: 'AsyncIssuanceContact', notification?: { __typename?: 'Contact', value: string, method: ContactMethod } | null, verification?: { __typename?: 'Contact', value: string, method: ContactMethod } | null } | null };
 
 export type ContractFragmentFragment = { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> } };
 
@@ -4932,7 +4938,7 @@ export type ApprovalTokenResponseResolvers<ContextType = GraphQLContext, ParentT
 };
 
 export type AsyncIssuanceContactResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AsyncIssuanceContact'] = ResolversParentTypes['AsyncIssuanceContact']> = {
-  notification?: Resolver<ResolversTypes['Contact'], ParentType, ContextType>;
+  notification?: Resolver<Maybe<ResolversTypes['Contact']>, ParentType, ContextType>;
   verification?: Resolver<Maybe<ResolversTypes['Contact']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -4950,6 +4956,8 @@ export type AsyncIssuanceRequestResolvers<ContextType = GraphQLContext, ParentTy
   expiresOn?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   expiry?: Resolver<ResolversTypes['AsyncIssuanceRequestExpiry'], ParentType, ContextType>;
   failureReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  hasContactNotificationSet?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  hasContactVerificationSet?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
   isStatusFinal?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -5293,7 +5301,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
   sendAsyncIssuanceVerification?: Resolver<ResolversTypes['SendAsyncIssuanceVerificationResponse'], ParentType, ContextType, RequireFields<MutationSendAsyncIssuanceVerificationArgs, 'asyncIssuanceRequestId'>>;
   updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
-  updateAsyncIssuanceContact?: Resolver<ResolversTypes['AsyncIssuanceContact'], ParentType, ContextType, RequireFields<MutationUpdateAsyncIssuanceContactArgs, 'asyncIssuanceRequestId' | 'contact'>>;
+  updateAsyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<MutationUpdateAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
   updateOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientArgs, 'id' | 'input'>>;
   updateOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientResourceArgs, 'clientId' | 'input'>>;
@@ -5482,7 +5490,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   actionedApprovalData?: Resolver<Maybe<ResolversTypes['ActionedApprovalData']>, ParentType, ContextType, RequireFields<QueryActionedApprovalDataArgs, 'id'>>;
   approvalRequest?: Resolver<ResolversTypes['ApprovalRequest'], ParentType, ContextType, RequireFields<QueryApprovalRequestArgs, 'id'>>;
   approvalRequestTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-  asyncIssuanceContact?: Resolver<ResolversTypes['AsyncIssuanceContact'], ParentType, ContextType, RequireFields<QueryAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
+  asyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<QueryAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   asyncIssuanceRequest?: Resolver<ResolversTypes['AsyncIssuanceRequest'], ParentType, ContextType, RequireFields<QueryAsyncIssuanceRequestArgs, 'id'>>;
   authority?: Resolver<ResolversTypes['Authority'], ParentType, ContextType>;
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
@@ -5581,7 +5589,7 @@ export type RequestedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
 };
 
 export type SendAsyncIssuanceVerificationResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SendAsyncIssuanceVerificationResponse'] = ResolversParentTypes['SendAsyncIssuanceVerificationResponse']> = {
-  method?: Resolver<ResolversTypes['ContactMethod'], ParentType, ContextType>;
+  method?: Resolver<Maybe<ResolversTypes['ContactMethod']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

@@ -14,6 +14,7 @@ import type {
   AsyncIssuanceRequestInput,
   AsyncIssuanceResponse,
   IdentityInput,
+  Maybe,
 } from '../../../generated/graphql'
 import { ContactMethod, FaceCheckPhotoSupport } from '../../../generated/graphql'
 import { logger } from '../../../logger'
@@ -39,19 +40,21 @@ const invalidPhoneNumberMessage = (contactType: 'notification' | 'verification')
 
 const invalidEmailMessage = (contactType: 'notification' | 'verification') => `Email address for contact ${contactType} is invalid`
 
-function validateContact({ notification, verification }: AsyncIssuanceContactInput) {
-  if (notification.method === ContactMethod.Email) {
-    if (!isValidEmail(notification.value)) throw new Error(invalidEmailMessage('notification'))
-  } else {
-    if (!isValidPhoneNumber(notification.value)) throw new Error(invalidPhoneNumberMessage('notification'))
+function validateContact(contact?: Maybe<AsyncIssuanceContactInput>) {
+  if (!contact) return
+
+  const { notification, verification } = contact
+
+  if (notification) {
+    if (notification.method === ContactMethod.Email) {
+      if (!isValidEmail(notification.value)) throw new Error(invalidEmailMessage('notification'))
+    } else if (!isValidPhoneNumber(notification.value)) throw new Error(invalidPhoneNumberMessage('notification'))
   }
 
-  if (!verification) return
-
-  if (verification.method === ContactMethod.Email) {
-    if (!isValidEmail(verification.value)) throw new Error(invalidEmailMessage('verification'))
-  } else {
-    if (!isValidPhoneNumber(verification.value)) throw new Error(invalidPhoneNumberMessage('verification'))
+  if (verification) {
+    if (verification.method === ContactMethod.Email) {
+      if (!isValidEmail(verification.value)) throw new Error(invalidEmailMessage('verification'))
+    } else if (!isValidPhoneNumber(verification.value)) throw new Error(invalidPhoneNumberMessage('verification'))
   }
 }
 

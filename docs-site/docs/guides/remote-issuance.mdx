@@ -3,15 +3,34 @@ sidebar_position: 7
 ---
 
 import ThemedImage from '@theme/ThemedImage'
-import { AdminUrl } from '@site/src/components/admin-url'
+import { AdminLink } from '@site/src/components/admin-link'
+import { PortalLink } from '@site/src/components/portal-link'
+import { PortalUrl } from '@site/src/components/portal-url'
 
 # Remote issuance
 
 Remote issuance allows you to issue credentials to recipients who are not present at the time of issuance.
 
-The issuance flow is as follows:
+:::tip
+Remote issuance is easier to implement than in-person issuance, since no user-interface is required. If you want control over the issuance process and user interface, use [in-person issuance](/docs/guides/issuance).
+:::
 
-- The recipient receives an email or SMS containing a link to receive the credential via the Verified Orchestration Concierge website.
+## Verification options
+
+Described below are the two methods by which the recipient can accept remote issuances:
+
+1. [Verifying using a one-time passcode (OTP) sent via SMS or email](#otp-verification)
+1. [Signing in to the Concierge using an existing active credential](#concierge-sign-in-verification)
+
+:::note
+Signing in to the Concierge is the recommended method for recipients who already have an active credential. This method is easier for the issuer (verification SMS or email is not required) and provides a good user experience.
+:::
+
+### OTP verification
+
+The OTP issuance flow is as follows:
+
+- The recipient receives an email or SMS containing a link to accept the credential via the Verified Orchestration Concierge website.
 - The recipient opens the link and is verified by an SMS or email as second-factor authentication via an OTP (one-time passcode).
   - _If the recipient is not verified, the issuance is not completed_
 - Optionally, a guided photo-capture flow is used to capture a photo of the recipient for credential presentation in combination with Face Check.
@@ -19,10 +38,6 @@ The issuance flow is as follows:
   - _On a desktop, the recipient is prompted to scan the QR code to complete the issuance on their mobile device._
   - _On a mobile device, the wallet is opened via a deep link, and recipient is prompted to save their verifiable credential._
     - _If the recipient does not have a wallet, they will be prompted to install the Microsoft Authenticator app._
-
-:::note
-A verifiable credential with Face Check requires presentation via the Microsoft Authenticator app and will not work with other wallet apps.
-:::
 
 <ThemedImage
   alt="remote issuance interaction diagram"
@@ -32,9 +47,42 @@ A verifiable credential with Face Check requires presentation via the Microsoft 
   }}
 />
 
-:::info
-Remote issuance is easier to implement than in-person issuance, since no user-interface is required. If you want control over the issuance process and user interface, use [in-person issuance](/docs/guides/issuance).
-:::
+### Concierge sign-in verification
+
+The Concierge sign-in issuance flow is as follows:
+
+- The recipient receives an email or SMS containing a link to accept the credential via the Verified Orchestration Concierge website.
+- The receipient opens the link, if not already signed-in to the Concierge, they are prompted to sign-in.
+- Optionally, a guided photo-capture flow is used to capture a photo of the recipient for credential presentation in combination with Face Check.
+- The recipient adds the credential to their wallet.
+  - _On a desktop, the recipient is prompted to scan the QR code to complete the issuance on their mobile device._
+  - _On a mobile device, the wallet is opened via a deep link, and recipient is prompted to save their verifiable credential._
+    - _If the recipient does not have a wallet, they will be prompted to install the Microsoft Authenticator app._
+
+Alternatively, the recipient can <PortalLink target="_blank">sign in to the Concierge</PortalLink> and see all pending issuances at the top of their home page. They can select each pending issuance to accept the credential.
+
+<ThemedImage
+  alt="remote issuance via concierge interaction diagram"
+  sources={{
+    light: '/img/remote-issuance-concierge.svg',
+    dark: '/img/remote-issuance-concierge-dark.svg',
+  }}
+/>
+
+## Notification options
+
+The Verified Orchestration platform can send a notification to the recipient via email or SMS. The recipient will receive a link to complete the issuance.
+
+If you prefer to send your own notification, you can include a link directly for the applicable issuance flow in your own email or SMS (see [issuance URLs](#issuance-urls)).
+
+### Issuance URLs
+
+Issuance URLs for the two verification methods are as follows, where the `$issuanceId` is the ID of the remote issuance:
+
+- OTP verification: <PortalUrl />/issuance/$issuanceId
+- Concierge sign-in verification: <PortalUrl />/issue/$issuanceId
+
+Alternatively, issuees can sign in to the Concierge and see all pending issuances at the top of their home page. They can click or tap on each pending issuance to accept the credential.
 
 ## Bulk remote issuance
 
@@ -86,28 +134,28 @@ Each row represents a single [async issuance request](/docs/reference/types/inpu
       <td>Name of the identity</td>
     </tr>
     <tr>
-      <td>Notification Method (email | sms)</td>
+      <td>(Optional) Notification Method (email | sms)</td>
       <td>
         [AsyncIssuanceRequestInput.contact.notification.method](/docs/reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputnotificationcontactinput--)
       </td>
       <td>["email" or "sms"](/docs/reference/types/enums/contact-method)</td>
     </tr>
     <tr>
-      <td>Notification Value</td>
+      <td>(Optional) Notification Value</td>
       <td>
         [AsyncIssuanceRequestInput.contact.notification.value](/docs/reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputnotificationcontactinput--)
       </td>
       <td>Email or phone number for notification of issuance</td>
     </tr>
     <tr>
-      <td>Verification Method (email | sms)</td>
+      <td>(Optional) Verification Method (email | sms)</td>
       <td>
         [AsyncIssuanceRequestInput.contact.verification.method](/docs/reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputverificationcontactinput-)
       </td>
       <td>["email" or "sms"](/docs/reference/types/enums/contact-method)</td>
     </tr>
     <tr>
-      <td>Verification Value</td>
+      <td>(Optional) Verification Value</td>
       <td>
         [AsyncIssuanceRequestInput.contact.verification.value](/docs/reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputverificationcontactinput-)
       </td>
@@ -141,20 +189,20 @@ Each row represents a single [async issuance request](/docs/reference/types/inpu
 </table>
 
 :::note
-"(Optional)" prefix means the column is not required and will fallback to a default value if left blank.
+"(Optional)" prefix means the column is not required.
 :::
 
 ## Create remote issuance request
 
 :::tip
-To create a remote issuance request definition and explore the API, use the <AdminUrl path="/issuance-builder">issuance builder</AdminUrl> and select 'Remote' as the 'Delivery method' option, as a starting point.
+To create a remote issuance request definition and explore the API, use the <AdminLink path="/issuance-builder">issuance builder</AdminLink> and select 'Remote' as the 'Delivery method' option, as a starting point.
 :::
 
 The [async issuance request input](/docs/reference/types/inputs/async-issuance-request-input) specifies:
 
 1. Which credential will be issued.
 1. The identity to whom the credential will be issued (recipient / issuee).
-1. The contact details of the recipient for notifications and verification during the issuance flow.
+1. The contact details of the recipient for notifications and verification (both optional) during the issuance flow.
 1. The values of any claims defined by the contract.
 1. The expiration of the remote issuance (not the credential), after which the issuance cannot be completed.
 1. Other optional input:
@@ -231,12 +279,12 @@ If there are validation errors, the response will contain a list of the errors. 
 
 ## Remote issuance completion process
 
-Once the remote issuance is created, the notification email or SMS will be sent to the recipient including a link to complete the issuance.
+Once the remote issuance is created, if notification details are set, the notification email or SMS will be sent to the recipient including a link to complete the issuance.
 
 The issuance link can be opened on a desktop or on a mobile device. Regardless of the method, the recipient will need a mobile device with a wallet or Microsoft Authenticator installed to complete the issuance.
 
-- The recipient opens the issuance link sent as part of the notification.
-- They then are prompted to enter a verification code that was sent via SMS or email (The method will depend on the supplied contact details at the time of creation).
+- The recipient opens the issuance link.
+- They are prompted either to enter a one-time passcode (OTP) or to sign in to the Concierge.
 - If photo capture was requested at time of creation, the recipient will be guided to capture a photo.
 - If using a mobile device, the recipient will be prompted to open Microsoft Authenticator.
   - If the recipient does not have Microsoft Authenticator installed, they will be prompted to install it.
@@ -249,9 +297,9 @@ A verifiable credential with Face Check requires presentation via the Microsoft 
 
 ## Administration of remote issuances
 
-Once the remote issuance is created, it can be <AdminUrl path="/remote-issuances">viewed</AdminUrl> and managed via the Composer.
+Once the remote issuance is created, it can be <AdminLink path="/remote-issuances">viewed</AdminLink> and managed via the Composer.
 
-- The <AdminUrl path="/remote-issuances">Remote Issuances</AdminUrl> page lists all remote issuances, with the ability to filter by status, recipient, credential and date of creation.
+- The <AdminLink path="/remote-issuances">Remote Issuances</AdminLink> page lists all remote issuances, with the ability to filter by status, recipient, credential and date of creation.
 - Pending remote issuances can be cancelled by selecting one or more in the list, or from the details page when viewing a single remote issuance.
 - The details page shows a communications log, showing issuance and verification communications sent to the recipient. Communication failures are also shown, including the error encountered to assist with troubleshooting.
 - The recipient's contact details can be revealed and checked for correctness.

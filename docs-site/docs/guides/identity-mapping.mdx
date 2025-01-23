@@ -3,7 +3,7 @@ sidebar_position: 10
 ---
 
 import ThemedImage from '@theme/ThemedImage'
-import { AdminUrl } from '@site/src/components/admin-url'
+import { AdminLink } from '@site/src/components/admin-link'
 
 # Identity mapping
 
@@ -47,10 +47,10 @@ These two values form the unique key which is used to link a Verified Orchestrat
 The table below demonstrates how an Entra ID identity store user can be mapped to a Verified Orchestration identity reference. This reference includes both the Entra ID user attributes and under which claims the values are stored by an Entra ID produced JWT.
 
 | Entra ID User Attribute | JWT Payload Claim | Verified Orchestration Identity Field |
-| -------------------- | ----------------- | ------------------------------------- |
-| Tenant ID            | `tid`             | `issuer`                              |
-| User Object ID       | `oid`             | `identifier`                          |
-| User Display name    | `name`            | `name`                                |
+| ----------------------- | ----------------- | ------------------------------------- |
+| Tenant ID               | `tid`             | `issuer`                              |
+| User Object ID          | `oid`             | `identifier`                          |
+| User Display name       | `name`            | `name`                                |
 
 ### What each identity reference looks like
 
@@ -163,7 +163,7 @@ Once identity references are saved:
 
 - They can be used as an API entry point to find related data.
 - The Composer supports searching for issuances, remote issuances and presentations by linked identities.
-- Admin users can find, list and filter identities via the quick search or <AdminUrl path="/identities">Issuees page</AdminUrl>.
+- Admin users can find, list and filter identities via the quick search or <AdminLink path="/identities">Issuees page</AdminLink>.
 
 ### Querying identity data
 

@@ -82,5 +82,7 @@ export const createContext = async (
   // create the context
   const user = await findUpdateOrCreateUser(jwtPayload, token)
   const context = { user, logger, requestInfo, started: Date.now(), dataSource }
-  return { ...context, services: createServices(context), dataLoaders: createDataLoaders() }
+  const services = createServices(context)
+  const dataLoaders = createDataLoaders(services)
+  return { ...context, services, dataLoaders }
 }

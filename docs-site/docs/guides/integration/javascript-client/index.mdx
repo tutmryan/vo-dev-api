@@ -28,12 +28,12 @@ The client is available for usage in the browser via UMD script or via npm. Type
   </head>
   <body>
     <script type="text/javascript">
-      const verifiedOrchestrationApiUrl = 'TODO: fill this in'
+      const verifiedOrchestrationApiLink = 'TODO: fill this in'
       const credentialTypes = ['VerifiedEmployee', 'KycVerifiedIdentity'] // TODO: fill this in
 
       acquirePresentationToken().then((accessToken) => {
         const client = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
-          url: verifiedOrchestrationApiUrl,
+          url: verifiedOrchestrationApiLink,
           accessToken,
         })
 
@@ -62,14 +62,14 @@ The client is available for usage in the browser via UMD script or via npm. Type
 import type { PresentationEventData, PresentationResponse } from '@verified-orchestration/client-js'
 import { VerifiedOrchestrationClient } from '@verified-orchestration/client-js'
 
-const verifiedOrchestrationApiUrl = 'TODO: fill this in'
+const verifiedOrchestrationApiLink = 'TODO: fill this in'
 const acquireAccessToken = async (): Promise<string> => throw new Error('TODO: acquireAccessToken')
 
 const showQrCodeOrOpenUrl = (presentationRequest: PresentationResponse) => console.log // TODO: show the QR code or open the presentation URL
 const onPresentationEvent = (event: PresentationEventData) => console.log // TODO: use the presentation data
 
 const client = new VerifiedOrchestrationClient({
-  url: verifiedOrchestrationApiUrl,
+  url: verifiedOrchestrationApiLink,
   accessToken: await acquireAccessToken(),
 })
 
