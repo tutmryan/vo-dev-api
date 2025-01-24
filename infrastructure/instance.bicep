@@ -1209,14 +1209,16 @@ resource workbook 'Microsoft.Insights/workbooks@2023-06-01' = {
 @description('Shared locations for availability tests')
 var availabilityTestLocations = [
   { Id: 'emea-au-syd-edge' } // Australia East
-  { Id: 'apac-hk-hkn-azr' } // East Asia
-  { Id: 'apac-sg-sin-azr' } // Southeast Asia
-  { Id: 'emea-nl-ams-azr' } // West Europe
-  { Id: 'emea-gb-db3-azr' } // North Europe
-  { Id: 'us-va-ash-azr' } // East US
-  { Id: 'us-ca-sjc-azr' } // West US
-  { Id: 'latam-br-gru-edge' } // Brazil South
 ]
+
+@description('Shared Interval in seconds between test runs for availability test')
+var availabilityTestFrequency = 900
+
+@description('Shared evaluation frequency how often the metric alert is evaluated')
+var alertEvaluationFrequency = 'PT15M'
+
+@description('Shared window size the period of time that is used to monitor alert activity based on the threshold')
+var alertWindowSize = 'PT15M'
 
 @description('Common validation rules for web tests')
 var commonValidationRules = {
@@ -1235,7 +1237,7 @@ resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
   properties: {
     Description: 'Availbility test for the API'
     Enabled: true
-    Frequency: 300
+    Frequency: availabilityTestFrequency
     Kind: 'standard'
     Locations: availabilityTestLocations
     Name: '${resourcePrefix}-api-availability-webtest'
@@ -1266,13 +1268,13 @@ resource apiAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if 
       apiAppInsights.id
       apiAvailabilityTest.id
     ]
-    evaluationFrequency: 'PT5M'
-    windowSize: 'PT5M'
+    evaluationFrequency: alertEvaluationFrequency
+    windowSize: alertWindowSize
     criteria: {
       'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
       webTestId: apiAvailabilityTest.id
       componentId: apiAppInsights.id
-      failedLocationCount: 6
+      failedLocationCount: 1
     }
     actions: [
       {
@@ -1292,7 +1294,7 @@ resource msGraphServiceHealthTest 'Microsoft.Insights/webtests@2022-06-15' = {
   properties: {
     Description: 'Health check for MS Graph service'
     Enabled: true
-    Frequency: 300
+    Frequency: availabilityTestFrequency
     Kind: 'standard'
     Locations: availabilityTestLocations
     Name: '${resourcePrefix}-msgraphservice-health-webtest'
@@ -1323,13 +1325,13 @@ resource msGraphServiceHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' 
       apiAppInsights.id
       msGraphServiceHealthTest.id
     ]
-    evaluationFrequency: 'PT5M'
-    windowSize: 'PT5M'
+    evaluationFrequency: alertEvaluationFrequency
+    windowSize: alertWindowSize
     criteria: {
       'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
       webTestId: msGraphServiceHealthTest.id
       componentId: apiAppInsights.id
-      failedLocationCount: 6
+      failedLocationCount: 1
     }
     actions: [
       {
@@ -1349,7 +1351,7 @@ resource vidServiceHealthTest 'Microsoft.Insights/webtests@2022-06-15' = {
   properties: {
     Description: 'Health check for Verified ID service'
     Enabled: true
-    Frequency: 300
+    Frequency: availabilityTestFrequency
     Kind: 'standard'
     Locations: availabilityTestLocations
     Name: '${resourcePrefix}-vidservice-health-webtest'
@@ -1380,13 +1382,13 @@ resource vidServiceHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if
       apiAppInsights.id
       vidServiceHealthTest.id
     ]
-    evaluationFrequency: 'PT5M'
-    windowSize: 'PT5M'
+    evaluationFrequency: alertEvaluationFrequency
+    windowSize: alertWindowSize
     criteria: {
       'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
       webTestId: vidServiceHealthTest.id
       componentId: apiAppInsights.id
-      failedLocationCount: 6
+      failedLocationCount: 1
     }
     actions: [
       {
@@ -1406,7 +1408,7 @@ resource oidcAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
   properties: {
     Description: 'Availability test for the OIDC endpoint'
     Enabled: true
-    Frequency: 300
+    Frequency: availabilityTestFrequency
     Kind: 'standard'
     Locations: availabilityTestLocations
     Name: '${resourcePrefix}-oidc-availability-webtest'
@@ -1444,13 +1446,13 @@ resource oidcAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if
       apiAppInsights.id
       oidcAvailabilityTest.id
     ]
-    evaluationFrequency: 'PT5M'
-    windowSize: 'PT5M'
+    evaluationFrequency: alertEvaluationFrequency
+    windowSize: alertWindowSize
     criteria: {
       'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
       webTestId: oidcAvailabilityTest.id
       componentId: apiAppInsights.id
-      failedLocationCount: 6
+      failedLocationCount: 1
     }
     actions: [
       {
