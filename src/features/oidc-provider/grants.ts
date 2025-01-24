@@ -44,7 +44,8 @@ export function loadExistingGrant(clients: OidcClientEntity[], resources: OidcRe
 
       if (isFirstParty(ctx.oidc.client)) {
         // grant all the OIDC scopes and configured resource scopes to avoid consent prompt
-        const oidcScopes = Object.keys(openidClaims).join(' ')
+        // Automatically include offline_access and all OIDC claims
+        const oidcScopes = ['offline_access', ...Object.keys(openidClaims)].join(' ')
         grant.addOIDCScope(oidcScopes)
 
         // if the client has access to resources, grant those scopes as well

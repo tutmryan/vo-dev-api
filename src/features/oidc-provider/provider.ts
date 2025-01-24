@@ -23,6 +23,7 @@ import { middleware } from './middleware'
 import RedisAdapter from './redis-adapter'
 import { getResourceServerInfo } from './resource-indicators'
 import { routes } from './routes'
+import { hookAndApplyCustomOfflineScopeHandling } from './scopes'
 import { logoutSource } from './source'
 import { extraTokenClaims, issueRefreshToken } from './tokens'
 
@@ -114,6 +115,8 @@ async function createProvider() {
   provider.proxy = true
   logEvents(provider)
   provider.use(middleware)
+  // VO Customisation
+  hookAndApplyCustomOfflineScopeHandling(provider)
   // Integrations
   hookAndApplyCustomEntraEamSpec(provider)
 

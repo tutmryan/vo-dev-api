@@ -14,7 +14,7 @@ input PresentationRequestForAuthnInput {
 }
 
 """
-Specifes which credential can be presented for authentication.
+Specifies which credential can be presented for authentication.
 """
 input AuthnRequestCredential {
   """

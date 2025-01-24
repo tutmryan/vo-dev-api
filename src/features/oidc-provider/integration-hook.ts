@@ -93,7 +93,7 @@ export const wrapOidcPipelineStep = (
     const indexOfStep = route.stack.findIndex((m) => m.name === step || m.name === `bound ${step}`)
     const originalStep = route.stack[indexOfStep]
 
-    invariant(originalStep, `Cannot hook to apply custom spec - Step '${step}' not found in route.`)
+    invariant(originalStep, `Cannot hook to apply custom spec - Step '${step}' not found in route. Is it already wrapped?`)
 
     route.stack.splice(indexOfStep, 1, async (ctx, next) => {
       return await wrapper(ctx, next, originalStep)

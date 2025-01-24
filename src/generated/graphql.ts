@@ -558,7 +558,7 @@ export type AsyncIssuanceTokenResponse = {
   token: Scalars['String']['output'];
 };
 
-/** Specifes which credential can be presented for authentication. */
+/** Specifies which credential can be presented for authentication. */
 export type AuthnRequestCredential = {
   /**
    * A collection of issuers' DIDs that could issue the type of verifiable credential that subjects can present.

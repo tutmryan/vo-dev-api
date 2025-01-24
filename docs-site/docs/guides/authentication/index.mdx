@@ -201,7 +201,7 @@ Claims are organised by scopes, which are used to request specific information a
 
 The full list of scopes is available from the <ApiLink path="/oidc/.well-known/openid-configuration">OpenID discovery document</ApiLink>.
 
-The Verified Orchestration OIDC provider supports standard scopes: `openid`, `profile`, `email`\* and `offline_access`.
+The Verified Orchestration OIDC provider supports standard scopes: `openid`, `profile`, `email`\* and `offline_access`\*.
 
 Additionally, credential info is available via the following scopes:
 
@@ -215,6 +215,12 @@ Additionally, credential info is available via the following scopes:
 :::note
 
 \* The `email` scope only results in a claim value when an `email` claim is present in the verifiable credential presentation.
+
+:::
+
+:::note
+
+\* The `offline_access` scope is automatically included, granted, and does not require consent.
 
 :::
 
