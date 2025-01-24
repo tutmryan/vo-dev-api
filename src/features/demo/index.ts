@@ -2,7 +2,7 @@ import { multiIssuerBearerTokenMiddleware } from '@makerx/express-bearer'
 import { getClientCredentialsToken } from '@makerx/node-common'
 import cors from 'cors'
 import type { RequestHandler } from 'express'
-import { issuerOptions, limitedDemoAuth, presentationDemoCors } from '../../config'
+import { internalClientIssuerOptions, limitedDemoAuth, presentationDemoCors } from '../../config'
 import { dispatchWithoutContext, findUpdateOrCreateUserEntity } from '../../context'
 import { logger } from '../../logger'
 import { User } from '../../user'
@@ -50,7 +50,7 @@ export const demoPresentationTokenHandlers: RequestHandler[] = [
   demoCors,
   demoClientAuthHandler,
   multiIssuerBearerTokenMiddleware({
-    issuerOptions,
+    issuerOptions: { [internalClientIssuerOptions.verifyOptions.issuer]: internalClientIssuerOptions },
     logger,
     tokenIsRequired: true,
   }),

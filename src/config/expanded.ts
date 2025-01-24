@@ -133,24 +133,50 @@ export const docsUrl = instance ? `https://${instance}.docs.verifiedorchestratio
 // default demoEnabled to devToolsEnabled to align without having to set both flags in every environment
 export const demoEnabled = config.has('demoEnabled') ? config.get('demoEnabled') : config.get('devToolsEnabled')
 
-// bearer token auth config - supports Azure tenants and OIDC
 export const oidcAuthorityUrl = `${apiUrl}/oidc`
-const authTenantIds = [platformTenantId, homeTenantId, ...config.get('auth.additionalAuthTenantIds')]
-const authTenantIssuers = authTenantIds.map((tenantId) => `https://sts.windows.net/${tenantId}/`)
-export const issuerOptions = authTenantIssuers.reduce<MultiIssuerBearerAuthOptions['issuerOptions']>((acc, issuer) => {
+
+// Customer tenant issuer config - customer tenant issued tokensnfor the API audience
+// Validate audience as the API client ID (this is the enterprise app installed into customer tenants)
+// This config is used to validate API access from customer users and apps
+const customerTenantIssuerOptions = [homeTenantId, ...config.get('auth.additionalAuthTenantIds')].reduce<
+  MultiIssuerBearerAuthOptions['issuerOptions']
+>((acc, tenantId) => {
+  const issuer = `https://sts.windows.net/${tenantId}/`
   acc[issuer] = merge(
     {
-      jwksUri: `https://login.microsoftonline.com/${homeTenantId}/discovery/v2.0/keys`,
+      jwksUri: `https://login.microsoftonline.com/${tenantId}/discovery/v2.0/keys`,
       verifyOptions: {
         issuer,
-        audience: [apiCredentials.clientId, config.get('internalClient.uri')],
+        audience: apiCredentials.clientId,
       },
     },
     config.get('auth.bearer'),
   )
   return acc
 }, {})
-issuerOptions[oidcAuthorityUrl] = merge(
+
+// Internal client issuer config - platform tenant issued tokens
+// This config is used to validate API access via JWTs that we issue, example:
+// - VID service callback tokens
+// - Limited access tokens
+// - Limited approval tokens
+// - Limited photo capture tokens
+// - Limited async issuance tokens
+// - Limited demo tokens
+export const internalClientIssuerOptions = merge(
+  {
+    jwksUri: `https://login.microsoftonline.com/${platformTenantId}/discovery/v2.0/keys`,
+    verifyOptions: {
+      issuer: `https://sts.windows.net/${platformTenantId}/`,
+      audience: [config.get('internalClient.uri')],
+    },
+  },
+  config.get('auth.bearer'),
+)
+
+// OIDC provider issuer config - OIDC issued tokens
+// We only accept tokens from the OIDC provider that have the API as the audience
+const oidcIssuerOptions = merge(
   {
     jwksUri: `${oidcAuthorityUrl}/jwks`,
     verifyOptions: {
@@ -161,5 +187,32 @@ issuerOptions[oidcAuthorityUrl] = merge(
   config.get('auth.bearer'),
 )
 
-// OIDC EAM friendly tenants
-export const eamFriendlyTenants = [...config.get('auth.additionalAuthTenantIds'), homeTenantId]
+// EAM issuer config - customer tenant issued tokens
+// We accept EAM tokens from any customer tenant
+// Note: The audience claim will be the EAM client (and thus is not known and can't be validated)
+// We cannot validate the audience claim for EAM tokens
+export const eamIssuerOptions = [homeTenantId, ...config.get('auth.additionalAuthTenantIds')].reduce<
+  MultiIssuerBearerAuthOptions['issuerOptions']
+>((acc, tenantId) => {
+  const issuer = `https://login.microsoftonline.com/${tenantId}/v2.0`
+  acc[issuer] = merge(
+    {
+      jwksUri: `https://login.microsoftonline.com/${tenantId}/discovery/v2.0/keys`,
+      verifyOptions: {
+        issuer,
+      },
+    },
+    config.get('auth.bearer'),
+  )
+  return acc
+}, {})
+
+// For access to the API, we accept tokens from:
+// - Customer tenants
+// - Internal client
+// - OIDC provider
+export const issuerOptions: MultiIssuerBearerAuthOptions['issuerOptions'] = {
+  ...customerTenantIssuerOptions,
+  [internalClientIssuerOptions.verifyOptions.issuer]: internalClientIssuerOptions,
+  [oidcIssuerOptions.verifyOptions.issuer]: oidcIssuerOptions,
+}

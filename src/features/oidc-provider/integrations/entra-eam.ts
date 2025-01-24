@@ -1,9 +1,8 @@
 import type { RouterContext } from '@koa/router'
-import { millisecondsInHour } from 'date-fns/constants'
-import type { JWTPayload, KeyLike } from 'jose'
-import { createRemoteJWKSet, decodeJwt, decodeProtectedHeader, jwtVerify } from 'jose'
-import type { Configuration, OIDCContext, UnknownObject, Provider } from 'oidc-provider'
-import { eamFriendlyTenants } from '../../../config'
+import { verifyMultiIssuer } from '@makerx/express-bearer'
+import { decodeJwt, decodeProtectedHeader } from 'jose'
+import type { Configuration, OIDCContext, Provider, UnknownObject } from 'oidc-provider'
+import { eamIssuerOptions } from '../../../config'
 import { dataSource } from '../../../data'
 import type { ClaimConstraint, PresentedCredential } from '../../../generated/graphql'
 import { logger } from '../../../logger'
@@ -148,9 +147,6 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
   return true
 }
 
-// Cache the Entra keys in memory
-const inMemoryKeySetCache = new Map<string, ReturnType<typeof createRemoteJWKSet>>()
-
 export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
   // Override the authorization -> checkIdTokenHint pipeline step to apply custom logic for EAM requests
   wrapOidcPipelineStep(provider, 'authorization', ['POST'], 'checkIdTokenHint', async (ctx, next, original) => {
@@ -168,35 +164,19 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
     }
 
     const authParams = paramsToAuthParamsSpec(oidc.params!, errors)
-    const decodedProtectedHeader = decodeProtectedHeader(authParams.id_token_hint!)
-    const decodedIdTokenHint = decodeJwt(authParams.id_token_hint!)
 
+    const decodedProtectedHeader = decodeProtectedHeader(authParams.id_token_hint!)
     if (!decodedProtectedHeader.alg) {
       logger.error(`id_token_hint does not contain an alg header`, { params: extractLoggable(oidc.params!) })
       throw new errors.InvalidRequest('id_token_hint does not contain an alg header')
     }
 
-    const tenantId = eamFriendlyTenants.find((tid) => tid.toLowerCase() === decodedIdTokenHint.tid)
-    if (!tenantId) {
-      logger.error(`Tenant ID not found in the authTenantIds`, { params: extractLoggable(oidc.params!) })
-      throw new errors.InvalidRequest('Tenant ID is not registered for use with this instance of VO.')
-    }
+    const payload = await verifyMultiIssuer(ctx.host, authParams.id_token_hint!, {
+      issuerOptions: eamIssuerOptions,
+      explicitNoAudienceValidation: true,
+    })
 
-    const jwksUri = mapMsLoginToAzureJwksUri(authParams.redirect_uri)!
-    if (!inMemoryKeySetCache.has(jwksUri)) {
-      inMemoryKeySetCache.set(
-        jwksUri,
-        createRemoteJWKSet(new URL(jwksUri), {
-          // The default is 10 minutes, however that's a little short for the EAM use-case.
-          // Given the MS advice is to refresh hourly, and that this is an MS OIDC implementation, we'll use an hour.
-          // https://learn.microsoft.com/en-us/entra/identity-platform/signing-key-rollover#general-considerations
-          cacheMaxAge: millisecondsInHour,
-        }),
-      )
-    }
-
-    const { payload, protectedHeader } = await jwtVerify<JWTPayload, KeyLike>(authParams.id_token_hint!, inMemoryKeySetCache.get(jwksUri)!)
-    oidc.entity('IdTokenHint', { payload, header: protectedHeader })
+    oidc.entity('IdTokenHint', { payload, header: decodeProtectedHeader })
 
     // Although the VO OIDC provider is session-less, we'll force the prompt here.
     // This ensures the implementation is accurate to a standard EAM flow,
