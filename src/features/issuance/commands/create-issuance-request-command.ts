@@ -126,11 +126,11 @@ export async function CreateIssuanceRequestCommand(
     const photoCaptureRequest = await getPhotoCaptureData(photoCaptureRequestId)
     invariant(photoCaptureRequest, 'Photo capture request not found')
     invariant(
-      photoCaptureRequest.contractId.toUpperCase() === contractId.toUpperCase(),
+      photoCaptureRequest.contractId.toLowerCase() === contractId.toLowerCase(),
       'Photo capture request must be for the same contract',
     )
     invariant(
-      photoCaptureRequest.identityId.toUpperCase() === identity.id.toUpperCase(),
+      photoCaptureRequest.identityId.toLowerCase() === identity.id.toLowerCase(),
       'Photo capture request must be for the same identity',
     )
     invariant(photoCaptureRequest.photo, 'Photo capture request must have a photo captured')
@@ -141,7 +141,7 @@ export async function CreateIssuanceRequestCommand(
   const standardClaims: StandardClaimsData = {
     issuanceId: randomUUID(),
     name: identity.name,
-    identityId: identity.id.toLowerCase(),
+    identityId: identity.id,
   }
   claims = { ...claims, ...standardClaims }
 
@@ -167,14 +167,14 @@ export async function CreateIssuanceRequestCommand(
   // if this was a photo capture, remove the cache, as the photo data is designed to be used a single time
   if (photoCaptureRequestId) await deletePhotoCaptureRequest(photoCaptureRequestId)
 
-  const issuedById = asyncIssuanceCreatedById ?? user.entity.id.toUpperCase()
+  const issuedById = asyncIssuanceCreatedById ?? user.entity.id
 
   // cache issuance details for use in the callback
   const requestDetails: IssuanceRequestDetails = {
-    id: standardClaims.issuanceId.toUpperCase(),
+    id: standardClaims.issuanceId,
     issuedById,
-    identityId: identity.id.toUpperCase(),
-    contractId: contract.id.toUpperCase(),
+    identityId: identity.id,
+    contractId: contract.id,
     expirationDate: issuanceRequest.expirationDate,
     photoCaptureRequestId,
     hasFaceCheckPhoto: contract.faceCheckSupport === FaceCheckPhotoSupport.None ? null : !!claims['photo'],

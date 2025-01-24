@@ -86,7 +86,7 @@ export async function CreateAsyncIssuanceRequestCommand(
         [...new Set(requestInput.map((i) => i.contractId))],
         'FindIdentitiesById',
       )
-    ).map((contract) => [contract.id.toLowerCase(), contract]),
+    ).map((contract) => [contract.id, contract]),
   )
 
   const referencedIdentities = new Map(
@@ -97,7 +97,7 @@ export async function CreateAsyncIssuanceRequestCommand(
         [...new Set(requestInput.map((i) => i.identityId ?? null).filter(isNotFalsy))],
         'FindIdentitiesById',
       )
-    ).map((identity) => [identity.id.toLowerCase(), identity]),
+    ).map((identity) => [identity.id, identity]),
   )
 
   // Validate the input

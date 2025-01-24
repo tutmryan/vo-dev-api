@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, RelationId } from 'typeorm'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import type { PresentedCredential, RequestCredential } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
@@ -36,13 +37,13 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   @ManyToOne(() => IdentityEntity)
   identity!: Promise<IdentityEntity | null>
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, transformer: uuidLowerCaseTransformer })
   identityId!: string | null
 
   @ManyToOne(() => UserEntity)
   requestedBy!: Promise<UserEntity>
 
-  @Column()
+  @Column({ transformer: uuidLowerCaseTransformer })
   requestedById!: string
 
   @ManyToMany(() => IssuanceEntity)

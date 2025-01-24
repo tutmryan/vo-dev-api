@@ -19,9 +19,9 @@ export async function FindCommunicationsQuery(
   const relations: FindOptionsRelations<CommunicationEntity> = {}
   const order: FindOptionsOrder<CommunicationEntity> = {}
 
-  if (criteria?.recipientId) where.recipientId = criteria.recipientId.toUpperCase()
-  if (criteria?.createdById) where.createdById = criteria.createdById.toUpperCase()
-  if (criteria?.asyncIssuanceRequestId) where.asyncIssuanceId = criteria.asyncIssuanceRequestId.toUpperCase()
+  if (criteria?.recipientId) where.recipientId = criteria.recipientId
+  if (criteria?.createdById) where.createdById = criteria.createdById
+  if (criteria?.asyncIssuanceRequestId) where.asyncIssuanceId = criteria.asyncIssuanceRequestId
   if (criteria?.contactMethod) where.contactMethod = criteria.contactMethod
   if (criteria?.purpose) where.purpose = criteria.purpose
   if (criteria?.status) where.error = criteria.status === 'sent' ? IsNull() : Not(IsNull())

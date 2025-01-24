@@ -1,6 +1,7 @@
 import { differenceInSeconds } from 'date-fns'
 import { isEqual, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import type { ContractDisplayCredential, ContractDisplayCredentialLogo, ContractDisplayModel } from '../../../generated/graphql'
 import { FaceCheckPhotoSupport } from '../../../generated/graphql'
 import { domainInvariant } from '../../../util/domain-invariant'
@@ -36,7 +37,7 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => TemplateEntity, { nullable: true })
   template!: Promise<TemplateEntity | null>
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, transformer: uuidLowerCaseTransformer })
   templateId!: string | null
 
   @Column({ type: 'bit', nullable: false })
@@ -45,7 +46,7 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'int', nullable: false })
   validityIntervalInSeconds!: number
 
-  @Column({ type: 'uniqueidentifier', nullable: true })
+  @Column({ type: 'uniqueidentifier', nullable: true, transformer: uuidLowerCaseTransformer })
   externalId!: string | null
 
   @ManyToOne(() => UserEntity, { nullable: true })

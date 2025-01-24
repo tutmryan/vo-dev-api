@@ -65,7 +65,7 @@ describe('create-update-identity', () => {
     expect(updateResponse.errors).toBeUndefined()
     expect(updateResponse.data).toBeDefined()
 
-    expect(updateResponse.data?.saveIdentity.id).toEqual(firstResponse.data?.saveIdentity.id.toUpperCase())
+    expect(updateResponse.data?.saveIdentity.id).toEqual(firstResponse.data?.saveIdentity.id)
     expect(updateResponse.data?.saveIdentity).toMatchObject(updatedInput)
   })
 
@@ -91,7 +91,7 @@ describe('create-update-identity', () => {
     expect(errors).toBeUndefined()
     expect(data).toBeDefined()
 
-    expect(data?.identity).toMatchObject({ ...input, id: saveResponse.data?.saveIdentity.id.toUpperCase() })
+    expect(data?.identity).toMatchObject({ ...input, id: saveResponse.data?.saveIdentity.id })
   })
 
   it('returns an unauthorized error when accessed anonymously', async () => {

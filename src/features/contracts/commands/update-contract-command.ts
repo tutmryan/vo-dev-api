@@ -22,7 +22,7 @@ export async function UpdateContractCommand(this: CommandContext, id: string, in
   if (template) await ensureNoOverridingTemplateData(input, await template.combinedData())
 
   await this.services.logoImages.deleteIfExists(decodeURIComponent(basename(contract.display.card.logo.uri)))
-  let displayLogoUri = await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image, {
+  let displayLogoUri = await this.services.logoImages.uploadDataUrl(id.toUpperCase(), input.display.card.logo.image, {
     appendExtension: true,
   })
 

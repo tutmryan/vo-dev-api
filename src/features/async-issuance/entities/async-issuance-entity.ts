@@ -1,5 +1,6 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm'
 import { calculateExpiryFromNow, convertAsyncIssuanceExpiryDaysToRequestExpiry, ExpiryPeriodsInDays } from '..'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { AsyncIssuanceRequestExpiry, AsyncIssuanceRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
@@ -45,19 +46,19 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => ContractEntity)
   contract!: Promise<ContractEntity>
 
-  @Column()
+  @Column({ transformer: uuidLowerCaseTransformer })
   contractId!: string
 
   @ManyToOne(() => IdentityEntity)
   identity!: Promise<IdentityEntity>
 
-  @Column()
+  @Column({ transformer: uuidLowerCaseTransformer })
   identityId!: string
 
   @ManyToOne(() => IssuanceEntity)
   issuance!: Promise<IssuanceEntity | null>
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, transformer: uuidLowerCaseTransformer })
   issuanceId!: string | null
 
   @Column({ type: 'nvarchar', default: 'pending' })

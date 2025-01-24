@@ -8,7 +8,7 @@ import { createIdentity } from '../../identity/tests/create-identity'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 import { sendAsyncIssuanceNotificationsJobHandler } from '../jobs/send-async-issuance-notifications'
 import { createIssuanceRequest } from './create-async-issuance'
-import { getAsyncIssuance } from './get-async-issunace'
+import { getAsyncIssuance } from './get-async-issuance'
 import { buildContact, givenContract } from './index'
 import { resendAsyncIssuanceNotification } from './resend-async-issunace-notification'
 

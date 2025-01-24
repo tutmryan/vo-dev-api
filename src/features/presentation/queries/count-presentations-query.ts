@@ -10,21 +10,21 @@ export async function CountPresentationsQuery(this: QueryContext, criteria?: May
   const where: FindOptionsWhere<PresentationEntity> = {}
   const relations: FindOptionsRelations<PresentationEntity> = {}
 
-  if (criteria?.requestId) where.requestId = criteria.requestId.toUpperCase()
-  if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
+  if (criteria?.requestId) where.requestId = criteria.requestId
+  if (criteria?.identityId) where.identityId = criteria.identityId
   if (criteria?.contractId || criteria?.issuanceId) {
     relations.issuances = true
     const issuanceWhere: FindOptionsWhere<IssuanceEntity> = {}
-    if (criteria.contractId) issuanceWhere.contractId = criteria.contractId.toUpperCase()
-    if (criteria.issuanceId) issuanceWhere.id = criteria.issuanceId.toUpperCase()
+    if (criteria.contractId) issuanceWhere.contractId = criteria.contractId
+    if (criteria.issuanceId) issuanceWhere.id = criteria.issuanceId
     where.issuances = issuanceWhere
   }
-  if (criteria?.requestedById) where.requestedById = criteria.requestedById.toUpperCase()
+  if (criteria?.requestedById) where.requestedById = criteria.requestedById
   if (criteria?.partnerId) {
     relations.partners = true
-    where.partners = { id: criteria.partnerId.toUpperCase() }
+    where.partners = { id: criteria.partnerId }
   }
-  if (criteria?.oidcClientId) where.oidcClientId = criteria.oidcClientId.toUpperCase()
+  if (criteria?.oidcClientId) where.oidcClientId = criteria.oidcClientId
 
   if (criteria?.from && criteria.to) where.presentedAt = BetweenTimestamp(criteria.from, criteria.to)
   else if (criteria?.from) where.presentedAt = MoreThanOrEqualTimestamp(criteria.from)

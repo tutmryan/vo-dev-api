@@ -1,12 +1,13 @@
 import DataLoader from 'dataloader'
 import { In } from 'typeorm'
 import { dataSource } from '../../data'
+import { compareIgnoreCase } from '../../util/string'
 import { IssuanceEntity } from './entities/issuance-entity'
 
 export const issuanceLoader = () =>
   new DataLoader<string, IssuanceEntity>(async (ids) => {
     const results = await dataSource.getRepository(IssuanceEntity).find({ comment: 'FindIssuancesById', where: { id: In(ids) } })
-    return ids.map((id) => results.find((result) => result.id.toUpperCase() === id.toUpperCase()) ?? new Error(`Issuance not found: ${id}`))
+    return ids.map((id) => results.find((result) => result.id === id) ?? new Error(`Issuance not found: ${id}`))
   })
 
 export const issuanceCountByIdentityLoader = () =>
@@ -21,7 +22,7 @@ export const issuanceCountByIdentityLoader = () =>
       .comment('CountIssuancesByIdentityQuery')
       .getRawMany()
 
-    return ids.map((id) => results.find((result) => result.identity_id.toUpperCase() === id.toUpperCase())?.count ?? 0)
+    return ids.map((id) => results.find((result) => compareIgnoreCase(result.identity_id, id))?.count ?? 0)
   })
 
 export const issuanceCountByContractLoader = () =>
@@ -36,5 +37,5 @@ export const issuanceCountByContractLoader = () =>
       .comment('CountIssuancesByContractQuery')
       .getRawMany()
 
-    return ids.map((id) => results.find((result) => result.contract_id.toUpperCase() === id.toUpperCase())?.count ?? 0)
+    return ids.map((id) => results.find((result) => compareIgnoreCase(result.contract_id, id))?.count ?? 0)
   })

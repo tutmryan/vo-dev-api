@@ -17,7 +17,7 @@ export async function FindApprovalRequestsQuery(
   const relations: FindOptionsRelations<ApprovalRequestEntity> = {}
   const order: FindOptionsOrder<ApprovalRequestEntity> = {}
 
-  if (criteria?.requestedById) where.createdById = criteria.requestedById.toUpperCase()
+  if (criteria?.requestedById) where.createdById = criteria.requestedById
   if (criteria?.requestType) where.requestType = criteria.requestType
   if (criteria?.requestedCredentialType) where.presentationRequestJson = ILike(`%"type":"${criteria.requestedCredentialType}"%`)
   if (criteria?.status === ApprovalRequestStatus.Approved) where.isApproved = true

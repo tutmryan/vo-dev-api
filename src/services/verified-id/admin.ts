@@ -31,10 +31,8 @@ export class VerifiedIdAdminService extends HttpClient {
   }
 
   async updateContract(contractId: string, input: UpdateContractInput): Promise<Contract> {
-    // The service is case-sensitive on GUIDs, and we get the contract ID from SQL Server / mssql as uppercase, so
-    // we need to lowercase it ourselves #prettylame
     try {
-      return await this.patch<Contract>(`verifiableCredentials/authorities/${this.authorityId}/contracts/${contractId.toLowerCase()}`, {
+      return await this.patch<Contract>(`verifiableCredentials/authorities/${this.authorityId}/contracts/${contractId}`, {
         data: input,
       })
     } catch (error: any) {
@@ -50,7 +48,7 @@ export class VerifiedIdAdminService extends HttpClient {
   }
 
   async contract(id: string): Promise<Contract | null> {
-    return this.get<Contract>(`verifiableCredentials/authorities/${this.authorityId}/contracts/${id.toLowerCase()}`)
+    return this.get<Contract>(`verifiableCredentials/authorities/${this.authorityId}/contracts/${id}`)
   }
 
   async findNetworkIssuers({ linkedDomainUrlsLike }: NetworkIssuersWhere): Promise<NetworkIssuer[]> {
@@ -62,7 +60,7 @@ export class VerifiedIdAdminService extends HttpClient {
 
   async networkContracts(tenantId: string, issuerId: string): Promise<NetworkContract[]> {
     const { value: contracts } = await this.get<Value<NetworkContract[]>>(
-      `tenants/${tenantId.toLowerCase()}/verifiableCredentialsNetwork/authorities/${issuerId.toLowerCase()}/contracts`,
+      `tenants/${tenantId}/verifiableCredentialsNetwork/authorities/${issuerId}/contracts`,
     )
     return contracts
   }

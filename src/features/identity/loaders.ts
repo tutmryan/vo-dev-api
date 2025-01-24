@@ -7,6 +7,6 @@ export const identityLoader = () =>
   new DataLoader<string, IdentityEntity>(async (ids) => {
     const results = await dataSource
       .getRepository(IdentityEntity)
-      .find({ comment: 'FindIdentitiesById', where: { id: In(ids.map((id) => id.toUpperCase())) } })
-    return ids.map((id) => results.find((result) => result.id.toUpperCase() === id.toUpperCase()) ?? new Error(`Identity not found: ${id}`))
+      .find({ comment: 'FindIdentitiesById', where: { id: In(ids.map((id) => id)) } })
+    return ids.map((id) => results.find((result) => result.id === id) ?? new Error(`Identity not found: ${id}`))
   })

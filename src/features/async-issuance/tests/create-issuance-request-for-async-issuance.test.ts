@@ -10,7 +10,7 @@ import { createIdentity } from '../../identity/tests/create-identity'
 import { sendAsyncIssuanceNotificationsJobHandler } from '../jobs/send-async-issuance-notifications'
 import { createIssuanceRequest } from './create-async-issuance'
 import { createIssuanceRequestForAsyncIssuance } from './create-issuance-request-for-async-issuance'
-import { getAsyncIssuance } from './get-async-issunace'
+import { getAsyncIssuance } from './get-async-issuance'
 import { additonalContractClaims, buildContact, faceCheckPhoto, givenContract, validAdditonalClaimsInput } from './index'
 
 describe('createIssuanceRequestForAsyncIssuance mutation', () => {

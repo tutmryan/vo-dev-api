@@ -39,7 +39,7 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     const issuanceIds =
       event.verifiedCredentialsData?.reduce<string[]>((acc, credential) => {
         if (credential.claims[StandardClaims.issuanceId] && credential.issuer === platformIssuerDid)
-          acc.push((credential.claims[StandardClaims.issuanceId] as string).toUpperCase())
+          acc.push(credential.claims[StandardClaims.issuanceId] as string)
         return acc
       }, []) ?? []
 

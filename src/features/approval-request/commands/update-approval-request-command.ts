@@ -17,7 +17,7 @@ export async function UpdateApprovalRequestCommand(this: CommandContext, id: str
   )
 
   invariant(
-    approvalRequest.createdById.toLowerCase() === user.entity.id.toLowerCase(),
+    approvalRequest.createdById === user.entity.id,
     `User does not have permission to update this approval request. Only the creator can update the request.`,
   )
 

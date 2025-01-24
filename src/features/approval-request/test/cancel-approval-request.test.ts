@@ -170,7 +170,7 @@ describe('cancel approval request mutation', () => {
 
       expect(errors).toBeUndefined()
       expect(data).not.toBeNull()
-      expect(data?.approvalRequest.id.toLowerCase()).toEqual(approvalRequest.id)
+      expect(data?.approvalRequest.id).toEqual(approvalRequest.id)
       expect(data?.approvalRequest.status).toEqual(ApprovalRequestStatus.Cancelled)
     }
   })

@@ -1,5 +1,6 @@
 import { pick } from 'lodash'
 import { Column, Entity, ManyToOne } from 'typeorm'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import type { Callback, PresentationRequestInput } from '../../../generated/graphql'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
@@ -60,7 +61,7 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
     return this.callbackJson ? JSON.parse(this.callbackJson) : null
   }
 
-  @Column({ type: 'uniqueidentifier' })
+  @Column({ type: 'uniqueidentifier', transformer: uuidLowerCaseTransformer })
   callbackSecret!: string
 
   @Column({ type: 'nvarchar', length: 'MAX' })
@@ -77,7 +78,7 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => PresentationEntity)
   presentation!: Promise<PresentationEntity | null>
 
-  @Column({ type: 'uniqueidentifier', nullable: true })
+  @Column({ type: 'uniqueidentifier', nullable: true, transformer: uuidLowerCaseTransformer })
   presentationId!: string | null
 
   @Column({ type: 'bit', nullable: true })

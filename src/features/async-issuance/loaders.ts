@@ -9,9 +9,7 @@ import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
 export const asyncIssuanceLoader = () =>
   new DataLoader<string, AsyncIssuanceEntity>(async (ids) => {
     const results = await dataSource.getRepository(AsyncIssuanceEntity).find({ comment: 'FindAsyncIssuancesById', where: { id: In(ids) } })
-    return ids.map(
-      (id) => results.find((result) => result.id.toUpperCase() === id.toUpperCase()) ?? new Error(`Async issuance not found: ${id}`),
-    )
+    return ids.map((id) => results.find((result) => result.id === id) ?? new Error(`Async issuance not found: ${id}`))
   })
 
 // We can't load multiple at a time but we can deduplicate loading contact data twice when both photoCapture and hasContactNotificationSet are queried on the same record

@@ -1,5 +1,6 @@
 import { Column, Entity, Index } from 'typeorm'
 import { homeTenant } from '../../../config'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 
@@ -13,10 +14,10 @@ export class UserEntity extends VerifiedOrchestrationEntity {
     if (args) typeSafeAssign(this, args)
   }
 
-  @Column({ type: 'uniqueidentifier' })
+  @Column({ type: 'uniqueidentifier', transformer: uuidLowerCaseTransformer })
   oid!: string
 
-  @Column({ type: 'uniqueidentifier' })
+  @Column({ type: 'uniqueidentifier', transformer: uuidLowerCaseTransformer })
   tenantId!: string
 
   @Column({ type: 'nvarchar', nullable: true })

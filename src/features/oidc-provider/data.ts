@@ -46,7 +46,7 @@ const toOidcClientMetadata = ({
   policyUrl,
   applicationType,
 }: OidcClientEntity): ClientMetadata => ({
-  client_id: id.toLowerCase(),
+  client_id: id,
   client_name: name,
   redirect_uris: redirectUris,
   post_logout_redirect_uris: postLogoutUris,
@@ -113,12 +113,12 @@ function apiResourceHasCorrectScope(resource: OidcResourceEntity) {
 }
 
 function dataIsInitialised([clients, resources]: SourceOidcData) {
-  const portalClient = clients.find((c) => c.id.toLowerCase() === portalClientId)
+  const portalClient = clients.find((c) => c.id === portalClientId)
   if (!portalClient) {
     logger.warn(`Portal client is missing`)
     return false
   }
-  const apiResource = resources.find((r) => r.id.toLowerCase() === apiResourceId)
+  const apiResource = resources.find((r) => r.id === apiResourceId)
   if (!apiResource) {
     logger.warn(`API resource is missing`)
     return false

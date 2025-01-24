@@ -21,8 +21,8 @@ export async function CreateContractCommand(this: CommandContext, input: Contrac
     : null
   if (template) await ensureNoOverridingTemplateData(input, await template.combinedData())
 
-  const contractId = randomUUID().toUpperCase()
-  let displayLogoUri = await this.services.logoImages.uploadDataUrl(contractId, displayInput.card.logo.image, {
+  const contractId = randomUUID()
+  let displayLogoUri = await this.services.logoImages.uploadDataUrl(contractId.toUpperCase(), displayInput.card.logo.image, {
     appendExtension: true,
   })
 

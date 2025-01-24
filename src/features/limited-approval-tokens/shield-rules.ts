@@ -15,7 +15,7 @@ export const hasApprovalRequestPresentationAndMatchesApprovalRequestId = rule('h
   cache: 'strict',
 })(
   (_, args: QueryApprovalRequestArgs | MutationActionApprovalRequestArgs, { user }: GraphQLContext) =>
-    !!user?.limitedApprovalData?.presentationId && user.limitedApprovalData.approvalRequestId.toLowerCase() === args.id.toLowerCase(),
+    !!user?.limitedApprovalData?.presentationId && user.limitedApprovalData.approvalRequestId === args.id,
 )
 
 // limited approval presentation validation

@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, Index, JoinTable, ManyToMany, ManyToOne, RelationId } from 'typeorm'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { IssuanceStatus } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
@@ -24,19 +25,19 @@ export class IssuanceEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => ContractEntity)
   contract!: Promise<ContractEntity>
 
-  @Column()
+  @Column({ transformer: uuidLowerCaseTransformer })
   contractId!: string
 
   @ManyToOne(() => IdentityEntity)
   identity!: Promise<IdentityEntity>
 
-  @Column()
+  @Column({ transformer: uuidLowerCaseTransformer })
   identityId!: string
 
   @ManyToOne(() => UserEntity)
   issuedBy!: Promise<UserEntity>
 
-  @Column()
+  @Column({ transformer: uuidLowerCaseTransformer })
   issuedById!: string
 
   @CreateDateColumn({ type: 'datetimeoffset' })

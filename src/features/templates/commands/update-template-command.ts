@@ -24,7 +24,7 @@ export async function UpdateTemplateCommand(this: CommandContext, id: string, in
     await this.services.logoImages.deleteIfExists(decodeURIComponent(basename(template.display.card.logo.uri)))
 
   const displayLogoUri = input.display?.card?.logo?.image
-    ? await this.services.logoImages.uploadDataUrl(id, input.display.card.logo.image, { appendExtension: true })
+    ? await this.services.logoImages.uploadDataUrl(id.toUpperCase(), input.display.card.logo.image, { appendExtension: true })
     : null
 
   await template.update({

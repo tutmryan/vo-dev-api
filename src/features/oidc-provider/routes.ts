@@ -53,7 +53,7 @@ const noCache: RequestHandler = (_req, res, next) => {
 }
 
 function getClient(clientId: string) {
-  const client = getData().clients.find((c) => c.id.toLowerCase() === clientId)
+  const client = getData().clients.find((c) => c.id === clientId)
   invariant(client, 'client not found')
   return client
 }

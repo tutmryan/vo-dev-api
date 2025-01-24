@@ -30,7 +30,7 @@ export async function FindContractsQuery(
       ...where,
       credentialTypesJson: ILike(`%"${type}"%`),
     }))
-  if (criteria?.createdById) where.createdById = criteria.createdById.toUpperCase()
+  if (criteria?.createdById) where.createdById = criteria.createdById
   where.createdAt = OptionalRange(criteria?.createdFrom, criteria?.createdTo)
 
   if (criteria && criteria.isDeprecated !== null && criteria.isDeprecated !== undefined)

@@ -7,7 +7,7 @@ export async function IdentitiesByIdsQuery(this: QueryContext, ids?: Maybe<strin
   if (!ids) return []
   const results = await this.entityManager
     .getRepository(IdentityEntity)
-    .find({ comment: 'IdentitiesById', where: { id: In(ids.map((id) => id.toUpperCase())) } })
+    .find({ comment: 'IdentitiesById', where: { id: In(ids.map((id) => id)) } })
 
-  return ids.map((id) => results.find((result) => result.id.toUpperCase() === id.toUpperCase()) ?? null)
+  return ids.map((id) => results.find((result) => result.id === id) ?? null)
 }

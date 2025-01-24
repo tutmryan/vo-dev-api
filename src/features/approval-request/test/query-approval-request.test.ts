@@ -51,7 +51,7 @@ describe('query approval request', () => {
     // Assert
     expect(errors).toBeUndefined()
     expect(data).not.toBeNull()
-    expect(data?.approvalRequest.id.toLowerCase()).toEqual(approvalRequest.id)
+    expect(data?.approvalRequest.id).toEqual(approvalRequest.id)
   })
 
   it('returns unauthorised when no presentation has been made', async () => {

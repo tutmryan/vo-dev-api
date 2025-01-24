@@ -22,15 +22,15 @@ export const invokeApprovalCallbackJobHandler: JobHandler<InvokeApprovalCallback
   const identity = await presentation?.identity
 
   const data: ActionedApprovalData = {
-    approvalRequestId: actionedApprovalRequest.id.toLowerCase(),
+    approvalRequestId: actionedApprovalRequest.id,
     correlationId: actionedApprovalRequest.correlationId,
     requestData: actionedApprovalRequest.requestData,
     state: actionedApprovalRequest.callbackInput.state,
     status: actionedApprovalRequest.status,
     actionedComment: actionedApprovalRequest.actionedComment,
     actionedAt: actionedApprovalRequest.updatedAt!,
-    actionedBy: identity ? { id: identity.id.toLowerCase(), name: identity.name } : null,
-    callbackSecret: actionedApprovalRequest.callbackSecret.toLowerCase(),
+    actionedBy: identity ? { id: identity.id, name: identity.name } : null,
+    callbackSecret: actionedApprovalRequest.callbackSecret,
   }
 
   const request: RequestInit = {

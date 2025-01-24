@@ -8,7 +8,5 @@ export const approvalRequestLoader = () =>
     const results = await dataSource
       .getRepository(ApprovalRequestEntity)
       .find({ comment: 'FindApprovalRequestsById', where: { id: In(ids) } })
-    return ids.map(
-      (id) => results.find((result) => result.id.toUpperCase() === id.toUpperCase()) ?? new Error(`Approval request not found: ${id}`),
-    )
+    return ids.map((id) => results.find((result) => result.id === id) ?? new Error(`Approval request not found: ${id}`))
   })

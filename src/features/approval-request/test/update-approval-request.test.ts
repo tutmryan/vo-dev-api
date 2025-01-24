@@ -174,7 +174,7 @@ describe('update approval request mutation', () => {
 
       expect(errors).toBeUndefined()
       expect(data).not.toBeNull()
-      expect(data?.approvalRequest.id.toLowerCase()).toEqual(approvalRequest.id)
+      expect(data?.approvalRequest.id).toEqual(approvalRequest.id)
       expect(data?.approvalRequest.purpose).toEqual('new purpose')
       expect(data?.approvalRequest.requestData).toEqual({ test: 'test' })
     }

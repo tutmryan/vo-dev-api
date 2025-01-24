@@ -39,11 +39,11 @@ describe('createOidcClientResource mutation', () => {
     expectToBeDefined(data?.createOidcClientResource)
     const clientWithResource = data.createOidcClientResource
 
-    expect(clientWithResource.id).toEqual(client.id.toUpperCase())
+    expect(clientWithResource.id).toEqual(client.id)
     expect(clientWithResource.resources).toHaveLength(1)
     expect(clientWithResource.resources?.[0]).toMatchObject({
       resource: {
-        id: resource.id.toUpperCase(),
+        id: resource.id,
       },
       resourceScopes: resource.scopes,
     })
@@ -81,7 +81,7 @@ describe('createOidcClientResource mutation', () => {
     expectToBeDefined(clientResource)
     expect(clientResource).toMatchObject({
       resource: {
-        id: resource.id.toUpperCase(),
+        id: resource.id,
       },
       resourceScopes: updatedScopes,
     })

@@ -22,20 +22,20 @@ export async function FindPresentationsQuery(
   const relations: FindOptionsRelations<PresentationEntity> = {}
   const order: FindOptionsOrder<PresentationEntity> = {}
 
-  if (criteria?.requestId) where.requestId = criteria.requestId.toUpperCase()
-  if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
-  if (criteria?.requestedById) where.requestedById = criteria.requestedById.toUpperCase()
-  if (criteria?.oidcClientId) where.oidcClientId = criteria.oidcClientId.toUpperCase()
+  if (criteria?.requestId) where.requestId = criteria.requestId
+  if (criteria?.identityId) where.identityId = criteria.identityId
+  if (criteria?.requestedById) where.requestedById = criteria.requestedById
+  if (criteria?.oidcClientId) where.oidcClientId = criteria.oidcClientId
   if (criteria?.contractId || criteria?.issuanceId) {
     relations.issuances = true
     const issuanceWhere: FindOptionsWhere<IssuanceEntity> = {}
-    if (criteria.contractId) issuanceWhere.contractId = criteria.contractId.toUpperCase()
-    if (criteria.issuanceId) issuanceWhere.id = criteria.issuanceId.toUpperCase()
+    if (criteria.contractId) issuanceWhere.contractId = criteria.contractId
+    if (criteria.issuanceId) issuanceWhere.id = criteria.issuanceId
     where.issuances = issuanceWhere
   }
   if (criteria?.partnerId) {
     relations.partners = true
-    where.partners = { id: criteria.partnerId.toUpperCase() }
+    where.partners = { id: criteria.partnerId }
   }
   if (criteria?.requestedType) where.requestedCredentialsJson = ILike(`%"type":"${criteria.requestedType}"%`)
   if (criteria?.presentedType) where.presentedCredentialsJson = ILike(`%"type":[[]%"${criteria.presentedType}"%]%`) // [[] is how you escape [ https://stackoverflow.com/questions/439495/how-can-i-escape-square-brackets-in-a-like-clause

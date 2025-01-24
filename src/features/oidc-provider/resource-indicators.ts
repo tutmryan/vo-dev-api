@@ -9,7 +9,7 @@ export function getResourceServerInfo(clients: OidcClientEntity[], resources: Oi
     const { errors } = await oidcProviderModule()
 
     // look up the client and validate the client is configured to have access to the resource
-    const clientEntity = clients.find((c) => c.id.toLowerCase() === client.clientId)
+    const clientEntity = clients.find((c) => c.id === client.clientId)
     invariant(clientEntity, `Client ${client.clientId} not found`)
     const clientResources = await clientEntity.resources
     const clientResource = clientResources.find(({ resourceId }) => {

@@ -8,18 +8,18 @@ import { IssuanceEntity } from '../entities/issuance-entity'
 export async function CountIssuancesQuery(this: QueryContext, criteria?: Maybe<IssuanceWhere>) {
   const where: FindOptionsWhere<IssuanceEntity> = {}
   const relations: FindOptionsRelations<IssuanceEntity> = {}
-  if (criteria?.requestId) where.requestId = criteria.requestId.toUpperCase()
-  if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
-  if (criteria?.contractId) where.contractId = criteria.contractId.toUpperCase()
-  if (criteria?.issuedById) where.issuedById = criteria.issuedById.toUpperCase()
-  if (criteria?.revokedById) where.revokedById = criteria.revokedById.toUpperCase()
+  if (criteria?.requestId) where.requestId = criteria.requestId
+  if (criteria?.identityId) where.identityId = criteria.identityId
+  if (criteria?.contractId) where.contractId = criteria.contractId
+  if (criteria?.issuedById) where.issuedById = criteria.issuedById
+  if (criteria?.revokedById) where.revokedById = criteria.revokedById
   if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined) {
     where.hasFaceCheckPhoto = Raw((alias) => `ISNULL(${alias}, 0) = :hasFaceCheckPhoto`, { hasFaceCheckPhoto: criteria.hasFaceCheckPhoto })
   }
   if (criteria?.presentationId) {
     relations.presentations = true
     where.presentations = {
-      id: criteria.presentationId.toUpperCase(),
+      id: criteria.presentationId,
     }
   }
 

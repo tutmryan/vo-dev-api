@@ -37,7 +37,7 @@ describe('action approval request', () => {
     // Assert
     expect(errors).toBeUndefined()
     expect(data).not.toBeNull()
-    expect(data?.actionApprovalRequest.id.toLowerCase()).toEqual(approvalRequest.id)
+    expect(data?.actionApprovalRequest.id).toEqual(approvalRequest.id)
     expect(data?.actionApprovalRequest.status).toEqual(ApprovalRequestStatus.Approved)
     expect(data?.actionApprovalRequest.isApproved).toEqual(true)
     expect(data?.actionApprovalRequest.actionedComment).toEqual('I hereby approve this request')
@@ -62,7 +62,7 @@ describe('action approval request', () => {
     // Assert
     expect(errors).toBeUndefined()
     expect(data).not.toBeNull()
-    expect(data?.actionApprovalRequest.id.toLowerCase()).toEqual(approvalRequest.id)
+    expect(data?.actionApprovalRequest.id).toEqual(approvalRequest.id)
     expect(data?.actionApprovalRequest.status).toEqual(ApprovalRequestStatus.Rejected)
     expect(data?.actionApprovalRequest.isApproved).toEqual(false)
     expect(data?.actionApprovalRequest.actionedComment).toEqual('I cannot approve this request')

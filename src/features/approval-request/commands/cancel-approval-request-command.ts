@@ -19,8 +19,7 @@ export async function CancelApprovalRequestCommand(this: CommandContext, id: str
   )
 
   // admins can cancel any request, otherwise only the creator can cancel
-  const isPermittedToCancel =
-    user.roles.includes(UserRoles.approvalRequestAdmin) || approvalRequest.createdById.toLowerCase() === user.entity.id.toLowerCase()
+  const isPermittedToCancel = user.roles.includes(UserRoles.approvalRequestAdmin) || approvalRequest.createdById === user.entity.id
   invariant(
     isPermittedToCancel,
     `User does not have permission to cancel this approval request. Only the creator of the request or an admin can cancel it.`,

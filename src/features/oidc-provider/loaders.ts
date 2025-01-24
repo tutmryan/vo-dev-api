@@ -9,9 +9,7 @@ export const oidcClientLoader = () =>
     const results = await dataSource
       .getRepository(OidcClientEntity)
       .find({ comment: 'FindOidcClientsById', where: { id: In(ids) }, withDeleted: true })
-    return ids.map(
-      (id) => results.find((result) => result.id.toUpperCase() === id.toUpperCase()) ?? new Error(`OIDC client not found: ${id}`),
-    )
+    return ids.map((id) => results.find((result) => result.id === id) ?? new Error(`OIDC client not found: ${id}`))
   })
 
 export const oidcResourceLoader = () =>
@@ -19,7 +17,5 @@ export const oidcResourceLoader = () =>
     const results = await dataSource
       .getRepository(OidcResourceEntity)
       .find({ comment: 'FindOidcResourcesById', where: { id: In(ids) }, withDeleted: true })
-    return ids.map(
-      (id) => results.find((result) => result.id.toUpperCase() === id.toUpperCase()) ?? new Error(`OIDC resource not found: ${id}`),
-    )
+    return ids.map((id) => results.find((result) => result.id === id) ?? new Error(`OIDC resource not found: ${id}`))
   })

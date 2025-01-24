@@ -83,8 +83,8 @@ export async function CreatePresentationRequestCommand(
 
   // cache presentation details for use in the callback
   const requestDetails: PresentationRequestDetails = {
-    requestedById: user.entity.id.toUpperCase(),
-    identityId: identity?.id.toUpperCase() ?? null,
+    requestedById: user.entity.id,
+    identityId: identity?.id ?? null,
     requestedCredentials: presentationRequest.requestedCredentials,
     ...context,
   }

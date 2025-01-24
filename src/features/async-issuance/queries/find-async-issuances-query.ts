@@ -47,9 +47,9 @@ export async function FindAsyncIssuancesQuery(
     }
   }
 
-  if (criteria?.identityId) where.identityId = criteria.identityId.toUpperCase()
-  if (criteria?.contractId) where.contractId = criteria.contractId.toUpperCase()
-  if (criteria?.createdById) where.createdById = criteria.createdById.toUpperCase()
+  if (criteria?.identityId) where.identityId = criteria.identityId
+  if (criteria?.contractId) where.contractId = criteria.contractId
+  if (criteria?.createdById) where.createdById = criteria.createdById
 
   where.createdAt = OptionalRange(criteria?.createdFrom, criteria?.createdTo)
 

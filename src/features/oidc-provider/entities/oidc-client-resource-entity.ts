@@ -1,4 +1,5 @@
 import { Column, Entity, Index, ManyToOne } from 'typeorm'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { OidcClientEntity } from './oidc-client-entity'
@@ -15,7 +16,7 @@ export class OidcClientResourceEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => OidcClientEntity)
   client!: Promise<OidcClientEntity>
 
-  @Column()
+  @Column({ transformer: uuidLowerCaseTransformer })
   clientId!: string
 
   /**
@@ -24,7 +25,7 @@ export class OidcClientResourceEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => OidcResourceEntity)
   resource!: Promise<OidcResourceEntity>
 
-  @Column()
+  @Column({ transformer: uuidLowerCaseTransformer })
   resourceId!: string
 
   /**

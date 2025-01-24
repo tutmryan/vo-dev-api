@@ -2,7 +2,7 @@ import { graphql } from '../../../generated'
 import { UserRoles } from '../../../roles'
 import { executeOperationAsUser } from '../../../test'
 
-export const AsyncIssuanceRequestFragment = graphql(`
+graphql(`
   fragment AsyncIssuanceRequestFragment on AsyncIssuanceRequest {
     id
     status

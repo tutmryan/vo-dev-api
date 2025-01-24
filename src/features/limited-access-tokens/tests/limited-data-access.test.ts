@@ -135,7 +135,7 @@ describe('list contracts and identity-based access', () => {
     expect(errors).toBeUndefined()
 
     expectToBeDefined(data?.findContracts)
-    const contract = data?.findContracts.find((c) => c.id === id.toUpperCase())
+    const contract = data?.findContracts.find((c) => c.id === id)
     expectToBeDefined(contract)
 
     expectToBeDefined(contract?.issuances)

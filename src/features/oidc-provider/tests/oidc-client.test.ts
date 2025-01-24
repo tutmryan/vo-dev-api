@@ -77,7 +77,7 @@ describe('updateOidcClient mutation', () => {
     expectToBeDefined(data?.updateOidcClient)
     const updateOidcClient = data.updateOidcClient
 
-    expect(client.id.toUpperCase()).toEqual(updateOidcClient.id)
+    expect(client.id).toEqual(updateOidcClient.id)
     expect(updateOidcClient).toMatchObject(updateInput)
     expect(updateOidcClient.updatedAt).toBeDefined()
     expect(updateOidcClient.updatedAt?.getTime()).toBeGreaterThan(updateOidcClient.createdAt?.getDate())
@@ -104,7 +104,7 @@ describe('deleteOidcClient mutation', () => {
     expect(errors).toBeUndefined()
     expectToBeDefined(data?.deleteOidcClient)
 
-    expect(data.deleteOidcClient.id).toEqual(client.id.toUpperCase())
+    expect(data.deleteOidcClient.id).toEqual(client.id)
     expect(data.deleteOidcClient.deletedAt).toBeDefined()
     expect(data.deleteOidcClient.updatedBy).toBeDefined()
   })

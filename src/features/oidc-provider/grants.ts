@@ -51,7 +51,7 @@ export function loadExistingGrant(clients: OidcClientEntity[], resources: OidcRe
         // if the client has access to resources, grant those scopes as well
         const clientId = ctx.oidc.client.clientId
         invariant(clientId, 'client must be available on oidc context')
-        const client = clients.find((c) => c.id.toLowerCase() === clientId)
+        const client = clients.find((c) => c.id === clientId)
         invariant(client, `Client ${clientId} not found`)
 
         for (const clientResource of await client.resources) {

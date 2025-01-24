@@ -73,7 +73,7 @@ describe('updateOidcResource mutation', () => {
     expectToBeDefined(data?.updateOidcResource)
     const updateOidcResource = data.updateOidcResource
 
-    expect(resource.id.toUpperCase()).toEqual(updateOidcResource.id)
+    expect(resource.id).toEqual(updateOidcResource.id)
     expect(updateOidcResource).toMatchObject(updateInput)
     expect(updateOidcResource.updatedAt).toBeDefined()
     expect(updateOidcResource.updatedAt?.getTime()).toBeGreaterThan(updateOidcResource.createdAt?.getDate())

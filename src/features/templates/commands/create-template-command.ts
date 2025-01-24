@@ -21,10 +21,10 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
     await ensureNoIntersectingTemplateData(toTemplateParentDataFromInput(input), parentData)
   }
 
-  const templateId = randomUUID().toUpperCase()
+  const templateId = randomUUID()
 
   const displayLogoUri = input.display?.card?.logo?.image
-    ? await this.services.logoImages.uploadDataUrl(templateId, input.display.card.logo.image, { appendExtension: true })
+    ? await this.services.logoImages.uploadDataUrl(templateId.toUpperCase(), input.display.card.logo.image, { appendExtension: true })
     : null
 
   const template = new TemplateEntity({

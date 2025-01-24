@@ -1,4 +1,5 @@
 import { Column, Entity } from 'typeorm'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 
@@ -25,10 +26,10 @@ export class PartnerEntity extends AuditedAndTrackedEntity {
     this.credentialTypesJson = JSON.stringify(types)
   }
 
-  @Column({ type: 'uniqueidentifier', nullable: true })
+  @Column({ type: 'uniqueidentifier', nullable: true, transformer: uuidLowerCaseTransformer })
   tenantId!: string | null
 
-  @Column({ type: 'uniqueidentifier', nullable: true })
+  @Column({ type: 'uniqueidentifier', nullable: true, transformer: uuidLowerCaseTransformer })
   issuerId!: string | null
 
   @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
