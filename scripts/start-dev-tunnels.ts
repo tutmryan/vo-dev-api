@@ -7,8 +7,8 @@ import openEditor from 'open-editor'
 import YAML from 'yaml'
 
 const pathToApi = `${process.cwd()}`
-const pathToAdminUi = `${process.cwd()}/../verified-orchestration-admin`
-const pathToPortalUi = `${process.cwd()}/../verified-orchestration-portal`
+const pathToComposer = `${process.cwd()}/../verified-orchestration-admin`
+const pathToConcierge = `${process.cwd()}/../verified-orchestration-portal`
 
 const getNgrokConfigPath = () => {
   if (process.platform === 'darwin') {
@@ -27,12 +27,12 @@ const checkProjectLayout = async () => {
     console.error('API project not found. Exiting...', Path.join(pathToApi, 'package.json'))
     process.exit(-1)
   }
-  if (!fs.existsSync(Path.join(pathToAdminUi, 'package.json'))) {
-    console.error('Admin project not found. Exiting...')
+  if (!fs.existsSync(Path.join(pathToComposer, 'package.json'))) {
+    console.error('Composer project not found. Exiting...')
     process.exit(-1)
   }
-  if (!fs.existsSync(Path.join(pathToPortalUi, 'package.json'))) {
-    console.error('Portal project not found. Exiting...')
+  if (!fs.existsSync(Path.join(pathToConcierge, 'package.json'))) {
+    console.error('Concierge project not found. Exiting...')
     process.exit(-1)
   }
 }
@@ -114,50 +114,50 @@ const startNgrok = async () => {
     })
   }
 
-  console.log('Creating tunnel to the API project...')
-  const apiUrl = await ngrok.connect({
+  console.log('Creating tunnel to the API...')
+  const apiURL = await ngrok.connect({
     proto: 'http',
     addr: 4000,
   })
-  console.log(`✅ API tunnel created at ${apiUrl}`)
+  console.log(`✅ API tunnel created at ${apiURL}`)
 
-  console.log('Creating tunnel to the Admin UI project...')
-  const adminUiUrl = await ngrok.connect({
+  console.log('Creating tunnel to Composer...')
+  const composerURL = await ngrok.connect({
     proto: 'http',
     addr: 5173,
   })
-  console.log(`✅ Admin UI tunnel created at ${adminUiUrl}`)
+  console.log(`✅ Composer tunnel created at ${composerURL}`)
 
-  console.log('Creating tunnel to the Portal UI project...')
-  const portalUiUrl = await ngrok.connect({
+  console.log('Creating tunnel to Concierge...')
+  const conciergeURL = await ngrok.connect({
     proto: 'http',
     addr: 5174,
   })
-  console.log(`✅ Portal UI tunnel created at ${portalUiUrl}`)
+  console.log(`✅ Concierge UI tunnel created at ${conciergeURL}`)
 
   // API
   console.log('Updating the API .env file with the new API URL...')
-  replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_API', apiUrl, pathToApi, '.env')
+  replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_API', apiURL, pathToApi, '.env')
   console.log('Updating the API .env file with the new Portal tunnel URL...')
-  replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_PORTAL', portalUiUrl, pathToApi, '.env')
+  replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_PORTAL', conciergeURL, pathToApi, '.env')
 
-  // Admin
-  console.log('Updating the Admin UI .env.local file with the new API URL...')
-  replaceValueInEnvConfigFile('VITE_API_URL', `${apiUrl}/graphql`, pathToAdminUi, '.env.local')
+  // Composer
+  console.log('Updating the Composer .env.local file with the new API URL...')
+  replaceValueInEnvConfigFile('VITE_API_URL', `${apiURL}/graphql`, pathToComposer, '.env.local')
 
-  // Portal
-  console.log('Updating the Portal UI .env.local file with the new API URL...')
-  replaceValueInEnvConfigFile('VITE_VO_API_URL', `${apiUrl}/graphql`, pathToPortalUi, '.env.local')
-  replaceValueInEnvConfigFile('VITE_OIDC_AUTHORITY', `${apiUrl}/oidc`, pathToPortalUi, '.env.local')
+  // Concierge
+  console.log('Updating the Concierge .env.local file with the new API URL...')
+  replaceValueInEnvConfigFile('VITE_VO_API_URL', `${apiURL}/graphql`, pathToConcierge, '.env.local')
+  replaceValueInEnvConfigFile('VITE_OIDC_AUTHORITY', `${apiURL}/oidc`, pathToConcierge, '.env.local')
 
   const renderUi = () => {
     console.log('')
     console.log('')
     console.log('------------------------------------------------')
     console.log('Tunnels are open')
-    console.log(`  API:       ${apiUrl}`)
-    console.log(`  Admin UI:  ${adminUiUrl}`)
-    console.log(`  Portal UI: ${portalUiUrl}`)
+    console.log(`  API:       ${apiURL}`)
+    console.log(`  Composer UI:  ${composerURL}`)
+    console.log(`  Concierge UI: ${conciergeURL}`)
     console.log('')
     console.log('Ngrok dashboard')
     console.log('  http://127.0.0.1:4040/')
@@ -166,9 +166,9 @@ const startNgrok = async () => {
     console.log('')
     console.log('Press Ctrl+C to close the tunnels and exit')
     console.log('')
-    console.log('Enter `b` to open the API')
-    console.log('Enter `a` to open the Admin UI')
-    console.log('Enter `p` to open the Portal UI')
+    console.log('Enter `a` to open the API')
+    console.log('Enter `c` to open the Composer')
+    console.log('Enter `p` to open the Concierge')
     console.log('Enter `n` to open the ngrok dashboard')
     console.log('')
     console.log('------------------------------------------------')
@@ -186,15 +186,15 @@ const startNgrok = async () => {
     switch (input.toLowerCase()) {
       case 'b':
         console.log('Opening API...')
-        open(apiUrl).catch(console.error)
+        open(apiURL).catch(console.error)
         break
       case 'a':
-        console.log('Opening Admin UI...')
-        open(adminUiUrl).catch(console.error)
+        console.log('Opening Composer...')
+        open(composerURL).catch(console.error)
         break
       case 'p':
-        console.log('Opening Portal UI...')
-        open(portalUiUrl).catch(console.error)
+        console.log('Opening Concierge...')
+        open(conciergeURL).catch(console.error)
         break
       case 'n':
         console.log('Opening Ngrok dashboard...')
@@ -231,8 +231,8 @@ const graceful = async () => {
   console.log('Removing Ngrok configuration...')
   replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_API', '', pathToApi, '.env')
   replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_PORTAL', '', pathToApi, '.env')
-  replaceValueInEnvConfigFile('VITE_API_URL', `http://localhost:4000/graphql`, pathToAdminUi, '.env.local')
-  replaceValueInEnvConfigFile('VITE_VO_API_URL', `http://localhost:4000/graphql`, pathToPortalUi, '.env.local')
+  replaceValueInEnvConfigFile('VITE_API_URL', `http://localhost:4000/graphql`, pathToComposer, '.env.local')
+  replaceValueInEnvConfigFile('VITE_VO_API_URL', `http://localhost:4000/graphql`, pathToConcierge, '.env.local')
 
   process.exit(0)
 }
