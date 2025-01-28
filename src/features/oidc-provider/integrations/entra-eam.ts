@@ -118,7 +118,7 @@ export function whenEamApplyAcr(loginData: LoginInteractionData, acr: string) {
 export const isEamRequest = (params: UnknownObject, clientId: string) => {
   // Confirm the basic OIDC parameters line up with expected EAM values
   if (
-    params.scope !== 'openid' ||
+    !((params.scope as string | undefined) ?? '').includes('openid') ||
     params.response_type !== 'id_token' ||
     params.response_mode !== 'form_post' ||
     !params.id_token_hint ||
