@@ -88,6 +88,6 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   @ManyToOne(() => OidcClientEntity)
   oidcClient!: Promise<OidcClientEntity | null>
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, transformer: uuidLowerCaseTransformer })
   oidcClientId!: string | null
 }
