@@ -184,11 +184,11 @@ const startNgrok = async () => {
     console.clear()
     renderUi()
     switch (input.toLowerCase()) {
-      case 'b':
+      case 'a':
         console.log('Opening API...')
         open(apiURL).catch(console.error)
         break
-      case 'a':
+      case 'c':
         console.log('Opening Composer...')
         open(composerURL).catch(console.error)
         break
