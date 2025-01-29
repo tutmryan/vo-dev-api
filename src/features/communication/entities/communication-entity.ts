@@ -1,4 +1,5 @@
 import { Column, CreateDateColumn, Entity, Index, ManyToOne } from 'typeorm'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import { CommunicationPurpose, ContactMethod } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
@@ -26,13 +27,13 @@ export class CommunicationEntity extends VerifiedOrchestrationEntity {
   @ManyToOne(() => UserEntity)
   createdBy!: Promise<UserEntity>
 
-  @Column()
+  @Column({ transformer: uuidLowerCaseTransformer })
   createdById!: string
 
   @ManyToOne(() => IdentityEntity)
   recipient!: Promise<IdentityEntity>
 
-  @Column()
+  @Column({ transformer: uuidLowerCaseTransformer })
   recipientId!: string
 
   @Column({ type: 'nvarchar', length: 255 })
@@ -44,7 +45,7 @@ export class CommunicationEntity extends VerifiedOrchestrationEntity {
   @ManyToOne(() => AsyncIssuanceEntity)
   asyncIssuance!: Promise<UserEntity | null>
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, transformer: uuidLowerCaseTransformer })
   asyncIssuanceId!: string | null
 
   @Column({ type: 'nvarchar', nullable: true })
