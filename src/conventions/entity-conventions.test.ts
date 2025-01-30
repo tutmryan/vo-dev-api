@@ -1,10 +1,16 @@
+import { isFunction } from 'lodash'
 import { getMetadataArgsStorage } from 'typeorm'
 import { ValueTransformer } from 'typeorm/decorator/options/ValueTransformer'
 import { beforeAfterAll } from '../test'
 
 const typeormMetadata = getMetadataArgsStorage()
 const manyToOneRelations = () => {
-  return typeormMetadata.relations.filter((r) => r.relationType === 'many-to-one')
+  return typeormMetadata.relations
+    .filter((r) => r.relationType === 'many-to-one')
+    .map((r) => ({
+      ...r,
+      typeName: isFunction(r.type) ? r.type().name : r.type,
+    }))
 }
 const uniqueidentifierColumns = () => typeormMetadata.columns.filter((c) => c.options.type === 'uniqueidentifier')
 
@@ -19,7 +25,7 @@ describe('Entity Conventions', () => {
   })
   describe('Property relationships', () => {
     it.each(manyToOneRelations())(
-      'Mapped using @ManyToOne have corresponding id property with case transformer $target.name[$propertyName] to $type',
+      'Mapped using @ManyToOne have corresponding id property with case transformer $target.name[$propertyName] to $typeName',
       (manyToOneRelation) => {
         const columns = typeormMetadata.columns.filter((c) => c.target === manyToOneRelation.target)
         const relationIds = typeormMetadata.relationIds.filter((r) => r.target === manyToOneRelation.target)
