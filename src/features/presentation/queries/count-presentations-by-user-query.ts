@@ -17,7 +17,7 @@ export async function CountPresentationsByUserQuery(
     .getRepository(PresentationEntity)
     .createQueryBuilder('p')
     .select('COUNT(*)', 'count')
-    .addSelect('p.requested_by_id')
+    .addSelect('LOWER(p.requested_by_id) as requested_by_id')
     .groupBy('p.requested_by_id')
     .orderBy('count', 'DESC')
     .where('1=1')
