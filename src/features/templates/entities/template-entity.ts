@@ -1,5 +1,5 @@
 import { compact, flatten, isEqual, merge, uniq } from 'lodash'
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm'
+import { Column, Entity, ManyToOne, OneToMany, RelationId } from 'typeorm'
 import type {
   FaceCheckPhotoSupport,
   Maybe,
@@ -42,6 +42,9 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
 
   @ManyToOne(() => TemplateEntity, { nullable: true })
   parent!: Promise<TemplateEntity | null>
+
+  @RelationId((template: TemplateEntity) => template.parent)
+  parentId!: string | null
 
   @OneToMany(() => TemplateEntity, (template) => template.parent)
   children!: Promise<TemplateEntity[]>
