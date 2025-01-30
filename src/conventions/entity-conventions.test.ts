@@ -1,21 +1,25 @@
 import { getMetadataArgsStorage } from 'typeorm'
 import { ValueTransformer } from 'typeorm/decorator/options/ValueTransformer'
+import { beforeAfterAll } from '../test'
 
 const typeormMetadata = getMetadataArgsStorage()
-const manyToOneRelations = typeormMetadata.relations.filter((r) => r.relationType === 'many-to-one')
-const uniqueidentifierColumns = typeormMetadata.columns.filter((c) => c.options.type === 'uniqueidentifier')
+const manyToOneRelations = () => {
+  return typeormMetadata.relations.filter((r) => r.relationType === 'many-to-one')
+}
+const uniqueidentifierColumns = () => typeormMetadata.columns.filter((c) => c.options.type === 'uniqueidentifier')
 
 describe('Entity Conventions', () => {
-  describe('Columns', () => {
-    it.each(uniqueidentifierColumns)('$target.name property $propertyName is type uniqueidentifier and has a transformer', (column) => {
+  beforeAfterAll()
+  describe('Property columns', () => {
+    it.each(uniqueidentifierColumns())('Mapped to type uniqueidentifier has the case transformer $target.name[$propertyName]', (column) => {
       expect(column.options.transformer).toBeDefined()
       expect(Array.isArray(column.options.transformer)).toBe(false)
       expect((column.options.transformer as ValueTransformer).from('DB-VALUE')).toBe('db-value')
     })
   })
-  describe('Relationships for', () => {
-    it.each(manyToOneRelations)(
-      '$target.name many-to-one $propertyName for $type.name has an id property with transformer',
+  describe('Property relationships', () => {
+    it.each(manyToOneRelations())(
+      'Mapped using @ManyToOne have corresponding id property with case transformer $target.name[$propertyName] to $type',
       (manyToOneRelation) => {
         const columns = typeormMetadata.columns.filter((c) => c.target === manyToOneRelation.target)
         const relationIds = typeormMetadata.relationIds.filter((r) => r.target === manyToOneRelation.target)
