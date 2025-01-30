@@ -17,7 +17,7 @@ export async function CountIssuancesByContractQuery(
     .getRepository(IssuanceEntity)
     .createQueryBuilder('issuance')
     .select('COUNT(*)', 'count')
-    .addSelect('contract_id')
+    .addSelect('LOWER(contract_id) AS contract_id')
     .groupBy('contract_id')
     .orderBy('count', 'DESC')
     .where('1=1')

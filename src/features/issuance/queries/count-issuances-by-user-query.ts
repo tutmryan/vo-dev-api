@@ -17,7 +17,7 @@ export async function CountIssuancesByUserQuery(
     .getRepository(IssuanceEntity)
     .createQueryBuilder('issuance')
     .select('COUNT(*)', 'count')
-    .addSelect('issued_by_id')
+    .addSelect('LOWER(issued_by_id) AS issued_by_id')
     .groupBy('issued_by_id')
     .orderBy('count', 'DESC')
     .where('1=1')

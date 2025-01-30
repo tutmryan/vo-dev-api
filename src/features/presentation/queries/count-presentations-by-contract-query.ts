@@ -20,7 +20,7 @@ export async function CountPresentationsByContractQuery(
     .innerJoin('presentation', 'p', 'presentation_issuances.presentation_id = p.id')
     .innerJoin('issuance', 'i', 'presentation_issuances.issuance_id = i.id')
     .select('COUNT(*)', 'count')
-    .addSelect('contract_id')
+    .addSelect('LOWER(contract_id) AS contract_id')
     .groupBy('contract_id')
     .orderBy('count', 'DESC')
     .where('1=1')
