@@ -36,10 +36,19 @@ const minimalClientEntity = {
   >
 >
 
+const tryGetClient = (clientId: string | undefined) => {
+  if (!clientId) return minimalClientEntity
+  try {
+    return getClient(clientId)
+  } catch {
+    return minimalClientEntity
+  }
+}
+
 export const errorHandler: Configuration['renderError'] = async (ctx, errorOut, error) => {
   logger.error('OIDC provider error', { error, oidcParams: processOidcParams(ctx.oidc.params) })
   const clientId = ctx.oidc.params?.client_id as string | undefined
-  const clientEntity = clientId ? getClient(clientId) : minimalClientEntity
+  const clientEntity = tryGetClient(clientId)
   const { logo, backgroundColor, backgroundImage } = clientEntity
   ctx.response.body = await renderFile(path.join(__dirname, 'views', 'error.ejs'), {
     error,
