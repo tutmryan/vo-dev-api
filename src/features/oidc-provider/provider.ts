@@ -14,6 +14,7 @@ import { findAccount } from './account'
 import { openidClaims, presentationLoginStandardClaims } from './claims'
 import type { OidcData } from './data'
 import { loadOidcData } from './data'
+import { errorHandler } from './error-handler'
 import { extraParams } from './extra-params'
 import { loadExistingGrant } from './grants'
 import { eamExtraParams, hookAndApplyCustomEntraEamSpec } from './integrations/entra-eam'
@@ -96,6 +97,7 @@ async function createProvider() {
     ttl: {
       Session: 1,
     },
+    renderError: errorHandler,
   } satisfies Configuration)
 
   // allow http + localhost for redirect URIs
@@ -144,6 +146,12 @@ export function getData() {
   const data = dataRef.data
   invariant(data, 'dataRef.data not set')
   return data
+}
+
+export function getClient(clientId: string) {
+  const client = getData().clients.find((c) => c.id === clientId)
+  invariant(client, 'client not found')
+  return client
 }
 
 export async function addOidcProvider(app: Express): Promise<string> {

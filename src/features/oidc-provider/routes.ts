@@ -15,7 +15,7 @@ import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
 import { eamLoginFailResult, isEamRequestAndLoginShouldFail, whenEamApplyAcr, whenEamApplyAmr } from './integrations/entra-eam'
 import { createRequestInfo } from './log-events'
 import { voLogoUrl } from './logos'
-import { getData, getProvider } from './provider'
+import { getClient, getData, getProvider } from './provider'
 import { acquireLoginPresentationToken, buildAuthnPresentationRequest, completeLogin, getLoginInteractionData } from './session'
 
 // taken from: https://github.com/panva/node-oidc-provider/blob/main/example/routes/express.js
@@ -50,12 +50,6 @@ const body = urlencoded({ extended: false })
 const noCache: RequestHandler = (_req, res, next) => {
   res.set('cache-control', 'no-store')
   next()
-}
-
-function getClient(clientId: string) {
-  const client = getData().clients.find((c) => c.id === clientId)
-  invariant(client, 'client not found')
-  return client
 }
 
 export function routes(app: Express, route: string): void {
