@@ -25,10 +25,7 @@ import { pruneKeys } from './util/prune-keys'
 
 export const disableIntrospectionForAnonymousUsers: ApolloServerPlugin<GraphQLContext> = {
   requestDidStart: ({ request: { query }, contextValue: { user } }) => {
-    if (isIntrospectionQuery(query)) {
-      if (!devToolsEnabled) throw new Error('Introspection is disabled')
-      if (!user) throw new Error('Unauthenticated introspection is not supported')
-    }
+    if (isIntrospectionQuery(query) && !user) throw new Error('Unauthenticated introspection is not supported')
     return Promise.resolve()
   },
 }
