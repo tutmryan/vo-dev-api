@@ -8,7 +8,7 @@ export async function DeleteTemplateCommand(this: CommandContext, id: string) {
   const usedByContracts = await this.entityManager.getRepository(ContractEntity).findBy({
     templateId: id,
   })
-  invariant(usedByContracts.length === 0, 'Cannot delete template which used by one or more contract.')
+  invariant(usedByContracts.length === 0, 'Cannot delete a template that is used by contracts')
 
   const repo = this.entityManager.getRepository(TemplateEntity)
   const template = await repo.findOneByOrFail({ id })
