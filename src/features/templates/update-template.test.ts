@@ -234,4 +234,25 @@ describe('updateTemplate mutation', () => {
     expect(data).toBeDefined()
     expect(data!.updateTemplate.name).toBe('Updated SUT template')
   })
+
+  it('does not allow self-referencing parent', async () => {
+    // Arrange
+    const { template } = await givenTemplate({})
+
+    // Act
+    const { errors } = await executeOperationAsCredentialAdmin({
+      query: updateTemplateMutation,
+      variables: {
+        id: template.id,
+        input: {
+          ...getUpdateTemplateInput(template),
+          parentTemplateId: template.id,
+        },
+      },
+    })
+
+    // Assert
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toMatchInlineSnapshot(`"Template cannot be its own parent"`)
+  })
 })
