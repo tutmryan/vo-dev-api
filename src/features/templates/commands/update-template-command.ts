@@ -2,6 +2,7 @@ import { basename } from 'path'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckSupportEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { type TemplateInput } from '../../../generated/graphql'
+import { invariant } from '../../../util/invariant'
 import { validateTemplateInput } from '../../contracts/validation'
 import { TemplateEntity } from '../entities/template-entity'
 import { ensureNoIntersectingTemplateData, toPersistedDisplayModel, toTemplateParentDataFromInput } from '../mapping'
@@ -17,6 +18,8 @@ export async function UpdateTemplateCommand(this: CommandContext, id: string, in
 
   const parent = input.parentTemplateId ? await repository.findOneByOrFail({ id: input.parentTemplateId }) : null
   if (parent) {
+    invariant(template.id !== parent.id, 'Template cannot be its own parent')
+
     await ensureNoIntersectingTemplateData(toTemplateParentDataFromInput(input), await parent.combinedData())
   }
 
