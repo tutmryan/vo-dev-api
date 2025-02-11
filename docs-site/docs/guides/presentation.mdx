@@ -33,6 +33,7 @@ The [presentation request input](/docs/reference/types/inputs/presentation-reque
 
 1. One or more requested credentials. For partner types, the issuer must be specified, otherwise just the credential type is required.
    - Optionally, include [constraints](/docs/reference/types/inputs/claim-constraint) to narrow what credential can be presented
+   - "VerifiableCredential" is a special type that permits the presentation of any valid credential.
 1. The name of the requesting client application (for display in the wallet prompt)
 1. The identity to whom the credential will be issued (recipient / issuee)
 1. Other optional input:
