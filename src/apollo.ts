@@ -6,8 +6,7 @@ import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHt
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { verifyMultiIssuer } from '@makerx/express-bearer'
-import { graphqlOperationLoggingPlugin } from '@makerx/graphql-apollo-server'
-import { isIntrospectionQuery } from '@makerx/graphql-core'
+import { graphqlOperationLoggingPlugin, introspectionControlPlugin } from '@makerx/graphql-apollo-server'
 import { useSubscriptionsServer } from '@makerx/graphql-core/subscriptions'
 import { isProduction } from '@makerx/node-common'
 import type { Express } from 'express'
@@ -23,13 +22,6 @@ import { rateLimiterMiddleware } from './rate-limiter'
 import createSchema from './schema'
 import { pruneKeys } from './util/prune-keys'
 
-export const disableIntrospectionForAnonymousUsers: ApolloServerPlugin<GraphQLContext> = {
-  requestDidStart: ({ request: { query }, contextValue: { user } }) => {
-    if (isIntrospectionQuery(query) && !user) throw new Error('Unauthenticated introspection is not supported')
-    return Promise.resolve()
-  },
-}
-
 const plugins = (httpServer: http.Server, serverCleanup?: () => Promise<void>): ApolloServerPlugin<GraphQLContext>[] => {
   const plugins: ApolloServerPlugin<GraphQLContext>[] = [
     graphqlOperationLoggingPlugin<GraphQLContext, Logger>({
@@ -38,7 +30,7 @@ const plugins = (httpServer: http.Server, serverCleanup?: () => Promise<void>): 
       includeMutationResponseData: true,
       adjustVariables: (variables) => pruneKeys(variables, 'headers'),
     }),
-    disableIntrospectionForAnonymousUsers,
+    introspectionControlPlugin as ApolloServerPlugin<GraphQLContext>,
     ApolloServerPluginDrainHttpServer({ httpServer }),
     {
       async serverWillStart() {
