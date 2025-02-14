@@ -132,7 +132,7 @@
     "@types/oidc-provider": "^8.5.2",
     "asn1js": "^3.0.5",
     "body-parser": "^1.20.2",
-    "bullmq": "^5.8.2",
+    "bullmq": "^5.40.5",
     "config": "^3.3.11",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.5",

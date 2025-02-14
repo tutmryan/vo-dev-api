@@ -13,6 +13,7 @@ import type { JobPayload } from './jobs'
 import { handlers, jobOptions, type JobNames, type WorkerContext } from './jobs'
 import { publishBackgroundJobEvent } from './pubsub'
 import { defaultJobOptions, JobQueueName } from './queue'
+import { publishScheduledJobResult } from './scheduler'
 
 type BackgroundJob = Job<JobPayload>
 
@@ -39,8 +40,9 @@ export const worker = Lazy(() => {
       logger.info(`Running job handler: ${job.name}`)
       try {
         const context = await createWorkerContext(job.data?.userId)
-        await handler(context, job)
+        const result = await handler(context, job)
         logger.info(`Job handler ${job.name} completed in ${Date.now() - started}ms`)
+        return result
       } catch (error) {
         logger.error(`Job handler ${job.name} failed after ${Date.now() - started}ms`, { error })
         // Exceptions thrown from a worker must be an `Error` for BullMQ to handle them correctly
@@ -73,12 +75,18 @@ export const worker = Lazy(() => {
 
   worker.on('completed', (job: BackgroundJob, result) => {
     publishBackgroundJobEvent({
-      event: { status: BackgroundJobStatus.Completed, result: result },
+      event: { status: BackgroundJobStatus.Completed, result: result as Record<string, unknown> },
       jobId: job.id!,
       jobName: job.name,
       userId: job.data?.userId,
     })
-    logger.info(`Job (id: ${job.id}) is completed.`, result)
+
+    // schedule job IDs are prefixed with 'repeat:'
+    if (job.id?.startsWith('repeat:')) {
+      publishScheduledJobResult(job.name as JobNames, result)
+    }
+
+    logger.info(`Job (id: ${job.id}) is completed.`)
   })
 
   worker.on('failed', (job: BackgroundJob | undefined, error) => {

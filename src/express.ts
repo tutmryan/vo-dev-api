@@ -34,7 +34,7 @@ import { demoPresentationTokenHandlers, demoPresentationTokenRoute } from './fea
 import { vcLogoProxyHandler, vcLogoProxyTokenRoute } from './features/local-dev/vc-logo-proxy'
 import { addOidcProvider } from './features/oidc-provider'
 import { logger } from './logger'
-import { testGraphService, testVidService } from './services'
+import { addServiceHealthEndpoints } from './services/monitoring/express'
 import { addVoyager } from './voyager'
 
 export const requestOrigin = (req: Request): string => `${req.protocol}://${req.get('Host')}`
@@ -140,16 +140,10 @@ export async function getExpressApp(): Promise<Express> {
     logger.info(`Added ${demoPresentationTokenRoute}`)
   }
 
-  // startup configuration checks and health check endpoints
-  testGraphService().then((graphResult) => {
-    app.get('/health/services/ms-graph', (req, res) => res.status(graphResult ? 200 : 503).send(graphResult ? 'OK' : 'Not OK'))
-  })
-
-  testVidService().then((vidResult) => {
-    app.get('/health/services/verified-id', (req, res) => res.status(vidResult ? 200 : 503).send(vidResult ? 'OK' : 'Not OK'))
-  })
-
   app.get('/health', (req, res) => res.send('OK').end())
+  logger.info('Added GET /health')
+
+  addServiceHealthEndpoints(app)
 
   // add bearer auth to all requests
   app.use(

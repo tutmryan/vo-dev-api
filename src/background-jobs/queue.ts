@@ -15,6 +15,8 @@ export type JobType<TName extends string, TPayload extends JobPayload> = {
 }
 
 export const defaultJobOptions: DefaultJobOptions = {
+  removeOnComplete: true,
+  removeOnFail: true,
   backoff: {
     type: 'exponential',
     delay: 1000,
@@ -31,6 +33,7 @@ export const jobQueue = Lazy(
 
 export const jobQueueEvents = Lazy(() => {
   const events = new QueueEvents(JobQueueName, { connection: redisOptions })
+
   events.on('paused', () => {
     logger.info(`${JobQueueName} has been paused`)
   })
@@ -48,7 +51,7 @@ export const jobQueueEvents = Lazy(() => {
 
 export const addToJobQueue = async (jobType: JobTypes, jobId: string = randomUUID()): Promise<string> => {
   const options = jobOptions[jobType.name]
-  await jobQueue().add(jobType.name, jobType.payload, { jobId, removeOnComplete: true, removeDependencyOnFailure: true, ...options })
+  await jobQueue().add(jobType.name, jobType.payload, { jobId, removeDependencyOnFailure: true, ...options })
   return jobId
 }
 

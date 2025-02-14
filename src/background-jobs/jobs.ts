@@ -33,6 +33,7 @@ import type { UserEntity } from '../features/users/entities/user-entity'
 import type { logger } from '../logger'
 import { ONE_MINUTE_TTL } from '../redis/cache'
 import type { Services } from '../services'
+import { monitorServicesJobHandler, type MonitorServicesJobName, type MonitorServicesJobType } from '../services/monitoring/job'
 import type { PartialRecord } from '../util/partial-record'
 
 export type WorkerContext = {
@@ -48,7 +49,10 @@ export type JobPayload =
       requestId?: string
     }
 
-export type JobHandler<TPayload extends JobPayload = JobPayload> = (context: WorkerContext, job: Job<TPayload>) => Promise<void>
+export type JobHandler<TPayload extends JobPayload = JobPayload, TResult = unknown> = (
+  context: WorkerContext,
+  job: Job<TPayload>,
+) => Promise<TResult>
 
 type HandlerMap<T extends { name: JobNames }> = {
   [J in T as J['name']]?: JobHandler<any | never>
@@ -64,6 +68,7 @@ export type JobNames =
   | CancelAsyncIssuanceRequestsJobName
   | InitialiseOidcKeysJobName
   | InitialiseOidcDataJobName
+  | MonitorServicesJobName
 
 export type JobTypes =
   | RevokeIssuancesJobType
@@ -75,6 +80,7 @@ export type JobTypes =
   | CancelAsyncIssuanceRequestsJobType
   | InitialiseOidcKeysJobType
   | InitialiseOidcDataJobType
+  | MonitorServicesJobType
 
 export const handlers: HandlerMap<JobTypes> = {
   revokeIssuances: revokeIssuancesJobHandler,
@@ -86,6 +92,7 @@ export const handlers: HandlerMap<JobTypes> = {
   cancelAsyncIssuanceRequests: cancelAsyncIssuanceRequestsHandler,
   initialiseOidcKeys: initialiseOidcKeysJobHandler,
   initialiseOidcData: initialiseOidcDataJobHandler,
+  monitorServices: monitorServicesJobHandler,
 }
 
 // override default job options for specific job handlers

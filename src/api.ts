@@ -18,7 +18,7 @@ export const runApi = async () => {
   await dataSource.initialize()
 
   logger.info('Starting background job processing')
-  const jobRunnerCleanup = useBackgroundJob()
+  const jobRunnerCleanup = await useBackgroundJob()
 
   logger.info('Initialising express app')
   const app = await getExpressApp()
