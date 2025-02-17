@@ -52,3 +52,4 @@ export const limitedOidcClient = config.get('limitedOidcClient')
 export const verifiedIdAdmin = config.get('verifiedIdAdmin')
 export const verifiedIdRequest = config.get('verifiedIdRequest')
 export const localDev = config.has('localDev') ? config.get('localDev') : undefined
+export const graphQL = config.get('graphQL')

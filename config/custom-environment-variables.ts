@@ -158,6 +158,12 @@ const config: EnvVarSubstitution<Config> = {
       allowList: json('LOCAL_DEV_SMS_ALLOW_LIST'),
     },
   },
+  graphQL: {
+    maxAliases: json('GRAPHQL_MAX_ALIASES'),
+    maxDepth: json('GRAPHQL_MAX_DEPTH'),
+    maxDirectives: json('GRAPHQL_MAX_DIRECTIVES'),
+    maxTokens: json('GRAPHQL_MAX_TOKENS'),
+  },
 }
 
 export default config
