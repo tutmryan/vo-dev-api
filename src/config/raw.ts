@@ -168,6 +168,12 @@ export type Config = {
       allowList: string[]
     }
   }
+  graphQL: {
+    maxAliases: number
+    maxDepth: number
+    maxDirectives: number
+    maxTokens: number
+  }
 }
 
 const typedConfig = createTypedConfig<Config>(config)

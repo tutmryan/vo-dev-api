@@ -485,6 +485,14 @@ param faceCheckEnabled string
 param demoEnabled string
 @description('JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant')
 param additionalAuthTenantIds string
+@description('Limit the number of aliases in a GraphQL document.')
+param graphqlMaxAliases string
+@description('Limit the depth of a GraphQL document.')
+param graphqlMaxDepth string
+@description('Limit the number of directives in a GraphQL document.')
+param graphqlMaxDirectives string
+@description('Limit the number of tokens in a GraphQL document.')
+param graphqlMaxTokens string
 
 resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'HOME-TENANT-GRAPH-CLIENT-SECRET'
@@ -1133,6 +1141,10 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     IDENTITY_ISSUERS: identityIssuers
     PLATFORM_CONSUMER_APPS: platformConsumerApps
     ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds
+    GRAPHQL_MAX_ALIASES: graphqlMaxAliases
+    GRAPHQL_MAX_DEPTH: graphqlMaxDepth
+    GRAPHQL_MAX_DIRECTIVES: graphqlMaxDirectives
+    GRAPHQL_MAX_TOKENS: graphqlMaxTokens
   }
 }
 

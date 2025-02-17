@@ -89,6 +89,12 @@ const config: DeepPartial<Config> = {
   devToolsEnabled: true,
   faceCheckEnabled: true,
   oidcEnabled: true,
+  graphQL: {
+    maxAliases: 30,
+    maxDirectives: 50,
+    maxDepth: 12,
+    maxTokens: 2500,
+  },
 }
 
 module.exports = config

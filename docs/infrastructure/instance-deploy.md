@@ -32,6 +32,10 @@ The environment should have deployment protection rules applied (required review
 - VID_AUTHORITY_NAME (optional, only required for VO hosted authorities)
 - VID_AUTHORITY_DOMAIN (optional, only required for VO hosted authorities)
 - ADDITIONAL_AUTH_TENANT_IDS (optional)
+- GRAPHQL_MAX_ALIASES (optional, only required on customer request)
+- GRAPHQL_MAX_DEPTH (optional, only required on customer request)
+- GRAPHQL_MAX_DIRECTIVES (optional, only required on customer request)
+- GRAPHQL_MAX_TOKENS (optional, only required on customer request)
 
 #### Use of VID_AUTHORITY_NAME:
 

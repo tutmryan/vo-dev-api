@@ -12,7 +12,7 @@ import schema from '../schema'
 import type { LimitedApprovalOperationInput, LimitedPhotoCaptureOperationInput } from './context'
 import { buildJwt, createContext } from './context'
 
-export const server = new ApolloServer<GraphQLContext>({
+const server = new ApolloServer<GraphQLContext>({
   schema: schema(),
 })
 
@@ -27,8 +27,9 @@ export const executeOperation = async <TData = Record<string, unknown>, TVariabl
   limitedApprovalData?: LimitedApprovalOperationInput,
   limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
   limitedAsyncIssuanceData?: AsyncIssuanceSessionData,
+  serverInstance = server,
 ): Promise<FormattedExecutionResult<TData>> => {
-  const response = await server.executeOperation(request, {
+  const response = await serverInstance.executeOperation(request, {
     contextValue: await createContext(
       jwtPayload,
       limitedAccessData,

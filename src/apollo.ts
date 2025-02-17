@@ -5,15 +5,17 @@ import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/dis
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
+import { ApolloArmor } from '@escape.tech/graphql-armor'
+import type { GraphQLArmorConfig } from '@escape.tech/graphql-armor-types'
 import { verifyMultiIssuer } from '@makerx/express-bearer'
 import { graphqlOperationLoggingPlugin, introspectionControlPlugin } from '@makerx/graphql-apollo-server'
 import { useSubscriptionsServer } from '@makerx/graphql-core/subscriptions'
-import { isProduction } from '@makerx/node-common'
+import { isLocalDev, isProduction } from '@makerx/node-common'
 import type { Express } from 'express'
 import { json } from 'express'
 import { createApollo4QueryValidationPlugin } from 'graphql-constraint-directive/apollo4'
 import type http from 'http'
-import { devToolsEnabled, issuerOptions, logging } from './config'
+import { devToolsEnabled, graphQL, issuerOptions, logging } from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
 import type { Logger } from './logger'
@@ -22,8 +24,36 @@ import { rateLimiterMiddleware } from './rate-limiter'
 import createSchema from './schema'
 import { pruneKeys } from './util/prune-keys'
 
-const plugins = (httpServer: http.Server, serverCleanup?: () => Promise<void>): ApolloServerPlugin<GraphQLContext>[] => {
+export function createArmorProtection(config?: GraphQLArmorConfig) {
+  const armor = new ApolloArmor(
+    config ?? {
+      costLimit: { enabled: false },
+      maxAliases: {
+        n: graphQL.maxAliases,
+      },
+      maxDepth: {
+        n: graphQL.maxDepth,
+      },
+      maxTokens: {
+        n: graphQL.maxTokens,
+      },
+      maxDirectives: {
+        n: graphQL.maxDirectives,
+      },
+    },
+  )
+  const protection = armor.protect()
+  return { armor, protection }
+}
+
+const plugins = (
+  httpServer: http.Server,
+  protection: { plugins: ApolloServerPlugin[] },
+  serverCleanup?: () => Promise<void>,
+): ApolloServerPlugin<GraphQLContext>[] => {
   const plugins: ApolloServerPlugin<GraphQLContext>[] = [
+    // GraphQLArmor protection plugins
+    ...protection.plugins,
     graphqlOperationLoggingPlugin<GraphQLContext, Logger>({
       logLevel: 'audit',
       contextCreationFailureLogger: logger,
@@ -73,13 +103,16 @@ export const startApolloServer = async (app: Express, httpServer: http.Server, .
   })
 
   logger.info('Starting apollo server')
+  const { protection } = createArmorProtection()
   const server = new ApolloServer<GraphQLContext>({
     logger,
     schema,
-    plugins: plugins(httpServer, async () => {
+    ...protection,
+    plugins: plugins(httpServer, protection, async () => {
       await Promise.all([wsServerCleanup.dispose(), ...serverCleanup.map((cleanup) => cleanup())])
     }),
     introspection: devToolsEnabled,
+    includeStacktraceInErrorResponses: isLocalDev,
     csrfPrevention: true,
   })
   await server.start()
