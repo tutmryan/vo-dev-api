@@ -143,6 +143,7 @@ export const rules: ShieldSchema<Resolvers> = {
       hasTokenAcquisitionRoleRequiringIdentityAccess,
     ),
     me: allow,
+    authority: or(isUserWithReadPermissions, isIssuee),
   },
   Mutation: {
     '*': isCredentialAdminUser,

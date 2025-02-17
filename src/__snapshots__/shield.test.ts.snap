@@ -484,6 +484,18 @@ exports[`shield rules are setup correctly 1`] = `
     },
     "me": {
       "rules": []
+    },
+    "authority": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+          "cache": "contextual"
+        }
+      ]
     }
   },
   "Mutation": {
