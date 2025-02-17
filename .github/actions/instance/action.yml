@@ -148,6 +148,19 @@ inputs:
 
   additional-auth-tenant-ids:
     description: JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant
+
+  graphql-max-aliases:
+    description: Limit the number of aliases in a GraphQL document.
+    required: false
+  graphql-max-depth:
+    description: Limit the depth of a GraphQL document.
+    required: false
+  graphql-max-directives:
+    description: Limit the number of directives in a GraphQL document.
+    required: false
+  graphql-max-tokens:
+    description: Limit the number of tokens in a GraphQL document.
+    required: false
 outputs:
   instance-app-client-id:
     description: Client Id of the dedicated app registration for the instance
@@ -373,6 +386,10 @@ runs:
           platformConsumerApps="${{ inputs.platform-consumer-apps }}"
           additionalAuthTenantIds="${{ inputs.additional-auth-tenant-ids }}"
           actionGroupAlertName="${{ steps.check-action-group-alert-exists.outputs.actionGroupName }}"
+          graphqlMaxAliases=${{ inputs.graphql-max-aliases }}
+          graphqlMaxDepth=${{ inputs.graphql-max-depth }}
+          graphqlMaxDirectives=${{ inputs.graphql-max-directives }}
+          graphqlMaxTokens=${{ inputs.graphql-max-tokens }}
 
     - name: Log in to Azure again after potential long deployment
       uses: azure/login@v2

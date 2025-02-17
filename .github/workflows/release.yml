@@ -243,6 +243,11 @@ jobs:
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
           additional-auth-tenant-ids: "${{ vars.ADDITIONAL_AUTH_TENANT_IDS }}"
+
+          graphql-max-aliases: ${{ vars.GRAPHQL_MAX_ALIASES }}
+          graphql-max-depth: ${{ vars.GRAPHQL_MAX_DEPTH }}
+          graphql-max-directives: ${{ vars.GRAPHQL_MAX_DIRECTIVES }}
+          graphql-max-tokens: ${{ vars.GRAPHQL_MAX_TOKENS }}
       - name: Instance SQL database audit
         id: instance-sql-db-audit
         uses: ./github-actions/sql-db-audit
@@ -407,6 +412,11 @@ jobs:
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
           additional-auth-tenant-ids: "${{ vars.ADDITIONAL_AUTH_TENANT_IDS }}"
+
+          graphql-max-aliases: ${{ vars.GRAPHQL_MAX_ALIASES }}
+          graphql-max-depth: ${{ vars.GRAPHQL_MAX_DEPTH }}
+          graphql-max-directives: ${{ vars.GRAPHQL_MAX_DIRECTIVES }}
+          graphql-max-tokens: ${{ vars.GRAPHQL_MAX_TOKENS }}
       - name: Instance SQL database audit
         id: instance-sql-db-audit
         uses: ./github-actions/sql-db-audit
