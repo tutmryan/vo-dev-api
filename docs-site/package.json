@@ -16,6 +16,7 @@
     "audit": "npx --yes better-npm-audit audit",
     "check-types": "tsc",
     "generate-graphql-docs": "rimraf ./docs/reference/default.md && docusaurus graphql-to-doc && rimraf ./docs/reference/generated.md && git checkout -- ./docs/reference/sidebar-schema.js",
+    "generate-graphql-docs:watch": "nodemon -e graphql -w ../src/ -x npm run generate-graphql-docs",
     "delete-graphql-docs": "git clean -fdx -- ./docs/reference && git checkout -- ./docs/reference/default.md",
     "graphql-inspector": "graphql-inspector"
   },
@@ -37,7 +38,8 @@
     "@docusaurus/types": "3.4.0",
     "@graphql-inspector/cli": "^5.0.6",
     "dotenv": "^16.4.5",
-    "typescript": "^5.5.2"
+    "typescript": "^5.5.2",
+    "nodemon": "^3.1.4"
   },
   "browserslist": {
     "production": [
