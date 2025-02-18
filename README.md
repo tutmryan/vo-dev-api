@@ -77,7 +77,7 @@ Enter `p` to open the Portal UI
 Enter `n` to open the ngrok dashboard
 ```
 
-Note: *this script requires the local folder layout to be as follows:*
+Note: _this script requires the local folder layout to be as follows:_
 
 ```
 /shared-parent-folder/verified-orchestration-api
@@ -94,6 +94,7 @@ _Note 💡: all EAM cloud infrastructure is set up in the `VO Dev Sandbox` tenan
 _Note 🚨: the configuration in the Sandbox tenant is set up to support only a **single dev environment** at a time. It is possible to configure the environment to support multiple dev environments, but this is not covered in this guide. Given this limitation, it's good practise to confirm with team before using._
 
 ### Set up
+
 To successfully use Entra ID EAM with the VO OIDC provider locally, you will need to follow these steps:
 
 _Feel free to skip any steps that you have already completed._
@@ -103,13 +104,15 @@ _Feel free to skip any steps that you have already completed._
    ![Ngrok](/docs/assets/ngrok-local-tunnel-output-uris.png)<br/>
    ![App redirects](/docs/assets/entra-id-eam-app-redirect-uris.png)
 3. Register a new Authentication client in your local Orchestrator with the following redirect URI `https://login.microsoftonline.com/common/federation/externalauthprovider` and take note of the `Client ID`.
-4. Update the `Client ID` and `Discovery Endpoint` in the Entra ID Authentication Method named [EAM VO OIDC LocalDev - EAM](https://entra.microsoft.com/#view/Microsoft_AAD_AuthenticationMethods/ConfigureAuthMethod.ReactView/authMethodType/%23microsoft.graph.externalAuthenticationMethodConfiguration/authMethod~/%7B%22%40odata.type%22%3A%22%23microsoft.graph.externalAuthenticationMethodConfiguration%22%2C%22id%22%3A%22f7d00d04-2473-42de-933c-004a98795f36%22%2C%22state%22%3A%22enabled%22%2C%22displayName%22%3A%22EAM%20VO%20OIDC%20LocalDev%20-%20EAM%22%2C%22appId%22%3A%22bf811ba3-af2a-4189-beb6-12c54d8f0b55%22%2C%22excludeTargets%22%3A%5B%5D%2C%22openIdConnectSetting%22%3A%7B%22clientId%22%3A%225b5fdbc8-045e-4ac6-9d03-00beab33930d%22%2C%22discoveryUrl%22%3A%22https%3A%2F%2F3668c2d5b8f6.ngrok.app%2Foidc%2F.well-known%2Fopenid-configuration%22%7D%2C%22includeTargets%40odata.context%22%3A%22https%3A%2F%2Fgraph.microsoft.com%2Fbeta%2F%24metadata%23policies%2FauthenticationMethodsPolicy%2FauthenticationMethodConfigurations('f7d00d04-2473-42de-933c-004a98795f36')%2Fmicrosoft.graph.externalAuthenticationMethodConfiguration%2FincludeTargets%22%2C%22includeTargets%22%3A%5B%7B%22targetType%22%3A%22group%22%2C%22id%22%3A%22d775d0c2-0fbf-4acb-ade0-e6dbb9514d1a%22%2C%22isRegistrationRequired%22%3Afalse%2C%22displayName%22%3A%22EAM%20VO%20OIDC%20LocalDev%20-%20Group%22%7D%5D%2C%22enabled%22%3Atrue%2C%22target%22%3A%221%20group%22%2C%22isAllUsers%22%3Afalse%2C%22voiceDisabled%22%3Afalse%7D/canModify~/true) to match the `Client ID` from step 3 and `Discovery Endpoint` to match the API Ngrok URL from step 1.<br/><br/>
+4. Update the `Client ID` and `Discovery Endpoint` in the Entra ID Authentication Method named [EAM VO OIDC LocalDev - EAM](<https://entra.microsoft.com/#view/Microsoft_AAD_AuthenticationMethods/ConfigureAuthMethod.ReactView/authMethodType/%23microsoft.graph.externalAuthenticationMethodConfiguration/authMethod~/%7B%22%40odata.type%22%3A%22%23microsoft.graph.externalAuthenticationMethodConfiguration%22%2C%22id%22%3A%22f7d00d04-2473-42de-933c-004a98795f36%22%2C%22state%22%3A%22enabled%22%2C%22displayName%22%3A%22EAM%20VO%20OIDC%20LocalDev%20-%20EAM%22%2C%22appId%22%3A%22bf811ba3-af2a-4189-beb6-12c54d8f0b55%22%2C%22excludeTargets%22%3A%5B%5D%2C%22openIdConnectSetting%22%3A%7B%22clientId%22%3A%225b5fdbc8-045e-4ac6-9d03-00beab33930d%22%2C%22discoveryUrl%22%3A%22https%3A%2F%2F3668c2d5b8f6.ngrok.app%2Foidc%2F.well-known%2Fopenid-configuration%22%7D%2C%22includeTargets%40odata.context%22%3A%22https%3A%2F%2Fgraph.microsoft.com%2Fbeta%2F%24metadata%23policies%2FauthenticationMethodsPolicy%2FauthenticationMethodConfigurations('f7d00d04-2473-42de-933c-004a98795f36')%2Fmicrosoft.graph.externalAuthenticationMethodConfiguration%2FincludeTargets%22%2C%22includeTargets%22%3A%5B%7B%22targetType%22%3A%22group%22%2C%22id%22%3A%22d775d0c2-0fbf-4acb-ade0-e6dbb9514d1a%22%2C%22isRegistrationRequired%22%3Afalse%2C%22displayName%22%3A%22EAM%20VO%20OIDC%20LocalDev%20-%20Group%22%7D%5D%2C%22enabled%22%3Atrue%2C%22target%22%3A%221%20group%22%2C%22isAllUsers%22%3Afalse%2C%22voiceDisabled%22%3Afalse%7D/canModify~/true>) to match the `Client ID` from step 3 and `Discovery Endpoint` to match the API Ngrok URL from step 1.<br/><br/>
    ![External Auth Method](/docs/assets/entra-id-auth-method-external-oidc.png)
 5. Register an identity for the Entra `EAM VO OIDC LocalDev - User` test user with the following details:
-  - `identifier`: `226804b1-ab49-45f3-b28a-698e94e7678e`
-  -  `issuer`: `e5d1575e-338a-469b-b757-71788a0f3702`
-  -  `name`: `EAM VO OIDC LocalDev - User`<br/>
-     _Note: you may use this graphQL [query](http://localhost:4000/graphql?explorerURLState=N4IgJg9gxgrgtgUwHYBcQC4RxighigSwiQAIBlXANwQEkxlCUBPACgBICkAHHdEuhgWY1uOAIQBKEsAA6pEgGcqteqiGtOPFHw6iUU2fJIkCYOceNJcicxdOCAZgQQAnW8YIKFMV7YC%2Bcn4gADQglLguBLgARgA2CAoYIIbGMiCaOGl8KRZp9mpOvhgkaQBMpQBsABwADAAs0QCMALQxdQCczXUArA4AzM3RpVW4zRXtVQjtdQgA7BWzk2nB7iXpXj5uxWkI3WCN3bPdCM19fSNd49GDR7PNs42LIzX9szWly6tpVjbbIACiAEEALIkABqAHkSBCaAARADCJAAMtBcLFYQhKCRmiQAKoKIr%2BQIgPxAA) to create the identity_
+
+- `identifier`: `226804b1-ab49-45f3-b28a-698e94e7678e`
+- `issuer`: `e5d1575e-338a-469b-b757-71788a0f3702`
+- `name`: `EAM VO OIDC LocalDev - User`<br/>
+  _Note: you may use this graphQL [query](http://localhost:4000/graphql?explorerURLState=N4IgJg9gxgrgtgUwHYBcQC4RxighigSwiQAIBlXANwQEkxlCUBPACgBICkAHHdEuhgWY1uOAIQBKEsAA6pEgGcqteqiGtOPFHw6iUU2fJIkCYOceNJcicxdOCAZgQQAnW8YIKFMV7YC%2Bcn4gADQglLguBLgARgA2CAoYIIbGMiCaOGl8KRZp9mpOvhgkaQBMpQBsABwADAAs0QCMALQxdQCczXUArA4AzM3RpVW4zRXtVQjtdQgA7BWzk2nB7iXpXj5uxWkI3WCN3bPdCM19fSNd49GDR7PNs42LIzX9szWly6tpVjbbIACiAEEALIkABqAHkSBCaAARADCJAAMtBcLFYQhKCRmiQAKoKIr%2BQIgPxAA) to create the identity_
+
 6. Issue a credential for yourself with the `EAM VO OIDC LocalDev - User` identity, as the credential will be needed for development and testing.
 
 ### Testing
@@ -117,11 +120,42 @@ _Feel free to skip any steps that you have already completed._
 To test the Entra ID EAM setup, use the following steps:
 
 1. In a private browser tab, navigate to https://myapps.microsoft.com/ and sign in with the following credentials:
-  - Username: `eam-vo-oidc-localdev-user@vodevsandbox.onmicrosoft.com`
-  - Password: See Bitwarden `EAM VO OIDC LocalDev - User`
+
+- Username: `eam-vo-oidc-localdev-user@vodevsandbox.onmicrosoft.com`
+- Password: See Bitwarden `EAM VO OIDC LocalDev - User`
+
 2. During the sign-in process, you will be requested to provide a second factor. Click/Tap the `Approve with EAM VO OIDC LocalDev - EAM` button.<br/><br/>
    ![EAM Second Factor Select](/docs/assets/entra-id-second-factor-eam-select.png)
 3. You will then be present to present your VC<br/><br/>
    ![EAM Second Factor Present](/docs/assets/entra-id-eam-flow-vc-present.png)
 4. Upon successful presentation, you will be signed in and redirected to the My Apps portal.<br/><br/>
    ![EAM Second Factor Success](/docs/assets/entra-id-eam-success-signin.png)
+
+## Approvals
+
+Approvals allow integrating apps to create an approval request which can be actioned by someone presenting a credential.
+
+To test the approval workflow you must create the approval request via an authorised client, with the application role `VerifiableCredential.RequestApproval`.
+
+### Test client
+
+First, obtain the client secret from the [Github Approvals Demo client secret](https://vault.bitwarden.com/#/vault?organizationId=407a7ce4-93c3-4fb6-abdd-b1bd0185aa00&itemId=ce7341dc-fd43-4456-9873-b28400851ab4&action=view) item in Bitwarden.
+
+### Obtain access token
+
+Run the following authentication request to obtain an access token via Postman or whatever you prefer:
+
+POST to `https://login.microsoftonline.com/a4577872-4a36-4a93-9846-b29a1220ca89/oauth2/v2.0/token`
+
+BODY should be `x-www-form-urlencoded`
+
+```
+client_id:70b5693a-6fa0-4639-bc6a-f4e1f011b447
+scope:f24dc8de-66da-4b8b-928b-be4c6657d1cc/.default
+client_secret:{FROM BitWarden}
+grant_type:client_credentials
+```
+
+### Create approval request
+
+Follow the docs [create an approval request](https://dev.docs.verifiedorchestration.com/docs/guides/approvals#step-1-request-approval).

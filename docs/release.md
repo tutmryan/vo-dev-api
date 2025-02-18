@@ -3,6 +3,7 @@
 A release is created prior to deploying to non-production environment instances.
 
 Releases are usually deployed in stages to:
+
 1. non production and sandbox instances, where customers run them / QC for a period
 1. production instances
 
@@ -13,34 +14,37 @@ Once QA has been performed and a proposed release is agreed:
 1. Create a new release in GitHub (one for each component being released)
 1. For the title, use version number (which is the default)
 1. Use versioning `v${YYYY}.${minor}.${patch}` e.g. `v2024.0.0`, `v2024.1.0` or `v2024.1.1` (patch)
-  1. Use the current year
-  1. Increment the minor version when creating a new release from main
-  1. Increment the patch when creating a new release from a prior release
+1. Use the current year
+1. Increment the minor version when creating a new release from main
+1. Increment the patch when creating a new release from a prior release
 1. Generate release notes
 1. Curate [release notes](#release-notes))
 1. Ensure customer communications are completed with release notes, and any notification period is awaited before deployment at agreed time
-1. To release, run the Release workflow against the new release tag 
+1. To release, run the Release workflow against the new release tag
 
 ## Release notes
 
 Curate the release notes into a format which will make sense to a customer.
 
 Break into sections for:
- 1. New features
- 1. Enhancements
- 1. Fixes
+
+1.  New features
+1.  Enhancements
+1.  Fixes
 
 Balance detail with customer relevency.
 
 ### Example
 
 #### New features
+
 - OIDC authentication
 - Claim types and validation
 - Presentation constraints
 - Documentation search
 
 #### Enhancements
+
 - Add asyncIssuanceRequests field to Identity and Contract
 - Documentation updates:
   - Identity mapping
@@ -50,6 +54,7 @@ Balance detail with customer relevency.
 - Validating issuance payload to be less than 1 MB
 
 #### Fixes
+
 - Presentation demo is now off-by-default in production instances
 - Expired async issuances are no longer returned when using 'pending' status filter
 - Library vulnerability patching
@@ -63,3 +68,22 @@ Balance detail with customer relevency.
 1. Cherrypick fix commit(s) to release branch
 1. Create release in the usual way, **incrementing only the patch version number** from the target release version
 1. Verify fix as appropriate before broad rollout
+
+## Watch out for !!!
+
+### Re-creating releases against old versions
+
+TL;DR: If you create a new release from an old version, you may inadvertently start rebuilding torn-down instances.
+
+Solution: If the old version contains torn-down instances, first re-create the deleted environment and add a protection rule to gate the instance deployment
+
+#### What ?
+
+- Instance deployments are gated by environment deployment protection rules (required reviewers).
+- When an instance is torn down:
+  - Resource group is deleted
+  - Environment is deleted (protection rules are also deleted)
+  - Environment is removed from the deployment matrix
+- When an old version is run, containing the torn-down instance matrix referencem there are no protection rules to gate the instance deployment
+  - Torn-down instance will start deploying
+  - It will probably fail before it gets too far, but it will probably create the resource group and log analytics

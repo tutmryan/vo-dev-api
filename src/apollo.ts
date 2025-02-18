@@ -114,6 +114,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server, .
     introspection: devToolsEnabled,
     includeStacktraceInErrorResponses: isLocalDev,
     csrfPrevention: true,
+    hideSchemaDetailsFromClientErrors: !devToolsEnabled,
   })
   await server.start()
 
