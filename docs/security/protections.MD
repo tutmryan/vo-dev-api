@@ -38,6 +38,10 @@ Some operations have different limits, for example:
 
 - Acquiring an async issuance token (using an OTP) is limited to x attempts per OTP expiry window.
 
+## Request size limits
+
+The API host has limits on the size of requests to prevent abuse. Authenticated requests accept a larger payload size than unauthenticated requests.
+
 ## GraphQL protections
 
 There are limits in place for the GraphQL operations to prevent abuse:
