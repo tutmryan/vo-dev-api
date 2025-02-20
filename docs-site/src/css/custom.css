@@ -69,6 +69,6 @@ html[data-theme='dark'] {
 .navbar__search button {
   color: #ffffff;
 }
-.navbar__search [class^='dropdownMenu'] {
+.navbar__search [class^='noResults'] {
   color: var(--search-dropdown-no-result-color);
 }
