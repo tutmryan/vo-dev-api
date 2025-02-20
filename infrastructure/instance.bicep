@@ -1224,13 +1224,13 @@ var availabilityTestLocations = [
 ]
 
 @description('Shared Interval in seconds between test runs for availability test')
-var availabilityTestFrequency = 900
+var availabilityTestFrequency = 300
 
 @description('Shared evaluation frequency how often the metric alert is evaluated')
-var alertEvaluationFrequency = 'PT15M'
+var alertEvaluationFrequency = 'PT5M'
 
 @description('Shared window size the period of time that is used to monitor alert activity based on the threshold')
-var alertWindowSize = 'PT15M'
+var alertWindowSize = 'PT5M'
 
 @description('Common validation rules for web tests')
 var commonValidationRules = {
