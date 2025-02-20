@@ -1,17 +1,17 @@
 import { type BlobItem, type BlockBlobParallelUploadOptions } from '@azure/storage-blob'
+import * as asn1js from 'asn1js'
 import { randomUUID, subtle } from 'crypto'
 import { addYears } from 'date-fns'
 import type { JWK } from 'jose'
 import { exportJWK } from 'jose'
 import { compact } from 'lodash'
+import * as pkijs from 'pkijs'
 import { apiUrl, privateBlobStorage } from '../config'
 import type { PresentationLoginAccount } from '../features/oidc-provider/session'
 import { logger } from '../logger'
 import { invariant } from '../util/invariant'
 import { Lazy } from '../util/lazy'
 import { PrivateBlobStorageContainerService } from './private-blob-storage-container-service'
-import * as pkijs from 'pkijs'
-import * as asn1js from 'asn1js'
 
 const accountsFolder = 'accounts'
 function accountPath(accountId: string) {
@@ -148,14 +148,14 @@ export class OidcStorageService extends PrivateBlobStorageContainerService {
     return newestToOldest
   }
 
-  private async shouldRotateKey(blob: BlobItem) {
-    // Note: This can be removed once all environments have been updated to use the new OIDC keys with x5c
-    const data = await this.downloadToBuffer(blob.name)
+  private async shouldRotateKey(newestKeyBlob: BlobItem) {
+    // TODO: This can be removed once all environments have been updated to use the new OIDC keys with x5c
+    const data = await this.downloadToBuffer(newestKeyBlob.name)
     invariant(data, 'Failed to download OIDC key')
     const key = JSON.parse(data.toString('utf-8')) as JWK
     if (!key.x5c) return true
 
-    return blob.properties.lastModified.getTime() < Date.now() - keyMillisecondsBeforeRotation
+    return newestKeyBlob.properties.lastModified.getTime() < Date.now() - keyMillisecondsBeforeRotation
   }
 
   /***
