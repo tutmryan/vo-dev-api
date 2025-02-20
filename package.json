@@ -32,7 +32,7 @@
     "build:0-clean": "rimraf build",
     "build:1-compile": "tsc -p tsconfig.build.json",
     "build:2-copy-files": "copyfiles -e \"**/*.ts\" \"./src/**/*.graphql\" \"./src/**/*.ejs\" package.json package-lock.json .npmrc build",
-    "build:3-npm-install": "npm ci --prefix build --ignore-scripts --omit=dev && rimraf build/package.json build/package-lock.json build/.npmrc",
+    "build:3-npm-install": "npm ci --prefix build --omit=dev && rimraf build/package.json build/package-lock.json build/.npmrc",
     "start:built": "cd build && dotenv -e ../.env node ./src/main && cd ..",
     "test": "jest",
     "test:ci:start-db": "docker compose up -d && cross-env NODE_ENV=test ts-node scripts/localdev-database-wait",
