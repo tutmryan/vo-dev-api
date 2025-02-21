@@ -1,20 +1,20 @@
 /* eslint-disable */
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { TemplateEntity } from '../features/templates/entities/template-entity';
-import { ContractEntity } from '../features/contracts/entities/contract-entity';
-import { UserEntity } from '../features/users/entities/user-entity';
-import { IssuanceEntity } from '../features/issuance/entities/issuance-entity';
-import { PresentationEntity } from '../features/presentation/entities/presentation-entity';
-import { IdentityEntity } from '../features/identity/entities/identity-entity';
-import { PartnerEntity } from '../features/partners/entities/partner-entity';
+import { GraphQLContext } from '../context';
 import { ApprovalRequestEntity } from '../features/approval-request/entities/approval-request-entity';
 import { AsyncIssuanceEntity } from '../features/async-issuance/entities/async-issuance-entity';
 import { CommunicationEntity } from '../features/communication/entities/communication-entity';
+import { ContractEntity } from '../features/contracts/entities/contract-entity';
+import { IdentityEntity } from '../features/identity/entities/identity-entity';
+import { IssuanceEntity } from '../features/issuance/entities/issuance-entity';
 import { OidcClientEntity } from '../features/oidc-provider/entities/oidc-client-entity';
-import { OidcResourceEntity } from '../features/oidc-provider/entities/oidc-resource-entity';
 import { OidcClientResourceEntity } from '../features/oidc-provider/entities/oidc-client-resource-entity';
-import { GraphQLContext } from '../context';
-import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
+import { OidcResourceEntity } from '../features/oidc-provider/entities/oidc-resource-entity';
+import { PartnerEntity } from '../features/partners/entities/partner-entity';
+import { PresentationEntity } from '../features/presentation/entities/presentation-entity';
+import { TemplateEntity } from '../features/templates/entities/template-entity';
+import { UserEntity } from '../features/users/entities/user-entity';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -3454,7 +3454,7 @@ export type RequestCredential = {
    * Optional collection of claim constraints that must be met when a wallet selects the candidate credentials.
    *
    * This enables requesting a credential with specific claim value.
-   * Constraints specified will use the AND logic, ie if you specify three constraints, all of them have to be met.
+   * Constraints are evaluated with AND logic, i.e. if you specify multiple constraints, all must be met.
    *
    * For each constraint in the collection, you must select one operator of values, contains or startsWith.
    * Values cannot be regular expressions.
