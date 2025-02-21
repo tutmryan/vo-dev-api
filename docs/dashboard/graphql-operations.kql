@@ -1,5 +1,6 @@
 traces
 | where message == 'GraphQL operation'
+| extend version = customDimensions.version
 | extend Service = customDimensions.service
 | extend Request = todynamic(tostring(customDimensions.request))
 | extend RequestOrigin = Request.origin
@@ -12,7 +13,7 @@ traces
 | extend GraphQL_Query = customDimensions.query
 | extend GraphQL_Variables = customDimensions.variables
 | extend GraphQL_MutationResult = customDimensions.result
-| project timestamp, message, RequestOrigin, GraphQL_OperationType, GraphQL_OperationName, GraphQL_Query, GraphQL_Variables, GraphQL_MutationResult, UserOID, UserRoles, customDimensions
+| project timestamp, message, version, RequestOrigin, GraphQL_OperationType, GraphQL_OperationName, GraphQL_Query, GraphQL_Variables, GraphQL_MutationResult, UserOID, UserRoles, customDimensions
 // | where customDimensions has 'errors'
 // | where GraphQL_OperationType == 'mutation'
 // | where RequestOrigin == "https://vo-dev-verified-orchestration-api.azurewebsites.net"

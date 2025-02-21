@@ -1,5 +1,6 @@
 traces
 | where customDimensions.logLevel == 'audit'
+| extend version = customDimensions.version
 | extend Service = customDimensions.service
 | extend Request = todynamic(tostring(customDimensions.request))
 | extend RequestOrigin = Request.origin
@@ -14,7 +15,7 @@ traces
 | extend GraphQL_MutationResult = customDimensions.result
 | extend Presentation = customDimensions.presentation
 | extend Issuance = customDimensions.issuance
-| project timestamp, message, RequestOrigin, GraphQL_OperationType, GraphQL_OperationName, GraphQL_Query, GraphQL_Variables, GraphQL_MutationResult, UserOID, UserRoles, Issuance, Presentation, customDimensions
+| project timestamp, message, version, RequestOrigin, GraphQL_OperationType, GraphQL_OperationName, GraphQL_Query, GraphQL_Variables, GraphQL_MutationResult, UserOID, UserRoles, Issuance, Presentation, customDimensions
 // | where customDimensions has 'errors'
 // | where GraphQL_OperationType == 'query'
 // | where RequestOrigin == "https://dev.verifiedorchestration.com"
