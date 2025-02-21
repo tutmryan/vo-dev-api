@@ -1,5 +1,6 @@
 traces
 | where isnotnull(customDimensions.presentation)
+| extend version = customDimensions.version
 | extend Service = customDimensions.service
 | extend Presentation = todynamic(tostring(customDimensions.presentation))
 | extend RequestedCredentials = Presentation.requestedCredentialsJson
@@ -7,4 +8,4 @@ traces
 | extend Id = Presentation.id
 | extend IdentityId = Presentation.identityId
 | extend IssuanceIds = Presentation.issuanceIds
-| project timestamp, message, Id, IdentityId, IssuanceIds, RequestedCredentials, PresentedCredentials, Presentation, customDimensions
+| project timestamp, message, version, Id, IdentityId, IssuanceIds, RequestedCredentials, PresentedCredentials, Presentation, customDimensions
