@@ -329,6 +329,7 @@ runs:
         else
           echo "RELEASE_VERSION=${GITHUB_SHA:0:7}" >> $GITHUB_ENV
         fi
+        RELEASE_VERSION=V1.Static
 
     - name: Instance infrastructure
       id: instance-infra
