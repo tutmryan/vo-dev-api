@@ -1,3 +1,4 @@
+import { isLocalDev } from '@makerx/node-common'
 import type { Job, JobsOptions } from 'bullmq'
 import type {
   InvokeApprovalCallbackJobName,
@@ -95,23 +96,32 @@ export const handlers: HandlerMap<JobTypes> = {
   monitorServices: monitorServicesJobHandler,
 }
 
+// TTL for deduplication of initialisation jobs
+// For localdev we don't want to be prevented from running init job code changes for long
+// For deployed instances we want a safety margin which:
+//   A) covers a deployment which may take a few minutes
+//   B) not too long, to avoid preventing subsequent deployments from being able to run new versions of those jobs
+const INIT_JOB_LOCALDEV_DEDUP_TTL = ONE_MINUTE_TTL
+const INIT_JOB_DEPLOYED_DEDUP_TTL = ONE_MINUTE_TTL * 10
+const INITIALISATION_JOBS_DEDUPLICATION_TTL = isLocalDev ? INIT_JOB_LOCALDEV_DEDUP_TTL : INIT_JOB_DEPLOYED_DEDUP_TTL
+
 // override default job options for specific job handlers
 export const jobOptions: PartialRecord<JobNames, JobsOptions & { resultCacheTtl?: number }> = {
   invokeApprovalCallback: {
     attempts: 18, // exponential backoff means final retry (2 ** 18 = 262144s) = 3 days
   },
   initialiseOidcData: {
-    resultCacheTtl: ONE_MINUTE_TTL,
+    resultCacheTtl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
     deduplication: {
       id: 'initialiseOidcData',
-      ttl: ONE_MINUTE_TTL,
+      ttl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
     },
   },
   initialiseOidcKeys: {
-    resultCacheTtl: ONE_MINUTE_TTL,
+    resultCacheTtl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
     deduplication: {
       id: 'initialiseOidcKeys',
-      ttl: ONE_MINUTE_TTL,
+      ttl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
     },
   },
 }
