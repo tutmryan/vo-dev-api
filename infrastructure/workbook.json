@@ -787,7 +787,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "traces\n| where customDimensions.logLevel == 'error'\n| project\n timestamp,\n message,\n customDimensions\n// | where message == 'db query error'\n// | where message == 'Bearer token verification failed'\n// | where message == 'HTTP request failed'\n// | where message == 'Background worker failed'\n\n",
+              "query": "traces\n| where customDimensions.logLevel == 'error'\n| extend version = customDimensions.version\n| project\n timestamp,\n message,\n version,\n customDimensions\n// | where message == 'db query error'\n// | where message == 'Bearer token verification failed'\n// | where message == 'HTTP request failed'\n// | where message == 'Background worker failed'\n\n",
               "size": 0,
               "showAnalytics": true,
               "title": "Error logs",
