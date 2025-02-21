@@ -28,6 +28,11 @@ const config: EnvVarSubstitution<Config> = {
     consoleOptions: {
       silent: json('SILENT_CONSOLE'),
     },
+    loggerOptions: {
+      defaultMeta: {
+        version: 'VERSION',
+      },
+    },
   },
   instance: 'INSTANCE',
   version: 'VERSION',
