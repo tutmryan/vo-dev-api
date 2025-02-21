@@ -35,12 +35,12 @@ if ($slotState -ne "Running") {
     --slot $SourceSlotName
 }
 
-Write-Host "Stopping slot '$SourceSlotName' for '$AppServiceName'"
+Write-Host "Stopping target slot '$TargetSlotName' for '$AppServiceName'"
 
 az webapp stop `
   --resource-group $ResourceGroupName `
   --name $AppServiceName `
-  --slot $SourceSlotName
+  --slot $TargetSlotName
 
 Write-Host "Swapping slot '$SourceSlotName' to '$TargetSlotName' for '$AppServiceName'"
 
@@ -49,3 +49,10 @@ az webapp deployment slot swap `
   --name $AppServiceName `
   --slot $SourceSlotName `
   --target-slot $TargetSlotName
+
+Write-Host "Stopping slot '$SourceSlotName' for '$AppServiceName'"
+
+az webapp stop `
+  --resource-group $ResourceGroupName `
+  --name $AppServiceName `
+  --slot $SourceSlotName
