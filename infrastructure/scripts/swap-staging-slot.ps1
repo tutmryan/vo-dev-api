@@ -39,7 +39,8 @@ Write-Host "Stopping target slot '$TargetSlotName' for '$AppServiceName'"
 
 az webapp stop `
   --resource-group $ResourceGroupName `
-  --name $AppServiceName
+  --name $AppServiceName `
+  --slot $TargetSlotName
 
 Write-Host "Swapping slot '$SourceSlotName' to '$TargetSlotName' for '$AppServiceName'"
 
