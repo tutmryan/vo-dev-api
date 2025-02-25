@@ -1,5 +1,6 @@
 import { isLocalDev } from '@makerx/node-common'
 import { createLogger } from '@makerx/node-winston'
+import { pid } from 'node:process'
 import { configs } from 'triple-beam'
 import type { LoggerOptions, QueryRunner, Logger as TypeOrmLoggerInterface } from 'typeorm'
 import * as winston from 'winston'
@@ -20,7 +21,7 @@ winston.addColors({ ...colorsRest, audit: httpColor as string })
 const baseLogger = createLogger({
   consoleFormat: isLocalDev ? 'pretty' : 'json',
   consoleOptions: logging.consoleOptions,
-  loggerOptions: { ...logging.loggerOptions, levels },
+  loggerOptions: { ...logging.loggerOptions, levels, defaultMeta: { pid } },
   omitPaths: logging.omitPaths,
 }) as Logger
 

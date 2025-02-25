@@ -185,7 +185,6 @@ export class OidcStorageService extends PrivateBlobStorageContainerService {
    * !!Important!!: This method should not be called concurrently from multiple instances. It should only be run via a deduplicated background job.
    */
   async initialiseKeysFromDeduplicatedBackgroundJob() {
-    logger.info('initialiseKeysFromDeduplicatedBackgroundJob started')
     const blobs = await this.listKeyBlobs()
 
     // create the first key if none exist
