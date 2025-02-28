@@ -1,0 +1,9 @@
+alertsmanagementresources
+| where type == "microsoft.alertsmanagement/alerts"
+| extend severity = tostring(properties["essentials"]["severity"])
+| where properties["essentials"]["monitorCondition"] == "Fired"
+| extend startDateTime = todatetime(properties["essentials"]["startDateTime"])
+| extend description = tostring(properties["essentials"]["description"])
+| where startDateTime >= ago(30d)
+| project ["Unresolved Alert"] = name, ["Alert Time"] = startDateTime, description, severity
+| order by ["Alert Time"] desc
