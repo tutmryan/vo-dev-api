@@ -156,6 +156,21 @@ This is required for setting up blob storage contributor access for the API mana
 1. On "Principal types", select "Service principals".
 1. Click "Save".
 
+## Give the deployment service principal the ability to add and remove delete locks
+
+1. Navigate to the Subscription.
+1. Click on "Access control (IAM)".
+1. Click on "+ Add" > "Add custom role".
+1. Create a new role:
+   - Name: Resource Lock Management
+   - Description: Custom role allowing read/write/delete of Microsoft.Authorization/locks in the subscription
+   - Permissions: Read, Write and Delete on Microsoft.Authorization/locks
+1. Save the new role
+1. Click on "+ Add" > "Add role assignment".
+1. Pick the "Resource Lock Management" role, then click on "Next".
+1. Click on "+ Select members", then find the deployment service principal by its name.
+1. Click "Next", "Save" etc to complete role assignment.
+
 ## Create an Azure AD group for Azure SQL administrators
 
 1. Navigate to the Azure Active Directory blade in the Azure Portal: <https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview>.

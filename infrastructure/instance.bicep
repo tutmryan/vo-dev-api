@@ -697,6 +697,15 @@ resource verifiedOrchestrationStorage 'Microsoft.Storage/storageAccounts@2022-09
   }
 }
 
+resource verifiedOrchestrationStorageLock 'Microsoft.Authorization/locks@2020-05-01' = {
+  name: 'DeleteLock'
+  scope: verifiedOrchestrationStorage
+  properties: {
+    level: 'CanNotDelete'
+    notes: 'Prevent accidental deletion of verified orchestration storage account'
+  }
+}
+
 resource verifiedOrchestrationStorageBlobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
   name: 'default'
   parent: verifiedOrchestrationStorage
@@ -722,6 +731,23 @@ resource verifiedOrchestrationStorageBlobService 'Microsoft.Storage/storageAccou
         }
       ]
     }
+    deleteRetentionPolicy: {
+      enabled: true
+      days: 8
+    }
+    containerDeleteRetentionPolicy: {
+      enabled: true
+      days: 8
+    }
+    restorePolicy: {
+      enabled: true
+      days: 7
+    }
+    changeFeed: {
+      enabled: true
+      retentionInDays: 7
+    }
+    isVersioningEnabled: true
   }
 }
 
@@ -797,6 +823,15 @@ resource privateStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = 
   properties: privateStorageProps
 }
 
+resource privateStorageAccountLock 'Microsoft.Authorization/locks@2020-05-01' = {
+  name: 'DeleteLock'
+  scope: privateStorageAccount
+  properties: {
+    level: 'CanNotDelete'
+    notes: 'Prevent accidental deletion of private storage account'
+  }
+}
+
 resource privateStorageEncryptionKey 'Microsoft.KeyVault/vaults/keys@2021-10-01' = {
   parent: keyVault
   name: 'private-storage-key'
@@ -847,6 +882,23 @@ resource verifiedOrchestrationPrivateStorageBlobService 'Microsoft.Storage/stora
     lastAccessTimeTrackingPolicy: {
       enable: true
     }
+    deleteRetentionPolicy: {
+      enabled: true
+      days: 8
+    }
+    containerDeleteRetentionPolicy: {
+      enabled: true
+      days: 8
+    }
+    restorePolicy: {
+      enabled: true
+      days: 7
+    }
+    changeFeed: {
+      enabled: true
+      retentionInDays: 7
+    }
+    isVersioningEnabled: true
   }
 }
 
@@ -890,7 +942,12 @@ resource privateStorageDeletePolicy 'Microsoft.Storage/storageAccounts/managemen
             actions: {
               baseBlob: {
                 delete: {
-                  daysAfterLastAccessTimeGreaterThan: 14 // this should match OIDC TTL e.g. session 14 days
+                  daysAfterLastAccessTimeGreaterThan: 14 // Matches OIDC TTL (e.g. session 14 days)
+                }
+              }
+              version: {
+                delete: {
+                  daysAfterCreationGreaterThan: 14
                 }
               }
             }
@@ -914,6 +971,11 @@ resource privateStorageDeletePolicy 'Microsoft.Storage/storageAccounts/managemen
                   daysAfterModificationGreaterThan: 1
                 }
               }
+              version: {
+                delete: {
+                  daysAfterCreationGreaterThan: 1
+                }
+              }
             }
           }
         }
@@ -933,6 +995,11 @@ resource privateStorageDeletePolicy 'Microsoft.Storage/storageAccounts/managemen
               baseBlob: {
                 delete: {
                   daysAfterModificationGreaterThan: 3
+                }
+              }
+              version: {
+                delete: {
+                  daysAfterCreationGreaterThan: 3
                 }
               }
             }
@@ -956,6 +1023,11 @@ resource privateStorageDeletePolicy 'Microsoft.Storage/storageAccounts/managemen
                   daysAfterModificationGreaterThan: 7
                 }
               }
+              version: {
+                delete: {
+                  daysAfterCreationGreaterThan: 7
+                }
+              }
             }
           }
         }
@@ -975,6 +1047,11 @@ resource privateStorageDeletePolicy 'Microsoft.Storage/storageAccounts/managemen
               baseBlob: {
                 delete: {
                   daysAfterModificationGreaterThan: 14
+                }
+              }
+              version: {
+                delete: {
+                  daysAfterCreationGreaterThan: 14
                 }
               }
             }
@@ -998,6 +1075,11 @@ resource privateStorageDeletePolicy 'Microsoft.Storage/storageAccounts/managemen
                   daysAfterModificationGreaterThan: 30
                 }
               }
+              version: {
+                delete: {
+                  daysAfterCreationGreaterThan: 30
+                }
+              }
             }
           }
         }
@@ -1017,6 +1099,11 @@ resource privateStorageDeletePolicy 'Microsoft.Storage/storageAccounts/managemen
               baseBlob: {
                 delete: {
                   daysAfterModificationGreaterThan: 90
+                }
+              }
+              version: {
+                delete: {
+                  daysAfterCreationGreaterThan: 90
                 }
               }
             }
