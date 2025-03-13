@@ -51,7 +51,7 @@ Cannot complete external authentication: provider returned 'access_denied' error
 To ensure the credential presented belongs to the user progressing through the EAM process, a presentation constraint is used to enforce the resolved identity ID matches to identity ID embedded in the credential. See [create presentation request](/docs/guides/presentation#create-presentation-request) for more information.
 
 :::note
-Credentials issued prior to **1st Jan 2025** may not contain the identity ID. In this case, the credential cannot be used with EAM until it is re-issued.
+Any credentials issued prior to **1st Jan 2025** will not contain the Identity ID claim. Additionally, contracts published prior to **1st Jan 2025** will continue to issue credentials without the Identity ID claim until republished in Composer. A credential cannot be used with EAM until it is issued with the Identity ID claim included.
 :::
 
 ![Presentation Constraint](../../../static/img/eam-auth-cred-with-id.png)
