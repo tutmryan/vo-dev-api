@@ -22,6 +22,9 @@ exports[`shield rules are setup correctly 1`] = `
     "healthcheck": {
       "rules": []
     },
+    "conciergeBranding": {
+      "rules": []
+    },
     "template": {
       "rulesOr": [
         {
@@ -712,6 +715,14 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "strict"
         }
       ]
+    },
+    "saveConciergeBranding": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
+    },
+    "deleteConciergeBranding": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
     },
     "saveIdentity": {
       "rulesOr": [
@@ -1710,6 +1721,11 @@ exports[`shield rules are setup correctly 1`] = `
     }
   },
   "SendAsyncIssuanceVerificationResponse": {
+    "*": {
+      "rules": []
+    }
+  },
+  "Branding": {
     "*": {
       "rules": []
     }

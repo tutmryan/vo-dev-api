@@ -28,6 +28,7 @@ extensions:
                 OidcClient: ../features/oidc-provider/entities/oidc-client-entity#OidcClientEntity
                 OidcResource: ../features/oidc-provider/entities/oidc-resource-entity#OidcResourceEntity
                 OidcClientResource: ../features/oidc-provider/entities/oidc-client-resource-entity#OidcClientResourceEntity
+                Branding: ../features/branding/entities/branding-entity#BrandingEntity
         config:
           strictScalars: true
           scalars:

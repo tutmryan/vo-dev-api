@@ -1,0 +1,100 @@
+import { AdminLink } from '@site/src/components/admin-link'
+import { PortalLink } from '@site/src/components/portal-link'
+
+# Branding
+
+You can customize the appearance of the <PortalLink target="_blank">Concierge</PortalLink> to align with your organisation's branding by leveraging our branding capabilities.
+
+### Navigation
+
+1. [Permission](#permission)
+2. [Theming](#theming)
+3. [Branding Tool](#branding-tool)
+4. [Guide Lines](#guidelines)
+## Permission
+
+To make changes to the branding configurations, you must have the role:
+**[VerifiableCredential.InstanceAdmin](/docs/guides/onboarding-users#instance-admin)**.
+
+## Theming
+
+### Color Palette and Logo
+
+The branding capabilities are built on top of **Material UI's theming system** and palettes, allowing you to define **primary, secondary, logo, and other color variants** to match your brand.
+
+Two configurations with separate palettes for **light and dark mode** are currently supported. If either configuration is not provided or contains invalid data, the **default theme** will be used as a fallback.
+
+You can read more about **Material UI's palette** [here](https://mui.com/material-ui/customization/palette/?srsltid=AfmBOorjRQr4qilN4ZFBZ_ydrcvg3Zc3bQkbQB1ES36mGwylpFEL6w-Q).
+
+```graphql title="saveConciergeBranding mutation"
+mutation SaveConciergeBranding($input: ConciergeBrandingInput!) {
+  saveConciergeBranding(input: $input) {
+    id
+  }
+}
+```
+
+```json title="Example theme data input"
+{
+  "input": {
+    "data": {
+      "logo": {
+        "light": "data:[image format];base64,[base64-encoded image] OR hosted image url",
+        "dark": null
+      },
+      "palette": {
+        "light": {
+          "primary": {
+            "main": "#406bf7",
+            "light": "#6688f8",
+            "dark": "#2c4aac",
+            "contrastText": "#ffffff"
+          },
+          "secondary": {
+            "main": "#b0b5ff",
+            "light": "#bfc3ff",
+            "dark": "#7b7eb2",
+            "contrastText": "#000000"
+          },
+          "background": {
+            "default": "#fcfcfc"
+          }
+          ...Other desirable palette config
+        },
+        "dark": null
+      }
+    }
+  }
+}
+```
+
+:::warning [Note]
+While all properties within `data` are optional, the `logo` should follow the suggested format to function correctly.
+The `palette` object supports any valid MUI palette properties, as long as they are supported by the MUI framework.
+:::
+
+## Branding Tool
+
+The <AdminLink path="/branding">branding tool</AdminLink> is available for your organisation's **instance admins**. It allows you to adjust the **Concierge theme configurations** with ease.
+
+Using the branding tool, you can:
+
+- Select the **mode** you want to modify (light or dark).
+- Upload your **organisation's logo**.
+- Change your **primary color**, **secondary color**, **background color**
+
+The new theme will be **applied immediately** once you click **"Save changes"**.
+
+<img src={require('../../../static/img/branding-tool.png').default} alt="Branding tool photo" style={{ width: '100%' }} />
+
+### Guidelines
+
+1. **Color Selection:**
+   Primary and secondary colors should complement each other for the best user interface. Use [this tool](https://m2.material.io/inline-tools/color/) for suggestions.
+
+2. **Logo & Image Sizing:**
+   The Concierge's navigation bar content area has a height of **36px**. A logo or image with an aspect ratio between **4:1 and 5:1** is recommended for optimal display.
+
+3. **Image Format & Performance:**
+   To improve performance, compress images larger than **3MB**. Supported formats: **SVG, PNG, JPG, and JPEG**.
+   SVG is recommended for logos due to its **small file size** and **scalability**.

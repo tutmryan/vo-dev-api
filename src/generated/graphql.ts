@@ -1,20 +1,21 @@
 /* eslint-disable */
-import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import { GraphQLContext } from '../context';
+import { TemplateEntity } from '../features/templates/entities/template-entity';
+import { ContractEntity } from '../features/contracts/entities/contract-entity';
+import { UserEntity } from '../features/users/entities/user-entity';
+import { IssuanceEntity } from '../features/issuance/entities/issuance-entity';
+import { PresentationEntity } from '../features/presentation/entities/presentation-entity';
+import { IdentityEntity } from '../features/identity/entities/identity-entity';
+import { PartnerEntity } from '../features/partners/entities/partner-entity';
 import { ApprovalRequestEntity } from '../features/approval-request/entities/approval-request-entity';
 import { AsyncIssuanceEntity } from '../features/async-issuance/entities/async-issuance-entity';
 import { CommunicationEntity } from '../features/communication/entities/communication-entity';
-import { ContractEntity } from '../features/contracts/entities/contract-entity';
-import { IdentityEntity } from '../features/identity/entities/identity-entity';
-import { IssuanceEntity } from '../features/issuance/entities/issuance-entity';
 import { OidcClientEntity } from '../features/oidc-provider/entities/oidc-client-entity';
-import { OidcClientResourceEntity } from '../features/oidc-provider/entities/oidc-client-resource-entity';
 import { OidcResourceEntity } from '../features/oidc-provider/entities/oidc-resource-entity';
-import { PartnerEntity } from '../features/partners/entities/partner-entity';
-import { PresentationEntity } from '../features/presentation/entities/presentation-entity';
-import { TemplateEntity } from '../features/templates/entities/template-entity';
-import { UserEntity } from '../features/users/entities/user-entity';
+import { OidcClientResourceEntity } from '../features/oidc-provider/entities/oidc-client-resource-entity';
+import { BrandingEntity } from '../features/branding/entities/branding-entity';
+import { GraphQLContext } from '../context';
+import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -668,6 +669,25 @@ export enum BackgroundJobStatus {
   Retrying = 'retrying'
 }
 
+/** Defines the branding configuration for VO applications. */
+export type Branding = {
+  __typename?: 'Branding';
+  /** When the branding was created. */
+  createdAt: Scalars['DateTime']['output'];
+  /** The user who created the branding */
+  createdBy: User;
+  /** The branding configuration data. */
+  data?: Maybe<Scalars['JSONObject']['output']>;
+  /** The ID of the branding configuration. */
+  id: Scalars['ID']['output'];
+  /** The name of the platform this branding is for */
+  name: Scalars['String']['output'];
+  /** When the branding was last updated. */
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The user who last updated the branding. */
+  updatedBy?: Maybe<User>;
+};
+
 export enum CacheControlScope {
   Private = 'PRIVATE',
   Public = 'PUBLIC'
@@ -804,6 +824,12 @@ export type CommunicationWhere = {
   sentTo?: InputMaybe<Scalars['DateTime']['input']>;
   /** The status of the communication. */
   status?: InputMaybe<CommunicationStatus>;
+};
+
+/** Defines the input to create or update a concierge branding configuration. */
+export type ConciergeBrandingInput = {
+  /** The branding configuration data. */
+  data: Scalars['JSONObject']['input'];
 };
 
 /** Provides information about the presented credentials should be validated */
@@ -2027,6 +2053,8 @@ export type Mutation = {
   createPresentationRequestForAuthn: PresentationRequestResponse;
   /** Creates a new template */
   createTemplate: Template;
+  /** Deletes an existing concierge branding. */
+  deleteConciergeBranding?: Maybe<Scalars['Void']['output']>;
   /** Deletes an existing contract. Only possible when the contract has not yet been provisioned. */
   deleteContract?: Maybe<Scalars['Void']['output']>;
   /** Deletes an OIDC client */
@@ -2067,6 +2095,8 @@ export type Mutation = {
   revokeIssuances: Scalars['ID']['output'];
   /** Revokes existing credentials issued by a user. */
   revokeUserIssuances: Scalars['ID']['output'];
+  /** Create or update a concierge branding config. */
+  saveConciergeBranding: Branding;
   /** Creates or updates an identity based on its issuer and identifier */
   saveIdentity: Identity;
   /**
@@ -2294,6 +2324,11 @@ export type MutationRevokeIssuancesArgs = {
 
 export type MutationRevokeUserIssuancesArgs = {
   userId: Scalars['ID']['input'];
+};
+
+
+export type MutationSaveConciergeBrandingArgs = {
+  input: ConciergeBrandingInput;
 };
 
 
@@ -3059,6 +3094,8 @@ export type Query = {
   asyncIssuanceRequest: AsyncIssuanceRequest;
   /** Returns the details of the configured instance authority */
   authority: Authority;
+  /** Returns a branding config for the Concierge or null if no branding has been saved yet. */
+  conciergeBranding?: Maybe<Branding>;
   /** Returns a contract by ID */
   contract: Contract;
   /**
@@ -4022,6 +4059,23 @@ export type UpdateAsyncIssuanceContactMutationVariables = Exact<{
 
 export type UpdateAsyncIssuanceContactMutation = { __typename?: 'Mutation', updateAsyncIssuanceContact?: { __typename?: 'AsyncIssuanceContact', notification?: { __typename?: 'Contact', value: string, method: ContactMethod } | null, verification?: { __typename?: 'Contact', value: string, method: ContactMethod } | null } | null };
 
+export type ConciergeBrandingQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ConciergeBrandingQuery = { __typename?: 'Query', conciergeBranding?: { __typename?: 'Branding', data?: Record<string, unknown> | null } | null };
+
+export type SaveConciergeBrandingMutationVariables = Exact<{
+  input: ConciergeBrandingInput;
+}>;
+
+
+export type SaveConciergeBrandingMutation = { __typename?: 'Mutation', saveConciergeBranding: { __typename?: 'Branding', id: string } };
+
+export type DeleteConciergeBrandingMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type DeleteConciergeBrandingMutation = { __typename?: 'Mutation', deleteConciergeBranding?: null | undefined | void | null };
+
 export type ContractFragmentFragment = { __typename?: 'Contract', id: string, name: string, description: string, credentialTypes: Array<string>, isPublic: boolean, validityIntervalInSeconds: number, template?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display: { __typename?: 'ContractDisplayModel', locale: string, card: { __typename?: 'ContractDisplayCredential', title: string, issuedBy: string, backgroundColor: string, textColor: string, description: string, logo: { __typename?: 'ContractDisplayCredentialLogo', uri: string, image: string, description: string } }, consent: { __typename?: 'ContractDisplayConsent', title?: string | null, instructions?: string | null }, claims: Array<{ __typename?: 'ContractDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> } };
 
 export type CreateContractMutationVariables = Exact<{
@@ -4339,6 +4393,9 @@ export const CreateIssuanceRequestForAsyncIssuanceDocument = {"kind":"Document",
 export const GetAsyncIssuanceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetAsyncIssuance"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"asyncIssuanceRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AsyncIssuanceRequestFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AsyncIssuanceRequestFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AsyncIssuanceRequest"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"isStatusFinal"}},{"kind":"Field","name":{"kind":"Name","value":"failureReason"}},{"kind":"Field","name":{"kind":"Name","value":"expiry"}},{"kind":"Field","name":{"kind":"Name","value":"expiresOn"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"identity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"issuance"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<GetAsyncIssuanceQuery, GetAsyncIssuanceQueryVariables>;
 export const ResendAsyncIssuanceNotificationDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ResendAsyncIssuanceNotification"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"asyncIssuanceRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resendAsyncIssuanceNotification"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"asyncIssuanceRequestId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"asyncIssuanceRequestId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AsyncIssuanceRequestFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AsyncIssuanceRequestFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AsyncIssuanceRequest"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"isStatusFinal"}},{"kind":"Field","name":{"kind":"Name","value":"failureReason"}},{"kind":"Field","name":{"kind":"Name","value":"expiry"}},{"kind":"Field","name":{"kind":"Name","value":"expiresOn"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"identity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"issuance"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<ResendAsyncIssuanceNotificationMutation, ResendAsyncIssuanceNotificationMutationVariables>;
 export const UpdateAsyncIssuanceContactDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateAsyncIssuanceContact"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"asyncIssuanceRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"contact"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AsyncIssuanceContactInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateAsyncIssuanceContact"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"asyncIssuanceRequestId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"asyncIssuanceRequestId"}}},{"kind":"Argument","name":{"kind":"Name","value":"contact"},"value":{"kind":"Variable","name":{"kind":"Name","value":"contact"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"notification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"method"}}]}},{"kind":"Field","name":{"kind":"Name","value":"verification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"value"}},{"kind":"Field","name":{"kind":"Name","value":"method"}}]}}]}}]}}]} as unknown as DocumentNode<UpdateAsyncIssuanceContactMutation, UpdateAsyncIssuanceContactMutationVariables>;
+export const ConciergeBrandingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ConciergeBranding"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"conciergeBranding"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"data"}}]}}]}}]} as unknown as DocumentNode<ConciergeBrandingQuery, ConciergeBrandingQueryVariables>;
+export const SaveConciergeBrandingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SaveConciergeBranding"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ConciergeBrandingInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"saveConciergeBranding"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<SaveConciergeBrandingMutation, SaveConciergeBrandingMutationVariables>;
+export const DeleteConciergeBrandingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteConciergeBranding"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteConciergeBranding"}}]}}]} as unknown as DocumentNode<DeleteConciergeBrandingMutation, DeleteConciergeBrandingMutationVariables>;
 export const CreateContractDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateContract"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ContractInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createContract"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ContractFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ContractFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Contract"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"template"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<CreateContractMutation, CreateContractMutationVariables>;
 export const DeprecateContractDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeprecateContract"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deprecateContract"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ContractFragment"}},{"kind":"Field","name":{"kind":"Name","value":"externalId"}},{"kind":"Field","name":{"kind":"Name","value":"provisionedAt"}},{"kind":"Field","name":{"kind":"Name","value":"lastProvisionedAt"}},{"kind":"Field","name":{"kind":"Name","value":"isDeprecated"}},{"kind":"Field","name":{"kind":"Name","value":"deprecatedAt"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ContractFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Contract"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"template"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<DeprecateContractMutation, DeprecateContractMutationVariables>;
 export const GetContractDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetContract"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"contract"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"ContractFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"ContractFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Contract"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"template"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}}]} as unknown as DocumentNode<GetContractQuery, GetContractQueryVariables>;
@@ -4498,6 +4555,7 @@ export type ResolversTypes = {
   BackgroundJobEventWhere: BackgroundJobEventWhere;
   BackgroundJobProgressEvent: ResolverTypeWrapper<BackgroundJobProgressEvent>;
   BackgroundJobStatus: BackgroundJobStatus;
+  Branding: ResolverTypeWrapper<BrandingEntity>;
   CacheControlScope: CacheControlScope;
   Callback: Callback;
   ClaimConstraint: ClaimConstraint;
@@ -4509,6 +4567,7 @@ export type ResolversTypes = {
   CommunicationPurpose: CommunicationPurpose;
   CommunicationStatus: CommunicationStatus;
   CommunicationWhere: CommunicationWhere;
+  ConciergeBrandingInput: ConciergeBrandingInput;
   ConfigurationValidation: ConfigurationValidation;
   Contact: ResolverTypeWrapper<Contact>;
   ContactInput: ContactInput;
@@ -4704,12 +4763,14 @@ export type ResolversParentTypes = {
   BackgroundJobEventData: Omit<BackgroundJobEventData, 'event' | 'user'> & { event: ResolversParentTypes['BackgroundJobEvent'], user?: Maybe<ResolversParentTypes['User']> };
   BackgroundJobEventWhere: BackgroundJobEventWhere;
   BackgroundJobProgressEvent: BackgroundJobProgressEvent;
+  Branding: BrandingEntity;
   Callback: Callback;
   ClaimConstraint: ClaimConstraint;
   ClaimValidation: ResolversUnionTypes<ResolversParentTypes>['ClaimValidation'];
   ClaimValidationInput: ClaimValidationInput;
   Communication: CommunicationEntity;
   CommunicationWhere: CommunicationWhere;
+  ConciergeBrandingInput: ConciergeBrandingInput;
   ConfigurationValidation: ConfigurationValidation;
   Contact: Contact;
   ContactInput: ContactInput;
@@ -5028,6 +5089,17 @@ export type BackgroundJobProgressEventResolvers<ContextType = GraphQLContext, Pa
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type BrandingResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Branding'] = ResolversParentTypes['Branding']> = {
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  data?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type ClaimValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ClaimValidation'] = ResolversParentTypes['ClaimValidation']> = {
   __resolveType: TypeResolveFn<'ListValidation' | 'NumberValidation' | 'RegexValidation' | 'TextValidation', ParentType, ContextType>;
 };
@@ -5284,6 +5356,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createPresentationRequestForApproval?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestForApprovalArgs, 'approvalRequestId'>>;
   createPresentationRequestForAuthn?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, Partial<MutationCreatePresentationRequestForAuthnArgs>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
+  deleteConciergeBranding?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
   deleteOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientArgs, 'id'>>;
   deleteOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientResourceArgs, 'clientId' | 'resourceId'>>;
@@ -5298,6 +5371,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   revokeIssuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<MutationRevokeIssuanceArgs, 'id'>>;
   revokeIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeIssuancesArgs, 'ids'>>;
   revokeUserIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeUserIssuancesArgs, 'userId'>>;
+  saveConciergeBranding?: Resolver<ResolversTypes['Branding'], ParentType, ContextType, RequireFields<MutationSaveConciergeBrandingArgs, 'input'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
   sendAsyncIssuanceVerification?: Resolver<ResolversTypes['SendAsyncIssuanceVerificationResponse'], ParentType, ContextType, RequireFields<MutationSendAsyncIssuanceVerificationArgs, 'asyncIssuanceRequestId'>>;
   updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
@@ -5493,6 +5567,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   asyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<QueryAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   asyncIssuanceRequest?: Resolver<ResolversTypes['AsyncIssuanceRequest'], ParentType, ContextType, RequireFields<QueryAsyncIssuanceRequestArgs, 'id'>>;
   authority?: Resolver<ResolversTypes['Authority'], ParentType, ContextType>;
+  conciergeBranding?: Resolver<Maybe<ResolversTypes['Branding']>, ParentType, ContextType>;
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, Partial<QueryCredentialTypesArgs>>;
   discovery?: Resolver<ResolversTypes['Discovery'], ParentType, ContextType>;
@@ -5742,6 +5817,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   BackgroundJobEvent?: BackgroundJobEventResolvers<ContextType>;
   BackgroundJobEventData?: BackgroundJobEventDataResolvers<ContextType>;
   BackgroundJobProgressEvent?: BackgroundJobProgressEventResolvers<ContextType>;
+  Branding?: BrandingResolvers<ContextType>;
   ClaimValidation?: ClaimValidationResolvers<ContextType>;
   Communication?: CommunicationResolvers<ContextType>;
   Contact?: ContactResolvers<ContextType>;

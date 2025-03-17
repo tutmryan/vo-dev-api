@@ -73,6 +73,12 @@ export const executeOperationAsCredentialAdmin = async <
   },
 ): Promise<FormattedExecutionResult<TData>> => executeOperationAsUser(request, UserRoles.credentialAdmin)
 
+export const executeOperationAsInstanceAdmin = async <TData = Record<string, unknown>, TVariables extends VariableValues = VariableValues>(
+  request: Omit<GraphQLRequest<TVariables>, 'query'> & {
+    query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
+  },
+): Promise<FormattedExecutionResult<TData>> => executeOperationAsUser(request, UserRoles.instanceAdmin)
+
 export const executeOperationAsApprovalRequestAdmin = async <
   TData = Record<string, unknown>,
   TVariables extends VariableValues = VariableValues,

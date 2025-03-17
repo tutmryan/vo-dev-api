@@ -5,6 +5,7 @@ export enum UserRoles {
   partnerAdmin = 'VerifiableCredential.PartnerAdmin',
   approvalRequestAdmin = 'VerifiableCredential.ApprovalRequestAdmin',
   oidcAdmin = 'VerifiableCredential.OidcAdmin',
+  instanceAdmin = 'VerifiableCredential.InstanceAdmin',
 }
 
 export enum OidcScopes {

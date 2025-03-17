@@ -1,0 +1,61 @@
+"""
+Defines the branding configuration for VO applications.
+"""
+type Branding {
+  """
+  The ID of the branding configuration.
+  """
+  id: ID!
+  """
+  The name of the platform this branding is for
+  """
+  name: String!
+  """
+  The branding configuration data.
+  """
+  data: JSONObject
+  """
+  The user who created the branding
+  """
+  createdBy: User!
+  """
+  When the branding was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who last updated the branding.
+  """
+  updatedBy: User
+  """
+  When the branding was last updated.
+  """
+  updatedAt: DateTime
+}
+
+"""
+Defines the input to create or update a concierge branding configuration.
+"""
+input ConciergeBrandingInput {
+  """
+  The branding configuration data.
+  """
+  data: JSONObject!
+}
+
+extend type Query {
+  """
+  Returns a branding config for the Concierge or null if no branding has been saved yet.
+  """
+  conciergeBranding: Branding
+}
+
+extend type Mutation {
+  """
+  Create or update a concierge branding config.
+  """
+  saveConciergeBranding(input: ConciergeBrandingInput!): Branding!
+  """
+  Deletes an existing concierge branding.
+  """
+  deleteConciergeBranding: Void
+}

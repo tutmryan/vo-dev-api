@@ -124,5 +124,14 @@
     "description": "Provides access to administer OIDC clients and resources",
     "displayName": "OIDC admin",
     "value": "VerifiableCredential.OidcAdmin"
+  },
+  {
+    "id": "48055600-448e-4e66-8904-2f919eec6298",
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to administer an instance",
+    "displayName": "Instance admin",
+    "value": "VerifiableCredential.InstanceAdmin"
   }
 ]

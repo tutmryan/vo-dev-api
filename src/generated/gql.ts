@@ -26,6 +26,9 @@ const documents = {
     "\n  query GetAsyncIssuance($id: UUID!) {\n    asyncIssuanceRequest(id: $id) {\n      ...AsyncIssuanceRequestFragment\n    }\n  }\n": types.GetAsyncIssuanceDocument,
     "\n  mutation ResendAsyncIssuanceNotification($asyncIssuanceRequestId: UUID!) {\n    resendAsyncIssuanceNotification(asyncIssuanceRequestId: $asyncIssuanceRequestId) {\n      ...AsyncIssuanceRequestFragment\n    }\n  }\n": types.ResendAsyncIssuanceNotificationDocument,
     "\n  mutation UpdateAsyncIssuanceContact($asyncIssuanceRequestId: UUID!, $contact: AsyncIssuanceContactInput!) {\n    updateAsyncIssuanceContact(asyncIssuanceRequestId: $asyncIssuanceRequestId, contact: $contact) {\n      notification {\n        value\n        method\n      }\n      verification {\n        value\n        method\n      }\n    }\n  }\n": types.UpdateAsyncIssuanceContactDocument,
+    "\n  query ConciergeBranding {\n    conciergeBranding {\n      data\n    }\n  }\n": types.ConciergeBrandingDocument,
+    "\n  mutation SaveConciergeBranding($input: ConciergeBrandingInput!) {\n    saveConciergeBranding(input: $input) {\n      id\n    }\n  }\n": types.SaveConciergeBrandingDocument,
+    "\n  mutation DeleteConciergeBranding {\n    deleteConciergeBranding\n  }\n": types.DeleteConciergeBrandingDocument,
     "\n  fragment ContractFragment on Contract {\n    id\n    name\n    description\n    template {\n      id\n      name\n      description\n      isPublic\n      validityIntervalInSeconds\n    }\n    credentialTypes\n    display {\n      locale\n      card {\n        title\n        issuedBy\n        backgroundColor\n        textColor\n        description\n        logo {\n          uri\n          image\n          description\n        }\n      }\n      consent {\n        title\n        instructions\n      }\n      claims {\n        label\n        claim\n        type\n        description\n        value\n      }\n    }\n    isPublic\n    validityIntervalInSeconds\n  }\n": types.ContractFragmentFragmentDoc,
     "\n  mutation CreateContract($input: ContractInput!) {\n    createContract(input: $input) {\n      ...ContractFragment\n    }\n  }\n": types.CreateContractDocument,
     "\n  mutation DeprecateContract($id: ID!) {\n    deprecateContract(id: $id) {\n      ...ContractFragment,\n      externalId,\n      provisionedAt,\n      lastProvisionedAt,\n      isDeprecated,\n      deprecatedAt\n    }\n  }\n": types.DeprecateContractDocument,
@@ -139,6 +142,18 @@ export function graphql(source: "\n  mutation ResendAsyncIssuanceNotification($a
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation UpdateAsyncIssuanceContact($asyncIssuanceRequestId: UUID!, $contact: AsyncIssuanceContactInput!) {\n    updateAsyncIssuanceContact(asyncIssuanceRequestId: $asyncIssuanceRequestId, contact: $contact) {\n      notification {\n        value\n        method\n      }\n      verification {\n        value\n        method\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateAsyncIssuanceContact($asyncIssuanceRequestId: UUID!, $contact: AsyncIssuanceContactInput!) {\n    updateAsyncIssuanceContact(asyncIssuanceRequestId: $asyncIssuanceRequestId, contact: $contact) {\n      notification {\n        value\n        method\n      }\n      verification {\n        value\n        method\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query ConciergeBranding {\n    conciergeBranding {\n      data\n    }\n  }\n"): (typeof documents)["\n  query ConciergeBranding {\n    conciergeBranding {\n      data\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation SaveConciergeBranding($input: ConciergeBrandingInput!) {\n    saveConciergeBranding(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation SaveConciergeBranding($input: ConciergeBrandingInput!) {\n    saveConciergeBranding(input: $input) {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteConciergeBranding {\n    deleteConciergeBranding\n  }\n"): (typeof documents)["\n  mutation DeleteConciergeBranding {\n    deleteConciergeBranding\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

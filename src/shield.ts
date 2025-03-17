@@ -67,6 +67,7 @@ const isCredentialAdminUser = hasRoleRule(UserRoles.credentialAdmin)
 const isPartnerAdminUser = hasRoleRule(UserRoles.partnerAdmin)
 const isApprovalRequestAdminUser = hasRoleRule(UserRoles.approvalRequestAdmin)
 const isOidcAdminUser = hasRoleRule(UserRoles.oidcAdmin)
+const isInstanceAdminUser = hasRoleRule(UserRoles.instanceAdmin)
 
 // app roles
 const isIssuanceApp = hasRoleRule(AppRoles.issue, 'isIssuanceApp')
@@ -111,6 +112,7 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': isUserWithReadPermissions,
     discovery: or(isUserWithReadPermissions, isIssuee),
     healthcheck: allow,
+    conciergeBranding: allow,
     template: or(isUserWithReadPermissions, isContractAdminApp),
     findTemplates: or(isUserWithReadPermissions, isContractAdminApp),
     templateCombinedData: or(isUserWithReadPermissions, isContractAdminApp),
@@ -162,6 +164,8 @@ export const rules: ShieldSchema<Resolvers> = {
     createIssuanceRequestForAsyncIssuance: or(isIssuee, isValidCreateIssuanceRequestForAsyncIssuanceRequest),
     createPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedPresentationRequest),
     createPresentationRequestForAuthn: isValidOidcAuthnPresentationRequest,
+    saveConciergeBranding: isInstanceAdminUser,
+    deleteConciergeBranding: isInstanceAdminUser,
     saveIdentity: or(
       isIssuerUser,
       isIssuanceApp,
@@ -279,6 +283,9 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': allow,
   },
   SendAsyncIssuanceVerificationResponse: {
+    '*': allow,
+  },
+  Branding: {
     '*': allow,
   },
 }
