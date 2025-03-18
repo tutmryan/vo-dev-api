@@ -1,4 +1,18 @@
+<!--
+  * ********************************************************************************************** *
+  * WARNING: Ensure any changes to this file are compatible with WebView/3.0 used in the Teams for *
+  * Windows authentication flow. This is critical as the WebView/3.0 is based on an older version  *
+  * of Chromium (70), which may not support modern JavaScript features, like ??                    *
+  * ********************************************************************************************** *
+-->
+
 <script type="text/javascript">
+
+  // Polyfill for async iterator if not supported. Required for WebView/3.0
+  if (typeof Symbol.asyncIterator === 'undefined') {
+    Symbol.asyncIterator = Symbol.for('Symbol.asyncIterator');
+  }
+
   const isMobile = /Android|iPhone/i.test(navigator.userAgent)
 
   let client
@@ -84,7 +98,7 @@
 
   function displayError(error) {
     hide(document.querySelectorAll('#desktop, #mobile, #progress'))
-    document.querySelector('#errorText').textContent = `${error?.message ?? error}`
+    document.querySelector('#errorText').textContent = `${(error && error.message != null ? error.message : error)}`
     show(document.querySelector('#error'))
   }
 
@@ -160,4 +174,8 @@
 <script type="text/javascript">
   displayProgress(isMobile ? 'Generating presentation link...' : 'Generating QR code...')
 </script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js/index.min.js"></script>
+<% if (isLegacyWebView) { %>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js/index.es6.min.js" crossorigin></script>
+<% } else { %>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js/index.min.js"></script>
+<% } %>
