@@ -101,7 +101,13 @@ export function routes(app: Express, route: string): void {
           // TODO: handle param validation errors with a better UX
           const presentationRequest = await buildAuthnPresentationRequest(params, clientEntity, getData().partners, loginInteractionData)
           const { logo, backgroundColor, backgroundImage } = clientEntity
+
+          // Teams on Windows during authentication hands off to the OS, which then uses an old version of WebView based on Chromium 70. If it were
+          // Edge based (WebView2) it would not include WebView/3.0 in the user agent. Flag for legacy support.
+          const isLegacyWebView = req.headers['user-agent']?.includes('WebView/3.0') && req.headers['user-agent'].includes('Chrome/70')
+
           return res.render('login', {
+            isLegacyWebView,
             client,
             uid,
             details: prompt.details,
