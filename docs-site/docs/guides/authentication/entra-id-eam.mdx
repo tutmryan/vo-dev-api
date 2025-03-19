@@ -4,9 +4,21 @@ import { ImgBorder } from '@site/src/components/ImgBorder'
 
 # Entra ID EAM
 
-An external authentication method (EAM) lets users choose an external provider to meet multifactor authentication (MFA) requirements when they sign in to Microsoft Entra ID. An EAM can satisfy MFA requirements from Conditional Access policies, Microsoft Entra ID Protection risk-based Conditional Access policies, Privileged Identity Management (PIM) activation, and when the application itself requires MFA.
+An external authentication method (EAM), lets users choose an external provider to meet multifactor authentication (MFA) requirements when they sign in to Microsoft Entra ID. An EAM can satisfy MFA requirements from Conditional Access policies, Microsoft Entra ID Protection risk-based Conditional Access policies, Privileged Identity Management (PIM) activation, and when the application itself requires MFA.
 
 ## Important Information
+
+### Release Status: Public Preview
+
+Entra ID EAM is in [public preview](https://learn.microsoft.com/en-us/entra/fundamentals/licensing-preview-info). Public preview features carry a higher risk of change and buggy behaviour than features that are generally available.
+
+:::danger[Caution]
+
+Authentications flows on Mobile devices which use Entra EAM with Verifiable Credentials (VC) are not supported.
+
+Verified Orchestration is working with Microsoft to resolve this issue.
+
+:::
 
 ### Tenants
 
