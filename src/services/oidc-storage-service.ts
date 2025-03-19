@@ -11,6 +11,7 @@ import type { PresentationLoginAccount } from '../features/oidc-provider/session
 import { logger } from '../logger'
 import { invariant } from '../util/invariant'
 import { Lazy } from '../util/lazy'
+import { throwError } from '../util/throw-error'
 import { PrivateBlobStorageContainerService } from './private-blob-storage-container-service'
 
 const accountsFolder = 'accounts'
@@ -161,17 +162,23 @@ export class OidcStorageService extends PrivateBlobStorageContainerService {
   /***
    * Returns the existing OIDC keys, unless keys require initialization, in which case it returns undefined.
    */
-  async loadExistingKeys(): Promise<JWK[] | undefined> {
+  async loadExistingKeys(): Promise<{ jwk: JWK; createdOn: Date }[] | undefined> {
     const blobs = await this.listKeyBlobs()
+
     const [newest, ...others] = blobs
     if (!newest) return undefined
+
     const needsRotation = await this.shouldRotateKey(newest)
     if (needsRotation) return undefined
+
     const keys = await Promise.all(
       [newest, ...others].map(async (blob) => {
         const data = await this.downloadToBuffer(blob.name)
         if (!data) return undefined
-        return JSON.parse(data.toString('utf-8')) as JWK
+        return {
+          jwk: JSON.parse(data.toString('utf-8')) as JWK,
+          createdOn: blob.properties.createdOn ?? throwError('Failed to get createdOn date for OIDC key from blog storage'),
+        }
       }),
     )
     return compact(keys)
