@@ -149,13 +149,7 @@ export class OidcStorageService extends PrivateBlobStorageContainerService {
     return newestToOldest
   }
 
-  private async shouldRotateKey(newestKeyBlob: BlobItem) {
-    // TODO: This can be removed once all environments have been updated to use the new OIDC keys with x5c
-    const data = await this.downloadToBuffer(newestKeyBlob.name)
-    invariant(data, 'Failed to download OIDC key')
-    const key = JSON.parse(data.toString('utf-8')) as JWK
-    if (!key.x5c) return true
-
+  private shouldRotateKey(newestKeyBlob: BlobItem) {
     return newestKeyBlob.properties.lastModified.getTime() < Date.now() - keyMillisecondsBeforeRotation
   }
 
@@ -168,7 +162,7 @@ export class OidcStorageService extends PrivateBlobStorageContainerService {
     const [newest, ...others] = blobs
     if (!newest) return undefined
 
-    const needsRotation = await this.shouldRotateKey(newest)
+    const needsRotation = this.shouldRotateKey(newest)
     if (needsRotation) return undefined
 
     const keys = await Promise.all(
