@@ -16,6 +16,8 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    outputs:
+      sql-server-1-name: ${{ steps.deploy.outputs.sql-server-1-name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -41,3 +43,28 @@ jobs:
           resource-group-name: vo-nonprd-platform-shared-infra
           partner-id: ${{ vars.NON_PROD_PARTNER_ID }}
           alerts-email: ${{ vars.NON_PROD_ALERTS_EMAIL }}
+  sql-server-setup:
+    name: SQL Server setup
+    runs-on: vo-saas-vnet-runner-nonprod
+    needs: [deploy-to-non-prod]
+    environment:
+      name: Non-production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+      - name: SQL Server setup
+        id: sql-server-setup
+        uses: ./.github/actions/sql-server-setup
+        with:
+          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          sql-server-name: ${{ needs.deploy-to-non-prod.outputs.sql-server-1-name }}

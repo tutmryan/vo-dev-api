@@ -118,7 +118,7 @@ jobs:
 
   deploy-to-non-prod:
     name: Deploy to ${{ matrix.instance }} non-prod environment
-    runs-on: ubuntu-latest
+    runs-on: vo-saas-vnet-runner-nonprod
     permissions:
       id-token: write
     needs:
@@ -170,13 +170,6 @@ jobs:
         with:
           resource-group-name: ${{ matrix.resourceGroup }}
           resource-prefix: ${{ matrix.resourcePrefix }}
-      - name: Add temporary SQL firewall rule
-        id: add-temporary-sql-firewall-rule
-        uses: ./github-actions/sql-firewall-rule-add
-        with:
-          resource-group-name: vo-nonprd-platform-shared-infra
-          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
-          rule-name-prefix: '${{ matrix.resourcePrefix}}-${{ github.run_id }}'
       - name: Instance SQL database
         id: instance-sql-db
         uses: ./github-actions/sql-db
@@ -204,6 +197,7 @@ jobs:
           resource-group-unique-string: ${{ steps.instance-resource-group.outputs.resource-group-unique-string }}
           resource-prefix: ${{ matrix.resourcePrefix }}
           deployment-service-principal-object-id: ${{ vars.NON_PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
+          vnet-name: ${{ vars.NON_PROD_VNET_NAME }}
 
           key-vault-resource-group-name: ${{ vars.NON_PROD_KEY_VAULT_RESOURCE_GROUP_NAME }}
           key-vault-name: ${{ vars.NON_PROD_KEY_VAULT_NAME }}
@@ -256,18 +250,10 @@ jobs:
           resource-prefix: ${{ matrix.resourcePrefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
-      - name: Remove temporary SQL firewall rule
-        id: remove-temporary-sql-firewall-rule
-        if: always()
-        uses: ./github-actions/sql-firewall-rule-remove
-        with:
-          resource-group-name: vo-nonprd-platform-shared-infra
-          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
-          rule-name: ${{ steps.add-temporary-sql-firewall-rule.outputs.rule-name }}
 
   deploy-to-prod:
     name: Deploy to ${{ matrix.instance }} prod environment
-    runs-on: ubuntu-latest
+    runs-on: vo-saas-vnet-runner-prod
     permissions:
       id-token: write
     needs:
@@ -338,13 +324,6 @@ jobs:
         with:
           resource-group-name: ${{ matrix.resourceGroup }}
           resource-prefix: ${{ matrix.resourcePrefix }}
-      - name: Add temporary SQL firewall rule
-        id: add-temporary-sql-firewall-rule
-        uses: ./github-actions/sql-firewall-rule-add
-        with:
-          resource-group-name: vo-platform-shared-infra
-          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
-          rule-name-prefix: '${{ matrix.resourcePrefix }}-${{ github.run_id }}'
       - name: Instance SQL database
         id: instance-sql-db
         uses: ./github-actions/sql-db
@@ -372,6 +351,7 @@ jobs:
           resource-group-unique-string: ${{ steps.instance-resource-group.outputs.resource-group-unique-string }}
           resource-prefix: ${{ matrix.resourcePrefix }}
           deployment-service-principal-object-id: ${{ vars.PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
+          vnet-name: ${{ vars.PROD_VNET_NAME }}
 
           key-vault-resource-group-name: ${{ vars.PROD_KEY_VAULT_RESOURCE_GROUP_NAME }}
           key-vault-name: ${{ vars.PROD_KEY_VAULT_NAME }}
@@ -425,11 +405,3 @@ jobs:
           resource-prefix: ${{ matrix.resourcePrefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
-      - name: Remove temporary SQL firewall rule
-        id: remove-temporary-sql-firewall-rule
-        if: always()
-        uses: ./github-actions/sql-firewall-rule-remove
-        with:
-          resource-group-name: vo-platform-shared-infra
-          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
-          rule-name: ${{ steps.add-temporary-sql-firewall-rule.outputs.rule-name }}

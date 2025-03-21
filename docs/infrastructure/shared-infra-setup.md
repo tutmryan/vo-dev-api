@@ -76,30 +76,45 @@ gh api \
   -f "include_claim_keys[]=repo"
 ```
 
+## Register GitHub Network provider
+
+Using the Azure CLI, log into the hosting tenant and register the GitHub Network provider.
+
+```bash
+az provider register --namespace GitHub.Network
+```
+
+Check the registration status:
+
+```bash
+az provider show --namespace GitHub.Network
+```
+
 ## Configure organisation variables in GitHub
 
 Add organisation variables and secrets to GitHub using the output from the previous steps and auth setup.
 
 Prefix the variable names with the hosting tenant name, e.g. `[NON_]PROD_AZURE_CLIENT_ID`.
 
-| Name                                   | Value                                                                          |
-| -------------------------------------- | ------------------------------------------------------------------------------ |
-| `AZURE_CLIENT_ID`                      | The client ID of the deployment app registration                               |
-| `AZURE_TENANT_ID`                      | The ID of the target tenant                                                    |
-| `AZURE_SUBSCRIPTION_ID`                | The ID of the target subscription                                              |
-| `KEY_VAULT_NAME`                       | The name of the key vault to hold signing keys used by Verified ID authorities |
-| `KEY_VAULT_RESOURCE_GROUP_NAME`        | The name of the resource group to hold Verified ID resources                   |
-| `DNS_API_KEY`                          | The GoDaddy DNS API key                                                        |
-| `DNS_API_SECRET`                       | The GoDaddy DNS API secret                                                     |
-| `SMS_SECRET`                           | The Twilio SMS secret                                                          |
-| `EMAIL_API_KEY`                        | The SendGrid email API key                                                     |
-| `LIMITED_ACCESS_CLIENT_SECRET`         | The client secret for the limited access client                                |
-| `LIMITED_APPROVAL_CLIENT_SECRET`       | The client secret for the limited approval client                              |
-| `LIMITED_PHOTO_CAPTURE_CLIENT_SECRET`  | The client secret for the limited photo capture client                         |
-| `LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET` | The client secret for the limited async issuance client                        |
-| `LIMITED_DEMO_CLIENT_SECRET`           | The client secret for the limited demo client                                  |
-| `LIMITED_OIDC_CLIENT_SECRET`           | The client secret for the limited OIDC authentication client                   |
-| `VID_CALLBACK_CLIENT_SECRET`           | The client secret for the VID callback client                                  |
+| Name                                   | Value                                                                                                                                                                              |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VNET_NAME`                            | The name of the virtual network to hold shared infrastructure resources. This may be overridden at instance environment level. Use `vo-nonprd-platform-vnet` or `vo-platform-vnet` |
+| `AZURE_CLIENT_ID`                      | The client ID of the deployment app registration                                                                                                                                   |
+| `AZURE_TENANT_ID`                      | The ID of the target tenant                                                                                                                                                        |
+| `AZURE_SUBSCRIPTION_ID`                | The ID of the target subscription                                                                                                                                                  |
+| `KEY_VAULT_NAME`                       | The name of the key vault to hold signing keys used by Verified ID authorities                                                                                                     |
+| `KEY_VAULT_RESOURCE_GROUP_NAME`        | The name of the resource group to hold Verified ID resources                                                                                                                       |
+| `DNS_API_KEY`                          | The GoDaddy DNS API key                                                                                                                                                            |
+| `DNS_API_SECRET`                       | The GoDaddy DNS API secret                                                                                                                                                         |
+| `SMS_SECRET`                           | The Twilio SMS secret                                                                                                                                                              |
+| `EMAIL_API_KEY`                        | The SendGrid email API key                                                                                                                                                         |
+| `LIMITED_ACCESS_CLIENT_SECRET`         | The client secret for the limited access client                                                                                                                                    |
+| `LIMITED_APPROVAL_CLIENT_SECRET`       | The client secret for the limited approval client                                                                                                                                  |
+| `LIMITED_PHOTO_CAPTURE_CLIENT_SECRET`  | The client secret for the limited photo capture client                                                                                                                             |
+| `LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET` | The client secret for the limited async issuance client                                                                                                                            |
+| `LIMITED_DEMO_CLIENT_SECRET`           | The client secret for the limited demo client                                                                                                                                      |
+| `LIMITED_OIDC_CLIENT_SECRET`           | The client secret for the limited OIDC authentication client                                                                                                                       |
+| `VID_CALLBACK_CLIENT_SECRET`           | The client secret for the VID callback client                                                                                                                                      |
 
 To do so:
 
@@ -200,7 +215,7 @@ Using the output from these steps, create a `shared.<nonprd/prd>.bicepparam` fil
 
 If you have access, e.g. for non-prod, you can check the shared infrastructure deployment by running a what-if command, e.g.:
 
-```
+```console
 az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --template-file ./infrastructure/shared.bicep --parameters ./infrastructure/parameters/shared.nonprd.bicepparam
 ```
 
@@ -248,6 +263,8 @@ az deployment group what-if --resource-group vo-nonprd-platform-shared-infra --t
 
 You can now create a new workflow in the `.github/workflows` directory to call the `shared-infra` action for the hosting tenant.
 
+- The first time you run this, the `sql-server-setup` workflow job will fail because the deployment service principal is not yet a member of the Azure SQL administrators group.
+
 ## Give the SQL Server user assigned identity AAD Directory Readers role assignment
 
 After running the shared infrastructure pipeline, but before deploying any instances, the SQL Server user assigned identity must be assigned the AAD Directory Readers role to support authentication from API managed identities.
@@ -256,10 +273,47 @@ After running the shared infrastructure pipeline, but before deploying any insta
 1. In the "Manage" section, click on "Roles and administrators".
 1. Find the "Directory Readers" role, select it, then click on "Add assignments".
 1. Search for the SQL Server user assigned identity by its name e.g. `vo-nonprd-platform-sql-server-identity`, then click on "Add".
+1. Re-run the shared infra pipeline to successfully run the `sql-server-setup` step.
 
 ## Remove the deployment service principal from the Azure SQL administrators group
 
 The deployment service principal needs to be removed from the Azure SQL administrators group so that it is no longer a server administrator. If it remains a server administrator, the deployment service principal can connect to any instance databases in the server.
+
+## Configure GitHub VNET integration
+
+### Add a new network configuration for the enterprise
+
+Refer to https://docs.github.com/en/enterprise-cloud@latest/admin/configuring-settings/configuring-private-networking-for-hosted-compute-products/configuring-private-networking-for-github-hosted-runners-in-your-enterprise#1-add-a-new-network-configuration-for-your-enterprise
+
+- Add a new network configuration for the enterprise
+- Obtain the GitHub ID from the tag of the created `GitHub.Network/networkSettings` resource
+- For the name of the network configuration, use the name of the shared infra resource group in which the VNET is created, e.g. `vo-nonprd-platform-shared-infra`
+
+### Create a runner group
+
+Create a new runner group for the network configuration created in the previous step.
+
+- For the name, use `vo-saas-vnet-runner-group-[nonprod/prod]`
+- Select the organisation
+- Select the network configuration created in the previous step
+
+### Create a runner
+
+Create a new runner for the runner group created in the previous step.
+
+- Select "New GitHub-hosted runner"
+- For the name, use `vo-saas-vnet-runner-[nonprod/prod]`
+- For platform, leave the default "Linux x64" and click "Save"
+- Accept other field default values
+- Create the runner
+
+### Configure organisation access to the runner group
+
+Navigate to the organisation runner groups settings page at <https://github.com/organizations/VerifiedOrchestration/settings/actions/runner-groups>.
+
+- Click on the runner group created in the previous step
+- Select the API repository
+- DO NOT ALLOW PUBLIC ACCESS
 
 ## Warning about changing shared infrastructure (App Service Plan)
 

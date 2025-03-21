@@ -8,6 +8,7 @@ param elasticPoolEdition = 'Standard'
 param elasticPoolCapacity = 50
 param appServicePlanSku = 'P1MV3'
 param appServicePlanCapacity = 1
+param gitHubEnterpriseDatabaseId = '139081'
 param actionGroupAlertName = 'vo-nonprd-alerts'
 param actionGroupAlertShortName = 'VO-Alerts NP'
 param sqlServerElasticPoolAlertName = 'VO SQL Elastic Pool (non-prod) Alert'

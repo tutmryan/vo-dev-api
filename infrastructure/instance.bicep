@@ -26,60 +26,102 @@ resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
-var keyVaultProperties = {
-  enabledForTemplateDeployment: true
-  tenantId: subscription().tenantId
-  sku: {
-    name: 'standard'
-    family: 'A'
-  }
-  enablePurgeProtection: true
-  accessPolicies: [
-    {
-      tenantId: subscription().tenantId
-      objectId: apiAppService.identity.principalId
-      permissions: {
-        secrets: [
-          'get'
-        ]
-      }
-    }
-    {
-      tenantId: subscription().tenantId
-      objectId: privateStorageUserAssignedIdentity.properties.principalId
-      permissions: {
-        keys: [
-          'unwrapKey'
-          'wrapKey'
-          'get'
-        ]
-      }
-    }
-    {
-      tenantId: subscription().tenantId
-      objectId: deploymentServicePrincipalObjectId
-      permissions: {
-        secrets: [
-          'list'
-        ]
-      }
-    }
-  ]
-}
+param vnetName string
+// subnet ids
+var privateEndpointsSubnetId = resourceId(
+  sharedResourceGroupName,
+  'Microsoft.Network/virtualNetworks/subnets',
+  vnetName,
+  'private-endpoints-subnet'
+)
+var appServiceSubnetId = resourceId(
+  sharedResourceGroupName,
+  'Microsoft.Network/virtualNetworks/subnets',
+  vnetName,
+  'app-service-subnet'
+)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   name: 'vo-kv-inst-${uniqueSuffix}'
   location: location
-  properties: keyVaultProperties
+  properties: {
+    enabledForTemplateDeployment: true
+    tenantId: subscription().tenantId
+    sku: {
+      name: 'standard'
+      family: 'A'
+    }
+    enablePurgeProtection: true
+    publicNetworkAccess: 'Disabled'
+    accessPolicies: [
+      {
+        tenantId: subscription().tenantId
+        objectId: apiAppService.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+          ]
+        }
+      }
+      {
+        tenantId: subscription().tenantId
+        objectId: privateStorageUserAssignedIdentity.properties.principalId
+        permissions: {
+          keys: [
+            'unwrapKey'
+            'wrapKey'
+            'get'
+          ]
+        }
+      }
+      {
+        tenantId: subscription().tenantId
+        objectId: deploymentServicePrincipalObjectId
+        permissions: {
+          secrets: [
+            'list'
+          ]
+        }
+      }
+    ]
+  }
 }
 
-module keyVaultFirewall './keyvault-firewall.bicep' = {
-  name: 'keyvault-firewall'
-  params: {
-    keyVaultName: keyVault.name
-    keyVaultProperties: keyVaultProperties
-    location: location
-    ipAddresses: split(apiAppService.properties.outboundIpAddresses, ',')
+resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+  name: '${resourcePrefix}-kv-pe'
+  location: location
+  properties: {
+    subnet: {
+      id: privateEndpointsSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: '${resourcePrefix}-kv-private-link'
+        properties: {
+          privateLinkServiceId: keyVault.id
+          groupIds: ['vault']
+        }
+      }
+    ]
+  }
+}
+
+resource keyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
+  parent: keyVaultPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config1'
+        properties: {
+          privateDnsZoneId: resourceId(
+            sharedResourceGroupName,
+            'Microsoft.Network/privateDnsZones',
+            'privatelink.vaultcore.azure.net'
+          )
+        }
+      }
+    ]
   }
 }
 
@@ -554,6 +596,7 @@ resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   properties: {
     enableNonSslPort: false
     minimumTlsVersion: '1.2'
+    publicNetworkAccess: 'Disabled'
     sku: {
       capacity: redisCacheCapacity
       family: redisCacheFamily
@@ -565,11 +608,41 @@ resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   }
 }
 
-module redisCacheFirewall './redis-firewall.bicep' = {
-  name: 'redis-firewall'
-  params: {
-    redisCacheName: redisCache.name
-    ipAddresses: split(apiAppService.properties.outboundIpAddresses, ',')
+resource redisCachePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+  name: '${resourcePrefix}-redis-pe'
+  location: location
+  properties: {
+    subnet: {
+      id: privateEndpointsSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: '${resourcePrefix}-redis-private-link'
+        properties: {
+          privateLinkServiceId: redisCache.id
+          groupIds: ['redisCache']
+        }
+      }
+    ]
+  }
+}
+
+resource redisCachePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
+  parent: redisCachePrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config1'
+        properties: {
+          privateDnsZoneId: resourceId(
+            sharedResourceGroupName,
+            'Microsoft.Network/privateDnsZones',
+            'privatelink.redis.cache.windows.net'
+          )
+        }
+      }
+    ]
   }
 }
 
@@ -780,38 +853,6 @@ resource privateStorageUserAssignedIdentity 'Microsoft.ManagedIdentity/userAssig
   location: location
 }
 
-var privateStorageIdentity = {
-  type: 'UserAssigned'
-  userAssignedIdentities: {
-    '${privateStorageUserAssignedIdentity.id}': {}
-  }
-}
-
-var privateStorageProps = {
-  allowBlobPublicAccess: false
-  publicNetworkAccess: 'Enabled'
-  minimumTlsVersion: 'TLS1_2'
-  supportsHttpsTrafficOnly: true
-  allowSharedKeyAccess: false
-  encryption: {
-    services: {
-      blob: {
-        enabled: true
-      }
-    }
-    identity: {
-      userAssignedIdentity: privateStorageUserAssignedIdentity.id
-    }
-    keySource: 'Microsoft.Keyvault'
-    keyvaultproperties: {
-      keyname: privateStorageEncryptionKey.name
-      keyvaulturi: endsWith(keyVault.properties.vaultUri, '/')
-        ? substring(keyVault.properties.vaultUri, 0, length(keyVault.properties.vaultUri) - 1)
-        : keyVault.properties.vaultUri
-    }
-  }
-}
-
 resource privateStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: 'voprivate${uniqueSuffix}'
   location: location
@@ -819,8 +860,36 @@ resource privateStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = 
   sku: {
     name: 'Standard_GRS'
   }
-  identity: privateStorageIdentity
-  properties: privateStorageProps
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${privateStorageUserAssignedIdentity.id}': {}
+    }
+  }
+  properties: {
+    allowBlobPublicAccess: false
+    publicNetworkAccess: 'Disabled'
+    minimumTlsVersion: 'TLS1_2'
+    supportsHttpsTrafficOnly: true
+    allowSharedKeyAccess: false
+    encryption: {
+      services: {
+        blob: {
+          enabled: true
+        }
+      }
+      identity: {
+        userAssignedIdentity: privateStorageUserAssignedIdentity.id
+      }
+      keySource: 'Microsoft.Keyvault'
+      keyvaultproperties: {
+        keyname: privateStorageEncryptionKey.name
+        keyvaulturi: endsWith(keyVault.properties.vaultUri, '/')
+          ? substring(keyVault.properties.vaultUri, 0, length(keyVault.properties.vaultUri) - 1)
+          : keyVault.properties.vaultUri
+      }
+    }
+  }
 }
 
 resource privateStorageAccountLock 'Microsoft.Authorization/locks@2020-05-01' = {
@@ -843,17 +912,6 @@ resource privateStorageEncryptionKey 'Microsoft.KeyVault/vaults/keys@2021-10-01'
     kty: 'RSA'
   }
 }
-
-// module privateStorageFirewall './storage-account-firewall.bicep' = {
-//   name: 'private-storage-firewall'
-//   params: {
-//     storageAccountName: privateStorageAccount.name
-//     storageAccountIdentity: privateStorageIdentity
-//     storageAccountProperties: privateStorageProps
-//     location: location
-//     ipAddresses: split(apiAppService.properties.outboundIpAddresses, ',')
-//   }
-// }
 
 @description('The key for encrypting private storage data')
 @secure()
@@ -899,6 +957,44 @@ resource verifiedOrchestrationPrivateStorageBlobService 'Microsoft.Storage/stora
       retentionInDays: 7
     }
     isVersioningEnabled: true
+  }
+}
+
+resource storagePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+  name: '${resourcePrefix}-storage-pe'
+  location: location
+  properties: {
+    subnet: {
+      id: privateEndpointsSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: '${resourcePrefix}-storage-private-link'
+        properties: {
+          privateLinkServiceId: privateStorageAccount.id
+          groupIds: ['blob']
+        }
+      }
+    ]
+  }
+}
+
+resource storagePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
+  parent: storagePrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config1'
+        properties: {
+          privateDnsZoneId: resourceId(
+            sharedResourceGroupName,
+            'Microsoft.Network/privateDnsZones',
+            'privatelink.blob.${environment().suffixes.storage}'
+          )
+        }
+      }
+    ]
   }
 }
 
@@ -1142,12 +1238,14 @@ var apiAppServiceProperties = {
   serverFarmId: appServicePlanId
   httpsOnly: true
   clientAffinityEnabled: false
+  virtualNetworkSubnetId: appServiceSubnetId
   siteConfig: {
     alwaysOn: true
     appCommandLine: 'pm2 start ./src/main.tracing.js -i max --no-daemon'
     ftpsState: 'Disabled'
     linuxFxVersion: 'NODE|22-lts'
     minTlsVersion: '1.2'
+    vnetRouteAllEnabled: true
   }
 }
 
@@ -1236,16 +1334,6 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
 }
 
 param sharedResourceGroupName string
-
-module sqlServerFirewall './sql-firewall.bicep' = {
-  name: 'sql-firewall'
-  scope: resourceGroup(sharedResourceGroupName)
-  params: {
-    sqlServerName: sqlServerName
-    ipAddresses: split(apiAppService.properties.outboundIpAddresses, ',')
-    rulePrefix: 'AppService'
-  }
-}
 
 resource docsSite 'Microsoft.Web/staticSites@2022-03-01' = {
   name: '${resourcePrefix}-docs-site'
