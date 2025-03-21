@@ -20,7 +20,7 @@ type JobSchedule = { every: number } | { pattern: string }
 
 const scheduledJobConfig: PartialRecord<JobNames, JobSchedule> = {
   monitorServices: { every: 5 * 60 * 1000 }, // every 5 minutes
-  applyOidcSigningKeysRotation: { pattern: '0 1 * * *' }, // every day at 1am
+  applyOidcSigningKeysRotation: { pattern: '0 0 1 * * *' }, // every day at 1am
 }
 
 const scheduledJobResultHandlers: ResultHandlerMap<JobTypes> = {
