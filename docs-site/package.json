@@ -54,7 +54,7 @@
     ]
   },
   "engines": {
-    "node": ">=18.0"
+    "node": ">=22.11.0"
   },
   "overrides": {
     "braces": "^3.0.3",

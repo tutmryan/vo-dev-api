@@ -4,6 +4,9 @@
   "description": "Runs TypeORM migrations",
   "author": "MakerX",
   "main": "index.js",
+  "engines": {
+    "node": ">=22.11.0"
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "cross-env HOST=localhost DATABASE=VerifiedOrchestration USER=api_user PASSWORD=7o}R~=XA1jmz!-aHQ^pA ts-node --transpile-only -r dotenv/config index",

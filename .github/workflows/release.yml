@@ -15,7 +15,7 @@ jobs:
     name: CI API
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
-      node-version: 20.x
+      node-version: 22.x
       audit-script: npm run audit
       pre-test-script: npm run test:ci:start-db
       test-script: npm run test:ci
@@ -24,7 +24,7 @@ jobs:
     name: CI Migrations Package
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
-      node-version: 20.x
+      node-version: 22.x
       audit-script: npm run audit
       working-directory: ./migrate-db
 
@@ -32,7 +32,7 @@ jobs:
     name: CI Docs Site
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
-      node-version: 20.x
+      node-version: 22.x
       audit-script: npm run audit
       working-directory: ./docs-site
 
@@ -42,7 +42,7 @@ jobs:
       - ci-api
     uses: makerxstudio/shared-config/.github/workflows/node-build-zip.yml@main
     with:
-      node-version: 20.x
+      node-version: 22.x
       artifact-name: api
 
   build-migrations-package:
@@ -51,7 +51,7 @@ jobs:
       - ci-migrations-package
     uses: makerxstudio/shared-config/.github/workflows/node-build-zip.yml@main
     with:
-      node-version: 20.x
+      node-version: 22.x
       working-directory: ./migrate-db
       artifact-name: migrations-package
 
@@ -68,7 +68,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20.x
+          node-version: 22.x
           cache: npm
           cache-dependency-path: ./docs-site/package-lock.json
 

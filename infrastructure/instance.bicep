@@ -1146,7 +1146,7 @@ var apiAppServiceProperties = {
     alwaysOn: true
     appCommandLine: 'pm2 start ./src/main.tracing.js -i max --no-daemon'
     ftpsState: 'Disabled'
-    linuxFxVersion: 'NODE|20-lts'
+    linuxFxVersion: 'NODE|22-lts'
     minTlsVersion: '1.2'
   }
 }
