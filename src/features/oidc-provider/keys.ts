@@ -13,11 +13,10 @@ export async function keys(): Promise<JWK[]> {
   const existing = await oidcStorageService().loadExistingKeys()
 
   if (existing) {
-    // Order keys by createdOn date, most recent first
-    let keys = [...existing]
-
     // Key usage cut-off date
     const cutOff = subHours(new Date(), oidcKeyHoursBeforeUsage)
+
+    let keys = [...existing]
 
     if (keys[0] && keys[0].createdOn > cutOff) {
       // Move the most recent key to the end of the list if it was created less than `oidcKeyHoursBeforeUsage` hours ago
