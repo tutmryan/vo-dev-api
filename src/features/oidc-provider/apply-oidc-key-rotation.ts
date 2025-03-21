@@ -1,3 +1,4 @@
+import { calculateKid } from '../../util/jwk'
 import { keys } from './keys'
 import { getData, notifyOidcDataChanged } from './provider'
 
@@ -11,7 +12,7 @@ export const applyOidcSigningKeysRotation = async () => {
   const providerData = getData()
 
   // If the keys have changed, notify the provider to reload
-  if (currentKeys.length !== providerData.keys.length || currentKeys[0]!.kid !== providerData.keys[0]!.kid) {
+  if (currentKeys.length !== providerData.keys.length || calculateKid(currentKeys[0]!) !== calculateKid(providerData.keys[0]!)) {
     notifyOidcDataChanged()
   }
 }
