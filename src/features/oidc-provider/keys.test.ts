@@ -28,8 +28,8 @@ describe('keys', () => {
   it('returns multiple keys in correct order', async () => {
     // Arrange
     const mockKeys = [
-      { jwk: { kty: 'RSA' }, createdOn: subHours(new Date(), oidcKeyHoursBeforeUsage * 2 + 1) },
       { jwk: { kty: 'RSA' }, createdOn: subHours(new Date(), oidcKeyHoursBeforeUsage + 1) },
+      { jwk: { kty: 'RSA' }, createdOn: subHours(new Date(), oidcKeyHoursBeforeUsage * 2 + 1) },
     ]
     mockedServices.oidcStorageService.loadExistingKeys.mock().mockResolvedValue(mockKeys)
 
@@ -38,8 +38,8 @@ describe('keys', () => {
 
     // Assert
     expect(result).toHaveLength(2)
-    expect(result[0]).toEqual(mockKeys[1]!.jwk)
-    expect(result[1]).toEqual(mockKeys[0]!.jwk)
+    expect(result[0]).toEqual(mockKeys[0]!.jwk)
+    expect(result[1]).toEqual(mockKeys[1]!.jwk)
   })
 
   it('returns with the newest key at the back if newer than the cutoff', async () => {
