@@ -1,3 +1,4 @@
+import { logger } from '../../logger'
 import { calculateKid } from '../../util/jwk'
 import { keys } from './keys'
 import { getData, notifyOidcDataChanged } from './provider'
@@ -13,6 +14,7 @@ export const applyOidcSigningKeysRotation = async () => {
 
   // If the keys have changed, notify all providers to reload and reflect the new keys state
   if (currentKeys.length !== providerData.keys.length || calculateKid(currentKeys[0]!) !== calculateKid(providerData.keys[0]!)) {
+    logger.info('OIDC keys need to be rotated, notifying all providers to reload')
     notifyOidcDataChanged()
   }
 }
