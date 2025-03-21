@@ -3,7 +3,6 @@ import type { JWK } from 'jose'
 import { oidcStorageService } from '.'
 import { runDeduplicatedJob } from '../../background-jobs'
 import { invariant } from '../../util/invariant'
-import { sortBy } from '../../util/sort-by'
 
 export const oidcKeyHoursBeforeUsage = 24
 
@@ -15,7 +14,7 @@ export async function keys(): Promise<JWK[]> {
 
   if (existing) {
     // Order keys by createdOn date, most recent first
-    let keys = existing.sort(sortBy((k) => k.createdOn, true))
+    let keys = [...existing]
 
     // Key usage cut-off date
     const cutOff = subHours(new Date(), oidcKeyHoursBeforeUsage)
