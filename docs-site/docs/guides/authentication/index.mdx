@@ -13,17 +13,17 @@ Your Verified Orchestration instance includes an OpenID Connect (OIDC) authentic
 This feature supports:
 
 - Administrative control over authentication clients:
-- What types of credentials can be presented
-- Use of partner credentials for authentication
-- Use of face check for biometric authentication
+  - What types of credentials can be presented
+  - Use of partner credentials for authentication
+  - Use of face check for biometric authentication
 - Dynamic control over authentication within applications:
-- What partner credentials can be presented
-- What credential types can be presented
-- Whether face check is required for biometric authentication
-- Arbitrary constraints on claims, e.g. limiting authentication to a specific identity
+  - What partner credentials can be presented
+  - What credential types can be presented
+  - Whether face check is required for biometric authentication
+  - Arbitrary constraints on claims, e.g. limiting authentication to a specific identity
 - Configuration of resources to protect access to backend services e.g. APIs:
-- Define resources with scopes
-- Configuration of client access to resources
+  - Define resources with scopes
+  - Configuration of client access to resources
 
 ## Administration of clients and resources
 
@@ -32,10 +32,8 @@ To administer authentication, you must be granted access to user role `Verifiabl
 The <AdminLink path='/oidc'>Composer authentication page</AdminLink> displays the:
 
 1. OpenID Connect provider details:
-
-- Authority URL
-- Discovery URL
-
+   - Authority URL
+   - Discovery URL
 1. List of authentication clients
 1. List of resources
 
@@ -232,7 +230,7 @@ The following table describes all claims available and the scope required to acc
 | `sub`                                    | `openid`                  | The subject identifier, derived from the Verified Orchestration issuance ID.<br /><br />Or, for partner credential presentations:<br /> - the value of the `vc_unique_claim_for_sub` parameter<br /> - the first matching **Unique claim for subject identifier** configured on the client |
 | `name`                                   | `profile`                 | The Verified Orchestration identity name (n/a for partner presentations).                                                                                                                                                                                                                  |
 | `email`                                  | `email`                   | The value of the `email` claim from the verifiable credential presentation, if present.                                                                                                                                                                                                    |
-| `email_verified`                         | `email`                   | A boolean indicating whether the email has been additionally verified, if present.                                                                                                                                                                                                          |
+| `email_verified`                         | `email`                   | A boolean indicating whether the email has been additionally verified, if present.                                                                                                                                                                                                         |
 | `vc_issuer`                              | `vc_info`                 | The issuer DID of the verifiable credential.                                                                                                                                                                                                                                               |
 | `vc_type`                                | `vc_info`                 | The type of the verifiable credential.                                                                                                                                                                                                                                                     |
 | `vc_revocation_status`                   | `vc_info`                 | The revocation status of the verifiable credential, either `VALID` or `REVOKED`.                                                                                                                                                                                                           |
