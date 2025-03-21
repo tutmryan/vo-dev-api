@@ -41,6 +41,7 @@ export function accountToClaims(account: PresentationLoginAccount): AccountClaim
     ...presentationLoginStandardClaims,
     [OpenIdProfileClaim.Name]: identity?.name ?? credentialClaims?.name,
     [OpenIdEmailClaim.Email]: credentialClaims?.email,
+    [OpenIdEmailClaim.EmailVerified]: normalizeBoolean(credentialClaims?.email_verified),
     [VcInfoClaim.Issuer]: did,
     [VcInfoClaim.Type]: credentialType,
     [VcInfoClaim.RevocationStatus]: account.revocationStatus,
@@ -54,6 +55,18 @@ export function accountToClaims(account: PresentationLoginAccount): AccountClaim
   }
   if (account.faceCheckMatchConfidenceScore) claims.amr = [...presentationLoginStandardClaims['amr'], faceCheckAmr]
   return claims
+}
+
+function normalizeBoolean(value: unknown): boolean | undefined {
+  if (value === undefined || value === null) return undefined
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase()
+    if (['true', 'yes', '1', 'on'].includes(normalized)) return true
+    if (['false', 'no', '0', 'off'].includes(normalized)) return false
+    return Boolean(value)
+  }
+  return Boolean(value)
 }
 
 export const deleteAccount = async (accountId: string) => {

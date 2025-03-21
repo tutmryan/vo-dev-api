@@ -23,6 +23,7 @@ export enum OpenIdProfileClaim {
 
 export enum OpenIdEmailClaim {
   Email = 'email',
+  EmailVerified = 'email_verified',
 }
 
 export enum VoIdentityClaim {

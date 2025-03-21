@@ -214,8 +214,7 @@ Additionally, credential info is available via the following scopes:
 
 :::note
 
-\* The `email` scope only results in a claim value when an `email` claim is present in the verifiable credential presentation.
-
+\* The `email` scope provides a claim value only when an `email` claim is present in the verifiable credential presentation. Similarly, the `email_verified` claim is included only when an `email_verified` claim is provided.
 :::
 
 :::note
@@ -233,6 +232,7 @@ The following table describes all claims available and the scope required to acc
 | `sub`                                    | `openid`                  | The subject identifier, derived from the Verified Orchestration issuance ID.<br /><br />Or, for partner credential presentations:<br /> - the value of the `vc_unique_claim_for_sub` parameter<br /> - the first matching **Unique claim for subject identifier** configured on the client |
 | `name`                                   | `profile`                 | The Verified Orchestration identity name (n/a for partner presentations).                                                                                                                                                                                                                  |
 | `email`                                  | `email`                   | The value of the `email` claim from the verifiable credential presentation, if present.                                                                                                                                                                                                    |
+| `email_verified`                         | `email`                   | A boolean indicating whether the email has been additionally verified, if present.                                                                                                                                                                                                          |
 | `vc_issuer`                              | `vc_info`                 | The issuer DID of the verifiable credential.                                                                                                                                                                                                                                               |
 | `vc_type`                                | `vc_info`                 | The type of the verifiable credential.                                                                                                                                                                                                                                                     |
 | `vc_revocation_status`                   | `vc_info`                 | The revocation status of the verifiable credential, either `VALID` or `REVOKED`.                                                                                                                                                                                                           |
