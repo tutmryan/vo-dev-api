@@ -15,15 +15,12 @@ export async function keys(): Promise<JWK[]> {
   if (existing) {
     // Key usage cut-off date
     const cutOff = subHours(new Date(), oidcKeyHoursBeforeUsage)
-
     let keys = [...existing]
-
+    // Move the most recent key to the end of the list if it was created less than `oidcKeyHoursBeforeUsage` hours ago
     if (keys[0] && keys[0].createdOn > cutOff) {
-      // Move the most recent key to the end of the list if it was created less than `oidcKeyHoursBeforeUsage` hours ago
       const [mostRecent, ...rest] = keys
       keys = [...rest, mostRecent]
     }
-
     return keys.map((k) => k.jwk)
   }
 

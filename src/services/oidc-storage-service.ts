@@ -158,13 +158,10 @@ export class OidcStorageService extends PrivateBlobStorageContainerService {
    */
   async loadExistingKeys(): Promise<{ jwk: JWK; createdOn: Date }[] | undefined> {
     const blobs = await this.listKeyBlobs()
-
     const [newest, ...others] = blobs
     if (!newest) return undefined
-
     const needsRotation = this.shouldRotateKey(newest)
     if (needsRotation) return undefined
-
     const keys = await Promise.all(
       [newest, ...others].map(async (blob) => {
         const data = await this.downloadToBuffer(blob.name)

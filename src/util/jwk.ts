@@ -13,23 +13,8 @@ export const calculateKid = (jwk: JWK) => {
         n: jwk.n,
       }
       break
-    case 'EC':
-      components = {
-        crv: jwk.crv,
-        kty: 'EC',
-        x: jwk.x,
-        y: jwk.y,
-      }
-      break
-    case 'OKP':
-      components = {
-        crv: jwk.crv,
-        kty: 'OKP',
-        x: jwk.x,
-      }
-      break
     default:
-      return undefined
+      throw new Error('Unsupported key type')
   }
 
   return createHash('sha256').update(JSON.stringify(components)).digest().toString('base64url')

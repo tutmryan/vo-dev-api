@@ -11,7 +11,7 @@ export const applyOidcSigningKeysRotation = async () => {
 
   const providerData = getData()
 
-  // If the keys have changed, notify all providers to reload to reflect the new keys state
+  // If the keys have changed, notify all providers to reload and reflect the new keys state
   if (currentKeys.length !== providerData.keys.length || calculateKid(currentKeys[0]!) !== calculateKid(providerData.keys[0]!)) {
     notifyOidcDataChanged()
   }

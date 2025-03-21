@@ -11,7 +11,6 @@ describe('keys', () => {
       mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
     )
   })
-
   it('returns a single key', async () => {
     // Arrange
     const mockKey = { jwk: { kty: 'RSA' }, createdOn: new Date() }
@@ -24,7 +23,6 @@ describe('keys', () => {
     expect(result).toHaveLength(1)
     expect(result[0]).toEqual(mockKey.jwk)
   })
-
   it('returns multiple keys in correct order', async () => {
     // Arrange
     const mockKeys = [
@@ -41,7 +39,6 @@ describe('keys', () => {
     expect(result[0]).toEqual(mockKeys[0]!.jwk)
     expect(result[1]).toEqual(mockKeys[1]!.jwk)
   })
-
   it('returns with the newest key at the back if newer than the cutoff', async () => {
     // Arrange
     const recentKey = { jwk: { kty: 'RSA' }, createdOn: new Date() }
