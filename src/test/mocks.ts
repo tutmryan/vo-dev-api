@@ -4,6 +4,7 @@ import { helper as verifiedRequestServiceMockHelper } from '../services/__mocks_
 import { helper as blobStorageContainerServiceHelper } from '../services/__mocks__/blob-storage-container-service'
 import { helper as asyncIssuanceServiceHelper } from '../services/__mocks__/async-issuance-service'
 import { helper as communicationServiceHelper } from '../services/__mocks__/communications-service'
+import { helper as oidcStorageServiceHelper } from '../services/__mocks__/oidc-storage-service'
 
 export const mockedServices = {
   clearAllMocks: () => {
@@ -12,12 +13,14 @@ export const mockedServices = {
     verifiedRequestServiceMockHelper.clearAllMocks()
     asyncIssuanceServiceHelper.clearAllMocks()
     communicationServiceHelper.clearAllMocks()
+    oidcStorageServiceHelper.clearAllMocks()
   },
   adminService: adminServiceMockHelper,
   requestService: verifiedRequestServiceMockHelper,
   blobStorageContainerService: blobStorageContainerServiceHelper,
   asyncIssuanceService: asyncIssuanceServiceHelper,
   communicationsService: communicationServiceHelper,
+  oidcStorageService: oidcStorageServiceHelper,
 }
 
 export function loadMocks() {

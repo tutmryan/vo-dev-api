@@ -23,6 +23,11 @@ import type { RevokeIssuancesJobName, RevokeIssuancesJobType } from '../features
 import { revokeIssuancesJobHandler } from '../features/issuance/jobs/revoke-issuances'
 import type { RevokeUserIssuancesJobName, RevokeUserIssuancesJobType } from '../features/issuance/jobs/revoke-user-issuances'
 import { revokeUserIssuancesJobHandler } from '../features/issuance/jobs/revoke-user-issuances'
+import type {
+  ApplyOidcSigningKeysRotationJobName,
+  ApplyOidcSigningKeysRotationJobType,
+} from '../features/oidc-provider/jobs/apply-oidc-key-rotation'
+import { applyOidcSigningKeysRotationJobHandler } from '../features/oidc-provider/jobs/apply-oidc-key-rotation'
 import {
   initialiseOidcDataJobHandler,
   type InitialiseOidcDataJobName,
@@ -70,6 +75,7 @@ export type JobNames =
   | InitialiseOidcKeysJobName
   | InitialiseOidcDataJobName
   | MonitorServicesJobName
+  | ApplyOidcSigningKeysRotationJobName
 
 export type JobTypes =
   | RevokeIssuancesJobType
@@ -82,6 +88,7 @@ export type JobTypes =
   | InitialiseOidcKeysJobType
   | InitialiseOidcDataJobType
   | MonitorServicesJobType
+  | ApplyOidcSigningKeysRotationJobType
 
 export const handlers: HandlerMap<JobTypes> = {
   revokeIssuances: revokeIssuancesJobHandler,
@@ -94,6 +101,7 @@ export const handlers: HandlerMap<JobTypes> = {
   initialiseOidcKeys: initialiseOidcKeysJobHandler,
   initialiseOidcData: initialiseOidcDataJobHandler,
   monitorServices: monitorServicesJobHandler,
+  applyOidcSigningKeysRotation: applyOidcSigningKeysRotationJobHandler,
 }
 
 // TTL for deduplication of initialisation jobs

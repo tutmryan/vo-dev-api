@@ -1,5 +1,6 @@
 import type { Constructor } from '@graphql-tools/utils'
 import type { Express, RequestHandler } from 'express'
+import type { JWK } from 'jose'
 import { debounce } from 'lodash'
 import type { Configuration, Errors, Interaction, interactionPolicy, KoaContextWithOIDC, Provider } from 'oidc-provider'
 import { apiUrl, cookieSession } from '../../config'
@@ -58,7 +59,7 @@ async function createProvider() {
   const jwksKeys = jwksKeysPromise.value
 
   if (dataPromise.status === 'rejected') throw dataPromise.reason
-  const data = dataPromise.value
+  const data = { ...dataPromise.value, keys: jwksKeys }
 
   const { clients, clientMetadata, resources, resourceScopes } = data
 
@@ -134,7 +135,7 @@ const oidcRouteHandler: RequestHandler = async (req, res) => {
   return providerHandler(req, res)
 }
 
-const dataRef: { provider?: Provider; data?: OidcData } = {}
+const dataRef: { provider?: Provider; data?: OidcData & { keys: JWK[] } } = {}
 
 export function getProvider() {
   const provider = dataRef.provider
