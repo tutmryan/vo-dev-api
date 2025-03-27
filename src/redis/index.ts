@@ -31,7 +31,6 @@ export function createRedisClient(clientName: ClientNames, options: RedisOptions
   const prefix = keyPrefix(clientName)
   logger.info(`Creating Redis ${clientName} client with keyPrefix '${prefix}'`)
   const client = new Redis({ ...options, keyPrefix: prefix })
-  client.on('connect', () => logger.info(`Connected to Redis ${clientName} client`))
   client.on('warning', (warning) => logger.warn(`Redis ${clientName} client warning`, warning))
   client.on('error', ({ message, stack, ...rest }) => logger.error(`Redis ${clientName} client error`, { message, stack, ...rest }))
   return client

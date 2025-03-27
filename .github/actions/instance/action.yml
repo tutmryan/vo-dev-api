@@ -223,7 +223,7 @@ runs:
       uses: azure/arm-deploy@v1
       if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       with:
-        deploymentName: ${{env.NOW}}-did-storage-github-actions
+        deploymentName: ${{env.NOW}}-did-storage-${{inputs.instance}}
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/verified-id-domain-verification-storage.bicep
 
@@ -240,7 +240,7 @@ runs:
       uses: azure/arm-deploy@v1
       if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       with:
-        deploymentName: ${{env.NOW}}-did-cdn-github-actions
+        deploymentName: ${{env.NOW}}-did-cdn-${{inputs.instance}}
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/verified-id-domain-verification-cdn.bicep
         parameters: >-
@@ -337,7 +337,7 @@ runs:
       id: instance-infra
       uses: azure/arm-deploy@v1
       with:
-        deploymentName: ${{env.NOW}}-api-github-actions
+        deploymentName: ${{env.NOW}}-api-${{inputs.instance}}
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/instance.bicep
         parameters: >-
@@ -429,7 +429,7 @@ runs:
       id: set-up-api-domain
       uses: azure/arm-deploy@v1
       with:
-        deploymentName: ${{env.NOW}}-api-domain-github-actions
+        deploymentName: ${{env.NOW}}-api-domain-${{inputs.instance}}
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/app-service-custom-domain.bicep
         parameters: >-
@@ -451,7 +451,7 @@ runs:
       id: set-up-docs-domain
       uses: azure/arm-deploy@v1
       with:
-        deploymentName: ${{env.NOW}}-docs-domain-github-actions
+        deploymentName: ${{env.NOW}}-docs-domain-${{inputs.instance}}
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/static-site-custom-domain.bicep
         parameters: >-
@@ -646,7 +646,7 @@ runs:
       uses: azure/arm-deploy@v1
       if: inputs.audit-log-streaming-enabled == 'true'
       with:
-        deploymentName: ${{env.NOW}}-audit-log-streaming
+        deploymentName: ${{env.NOW}}-audit-${{inputs.instance}}
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/audit-log-streaming.bicep
         parameters: >-

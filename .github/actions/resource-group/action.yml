@@ -24,7 +24,7 @@ runs:
       id: deploy-resource-group
       uses: azure/arm-deploy@v1
       with:
-        deploymentName: ${{env.NOW}}-resource-group-github-actions
+        deploymentName: ${{env.NOW}}-rg-${{inputs.resource-group-name}}
         scope: subscription
         region: ${{ inputs.resource-group-location }}
         template: ./infrastructure/resource-group.bicep

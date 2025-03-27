@@ -43,7 +43,7 @@ runs:
       id: deploy-shared-infrastructure
       uses: azure/arm-deploy@v1
       with:
-        deploymentName: ${{env.NOW}}-shared-infra-github-actions
+        deploymentName: ${{env.NOW}}-shared-infra
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/shared.bicep
         parameters: ./infrastructure/parameters/shared.${{ inputs.infra-environment }}.bicepparam actionGroupAlertEmail=${{ inputs.alerts-email }}

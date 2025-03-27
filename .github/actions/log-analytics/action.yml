@@ -25,7 +25,7 @@ runs:
       id: deploy-log-analytics
       uses: azure/arm-deploy@v1
       with:
-        deploymentName: ${{env.NOW}}-log-analytics-github-actions
+        deploymentName: ${{env.NOW}}-log-analytics-${{inputs.resource-prefix}}
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/log-analytics.bicep
         parameters: >-

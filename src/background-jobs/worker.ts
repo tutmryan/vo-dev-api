@@ -60,7 +60,6 @@ export const worker = Lazy(() => {
       jobName: job.name,
       userId: job.data?.userId,
     })
-    logger.info(`Job (id: ${job.id}) is active.`)
   })
 
   worker.on('progress', (job: BackgroundJob, progress) => {
@@ -70,7 +69,6 @@ export const worker = Lazy(() => {
       jobName: job.name,
       userId: job.data?.userId,
     })
-    logger.info(`Job (id: ${job.id}) is in progress: ${progress}`, progress)
   })
 
   worker.on('completed', (job: BackgroundJob, result) => {
@@ -85,8 +83,6 @@ export const worker = Lazy(() => {
     if (job.id?.startsWith('repeat:')) {
       publishScheduledJobResult(job.name as JobNames, result)
     }
-
-    logger.info(`Job (id: ${job.id}) is completed.`)
   })
 
   worker.on('failed', (job: BackgroundJob | undefined, error) => {
