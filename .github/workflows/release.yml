@@ -147,7 +147,7 @@ jobs:
             resourcePrefix: vo-demo-altleague
     environment:
       name: ${{ matrix.instance }}
-      url: ${{ matrix.instance }}.verifiedorchestration.com
+      url: https://${{ matrix.instance }}.verifiedorchestration.com
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4

@@ -20,38 +20,6 @@ if [ $keyVaultExists -ne 0 ]; then
   secretNames=""
   echo "Key vault $keyVaultName does not yet exist"
 else
-  # get the current IP address
-  ip=$(curl -s ipinfo.io/ip)
-  ret=$?
-  if [ $ret -ne 0 ]; then
-    echo "Error reading IP address"
-    exit 1
-  fi
-
-  # list the current firewall rules for the key vault
-  list=$(az keyvault network-rule list --name $keyVaultName --query "ipRules[].value" -o tsv 2>/dev/null)
-  ret=$?
-  if [ $ret -ne 0 ]; then
-    echo "Error reading firewall rules for key vault $keyVaultName"
-    exit 1
-  fi
-
-  # check if the IP address is already in the list of firewall rules
-  if [[ $list == *$ip* ]]; then
-    echo "Firewall rule for IP address $ip already exists in key vault $keyVaultName"
-  else
-    # add the IP address to the list of firewall rules
-    echo "Adding firewall rule to key vault $keyVaultName for IP address $ip"
-    az keyvault network-rule add --name $keyVaultName --ip-address $ip -o none
-    ret=$?
-    if [ $ret -ne 0 ]; then
-      echo "Error adding firewall rule to key vault $keyVaultName for IP address $ip"
-      exit 1
-    fi
-    # wait for the firewall rule to be updated
-    az keyvault network-rule wait --name $keyVaultName --updated -o none
-  fi
-
   secretNames=$(az keyvault secret list --vault-name $keyVaultName --query "[].name" -o tsv 2>/dev/null)
   ret=$?
   if [ $ret -ne 0 ]; then
@@ -68,9 +36,6 @@ else
       exit 1
     fi
   fi
-
-  echo "Removing firewall rule from key vault $keyVaultName for IP address $ip"
-  az keyvault network-rule remove --name $keyVaultName --ip-address $ip -o none
 fi
 
 while test ${#} -gt 0

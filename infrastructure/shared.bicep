@@ -39,8 +39,7 @@ resource sqlServer1 'Microsoft.Sql/servers@2022-05-01-preview' = {
     type: 'UserAssigned'
   }
   properties: {
-    // TODO: this must be set to 'Enabled' once all instances are updated to use the VNET
-    publicNetworkAccess: 'Enabled'
+    publicNetworkAccess: 'Disabled'
     primaryUserAssignedIdentityId: sqlServerUserAssignedIdentity.id
     administrators: {
       azureADOnlyAuthentication: true
