@@ -1396,6 +1396,7 @@ resource workbook 'Microsoft.Insights/workbooks@2023-06-01' = {
 @description('Shared locations for availability tests')
 var availabilityTestLocations = [
   { Id: 'emea-au-syd-edge' } // Australia East
+  { Id: 'us-ca-sjc-azr' } // West US
 ]
 
 @description('Shared Interval in seconds between test runs for availability test')
@@ -1461,7 +1462,7 @@ resource apiAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if 
       'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
       webTestId: apiAvailabilityTest.id
       componentId: apiAppInsights.id
-      failedLocationCount: 1
+      failedLocationCount: 2
     }
     actions: [
       {
@@ -1518,7 +1519,7 @@ resource msGraphServiceHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' 
       'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
       webTestId: msGraphServiceHealthTest.id
       componentId: apiAppInsights.id
-      failedLocationCount: 1
+      failedLocationCount: 2
     }
     actions: [
       {
@@ -1575,7 +1576,7 @@ resource vidServiceHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if
       'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
       webTestId: vidServiceHealthTest.id
       componentId: apiAppInsights.id
-      failedLocationCount: 1
+      failedLocationCount: 2
     }
     actions: [
       {
@@ -1639,7 +1640,7 @@ resource oidcAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if
       'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
       webTestId: oidcAvailabilityTest.id
       componentId: apiAppInsights.id
-      failedLocationCount: 1
+      failedLocationCount: 2
     }
     actions: [
       {
