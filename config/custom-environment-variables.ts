@@ -32,6 +32,7 @@ const config: EnvVarSubstitution<Config> = {
       defaultMeta: {
         version: 'VERSION',
       },
+      level: 'LOG_LEVEL',
     },
   },
   instance: 'INSTANCE',
