@@ -63,37 +63,58 @@ const eamPresentationLoginStandardClaims = {
 
 export function whenEamAddPresentationConstraints(loginData?: LoginInteractionData, constraints?: ClaimConstraint[]) {
   // Ignore non-EAM requests
-  if (!loginData?.integrations?.entraEam) return constraints
+  if (!loginData?.integrations?.entraEam) {
+    logger.verbose('OIDC EAM hook:whenEamAddPresentationConstraints skipping non-EAM request')
+    return constraints
+  }
 
   invariant(loginData.integrations.entraEam.identityId, 'Identity ID not found during EAM identity constraint build')
 
-  return [
+  const augmentedConstraints = [
     ...(constraints ?? []),
     {
       claimName: StandardClaims.identityId,
       values: [loginData.integrations.entraEam.identityId],
     },
   ]
+
+  logger.verbose('OIDC EAM hook:whenEamAddPresentationConstraints augmenting constraints', {
+    augmentedConstraints,
+  })
+
+  return augmentedConstraints
 }
 
 export function whenEamGetAccountId(loginData: LoginInteractionData, credential: PresentedCredential) {
   // Ignore non-EAM requests
-  if (!loginData.integrations?.entraEam) return undefined
+  if (!loginData.integrations?.entraEam) {
+    logger.verbose('OIDC EAM hook:whenEamGetAccountId skipping non-EAM request')
+    return undefined
+  }
 
   invariant(
     compareIgnoreCase(credential.claims[StandardClaims.identityId], loginData.integrations.entraEam.identityId),
     'Identity ID mismatch during EAM account ID check',
   )
 
+  logger.verbose('OIDC EAM hook:whenEamGetAccountId account Id', { accountId: loginData.integrations.entraEam.sub })
   return loginData.integrations.entraEam.sub
 }
 
 export function isEamRequestAndLoginShouldFail(loginData?: LoginInteractionData) {
   // Ignore non-EAM requests
-  if (!loginData?.integrations?.entraEam) return false
+  if (!loginData?.integrations?.entraEam) {
+    logger.verbose('OIDC EAM hook:isEamRequestAndLoginShouldFail skipping non-EAM request')
+    return false
+  }
 
   // Fail the login if the identity ID is not set
-  return loginData.integrations.entraEam.identityId === undefined
+  if (loginData.integrations.entraEam.identityId === undefined) {
+    logger.verbose('OIDC EAM hook:isEamRequestAndLoginShouldFail identity ID not set', { result: 'fail' })
+    return true
+  }
+  logger.verbose('OIDC EAM hook:isEamRequestAndLoginShouldFail identity ID is set', { result: 'pass' })
+  return false
 }
 
 export const eamLoginFailResult = {
@@ -103,15 +124,23 @@ export const eamLoginFailResult = {
 
 export function whenEamApplyAmr(loginData: LoginInteractionData, amr: string[]) {
   // Ignore non-EAM requests
-  if (!loginData.integrations?.entraEam) return amr
+  if (!loginData.integrations?.entraEam) {
+    logger.verbose('OIDC EAM hook:whenEamApplyAmr skipping non-EAM request')
+    return amr
+  }
 
+  logger.verbose('OIDC EAM hook:whenEamApplyAmr amr', { amr: eamPresentationLoginStandardClaims.amr })
   return [...eamPresentationLoginStandardClaims.amr]
 }
 
 export function whenEamApplyAcr(loginData: LoginInteractionData, acr: string) {
   // Ignore non-EAM requests
-  if (!loginData.integrations?.entraEam) return acr
+  if (!loginData.integrations?.entraEam) {
+    logger.verbose('OIDC EAM hook:whenEamApplyAcr skipping non-EAM request')
+    return acr
+  }
 
+  logger.verbose('OIDC EAM hook:whenEamApplyAcr acr', { acr: eamPresentationLoginStandardClaims.acr })
   return eamPresentationLoginStandardClaims.acr as string
 }
 
@@ -160,6 +189,7 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
 
     // Don't intercept non-EAM requests
     if (!isEamRequest(oidc.params!, oidc.client.clientId)) {
+      logger.verbose('OIDC EAM hook:authorization/post/checkIdTokenHint skipping non-EAM request')
       return original(ctx, next)
     }
 
@@ -186,6 +216,11 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
       oidc.params!.prompt = [...prompts].join(' ')
     }
 
+    logger.verbose(`OIDC EAM hook:authorization/post/checkIdTokenHint intercept end`, {
+      idTokenHint: payload,
+      params: extractLoggable(oidc.params!),
+    })
+
     return next()
   })
 
@@ -201,6 +236,7 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
 
     // Don't intercept non-EAM requests
     if (!isEamRequest(oidc.params!, oidc.client.clientId)) {
+      logger.verbose('OIDC EAM hook:authorization/post/interactions skipping non-EAM request')
       return original(ctx, next)
     }
 
@@ -252,5 +288,15 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
         },
       },
     })
+
+    if (logger.isVerboseEnabled()) {
+      logger.verbose('OIDC EAM hook:authorization/post/interactions intercept end', {
+        preInteractionData: interactionData,
+        postInteractionData: await getLoginInteractionData(oidc.entities.Interaction.uid),
+        identity: { id: identity?.id, name: identity?.name },
+        idTokenHint: oidc.entities.IdTokenHint.payload,
+        params: extractLoggable(oidc.params!),
+      })
+    }
   })
 }

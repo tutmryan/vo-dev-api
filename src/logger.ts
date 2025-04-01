@@ -3,13 +3,14 @@ import { createLogger } from '@makerx/node-winston'
 import { pid } from 'node:process'
 import { configs } from 'triple-beam'
 import type { LoggerOptions, QueryRunner, Logger as TypeOrmLoggerInterface } from 'typeorm'
+import type { Logger as WinstonLogger } from 'winston'
 import * as winston from 'winston'
 import { logging } from './config'
 
 /**
  * set up 'audit' log level, replacing 'http' level
  */
-export type Logger = ReturnType<typeof createLogger> & { audit: winston.LeveledLogMethod }
+export type Logger = ReturnType<typeof createLogger> & { audit: winston.LeveledLogMethod } & Pick<WinstonLogger, 'isVerboseEnabled'>
 // extract http from levels and colors
 const { http: httpLevel, ...levelsRest } = configs.npm.levels
 const { http: httpColor, ...colorsRest } = configs.npm.colors
