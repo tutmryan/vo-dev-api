@@ -1,6 +1,6 @@
 # Multitenant auth setup
 
-A multitenant app registartion is created for each instance in the autmoated deployment pipeline. It is then installed into one or more tenants of the customer who commissioned the instance.
+A multitenant app registration is created for each instance in the automated deployment pipeline. It is then installed into one or more tenants of the customer who commissioned the instance.
 
 The following app registrations are created for the internal operations of the Verified Orchestration platform and are not exposed to the customers.
 
@@ -15,7 +15,7 @@ The following app registrations are created for the internal operations of the V
   - Consent description: `Verified Orchestration platform [INTERNAL API USE ONLY]`
 - create a client secret for the app registration to access the Verified ID API
   - set it to expires in 24 months
-  - store it in 1Password as `NonProd - Verified Orchestration -> Internal app client secret` for the non prod environment
+  - store it in Bitwarden as `NonProd - Verified Orchestration -> Internal app client secret` for the non prod environment
   - set `[NON_PROD | PROD]_INTERNAL_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verifiable Credentials Service Admin` API
   - VerifiableCredential.Authority.ReadWrite
@@ -83,7 +83,7 @@ The following app registrations are created for the internal operations of the V
 - click "Register" to create the app registration
 - create a client secret for the Verified Orchestration API to generate a token
   - set it to expires in 24 months
-  - store it in 1Password, `NonProd - Verified Orchestration -> Limited access client secret` for the non prod environment
+  - store it in Bitwarden, `NonProd - Verified Orchestration -> Limited access client secret` for the non prod environment
   - set `[NON_PROD | PROD]_LIMITED_ACCESS_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.LimitedAccess
@@ -96,7 +96,7 @@ The following app registrations are created for the internal operations of the V
 - click "Register" to create the app registration
 - create a client secret for the Verified Orchestration API to generate a token
   - set it to expires in 24 months
-  - store it in 1Password, `NonProd - Verified Orchestration -> Limited approval client secret` for the non prod environment
+  - store it in Bitwarden, `NonProd - Verified Orchestration -> Limited approval client secret` for the non prod environment
   - set `[NON_PROD | PROD]_LIMITED_APPROVAL_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.LimitedApproval
@@ -109,7 +109,7 @@ The following app registrations are created for the internal operations of the V
 - click "Register" to create the app registration
 - create a client secret for the Verified Orchestration API to generate a token
   - set it to expires in 24 months
-  - store it in 1Password, `NonProd - Verified Orchestration -> Limited photo capture client secret` for the non prod environment
+  - store it in Bitwarden, `NonProd - Verified Orchestration -> Limited photo capture client secret` for the non prod environment
   - set `[NON_PROD | PROD]_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.LimitedPhotoCapture
@@ -122,7 +122,7 @@ The following app registrations are created for the internal operations of the V
 - click "Register" to create the app registration
 - create a client secret for the Verified Orchestration API to generate a token
   - set it to expires in 24 months
-  - store it in 1Password, `NonProd - Verified Orchestration -> Limited async issuance client secret` for the non prod environment
+  - store it in Bitwarden, `NonProd - Verified Orchestration -> Limited async issuance client secret` for the non prod environment
   - set `[NON_PROD | PROD]_LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.LimitedAsyncIssuance
@@ -161,7 +161,7 @@ The following app registrations are created for the internal operations of the V
 - click "Register" to create the app registration
 - create a client secret for the Verified Orchestration API to generate a callback token for the Verified ID
   - set it to expires in 24 months
-  - store it in 1Password, `NonProd - Verified Orchestration -> VID callback client secret` for the non prod environment
+  - store it in Bitwarden, `NonProd - Verified Orchestration -> VID callback client secret` for the non prod environment
   - set `[NON_PROD | PROD]_VID_CALLBACK_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verified Orchestration Internal` API
   - VerifiableCredential.Request.Callback

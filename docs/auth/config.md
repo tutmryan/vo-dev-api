@@ -42,4 +42,4 @@ Note: for localdev, configure API permissions for both localdev and dev APIs
 1. Description: Client credentials secret
 1. Expires: 24 months
 1. Add
-1. Copy to 1Password vault (for localdev) or GitHub environment secrets (for dev, prod)
+1. Copy to the Bitwarden vault (for localdev) or GitHub environment secrets deployed instances
