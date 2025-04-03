@@ -8,6 +8,7 @@ import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { OidcClientEntity } from '../../oidc-provider/entities/oidc-client-entity'
 import { PartnerEntity } from '../../partners/entities/partner-entity'
 import { UserEntity } from '../../users/entities/user-entity'
+import { WalletEntity } from '../../wallet/entities/wallet-entity'
 
 export type PresentedData = Omit<PresentedCredential, 'claims'>
 
@@ -18,16 +19,17 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
       PresentationEntity,
       'requestId' | 'identityId' | 'requestedById' | 'issuanceIds' | 'requestedCredentials' | 'presentedCredentials' | 'partnerIds'
     > &
-      Partial<Pick<PresentationEntity, 'oidcClientId'>>,
+      Partial<Pick<PresentationEntity, 'oidcClientId' | 'walletId'>>,
   ) {
     super()
     if (!args) return
-    const { issuanceIds, partnerIds, oidcClientId, ...rest } = args
+    const { issuanceIds, partnerIds, oidcClientId, walletId, ...rest } = args
     typeSafeAssign(this, {
       ...rest,
       issuances: Promise.resolve(issuanceIds.map((id) => ({ id }) as IssuanceEntity)),
       partners: Promise.resolve(partnerIds.map((id) => ({ id }) as PartnerEntity)),
       oidcClientId: oidcClientId ?? null,
+      walletId: walletId ?? null,
     })
   }
 
@@ -90,4 +92,10 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
 
   @Column({ nullable: true, transformer: uuidLowerCaseTransformer })
   oidcClientId!: string | null
+
+  @ManyToOne(() => WalletEntity, { nullable: true })
+  wallet!: Promise<WalletEntity | null>
+
+  @Column({ nullable: true, transformer: uuidLowerCaseTransformer })
+  walletId!: string | null
 }

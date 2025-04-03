@@ -11,6 +11,7 @@ import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { getLimitedApprovalDataByKey, setLimitedApprovalDataByKey } from '../../limited-approval-tokens'
 import { setLoginInteractionData, validateLoginSessionForPresentation } from '../../oidc-provider/session'
 import { PartnerEntity } from '../../partners/entities/partner-entity'
+import { WalletEntity } from '../../wallet/entities/wallet-entity'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import type { PresentedData } from '../entities/presentation-entity'
 import { PresentationEntity } from '../entities/presentation-entity'
@@ -75,6 +76,23 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
       : []
     const presentedIssuers = presentedCredentials.map((c) => c.issuer)
     const partners = await entityManager.getRepository(PartnerEntity).findBy({ did: In([...new Set(presentedIssuers)]) })
+
+    // find or create a wallet entity if the presentation request has a subject
+    // assign walletId to the presentation entity if it exists
+    let walletId: string | undefined
+    if (event.subject) {
+      const walletRepository = entityManager.getRepository(WalletEntity)
+      let wallet = await walletRepository.findOneBy({ subject: event.subject })
+      if (!wallet) {
+        wallet = await walletRepository.save(
+          new WalletEntity({
+            subject: event.subject,
+          }),
+        )
+      }
+      walletId = wallet.id
+    }
+
     const { requestedById, requestedCredentials } = presentationRequestDetails
     const presentationEntity = new PresentationEntity({
       requestId: event.requestId,
@@ -85,6 +103,7 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
       presentedCredentials,
       partnerIds: partners.map((p) => p.id),
       oidcClientId: authInteractionData?.clientId ?? null,
+      walletId,
     })
 
     const { id } = await entityManager.getRepository(PresentationEntity).save(presentationEntity)
