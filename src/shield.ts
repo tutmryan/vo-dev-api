@@ -175,6 +175,7 @@ export const rules: ShieldSchema<Resolvers> = {
     ),
     createPartner: isPartnerAdminUser,
     updatePartner: isPartnerAdminUser,
+    deletePartner: isPartnerAdminUser,
     createApprovalRequest: isApprovalRequestApp,
     updateApprovalRequest: isApprovalRequestApp,
     cancelApprovalRequest: or(isApprovalRequestAdminUser, isApprovalRequestApp),

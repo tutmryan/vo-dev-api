@@ -70,6 +70,7 @@ export async function FindPresentationsQuery(
     skip: offset ?? undefined,
     take: limit ?? undefined,
     order,
+    ...(relations.partners ? { withDeleted: true } : {}),
   })
 
   return presentations

@@ -1,5 +1,6 @@
+import { isNotNil } from '@makerx/graphql-core'
 import type { FindOptionsOrder, FindOptionsWhere } from 'typeorm'
-import { ILike } from 'typeorm'
+import { ILike, IsNull, Not } from 'typeorm'
 import type { QueryContext } from '../../../cqs'
 import type { Maybe, PartnerWhere } from '../../../generated/graphql'
 import { OrderDirection, PartnerOrderBy } from '../../../generated/graphql'
@@ -20,6 +21,7 @@ export async function FindPartnersQuery(
 
   if (criteria?.credentialType) where.credentialTypesJson = ILike(`%"${criteria.credentialType}"%`)
   if (criteria?.linkedDomainUrl) where.linkedDomainUrlsJson = ILike(`%${criteria.linkedDomainUrl}%`)
+  if (isNotNil(criteria?.isDeleted)) where.deletedAt = criteria.isDeleted ? Not(IsNull()) : IsNull()
 
   const direction = orderDirection ?? OrderDirection.Asc
   switch (orderBy) {
@@ -43,5 +45,6 @@ export async function FindPartnersQuery(
     skip: offset ?? undefined,
     take: limit ?? undefined,
     order,
+    withDeleted: criteria?.includeDeleted ?? criteria?.isDeleted ?? false,
   })
 }

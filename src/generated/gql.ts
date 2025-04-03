@@ -63,6 +63,10 @@ const documents = {
     "\n  mutation CreateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    createOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.CreateOidcClientResourceDocument,
     "\n  mutation UpdateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    updateOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.UpdateOidcClientResourceDocument,
     "\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n": types.DeleteOidcClientResourceDocument,
+    "\n  mutation CreatePartnerTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n      did\n      name\n    }\n  }\n": types.CreatePartnerTestDocument,
+    "\n  mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {\n    updatePartner(id: $id, input: $input) {\n      id\n      did\n      name\n      credentialTypes\n    }\n  }\n": types.UpdatePartnerDocument,
+    "\n  mutation DeletePartner($id: ID!) {\n    deletePartner(id: $id) {\n      id\n      did\n      name\n    }\n  }\n": types.DeletePartnerDocument,
+    "\n  query Partner($id: ID!) {\n    partner(id: $id) {\n      id\n      did\n      name\n      credentialTypes\n      deletedAt\n    }\n  }\n": types.PartnerDocument,
     "\n  mutation CreatePhotoCaptureRequest($request: PhotoCaptureRequest!) {\n    createPhotoCaptureRequest(request: $request) {\n      id\n      photoCaptureUrl\n      photoCaptureQrCode\n    }\n  }\n": types.CreatePhotoCaptureRequestDocument,
     "\n  mutation CapturePhoto($photoCaptureRequestId: UUID!, $photo: String!) {\n    capturePhoto(photoCaptureRequestId: $photoCaptureRequestId, photo: $photo)\n  }\n": types.CapturePhotoDocument,
     "\n  query PhotoCaptureStatus($photoCaptureRequestId: UUID!) {\n    photoCaptureStatus(photoCaptureRequestId: $photoCaptureRequestId) {\n      status\n    }\n  }\n": types.PhotoCaptureStatusDocument,
@@ -290,6 +294,22 @@ export function graphql(source: "\n  mutation UpdateOidcClientResource($clientId
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreatePartnerTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n      did\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation CreatePartnerTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n      did\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {\n    updatePartner(id: $id, input: $input) {\n      id\n      did\n      name\n      credentialTypes\n    }\n  }\n"): (typeof documents)["\n  mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {\n    updatePartner(id: $id, input: $input) {\n      id\n      did\n      name\n      credentialTypes\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeletePartner($id: ID!) {\n    deletePartner(id: $id) {\n      id\n      did\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation DeletePartner($id: ID!) {\n    deletePartner(id: $id) {\n      id\n      did\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query Partner($id: ID!) {\n    partner(id: $id) {\n      id\n      did\n      name\n      credentialTypes\n      deletedAt\n    }\n  }\n"): (typeof documents)["\n  query Partner($id: ID!) {\n    partner(id: $id) {\n      id\n      did\n      name\n      credentialTypes\n      deletedAt\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

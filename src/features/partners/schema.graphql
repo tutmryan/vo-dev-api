@@ -109,6 +109,10 @@ type Partner {
   When the partner was last updated.
   """
   updatedAt: DateTime
+  """
+  When the partner was deleted.
+  """
+  deletedAt: DateTime
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description
@@ -122,6 +126,10 @@ type Mutation {
   Updates the name and credential types of a partner
   """
   updatePartner(id: ID!, input: UpdatePartnerInput!): Partner!
+  """
+  Deletes a partner and revokes access to its credential types
+  """
+  deletePartner(id: ID!): Partner!
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description
@@ -227,6 +235,14 @@ input PartnerWhere {
   The partial domain url linked to the partner to match
   """
   linkedDomainUrl: String
+  """
+  List only the partners which are, or are not, deleted.
+  """
+  isDeleted: Boolean
+  """
+  Whether to include deleted partners in the results.
+  """
+  includeDeleted: Boolean
 }
 
 """

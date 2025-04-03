@@ -37,6 +37,7 @@ export async function CountPresentationsQuery(this: QueryContext, criteria?: May
     comment: 'CountPresentationsQuery',
     relations,
     where,
+    ...(relations.partners ? { withDeleted: true } : {}),
   })
 
   return count

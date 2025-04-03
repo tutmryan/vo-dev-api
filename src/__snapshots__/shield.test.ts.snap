@@ -764,6 +764,10 @@ exports[`shield rules are setup correctly 1`] = `
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
       "cache": "contextual"
     },
+    "deletePartner": {
+      "name": "hasRole-VerifiableCredential.PartnerAdmin",
+      "cache": "contextual"
+    },
     "createApprovalRequest": {
       "name": "isApprovalRequestApp",
       "cache": "contextual"

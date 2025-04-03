@@ -1,7 +1,8 @@
-import { Column, Entity } from 'typeorm'
+import { Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, RelationId } from 'typeorm'
 import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
+import { PresentationEntity } from '../../presentation/entities/presentation-entity'
 
 @Entity('partner')
 export class PartnerEntity extends AuditedAndTrackedEntity {
@@ -13,7 +14,7 @@ export class PartnerEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'nvarchar' })
   name!: string
 
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({ type: 'nvarchar', length: 510, unique: true })
   did!: string
 
   @Column({ type: 'nvarchar', length: 'MAX' })
@@ -41,4 +42,14 @@ export class PartnerEntity extends AuditedAndTrackedEntity {
   set linkedDomainUrls(urls: string[] | null) {
     this.linkedDomainUrlsJson = urls ? JSON.stringify(urls) : null
   }
+
+  @DeleteDateColumn({ type: 'datetimeoffset', nullable: true })
+  deletedAt!: Date | null
+
+  @ManyToMany(() => PresentationEntity)
+  @JoinTable({ name: 'presentation_partners' })
+  presentations!: Promise<PresentationEntity[]>
+
+  @RelationId((partner: PartnerEntity) => partner.presentations)
+  presentationIds!: string[]
 }
