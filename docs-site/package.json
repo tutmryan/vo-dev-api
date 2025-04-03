@@ -21,8 +21,8 @@
     "graphql-inspector": "graphql-inspector"
   },
   "dependencies": {
-    "@docusaurus/core": "3.4.0",
-    "@docusaurus/preset-classic": "3.4.0",
+    "@docusaurus/core": "3.7.0",
+    "@docusaurus/preset-classic": "3.7.0",
     "@easyops-cn/docusaurus-search-local": "^0.45.0",
     "@graphql-markdown/docusaurus": "^1.24.2",
     "@graphql-tools/graphql-file-loader": "^8.0.1",
