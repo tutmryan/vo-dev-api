@@ -82,11 +82,13 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     let walletId: string | undefined
     if (event.subject) {
       const walletRepository = entityManager.getRepository(WalletEntity)
-      let wallet = await walletRepository.findOneBy({ subjectHash: hashSubject(event.subject) })
+      const subjectHash = hashSubject(event.subject)
+      let wallet = await walletRepository.findOneBy({ subjectHash })
       if (!wallet) {
         wallet = await walletRepository.save(
           new WalletEntity({
             subject: event.subject,
+            subjectHash,
           }),
         )
       }

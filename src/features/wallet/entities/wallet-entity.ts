@@ -11,13 +11,10 @@ import { PresentationEntity } from '../../presentation/entities/presentation-ent
 
 @Entity('wallet')
 export class WalletEntity extends VerifiedOrchestrationEntity {
-  constructor(args?: Pick<WalletEntity, 'subject'>) {
+  constructor(args?: Pick<WalletEntity, 'subject' | 'subjectHash'>) {
     super()
     if (!args) return
-    typeSafeAssign(this, {
-      ...args,
-      subjectHash: hashSubject(args.subject),
-    })
+    typeSafeAssign(this, args)
   }
 
   @Column({ type: 'varchar', length: 'MAX' })
