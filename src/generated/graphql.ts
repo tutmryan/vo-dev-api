@@ -2795,7 +2795,7 @@ export type PartnerPresentationWhere = {
 export type PartnerWhere = {
   /** The type of credential the partner provides. */
   credentialType?: InputMaybe<Scalars['String']['input']>;
-  /** Whether to include deleted clients in the results. */
+  /** Whether to include deleted partners in the results. */
   includeDeleted?: InputMaybe<Scalars['Boolean']['input']>;
   /** List only the partners which are, or are not, deleted. */
   isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
