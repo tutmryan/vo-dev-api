@@ -16,7 +16,7 @@ export class WalletEntity extends VerifiedOrchestrationEntity {
     if (!args) return
     typeSafeAssign(this, {
       ...args,
-      subjectHash: hashSubject(this.subject),
+      subjectHash: hashSubject(args.subject),
     })
   }
 
