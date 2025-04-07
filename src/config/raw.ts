@@ -25,6 +25,7 @@ export type Config = {
     port?: number
   }
   logging: {
+    redactPaths: string[]
     userClaimsToLog: string[]
     requestInfoToLog: string[]
     omitPaths: string[]

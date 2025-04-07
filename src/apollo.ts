@@ -22,7 +22,6 @@ import type { Logger } from './logger'
 import { logger } from './logger'
 import { rateLimiterMiddleware } from './rate-limiter'
 import createSchema from './schema'
-import { pruneKeys } from './util/prune-keys'
 
 export function createArmorProtection(config?: GraphQLArmorConfig) {
   const armor = new ApolloArmor(
@@ -58,7 +57,6 @@ const plugins = (
       logLevel: 'audit',
       contextCreationFailureLogger: logger,
       includeMutationResponseData: true,
-      adjustVariables: (variables) => pruneKeys(variables, 'headers'),
     }),
     introspectionControlPlugin as ApolloServerPlugin<GraphQLContext>,
     ApolloServerPluginDrainHttpServer({ httpServer }),

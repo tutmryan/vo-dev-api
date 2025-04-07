@@ -23,6 +23,8 @@ export const instrumentations = [
     // Merge list items into a single element.
     // Example: `users.*.name` instead of `users.0.name`, `users.1.name`
     mergeItems: true,
+    // Don't record the values of the arguments which can include PII.
+    allowValues: false,
   }),
   new WSInstrumentation(),
   new TediousInstrumentation(),

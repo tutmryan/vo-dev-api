@@ -6,6 +6,7 @@ import type { LoggerOptions, QueryRunner, Logger as TypeOrmLoggerInterface } fro
 import type { Logger as WinstonLogger } from 'winston'
 import * as winston from 'winston'
 import { logging } from './config'
+import { redactValues } from './util/redact-values'
 
 /**
  * set up 'audit' log level, replacing 'http' level
@@ -37,7 +38,9 @@ export const logger: Logger = Object.create(baseLogger, {
   write: {
     value: function ({ level, ...rest }: { level: any }) {
       const transform = baseLogger as any
-      transform.write(Object.assign({}, { logLevel: level, level: level === 'audit' ? 'info' : level }, rest))
+      transform.write(
+        Object.assign({}, { logLevel: level, level: level === 'audit' ? 'info' : level }, redactValues(rest, ...logging.redactPaths)),
+      )
     },
   },
 })
