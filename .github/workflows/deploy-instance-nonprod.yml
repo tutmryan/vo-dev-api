@@ -108,6 +108,13 @@ jobs:
       name: ${{ inputs.instance }}
       url: https://${{ inputs.instance }}.verifiedorchestration.com
     steps:
+      - name: Set variables
+        id: set-vars
+        shell: bash
+        run: |
+          instance=${{ inputs.instance }}
+          echo "resource-group-name=vo-${instance/./-}-instance" >> $GITHUB_ENV
+          echo "resource-prefix=vo-${instance/./-}" >> $GITHUB_ENV
       - name: Download all artifacts
         uses: actions/download-artifact@v4
       - name: Log in to Azure
@@ -121,19 +128,19 @@ jobs:
         id: instance-resource-group
         uses: ./github-actions/resource-group
         with:
-          resource-group-name: vo-${{ inputs.instance }}-instance
+          resource-group-name: ${{ env.resource-group-name }}
           resource-group-location: australiaeast
       - name: Instance log analytics
         id: instance-log-analytics
         uses: ./github-actions/log-analytics
         with:
-          resource-group-name: vo-${{ inputs.instance }}-instance
-          resource-prefix: vo-${{ inputs.instance }}
+          resource-group-name: ${{ env.resource-group-name }}
+          resource-prefix: ${{ env.resource-prefix }}
       - name: Instance SQL database
         id: instance-sql-db
         uses: ./github-actions/sql-db
         with:
-          resource-prefix: vo-${{ inputs.instance }}
+          resource-prefix: ${{ env.resource-prefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           elastic-pool-name: ${{ vars.SQL_ELASTIC_POOL_NAME }}
       - name: Deploy instance
@@ -152,9 +159,9 @@ jobs:
           azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
           azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
-          resource-group-name: vo-${{ inputs.instance }}-instance
+          resource-group-name: ${{ env.resource-group-name }}
           resource-group-unique-string: ${{ steps.instance-resource-group.outputs.resource-group-unique-string }}
-          resource-prefix: vo-${{ inputs.instance }}
+          resource-prefix: ${{ env.resource-prefix }}
           deployment-service-principal-object-id: ${{ vars.NON_PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
           vnet-name: ${{ vars.NON_PROD_VNET_NAME }}
 
@@ -206,6 +213,6 @@ jobs:
         uses: ./github-actions/sql-db-audit
         with:
           resource-group-name: vo-nonprd-platform-shared-infra
-          resource-prefix: vo-${{ inputs.instance }}
+          resource-prefix: ${{ env.resource-prefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
