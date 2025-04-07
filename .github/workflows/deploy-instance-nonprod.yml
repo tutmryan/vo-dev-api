@@ -1,0 +1,211 @@
+name: Deploy instance (non prod)
+# DO NOT CHANGE THE FORMAT OF THE `run-name` FIELD
+# - it follows a standard pattern across all components
+# - it is used to derive the instance, component and environment
+run-name: Deploy ${{ inputs.instance }} api to non-prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      instance:
+        description: 'The instance to deploy'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ inputs.instance }}
+  cancel-in-progress: true
+
+jobs:
+
+  build-api:
+    name: Build API
+    uses: makerxstudio/shared-config/.github/workflows/node-build-zip.yml@main
+    with:
+      node-version: 22.x
+      artifact-name: api
+
+  build-migrations-package:
+    name: Build Migrations Package
+    uses: makerxstudio/shared-config/.github/workflows/node-build-zip.yml@main
+    with:
+      node-version: 22.x
+      working-directory: ./migrate-db
+      artifact-name: migrations-package
+
+  prepare-docs-site:
+    name: Prepare Docs Site
+    # ^^ this means generate GraphQL docs + zip
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.x
+          cache: npm
+          cache-dependency-path: ./docs-site/package-lock.json
+
+      - name: Install npm packages
+        shell: bash
+        run: npm ci
+        working-directory: ./docs-site
+
+      - name: Generate GraphQL docs
+        shell: bash
+        run: npm run generate-graphql-docs
+        working-directory: ./docs-site
+
+      - name: Delete node_modules
+        run: rm -rf ./docs-site/node_modules
+
+      - name: Zip docs site
+        run: pushd ./docs-site; zip -q -r docs-site.zip *
+
+      - name: Upload docs site artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-site
+          path: ./docs-site/docs-site.zip
+          if-no-files-found: error
+
+  upload-other-artifacts:
+    name: Upload other artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Upload infrastructure artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: infrastructure
+          path: ./infrastructure
+          if-no-files-found: error
+
+      - name: Upload github-actions artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: github-actions
+          path: ./.github/actions
+          if-no-files-found: error
+
+  deploy:
+    name: Deploy to non-prod
+    runs-on: vo-saas-vnet-runner-nonprod
+    permissions:
+      id-token: write
+    needs:
+      - build-api
+      - build-migrations-package
+      - prepare-docs-site
+      - upload-other-artifacts
+    environment:
+      name: ${{ inputs.instance }}
+      url: https://${{ inputs.instance }}.verifiedorchestration.com
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          enable-AzPSSession: true
+      - name: Instance resource group
+        id: instance-resource-group
+        uses: ./github-actions/resource-group
+        with:
+          resource-group-name: vo-${{ inputs.instance }}-instance
+          resource-group-location: australiaeast
+      - name: Instance log analytics
+        id: instance-log-analytics
+        uses: ./github-actions/log-analytics
+        with:
+          resource-group-name: vo-${{ inputs.instance }}-instance
+          resource-prefix: vo-${{ inputs.instance }}
+      - name: Instance SQL database
+        id: instance-sql-db
+        uses: ./github-actions/sql-db
+        with:
+          resource-prefix: vo-${{ inputs.instance }}
+          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          elastic-pool-name: ${{ vars.SQL_ELASTIC_POOL_NAME }}
+      - name: Deploy instance
+        id: deploy-instance
+        uses: ./github-actions/instance
+        with:
+          instance: ${{ inputs.instance }}
+          node-env: nonprod
+          audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
+          dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
+          face-check-enabled: ${{ vars.FACE_CHECK_ENABLED }}
+          demo-enabled: ${{ vars.DEMO_ENABLED  }}
+          identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
+          platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
+
+          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          resource-group-name: vo-${{ inputs.instance }}-instance
+          resource-group-unique-string: ${{ steps.instance-resource-group.outputs.resource-group-unique-string }}
+          resource-prefix: vo-${{ inputs.instance }}
+          deployment-service-principal-object-id: ${{ vars.NON_PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
+          vnet-name: ${{ vars.NON_PROD_VNET_NAME }}
+
+          key-vault-resource-group-name: ${{ vars.NON_PROD_KEY_VAULT_RESOURCE_GROUP_NAME }}
+          key-vault-name: ${{ vars.NON_PROD_KEY_VAULT_NAME }}
+          dns-api-key: ${{ secrets.NON_PROD_DNS_API_KEY }}
+          dns-api-secret: ${{ secrets.NON_PROD_DNS_API_SECRET }}
+
+          organisation-name: ${{ vars.VID_AUTHORITY_NAME }}
+          organisation-domain: ${{ vars.VID_AUTHORITY_DOMAIN }}
+
+          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          shared-resource-group-name: vo-nonprd-platform-shared-infra
+          shared-action-group-alert-name: vo-nonprd-alerts
+          app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
+          redis-cache-sku: Basic
+          redis-cache-family: C
+          redis-cache-capacity: 0
+
+          cors-origin: "${{ vars.CORS_ORIGIN }}"
+          sms-secret: ${{ secrets.NON_PROD_SMS_SECRET }}
+          email-api-key: ${{ secrets.NON_PROD_EMAIL_API_KEY }}
+
+          internal-client-secret: ${{ secrets.NON_PROD_INTERNAL_CLIENT_SECRET }}
+          vid-callback-client-secret: ${{ secrets.NON_PROD_VID_CALLBACK_CLIENT_SECRET }}
+
+          limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}
+          limited-approval-client-secret: ${{ secrets.NON_PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
+          limited-photo-capture-client-secret: ${{ secrets.NON_PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
+          limited-async-issuance-client-secret: ${{ secrets.NON_PROD_LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET }}
+          limited-demo-client-secret: ${{ secrets.NON_PROD_LIMITED_DEMO_CLIENT_SECRET }}
+          limited-oidc-client-secret: ${{ secrets.NON_PROD_LIMITED_OIDC_CLIENT_SECRET }}
+
+          home-tenant-id: ${{ vars.HOME_TENANT_ID }}
+          home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
+          home-tenant-graph-client-id: ${{ vars.HOME_TENANT_GRAPH_CLIENT_ID }}
+          home-tenant-graph-client-secret: ${{ secrets.HOME_TENANT_GRAPH_CLIENT_SECRET }}
+          home-tenant-authority-id: ${{ vars.HOME_TENANT_AUTHORITY_ID }}
+          home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
+          home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}
+          additional-auth-tenant-ids: "${{ vars.ADDITIONAL_AUTH_TENANT_IDS }}"
+
+          graphql-max-aliases: ${{ vars.GRAPHQL_MAX_ALIASES }}
+          graphql-max-depth: ${{ vars.GRAPHQL_MAX_DEPTH }}
+          graphql-max-directives: ${{ vars.GRAPHQL_MAX_DIRECTIVES }}
+          graphql-max-tokens: ${{ vars.GRAPHQL_MAX_TOKENS }}
+      - name: Instance SQL database audit
+        id: instance-sql-db-audit
+        uses: ./github-actions/sql-db-audit
+        with:
+          resource-group-name: vo-nonprd-platform-shared-infra
+          resource-prefix: vo-${{ inputs.instance }}
+          sql-server-name: ${{ vars.SQL_SERVER_NAME }}
+          log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
