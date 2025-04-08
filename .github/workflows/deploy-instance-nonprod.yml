@@ -106,7 +106,7 @@ jobs:
       - upload-other-artifacts
     environment:
       name: ${{ inputs.instance }}
-      url: https://${{ inputs.instance }}.verifiedorchestration.com
+      url: https://${{ inputs.instance }}.api.verifiedorchestration.com
     steps:
       - name: Set variables
         id: set-vars
