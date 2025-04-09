@@ -425,6 +425,14 @@ runs:
         -RecordName 'ausid.${{ inputs.instance }}.api.${{ inputs.domain }}'
         -RecordValue '${{ steps.instance-infra.outputs.apiAppServiceCustomDomainVerificationId }}'
 
+    - name: Wait for API DNS record propagation
+      id: wait-for-api-dns
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/verify-dns-records.ps1
+        -DnsRecords ${{ inputs.instance }}.api.${{ inputs.domain }}, ausid.${{ inputs.instance }}.api.${{ inputs.domain }}
+        -TimeoutMinutes 3 -PollingIntervalSeconds 10
+
     - name: Set up API domain
       id: set-up-api-domain
       uses: azure/arm-deploy@v1
@@ -446,6 +454,14 @@ runs:
         -RecordType 'CNAME'
         -RecordName '${{ inputs.instance }}.docs.${{ inputs.domain }}'
         -RecordValue '${{ steps.instance-infra.outputs.docsSiteDefaultHostname }}'
+
+    - name: Wait for docs site DNS record propagation
+      id: wait-for-docs-dns
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/verify-dns-records.ps1
+        -DnsRecords ${{ inputs.instance }}.docs.${{ inputs.domain }}
+        -TimeoutMinutes 3 -PollingIntervalSeconds 10
 
     - name: Set up docs site domain
       id: set-up-docs-domain
@@ -629,6 +645,15 @@ runs:
         echo "Name: ${{ steps.deploy-did-cdn.outputs.customDomainValidationDnsTxtRecordName }}"
         echo "Data: ${{ steps.deploy-did-cdn.outputs.customDomainValidationDnsTxtRecordValue }}"
         echo "TTL: 3600"
+
+    - name: Wait for authority DID DNS record propagation
+      id: wait-for-did-dns
+      shell: pwsh
+      if: steps.check-vid-authority.outputs.isVoSubdomain == 'True' && steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
+      run: >-
+        ./infrastructure/scripts/verify-dns-records.ps1
+        -DnsRecords ${{ inputs.organisation-domain }}, ${{ steps.deploy-did-cdn.outputs.customDomainValidationDnsTxtRecordName }}
+        -TimeoutMinutes 2 -PollingIntervalSeconds 10
 
     - name: Verify authority in Verified ID service for the instance
       id: verify-vid-authority
