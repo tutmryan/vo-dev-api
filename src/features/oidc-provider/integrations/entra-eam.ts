@@ -265,6 +265,10 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
       },
     })
 
+    if (!identity) {
+      logger.warn('No identity could be matched during a EAM auth flow', { params: extractLoggable(oidc.params!) })
+    }
+
     invariant(oidc.params, 'Params not found post interactions')
 
     await setLoginInteractionData({
@@ -298,5 +302,33 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
         params: extractLoggable(oidc.params!),
       })
     }
+  })
+
+  // Override the resume -> processResponseTypes pipeline step to log the return token when verbose logging is enabled
+  // The actual step we're targeting is `respond`, but `respond` calls `processResponseTypes` internally which returns the token. If we were to intercept `respond`, we would not have access to the token
+  // unless we dug through http response to locate it. This is much cleaner.
+  wrapOidcPipelineStep(provider, 'resume', ['GET'], 'processResponseTypes', async (ctx, next, original) => {
+    const { oidc } = ctx as RouterContext & { oidc: OIDCContext }
+    const { errors } = await oidcProviderModule()
+
+    if (!oidc.client?.clientId) {
+      logger.error(`Client ID not found in the OIDC context`, { params: extractLoggable(oidc.params!) })
+      throw new errors.InvalidClient('Client not found')
+    }
+
+    // Don't intercept non-EAM requests
+    if (!isEamRequest(oidc.params!, oidc.client.clientId)) {
+      logger.verbose('OIDC EAM hook:resume/get/processResponseTypes skipping non-EAM request')
+      return original(ctx, next)
+    }
+
+    const response = await original(ctx, next)
+
+    logger.verbose('OIDC EAM hook:resume/get/processResponseTypes intercept end', {
+      response,
+      params: extractLoggable(oidc.params!),
+    })
+
+    return response
   })
 }

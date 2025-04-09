@@ -1,6 +1,7 @@
 import type { DefaultJobOptions } from 'bullmq'
 import { Queue, QueueEvents } from 'bullmq'
 import { randomUUID } from 'crypto'
+import { BackgroundJobStatus } from '../generated/graphql'
 import { logger } from '../logger'
 import { redisOptions } from '../redis'
 import { Lazy } from '../util/lazy'
@@ -68,6 +69,10 @@ export const runDeduplicatedJob = async (jobType: JobTypes, awaitCompletion: boo
   logger.info(`Waiting for deduplicated job completion: ${jobType.name}`)
   for await (const data of iterator) {
     if (eventIsFinal(data)) {
+      if (data.event.status === BackgroundJobStatus.Failed) {
+        logger.error(`Deduplicated job failed to completed: ${jobType.name}`, { data })
+        return
+      }
       logger.info(`Deduplicated job completed: ${jobType.name}`)
       return
     }

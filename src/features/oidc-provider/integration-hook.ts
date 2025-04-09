@@ -75,7 +75,7 @@ const buildContext = (provider: Provider) => {
 
 export const wrapOidcPipelineStep = (
   provider: Provider,
-  action: 'authorization',
+  action: 'authorization' | 'resume',
   methods: Methods,
   step: Steps,
   wrapper: (ctx: RouterContext, next: Next, original: Middleware) => Promise<void>,
