@@ -1,13 +1,18 @@
 import { logger } from '../../logger'
 import { calculateKid } from '../../util/jwk'
 import { keys } from './keys'
-import { getData, notifyOidcDataChanged } from './provider'
+import { getData, hasData, notifyOidcDataChanged } from './provider'
 
 export const applyOidcSigningKeysRotation = async () => {
   const currentKeys = await keys()
 
   if (currentKeys.length === 0) {
     return // Unlikely to happen that this is a new instance and this job is run before the first key is created
+  }
+
+  if (!hasData()) {
+    logger.warn('OIDC provider data was not set, skipping apply key rotation check')
+    return
   }
 
   const providerData = getData()

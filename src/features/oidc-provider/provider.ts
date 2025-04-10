@@ -143,6 +143,8 @@ export function getProvider() {
   return provider
 }
 
+export const hasData = () => !!dataRef.data
+
 export function getData() {
   const data = dataRef.data
   invariant(data, 'dataRef.data not set')
