@@ -2990,6 +2990,7 @@ export type PresentationRequestInput = {
   /**
    * The ID of the identity who will present (alternatively use the identity property).
    * Presentation identity information is only required for presentations where all requested credentials are issued by external partners.
+   * When provided, a `identityId` constraint will be added to every requested credential.
    */
   identityId?: InputMaybe<Scalars['ID']['input']>;
   /**

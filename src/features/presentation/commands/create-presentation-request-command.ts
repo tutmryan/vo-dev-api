@@ -67,6 +67,20 @@ export async function CreatePresentationRequestCommand(
       ? await createOrUpdateIdentity(entityManager, identityInput)
       : undefined
 
+  // if an identity is provided, add a constraint for identityId to each requested credential
+  if (identityId) {
+    presentationRequest.requestedCredentials.forEach((requestedCredential) => {
+      const existingIdentityConstraint = requestedCredential.constraints?.find((constraint) => constraint.claimName === 'identityId')
+      invariant(
+        !existingIdentityConstraint,
+        `An 'identityId' constraint cannot be accepted in addition to presentation identity input. An 'identityId' constraint will automatically be applied.`,
+      )
+
+      if (!requestedCredential.constraints) requestedCredential.constraints = []
+      requestedCredential.constraints.push({ claimName: 'identityId', values: [identityId] })
+    })
+  }
+
   // set the sourcePhotoClaimName field on any requested credential where faceCheck is specified
   // using `set` is a cheat to avoid creating several new types
   // for the VID service representation of RequestedCredential > Configuration > Validation chain of types
@@ -76,7 +90,10 @@ export async function CreatePresentationRequestCommand(
   })
 
   // send it
-  const response = await verifiedIdRequest.createPresentationRequest({ ...presentationRequest, authority: platformIssuerDid })
+  const response = await verifiedIdRequest.createPresentationRequest({
+    ...presentationRequest,
+    authority: platformIssuerDid,
+  })
 
   // if the response is RequestErrorResponse, return it immediately
   if ('error' in response) return response

@@ -35,7 +35,7 @@ The [presentation request input](/docs/reference/types/inputs/presentation-reque
    - Optionally, include [constraints](/docs/reference/types/inputs/claim-constraint) to narrow what credential can be presented
    - "VerifiableCredential" is a special type that permits the presentation of any valid credential.
 1. The name of the requesting client application (for display in the wallet prompt)
-1. The identity to whom the credential will be issued (recipient / issuee)
+1. The identity who must present the credential. When specified, a constraint for identityId is added to each requested credential.
 1. Other optional input:
    1. For each requested credential, whether revoked credentials can be presented. It is recommended that the requesting application handle presentation of revoked credentials gracefully.
    1. Callback info, if presentation event data should also be sent to a server-side endpoint
