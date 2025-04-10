@@ -5,7 +5,7 @@ The verified orchestration platform GraphQL API backend repository.
 ## Developer prerequisites
 
 - [Docker](https://www.docker.com/products/docker-desktop/)
-- [Node v20 LTS](https://nodejs.org/en/download/package-manager)
+- [Node v22 LTS](https://nodejs.org/en/download/package-manager)
 - [Ngrok](https://ngrok.com/) (required for issuing credentials locally)
 
 ## Developer IDE recommendations
