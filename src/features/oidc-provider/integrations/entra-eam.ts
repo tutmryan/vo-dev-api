@@ -58,6 +58,28 @@ const eamPresentationLoginStandardClaims = {
   // Note: EAM only allows a single amr value
   amr: ['pop'],
   // Note: sending only 'possession' as the acr value does not work
+  /*
+  | ACR                               | AMR    | result  | failure reason                                                                         |
+  |-----------------------------------|--------|---------|----------------------------------------------------------------------------------------|
+  | possessionorinherence             | pop    | success |                                                                                        |
+  | possessionorinherence             | face   | success |                                                                                        |
+  | possessionorinherence             | sms    | success |                                                                                        |
+  | possessionorinherence             | swk    | success |                                                                                        |
+  | possessionorinherence             | tel    | success |                                                                                        |
+  | possessionorinherence             | retina | success |                                                                                        |
+  | possessionorinherence             | fido   | success |                                                                                        |
+  | possessionorinherence             | yeet   | fail    | AADSTS5001257: Failed to validate external id_token: 'amr' claim has unexpected value. |
+  | knowledgeorpossession             | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+  | knowledgeorinherence              | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+  | knowledgeorpossessionorinherence  | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+  | knowledge                         | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+  | possession                        | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+  | inherence                         | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+  | knowledge                         | otp    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+  | possession                        | hwk    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+  | inherence                         | fpt    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+  | inherence                         | iris   | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+   */
   acr: 'possessionorinherence',
 } as const
 
