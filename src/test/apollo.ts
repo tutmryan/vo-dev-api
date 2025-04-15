@@ -10,7 +10,7 @@ import type { AppRoles } from '../roles'
 import { InternalRoles, UserRoles } from '../roles'
 import schema from '../schema'
 import type { LimitedApprovalOperationInput, LimitedPhotoCaptureOperationInput } from './context'
-import { buildJwt, createContext } from './context'
+import { buildIssueeJwt, buildJwt, createContext } from './context'
 
 const server = new ApolloServer<GraphQLContext>({
   schema: schema(),
@@ -152,3 +152,10 @@ export const executeOperationAsLimitedAsyncIssuanceClient = async <
     limitedPhotoCaptureData,
     limitedAsyncIssuanceData,
   )
+
+export const executeOperationAsIssuee = async <TData = Record<string, unknown>, TVariables extends VariableValues = VariableValues>(
+  request: Omit<GraphQLRequest<TVariables>, 'query'> & {
+    query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
+  },
+  identityId: string,
+): Promise<FormattedExecutionResult<TData>> => executeOperation(request, buildIssueeJwt(identityId))

@@ -63,6 +63,11 @@ const documents = {
     "\n  mutation CreateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    createOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.CreateOidcClientResourceDocument,
     "\n  mutation UpdateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    updateOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.UpdateOidcClientResourceDocument,
     "\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n": types.DeleteOidcClientResourceDocument,
+    "\n  query Discovery{\n    discovery {\n      version\n    }\n  }\n": types.DiscoveryDocument,
+    "\n  query Authority {\n    authority {\n      id\n    }\n  }\n": types.AuthorityDocument,
+    "\nquery Me {\n  me {\n    ... on Identity {\n      presentations {\n        id\n      }\n      issuances {\n        id\n      }\n      asyncIssuanceRequests {\n        id\n      }\n    }\n  }\n}\n": types.MeDocument,
+    "\nquery AsyncIssuanceRequest($asyncIssuanceRequestId: UUID!) {\n  asyncIssuanceRequest(id: $asyncIssuanceRequestId) {\n    id\n  }\n}\n": types.AsyncIssuanceRequestDocument,
+    "\n  mutation CreatePartnerIdentityTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n      did\n      name\n    }\n  }\n": types.CreatePartnerIdentityTestDocument,
     "\n  mutation CreatePartnerTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n      did\n      name\n    }\n  }\n": types.CreatePartnerTestDocument,
     "\n  mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {\n    updatePartner(id: $id, input: $input) {\n      id\n      did\n      name\n      credentialTypes\n    }\n  }\n": types.UpdatePartnerDocument,
     "\n  mutation DeletePartner($id: ID!) {\n    deletePartner(id: $id) {\n      id\n      did\n      name\n    }\n  }\n": types.DeletePartnerDocument,
@@ -294,6 +299,26 @@ export function graphql(source: "\n  mutation UpdateOidcClientResource($clientId
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query Discovery{\n    discovery {\n      version\n    }\n  }\n"): (typeof documents)["\n  query Discovery{\n    discovery {\n      version\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query Authority {\n    authority {\n      id\n    }\n  }\n"): (typeof documents)["\n  query Authority {\n    authority {\n      id\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\nquery Me {\n  me {\n    ... on Identity {\n      presentations {\n        id\n      }\n      issuances {\n        id\n      }\n      asyncIssuanceRequests {\n        id\n      }\n    }\n  }\n}\n"): (typeof documents)["\nquery Me {\n  me {\n    ... on Identity {\n      presentations {\n        id\n      }\n      issuances {\n        id\n      }\n      asyncIssuanceRequests {\n        id\n      }\n    }\n  }\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\nquery AsyncIssuanceRequest($asyncIssuanceRequestId: UUID!) {\n  asyncIssuanceRequest(id: $asyncIssuanceRequestId) {\n    id\n  }\n}\n"): (typeof documents)["\nquery AsyncIssuanceRequest($asyncIssuanceRequestId: UUID!) {\n  asyncIssuanceRequest(id: $asyncIssuanceRequestId) {\n    id\n  }\n}\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreatePartnerIdentityTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n      did\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation CreatePartnerIdentityTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n      did\n      name\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

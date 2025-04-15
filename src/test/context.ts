@@ -1,6 +1,7 @@
 import type { JwtPayload, RequestInfo } from '@makerx/graphql-core'
 import casual from 'casual'
 import { randomUUID } from 'crypto'
+import { apiUrl, oidcAuthorityUrl } from '../config'
 import type { GraphQLContext } from '../context'
 import { findUpdateOrCreateUser, findUpdateOrCreateUserEntity } from '../context'
 import { dataSource } from '../data'
@@ -10,10 +11,12 @@ import { setLimitedAccessData } from '../features/limited-access-tokens'
 import type { LimitedApprovalData } from '../features/limited-approval-tokens'
 import { setLimitedApprovalData } from '../features/limited-approval-tokens'
 import { createLimitedPhotoCaptureSession } from '../features/limited-photo-capture-tokens'
+import { VoIdentityClaim } from '../features/oidc-provider/claims'
 import { setPhotoCaptureData, type PhotoCaptureData } from '../features/photo-capture'
 import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
 import { createDataLoaders } from '../loaders'
 import { logger } from '../logger'
+import { OidcScopes } from '../roles'
 import { createServices } from '../services'
 import type { PartialBy } from '../util/partial-by'
 
@@ -50,6 +53,15 @@ export const buildJwt = ({
   scp: scopes.join(' '),
   roles,
 })
+
+export function buildIssueeJwt(identityId: string) {
+  return {
+    ...buildJwt({ scopes: [OidcScopes.issuee] }),
+    iss: oidcAuthorityUrl,
+    aud: apiUrl,
+    [VoIdentityClaim.IdentityId]: identityId,
+  }
+}
 
 export type LimitedApprovalOperationInput = PartialBy<LimitedApprovalData, 'userId'>
 export type LimitedPhotoCaptureOperationInput = PartialBy<PhotoCaptureData, 'userId'> & { disableSession?: boolean }
