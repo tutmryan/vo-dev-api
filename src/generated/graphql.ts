@@ -3126,7 +3126,7 @@ export type Query = {
   findCommunications: Array<Communication>;
   /** Returns contracts, optionally matching the specified criteria */
   findContracts: Array<Contract>;
-  /** Returns identites, optionally matching the specified criteria */
+  /** Returns identities, optionally matching the specified criteria */
   findIdentities: Array<Identity>;
   /** Returns successful credential issuances, optionally matching the specified criteria. */
   findIssuances: Array<Issuance>;
@@ -3145,7 +3145,7 @@ export type Query = {
   findPresentations: Array<Presentation>;
   /** Returns templates, optionally matching the specified criteria */
   findTemplates: Array<Template>;
-  /** Returns home tenant user identies matching the specified criteria */
+  /** Returns home tenant user identities matching the specified criteria */
   findTenantIdentities: Array<TenantIdentity>;
   /** Returns users, optionally matching the specified criteria */
   findUsers: Array<User>;
@@ -3157,7 +3157,7 @@ export type Query = {
   identitiesByIdentifiers: Array<Maybe<Identity>>;
   /** Returns an identity by ID */
   identity: Identity;
-  /** Returns an identity by issuer identitifer */
+  /** Returns an identity by issuer identifier */
   identityByIdentifier: Identity;
   /** Returns the distinct set of issuers from all identities */
   identityIssuers: Array<IdentityIssuer>;

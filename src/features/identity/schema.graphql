@@ -168,7 +168,7 @@ type Query {
   """
   identity(id: ID!): Identity!
   """
-  Returns an identity by issuer identitifer
+  Returns an identity by issuer identifier
   """
   identityByIdentifier(issuerId: IssuerIdentifierInput!): Identity!
   """
@@ -180,7 +180,7 @@ type Query {
   """
   identitiesByIdentifiers(filters: [IssuerIdentifierInput!]): [Identity]!
   """
-  Returns identites, optionally matching the specified criteria
+  Returns identities, optionally matching the specified criteria
   """
   findIdentities(
     where: IdentityWhere
@@ -190,7 +190,7 @@ type Query {
     orderDirection: OrderDirection
   ): [Identity!]!
   """
-  Returns home tenant user identies matching the specified criteria
+  Returns home tenant user identities matching the specified criteria
   """
   findTenantIdentities(where: TenantIdentityWhere!, limit: PositiveInt = 100): [TenantIdentity!]!
   """
