@@ -26,4 +26,7 @@ export const resolvers: Resolvers = {
     partners: (presentation, _, { dataLoaders: { presentationPartnersLoader } }) =>
       presentationPartnersLoader.load(presentation.id).then(compactErrors),
   },
+  Partner: {
+    suspendedAt: (parent) => parent.deletedAt,
+  },
 }

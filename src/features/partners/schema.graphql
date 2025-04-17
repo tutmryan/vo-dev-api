@@ -110,9 +110,9 @@ type Partner {
   """
   updatedAt: DateTime
   """
-  When the partner was deleted.
+  When the partner was suspended.
   """
-  deletedAt: DateTime
+  suspendedAt: DateTime
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description
@@ -240,13 +240,13 @@ input PartnerWhere {
   """
   linkedDomainUrl: String
   """
-  List only the partners which are, or are not, deleted.
+  List only the partners which are, or are not, suspended.
   """
-  isDeleted: Boolean
+  isSuspended: Boolean
   """
-  Whether to include deleted partners in the results.
+  Whether to include suspended partners in the results.
   """
-  includeDeleted: Boolean
+  includeSuspended: Boolean
 }
 
 """
