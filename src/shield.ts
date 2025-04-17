@@ -179,7 +179,7 @@ export const rules: ShieldSchema<Resolvers> = {
     deleteIdentities: isAllowedToCreateAndDeleteIdentities,
     createPartner: isPartnerAdminUser,
     updatePartner: isPartnerAdminUser,
-    deletePartner: isPartnerAdminUser,
+    suspendPartner: isPartnerAdminUser,
     createApprovalRequest: isApprovalRequestApp,
     updateApprovalRequest: isApprovalRequestApp,
     cancelApprovalRequest: or(isApprovalRequestAdminUser, isApprovalRequestApp),

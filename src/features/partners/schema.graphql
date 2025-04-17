@@ -127,9 +127,9 @@ type Mutation {
   """
   updatePartner(id: ID!, input: UpdatePartnerInput!): Partner!
   """
-  Deletes a partner and revokes access to its credential types
+  Suspends a partner and revokes access to its defined credential types
   """
-  deletePartner(id: ID!): Partner!
+  suspendPartner(id: ID!): Partner!
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description

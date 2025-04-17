@@ -2,7 +2,7 @@ import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { compactErrors } from '../../util/compact-errors'
 import { CreatePartnerCommand } from './commands/create-partner-command'
-import { DeletePartnerCommand } from './commands/delete-partner-command'
+import { SuspendPartnerCommand } from './commands/suspend-partner-command'
 import { UpdatePartnerCommand } from './commands/update-partner-command'
 import { FindPartnersQuery } from './queries/find-partners-query'
 
@@ -10,7 +10,7 @@ export const resolvers: Resolvers = {
   Mutation: {
     createPartner: (_, { input }, context) => dispatch(context, CreatePartnerCommand, input),
     updatePartner: (_, { id, input }, context) => dispatch(context, UpdatePartnerCommand, id, input),
-    deletePartner: async (_parent, { id }, context) => dispatch(context, DeletePartnerCommand, id),
+    suspendPartner: async (_parent, { id }, context) => dispatch(context, SuspendPartnerCommand, id),
   },
   Query: {
     findNetworkIssuers: (_, { where }, { services: { verifiedIdAdmin } }) => verifiedIdAdmin.findNetworkIssuers(where),
