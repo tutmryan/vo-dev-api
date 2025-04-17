@@ -130,6 +130,10 @@ type Mutation {
   Creates or updates an identity based on its issuer and identifier
   """
   saveIdentity(input: IdentityInput!): Identity!
+  """
+  Deletes one or more identities by ID
+  """
+  deleteIdentities(ids: [UUID!]!): Void
 }
 
 """

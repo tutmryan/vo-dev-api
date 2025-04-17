@@ -1,5 +1,5 @@
-import type { ObjectLiteral } from 'typeorm/common/ObjectLiteral'
 import type { EntityTarget } from 'typeorm/common/EntityTarget'
+import type { ObjectLiteral } from 'typeorm/common/ObjectLiteral'
 import type { Repository } from 'typeorm/repository/Repository'
 import type { VerifiedOrchestrationEntity } from './verified-orchestration-entity'
 

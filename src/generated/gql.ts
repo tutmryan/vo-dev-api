@@ -39,6 +39,7 @@ const documents = {
     "\n  query Identity($id: ID!) {\n    identity(id: $id) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": types.IdentityDocument,
     "\n  query FindIdentities($where: IdentityWhere, $limit: PositiveInt, $offset: PositiveInt) {\n    findIdentities(where: $where, limit: $limit, offset: $offset) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": types.FindIdentitiesDocument,
     "\n  mutation SaveIdentity($input: IdentityInput!) {\n    saveIdentity(input: $input) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": types.SaveIdentityDocument,
+    "\n  mutation DeleteIdentities($ids: [UUID!]!) {\n    deleteIdentities(ids: $ids)\n  }\n": types.DeleteIdentitiesDocument,
     "\n  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {\n    createIssuanceRequest(request: $request) {\n      ... on IssuanceResponse {\n        requestId\n        url\n        qrCode\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n        }\n      }\n    }\n  }\n": types.CreateIssuanceRequestDocument,
     "\n  mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {\n    acquireLimitedAccessToken(input: $input) {\n      expires\n      token\n    }\n  }\n": types.AcquireLimitedAccessTokenDocument,
     "\n  query FindContracts($where: ContractWhere, $forIdentityId: ID) {\n    findContracts(where: $where) {\n      id\n      credentialTypes\n      display {\n        card {\n          title\n          issuedBy\n          backgroundColor\n          textColor\n          description\n          logo {\n            uri\n            description\n          }\n        }\n      }\n      issuances(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        issuedAt\n        expiresAt\n      }\n      presentations(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        presentedAt\n      }\n    }\n  }\n": types.FindContractsDocument,
@@ -203,6 +204,10 @@ export function graphql(source: "\n  query FindIdentities($where: IdentityWhere,
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation SaveIdentity($input: IdentityInput!) {\n    saveIdentity(input: $input) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation SaveIdentity($input: IdentityInput!) {\n    saveIdentity(input: $input) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteIdentities($ids: [UUID!]!) {\n    deleteIdentities(ids: $ids)\n  }\n"): (typeof documents)["\n  mutation DeleteIdentities($ids: [UUID!]!) {\n    deleteIdentities(ids: $ids)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -16,6 +16,17 @@ export async function createIdentity(input: IdentityInput = createIdentityInput(
   return data.saveIdentity
 }
 
+export async function deleteIdentities(ids: string[]) {
+  const { data } = await executeOperationAsCredentialAdmin({
+    query: deleteIdentitiesMutation,
+    variables: {
+      ids,
+    },
+  })
+  invariant(data, 'data is undefined')
+  expect(data.deleteIdentities).toBe(null)
+}
+
 export const saveIdentityMutation = graphql(`
   mutation SaveIdentity($input: IdentityInput!) {
     saveIdentity(input: $input) {
@@ -24,6 +35,12 @@ export const saveIdentityMutation = graphql(`
       identifier
       name
     }
+  }
+`)
+
+export const deleteIdentitiesMutation = graphql(`
+  mutation DeleteIdentities($ids: [UUID!]!) {
+    deleteIdentities(ids: $ids)
   }
 `)
 

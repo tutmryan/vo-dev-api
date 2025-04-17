@@ -1,6 +1,7 @@
 import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { CreateOrUpdateIdentityCommand } from './commands/create-or-update-identity'
+import { DeleteIdentitiesCommand } from './commands/delete-identities'
 import { resolveIssuerLabel } from './issuer-label-resolver'
 import { FindIdentitiesQuery } from './queries/find-identities-query'
 import { FindTenantIdentitiesQuery } from './queries/find-tenant-identities-query'
@@ -12,6 +13,7 @@ import { IdentityIssuersQuery } from './queries/identity-issuers-query'
 export const resolvers: Resolvers = {
   Mutation: {
     saveIdentity: (_, { input }, context) => dispatch(context, CreateOrUpdateIdentityCommand, input),
+    deleteIdentities: async (_parent, { ids }, context) => dispatch(context, DeleteIdentitiesCommand, ids),
   },
   Query: {
     identity: (_, { id }, { dataLoaders: { identities } }) => identities.load(id),

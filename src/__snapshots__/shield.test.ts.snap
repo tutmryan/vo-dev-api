@@ -756,6 +756,38 @@ exports[`shield rules are setup correctly 1`] = `
         }
       ]
     },
+    "deleteIdentities": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.Issuer",
+          "cache": "contextual"
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "hasLimitedAccessData-limitedIssuance",
+              "cache": "contextual"
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",
+          "cache": "contextual"
+        }
+      ]
+    },
     "createPartner": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
       "cache": "contextual"

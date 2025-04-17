@@ -106,6 +106,15 @@ const isAllowedToViewPresentations = or(
   isValidLimitedApprovalPresentationFilter,
   isValidOidcAuthnPresentationFilter,
 )
+
+const isAllowedToCreateAndDeleteIdentities = or(
+  isIssuerUser,
+  isIssuanceApp,
+  isLimitedIssuanceApp,
+  isCredentialAdminUser,
+  hasTokenAcquisitionRoleRequiringIdentityAccess,
+)
+
 const isAllowedToViewAsyncIssuanceRequests = or(isUserWithReadPermissions, isIssuanceApp)
 export const rules: ShieldSchema<Resolvers> = {
   Query: {
@@ -166,13 +175,8 @@ export const rules: ShieldSchema<Resolvers> = {
     createPresentationRequestForAuthn: isValidOidcAuthnPresentationRequest,
     saveConciergeBranding: isInstanceAdminUser,
     deleteConciergeBranding: isInstanceAdminUser,
-    saveIdentity: or(
-      isIssuerUser,
-      isIssuanceApp,
-      isLimitedIssuanceApp,
-      isCredentialAdminUser,
-      hasTokenAcquisitionRoleRequiringIdentityAccess,
-    ),
+    saveIdentity: isAllowedToCreateAndDeleteIdentities,
+    deleteIdentities: isAllowedToCreateAndDeleteIdentities,
     createPartner: isPartnerAdminUser,
     updatePartner: isPartnerAdminUser,
     deletePartner: isPartnerAdminUser,
