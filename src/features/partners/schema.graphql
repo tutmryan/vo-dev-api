@@ -130,6 +130,10 @@ type Mutation {
   Suspends a partner and revokes access to its defined credential types
   """
   suspendPartner(id: ID!): Partner!
+  """
+  Resumes a partner and restores access to its defined credential types
+  """
+  resumePartner(id: ID!): Partner!
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description
