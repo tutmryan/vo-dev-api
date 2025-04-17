@@ -26,12 +26,24 @@ const updatePartnerMutation = graphql(`
   }
 `)
 
-const deletePartnerMutation = graphql(`
-  mutation DeletePartner($id: ID!) {
-    deletePartner(id: $id) {
+const suspendPartnerMutation = graphql(`
+  mutation SuspendPartner($id: ID!) {
+    suspendPartner(id: $id) {
       id
       did
       name
+      suspendedAt
+    }
+  }
+`)
+
+const resumePartnerMutation = graphql(`
+  mutation ResumePartner($id: ID!) {
+    resumePartner(id: $id) {
+      id
+      did
+      name
+      suspendedAt
     }
   }
 `)
@@ -43,7 +55,7 @@ const partnerQuery = graphql(`
       did
       name
       credentialTypes
-      deletedAt
+      suspendedAt
     }
   }
 `)
@@ -115,10 +127,10 @@ describe('Partner', () => {
     })
   })
 
-  describe('deletePartner mutation', () => {
+  describe('suspendPartner mutation', () => {
     beforeAfterAll()
 
-    it('returns deleted partner details when called as partner admin and set deletedAt field', async () => {
+    it('returns suspended partner details when called as partner admin and set suspendedAt field', async () => {
       const uniqueInput = { input: { ...createPartnerMutationInput.input, did: getUniqueDid() } }
       const createResult = await executeOperationAsPartnerAdmin({
         query: createPartnerMutation,
@@ -128,12 +140,12 @@ describe('Partner', () => {
       expect(partnerId).toBeDefined()
 
       const { data, errors } = await executeOperationAsPartnerAdmin({
-        query: deletePartnerMutation,
+        query: suspendPartnerMutation,
         variables: { id: partnerId! },
       })
 
       expect(data).toMatchObject({
-        deletePartner: {
+        suspendPartner: {
           id: partnerId,
           did: uniqueInput.input.did,
           name: createPartnerMutationInput.input.name,
@@ -141,12 +153,12 @@ describe('Partner', () => {
       })
       expect(errors).toBeUndefined()
 
-      //Call partner query to check deletedAt has been set
+      //Call partner query to check suspendedAt has been set
       const partnerResult = await executeOperationAsPartnerAdmin({
         query: partnerQuery,
         variables: { id: partnerId! },
       })
-      expect(partnerResult.data?.partner.deletedAt).toBeDefined()
+      expect(partnerResult.data?.partner.suspendedAt).toBeDefined()
     })
   })
 
@@ -183,7 +195,7 @@ describe('Partner', () => {
       expectUnauthorizedError(errors)
     })
 
-    it('should not allow anonymous users to call deletePartner', async () => {
+    it('should not allow anonymous users to call suspendPartner', async () => {
       const uniqueInput = { input: { ...createPartnerMutationInput.input, did: getUniqueDid() } }
       const createResult = await executeOperationAsPartnerAdmin({
         query: createPartnerMutation,
@@ -193,7 +205,7 @@ describe('Partner', () => {
       expect(partnerId).toBeDefined()
 
       const { data, errors } = await executeOperationAnonymous({
-        query: deletePartnerMutation,
+        query: suspendPartnerMutation,
         variables: { id: partnerId! },
       })
 
@@ -205,7 +217,7 @@ describe('Partner', () => {
   describe('partner happy path', () => {
     beforeAfterAll()
 
-    it('creates, updates, deletes, and revives partner and returns same id for same did', async () => {
+    it('creates, updates, suspends, and resumes', async () => {
       // Create partner
       const createResult1 = await executeOperationAsPartnerAdmin({
         query: createPartnerMutation,
@@ -227,12 +239,57 @@ describe('Partner', () => {
         credentialTypes: updatePartnerMutationInput.input.credentialTypes,
       })
 
-      // Delete partner
-      const deleteResult = await executeOperationAsPartnerAdmin({
-        query: deletePartnerMutation,
+      // Suspend partner
+      const suspendResult = await executeOperationAsPartnerAdmin({
+        query: suspendPartnerMutation,
         variables: { id: partnerId1! },
       })
-      expect(deleteResult.data?.deletePartner).toMatchObject({
+      expect(suspendResult.data?.suspendPartner.suspendedAt?.getTime()).toBeLessThanOrEqual(new Date().getTime())
+      delete suspendResult.data?.suspendPartner.suspendedAt
+      expect(suspendResult.data?.suspendPartner).toMatchObject({
+        id: partnerId1,
+        did: partnerDid,
+        name: updatePartnerMutationInput.input.name,
+      })
+
+      // Resume partner
+      const resumeResult = await executeOperationAsPartnerAdmin({
+        query: resumePartnerMutation,
+        variables: { id: partnerId1! },
+      })
+      expect(resumeResult.data?.resumePartner.suspendedAt).toBeNull()
+    })
+
+    it('creates, updates, suspends, and revives partner and returns same id for same did', async () => {
+      // Create partner
+      const createResult1 = await executeOperationAsPartnerAdmin({
+        query: createPartnerMutation,
+        variables: createPartnerMutationInput,
+      })
+      const partnerId1 = createResult1.data?.createPartner.id
+      expect(partnerId1).toBeDefined()
+      const partnerDid = createResult1.data?.createPartner.did
+      expect(partnerDid).toBeDefined()
+
+      // Update partner
+      const updateResult = await executeOperationAsPartnerAdmin({
+        query: updatePartnerMutation,
+        variables: { id: partnerId1!, ...updatePartnerMutationInput },
+      })
+      expect(updateResult.data?.updatePartner).toMatchObject({
+        id: partnerId1,
+        name: updatePartnerMutationInput.input.name,
+        credentialTypes: updatePartnerMutationInput.input.credentialTypes,
+      })
+
+      // Suspend partner
+      const suspendResult = await executeOperationAsPartnerAdmin({
+        query: suspendPartnerMutation,
+        variables: { id: partnerId1! },
+      })
+      expect(suspendResult.data?.suspendPartner.suspendedAt?.getTime()).toBeLessThanOrEqual(new Date().getTime())
+      delete suspendResult.data?.suspendPartner.suspendedAt
+      expect(suspendResult.data?.suspendPartner).toMatchObject({
         id: partnerId1,
         did: partnerDid,
         name: updatePartnerMutationInput.input.name,
