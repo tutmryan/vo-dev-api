@@ -1,7 +1,7 @@
 import { approvalRequestLoader } from './features/approval-request/loaders'
 import { asyncIssuanceContactLoader, asyncIssuanceLoader } from './features/async-issuance/loaders'
 import { contractLoader } from './features/contracts/loaders'
-import { identityLoader } from './features/identity/loaders'
+import { identityLoader, isIdentityDeletableLoader } from './features/identity/loaders'
 import { issuanceCountByContractLoader, issuanceCountByIdentityLoader, issuanceLoader } from './features/issuance/loaders'
 import { oidcClientLoader, oidcResourceLoader } from './features/oidc-provider/loaders'
 import { partnerLoader, presentationPartnersLoader } from './features/partners/loaders'
@@ -28,4 +28,5 @@ export const createDataLoaders = (services: Services) => ({
   asyncIssuanceContact: asyncIssuanceContactLoader(services.asyncIssuances),
   oidcClients: oidcClientLoader(),
   oidcResources: oidcResourceLoader(),
+  isIdentityDeletable: isIdentityDeletableLoader(),
 })

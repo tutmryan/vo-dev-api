@@ -27,6 +27,7 @@ export const resolvers: Resolvers = {
   },
   Identity: {
     issuerLabel: resolveIssuerLabel,
+    isDeletable: ({ id }, _, { dataLoaders: { isIdentityDeletable } }) => isIdentityDeletable.load(id),
   },
   Issuance: {
     identity: ({ identityId }, _, { dataLoaders: { identities } }) => identities.load(identityId),

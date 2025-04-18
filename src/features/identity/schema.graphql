@@ -23,7 +23,10 @@ type Identity {
   The name of the identity
   """
   name: String!
-
+  """
+  Indicates whether this identity is deletable. Only identities that have no issuances or async issuances can be deleted.
+  """
+  isDeletable: Boolean!
   """
   The user who created the identity.
   """

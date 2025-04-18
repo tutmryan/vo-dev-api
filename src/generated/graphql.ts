@@ -1490,6 +1490,8 @@ export type Identity = {
   id: Scalars['ID']['output'];
   /** The unique identifier of the identity in the issuing tenant */
   identifier: Scalars['String']['output'];
+  /** Indicates whether this identity is deletable. Only identities that have no issuances or async issuances can be deleted. */
+  isDeletable: Scalars['Boolean']['output'];
   /** Returns the total number of credential issuances for this identity. */
   issuanceCount: Scalars['Int']['output'];
   /** Returns the successful credential issuances for this identity. */
@@ -5350,6 +5352,7 @@ export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends R
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  isDeletable?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   issuanceCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, RequireFields<IdentityIssuancesArgs, 'limit'>>;
   issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
