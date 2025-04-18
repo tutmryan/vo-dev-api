@@ -93,6 +93,10 @@ input IdentityWhere {
   The issuer of the identity to match
   """
   issuer: String
+  """
+  List only the identities which can be deleted
+  """
+  isDeletable: Boolean
 }
 
 """

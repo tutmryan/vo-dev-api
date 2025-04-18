@@ -1631,6 +1631,8 @@ export type IdentityPresentationWhere = {
 
 /** Defines the searchable fields usable to find identities */
 export type IdentityWhere = {
+  /** List only the identities which can be deleted */
+  isDeletable?: InputMaybe<Scalars['Boolean']['input']>;
   /** The issuer of the identity to match */
   issuer?: InputMaybe<Scalars['String']['input']>;
   /** The name of the identity to match */
