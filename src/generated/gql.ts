@@ -69,10 +69,11 @@ const documents = {
     "\nquery Me {\n  me {\n    ... on Identity {\n      presentations {\n        id\n      }\n      issuances {\n        id\n      }\n      asyncIssuanceRequests {\n        id\n      }\n    }\n  }\n}\n": types.MeDocument,
     "\nquery AsyncIssuanceRequest($asyncIssuanceRequestId: UUID!) {\n  asyncIssuanceRequest(id: $asyncIssuanceRequestId) {\n    id\n  }\n}\n": types.AsyncIssuanceRequestDocument,
     "\n  mutation CreatePartnerIdentityTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n      did\n      name\n    }\n  }\n": types.CreatePartnerIdentityTestDocument,
-    "\n  mutation CreatePartnerTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n      did\n      name\n    }\n  }\n": types.CreatePartnerTestDocument,
-    "\n  mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {\n    updatePartner(id: $id, input: $input) {\n      id\n      did\n      name\n      credentialTypes\n    }\n  }\n": types.UpdatePartnerDocument,
-    "\n  mutation DeletePartner($id: ID!) {\n    deletePartner(id: $id) {\n      id\n      did\n      name\n    }\n  }\n": types.DeletePartnerDocument,
-    "\n  query Partner($id: ID!) {\n    partner(id: $id) {\n      id\n      did\n      name\n      credentialTypes\n      deletedAt\n    }\n  }\n": types.PartnerDocument,
+    "\n  fragment PartnerFields on Partner {\n    id\n    did\n    tenantId\n    issuerId\n    name\n    credentialTypes\n    linkedDomainUrls\n    suspendedAt\n  }\n": types.PartnerFieldsFragmentDoc,
+    "\n  mutation CreatePartner($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      ...PartnerFields\n    }\n  }\n": types.CreatePartnerDocument,
+    "\n  mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {\n    updatePartner(id: $id, input: $input) {\n      ...PartnerFields\n    }\n  }\n": types.UpdatePartnerDocument,
+    "\n  mutation SuspendPartner($id: ID!) {\n    suspendPartner(id: $id) {\n      ...PartnerFields\n    }\n  }\n": types.SuspendPartnerDocument,
+    "\n  mutation ResumePartner($id: ID!) {\n    resumePartner(id: $id) {\n      ...PartnerFields\n    }\n  }\n": types.ResumePartnerDocument,
     "\n  mutation CreatePhotoCaptureRequest($request: PhotoCaptureRequest!) {\n    createPhotoCaptureRequest(request: $request) {\n      id\n      photoCaptureUrl\n      photoCaptureQrCode\n    }\n  }\n": types.CreatePhotoCaptureRequestDocument,
     "\n  mutation CapturePhoto($photoCaptureRequestId: UUID!, $photo: String!) {\n    capturePhoto(photoCaptureRequestId: $photoCaptureRequestId, photo: $photo)\n  }\n": types.CapturePhotoDocument,
     "\n  query PhotoCaptureStatus($photoCaptureRequestId: UUID!) {\n    photoCaptureStatus(photoCaptureRequestId: $photoCaptureRequestId) {\n      status\n    }\n  }\n": types.PhotoCaptureStatusDocument,
@@ -82,7 +83,7 @@ const documents = {
     "\n  mutation CreateTemplate($input: TemplateInput!) {\n    createTemplate(input: $input) {\n      ...TemplateFragment\n    }\n  }\n": types.CreateTemplateDocument,
     "\n  query GetTemplate($id: ID!) {\n    template(id: $id) {\n      ...TemplateFragment\n    }\n  }": types.GetTemplateDocument,
     "\n  mutation UpdateTemplate($id: ID!, $input: TemplateInput!) {\n    updateTemplate(id: $id, input: $input) {\n      ...TemplateFragment\n    }\n  }\n": types.UpdateTemplateDocument,
-    "\n  mutation CreatePartner($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n    }\n  }\n": types.CreatePartnerDocument,
+    "\n  mutation CreatePartnerShieldTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n    }\n  }\n": types.CreatePartnerShieldTestDocument,
     "\n    mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {\n      acquireLimitedAccessToken(input: $input) {\n        expires\n        token\n      }\n    }\n  ": types.AcquireLimitedAccessTokenDocument,
 };
 
@@ -327,19 +328,23 @@ export function graphql(source: "\n  mutation CreatePartnerIdentityTest($input: 
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation CreatePartnerTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n      did\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation CreatePartnerTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n      did\n      name\n    }\n  }\n"];
+export function graphql(source: "\n  fragment PartnerFields on Partner {\n    id\n    did\n    tenantId\n    issuerId\n    name\n    credentialTypes\n    linkedDomainUrls\n    suspendedAt\n  }\n"): (typeof documents)["\n  fragment PartnerFields on Partner {\n    id\n    did\n    tenantId\n    issuerId\n    name\n    credentialTypes\n    linkedDomainUrls\n    suspendedAt\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {\n    updatePartner(id: $id, input: $input) {\n      id\n      did\n      name\n      credentialTypes\n    }\n  }\n"): (typeof documents)["\n  mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {\n    updatePartner(id: $id, input: $input) {\n      id\n      did\n      name\n      credentialTypes\n    }\n  }\n"];
+export function graphql(source: "\n  mutation CreatePartner($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      ...PartnerFields\n    }\n  }\n"): (typeof documents)["\n  mutation CreatePartner($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      ...PartnerFields\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation DeletePartner($id: ID!) {\n    deletePartner(id: $id) {\n      id\n      did\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation DeletePartner($id: ID!) {\n    deletePartner(id: $id) {\n      id\n      did\n      name\n    }\n  }\n"];
+export function graphql(source: "\n  mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {\n    updatePartner(id: $id, input: $input) {\n      ...PartnerFields\n    }\n  }\n"): (typeof documents)["\n  mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {\n    updatePartner(id: $id, input: $input) {\n      ...PartnerFields\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  query Partner($id: ID!) {\n    partner(id: $id) {\n      id\n      did\n      name\n      credentialTypes\n      deletedAt\n    }\n  }\n"): (typeof documents)["\n  query Partner($id: ID!) {\n    partner(id: $id) {\n      id\n      did\n      name\n      credentialTypes\n      deletedAt\n    }\n  }\n"];
+export function graphql(source: "\n  mutation SuspendPartner($id: ID!) {\n    suspendPartner(id: $id) {\n      ...PartnerFields\n    }\n  }\n"): (typeof documents)["\n  mutation SuspendPartner($id: ID!) {\n    suspendPartner(id: $id) {\n      ...PartnerFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation ResumePartner($id: ID!) {\n    resumePartner(id: $id) {\n      ...PartnerFields\n    }\n  }\n"): (typeof documents)["\n  mutation ResumePartner($id: ID!) {\n    resumePartner(id: $id) {\n      ...PartnerFields\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
@@ -379,7 +384,7 @@ export function graphql(source: "\n  mutation UpdateTemplate($id: ID!, $input: T
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  mutation CreatePartner($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation CreatePartner($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n    }\n  }\n"];
+export function graphql(source: "\n  mutation CreatePartnerShieldTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n    }\n  }\n"): (typeof documents)["\n  mutation CreatePartnerShieldTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
