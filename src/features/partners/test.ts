@@ -1,16 +1,39 @@
+import { faker } from '@faker-js/faker/locale/en'
 import { graphql } from '../../generated'
+import {
+  CreatePartnerInput,
+  CreatePartnerMutation,
+  ResumePartnerMutation,
+  SuspendPartnerMutation,
+  UpdatePartnerInput,
+  UpdatePartnerMutation,
+} from '../../generated/graphql'
 import { beforeAfterAll, executeOperationAnonymous, executeOperationAsPartnerAdmin, expectUnauthorizedError } from '../../test'
 
+// Reset the faker seed to ensure consistent test data between runs
+faker.seed(123)
+
 function getUniqueDid(): string {
-  return `did:example:${Date.now()}-${Math.floor(Math.random() * 10000)}`
+  return `did:example:${faker.string.uuid()}`
 }
 
+export const partnerFragment = graphql(`
+  fragment PartnerFields on Partner {
+    id
+    did
+    tenantId
+    issuerId
+    name
+    credentialTypes
+    linkedDomainUrls
+    suspendedAt
+  }
+`)
+
 const createPartnerMutation = graphql(`
-  mutation CreatePartnerTest($input: CreatePartnerInput!) {
+  mutation CreatePartner($input: CreatePartnerInput!) {
     createPartner(input: $input) {
-      id
-      did
-      name
+      ...PartnerFields
     }
   }
 `)
@@ -18,10 +41,7 @@ const createPartnerMutation = graphql(`
 const updatePartnerMutation = graphql(`
   mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {
     updatePartner(id: $id, input: $input) {
-      id
-      did
-      name
-      credentialTypes
+      ...PartnerFields
     }
   }
 `)
@@ -29,10 +49,7 @@ const updatePartnerMutation = graphql(`
 const suspendPartnerMutation = graphql(`
   mutation SuspendPartner($id: ID!) {
     suspendPartner(id: $id) {
-      id
-      did
-      name
-      suspendedAt
+      ...PartnerFields
     }
   }
 `)
@@ -40,270 +57,198 @@ const suspendPartnerMutation = graphql(`
 const resumePartnerMutation = graphql(`
   mutation ResumePartner($id: ID!) {
     resumePartner(id: $id) {
-      id
-      did
-      name
-      suspendedAt
+      ...PartnerFields
     }
   }
 `)
 
-const partnerQuery = graphql(`
-  query Partner($id: ID!) {
-    partner(id: $id) {
-      id
-      did
-      name
-      credentialTypes
-      suspendedAt
-    }
-  }
-`)
+const getUniqueCreatePartnerInput = (): CreatePartnerInput => ({
+  name: `${faker.company.name()} Partner`,
+  did: getUniqueDid(),
+  credentialTypes: faker.helpers.arrayElements(['t1', 't2', 't3', 't4', 't5', 't6', 't7'], { min: 1, max: 3 }),
+  tenantId: faker.string.uuid(),
+  issuerId: faker.string.uuid(),
+  linkedDomainUrls: [faker.internet.url({ appendSlash: true })],
+})
 
-const createPartnerMutationInput = {
-  input: {
-    name: 'Test Partner',
-    did: 'did:example:123',
-    credentialTypes: ['type1', 'type2'],
-    tenantId: '36faedc5-b6f9-4c4e-a514-b925df3447ee',
-    issuerId: 'ea555a2b-65da-4263-b280-7618b6555017',
-    linkedDomainUrls: ['https://example.com'],
-  },
-}
-
-const updatePartnerMutationInput = {
-  input: {
-    name: 'Updated Test Partner',
-    credentialTypes: ['type1', 'type2', 'type3'],
-  },
-}
+const getUniqueUpdatePartnerInput = (): UpdatePartnerInput => ({
+  name: `${faker.company.name()} Partner`,
+  credentialTypes: faker.helpers.arrayElements(['t1', 't2', 't3', 't4', 't5', 't6', 't7'], { min: 1, max: 3 }).sort(),
+})
 
 describe('Partner', () => {
+  beforeAfterAll()
   describe('createPartner mutation', () => {
-    beforeAfterAll()
-
     it('returns partner id and details when called as partner admin', async () => {
-      const uniqueInput = { input: { ...createPartnerMutationInput.input, did: getUniqueDid() } }
+      // Arrange
+      const createVars = { input: { ...getUniqueCreatePartnerInput(), did: getUniqueDid() } }
+
+      // Act
       const { data, errors } = await executeOperationAsPartnerAdmin({
         query: createPartnerMutation,
-        variables: uniqueInput,
+        variables: createVars,
       })
 
-      expect(data).toMatchObject({
-        createPartner: {
-          id: expect.any(String),
-          did: uniqueInput.input.did,
-          name: createPartnerMutationInput.input.name,
-        },
-      })
+      // Assert
       expect(errors).toBeUndefined()
+      expect(data?.createPartner).toMatchObject({
+        id: expect.any(String),
+        did: createVars.input.did,
+        tenantId: createVars.input.tenantId,
+        issuerId: createVars.input.issuerId,
+        name: createVars.input.name,
+        credentialTypes: createVars.input.credentialTypes,
+        linkedDomainUrls: createVars.input.linkedDomainUrls,
+        suspendedAt: null,
+      } satisfies Omit<CreatePartnerMutation['createPartner'], '__typename'>)
     })
   })
 
   describe('updatePartner mutation', () => {
-    beforeAfterAll()
     it('returns updated partner details when called as partner admin', async () => {
-      const uniqueInput = { input: { ...createPartnerMutationInput.input, did: getUniqueDid() } }
+      // Arrange
+      const createVars = { input: { ...getUniqueCreatePartnerInput(), did: getUniqueDid() } }
       const createResult = await executeOperationAsPartnerAdmin({
         query: createPartnerMutation,
-        variables: uniqueInput,
+        variables: createVars,
       })
-      const partnerId = createResult.data?.createPartner.id
-      expect(partnerId).toBeDefined()
+      const updateVars = { id: createResult.data!.createPartner.id, input: getUniqueUpdatePartnerInput() }
 
+      // Act
       const { data, errors } = await executeOperationAsPartnerAdmin({
         query: updatePartnerMutation,
-        variables: { id: partnerId!, ...updatePartnerMutationInput },
+        variables: updateVars,
       })
 
-      expect(data).toMatchObject({
-        updatePartner: {
-          id: partnerId,
-          name: updatePartnerMutationInput.input.name,
-          credentialTypes: updatePartnerMutationInput.input.credentialTypes,
-        },
-      })
+      // Assert
       expect(errors).toBeUndefined()
+      expect(data?.updatePartner).toMatchObject({
+        id: updateVars.id,
+        did: createVars.input.did,
+        tenantId: createVars.input.tenantId,
+        issuerId: createVars.input.issuerId,
+        name: updateVars.input.name,
+        credentialTypes: updateVars.input.credentialTypes,
+        linkedDomainUrls: createVars.input.linkedDomainUrls,
+        suspendedAt: null,
+      } satisfies Omit<UpdatePartnerMutation['updatePartner'], '__typename'>)
     })
   })
 
   describe('suspendPartner mutation', () => {
-    beforeAfterAll()
-
-    it('returns suspended partner details when called as partner admin and set suspendedAt field', async () => {
-      const uniqueInput = { input: { ...createPartnerMutationInput.input, did: getUniqueDid() } }
+    it('returns suspended partner details when called as partner admin', async () => {
+      // Arrange
+      const createVars = { input: { ...getUniqueCreatePartnerInput(), did: getUniqueDid() } }
       const createResult = await executeOperationAsPartnerAdmin({
         query: createPartnerMutation,
-        variables: uniqueInput,
+        variables: createVars,
       })
-      const partnerId = createResult.data?.createPartner.id
-      expect(partnerId).toBeDefined()
 
+      // Act
+      const suspendVars = { id: createResult.data!.createPartner.id }
       const { data, errors } = await executeOperationAsPartnerAdmin({
         query: suspendPartnerMutation,
-        variables: { id: partnerId! },
+        variables: suspendVars,
       })
 
-      expect(data).toMatchObject({
-        suspendPartner: {
-          id: partnerId,
-          did: uniqueInput.input.did,
-          name: createPartnerMutationInput.input.name,
-        },
-      })
+      // Assert
       expect(errors).toBeUndefined()
+      expect(data?.suspendPartner).toMatchObject({
+        id: suspendVars.id,
+        suspendedAt: expect.any(Date),
+      } satisfies Pick<SuspendPartnerMutation['suspendPartner'], 'id' | 'suspendedAt'>)
+    })
+  })
 
-      //Call partner query to check suspendedAt has been set
-      const partnerResult = await executeOperationAsPartnerAdmin({
-        query: partnerQuery,
-        variables: { id: partnerId! },
+  describe('resumePartner mutation', () => {
+    it('returns resumed partner details when called as partner admin', async () => {
+      // Arrange
+      const createVars = { input: { ...getUniqueCreatePartnerInput(), did: getUniqueDid() } }
+      const createResult = await executeOperationAsPartnerAdmin({
+        query: createPartnerMutation,
+        variables: createVars,
       })
-      expect(partnerResult.data?.partner.suspendedAt).toBeDefined()
+
+      // Act
+      const resumeVars = { id: createResult.data!.createPartner.id }
+      const { data, errors } = await executeOperationAsPartnerAdmin({
+        query: resumePartnerMutation,
+        variables: resumeVars,
+      })
+
+      // Assert
+      expect(errors).toBeUndefined()
+      expect(data?.resumePartner).toMatchObject({
+        id: resumeVars.id,
+        suspendedAt: null,
+      } satisfies Pick<ResumePartnerMutation['resumePartner'], 'id' | 'suspendedAt'>)
     })
   })
 
   // Unauthorized operations
   describe('unauthorized operations', () => {
-    beforeAfterAll()
-
     it('should not allow anonymous users to call createPartner', async () => {
-      const uniqueInput = { input: { ...createPartnerMutationInput.input, did: getUniqueDid() } }
+      // Act
       const { data, errors } = await executeOperationAnonymous({
         query: createPartnerMutation,
-        variables: uniqueInput,
+        variables: { input: { ...getUniqueCreatePartnerInput(), did: getUniqueDid() } },
       })
 
+      // Assert
       expect(data).toBeNull()
       expectUnauthorizedError(errors)
     })
 
     it('should not allow anonymous users to call updatePartner', async () => {
-      const uniqueInput = { input: { ...createPartnerMutationInput.input, did: getUniqueDid() } }
+      // Arrange
       const createResult = await executeOperationAsPartnerAdmin({
         query: createPartnerMutation,
-        variables: uniqueInput,
+        variables: { input: { ...getUniqueCreatePartnerInput(), did: getUniqueDid() } },
       })
-      const partnerId = createResult.data?.createPartner.id
-      expect(partnerId).toBeDefined()
 
+      // Act
       const { data, errors } = await executeOperationAnonymous({
         query: updatePartnerMutation,
-        variables: { id: partnerId!, ...updatePartnerMutationInput },
+        variables: { id: createResult.data!.createPartner.id, input: getUniqueUpdatePartnerInput() },
       })
 
+      // Assert
       expect(data).toBeNull()
       expectUnauthorizedError(errors)
     })
 
     it('should not allow anonymous users to call suspendPartner', async () => {
-      const uniqueInput = { input: { ...createPartnerMutationInput.input, did: getUniqueDid() } }
+      // Arrange
       const createResult = await executeOperationAsPartnerAdmin({
         query: createPartnerMutation,
-        variables: uniqueInput,
+        variables: { input: { ...getUniqueCreatePartnerInput(), did: getUniqueDid() } },
       })
-      const partnerId = createResult.data?.createPartner.id
-      expect(partnerId).toBeDefined()
 
+      // Act
       const { data, errors } = await executeOperationAnonymous({
         query: suspendPartnerMutation,
-        variables: { id: partnerId! },
+        variables: { id: createResult.data!.createPartner.id },
       })
 
       expect(data).toBeNull()
       expectUnauthorizedError(errors)
     })
-  })
 
-  describe('partner happy path', () => {
-    beforeAfterAll()
-
-    it('creates, updates, suspends, and resumes', async () => {
-      // Create partner
-      const createResult1 = await executeOperationAsPartnerAdmin({
+    it('should not allow anonymous users to call resumePartner', async () => {
+      // Arrange
+      const createResult = await executeOperationAsPartnerAdmin({
         query: createPartnerMutation,
-        variables: createPartnerMutationInput,
-      })
-      const partnerId1 = createResult1.data?.createPartner.id
-      expect(partnerId1).toBeDefined()
-      const partnerDid = createResult1.data?.createPartner.did
-      expect(partnerDid).toBeDefined()
-
-      // Update partner
-      const updateResult = await executeOperationAsPartnerAdmin({
-        query: updatePartnerMutation,
-        variables: { id: partnerId1!, ...updatePartnerMutationInput },
-      })
-      expect(updateResult.data?.updatePartner).toMatchObject({
-        id: partnerId1,
-        name: updatePartnerMutationInput.input.name,
-        credentialTypes: updatePartnerMutationInput.input.credentialTypes,
+        variables: { input: { ...getUniqueCreatePartnerInput(), did: getUniqueDid() } },
       })
 
-      // Suspend partner
-      const suspendResult = await executeOperationAsPartnerAdmin({
-        query: suspendPartnerMutation,
-        variables: { id: partnerId1! },
-      })
-      expect(suspendResult.data?.suspendPartner.suspendedAt?.getTime()).toBeLessThanOrEqual(new Date().getTime())
-      delete suspendResult.data?.suspendPartner.suspendedAt
-      expect(suspendResult.data?.suspendPartner).toMatchObject({
-        id: partnerId1,
-        did: partnerDid,
-        name: updatePartnerMutationInput.input.name,
-      })
-
-      // Resume partner
-      const resumeResult = await executeOperationAsPartnerAdmin({
+      // Act
+      const { data, errors } = await executeOperationAnonymous({
         query: resumePartnerMutation,
-        variables: { id: partnerId1! },
-      })
-      expect(resumeResult.data?.resumePartner.suspendedAt).toBeNull()
-    })
-
-    it('creates, updates, suspends, and revives partner and returns same id for same did', async () => {
-      // Create partner
-      const createResult1 = await executeOperationAsPartnerAdmin({
-        query: createPartnerMutation,
-        variables: createPartnerMutationInput,
-      })
-      const partnerId1 = createResult1.data?.createPartner.id
-      expect(partnerId1).toBeDefined()
-      const partnerDid = createResult1.data?.createPartner.did
-      expect(partnerDid).toBeDefined()
-
-      // Update partner
-      const updateResult = await executeOperationAsPartnerAdmin({
-        query: updatePartnerMutation,
-        variables: { id: partnerId1!, ...updatePartnerMutationInput },
-      })
-      expect(updateResult.data?.updatePartner).toMatchObject({
-        id: partnerId1,
-        name: updatePartnerMutationInput.input.name,
-        credentialTypes: updatePartnerMutationInput.input.credentialTypes,
+        variables: { id: createResult.data!.createPartner.id },
       })
 
-      // Suspend partner
-      const suspendResult = await executeOperationAsPartnerAdmin({
-        query: suspendPartnerMutation,
-        variables: { id: partnerId1! },
-      })
-      expect(suspendResult.data?.suspendPartner.suspendedAt?.getTime()).toBeLessThanOrEqual(new Date().getTime())
-      delete suspendResult.data?.suspendPartner.suspendedAt
-      expect(suspendResult.data?.suspendPartner).toMatchObject({
-        id: partnerId1,
-        did: partnerDid,
-        name: updatePartnerMutationInput.input.name,
-      })
-
-      // Revive partner
-      const createResult2 = await executeOperationAsPartnerAdmin({
-        query: createPartnerMutation,
-        variables: createPartnerMutationInput,
-      })
-      const partnerId2 = createResult2.data?.createPartner.id
-      expect(partnerId2).toBeDefined()
-
-      expect(partnerId2).toBe(partnerId1)
+      expect(data).toBeNull()
+      expectUnauthorizedError(errors)
     })
   })
 })

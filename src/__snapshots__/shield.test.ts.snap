@@ -796,7 +796,11 @@ exports[`shield rules are setup correctly 1`] = `
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
       "cache": "contextual"
     },
-    "deletePartner": {
+    "suspendPartner": {
+      "name": "hasRole-VerifiableCredential.PartnerAdmin",
+      "cache": "contextual"
+    },
+    "resumePartner": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
       "cache": "contextual"
     },
