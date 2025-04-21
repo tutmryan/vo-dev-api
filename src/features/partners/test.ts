@@ -65,7 +65,7 @@ const resumePartnerMutation = graphql(`
 const getUniqueCreatePartnerInput = (): CreatePartnerInput => ({
   name: `${faker.company.name()} Partner`,
   did: getUniqueDid(),
-  credentialTypes: faker.helpers.arrayElements(['t1', 't2', 't3', 't4', 't5', 't6', 't7'], { min: 1, max: 3 }),
+  credentialTypes: faker.helpers.arrayElements(['t1', 't2', 't3', 't4', 't5', 't6', 't7'], { min: 1, max: 3 }).sort(),
   tenantId: faker.string.uuid(),
   issuerId: faker.string.uuid(),
   linkedDomainUrls: [faker.internet.url({ appendSlash: true })],
