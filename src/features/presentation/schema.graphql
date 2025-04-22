@@ -773,7 +773,7 @@ extend type Issuance {
 
 extend type Partner {
   """
-  Returns the successful credential presentations of credentails issued by this partner.
+  Returns the successful credential presentations of credentials issued by this partner.
   """
   presentations(where: PartnerPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
 }
