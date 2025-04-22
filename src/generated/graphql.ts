@@ -2753,7 +2753,7 @@ export type Partner = {
   linkedDomainUrls?: Maybe<Array<Scalars['URL']['output']>>;
   /** The name of the partner */
   name: Scalars['String']['output'];
-  /** Returns the successful credential presentations of credentails issued by this partner. */
+  /** Returns the successful credential presentations of credentials issued by this partner. */
   presentations: Array<Presentation>;
   /** When the partner was suspended. */
   suspendedAt?: Maybe<Scalars['DateTime']['output']>;
