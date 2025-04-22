@@ -139,24 +139,44 @@ Re-running the deployment a second time usually results in a successful deployme
 Note: click-ops must be performed as a pair using screen sharing for peer review, do not perform tear-down operations alone.
 
 ### Optional prep (if the customer wants)
+
 1. Deprecate all contracts which would revoke all issuances as the Verified ID authority cannot be deleted
 
 ### Main steps
+
 1. PR to remove matrix entries (3x)
 1. Delete the instance resource group e.g. vo-{name}-instance
 1. Delete the instance database from the shared infrastructure resource group named vo-{name}-sql-db
 1. Delete GitHub environments (3x)
 1. Delete all the instance app registrations:
    - `Verified Orchestration (<instance>)`
-  
+
 ### DNS cleanup
+
 1. Delete CNAMEs and TXTs including authority (did.) CNAME and TXT
 
 ### Notes
+
 1. If you plan to re-create the instance:
    - you must purge the deleted keyvault - re-creating the same keyvault name will fail
-   - you must delete the sql DB external login for the API identity - re-using the login between same named API identity will fail (TODO ?? confirm)
+   - you must delete the sql DB external login for the API identity, the login must be re-created after the API identity is re-created, see #reset-api-identity-sql-login-for-re-created-instance
    - you must invoke Verified ID admin API endpoint to verify well known DID configuration which should invalidate previously verified linked domain. The CI/CD pipeline would detect the unverified status and start the process to get the authority verified.
+
+#### Re-create API identity SQL login for re-created instance
+
+If you need to do this, you'll need to:
+
+1. Add yourself to the SQL Administrators group (temporarily)
+1. Change the firewall rules to allow public access and allow your IP (temporarily)
+1. Execute the following SQL script to re-create the login:
+
+```sql
+DROP USER [{instance api app service name}];
+GO
+CREATE USER [{instance api app service name}] FROM EXTERNAL PROVIDER;
+ALTER ROLE [db_datareader] ADD MEMBER [{instance api app service name}];
+ALTER ROLE [db_datawriter] ADD MEMBER [{instance api app service name}];
+```
 
 ## Notes on the instance Database setup
 
