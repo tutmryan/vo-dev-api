@@ -9,7 +9,7 @@ export async function CreatePartnerCommand(this: CommandContext, input: CreatePa
   const repo = entityManager.getRepository(PartnerEntity)
 
   const partner = await repo.findOne({
-    where: { did: input.did },
+    where: { didHash: PartnerEntity.createDidHash(input.did) },
     withDeleted: true,
   })
   invariant(!partner, 'DID already exists in the system. Use updatePartner mutation to update an existing partner.')
