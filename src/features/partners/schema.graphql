@@ -162,6 +162,10 @@ type Query {
   Returns a partner by ID
   """
   partner(id: ID!): Partner!
+  """
+  Returns a partner by DID
+  """
+  partnerByDid(did: String!): Partner
 }
 
 """

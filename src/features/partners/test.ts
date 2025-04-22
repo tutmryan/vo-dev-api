@@ -8,7 +8,14 @@ import {
   UpdatePartnerInput,
   UpdatePartnerMutation,
 } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsPartnerAdmin, expectUnauthorizedError } from '../../test'
+import { UserRoles } from '../../roles'
+import {
+  beforeAfterAll,
+  executeOperationAnonymous,
+  executeOperationAsPartnerAdmin,
+  executeOperationAsUser,
+  expectUnauthorizedError,
+} from '../../test'
 
 // Reset the faker seed to ensure consistent test data between runs
 faker.seed(123)
@@ -57,6 +64,14 @@ const suspendPartnerMutation = graphql(`
 const resumePartnerMutation = graphql(`
   mutation ResumePartner($id: ID!) {
     resumePartner(id: $id) {
+      ...PartnerFields
+    }
+  }
+`)
+
+const partnerByDidQuery = graphql(`
+  query PartnerByDid($did: String!) {
+    partnerByDid(did: $did) {
       ...PartnerFields
     }
   }
@@ -157,6 +172,42 @@ describe('Partner', () => {
         id: suspendVars.id,
         suspendedAt: expect.any(Date),
       } satisfies Pick<SuspendPartnerMutation['suspendPartner'], 'id' | 'suspendedAt'>)
+    })
+  })
+
+  describe('partner by did query', () => {
+    it('returns partner details when called as user', async () => {
+      // Arrange
+      const createVars = { input: { ...getUniqueCreatePartnerInput(), did: getUniqueDid() } }
+      const createResult = await executeOperationAsPartnerAdmin({
+        query: createPartnerMutation,
+        variables: createVars,
+      })
+
+      // Act
+      const { data, errors } = await executeOperationAsUser(
+        {
+          query: partnerByDidQuery,
+          variables: { did: createResult.data!.createPartner.did },
+        },
+        UserRoles.reader,
+      )
+
+      // Assert
+      expect(errors).toBeUndefined()
+      expect(data?.partnerByDid).toBeDefined()
+    })
+
+    it('returns null for partner details when called as user', async () => {
+      // Act
+      const { data, errors } = await executeOperationAsPartnerAdmin({
+        query: partnerByDidQuery,
+        variables: { did: getUniqueDid() },
+      })
+
+      // Assert
+      expect(errors).toBeUndefined()
+      expect(data?.partnerByDid).toBeNull()
     })
   })
 

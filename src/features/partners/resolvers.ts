@@ -6,6 +6,7 @@ import { ResumePartnerCommand } from './commands/resume-partner-command'
 import { SuspendPartnerCommand } from './commands/suspend-partner-command'
 import { UpdatePartnerCommand } from './commands/update-partner-command'
 import { FindPartnersQuery } from './queries/find-partners-query'
+import { PartnerByDidQuery } from './queries/partner-by-did-query'
 
 export const resolvers: Resolvers = {
   Mutation: {
@@ -21,6 +22,7 @@ export const resolvers: Resolvers = {
     findPartners: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindPartnersQuery, where, offset, limit, orderBy, orderDirection),
     partner: (_, { id }, { dataLoaders: { partners } }) => partners.load(id),
+    partnerByDid: (_, { did }, context) => query(context, PartnerByDidQuery, did),
   },
   Presentation: {
     partners: (presentation, _, { dataLoaders: { presentationPartnersLoader } }) =>
