@@ -74,6 +74,7 @@ const documents = {
     "\n  mutation UpdatePartner($id: ID!, $input: UpdatePartnerInput!) {\n    updatePartner(id: $id, input: $input) {\n      ...PartnerFields\n    }\n  }\n": types.UpdatePartnerDocument,
     "\n  mutation SuspendPartner($id: ID!) {\n    suspendPartner(id: $id) {\n      ...PartnerFields\n    }\n  }\n": types.SuspendPartnerDocument,
     "\n  mutation ResumePartner($id: ID!) {\n    resumePartner(id: $id) {\n      ...PartnerFields\n    }\n  }\n": types.ResumePartnerDocument,
+    "\n  query PartnerByDid($did: String!) {\n    partnerByDid(did: $did) {\n      ...PartnerFields\n    }\n  }\n": types.PartnerByDidDocument,
     "\n  mutation CreatePhotoCaptureRequest($request: PhotoCaptureRequest!) {\n    createPhotoCaptureRequest(request: $request) {\n      id\n      photoCaptureUrl\n      photoCaptureQrCode\n    }\n  }\n": types.CreatePhotoCaptureRequestDocument,
     "\n  mutation CapturePhoto($photoCaptureRequestId: UUID!, $photo: String!) {\n    capturePhoto(photoCaptureRequestId: $photoCaptureRequestId, photo: $photo)\n  }\n": types.CapturePhotoDocument,
     "\n  query PhotoCaptureStatus($photoCaptureRequestId: UUID!) {\n    photoCaptureStatus(photoCaptureRequestId: $photoCaptureRequestId) {\n      status\n    }\n  }\n": types.PhotoCaptureStatusDocument,
@@ -345,6 +346,10 @@ export function graphql(source: "\n  mutation SuspendPartner($id: ID!) {\n    su
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation ResumePartner($id: ID!) {\n    resumePartner(id: $id) {\n      ...PartnerFields\n    }\n  }\n"): (typeof documents)["\n  mutation ResumePartner($id: ID!) {\n    resumePartner(id: $id) {\n      ...PartnerFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query PartnerByDid($did: String!) {\n    partnerByDid(did: $did) {\n      ...PartnerFields\n    }\n  }\n"): (typeof documents)["\n  query PartnerByDid($did: String!) {\n    partnerByDid(did: $did) {\n      ...PartnerFields\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

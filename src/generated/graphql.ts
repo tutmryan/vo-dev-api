@@ -3200,6 +3200,8 @@ export type Query = {
   oidcResource: OidcResource;
   /** Returns a partner by ID */
   partner: Partner;
+  /** Returns a partner by DID */
+  partnerByDid?: Maybe<Partner>;
   /**
    * Returns the current status of the specified photo capture request.
    * Note: this query is an alternative to the `photoCaptureEvent` subscription, suitable for polling behaviour.
@@ -3431,6 +3433,11 @@ export type QueryOidcResourceArgs = {
 
 export type QueryPartnerArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryPartnerByDidArgs = {
+  did: Scalars['String']['input'];
 };
 
 
@@ -3799,7 +3806,7 @@ export type TemplateParentData = {
   validityIntervalInSeconds?: Maybe<Scalars['PositiveInt']['output']>;
 };
 
-/** Defines the filter critiera used to find templates */
+/** Defines the filter criteria used to find templates */
 export type TemplateWhere = {
   /** List only the templates which include any of these credential types */
   credentialTypes?: InputMaybe<Array<Scalars['String']['input']>>;
@@ -3985,7 +3992,7 @@ export type UserPresentationWhere = {
 export type UserWhere = {
   /**
    * The email of the user to match
-   * Note: only relevent for users who are people, applications don't have an email
+   * Note: only relevant for users who are people, applications don't have an email
    */
   email?: InputMaybe<Scalars['String']['input']>;
   /** Matches users that are applications (or not - people) */
@@ -4412,6 +4419,13 @@ export type ResumePartnerMutationVariables = Exact<{
 
 export type ResumePartnerMutation = { __typename?: 'Mutation', resumePartner: { __typename?: 'Partner', id: string, did: string, tenantId?: string | null, issuerId?: string | null, name: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null, suspendedAt?: Date | null } };
 
+export type PartnerByDidQueryVariables = Exact<{
+  did: Scalars['String']['input'];
+}>;
+
+
+export type PartnerByDidQuery = { __typename?: 'Query', partnerByDid?: { __typename?: 'Partner', id: string, did: string, tenantId?: string | null, issuerId?: string | null, name: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null, suspendedAt?: Date | null } | null };
+
 export type CreatePhotoCaptureRequestMutationVariables = Exact<{
   request: PhotoCaptureRequest;
 }>;
@@ -4537,6 +4551,7 @@ export const CreatePartnerDocument = {"kind":"Document","definitions":[{"kind":"
 export const UpdatePartnerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdatePartner"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdatePartnerInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updatePartner"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PartnerFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PartnerFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Partner"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}},{"kind":"Field","name":{"kind":"Name","value":"issuerId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}},{"kind":"Field","name":{"kind":"Name","value":"suspendedAt"}}]}}]} as unknown as DocumentNode<UpdatePartnerMutation, UpdatePartnerMutationVariables>;
 export const SuspendPartnerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SuspendPartner"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"suspendPartner"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PartnerFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PartnerFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Partner"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}},{"kind":"Field","name":{"kind":"Name","value":"issuerId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}},{"kind":"Field","name":{"kind":"Name","value":"suspendedAt"}}]}}]} as unknown as DocumentNode<SuspendPartnerMutation, SuspendPartnerMutationVariables>;
 export const ResumePartnerDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ResumePartner"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resumePartner"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PartnerFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PartnerFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Partner"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}},{"kind":"Field","name":{"kind":"Name","value":"issuerId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}},{"kind":"Field","name":{"kind":"Name","value":"suspendedAt"}}]}}]} as unknown as DocumentNode<ResumePartnerMutation, ResumePartnerMutationVariables>;
+export const PartnerByDidDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PartnerByDid"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"did"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"partnerByDid"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"did"},"value":{"kind":"Variable","name":{"kind":"Name","value":"did"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"PartnerFields"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PartnerFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Partner"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}},{"kind":"Field","name":{"kind":"Name","value":"issuerId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}},{"kind":"Field","name":{"kind":"Name","value":"suspendedAt"}}]}}]} as unknown as DocumentNode<PartnerByDidQuery, PartnerByDidQueryVariables>;
 export const CreatePhotoCaptureRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePhotoCaptureRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PhotoCaptureRequest"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPhotoCaptureRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"photoCaptureUrl"}},{"kind":"Field","name":{"kind":"Name","value":"photoCaptureQrCode"}}]}}]}}]} as unknown as DocumentNode<CreatePhotoCaptureRequestMutation, CreatePhotoCaptureRequestMutationVariables>;
 export const CapturePhotoDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CapturePhoto"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"photo"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capturePhoto"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"photoCaptureRequestId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}}},{"kind":"Argument","name":{"kind":"Name","value":"photo"},"value":{"kind":"Variable","name":{"kind":"Name","value":"photo"}}}]}]}}]} as unknown as DocumentNode<CapturePhotoMutation, CapturePhotoMutationVariables>;
 export const PhotoCaptureStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PhotoCaptureStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"photoCaptureStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"photoCaptureRequestId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<PhotoCaptureStatusQuery, PhotoCaptureStatusQueryVariables>;
@@ -5715,6 +5730,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   oidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<QueryOidcClientArgs, 'id'>>;
   oidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<QueryOidcResourceArgs, 'id'>>;
   partner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<QueryPartnerArgs, 'id'>>;
+  partnerByDid?: Resolver<Maybe<ResolversTypes['Partner']>, ParentType, ContextType, RequireFields<QueryPartnerByDidArgs, 'did'>>;
   photoCaptureStatus?: Resolver<ResolversTypes['PhotoCaptureEventData'], ParentType, ContextType, RequireFields<QueryPhotoCaptureStatusArgs, 'photoCaptureRequestId'>>;
   presentation?: Resolver<ResolversTypes['Presentation'], ParentType, ContextType, RequireFields<QueryPresentationArgs, 'id'>>;
   presentationCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryPresentationCountArgs>>;
