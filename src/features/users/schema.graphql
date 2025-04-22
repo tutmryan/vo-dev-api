@@ -51,7 +51,7 @@ input UserWhere {
   name: String
   """
   The email of the user to match
-  Note: only relevent for users who are people, applications don't have an email
+  Note: only relevant for users who are people, applications don't have an email
   """
   email: String
   """
