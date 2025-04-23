@@ -127,7 +127,7 @@ type Mutation {
   """
   updatePartner(id: ID!, input: UpdatePartnerInput!): Partner!
   """
-  Suspends a partner and revokes access to its defined credential types
+  Suspends a partner
   """
   suspendPartner(id: ID!): Partner!
   """
