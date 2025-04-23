@@ -2091,7 +2091,7 @@ export type Mutation = {
    * - Starts a background job for all notifications and returns that job id.
    */
   resendAsyncIssuanceNotifications: Scalars['ID']['output'];
-  /** Resumes a partner and restores access to its defined credential types */
+  /** Resumes a partner */
   resumePartner: Partner;
   /** Revokes existing credentials for a contract. */
   revokeContractIssuances: Scalars['ID']['output'];
@@ -2113,7 +2113,7 @@ export type Mutation = {
    * The verification code can then be used to acquire a token for issuance.
    */
   sendAsyncIssuanceVerification: SendAsyncIssuanceVerificationResponse;
-  /** Suspends a partner and revokes access to its defined credential types */
+  /** Suspends a partner */
   suspendPartner: Partner;
   /** Updates an existing pending approval request. */
   updateApprovalRequest?: Maybe<Scalars['Void']['output']>;
