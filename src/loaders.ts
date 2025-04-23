@@ -4,7 +4,7 @@ import { contractLoader } from './features/contracts/loaders'
 import { identityLoader, isIdentityDeletableLoader } from './features/identity/loaders'
 import { issuanceCountByContractLoader, issuanceCountByIdentityLoader, issuanceLoader } from './features/issuance/loaders'
 import { oidcClientLoader, oidcResourceLoader } from './features/oidc-provider/loaders'
-import { partnerLoader, presentationPartnersLoader } from './features/partners/loaders'
+import { partnerByDidLoader, partnerLoader, presentationPartnersLoader } from './features/partners/loaders'
 import { presentationLoader } from './features/presentation/loaders'
 import { templateLoader } from './features/templates/loaders'
 import { userLoader } from './features/users/loaders'
@@ -21,6 +21,7 @@ export const createDataLoaders = (services: Services) => ({
   issuanceCountByIdentity: issuanceCountByIdentityLoader(),
   issuanceCountByContract: issuanceCountByContractLoader(),
   partners: partnerLoader(),
+  partnersByDid: partnerByDidLoader(),
   presentationPartnersLoader: presentationPartnersLoader(),
   presentations: presentationLoader(),
   approvalRequests: approvalRequestLoader(),
