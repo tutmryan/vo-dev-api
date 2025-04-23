@@ -131,7 +131,7 @@ type Mutation {
   """
   suspendPartner(id: ID!): Partner!
   """
-  Resumes a partner and restores access to its defined credential types
+  Resumes a partner
   """
   resumePartner(id: ID!): Partner!
 }
