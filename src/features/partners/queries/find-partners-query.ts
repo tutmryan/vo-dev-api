@@ -21,7 +21,7 @@ export async function FindPartnersQuery(
 
   if (criteria?.credentialType) where.credentialTypesJson = ILike(`%"${criteria.credentialType}"%`)
   if (criteria?.linkedDomainUrl) where.linkedDomainUrlsJson = ILike(`%${criteria.linkedDomainUrl}%`)
-  if (isNotNil(criteria?.isDeleted)) where.deletedAt = criteria.isDeleted ? Not(IsNull()) : IsNull()
+  if (isNotNil(criteria?.isSuspended)) where.deletedAt = criteria.isSuspended ? Not(IsNull()) : IsNull()
 
   const direction = orderDirection ?? OrderDirection.Asc
   switch (orderBy) {
@@ -45,6 +45,6 @@ export async function FindPartnersQuery(
     skip: offset ?? undefined,
     take: limit ?? undefined,
     order,
-    withDeleted: criteria?.includeDeleted ?? criteria?.isDeleted ?? false,
+    withDeleted: criteria?.includeSuspended ?? criteria?.isSuspended ?? false,
   })
 }

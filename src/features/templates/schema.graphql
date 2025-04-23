@@ -403,7 +403,7 @@ input CreateUpdateTemplateDisplayClaimInput {
 }
 
 """
-Defines the filter critiera used to find templates
+Defines the filter criteria used to find templates
 """
 input TemplateWhere {
   """

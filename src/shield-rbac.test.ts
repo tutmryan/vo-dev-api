@@ -8,7 +8,7 @@ import { beforeAfterAll, buildJwt, executeOperationAs, executeOperationAsCredent
 
 const createPartnerMutation = graphql(
   `
-  mutation CreatePartner($input: CreatePartnerInput!) {
+  mutation CreatePartnerShieldTest($input: CreatePartnerInput!) {
     createPartner(input: $input) {
       id
     }

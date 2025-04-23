@@ -1,21 +1,33 @@
 import { Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, RelationId } from 'typeorm'
 import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
+import { createSha256Hash } from '../../../util/crypto-hash'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { PresentationEntity } from '../../presentation/entities/presentation-entity'
 
 @Entity('partner')
 export class PartnerEntity extends AuditedAndTrackedEntity {
+  static createDidHash(did: string): string {
+    return createSha256Hash(did)
+  }
+
   constructor(args?: Pick<PartnerEntity, 'name' | 'did' | 'credentialTypes' | 'tenantId' | 'issuerId' | 'linkedDomainUrls'>) {
     super()
-    if (args) typeSafeAssign(this, args)
+    if (args)
+      typeSafeAssign(this, {
+        ...args,
+        didHash: PartnerEntity.createDidHash(args.did),
+      })
   }
 
   @Column({ type: 'nvarchar' })
   name!: string
 
-  @Column({ type: 'nvarchar', length: 510, unique: true })
+  @Column({ type: 'nvarchar', length: 'MAX' })
   did!: string
+
+  @Column({ type: 'varchar', unique: true, length: 255 })
+  didHash!: string
 
   @Column({ type: 'nvarchar', length: 'MAX' })
   credentialTypesJson!: string

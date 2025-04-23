@@ -11,7 +11,7 @@ import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { getLimitedApprovalDataByKey, setLimitedApprovalDataByKey } from '../../limited-approval-tokens'
 import { setLoginInteractionData, validateLoginSessionForPresentation } from '../../oidc-provider/session'
 import { PartnerEntity } from '../../partners/entities/partner-entity'
-import { WalletEntity, hashSubject } from '../../wallet/entities/wallet-entity'
+import { WalletEntity } from '../../wallet/entities/wallet-entity'
 import type { PresentationRequestDetails } from '../commands/create-presentation-request-command'
 import type { PresentedData } from '../entities/presentation-entity'
 import { PresentationEntity } from '../entities/presentation-entity'
@@ -82,13 +82,12 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     let walletId: string | undefined
     if (event.subject) {
       const walletRepository = entityManager.getRepository(WalletEntity)
-      const subjectHash = hashSubject(event.subject)
+      const subjectHash = WalletEntity.createSubjectHash(event.subject)
       let wallet = await walletRepository.findOneBy({ subjectHash })
       if (!wallet) {
         wallet = await walletRepository.save(
           new WalletEntity({
             subject: event.subject,
-            subjectHash,
           }),
         )
       }

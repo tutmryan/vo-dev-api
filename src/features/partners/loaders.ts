@@ -18,3 +18,11 @@ export const presentationPartnersLoader = () =>
       .find({ where: { presentations: { id: In(presentationIds) } }, withDeleted: true })
     return presentationIds.map((presentationId) => partners.filter((partner) => partner.presentationIds.includes(presentationId)))
   })
+
+export const partnerByDidLoader = () =>
+  new DataLoader<string, PartnerEntity | null>(async (dids) => {
+    const results = await entityManager
+      .getRepository(PartnerEntity)
+      .find({ where: { didHash: In(dids.map((did) => PartnerEntity.createDidHash(did))) }, withDeleted: true })
+    return dids.map((did) => results.find((result) => result.didHash === PartnerEntity.createDidHash(did)) ?? null)
+  })

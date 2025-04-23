@@ -110,9 +110,9 @@ type Partner {
   """
   updatedAt: DateTime
   """
-  When the partner was deleted.
+  When the partner was suspended.
   """
-  deletedAt: DateTime
+  suspendedAt: DateTime
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description
@@ -127,9 +127,13 @@ type Mutation {
   """
   updatePartner(id: ID!, input: UpdatePartnerInput!): Partner!
   """
-  Deletes a partner and revokes access to its credential types
+  Suspends a partner
   """
-  deletePartner(id: ID!): Partner!
+  suspendPartner(id: ID!): Partner!
+  """
+  Resumes a partner
+  """
+  resumePartner(id: ID!): Partner!
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description
@@ -158,6 +162,10 @@ type Query {
   Returns a partner by ID
   """
   partner(id: ID!): Partner!
+  """
+  Returns a partner by DID
+  """
+  partnerByDid(did: String!): Partner
 }
 
 """
@@ -236,13 +244,13 @@ input PartnerWhere {
   """
   linkedDomainUrl: String
   """
-  List only the partners which are, or are not, deleted.
+  List only the partners which are, or are not, suspended.
   """
-  isDeleted: Boolean
+  isSuspended: Boolean
   """
-  Whether to include deleted partners in the results.
+  Whether to include suspended partners in the results.
   """
-  includeDeleted: Boolean
+  includeSuspended: Boolean
 }
 
 """

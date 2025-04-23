@@ -1,6 +1,6 @@
-import { omit } from 'lodash'
 import type { CommandContext } from '../../../cqs'
 import type { CreatePartnerInput } from '../../../generated/graphql'
+import { invariant } from '../../../util/invariant'
 import { notifyOidcDataChanged } from '../../oidc-provider'
 import { PartnerEntity } from '../entities/partner-entity'
 
@@ -8,31 +8,24 @@ export async function CreatePartnerCommand(this: CommandContext, input: CreatePa
   const { entityManager } = this
   const repo = entityManager.getRepository(PartnerEntity)
 
-  const sharedProps = {
-    tenantId: input.tenantId ?? null,
-    issuerId: input.issuerId ?? null,
-    linkedDomainUrls: input.linkedDomainUrls ?? null,
-    ...omit(input, 'tenantId', 'issuerId', 'linkedDomainUrls'),
-  }
+  const partner = await this.dataLoaders.partnersByDid.load(input.did)
+  invariant(!partner, 'DID already exists in the system. Use updatePartner mutation to update an existing partner.')
 
-  const partner = await repo.findOne({
-    where: { did: input.did },
-    withDeleted: true,
-  })
+  type AdvancedInitKeys = 'tenantId' | 'issuerId' | 'linkedDomainUrls'
+  type RemainingKeys = Omit<CreatePartnerInput, AdvancedInitKeys>
 
-  if (partner) {
-    if (partner.deletedAt) {
-      repo.merge(partner, {
-        ...sharedProps,
-        deletedAt: null,
-      })
-      return await repo.save(partner)
-    } else {
-      throw new Error('DID already exists in the system. Use updatePartner mutation to update an existing partner.')
-    }
-  }
+  const { tenantId, issuerId, linkedDomainUrls, ...rest } = input as {
+    [K in keyof CreatePartnerInput]: K extends AdvancedInitKeys ? CreatePartnerInput[K] : never
+  } & RemainingKeys
 
-  const saved = await repo.save(new PartnerEntity(sharedProps))
+  const result = await repo.save(
+    new PartnerEntity({
+      tenantId: tenantId ?? null,
+      issuerId: issuerId ?? null,
+      linkedDomainUrls: linkedDomainUrls ?? null,
+      ...rest,
+    }),
+  )
   notifyOidcDataChanged()
-  return saved
+  return result
 }
