@@ -1,8 +1,8 @@
 import { Column, Entity, OneToMany, RelationId } from 'typeorm'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
+import { createSha256Hash } from '../../../util/crypto-hash'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { PresentationEntity } from '../../presentation/entities/presentation-entity'
-import { createSha256Hash } from '../../../util/crypto-hash'
 
 @Entity('wallet')
 export class WalletEntity extends VerifiedOrchestrationEntity {
@@ -15,7 +15,7 @@ export class WalletEntity extends VerifiedOrchestrationEntity {
     if (!args) return
     typeSafeAssign(this, {
       ...args,
-      subjectHash: WalletEntity.createSubjectHash(args.subject), // Hash the subject for storage
+      subjectHash: WalletEntity.createSubjectHash(args.subject),
     })
   }
 
