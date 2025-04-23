@@ -34,6 +34,10 @@ export enum StandardClaims {
   identityId = 'identityId',
 }
 
+export enum DisallowedClaims {
+  photo = 'photo',
+}
+
 export const standardClaimLabels: Record<StandardClaims, string> = {
   [StandardClaims.issuanceId]: 'Credential ID',
   [StandardClaims.name]: 'Issued to',
@@ -41,6 +45,8 @@ export const standardClaimLabels: Record<StandardClaims, string> = {
 }
 
 export const standardClaims = Object.values(StandardClaims)
+
+export const disallowedClaims = Object.values(DisallowedClaims)
 
 export const standardClaimAttestations: AttestationClaimMapping[] = standardClaims.map((claim) => ({
   type: claimTypeString,
@@ -56,26 +62,26 @@ export const standardContractDislayClaims: DisplayClaim[] = standardClaims.map((
   type: claimTypeString,
 }))
 
-const standardClaimsErrorMessage = `Claims must not include any of: ${standardClaims.join(', ')}`
+const claimsErrorMessage = `Claims must not include any of: ${[...standardClaims, ...disallowedClaims].join(', ')}`
 
 /**
  * Throws an error if any of the standard claims are included.
  */
 const validateStandardIssuanceClaims = (claims?: IssuanceRequestInput['claims'] | AsyncIssuanceRequestInput['claims']): void => {
-  if (claims && Object.keys(claims).some((key) => standardClaims.includes(key as StandardClaims)))
-    throw new Error(standardClaimsErrorMessage)
+  if (claims && Object.keys(claims).some((key) => standardClaims.includes(key as StandardClaims))) throw new Error(claimsErrorMessage)
 }
 
 /**
- * Validates all contract claims inputs, throwing an error if any standard claims are included
+ * Validates all contract claims inputs, throwing an error if any standard claims or disallowed claims are included,
  * or if any claim fails individual validation.
  */
 export const validateContractClaims = (
   claimsInputs?: ContractDisplayModelInput['claims'] | CreateUpdateTemplateDisplayModelInput['claims'],
 ): void => {
   claimsInputs?.forEach((claimInput) => {
-    if (standardClaims.includes(claimInput.claim as StandardClaims)) {
-      throw new Error(standardClaimsErrorMessage)
+    const claim = claimInput.claim
+    if ([...standardClaims, ...disallowedClaims].includes(claim as StandardClaims | DisallowedClaims)) {
+      throw new Error(claimsErrorMessage)
     }
     validateClaimInput(claimInput)
   })

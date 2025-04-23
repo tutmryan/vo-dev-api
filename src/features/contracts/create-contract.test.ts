@@ -81,7 +81,7 @@ describe('createContract mutation', () => {
 
     // Assert
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toMatchInlineSnapshot(`"${notSupportedCredentialTypes[0]} is not a supported credential type"`)
+    expect(errors?.[0]?.message).toMatchInlineSnapshot(`"VerifiedEmployee is not a supported credential type"`)
   })
 
   it('returns an error if the contract overrides properties from its template', async () => {
@@ -234,7 +234,7 @@ describe('createContract mutation', () => {
               "line": 2,
             },
           ],
-          "message": "Claims must not include any of: issuanceId, name, identityId",
+          "message": "Claims must not include any of: issuanceId, name, identityId, photo",
           "path": [
             "createContract",
           ],
