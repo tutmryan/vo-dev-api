@@ -2,9 +2,12 @@ name: Deploy instance (non prod)
 # DO NOT CHANGE THE FORMAT OF THE `run-name` FIELD
 # - it follows a standard pattern across all components
 # - it is used to derive the instance, component and environment
-run-name: Deploy ${{ inputs.instance }} api to non-prod
+run-name: Deploy ${{ inputs.instance || 'dev' }} api to non-prod
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       instance:
@@ -15,7 +18,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ inputs.instance }}
+  group: ${{ inputs.instance || 'dev' }}
   cancel-in-progress: true
 
 jobs:
@@ -105,14 +108,15 @@ jobs:
       - prepare-docs-site
       - upload-other-artifacts
     environment:
-      name: ${{ inputs.instance }}
-      url: https://${{ inputs.instance }}.api.verifiedorchestration.com
+      name: ${{ inputs.instance || 'dev' }}
+      url: https://${{ inputs.instance || 'dev' }}.api.verifiedorchestration.com
     steps:
       - name: Set variables
         id: set-vars
         shell: bash
         run: |
-          instance=${{ inputs.instance }}
+          instance=${{ inputs.instance || 'dev' }}
+          echo "instance=${instance}" >> $GITHUB_ENV
           echo "resource-group-name=vo-${instance/./-}-instance" >> $GITHUB_ENV
           echo "resource-prefix=vo-${instance/./-}" >> $GITHUB_ENV
       - name: Download all artifacts
@@ -147,7 +151,7 @@ jobs:
         id: deploy-instance
         uses: ./github-actions/instance
         with:
-          instance: ${{ inputs.instance }}
+          instance: ${{ env.instance }}
           node-env: nonprod
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
