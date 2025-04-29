@@ -1,1 +1,6 @@
-{}
+{
+  "1104046": {
+    "notes": "Upstream has a fix for this, so we're waiting for it to be released. https://github.com/Escape-Technologies/graphql-armor/pull/772",
+    "expiry": "2025/06/01"
+  }
+}
