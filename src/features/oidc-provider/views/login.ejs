@@ -52,7 +52,11 @@
       displayError(data)
     } else if (data.event.requestStatus === 'presentation_error') {
       const { code, message } = data.event.error
-      displayError(data.event.error ? `${code}: ${message}` : 'Presentation failed.')
+      if (code === 'vcExpiredError') {
+        displayError('The Verifiable Credential you presented has expired. Please contact the issuer to obtain a new credential or for further assistance.')
+      } else {
+        displayError(data.event.error ? `${code}: ${message}` : 'Presentation failed.')
+      }
     } else if (data.event.requestStatus === 'request_retrieved') {
       displayProgress('Scanned, waiting for presentation...')
     } else {
@@ -161,7 +165,7 @@
   <div class="text-success me-3"><i class="bi-check2-all text-success" style="font-size: 2rem;"></i></div>
 </div>
 
-<div id="error" class="alert alert-danger d-flex align-items-center d-none" role="alert">
+<div id="error" class="alert alert-danger d-flex align-items-center d-none my-4" role="alert">
   <div class="text-primary me-3"><i class="bi-exclamation-circle text-danger" style="font-size: 2rem;"></i></div>
   <div class="fw-light" id="errorText">
   </div>
