@@ -1,11 +1,11 @@
 import fs from 'fs'
+import mssql from 'mssql'
 import ngrok from 'ngrok'
 import * as Path from 'node:path'
 import readline from 'node:readline'
 import open from 'open'
 import openEditor from 'open-editor'
 import YAML from 'yaml'
-import mssql from 'mssql'
 
 const pathToApi = `${process.cwd()}`
 const pathToComposer = `${process.cwd()}/../verified-orchestration-admin`
@@ -188,10 +188,10 @@ const startNgrok = async () => {
     console.log('')
     console.log('Press Ctrl+C to close the tunnels and exit')
     console.log('')
-    console.log('Enter `a` to open the API')
-    console.log('Enter `c` to open the Composer')
-    console.log('Enter `p` to open the Concierge')
-    console.log('Enter `n` to open the ngrok dashboard')
+    console.log('Enter 1 or a to open API')
+    console.log('Enter 2 or c to open Composer')
+    console.log('Enter 3 or p to open Concierge')
+    console.log('Enter 4 or n to open the ngrok dashboard')
     console.log('')
     console.log('------------------------------------------------')
     console.log('Enter `e` to edit the Ngrok configuration file')
@@ -206,18 +206,22 @@ const startNgrok = async () => {
     console.clear()
     renderUi()
     switch (input.toLowerCase()) {
+      case '1':
       case 'a':
         console.log('Opening API...')
         open(apiURL).catch(console.error)
         break
+      case '2':
       case 'c':
         console.log('Opening Composer...')
         open(composerURL).catch(console.error)
         break
+      case '3':
       case 'p':
         console.log('Opening Concierge...')
         open(conciergeURL).catch(console.error)
         break
+      case '4':
       case 'n':
         console.log('Opening Ngrok dashboard...')
         open('http://127.0.0.1:4040/').catch(console.error)
