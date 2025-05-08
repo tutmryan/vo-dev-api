@@ -105,9 +105,9 @@ const signInWithPassport = useCallback(
         vc_issuer: 'did:web:example.country.gov',
         vc_unique_claim_for_sub: 'passportNumber',
         vc_facecheck: true,
-        constraint_name: 'passportNumber',
-        constraint_operator: 'values',
-        constraint_value: '123456789',
+        vc_constraint_name: 'passportNumber',
+        vc_constraint_operator: 'values',
+        vc_constraint_value: '123456789',
       },
     }),
   [signinRedirect],
@@ -121,9 +121,9 @@ const signInWithPassport = useCallback(
 | `vc_facecheck`            | Whether face check is required for biometric authentication.<br /><br />Note: If forced via client configuration, it need not be specified.                                                                                                          |
 | `vc_issuer`               | The partner issuer DID (authenticating using partner credentials).<br /><br />Note: `vc_unique_claim_for_sub` must also be supplied or values configured with the client.                                                                            |
 | `vc_unique_claim_for_sub` | The claim from which a unique identifier can be derived when authenticating using partner credentials.<br /><br />Note: Only required for partner credentials when values are not configured with the client or one specific claim needs to be used. |
-| `constraint_name`         | The claim key to apply the constraint specified by `constraint_operator` and `constraint_value`.                                                                                                                                                     |
-| `constraint_operator`     | The constraint operator, either `contains`, `startsWith` or `values`.                                                                                                                                                                                |
-| `constraint_value`        | The constraint operator. If `values` is used, several values can be specified using a comma to separate, e.g. `123,456,789`.                                                                                                                         |
+| `vc_constraint_name`      | The claim key to apply the constraint specified by `vc_constraint_operator` and `vc_constraint_value`.                                                                                                                                               |
+| `vc_constraint_operator`  | The constraint operator, either `contains`, `startsWith` or `values`.                                                                                                                                                                                |
+| `vc_constraint_value`     | The constraint operator. If `values` is used, several values can be specified using a comma to separate, e.g. `123,456,789`.                                                                                                                         |
 
 ### Demo 🎥
 
