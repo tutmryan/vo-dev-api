@@ -65,13 +65,6 @@ export async function acquireLoginPresentationToken({
   return token
 }
 
-export type Constraint = {
-  constraintName: string | undefined
-  constraintOperator: (typeof claimConstraintOperators)[number] | undefined
-  constraintValue: string | undefined
-  constraintValues: string[] | undefined
-}
-
 export async function buildAuthnPresentationRequest(
   params: UnknownObject,
   client: OidcClientEntity,
