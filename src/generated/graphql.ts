@@ -1161,6 +1161,14 @@ export type ContractDisplayModelInput = {
   locale: Scalars['Locale']['input'];
 };
 
+/** Defines the input to import a contract. */
+export type ContractImportInput = {
+  /** The input to create the contract. */
+  contractInput: ContractInput;
+  /** The id of the exported contract. */
+  id: Scalars['ID']['input'];
+};
+
 /** Defines the input to create or update a contract */
 export type ContractInput = {
   /**
@@ -1639,6 +1647,18 @@ export type IdentityWhere = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** Defines the input for templates and contracts. */
+export type ImportInput = {
+  /** The contracts to import. */
+  contracts?: InputMaybe<Array<ContractImportInput>>;
+  /**
+   * The templates to import.
+   *
+   * Must be ordered with parents before their children (i.e. top-down hierarchy).
+   */
+  templates?: InputMaybe<Array<TemplateImportInput>>;
+};
+
 /** An instance of a successful contract-to-credential issuance. */
 export type Issuance = {
   __typename?: 'Issuance';
@@ -2073,6 +2093,8 @@ export type Mutation = {
   deleteTemplate?: Maybe<Scalars['Void']['output']>;
   /** Deprecates an existing contract. */
   deprecateContract: Contract;
+  /** Import contracts with associated templates, contracts, or templates. */
+  import?: Maybe<Scalars['Void']['output']>;
   /** Provisions or re-provisions a contract into the Verified ID service */
   provisionContract: Contract;
   /**
@@ -2299,6 +2321,11 @@ export type MutationDeleteTemplateArgs = {
 
 export type MutationDeprecateContractArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type MutationImportArgs = {
+  input: ImportInput;
 };
 
 
@@ -3773,6 +3800,14 @@ export type TemplateDisplayModel = {
   locale?: Maybe<Scalars['Locale']['output']>;
 };
 
+/** Defines the input to import a template. */
+export type TemplateImportInput = {
+  /** The id of the exported template. */
+  id: Scalars['ID']['input'];
+  /** The input to create the template. */
+  templateInput: TemplateInput;
+};
+
 /** Defines the input to create or update a template */
 export type TemplateInput = {
   /** The type(s) of the contract / credential */
@@ -4188,6 +4223,13 @@ export type DeleteIdentitiesMutationVariables = Exact<{
 
 export type DeleteIdentitiesMutation = { __typename?: 'Mutation', deleteIdentities?: null | undefined | void | null };
 
+export type ImportMutationVariables = Exact<{
+  input: ImportInput;
+}>;
+
+
+export type ImportMutation = { __typename?: 'Mutation', import?: null | undefined | void | null };
+
 export type CreateIssuanceRequestMutationVariables = Exact<{
   request: IssuanceRequestInput;
 }>;
@@ -4520,6 +4562,7 @@ export const IdentityDocument = {"kind":"Document","definitions":[{"kind":"Opera
 export const FindIdentitiesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindIdentities"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"IdentityWhere"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PositiveInt"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PositiveInt"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findIdentities"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"issuer"}},{"kind":"Field","name":{"kind":"Name","value":"identifier"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<FindIdentitiesQuery, FindIdentitiesQueryVariables>;
 export const SaveIdentityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SaveIdentity"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"IdentityInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"saveIdentity"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"issuer"}},{"kind":"Field","name":{"kind":"Name","value":"identifier"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<SaveIdentityMutation, SaveIdentityMutationVariables>;
 export const DeleteIdentitiesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteIdentities"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"ids"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteIdentities"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"ids"},"value":{"kind":"Variable","name":{"kind":"Name","value":"ids"}}}]}]}}]} as unknown as DocumentNode<DeleteIdentitiesMutation, DeleteIdentitiesMutationVariables>;
+export const ImportDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"Import"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ImportInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"import"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<ImportMutation, ImportMutationVariables>;
 export const CreateIssuanceRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateIssuanceRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"IssuanceRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createIssuanceRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"IssuanceResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"requestId"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"qrCode"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RequestErrorResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"error"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateIssuanceRequestMutation, CreateIssuanceRequestMutationVariables>;
 export const AcquireLimitedAccessTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AcquireLimitedAccessToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AcquireLimitedAccessTokenInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"acquireLimitedAccessToken"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"expires"}},{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<AcquireLimitedAccessTokenMutation, AcquireLimitedAccessTokenMutationVariables>;
 export const FindContractsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindContracts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ContractWhere"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"forIdentityId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findContracts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"issuances"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"identityId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"forIdentityId"}}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"issuedAt"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"presentations"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"identityId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"forIdentityId"}}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"presentedAt"}}]}}]}}]}}]} as unknown as DocumentNode<FindContractsQuery, FindContractsQueryVariables>;
@@ -4712,6 +4755,7 @@ export type ResolversTypes = {
   ContractDisplayCredentialLogoInput: ContractDisplayCredentialLogoInput;
   ContractDisplayModel: ResolverTypeWrapper<ContractDisplayModel>;
   ContractDisplayModelInput: ContractDisplayModelInput;
+  ContractImportInput: ContractImportInput;
   ContractInput: ContractInput;
   ContractIssuanceWeeklyAverageWhere: ContractIssuanceWeeklyAverageWhere;
   ContractIssuanceWhere: ContractIssuanceWhere;
@@ -4746,6 +4790,7 @@ export type ResolversTypes = {
   IdentityOrderBy: IdentityOrderBy;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
+  ImportInput: ImportInput;
   Issuance: ResolverTypeWrapper<IssuanceEntity>;
   IssuanceCallbackEvent: ResolverTypeWrapper<IssuanceCallbackEvent>;
   IssuanceEventData: ResolverTypeWrapper<Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversTypes['Issuance']> }>;
@@ -4831,6 +4876,7 @@ export type ResolversTypes = {
   TemplateDisplayCredential: ResolverTypeWrapper<TemplateDisplayCredential>;
   TemplateDisplayCredentialLogo: ResolverTypeWrapper<TemplateDisplayCredentialLogo>;
   TemplateDisplayModel: ResolverTypeWrapper<TemplateDisplayModel>;
+  TemplateImportInput: TemplateImportInput;
   TemplateInput: TemplateInput;
   TemplateParentData: ResolverTypeWrapper<TemplateParentData>;
   TemplateWhere: TemplateWhere;
@@ -4914,6 +4960,7 @@ export type ResolversParentTypes = {
   ContractDisplayCredentialLogoInput: ContractDisplayCredentialLogoInput;
   ContractDisplayModel: ContractDisplayModel;
   ContractDisplayModelInput: ContractDisplayModelInput;
+  ContractImportInput: ContractImportInput;
   ContractInput: ContractInput;
   ContractIssuanceWeeklyAverageWhere: ContractIssuanceWeeklyAverageWhere;
   ContractIssuanceWhere: ContractIssuanceWhere;
@@ -4944,6 +4991,7 @@ export type ResolversParentTypes = {
   IdentityIssuer: IdentityIssuer;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
+  ImportInput: ImportInput;
   Issuance: IssuanceEntity;
   IssuanceCallbackEvent: IssuanceCallbackEvent;
   IssuanceEventData: Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversParentTypes['Issuance']> };
@@ -5018,6 +5066,7 @@ export type ResolversParentTypes = {
   TemplateDisplayCredential: TemplateDisplayCredential;
   TemplateDisplayCredentialLogo: TemplateDisplayCredentialLogo;
   TemplateDisplayModel: TemplateDisplayModel;
+  TemplateImportInput: TemplateImportInput;
   TemplateInput: TemplateInput;
   TemplateParentData: TemplateParentData;
   TemplateWhere: TemplateWhere;
@@ -5490,6 +5539,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   deleteOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationDeleteOidcResourceArgs, 'id'>>;
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;
   deprecateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationDeprecateContractArgs, 'id'>>;
+  import?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationImportArgs, 'input'>>;
   provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
   resendAsyncIssuanceNotification?: Resolver<Maybe<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<MutationResendAsyncIssuanceNotificationArgs, 'asyncIssuanceRequestId'>>;
   resendAsyncIssuanceNotifications?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationResendAsyncIssuanceNotificationsArgs, 'asyncIssuanceRequestIds'>>;

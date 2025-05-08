@@ -602,6 +602,18 @@ exports[`shield rules are setup correctly 1`] = `
         }
       ]
     },
+    "import": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
     "acquireLimitedAccessToken": {
       "rulesAnd": [
         {

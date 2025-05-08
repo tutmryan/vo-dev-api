@@ -166,6 +166,7 @@ export const rules: ShieldSchema<Resolvers> = {
     deleteContract: or(isCredentialAdminUser, isContractAdminApp),
     provisionContract: or(isCredentialAdminUser, isContractAdminApp),
     deprecateContract: or(isCredentialAdminUser, isContractAdminApp),
+    import: or(isCredentialAdminUser, isContractAdminApp),
     acquireLimitedAccessToken: and(hasTokenAcquisitionRole, isValidAcquireLimitedAccessTokenRequest),
     acquireLimitedApprovalToken: allow,
     acquireLimitedPhotoCaptureToken: allow,

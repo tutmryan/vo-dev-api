@@ -1,0 +1,51 @@
+# eslint-disable-next-line @graphql-eslint/require-description
+type Mutation {
+  """
+  Import contracts with associated templates, contracts, or templates.
+  """
+  import(input: ImportInput!): Void
+}
+
+"""
+Defines the input for templates and contracts.
+"""
+input ImportInput {
+  """
+  The contracts to import.
+  """
+  contracts: [ContractImportInput!]
+
+  """
+  The templates to import.
+
+  Must be ordered with parents before their children (i.e. top-down hierarchy).
+  """
+  templates: [TemplateImportInput!]
+}
+
+"""
+Defines the input to import a contract.
+"""
+input ContractImportInput {
+  """
+  The id of the exported contract.
+  """
+  id: ID!
+  """
+  The input to create the contract.
+  """
+  contractInput: ContractInput!
+}
+"""
+Defines the input to import a template.
+"""
+input TemplateImportInput {
+  """
+  The id of the exported template.
+  """
+  id: ID!
+  """
+  The input to create the template.
+  """
+  templateInput: TemplateInput!
+}
