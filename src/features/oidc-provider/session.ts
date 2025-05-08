@@ -15,8 +15,8 @@ import type { PartnerEntity } from '../partners/entities/partner-entity'
 import { getPresentationDataFromCache } from '../presentation/callback/cache'
 import { PresentationEntity } from '../presentation/entities/presentation-entity'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
-import { whenEamAddPresentationConstraints, whenEamGetAccountId } from './integrations/entra-eam'
 import { ExtraParams } from './extra-params'
+import { whenEamAddPresentationConstraints, whenEamGetAccountId } from './integrations/entra-eam'
 
 const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
 const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', ONE_HOUR_TTL))
@@ -65,13 +65,6 @@ export async function acquireLoginPresentationToken({
   return token
 }
 
-export type Constraint = {
-  constraintName: string | undefined
-  constraintOperator: (typeof claimConstraintOperators)[number] | undefined
-  constraintValue: string | undefined
-  constraintValues: string[] | undefined
-}
-
 export async function buildAuthnPresentationRequest(
   params: UnknownObject,
   client: OidcClientEntity,
@@ -118,18 +111,11 @@ export async function buildAuthnPresentationRequest(
       throw new errors.InvalidTarget(`The requested credential type '${type}' is not configured for partner issuer: ${vcIssuerParam}`)
   }
 
-  function getConstraint(): Constraint {
-    const constraintValue = params[ExtraParams.vc_constraint_value] as string | undefined
-    return {
-      constraintName: params[ExtraParams.vc_constraint_name] as string | undefined,
-      constraintOperator: params[ExtraParams.vc_constraint_operator] as (typeof claimConstraintOperators)[number] | undefined,
-      constraintValue,
-      constraintValues: constraintValue && constraintOperator === 'values' ? constraintValue.split(',') : undefined,
-    }
-  }
-
   // validate constraint params
-  const { constraintName, constraintOperator, constraintValue, constraintValues } = getConstraint()
+  const constraintName = params[ExtraParams.vc_constraint_name] as string | undefined
+  const constraintOperator = params[ExtraParams.vc_constraint_operator] as (typeof claimConstraintOperators)[number] | undefined
+  const constraintValue = params[ExtraParams.vc_constraint_value] as string | undefined
+  const constraintValues = constraintValue && constraintOperator === 'values' ? constraintValue.split(',') : undefined
 
   // assign constraints, if provided
   let constraints: ClaimConstraint[] | undefined
