@@ -1,7 +1,7 @@
-import { omit } from 'lodash'
 import type Provider from 'oidc-provider'
 import type { AccessToken, OIDCContext } from 'oidc-provider'
 import { logger } from '../../logger'
+import { redactValueEmail, redactValueInner, redactValueObjectUnknown } from '../../util/redact-values'
 import { deleteAccount } from './account'
 
 type Middleware = Parameters<Provider['use']>[0]
@@ -15,59 +15,14 @@ const checkOidcRequestLogging = (ctx: Context) => {
   return true
 }
 
-const redactInner = (input: string | unknown) => {
-  if (!input || typeof input !== 'string') return undefined
-  if (input.length < 8) return '**[REDACTED]**'
-  const start = input.substring(0, 2)
-  const end = input.substring(input.length - 2)
-  return `${start}****${end}`
-}
-
-const redactEmail = (input: string | unknown) => {
-  if (!input || typeof input !== 'string') return undefined
-
-  const atIndex = input.indexOf('@')
-  if (atIndex === -1) return input
-
-  const firstLetter = input.charAt(0)
-  const domain = input.substring(atIndex)
-  return `${firstLetter}*[REDACTED]*${domain}`
-}
-
-const processSensitiveKeyValues = (object: Record<string, unknown>, ignoreKeys: string[]) => {
-  const objectToProcess = omit({ ...object }, ignoreKeys)
-
-  const result: Record<string, string | object | undefined> = {}
-
-  for (const key in objectToProcess) {
-    const value = objectToProcess[key]
-    const keyLower = key.toLowerCase()
-    if (typeof value !== 'string' && typeof value !== 'object') {
-      continue
-    }
-
-    if (keyLower.includes('email')) {
-      result[key] = redactEmail(value)
-    } else if (['name', 'user', 'phone', 'address', 'secret', 'photo', 'biometric'].some((keyFragment) => keyLower.includes(keyFragment))) {
-      result[key] = redactInner(value)
-    } else if (typeof value === 'string') {
-      result[key] = value
-    } else if (value) {
-      result[key] = processSensitiveKeyValues(objectToProcess[key] as Record<string, unknown>, ignoreKeys)
-    }
-  }
-
-  return result
-}
-
 const buildAccessTokenExtra = (accessToken?: AccessToken) => {
   return accessToken?.extra
     ? {
         acr: accessToken.extra.acr,
         amr: accessToken.extra.amr,
-        sub: redactEmail(accessToken.extra.sub),
+        sub: redactValueEmail(accessToken.extra.sub),
         ...(accessToken.extra.email_verified ? { email_verified: accessToken.extra.email_verified } : {}),
-        ...processSensitiveKeyValues(accessToken.extra, ['sub', 'acr', 'amr', 'email_verified']),
+        ...redactValueObjectUnknown(accessToken.extra, ['sub', 'acr', 'amr', 'email_verified']),
       }
     : undefined
 }
@@ -93,8 +48,8 @@ const buildLogOutput = (ctx: Context, oidc: OIDCContext) => {
     },
     idTokenHint: IdTokenHint
       ? {
-          sub: redactEmail(IdTokenHint.payload.sub),
-          ...processSensitiveKeyValues(IdTokenHint.payload, ['sub']),
+          sub: redactValueEmail(IdTokenHint.payload.sub),
+          ...redactValueObjectUnknown(IdTokenHint.payload, ['sub']),
         }
       : undefined,
     interaction: Interaction
@@ -106,14 +61,14 @@ const buildLogOutput = (ctx: Context, oidc: OIDCContext) => {
           },
           params: {
             clientId: Interaction.params.client_id,
-            codeChallenge: redactInner(Interaction.params.code_challenge),
+            codeChallenge: redactValueInner(Interaction.params.code_challenge),
             codeChallengeMethod: Interaction.params.code_challenge_method,
             redirectUri: Interaction.params.redirect_uri,
             resource: Interaction.params.resource,
             responseType: Interaction.params.response_type,
             scope: Interaction.params.scope,
-            state: redactInner(Interaction.params.state),
-            nonce: redactInner(Interaction.params.nonce),
+            state: redactValueInner(Interaction.params.state),
+            nonce: redactValueInner(Interaction.params.nonce),
             // Log the keys of params not listed above
             nonLoggedParamKeys: Object.keys(Interaction.params).filter(
               (key) =>

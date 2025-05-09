@@ -1,9 +1,9 @@
-import { cloneDeep, forOwn, get, isNil, isObject, set } from 'lodash'
+import { cloneDeep, forOwn, get, isNil, isObject, omit, set } from 'lodash'
 
 /**
  * Recursively replaces values in an object with '<redacted>' for the specified keys. Enumerates arrays and applies the same redaction to elements.
  * @param obj The object to redact
- * @param keys The keys to redact, can be a dot-separated path (uses lodash's get/set).
+ * @param keys The keys to redact, that can be a dot-separated path (uses lodash's get/set)
  * Use dot notation to specify more specific keys.
  * Key checks are applied at every level of the object via recursion.
  * @returns A new object with the specified keys redacted
@@ -23,4 +23,77 @@ export function redactValues(obj: any, ...keys: string[]) {
     })
     return current
   })(cloneDeep(obj))
+}
+
+/**
+ * Recursively redacts sensitive values in an object.
+ *
+ * This function traverses the object and redacts values based on their keys. It uses a fuzzy matching approach to identify sensitive keys, such
+ * as keys containing these values 'name', 'user', 'phone', 'address', 'secret', 'photo', 'biometric', 'birth', 'dob', 'age'.
+ *
+ * Note: This is designed to be used in logging and debugging scenarios where sensitive information should not be exposed.
+ *
+ * @param object The object to redact
+ * @param excludeFormOutputKeys An array of keys to exclude from the source object in the redacted output object.
+ * Use dot notation to specify more specific keys.
+ * Key checks are applied at every level of the object via recursion.
+ * @returns A new object with sensitive values redacted
+ */
+export function redactValueObjectUnknown(object: Record<string, unknown>, excludeFormOutputKeys: string[] = []) {
+  const filteredObject = omit({ ...object }, excludeFormOutputKeys)
+  const result: Record<string, string | object | undefined> = {}
+
+  for (const key in filteredObject) {
+    const value = filteredObject[key]
+
+    if (typeof value === 'object') {
+      if (Array.isArray(value)) {
+        result[key] = value.map((item) => {
+          if (typeof item === 'object') {
+            if (Array.isArray(item)) return 'REDACTED-MULTI-DIMENSIONAL-ARRAY'
+            return redactValueObjectUnknown(item as Record<string, unknown>, excludeFormOutputKeys)
+          }
+          return item
+        })
+      } else {
+        result[key] = redactValueObjectUnknown(value as Record<string, unknown>, excludeFormOutputKeys)
+      }
+      continue
+    }
+
+    if (!value) continue
+
+    const keyLower = key.toLowerCase()
+
+    if (keyLower.includes('email')) {
+      result[key] = redactValueEmail(value.toString())
+    } else if (
+      ['name', 'user', 'phone', 'address', 'secret', 'photo', 'biometric', 'birth', 'dob', 'age', 'nonce', 'state'].some((keyFragment) =>
+        keyLower.includes(keyFragment),
+      )
+    ) {
+      result[key] = redactValueInner(value.toString())
+    } else {
+      result[key] = value
+    }
+  }
+
+  return result
+}
+
+export function redactValueInner(input: string | unknown) {
+  if (!input || typeof input !== 'string') return undefined
+  if (input.length < 8) return '[REDACTED]'
+  return `${input.substring(0, 2)}*[REDACTED]*${input.substring(input.length - 2)}`
+}
+
+export function redactValueEmail(input: string | unknown) {
+  if (!input || typeof input !== 'string') return undefined
+
+  const atIndex = input.indexOf('@')
+  if (atIndex === -1) return input
+  const domain = input.substring(atIndex)
+
+  if (input.length < 8) return `[REDACTED]${domain}`
+  return `${input.charAt(0)}*[REDACTED]*${input.charAt(atIndex + 1)}${domain}`
 }

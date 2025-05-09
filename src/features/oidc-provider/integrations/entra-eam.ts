@@ -7,6 +7,7 @@ import { dataSource } from '../../../data'
 import type { ClaimConstraint, PresentedCredential } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
+import { redactValueEmail, redactValueInner, redactValueObjectUnknown } from '../../../util/redact-values'
 import { compareIgnoreCase } from '../../../util/string'
 import { throwError } from '../../../util/throw-error'
 import { StandardClaims } from '../../contracts/claims'
@@ -43,10 +44,18 @@ const mapMsLoginToAzureJwksUri = (uri: string) => {
   return undefined
 }
 
-const extractLoggable = (params: UnknownObject) => {
+const extractLoggable = (params: UnknownObject, idTokenHint?: { header: UnknownObject; payload: UnknownObject }) => {
+  const redactedIdTokenHint = idTokenHint
+    ? {
+        ...redactValueObjectUnknown(idTokenHint.payload),
+        name: idTokenHint.payload.name && redactValueInner(idTokenHint.payload.name),
+        preferred_username: idTokenHint.payload.preferred_username && redactValueEmail(idTokenHint.payload.preferred_username),
+      }
+    : undefined
+
   return {
     clientRequestId: params[ExtraParams.clientRequestId],
-    idTokenHint: params.id_token_hint,
+    idTokenHint: redactedIdTokenHint,
     redirectUri: params.redirect_uri,
     responseMode: params.response_mode,
     responseType: params.response_type,
@@ -101,7 +110,7 @@ export function whenEamAddPresentationConstraints(loginData?: LoginInteractionDa
   ]
 
   logger.verbose('OIDC EAM hook:whenEamAddPresentationConstraints augmenting constraints', {
-    augmentedConstraints,
+    augmentedConstraints: augmentedConstraints.map((constraint) => redactValueObjectUnknown(constraint)),
   })
 
   return augmentedConstraints
@@ -119,7 +128,7 @@ export function whenEamGetAccountId(loginData: LoginInteractionData, credential:
     'Identity ID mismatch during EAM account ID check',
   )
 
-  logger.verbose('OIDC EAM hook:whenEamGetAccountId account Id', { accountId: loginData.integrations.entraEam.sub })
+  logger.verbose('OIDC EAM hook:whenEamGetAccountId account Id', { accountId: redactValueInner(loginData.integrations.entraEam.sub) })
   return loginData.integrations.entraEam.sub
 }
 
@@ -239,8 +248,7 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
     }
 
     logger.verbose(`OIDC EAM hook:authorization/post/checkIdTokenHint intercept end`, {
-      idTokenHint: payload,
-      params: extractLoggable(oidc.params!),
+      params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint),
     })
 
     return next()
@@ -252,7 +260,7 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
     const { errors } = await oidcProviderModule()
 
     if (!oidc.client?.clientId) {
-      logger.error(`Client ID not found in the OIDC context`, { params: extractLoggable(oidc.params!) })
+      logger.error(`Client ID not found in the OIDC context`, { params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint) })
       throw new errors.InvalidClient('Client not found')
     }
 
@@ -267,7 +275,7 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
 
     // Started interactions will redirect, so if we're not redirecting, we should not apply the custom logic
     if (ctx.response.status !== 303) {
-      logger.warn(`Interactions pipeline step did not redirect`, { params: extractLoggable(oidc.params!) })
+      logger.warn(`Interactions pipeline step did not redirect`, { params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint) })
       return
     }
 
@@ -288,7 +296,9 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
     })
 
     if (!identity) {
-      logger.warn('No identity could be matched during a EAM auth flow', { params: extractLoggable(oidc.params!) })
+      logger.warn('No identity could be matched during a EAM auth flow', {
+        params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint),
+      })
     }
 
     invariant(oidc.params, 'Params not found post interactions')
@@ -317,10 +327,9 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
 
     if (logger.isVerboseEnabled()) {
       logger.verbose('OIDC EAM hook:authorization/post/interactions intercept end', {
-        preInteractionData: interactionData,
-        postInteractionData: await getLoginInteractionData(oidc.entities.Interaction.uid),
-        identity: { id: identity?.id, name: identity?.name },
-        idTokenHint: oidc.entities.IdTokenHint.payload,
+        preInteractionData: redactValueObjectUnknown(interactionData ?? {}),
+        postInteractionData: redactValueObjectUnknown((await getLoginInteractionData(oidc.entities.Interaction.uid)) ?? {}),
+        identity: { id: identity?.id, name: redactValueInner(identity?.name) },
         params: extractLoggable(oidc.params!),
       })
     }
@@ -334,7 +343,7 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
     const { errors } = await oidcProviderModule()
 
     if (!oidc.client?.clientId) {
-      logger.error(`Client ID not found in the OIDC context`, { params: extractLoggable(oidc.params!) })
+      logger.error(`Client ID not found in the OIDC context`, { params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint) })
       throw new errors.InvalidClient('Client not found')
     }
 
@@ -347,8 +356,8 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
     const response = await original(ctx, next)
 
     logger.verbose('OIDC EAM hook:resume/get/processResponseTypes intercept end', {
-      response,
-      params: extractLoggable(oidc.params!),
+      response: response,
+      params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint),
     })
 
     return response
