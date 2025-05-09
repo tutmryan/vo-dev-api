@@ -48,7 +48,7 @@ const processSensitiveKeyValues = (object: Record<string, unknown>, ignoreKeys: 
 
     if (keyLower.includes('email')) {
       result[key] = redactEmail(value)
-    } else if (['name', 'user', 'phone', 'address', 'secret'].some((keyFragment) => keyLower.includes(keyFragment))) {
+    } else if (['name', 'user', 'phone', 'address', 'secret', 'photo', 'biometric'].some((keyFragment) => keyLower.includes(keyFragment))) {
       result[key] = redactInner(value)
     } else if (typeof value === 'string') {
       result[key] = value
