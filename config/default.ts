@@ -17,6 +17,8 @@ const config: DeepPartial<Config> = {
       'data.createIssuanceRequest.url',
       'data.createPresentationRequest.qrCode',
       'data.createPresentationRequest.url',
+      'data.createPresentationRequestForAuthn.qrCode',
+      'data.createPresentationRequestForAuthn.url',
       'verificationCode',
       'email',
       'token',
