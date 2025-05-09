@@ -356,7 +356,7 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
     const response = await original(ctx, next)
 
     logger.verbose('OIDC EAM hook:resume/get/processResponseTypes intercept end', {
-      response: response,
+      response,
       params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint),
     })
 
