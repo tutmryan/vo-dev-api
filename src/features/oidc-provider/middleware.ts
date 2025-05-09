@@ -1,5 +1,5 @@
 import type Provider from 'oidc-provider'
-import type { AccessToken, OIDCContext } from 'oidc-provider'
+import type { OIDCContext } from 'oidc-provider'
 import { logger } from '../../logger'
 import { redactValueEmail, redactValueInner, redactValueObjectUnknown } from '../../util/redact-values'
 import { deleteAccount } from './account'
@@ -7,27 +7,49 @@ import { deleteAccount } from './account'
 type Middleware = Parameters<Provider['use']>[0]
 type Context = Parameters<Middleware>[0]
 
-const checkOidcRequestLogging = (ctx: Context) => {
+export const middleware: Middleware = async (ctx, next) => {
+  const logRequest = checkOidcRequestLogging(ctx)
+  if (logRequest) {
+    logger.verbose(`pre OIDC middleware: ${ctx.method} ${ctx.path}`)
+  }
+
+  await next()
+
+  // Added by oidc-provider middleware
+  const oidc = ctx.oidc as OIDCContext | undefined
+  if (!oidc) {
+    logger.warn(`No OIDC context found for ${ctx.method} ${ctx.path}`)
+    return
+  }
+
+  deleteAccountOnLogout(ctx, oidc)
+
+  if (logRequest) {
+    logger.verbose(`post OIDC middleware: ${ctx.method} ${ctx.path}`, buildLogOutput(ctx, oidc))
+  }
+}
+
+function deleteAccountOnLogout(ctx: Context, oidc: OIDCContext) {
+  if (oidc.route === 'end_session') {
+    const accountId = oidc.entities.IdTokenHint?.payload.sub as string | undefined
+    if (accountId) {
+      logger.audit(`OIDC account ${accountId} logged out, deleting account`)
+      deleteAccount(accountId).catch((error) => {
+        logger.error(`Failed to delete OIDC account ${accountId}`, { error })
+      })
+    }
+  }
+}
+
+function checkOidcRequestLogging(ctx: Context) {
   if (!logger.isVerboseEnabled()) return false
   if (ctx.method === 'OPTIONS') return false
-  if (ctx.path.includes('/.well-known/')) return false
+  if (ctx.path.endsWith('/.well-known/openid-configuration')) return false
   if (ctx.path.endsWith('/jwks')) return false
   return true
 }
 
-const buildAccessTokenExtra = (accessToken?: AccessToken) => {
-  return accessToken?.extra
-    ? {
-        acr: accessToken.extra.acr,
-        amr: accessToken.extra.amr,
-        sub: redactValueEmail(accessToken.extra.sub),
-        ...(accessToken.extra.email_verified ? { email_verified: accessToken.extra.email_verified } : {}),
-        ...redactValueObjectUnknown(accessToken.extra, ['sub', 'acr', 'amr', 'email_verified']),
-      }
-    : undefined
-}
-
-const buildLogOutput = (ctx: Context, oidc: OIDCContext) => {
+function buildLogOutput(ctx: Context, oidc: OIDCContext) {
   const { method, path } = ctx
   const { route } = oidc
   const { Client, Interaction, AccessToken, IdTokenHint, RefreshToken } = oidc.entities
@@ -48,8 +70,8 @@ const buildLogOutput = (ctx: Context, oidc: OIDCContext) => {
     },
     idTokenHint: IdTokenHint
       ? {
+          ...redactValueObjectUnknown(IdTokenHint.payload),
           sub: redactValueEmail(IdTokenHint.payload.sub),
-          ...redactValueObjectUnknown(IdTokenHint.payload, ['sub']),
         }
       : undefined,
     interaction: Interaction
@@ -98,7 +120,15 @@ const buildLogOutput = (ctx: Context, oidc: OIDCContext) => {
           jti: AccessToken.jti,
           scope: AccessToken.scope,
           tokenType: AccessToken.tokenType,
-          ...buildAccessTokenExtra(AccessToken),
+          ...(AccessToken.extra
+            ? {
+                ...redactValueObjectUnknown(AccessToken.extra),
+                acr: AccessToken.extra.acr,
+                amr: AccessToken.extra.amr,
+                sub: redactValueEmail(AccessToken.extra.sub),
+                ...(AccessToken.extra.email_verified ? { email_verified: AccessToken.extra.email_verified } : {}),
+              }
+            : undefined),
         }
       : undefined,
     refreshToken: RefreshToken
@@ -115,39 +145,5 @@ const buildLogOutput = (ctx: Context, oidc: OIDCContext) => {
           tokenType: 'tokenType' in RefreshToken ? RefreshToken.tokenType : undefined,
         }
       : undefined,
-  }
-}
-
-export const middleware: Middleware = async (ctx, next) => {
-  const logRequest = checkOidcRequestLogging(ctx)
-  if (logRequest) {
-    logger.verbose(`pre OIDC middleware: ${ctx.method} ${ctx.path}`)
-  }
-
-  await next()
-
-  // Added by oidc-provider middleware
-  const oidc = ctx.oidc as OIDCContext | undefined
-  if (!oidc) {
-    logger.warn(`No OIDC context found for ${ctx.method} ${ctx.path}`)
-    return
-  }
-
-  deleteAccountOnLogout(ctx, oidc)
-
-  if (logRequest) {
-    logger.verbose(`post OIDC middleware: ${ctx.method} ${ctx.path}`, buildLogOutput(ctx, oidc))
-  }
-}
-
-function deleteAccountOnLogout(ctx: Context, oidc: OIDCContext) {
-  if (oidc.route === 'end_session') {
-    const accountId = oidc.entities.IdTokenHint?.payload.sub as string | undefined
-    if (accountId) {
-      logger.audit(`OIDC account ${accountId} logged out, deleting account`)
-      deleteAccount(accountId).catch((error) => {
-        logger.error(`Failed to delete OIDC account ${accountId}`, { error })
-      })
-    }
   }
 }

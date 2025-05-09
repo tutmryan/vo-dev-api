@@ -1,4 +1,4 @@
-import { cloneDeep, forOwn, get, isNil, isObject, omit, set } from 'lodash'
+import { cloneDeep, forOwn, get, isNil, isObject, set } from 'lodash'
 
 /**
  * Recursively replaces values in an object with '<redacted>' for the specified keys. Enumerates arrays and applies the same redaction to elements.
@@ -34,29 +34,25 @@ export function redactValues(obj: any, ...keys: string[]) {
  * Note: This is designed to be used in logging and debugging scenarios where sensitive information should not be exposed.
  *
  * @param object The object to redact
- * @param excludeFormOutputKeys An array of keys to exclude from the source object in the redacted output object.
- * Use dot notation to specify more specific keys.
- * Key checks are applied at every level of the object via recursion.
  * @returns A new object with sensitive values redacted
  */
-export function redactValueObjectUnknown(object: Record<string, unknown>, excludeFormOutputKeys: string[] = []) {
-  const filteredObject = omit({ ...object }, excludeFormOutputKeys)
+export function redactValueObjectUnknown(object: Record<string, unknown>) {
   const result: Record<string, string | object | undefined> = {}
 
-  for (const key in filteredObject) {
-    const value = filteredObject[key]
+  for (const key in object) {
+    const value = object[key]
 
     if (typeof value === 'object') {
       if (Array.isArray(value)) {
         result[key] = value.map((item) => {
           if (typeof item === 'object') {
-            if (Array.isArray(item)) return 'REDACTED-MULTI-DIMENSIONAL-ARRAY'
-            return redactValueObjectUnknown(item as Record<string, unknown>, excludeFormOutputKeys)
+            if (Array.isArray(item)) return '<redacted-array>'
+            return redactValueObjectUnknown(item as Record<string, unknown>)
           }
           return item
         })
       } else {
-        result[key] = redactValueObjectUnknown(value as Record<string, unknown>, excludeFormOutputKeys)
+        result[key] = redactValueObjectUnknown(value as Record<string, unknown>)
       }
       continue
     }
@@ -83,8 +79,8 @@ export function redactValueObjectUnknown(object: Record<string, unknown>, exclud
 
 export function redactValueInner(input: string | unknown) {
   if (!input || typeof input !== 'string') return undefined
-  if (input.length < 8) return '[REDACTED]'
-  return `${input.substring(0, 2)}*[REDACTED]*${input.substring(input.length - 2)}`
+  if (input.length < 8) return '<redacted>'
+  return `${input.substring(0, 2)}*<redacted>*${input.substring(input.length - 2)}`
 }
 
 export function redactValueEmail(input: string | unknown) {
@@ -94,6 +90,6 @@ export function redactValueEmail(input: string | unknown) {
   if (atIndex === -1) return input
   const domain = input.substring(atIndex)
 
-  if (input.length < 8) return `[REDACTED]${domain}`
-  return `${input.charAt(0)}*[REDACTED]*${input.charAt(atIndex + 1)}${domain}`
+  if (input.length < 8) return `<redacted>${domain}`
+  return `${input.charAt(0)}*<redacted>*${input.charAt(atIndex + 1)}${domain}`
 }

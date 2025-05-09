@@ -217,7 +217,7 @@ describe('redactValueInner', () => {
   it('should redact a string value', () => {
     const input = '1234567890'
     const result = redactValueInner(input)
-    expect(result).toBe('12*[REDACTED]*90')
+    expect(result).toBe('12*<redacted>*90')
   })
 
   it('should return undefined for non-string values', () => {
@@ -226,10 +226,10 @@ describe('redactValueInner', () => {
     expect(redactValueInner(undefined)).toBeUndefined()
   })
 
-  it('should return [REDACTED] for short strings', () => {
+  it('should return <redacted> for short strings', () => {
     const input = '1234'
     const result = redactValueInner(input)
-    expect(result).toBe('[REDACTED]')
+    expect(result).toBe('<redacted>')
   })
 })
 
@@ -237,7 +237,7 @@ describe('redactValueEmail', () => {
   it('should redact a valid email address', () => {
     const input = 'user@example.com'
     const result = redactValueEmail(input)
-    expect(result).toBe('u*[REDACTED]*e@example.com')
+    expect(result).toBe('u*<redacted>*e@example.com')
   })
 
   it('should return undefined for non-string values', () => {
@@ -252,10 +252,10 @@ describe('redactValueEmail', () => {
     expect(result).toBe('not-an-email')
   })
 
-  it('should return [REDACTED] for short email strings', () => {
+  it('should return <redacted> for short email strings', () => {
     const input = 'a@b.co'
     const result = redactValueEmail(input)
-    expect(result).toBe('[REDACTED]@b.co')
+    expect(result).toBe('<redacted>@b.co')
   })
 })
 
@@ -278,35 +278,17 @@ describe('redactValueObjectUnknown', () => {
 
     const result = redactValueObjectUnknown(obj)
     expect(result).toEqual({
-      email: 'u*[REDACTED]*e@example.com',
-      name: 'Jo*[REDACTED]*oe',
-      firstName: 'Jo*[REDACTED]*oe',
-      phone: '12*[REDACTED]*90',
-      address: '12*[REDACTED]*St',
-      collection: [{ name: 'Jo*[REDACTED]*oe' }],
+      email: 'u*<redacted>*e@example.com',
+      name: 'Jo*<redacted>*oe',
+      firstName: 'Jo*<redacted>*oe',
+      phone: '12*<redacted>*90',
+      address: '12*<redacted>*St',
+      collection: [{ name: 'Jo*<redacted>*oe' }],
       nested: {
         user: {
-          name: 'Ja*[REDACTED]*oe',
-          phone: '98*[REDACTED]*10',
+          name: 'Ja*<redacted>*oe',
+          phone: '98*<redacted>*10',
         },
-      },
-    })
-  })
-
-  it('should exclude specified keys using dot pathing', () => {
-    const obj = {
-      email: 'user@example.com',
-      user: {
-        email: 'user@example.com',
-        name: 'John Doe',
-      },
-    }
-
-    const result = redactValueObjectUnknown(obj, ['email', 'user.email'])
-
-    expect(result).toEqual({
-      user: {
-        name: 'Jo*[REDACTED]*oe',
       },
     })
   })
@@ -321,8 +303,8 @@ describe('redactValueObjectUnknown', () => {
     const result = redactValueObjectUnknown(obj)
 
     expect(result).toEqual({
-      email: 'u*[REDACTED]*e@example.com',
-      age: '[REDACTED]',
+      email: 'u*<redacted>*e@example.com',
+      age: '<redacted>',
       isActive: true,
     })
   })
