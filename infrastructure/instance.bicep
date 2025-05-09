@@ -885,7 +885,7 @@ resource privateStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = 
       keyvaultproperties: {
         keyname: privateStorageEncryptionKey.name
         keyvaulturi: endsWith(keyVault.properties.vaultUri, '/')
-          ? substring(keyVault.properties.vaultUri, 0, length(keyVault.properties.vaultUri) - 1)
+          ? substring(keyVault.properties.vaultUri, 0, max(length(keyVault.properties.vaultUri) - 1, 0))
           : keyVault.properties.vaultUri
       }
     }
