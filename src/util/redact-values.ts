@@ -66,7 +66,8 @@ export function redactValueObjectUnknown(object: Record<string, unknown>) {
     } else if (
       ['name', 'user', 'phone', 'address', 'secret', 'photo', 'biometric', 'birth', 'dob', 'age', 'nonce', 'state'].some((keyFragment) =>
         keyLower.includes(keyFragment),
-      )
+      ) &&
+      !['claimname'].includes(keyLower)
     ) {
       result[key] = redactValueInner(value.toString())
     } else {
