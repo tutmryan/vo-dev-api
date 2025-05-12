@@ -91,6 +91,9 @@ function buildLogOutput(ctx: Context, oidc: OIDCContext) {
             scope: Interaction.params.scope,
             state: redactValueInner(Interaction.params.state),
             nonce: redactValueInner(Interaction.params.nonce),
+            prompt: Interaction.params.prompt,
+            responseMode: Interaction.params.response_mode,
+            vcType: Interaction.params.vc_type,
             // Log the keys of params not listed above
             nonLoggedParamKeys: Object.keys(Interaction.params).filter(
               (key) =>
@@ -104,6 +107,9 @@ function buildLogOutput(ctx: Context, oidc: OIDCContext) {
                   'scope',
                   'state',
                   'nonce',
+                  'prompt',
+                  'response_mode',
+                  'vc_type',
                 ].includes(key),
             ),
           },
