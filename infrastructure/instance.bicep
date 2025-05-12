@@ -535,6 +535,8 @@ param graphqlMaxDepth string
 param graphqlMaxDirectives string
 @description('Limit the number of tokens in a GraphQL document.')
 param graphqlMaxTokens string
+@description('The log level of the API app')
+param logLevel string
 
 resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'HOME-TENANT-GRAPH-CLIENT-SECRET'
@@ -1279,58 +1281,61 @@ param apiClientId string
 resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' = {
   name: 'appsettings'
   parent: apiAppServiceSlot
-  properties: {
-    NODE_ENV: nodeEnv
-    WEBSITE_RUN_FROM_PACKAGE: '1'
-    APPINSIGHTS_INSTRUMENTATION_KEY: apiAppInsights.properties.InstrumentationKey
-    APPLICATIONINSIGHTS_CONNECTION_STRING: apiAppInsights.properties.ConnectionString
-    INSTANCE: instance
-    VERSION: releaseVersion
-    CORS_ORIGIN: corsOrigin
-    COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiCookieSecret) ? apiCookieSecretSecretExisting : apiCookieSecretSecret).properties.secretUri})'
-    SMS_SECRET: '@Microsoft.KeyVault(SecretUri=${smsSecretSecret.properties.secretUri})'
-    EMAIL_API_KEY: '@Microsoft.KeyVault(SecretUri=${emailApiKeySecret.properties.secretUri})'
-    DATABASE_HOST: '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
-    DATABASE_NAME: '${resourcePrefix}-sql-db'
-    REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
-    REDIS_HOST: '${redisCache.name}.redis.cache.windows.net'
-    BLOB_STORAGE_URL: 'https://${verifiedOrchestrationStorage.name}.blob.${az.environment().suffixes.storage}'
-    PRIVATE_BLOB_STORAGE_URL: 'https://${privateStorageAccount.name}.blob.${az.environment().suffixes.storage}'
-    PRIVATE_STORAGE_ENCRYPTION_KEY: '@Microsoft.KeyVault(SecretUri=${(empty(privateStorageClientEncryptionKey) ? privateStorageClientEncryptionKeySecretExisting : privateStorageClientEncryptionKeySecret).properties.secretUri})'
-    API_CLIENT_ID: apiClientId
-    API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiClientSecret) ? apiClientSecretSecretExisting : apiClientSecretSecret).properties.secretUri})'
-    API_CLIENT_URI: apiClientId
-    INTERNAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${internalClientSecretSecret.properties.secretUri})'
-    VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
-    LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
-    LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAccessSecret) ? limitedAccessSecretSecretExisting : limitedAccessSecretSecret).properties.secretUri})'
-    LIMITED_APPROVAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedApprovalClientSecretSecret.properties.secretUri})'
-    LIMITED_APPROVAL_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedApprovalSecret) ? limitedApprovalSecretSecretExisting : limitedApprovalSecretSecret).properties.secretUri})'
-    LIMITED_PHOTO_CAPTURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPhotoCaptureClientSecretSecret.properties.secretUri})'
-    LIMITED_PHOTO_CAPTURE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedPhotoCaptureSecret) ? limitedPhotoCaptureSecretSecretExisting : limitedPhotoCaptureSecretSecret).properties.secretUri})'
-    LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAsyncIssuanceClientSecretSecret.properties.secretUri})'
-    LIMITED_ASYNC_ISSUANCE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAsyncIssuanceSecret) ? limitedAsyncIssuanceSecretSecretExisting : limitedAsyncIssuanceSecretSecret).properties.secretUri})'
-    LIMITED_DEMO_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedDemoClientSecretSecret.properties.secretUri})'
-    LIMITED_OIDC_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedOidcClientSecretSecret.properties.secretUri})'
-    LIMITED_OIDC_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedOidcSecret) ? limitedOidcSecretSecretExisting : limitedOidcSecretSecret).properties.secretUri})'
-    HOME_TENANT_NAME: homeTenantName
-    HOME_TENANT_ID: homeTenantId
-    HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId
-    HOME_TENANT_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantGraphClientSecretSecret.properties.secretUri})'
-    HOME_TENANT_VID_SERVICE_CLIENT_ID: homeTenantVidServiceClientId
-    HOME_TENANT_VID_SERVICE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantVidServiceClientSecretSecret.properties.secretUri})'
-    VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
-    DEV_TOOLS_ENABLED: devToolsEnabled
-    FACE_CHECK_ENABLED: faceCheckEnabled
-    DEMO_ENABLED: demoEnabled
-    IDENTITY_ISSUERS: identityIssuers
-    PLATFORM_CONSUMER_APPS: platformConsumerApps
-    ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds
-    GRAPHQL_MAX_ALIASES: graphqlMaxAliases
-    GRAPHQL_MAX_DEPTH: graphqlMaxDepth
-    GRAPHQL_MAX_DIRECTIVES: graphqlMaxDirectives
-    GRAPHQL_MAX_TOKENS: graphqlMaxTokens
-  }
+  properties: union(
+    {
+      NODE_ENV: nodeEnv
+      WEBSITE_RUN_FROM_PACKAGE: '1'
+      APPINSIGHTS_INSTRUMENTATION_KEY: apiAppInsights.properties.InstrumentationKey
+      APPLICATIONINSIGHTS_CONNECTION_STRING: apiAppInsights.properties.ConnectionString
+      INSTANCE: instance
+      VERSION: releaseVersion
+      CORS_ORIGIN: corsOrigin
+      COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiCookieSecret) ? apiCookieSecretSecretExisting : apiCookieSecretSecret).properties.secretUri})'
+      SMS_SECRET: '@Microsoft.KeyVault(SecretUri=${smsSecretSecret.properties.secretUri})'
+      EMAIL_API_KEY: '@Microsoft.KeyVault(SecretUri=${emailApiKeySecret.properties.secretUri})'
+      DATABASE_HOST: '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
+      DATABASE_NAME: '${resourcePrefix}-sql-db'
+      REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
+      REDIS_HOST: '${redisCache.name}.redis.cache.windows.net'
+      BLOB_STORAGE_URL: 'https://${verifiedOrchestrationStorage.name}.blob.${az.environment().suffixes.storage}'
+      PRIVATE_BLOB_STORAGE_URL: 'https://${privateStorageAccount.name}.blob.${az.environment().suffixes.storage}'
+      PRIVATE_STORAGE_ENCRYPTION_KEY: '@Microsoft.KeyVault(SecretUri=${(empty(privateStorageClientEncryptionKey) ? privateStorageClientEncryptionKeySecretExisting : privateStorageClientEncryptionKeySecret).properties.secretUri})'
+      API_CLIENT_ID: apiClientId
+      API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiClientSecret) ? apiClientSecretSecretExisting : apiClientSecretSecret).properties.secretUri})'
+      API_CLIENT_URI: apiClientId
+      INTERNAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${internalClientSecretSecret.properties.secretUri})'
+      VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
+      LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
+      LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAccessSecret) ? limitedAccessSecretSecretExisting : limitedAccessSecretSecret).properties.secretUri})'
+      LIMITED_APPROVAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedApprovalClientSecretSecret.properties.secretUri})'
+      LIMITED_APPROVAL_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedApprovalSecret) ? limitedApprovalSecretSecretExisting : limitedApprovalSecretSecret).properties.secretUri})'
+      LIMITED_PHOTO_CAPTURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPhotoCaptureClientSecretSecret.properties.secretUri})'
+      LIMITED_PHOTO_CAPTURE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedPhotoCaptureSecret) ? limitedPhotoCaptureSecretSecretExisting : limitedPhotoCaptureSecretSecret).properties.secretUri})'
+      LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAsyncIssuanceClientSecretSecret.properties.secretUri})'
+      LIMITED_ASYNC_ISSUANCE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAsyncIssuanceSecret) ? limitedAsyncIssuanceSecretSecretExisting : limitedAsyncIssuanceSecretSecret).properties.secretUri})'
+      LIMITED_DEMO_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedDemoClientSecretSecret.properties.secretUri})'
+      LIMITED_OIDC_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedOidcClientSecretSecret.properties.secretUri})'
+      LIMITED_OIDC_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedOidcSecret) ? limitedOidcSecretSecretExisting : limitedOidcSecretSecret).properties.secretUri})'
+      HOME_TENANT_NAME: homeTenantName
+      HOME_TENANT_ID: homeTenantId
+      HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId
+      HOME_TENANT_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantGraphClientSecretSecret.properties.secretUri})'
+      HOME_TENANT_VID_SERVICE_CLIENT_ID: homeTenantVidServiceClientId
+      HOME_TENANT_VID_SERVICE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantVidServiceClientSecretSecret.properties.secretUri})'
+      VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
+      DEV_TOOLS_ENABLED: devToolsEnabled
+      FACE_CHECK_ENABLED: faceCheckEnabled
+      DEMO_ENABLED: demoEnabled
+      IDENTITY_ISSUERS: identityIssuers
+      PLATFORM_CONSUMER_APPS: platformConsumerApps
+      ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds
+      GRAPHQL_MAX_ALIASES: graphqlMaxAliases
+      GRAPHQL_MAX_DEPTH: graphqlMaxDepth
+      GRAPHQL_MAX_DIRECTIVES: graphqlMaxDirectives
+      GRAPHQL_MAX_TOKENS: graphqlMaxTokens
+    },
+    empty(logLevel) ? {} : { LOG_LEVEL: logLevel }
+  )
 }
 
 param sharedResourceGroupName string
