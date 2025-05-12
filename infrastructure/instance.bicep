@@ -535,6 +535,8 @@ param graphqlMaxDepth string
 param graphqlMaxDirectives string
 @description('Limit the number of tokens in a GraphQL document.')
 param graphqlMaxTokens string
+@description('The log level of the API app')
+param logLevel string
 
 resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   name: 'HOME-TENANT-GRAPH-CLIENT-SECRET'
@@ -1330,6 +1332,7 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     GRAPHQL_MAX_DEPTH: graphqlMaxDepth
     GRAPHQL_MAX_DIRECTIVES: graphqlMaxDirectives
     GRAPHQL_MAX_TOKENS: graphqlMaxTokens
+    LOG_LEVEL: logLevel
   }
 }
 

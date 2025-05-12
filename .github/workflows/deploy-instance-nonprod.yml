@@ -212,6 +212,8 @@ jobs:
           graphql-max-depth: ${{ vars.GRAPHQL_MAX_DEPTH }}
           graphql-max-directives: ${{ vars.GRAPHQL_MAX_DIRECTIVES }}
           graphql-max-tokens: ${{ vars.GRAPHQL_MAX_TOKENS }}
+
+          log-level: ${{ vars.LOG_LEVEL }}
       - name: Instance SQL database audit
         id: instance-sql-db-audit
         uses: ./github-actions/sql-db-audit
