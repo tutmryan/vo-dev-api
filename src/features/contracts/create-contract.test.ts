@@ -15,7 +15,6 @@ import { mockedServices } from '../../test/mocks'
 import { buildTemplateInput, createTemplate } from '../templates/test/create-template'
 import { StandardClaims } from './claims'
 import { createContractMutation, getDefaultContractInput, getUnsupportedCredentialTypeContractInput } from './test/create-contract'
-import { notSupportedCredentialTypes } from './validation'
 
 describe('createContract mutation', () => {
   beforeAfterAll()

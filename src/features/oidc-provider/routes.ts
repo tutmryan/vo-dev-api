@@ -11,6 +11,7 @@ import { instance } from '../../config'
 import { requestOrigin } from '../../express'
 import { logger } from '../../logger'
 import { invariant } from '../../util/invariant'
+import { redactValueObjectUnknown } from '../../util/redact-values'
 import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
 import { eamLoginFailResult, isEamRequestAndLoginShouldFail, whenEamApplyAcr, whenEamApplyAmr } from './integrations/entra-eam'
 import { createRequestInfo } from './log-events'
@@ -100,6 +101,9 @@ export function routes(app: Express, route: string): void {
 
           // TODO: handle param validation errors with a better UX
           const presentationRequest = await buildAuthnPresentationRequest(params, clientEntity, getData().partners, loginInteractionData)
+          logger.verbose('OIDC login presentation request', {
+            presentationRequest: redactValueObjectUnknown(presentationRequest),
+          })
           const { logo, backgroundColor, backgroundImage } = clientEntity
 
           // Teams on Windows during authentication hands off to the OS, which then uses an old version of WebView based on Chromium 70. If it were

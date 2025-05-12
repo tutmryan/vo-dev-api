@@ -131,7 +131,10 @@ async function createProvider() {
 
 let providerHandler: ReturnType<Provider['callback']> | undefined
 const oidcRouteHandler: RequestHandler = async (req, res) => {
-  if (!providerHandler) return res.sendStatus(503).end()
+  if (!providerHandler) {
+    logger.error('OIDC provider not set')
+    return res.sendStatus(503).end()
+  }
   return providerHandler(req, res)
 }
 

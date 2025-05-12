@@ -1,4 +1,4 @@
-import { redactValues } from './redact-values'
+import { redactValueEmail, redactValueInner, redactValueObjectUnknown, redactValues } from './redact-values'
 
 describe('redactValues', () => {
   it('should redact values at the specified paths', () => {
@@ -210,5 +210,102 @@ describe('redactValues', () => {
         ],
       }
     `)
+  })
+})
+
+describe('redactValueInner', () => {
+  it('should redact a string value', () => {
+    const input = '1234567890'
+    const result = redactValueInner(input)
+    expect(result).toBe('12*<redacted>*90')
+  })
+
+  it('should return undefined for non-string values', () => {
+    expect(redactValueInner(1234)).toBeUndefined()
+    expect(redactValueInner(null)).toBeUndefined()
+    expect(redactValueInner(undefined)).toBeUndefined()
+  })
+
+  it('should return <redacted> for short strings', () => {
+    const input = '1234'
+    const result = redactValueInner(input)
+    expect(result).toBe('<redacted>')
+  })
+})
+
+describe('redactValueEmail', () => {
+  it('should redact a valid email address', () => {
+    const input = 'user@example.com'
+    const result = redactValueEmail(input)
+    expect(result).toBe('u*<redacted>*e@example.com')
+  })
+
+  it('should return undefined for non-string values', () => {
+    expect(redactValueEmail(1234)).toBeUndefined()
+    expect(redactValueEmail(null)).toBeUndefined()
+    expect(redactValueEmail(undefined)).toBeUndefined()
+  })
+
+  it('should return the input if it is not a valid email', () => {
+    const input = 'not-an-email'
+    const result = redactValueEmail(input)
+    expect(result).toBe('not-an-email')
+  })
+
+  it('should return <redacted> for short email strings', () => {
+    const input = 'a@b.co'
+    const result = redactValueEmail(input)
+    expect(result).toBe('<redacted>@b.co')
+  })
+})
+
+describe('redactValueObjectUnknown', () => {
+  it('should redact sensitive keys based on fuzzy matching', () => {
+    const obj = {
+      email: 'user@example.com',
+      name: 'John Doe',
+      firstName: 'John Doe',
+      phone: '123-456-7890',
+      address: '123 Main St',
+      collection: [{ name: 'John Doe' }],
+      nested: {
+        user: {
+          name: 'Jane Doe',
+          phone: '987-654-3210',
+        },
+      },
+    }
+
+    const result = redactValueObjectUnknown(obj)
+    expect(result).toEqual({
+      email: 'u*<redacted>*e@example.com',
+      name: 'Jo*<redacted>*oe',
+      firstName: 'Jo*<redacted>*oe',
+      phone: '12*<redacted>*90',
+      address: '12*<redacted>*St',
+      collection: [{ name: 'Jo*<redacted>*oe' }],
+      nested: {
+        user: {
+          name: 'Ja*<redacted>*oe',
+          phone: '98*<redacted>*10',
+        },
+      },
+    })
+  })
+
+  it('should handle non-string and non-object values gracefully', () => {
+    const obj = {
+      email: 'user@example.com',
+      age: 30,
+      isActive: true,
+    }
+
+    const result = redactValueObjectUnknown(obj)
+
+    expect(result).toEqual({
+      email: 'u*<redacted>*e@example.com',
+      age: '<redacted>',
+      isActive: true,
+    })
   })
 })
