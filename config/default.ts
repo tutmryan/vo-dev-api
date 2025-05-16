@@ -111,6 +111,36 @@ const config: DeepPartial<Config> = {
     maxDepth: 12,
     maxTokens: 2500,
   },
+  platformManagement: {
+    transformFilters: {
+      types: ['String', 'Int', 'JSONObject', 'InstanceLogLevel'],
+      fields: {
+        Query: ['instance'],
+        Mutation: ['updateInstanceConfiguration'],
+        Instance: ['configuration'],
+        InstanceConfiguration: [
+          'additionalAuthTenantIds',
+          'appOidLabels',
+          'corsOrigins',
+          'graphQLSecuritySettings',
+          'identityIssuerLabels',
+          'logLevel',
+        ],
+        GraphQLSecuritySettings: ['maxAliases', 'maxDirectives', 'maxDepth', 'maxTokens'],
+      },
+      inputFields: {
+        InstanceConfigurationInput: [
+          'additionalAuthTenantIds',
+          'appOidLabels',
+          'corsOrigins',
+          'graphQLSecuritySettings',
+          'identityIssuerLabels',
+          'logLevel',
+        ],
+        GraphQLSecuritySettingsInput: ['maxAliases', 'maxDirectives', 'maxDepth', 'maxTokens'],
+      },
+    },
+  },
 }
 
 module.exports = config

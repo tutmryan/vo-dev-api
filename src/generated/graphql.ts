@@ -1485,6 +1485,23 @@ export type Features = {
   oidcEnabled: Scalars['Boolean']['output'];
 };
 
+/** The security settings for GraphQL operations. */
+export type GraphQlSecuritySettings = {
+  __typename?: 'GraphQLSecuritySettings';
+  maxAliases?: Maybe<Scalars['Int']['output']>;
+  maxDepth?: Maybe<Scalars['Int']['output']>;
+  maxDirectives?: Maybe<Scalars['Int']['output']>;
+  maxTokens?: Maybe<Scalars['Int']['output']>;
+};
+
+/** The security settings for GraphQL operations. */
+export type GraphQlSecuritySettingsInput = {
+  maxAliases?: InputMaybe<Scalars['Int']['input']>;
+  maxDepth?: InputMaybe<Scalars['Int']['input']>;
+  maxDirectives?: InputMaybe<Scalars['Int']['input']>;
+  maxTokens?: InputMaybe<Scalars['Int']['input']>;
+};
+
 /** Represents an identity that is issued credentials */
 export type Identity = {
   __typename?: 'Identity';
@@ -1657,6 +1674,37 @@ export type ImportInput = {
    * Must be ordered with parents before their children (i.e. top-down hierarchy).
    */
   templates?: InputMaybe<Array<TemplateImportInput>>;
+};
+
+/** An instances of the Verified Orchestration platform */
+export type Instance = {
+  __typename?: 'Instance';
+  /** The current instance configuration. */
+  configuration?: Maybe<InstanceConfiguration>;
+};
+
+/** The current configuration of the instance. */
+export type InstanceConfiguration = {
+  __typename?: 'InstanceConfiguration';
+  /** The additional auth tenant IDs for the instance. */
+  additionalAuthTenantIds?: Maybe<Array<Scalars['String']['output']>>;
+  /** The app OID labels for the instance. */
+  appOidLabels?: Maybe<Scalars['JSONObject']['output']>;
+  /** The CORS origins for the instance. */
+  corsOrigins?: Maybe<Array<Scalars['String']['output']>>;
+  /** The GraphQL security settings for the instance. */
+  graphQLSecuritySettings?: Maybe<GraphQlSecuritySettings>;
+  /** The identity issuer labels for the instance. */
+  identityIssuerLabels?: Maybe<Scalars['JSONObject']['output']>;
+};
+
+/** The new configuration of the instance. */
+export type InstanceConfigurationInput = {
+  additionalAuthTenantIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  appOidLabels?: InputMaybe<Scalars['JSONObject']['input']>;
+  corsOrigins?: InputMaybe<Array<Scalars['String']['input']>>;
+  graphQLSecuritySettings?: InputMaybe<GraphQlSecuritySettingsInput>;
+  identityIssuerLabels?: InputMaybe<Scalars['JSONObject']['input']>;
 };
 
 /** An instance of a successful contract-to-credential issuance. */
@@ -2149,6 +2197,8 @@ export type Mutation = {
   updateAsyncIssuanceContact?: Maybe<AsyncIssuanceContact>;
   /** Updates an existing contract */
   updateContract: Contract;
+  /** Updates the configuration of an instance. */
+  updateInstanceConfiguration: Instance;
   /** Updates an existing OIDC client */
   updateOidcClient: OidcClient;
   /** Updates an existing OIDC client resource */
@@ -2409,6 +2459,11 @@ export type MutationUpdateAsyncIssuanceContactArgs = {
 export type MutationUpdateContractArgs = {
   id: Scalars['ID']['input'];
   input: ContractInput;
+};
+
+
+export type MutationUpdateInstanceConfigurationArgs = {
+  configuration: InstanceConfigurationInput;
 };
 
 
@@ -3206,6 +3261,8 @@ export type Query = {
   identityByIdentifier: Identity;
   /** Returns the distinct set of issuers from all identities */
   identityIssuers: Array<IdentityIssuer>;
+  /** Returns a single instance by ID. */
+  instance: Instance;
   /** Returns an issuance by ID */
   issuance: Issuance;
   /** Returns the issuance count, optionally matching the specified criteria. */
@@ -4781,6 +4838,8 @@ export type ResolversTypes = {
   FaceCheckValidationInput: FaceCheckValidationInput;
   FeatureUrls: ResolverTypeWrapper<FeatureUrls>;
   Features: ResolverTypeWrapper<Features>;
+  GraphQLSecuritySettings: ResolverTypeWrapper<GraphQlSecuritySettings>;
+  GraphQLSecuritySettingsInput: GraphQlSecuritySettingsInput;
   HexColorCode: ResolverTypeWrapper<Scalars['HexColorCode']['output']>;
   Identity: ResolverTypeWrapper<IdentityEntity>;
   IdentityAsyncIssuanceRequestsWhere: IdentityAsyncIssuanceRequestsWhere;
@@ -4791,6 +4850,9 @@ export type ResolversTypes = {
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
   ImportInput: ImportInput;
+  Instance: ResolverTypeWrapper<Instance>;
+  InstanceConfiguration: ResolverTypeWrapper<InstanceConfiguration>;
+  InstanceConfigurationInput: InstanceConfigurationInput;
   Issuance: ResolverTypeWrapper<IssuanceEntity>;
   IssuanceCallbackEvent: ResolverTypeWrapper<IssuanceCallbackEvent>;
   IssuanceEventData: ResolverTypeWrapper<Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversTypes['Issuance']> }>;
@@ -4983,6 +5045,8 @@ export type ResolversParentTypes = {
   FaceCheckValidationInput: FaceCheckValidationInput;
   FeatureUrls: FeatureUrls;
   Features: Features;
+  GraphQLSecuritySettings: GraphQlSecuritySettings;
+  GraphQLSecuritySettingsInput: GraphQlSecuritySettingsInput;
   HexColorCode: Scalars['HexColorCode']['output'];
   Identity: IdentityEntity;
   IdentityAsyncIssuanceRequestsWhere: IdentityAsyncIssuanceRequestsWhere;
@@ -4992,6 +5056,9 @@ export type ResolversParentTypes = {
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityWhere: IdentityWhere;
   ImportInput: ImportInput;
+  Instance: Instance;
+  InstanceConfiguration: InstanceConfiguration;
+  InstanceConfigurationInput: InstanceConfigurationInput;
   Issuance: IssuanceEntity;
   IssuanceCallbackEvent: IssuanceCallbackEvent;
   IssuanceEventData: Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversParentTypes['Issuance']> };
@@ -5418,6 +5485,14 @@ export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends R
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GraphQlSecuritySettingsResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['GraphQLSecuritySettings'] = ResolversParentTypes['GraphQLSecuritySettings']> = {
+  maxAliases?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  maxDepth?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  maxDirectives?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  maxTokens?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['HexColorCode'], any> {
   name: 'HexColorCode';
 }
@@ -5443,6 +5518,20 @@ export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends R
 export type IdentityIssuerResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IdentityIssuer'] = ResolversParentTypes['IdentityIssuer']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type InstanceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Instance'] = ResolversParentTypes['Instance']> = {
+  configuration?: Resolver<Maybe<ResolversTypes['InstanceConfiguration']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type InstanceConfigurationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['InstanceConfiguration'] = ResolversParentTypes['InstanceConfiguration']> = {
+  additionalAuthTenantIds?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  appOidLabels?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  corsOrigins?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  graphQLSecuritySettings?: Resolver<Maybe<ResolversTypes['GraphQLSecuritySettings']>, ParentType, ContextType>;
+  identityIssuerLabels?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -5556,6 +5645,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
   updateAsyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<MutationUpdateAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
+  updateInstanceConfiguration?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationUpdateInstanceConfigurationArgs, 'configuration'>>;
   updateOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientArgs, 'id' | 'input'>>;
   updateOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientResourceArgs, 'clientId' | 'input'>>;
   updateOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationUpdateOidcResourceArgs, 'id' | 'input'>>;
@@ -5771,6 +5861,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityArgs, 'id'>>;
   identityByIdentifier?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityByIdentifierArgs, 'issuerId'>>;
   identityIssuers?: Resolver<Array<ResolversTypes['IdentityIssuer']>, ParentType, ContextType>;
+  instance?: Resolver<ResolversTypes['Instance'], ParentType, ContextType>;
   issuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<QueryIssuanceArgs, 'id'>>;
   issuanceCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryIssuanceCountArgs>>;
   issuanceCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByContractArgs>>;
@@ -6016,9 +6107,12 @@ export type Resolvers<ContextType = GraphQLContext> = {
   FaceCheckValidation?: FaceCheckValidationResolvers<ContextType>;
   FeatureUrls?: FeatureUrlsResolvers<ContextType>;
   Features?: FeaturesResolvers<ContextType>;
+  GraphQLSecuritySettings?: GraphQlSecuritySettingsResolvers<ContextType>;
   HexColorCode?: GraphQLScalarType;
   Identity?: IdentityResolvers<ContextType>;
   IdentityIssuer?: IdentityIssuerResolvers<ContextType>;
+  Instance?: InstanceResolvers<ContextType>;
+  InstanceConfiguration?: InstanceConfigurationResolvers<ContextType>;
   Issuance?: IssuanceResolvers<ContextType>;
   IssuanceCallbackEvent?: IssuanceCallbackEventResolvers<ContextType>;
   IssuanceEventData?: IssuanceEventDataResolvers<ContextType>;

@@ -1,6 +1,7 @@
 import { loadFilesSync } from '@graphql-tools/load-files'
 import { mergeResolvers } from '@graphql-tools/merge'
 import { makeExecutableSchema } from '@graphql-tools/schema'
+import { stitchSchemas } from '@graphql-tools/stitch'
 import type { GraphQLSchema } from 'graphql'
 import { GraphQLScalarType } from 'graphql'
 import { constraintDirectiveDocumentation, constraintDirectiveTypeDefs } from 'graphql-constraint-directive'
@@ -9,6 +10,8 @@ import { resolvers as scalarResolvers } from 'graphql-scalars'
 import { identityFunc } from 'graphql/jsutils/identityFunc'
 import { pick } from 'lodash'
 import path from 'path'
+import { buildRemoteSchema } from './features/platform-management'
+import { logger } from './logger'
 import { permissions } from './shield'
 
 const usedScalars = pick(
@@ -26,7 +29,7 @@ const usedScalars = pick(
   'UUID',
 )
 
-export default function () {
+function buildLocalSchema() {
   const resolvers = loadFilesSync(
     [path.join(__dirname, './features/**/resolvers.*'), path.join(__dirname, './background-jobs/**/resolvers.*')],
     { extensions: ['ts', 'js'] },
@@ -41,9 +44,7 @@ export default function () {
     typeDefs: [constraintDirectiveTypeDefs, typeDefs],
     resolvers: mergeResolvers([usedScalars, ...resolvers]),
   })
-
   schema = constraintDirectiveDocumentation({})(schema)
-
   requireExplicitResolversForScalars(schema)
 
   const scalarsWithNoExplicitResolvers = Object.values(schema.getTypeMap())
@@ -56,9 +57,18 @@ export default function () {
     throw new Error(`The following scalars have no explicit resolvers: ${scalarsWithNoExplicitResolvers.join(', ')}`)
   }
 
-  schema = applyMiddleware(schema, permissions)
-
   return schema
+}
+
+export default function () {
+  const localSchema = buildLocalSchema()
+  const platformManagementRemoteSchema = buildRemoteSchema()
+  if (!platformManagementRemoteSchema) logger.warn('Platform Management remote schema is not configured in this environment')
+  const schemaWithoutShield = platformManagementRemoteSchema
+    ? stitchSchemas({ subschemas: [localSchema, platformManagementRemoteSchema] })
+    : localSchema
+  const schemaWithShield = applyMiddleware(schemaWithoutShield, permissions)
+  return schemaWithShield
 }
 
 function requireExplicitResolversForScalars(schema: GraphQLSchema) {

@@ -14,6 +14,7 @@ const {
   limitedAsyncIssuance,
   limitedDemo,
   limitedOidcClient,
+  platformManagement,
 } = nonprod as Config
 
 const config: DeepPartial<Config> = {
@@ -89,6 +90,7 @@ const config: DeepPartial<Config> = {
     },
     sms: { disabled: true, allowList: [] },
   },
+  platformManagement,
 }
 
 module.exports = config

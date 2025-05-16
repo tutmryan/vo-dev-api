@@ -1,0 +1,110 @@
+# eslint-disable
+
+type Query {
+  """Returns a single instance by ID."""
+  instance: Instance!
+}
+
+type Mutation {
+  """Updates the configuration of an instance."""
+  updateInstanceConfiguration(instanceIdentifier: String!, configuration: InstanceConfigurationInput!): Instance!
+}
+
+"""An instances of the Verified Orchestration platform"""
+type Instance {
+  """The current instance configuration."""
+  configuration: InstanceConfiguration
+}
+
+"""The security settings for GraphQL operations."""
+input GraphQLSecuritySettingsInput {
+  maxAliases: Int
+  maxDepth: Int
+  maxDirectives: Int
+  maxTokens: Int
+}
+
+"""The security settings for GraphQL operations."""
+type GraphQLSecuritySettings {
+  maxAliases: Int
+  maxDepth: Int
+  maxDirectives: Int
+  maxTokens: Int
+}
+
+"""The log level for the instance."""
+enum InstanceLogLevel {
+  info
+  verbose
+}
+
+"""The new or updated configuration of the instance."""
+input InstanceConfigurationInput {
+  """
+  The additional auth tenant IDs for the instance.
+  For updates, when set to `null` (or not set), any existing value will be retained.
+  To remove the value, set to an empty array.
+  """
+  additionalAuthTenantIds: [String!]
+
+  """
+  The CORS origins for the instance.
+  For updates, when set to `null` (or not set), any existing value will be retained.
+  To remove the value, set to an empty array.
+  """
+  corsOrigins: [String!]
+
+  """
+  The app OID labels for the instance.
+  For updates, when set to `null` (or not set), any existing value will be retained.
+  To remove the value, set to an empty object.
+  """
+  appOidLabels: JSONObject
+
+  """
+  The identity issuer labels for the instance.
+  For updates, when set to `null` (or not set), any existing value will be retained.
+  To remove the value, set to an empty object.
+  """
+  identityIssuerLabels: JSONObject
+
+  """
+  The GraphQL security settings for the instance.
+  For updates, when set to `null` (or not set), any existing value will be retained.
+  To remove all GraphQL security settings and use the defaults, set to an empty object.
+  """
+  graphQLSecuritySettings: GraphQLSecuritySettingsInput
+
+  """
+  The log level for the instance.
+  When set to `null` (or not set), the existing value will be retained.
+  To reset to the default value, set to `info`.
+  """
+  logLevel: InstanceLogLevel
+}
+
+"""The current configuration of the instance."""
+type InstanceConfiguration {
+  """The additional auth tenant IDs for the instance."""
+  additionalAuthTenantIds: [String!]
+
+  """The CORS origins for the instance."""
+  corsOrigins: [String!]
+
+  """The app OID labels for the instance."""
+  appOidLabels: JSONObject
+
+  """The identity issuer labels for the instance."""
+  identityIssuerLabels: JSONObject
+
+  """The GraphQL security settings for the instance."""
+  graphQLSecuritySettings: GraphQLSecuritySettings
+
+  """The log level for the instance."""
+  logLevel: InstanceLogLevel
+}
+
+"""
+The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSONObject

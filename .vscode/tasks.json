@@ -66,6 +66,16 @@
       "problemMatcher": []
     },
     {
+      "label": "Download Remote (management) GraphQL Schema",
+      "type": "npm",
+      "script": "gql:download-remote",
+      "path": "${workspaceFolder}",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "Check types",
       "type": "npm",
       "script": "check-types",

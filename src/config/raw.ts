@@ -51,9 +51,6 @@ export type Config = {
     pollingFrequencySeconds: number
     maxProcessingAttempts: number
   }
-  /**
-   * The instance label, used to generate URLs according to convention
-   */
   instance: string
   version: string
   devToolsEnabled: boolean
@@ -174,6 +171,14 @@ export type Config = {
     maxDepth: number
     maxDirectives: number
     maxTokens: number
+  }
+  platformManagement: {
+    remoteUrl: string
+    transformFilters: {
+      types: string[]
+      fields: Record<string, string[]>
+      inputFields: Record<string, string[]>
+    }
   }
 }
 

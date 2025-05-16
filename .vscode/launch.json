@@ -21,6 +21,17 @@
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**", "node_modules/**"],
       "smartStep": true
+    },
+    {
+      "name": "Download remote schema",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "gql:download-remote"],
+      "cwd": "${workspaceRoot}",
+      "console": "integratedTerminal",
+      "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "smartStep": true
     }
   ]
 }
