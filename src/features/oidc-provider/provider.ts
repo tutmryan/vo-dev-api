@@ -3,7 +3,7 @@ import type { Express, RequestHandler } from 'express'
 import type { JWK } from 'jose'
 import { debounce } from 'lodash'
 import type { Configuration, Errors, Interaction, interactionPolicy, KoaContextWithOIDC, Provider } from 'oidc-provider'
-import { apiUrl, cookieSession } from '../../config'
+import { apiUrl, cookieSession, instance } from '../../config'
 import { logger } from '../../logger'
 import { createRedisClient, isRedisEnabled } from '../../redis'
 import { pubsub } from '../../redis/pubsub'
@@ -62,6 +62,13 @@ async function createProvider() {
   const data = { ...dataPromise.value, keys: jwksKeys }
 
   const { clients, clientMetadata, resources, resourceScopes } = data
+
+  if (instance === 'dev') {
+    const demoClient = clientMetadata.find((client) => client.client_id === '1b123dea-3c0b-48ee-848b-b499bc482ab0')
+    if (demoClient) {
+      demoClient.secret = 'demo-secret'
+    }
+  }
 
   const provider = new Provider(issuer, {
     clients: clientMetadata,
