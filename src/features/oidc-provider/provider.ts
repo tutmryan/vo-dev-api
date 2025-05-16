@@ -66,7 +66,7 @@ async function createProvider() {
   if (instance === 'dev') {
     const demoClient = clientMetadata.find((client) => client.client_id === '1b123dea-3c0b-48ee-848b-b499bc482ab0')
     if (demoClient) {
-      demoClient.secret = 'demo-secret'
+      demoClient.client_secret = 'demo-secret'
     }
   }
 
