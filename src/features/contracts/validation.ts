@@ -1,8 +1,10 @@
 import type { ContractInput, TemplateInput } from '../../generated/graphql'
 import { parseDataUrl } from '../../util/data-url'
+import type { TemplateEntity } from '../templates/entities/template-entity'
 import { validateContractClaims } from './claims'
 
 export const notSupportedCredentialTypes = ['VerifiedEmployee']
+export const maxTemplateDepth = 4
 
 export function validateContractInput(input: ContractInput) {
   validateContractClaims(input.display.claims)
@@ -28,5 +30,25 @@ export function validateContractCredentialTypes(credentialTypes: ContractInput['
   const notSupportedCredentialIndex = credentialTypes.findIndex((type) => notSupportedCredentialTypes.includes(type))
   if (notSupportedCredentialIndex !== -1) {
     throw new Error(`${credentialTypes[notSupportedCredentialIndex]} is not a supported credential type`)
+  }
+}
+
+export async function validateTemplateDepth(parent: TemplateEntity) {
+  const seen = new Set<string>()
+  let depth = 0
+  let current: TemplateEntity | null = parent
+
+  while (current) {
+    if (seen.has(current.id)) {
+      throw new Error('Circular template reference detected')
+    }
+    seen.add(current.id)
+
+    depth++
+    if (depth >= maxTemplateDepth) {
+      throw new Error(`Template is too deep (level ${depth}). The maximum allowed template depth is ${maxTemplateDepth - 1}.`)
+    }
+
+    current = await current.parent
   }
 }

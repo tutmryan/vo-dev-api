@@ -3,7 +3,7 @@ import { merge } from 'lodash'
 import { type CommandContext } from '../../../cqs'
 import { isFaceCheckSupportEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { type TemplateInput } from '../../../generated/graphql'
-import { validateTemplateInput } from '../../contracts/validation'
+import { validateTemplateDepth, validateTemplateInput } from '../../contracts/validation'
 import { TemplateEntity } from '../entities/template-entity'
 import { ensureNoIntersectingTemplateData, toPersistedDisplayModel, toTemplateParentData, toTemplateParentDataFromInput } from '../mapping'
 
@@ -17,6 +17,7 @@ export async function CreateTemplateCommand(this: CommandContext, input: Templat
   const parent = input.parentTemplateId ? await repository.findOneByOrFail({ id: input.parentTemplateId }) : null
 
   if (parent) {
+    await validateTemplateDepth(parent)
     const parentData = merge({}, toTemplateParentData(parent), await parent.parentData())
     await ensureNoIntersectingTemplateData(toTemplateParentDataFromInput(input), parentData)
   }

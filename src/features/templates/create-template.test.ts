@@ -177,4 +177,22 @@ describe('createTemplate mutation', () => {
     expect(errors).toBeUndefined()
     expect(data).toBeDefined()
   })
+
+  it('returns an error when the template is deeper than allowed', async () => {
+    const baseInput = getEmptyTemplateInput()
+    const root = await createTemplate(baseInput)
+    const lvl1 = await createTemplate({ ...baseInput, parentTemplateId: root.id })
+    const lvl2 = await createTemplate({ ...baseInput, parentTemplateId: lvl1.id })
+    const lvl3 = await createTemplate({ ...baseInput, parentTemplateId: lvl2.id })
+
+    const { errors } = await executeOperationAsCredentialAdmin({
+      query: createTemplateMutation,
+      variables: {
+        input: { ...baseInput, parentTemplateId: lvl3.id },
+      },
+    })
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('Template is too deep')
+  })
 })
