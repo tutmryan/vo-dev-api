@@ -111,6 +111,7 @@ function buildLogOutput(ctx: Context, oidc: OIDCContext) {
                   'prompt',
                   'response_mode',
                   'vc_type',
+                  'login_hint',
                 ].includes(key),
             ),
           },
