@@ -94,6 +94,7 @@ function buildLogOutput(ctx: Context, oidc: OIDCContext) {
             prompt: Interaction.params.prompt,
             response_mode: Interaction.params.response_mode,
             vc_type: Interaction.params.vc_type,
+            login_hint: redactValueInner(Interaction.params.login_hint),
             // Log the keys of params not listed above
             nonLoggedParamKeys: Object.keys(Interaction.params).filter(
               (key) =>
