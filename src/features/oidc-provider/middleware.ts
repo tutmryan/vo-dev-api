@@ -82,18 +82,18 @@ function buildLogOutput(ctx: Context, oidc: OIDCContext) {
             reasons: Interaction.prompt.reasons,
           },
           params: {
-            clientId: Interaction.params.client_id,
-            codeChallenge: redactValueInner(Interaction.params.code_challenge),
-            codeChallengeMethod: Interaction.params.code_challenge_method,
-            redirectUri: Interaction.params.redirect_uri,
+            client_id: Interaction.params.client_id,
+            code_challenge: redactValueInner(Interaction.params.code_challenge),
+            code_challenge_method: Interaction.params.code_challenge_method,
+            redirect_uri: Interaction.params.redirect_uri,
             resource: Interaction.params.resource,
-            responseType: Interaction.params.response_type,
+            response_type: Interaction.params.response_type,
             scope: Interaction.params.scope,
             state: redactValueInner(Interaction.params.state),
             nonce: redactValueInner(Interaction.params.nonce),
             prompt: Interaction.params.prompt,
-            responseMode: Interaction.params.response_mode,
-            vcType: Interaction.params.vc_type,
+            response_mode: Interaction.params.response_mode,
+            vc_type: Interaction.params.vc_type,
             // Log the keys of params not listed above
             nonLoggedParamKeys: Object.keys(Interaction.params).filter(
               (key) =>
