@@ -118,7 +118,7 @@ export async function buildAuthnPresentationRequest(
   let constraintValue = params[ExtraParams.vc_constraint_value] as string | undefined
   let constraintValues = constraintValue && constraintOperator === 'values' ? constraintValue.split(',') : undefined
 
-  // Resolve known dynamic constraint values to their actual value
+  // Resolve dynamic constraint values to their actual values to ensure proper validation and processing
   if (valueIsDynamic(constraintValue)) {
     constraintValue = resolveDynamicConstraintValue(constraintValue, params)
   }
