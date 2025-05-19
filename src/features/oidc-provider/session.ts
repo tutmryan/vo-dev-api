@@ -14,6 +14,7 @@ import { createKey } from '../../util/token'
 import type { PartnerEntity } from '../partners/entities/partner-entity'
 import { getPresentationDataFromCache } from '../presentation/callback/cache'
 import { PresentationEntity } from '../presentation/entities/presentation-entity'
+import { resolveDynamicConstraintValue, valueIsDynamic } from './dynamic-constraint-values'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
 import { ExtraParams } from './extra-params'
 import { whenEamAddPresentationConstraints, whenEamGetAccountId } from './integrations/entra-eam'
@@ -114,8 +115,14 @@ export async function buildAuthnPresentationRequest(
   // validate constraint params
   const constraintName = params[ExtraParams.vc_constraint_name] as string | undefined
   const constraintOperator = params[ExtraParams.vc_constraint_operator] as (typeof claimConstraintOperators)[number] | undefined
-  const constraintValue = params[ExtraParams.vc_constraint_value] as string | undefined
-  const constraintValues = constraintValue && constraintOperator === 'values' ? constraintValue.split(',') : undefined
+  let constraintValue = params[ExtraParams.vc_constraint_value] as string | undefined
+  let constraintValues = constraintValue && constraintOperator === 'values' ? constraintValue.split(',') : undefined
+
+  // Resolve known dynamic constraint values to their actual value
+  if (valueIsDynamic(constraintValue)) {
+    constraintValue = resolveDynamicConstraintValue(constraintValue, params)
+  }
+  constraintValues = constraintValues?.map((value) => (valueIsDynamic(value) ? resolveDynamicConstraintValue(value, params) : value))
 
   // assign constraints, if provided
   let constraints: ClaimConstraint[] | undefined
