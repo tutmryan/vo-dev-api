@@ -11,3 +11,6 @@ coverage
 # don't format ide files
 .idea
 temp
+
+# Prettier can't format these files correctly
+*.ejs
