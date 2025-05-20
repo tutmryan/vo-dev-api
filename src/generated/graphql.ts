@@ -2489,7 +2489,7 @@ export type MutationUpdateContractArgs = {
 
 export type MutationUpdateInstanceConfigurationArgs = {
   configuration: InstanceConfigurationInput;
-  instanceIdentifier: Scalars['String']['input'];
+  identifier: Scalars['String']['input'];
 };
 
 
@@ -3287,8 +3287,8 @@ export type Query = {
   identityByIdentifier: Identity;
   /** Returns the distinct set of issuers from all identities */
   identityIssuers: Array<IdentityIssuer>;
-  /** Returns a single instance by ID. */
-  instance: Instance;
+  /** Returns a single instance by identifier. */
+  instanceByIdentifier: Instance;
   /** Returns an issuance by ID */
   issuance: Issuance;
   /** Returns the issuance count, optionally matching the specified criteria. */
@@ -3498,6 +3498,11 @@ export type QueryIdentityArgs = {
 
 export type QueryIdentityByIdentifierArgs = {
   issuerId: IssuerIdentifierInput;
+};
+
+
+export type QueryInstanceByIdentifierArgs = {
+  identifier: Scalars['String']['input'];
 };
 
 
@@ -5671,7 +5676,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
   updateAsyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<MutationUpdateAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
-  updateInstanceConfiguration?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationUpdateInstanceConfigurationArgs, 'configuration' | 'instanceIdentifier'>>;
+  updateInstanceConfiguration?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationUpdateInstanceConfigurationArgs, 'configuration' | 'identifier'>>;
   updateOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientArgs, 'id' | 'input'>>;
   updateOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientResourceArgs, 'clientId' | 'input'>>;
   updateOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationUpdateOidcResourceArgs, 'id' | 'input'>>;
@@ -5887,7 +5892,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   identity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityArgs, 'id'>>;
   identityByIdentifier?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityByIdentifierArgs, 'issuerId'>>;
   identityIssuers?: Resolver<Array<ResolversTypes['IdentityIssuer']>, ParentType, ContextType>;
-  instance?: Resolver<ResolversTypes['Instance'], ParentType, ContextType>;
+  instanceByIdentifier?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<QueryInstanceByIdentifierArgs, 'identifier'>>;
   issuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<QueryIssuanceArgs, 'id'>>;
   issuanceCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryIssuanceCountArgs>>;
   issuanceCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByContractArgs>>;

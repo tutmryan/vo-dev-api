@@ -115,7 +115,7 @@ const config: DeepPartial<Config> = {
     transformFilters: {
       types: ['String', 'Int', 'JSONObject'],
       fields: {
-        Query: ['instance'],
+        Query: ['instanceByIdentifier'],
         Mutation: ['updateInstanceConfiguration'],
         Instance: ['configuration'],
         InstanceConfiguration: [

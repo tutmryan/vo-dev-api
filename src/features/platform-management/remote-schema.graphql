@@ -1,13 +1,13 @@
 # eslint-disable
 
 type Query {
-  """Returns a single instance by ID."""
-  instance: Instance!
+  """Returns a single instance by identifier."""
+  instanceByIdentifier(identifier: String!): Instance!
 }
 
 type Mutation {
   """Updates the configuration of an instance."""
-  updateInstanceConfiguration(instanceIdentifier: String!, configuration: InstanceConfigurationInput!): Instance!
+  updateInstanceConfiguration(identifier: String!, configuration: InstanceConfigurationInput!): Instance!
 }
 
 """An instances of the Verified Orchestration platform"""
