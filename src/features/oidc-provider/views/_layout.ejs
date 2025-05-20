@@ -97,13 +97,37 @@
     .grant-debug {
       text-align: center;
       font-family: Fixed, monospace;
-      width: 100%;
       font-size: 12px;
       color: #999;
+      min-width: 250px;
+      max-width: 50vw;
+      margin-left: auto;
+      margin-right: auto;
+      display: block;
+      padding-top: 10px;
     }
 
-    .grant-debug div {
-      padding-top: 10px;
+    .debug dt {
+      font-weight: bold;
+      text-align: left;
+    }
+
+    .debug dd {
+      margin-bottom: 10px;
+      text-align: left;
+    }
+
+    .debug details {
+      background-color: #f8f9fa;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .debug summary {
+      cursor: pointer;
+      font-weight: bold;
     }
 
     .login-help+form {
@@ -165,32 +189,33 @@
     </div>
   </div>
   <% if (showDebug) { %>
-  <div class="grant-debug">
+  <div class="grant-debug debug">
     <details>
       <summary style="text-align: center;">(Click to expand) DEBUG information</summary>
-      <div>
-        <strong>uid</strong>: <%= uid %>
-      </div>
+      <dl>
+        <dt>uid</dt>
+        <dd><%= uid %></dd>
 
-      <% if (session) { %>
-      <div>
-        SESSION <br>
-        ========= <br>
-        <%- session %>
-      </div>
-      <% } %>
+        <% if (session) { %>
+        <dt>SESSION</dt>
+        <dd>
+          ========= <br>
+          <%- session %>
+        </dd>
+        <% } %>
 
-      <div>
-        PARAMS <br>
-        ======== <br>
-        <%- dbg.params %>
-      </div>
+        <dt>PARAMS</dt>
+        <dd>
+          ======== <br>
+          <%- dbg.params %>
+        </dd>
 
-      <div>
-        PROMPT <br>
-        ======== <br>
-        <%- dbg.prompt %>
-      </div>
+        <dt>PROMPT</dt>
+        <dd>
+          ======== <br>
+          <%- dbg.prompt %>
+        </dd>
+      </dl>
     </details>
   </div>
   <% } %>
