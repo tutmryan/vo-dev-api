@@ -1698,12 +1698,37 @@ export type InstanceConfiguration = {
   identityIssuerLabels?: Maybe<Scalars['JSONObject']['output']>;
 };
 
-/** The new configuration of the instance. */
+/** The new or updated configuration of the instance. */
 export type InstanceConfigurationInput = {
+  /**
+   * The additional auth tenant IDs for the instance.
+   * For updates, when set to `null` (or not set), any existing value will be retained.
+   * To remove the value, set to an empty array.
+   */
   additionalAuthTenantIds?: InputMaybe<Array<Scalars['String']['input']>>;
+  /**
+   * The app OID labels for the instance.
+   * For updates, when set to `null` (or not set), any existing value will be retained.
+   * To remove the value, set to an empty object.
+   */
   appOidLabels?: InputMaybe<Scalars['JSONObject']['input']>;
+  /**
+   * The CORS origins for the instance.
+   * For updates, when set to `null` (or not set), any existing value will be retained.
+   * To remove the value, set to an empty array.
+   */
   corsOrigins?: InputMaybe<Array<Scalars['String']['input']>>;
+  /**
+   * The GraphQL security settings for the instance.
+   * For updates, when set to `null` (or not set), any existing value will be retained.
+   * To remove all GraphQL security settings and use the defaults, set to an empty object.
+   */
   graphQLSecuritySettings?: InputMaybe<GraphQlSecuritySettingsInput>;
+  /**
+   * The identity issuer labels for the instance.
+   * For updates, when set to `null` (or not set), any existing value will be retained.
+   * To remove the value, set to an empty object.
+   */
   identityIssuerLabels?: InputMaybe<Scalars['JSONObject']['input']>;
 };
 
@@ -2464,6 +2489,7 @@ export type MutationUpdateContractArgs = {
 
 export type MutationUpdateInstanceConfigurationArgs = {
   configuration: InstanceConfigurationInput;
+  instanceIdentifier: Scalars['String']['input'];
 };
 
 
@@ -5645,7 +5671,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
   updateAsyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<MutationUpdateAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
-  updateInstanceConfiguration?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationUpdateInstanceConfigurationArgs, 'configuration'>>;
+  updateInstanceConfiguration?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationUpdateInstanceConfigurationArgs, 'configuration' | 'instanceIdentifier'>>;
   updateOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientArgs, 'id' | 'input'>>;
   updateOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientResourceArgs, 'clientId' | 'input'>>;
   updateOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationUpdateOidcResourceArgs, 'id' | 'input'>>;

@@ -32,12 +32,6 @@ type GraphQLSecuritySettings {
   maxTokens: Int
 }
 
-"""The log level for the instance."""
-enum InstanceLogLevel {
-  info
-  verbose
-}
-
 """The new or updated configuration of the instance."""
 input InstanceConfigurationInput {
   """
@@ -74,13 +68,6 @@ input InstanceConfigurationInput {
   To remove all GraphQL security settings and use the defaults, set to an empty object.
   """
   graphQLSecuritySettings: GraphQLSecuritySettingsInput
-
-  """
-  The log level for the instance.
-  When set to `null` (or not set), the existing value will be retained.
-  To reset to the default value, set to `info`.
-  """
-  logLevel: InstanceLogLevel
 }
 
 """The current configuration of the instance."""
@@ -99,9 +86,6 @@ type InstanceConfiguration {
 
   """The GraphQL security settings for the instance."""
   graphQLSecuritySettings: GraphQLSecuritySettings
-
-  """The log level for the instance."""
-  logLevel: InstanceLogLevel
 }
 
 """

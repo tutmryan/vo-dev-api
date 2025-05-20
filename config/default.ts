@@ -113,7 +113,7 @@ const config: DeepPartial<Config> = {
   },
   platformManagement: {
     transformFilters: {
-      types: ['String', 'Int', 'JSONObject', 'InstanceLogLevel'],
+      types: ['String', 'Int', 'JSONObject'],
       fields: {
         Query: ['instance'],
         Mutation: ['updateInstanceConfiguration'],
@@ -124,7 +124,6 @@ const config: DeepPartial<Config> = {
           'corsOrigins',
           'graphQLSecuritySettings',
           'identityIssuerLabels',
-          'logLevel',
         ],
         GraphQLSecuritySettings: ['maxAliases', 'maxDirectives', 'maxDepth', 'maxTokens'],
       },
@@ -135,7 +134,6 @@ const config: DeepPartial<Config> = {
           'corsOrigins',
           'graphQLSecuritySettings',
           'identityIssuerLabels',
-          'logLevel',
         ],
         GraphQLSecuritySettingsInput: ['maxAliases', 'maxDirectives', 'maxDepth', 'maxTokens'],
       },
