@@ -61,7 +61,12 @@ export function routes(app: Express, route: string): void {
     const orig = res.render
     // you'll probably want to use a fully blown render engine capable of layouts
     res.render = (view, locals) => {
-      app.render(view, locals, (_err, html) => {
+      app.render(view, locals, (err, html) => {
+        if (err as Error | undefined) {
+          // An empty _layout fill will render. There's not much we can do to improve this.
+          // The log here is to help us find the problems with templates that only happen due to differences in data supplied at runtime.
+          logger.error(`OIDC render error while rendering template for: ${view}`, { error: err })
+        }
         const options: any = {
           ...locals,
           body: html,
