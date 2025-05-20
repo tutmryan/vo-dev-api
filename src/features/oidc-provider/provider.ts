@@ -64,10 +64,14 @@ async function createProvider() {
   const { clients, clientMetadata, resources, resourceScopes } = data
 
   if (instance === 'dev') {
-    const demoClient = clientMetadata.find((client) => client.client_id === '1b123dea-3c0b-48ee-848b-b499bc482ab0')
-    if (demoClient) {
-      demoClient.client_secret = 'demo-secret'
+    const addSecretToClient = (id: string, secret: string) => {
+      const client = clientMetadata.find((client) => client.client_id === id)
+      if (client) {
+        client.client_secret = secret
+      }
     }
+    addSecretToClient('1b123dea-3c0b-48ee-848b-b499bc482ab0', 'demo-secret')
+    addSecretToClient('8258a626-b6a2-4751-aca7-4693f4f32d22', 'demo-secret')
   }
 
   const provider = new Provider(issuer, {
