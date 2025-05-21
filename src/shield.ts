@@ -176,6 +176,7 @@ export const rules: ShieldSchema<Resolvers> = {
     createPresentationRequestForAuthn: isValidOidcAuthnPresentationRequest,
     saveConciergeBranding: isInstanceAdminUser,
     deleteConciergeBranding: isInstanceAdminUser,
+    updateInstanceConfiguration: isInstanceAdminUser,
     saveIdentity: isAllowedToCreateAndDeleteIdentities,
     deleteIdentities: isAllowedToCreateAndDeleteIdentities,
     createPartner: isPartnerAdminUser,

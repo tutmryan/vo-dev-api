@@ -69,6 +69,9 @@ const config: DeepPartial<Config> = {
     oid: 'TEST_LIMITED_OIDC_CLIENT_OID',
     credentials: {},
   },
+  platformManagement: {
+    remoteUrl: 'http://example.com/graphql',
+  },
 }
 
 module.exports = config
