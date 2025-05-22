@@ -12,6 +12,11 @@ type Mutation {
 
 """An instances of the Verified Orchestration platform"""
 type Instance {
+  """
+  The unique identifier of the instance, forming part of the URL, for example `company.sandbox` or `company`.
+  """
+  identifier: String!
+
   """The current instance configuration."""
   configuration: InstanceConfiguration
 }

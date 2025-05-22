@@ -117,7 +117,7 @@ const config: DeepPartial<Config> = {
       fields: {
         Query: ['instanceByIdentifier'],
         Mutation: ['updateInstanceConfiguration'],
-        Instance: ['configuration'],
+        Instance: ['identifier', 'configuration'],
         InstanceConfiguration: [
           'additionalAuthTenantIds',
           'appOidLabels',

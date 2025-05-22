@@ -1681,6 +1681,8 @@ export type Instance = {
   __typename?: 'Instance';
   /** The current instance configuration. */
   configuration?: Maybe<InstanceConfiguration>;
+  /** The unique identifier of the instance, forming part of the URL, for example `company.sandbox` or `company`. */
+  identifier: Scalars['String']['output'];
 };
 
 /** The current configuration of the instance. */
@@ -5554,6 +5556,7 @@ export type IdentityIssuerResolvers<ContextType = GraphQLContext, ParentType ext
 
 export type InstanceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Instance'] = ResolversParentTypes['Instance']> = {
   configuration?: Resolver<Maybe<ResolversTypes['InstanceConfiguration']>, ParentType, ContextType>;
+  identifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
