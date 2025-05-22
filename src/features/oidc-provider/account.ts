@@ -58,7 +58,7 @@ export function accountToClaims(account: PresentationLoginAccount): AccountClaim
 
   // Temp for Matt Zendesk demo in dev part 2 of 3
   if (instance === 'dev' && credentialType.toLowerCase() === 'vosupportagent') {
-    claims[OpenIdProfileClaim.preferredUsername] = credentialClaims?.email
+    claims[OpenIdProfileClaim.PreferredUsername] = credentialClaims?.email
   }
 
   return claims

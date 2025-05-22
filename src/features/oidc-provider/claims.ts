@@ -20,7 +20,7 @@ export enum VcPresentedAttributesClaim {
 export enum OpenIdProfileClaim {
   Name = 'name',
   // Temp for Matt Zendesk demo in dev part 3 of 3
-  preferredUsername = 'preferred_username',
+  PreferredUsername = 'preferred_username',
 }
 
 export enum OpenIdEmailClaim {
