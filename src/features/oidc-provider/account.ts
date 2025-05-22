@@ -1,6 +1,7 @@
 import { omit } from 'lodash'
 import type { Account, AccountClaims, FindAccount } from 'oidc-provider'
 import { oidcStorageService } from '.'
+import { instance } from '../../config'
 import { logger } from '../../logger'
 import {
   faceCheckAmr,
@@ -14,7 +15,6 @@ import {
 } from './claims'
 import { checkIssuanceIsNotRevoked } from './data'
 import type { PresentationLoginAccount } from './session'
-import { instance } from '../../config'
 
 export const findAccount: FindAccount = async (_ctx, id) => {
   try {
@@ -56,9 +56,9 @@ export function accountToClaims(account: PresentationLoginAccount): AccountClaim
   }
   if (account.faceCheckMatchConfidenceScore) claims.amr = [...presentationLoginStandardClaims['amr'], faceCheckAmr]
 
-  // Temp for Matt Zendesk demo in dev part 2 of 2
+  // Temp for Matt Zendesk demo in dev part 2 of 3
   if (instance === 'dev' && credentialType.toLowerCase() === 'vosupportagent') {
-    claims['preferred_username'] = credentialClaims?.email
+    claims[OpenIdProfileClaim.preferredUsername] = credentialClaims?.email
   }
 
   return claims

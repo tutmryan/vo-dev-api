@@ -63,7 +63,7 @@ async function createProvider() {
 
   const { clients, clientMetadata, resources, resourceScopes } = data
 
-  // Temp for Matt Zendesk demo in dev part 1 of 2
+  // Temp for Matt Zendesk demo in dev part 1 of 3
   if (instance === 'dev') {
     const addSecretToClient = (id: string, secret: string) => {
       const client = clientMetadata.find((client) => client.client_id === id)
