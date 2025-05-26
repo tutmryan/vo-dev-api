@@ -736,10 +736,6 @@ exports[`shield rules are setup correctly 1`] = `
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
       "cache": "contextual"
     },
-    "updateInstanceConfiguration": {
-      "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
-    },
     "saveIdentity": {
       "rulesOr": [
         {

@@ -227,12 +227,6 @@ describe('createContract mutation', () => {
           "extensions": {
             "code": "INTERNAL_SERVER_ERROR",
           },
-          "locations": [
-            {
-              "column": 3,
-              "line": 2,
-            },
-          ],
           "message": "Claims must not include any of: issuanceId, name, identityId, photo",
           "path": [
             "createContract",

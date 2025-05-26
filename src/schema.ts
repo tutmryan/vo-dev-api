@@ -57,18 +57,15 @@ function buildLocalSchema() {
     throw new Error(`The following scalars have no explicit resolvers: ${scalarsWithNoExplicitResolvers.join(', ')}`)
   }
 
-  return schema
+  const schemaWithShield = applyMiddleware(schema, permissions)
+  return schemaWithShield
 }
 
 export default function () {
   const localSchema = buildLocalSchema()
   const platformManagementRemoteSchema = buildRemoteSchema()
   if (!platformManagementRemoteSchema) logger.warn('Platform Management remote schema is not configured in this environment')
-  const schemaWithoutShield = platformManagementRemoteSchema
-    ? stitchSchemas({ subschemas: [localSchema, platformManagementRemoteSchema] })
-    : localSchema
-  const schemaWithShield = applyMiddleware(schemaWithoutShield, permissions)
-  return schemaWithShield
+  return platformManagementRemoteSchema ? stitchSchemas({ subschemas: [localSchema, platformManagementRemoteSchema] }) : localSchema
 }
 
 function requireExplicitResolversForScalars(schema: GraphQLSchema) {
