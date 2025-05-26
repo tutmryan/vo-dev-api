@@ -57,6 +57,11 @@ function buildLogOutput(ctx: Context, oidc: OIDCContext) {
     method,
     path,
     route,
+    requester: {
+      ipAddress: ctx.ip || 'unknown',
+      ipAddresses: ctx.ips,
+      userAgent: ctx.headers['user-agent'] || 'unknown',
+    },
     client: {
       id: Client?.clientId,
       name: Client?.clientName,
