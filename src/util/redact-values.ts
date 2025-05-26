@@ -64,9 +64,24 @@ export function redactValueObjectUnknown(object: Record<string, unknown>) {
     if (keyLower.includes('email')) {
       result[key] = redactValueEmail(value.toString())
     } else if (
-      ['name', 'user', 'phone', 'address', 'secret', 'photo', 'biometric', 'birth', 'dob', 'age', 'nonce', 'state', 'ssn', 'tfn'].some(
-        (keyFragment) => keyLower.includes(keyFragment),
-      ) &&
+      [
+        'name',
+        'user',
+        'phone',
+        'address',
+        'secret',
+        'photo',
+        'biometric',
+        'birth',
+        'dob',
+        'age',
+        'nonce',
+        'state',
+        'ssn',
+        'tfn',
+        // Remove PII from presentation request logging
+        'values',
+      ].some((keyFragment) => keyLower.includes(keyFragment)) &&
       !['claimName'].includes(key)
     ) {
       result[key] = redactValueInner(value.toString())
