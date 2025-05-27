@@ -268,6 +268,14 @@ describe('redactValueObjectUnknown', () => {
       phone: '123-456-7890',
       address: '123 Main St',
       collection: [{ name: 'John Doe' }],
+      presentationRequest: {
+        requestedCredentials: [
+          {
+            type: 'VOSupportAgent',
+            constraints: [{ claimName: 'email', values: ['billy-goat@abcstudios.com'] }],
+          },
+        ],
+      },
       nested: {
         user: {
           name: 'Jane Doe',
@@ -282,6 +290,19 @@ describe('redactValueObjectUnknown', () => {
       name: 'Jo*<redacted>*oe',
       firstName: 'Jo*<redacted>*oe',
       phone: '12*<redacted>*90',
+      presentationRequest: {
+        requestedCredentials: [
+          {
+            constraints: [
+              {
+                claimName: 'email',
+                values: ['bi*<redacted>*om'],
+              },
+            ],
+            type: 'VOSupportAgent',
+          },
+        ],
+      },
       address: '12*<redacted>*St',
       collection: [{ name: 'Jo*<redacted>*oe' }],
       nested: {

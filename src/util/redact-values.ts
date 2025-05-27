@@ -49,7 +49,7 @@ export function redactValueObjectUnknown(object: Record<string, unknown>) {
             if (Array.isArray(item)) return '<redacted-array>'
             return redactValueObjectUnknown(item as Record<string, unknown>)
           }
-          return item
+          return redactValueInner(item.toString())
         })
       } else {
         result[key] = redactValueObjectUnknown(value as Record<string, unknown>)

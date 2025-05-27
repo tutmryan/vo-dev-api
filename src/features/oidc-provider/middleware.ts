@@ -1,3 +1,4 @@
+import { decodeJwt } from 'jose'
 import type Provider from 'oidc-provider'
 import type { OIDCContext } from 'oidc-provider'
 import { logger } from '../../logger'
@@ -25,7 +26,18 @@ export const middleware: Middleware = async (ctx, next) => {
   deleteAccountOnLogout(ctx, oidc)
 
   if (logRequest) {
-    logger.verbose(`post OIDC middleware: ${ctx.method} ${ctx.path}`, buildLogOutput(ctx, oidc))
+    let idToken: object | undefined
+    if (ctx.path === '/token' && ctx.method === 'POST' && 'id_token' in ctx.body) {
+      const decodedIdToken = decodeJwt(ctx.body.id_token as string)
+      idToken = {
+        sub: redactValueEmail(decodedIdToken.sub),
+        ...redactValueObjectUnknown(decodedIdToken),
+      }
+    }
+    logger.verbose(`post OIDC middleware: ${ctx.method} ${ctx.path}`, {
+      ...buildLogOutput(ctx, oidc),
+      ...(idToken ? { idToken } : {}),
+    })
   }
 }
 
