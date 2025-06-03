@@ -1,42 +1,27 @@
-name: Release
+name: Deploy instance (prod)
+# DO NOT CHANGE THE FORMAT OF THE `run-name` FIELD
+# - it follows a standard pattern across all components
+# - it is used to derive the instance, component and environment
+run-name: Deploy ${{ inputs.instance }} api to prod
 
 on:
   workflow_dispatch:
+    inputs:
+      instance:
+        description: 'The instance to deploy'
+        required: true
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ inputs.instance }}
+  cancel-in-progress: true
+
 jobs:
-
-  ci-api:
-    name: CI API
-    uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
-    with:
-      node-version: 22.x
-      audit-script: npm run audit
-      pre-test-script: npm run test:ci:start-db
-      test-script: npm run test:ci
-
-  ci-migrations-package:
-    name: CI Migrations Package
-    uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
-    with:
-      node-version: 22.x
-      audit-script: npm run audit
-      working-directory: ./migrate-db
-
-  ci-docs-site:
-    name: CI Docs Site
-    uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
-    with:
-      node-version: 22.x
-      audit-script: npm run audit
-      working-directory: ./docs-site
 
   build-api:
     name: Build API
-    needs:
-      - ci-api
     uses: makerxstudio/shared-config/.github/workflows/node-build-zip.yml@main
     with:
       node-version: 22.x
@@ -44,8 +29,6 @@ jobs:
 
   build-migrations-package:
     name: Build Migrations Package
-    needs:
-      - ci-migrations-package
     uses: makerxstudio/shared-config/.github/workflows/node-build-zip.yml@main
     with:
       node-version: 22.x
@@ -56,8 +39,6 @@ jobs:
     name: Prepare Docs Site
     # ^^ this means generate GraphQL docs + zip
     runs-on: ubuntu-latest
-    needs:
-      - ci-docs-site
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -113,8 +94,8 @@ jobs:
           path: ./.github/actions
           if-no-files-found: error
 
-  deploy-to-prod:
-    name: Deploy to ${{ matrix.instance }} prod environment
+  deploy:
+    name: Deploy to prod
     runs-on: vo-saas-vnet-runner-prod
     permissions:
       id-token: write
@@ -123,48 +104,17 @@ jobs:
       - build-migrations-package
       - prepare-docs-site
       - upload-other-artifacts
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - instance: sandbox.partner
-            resourceGroup: vo-sandbox-partner-instance
-            resourcePrefix: vo-sandbox-partner
-          - instance: partner
-            resourceGroup: vo-partner-instance
-            resourcePrefix: vo-partner
-          - instance: sandbox.dribl
-            resourceGroup: vo-sandbox-dribl-instance
-            resourcePrefix: vo-sandbox-dribl
-          - instance: barhead
-            resourceGroup: vo-barhead-instance
-            resourcePrefix: vo-barhead
-          - instance: sandbox.barhead
-            resourceGroup: vo-sandbox-barhead-instance
-            resourcePrefix: vo-sandbox-barhead
-          - instance: sandbox.alyve
-            resourceGroup: vo-sandbox-alyve-instance
-            resourcePrefix: vo-sandbox-alyve
-          - instance: sandbox.scw
-            resourceGroup: vo-sandbox-scw-instance
-            resourcePrefix: vo-sandbox-scw
-          - instance: sandbox.cybernexus
-            resourceGroup: vo-sandbox-cybernexus-instance
-            resourcePrefix: vo-sandbox-cybernexus
-          - instance: sandbox.openlearning
-            resourceGroup: vo-sandbox-openlearning-instance
-            resourcePrefix: vo-sandbox-openlearning
-          - instance: sandbox.nelnet
-            resourceGroup: vo-sandbox-nelnet-instance
-            resourcePrefix: vo-sandbox-nelnet
-          - instance: nelnet
-            resourceGroup: vo-nelnet-instance
-            resourcePrefix: vo-nelnet
-
     environment:
-      name: ${{ matrix.instance }}
-      url: ${{ matrix.instance }}.verifiedorchestration.com
+      name: ${{ inputs.instance }}
+      url: https://${{ inputs.instance }}.api.verifiedorchestration.com
     steps:
+      - name: Set variables
+        id: set-vars
+        shell: bash
+        run: |
+          instance=${{ inputs.instance }}
+          echo "resource-group-name=vo-${instance/./-}-instance" >> $GITHUB_ENV
+          echo "resource-prefix=vo-${instance/./-}" >> $GITHUB_ENV
       - name: Download all artifacts
         uses: actions/download-artifact@v4
       - name: Log in to Azure
@@ -178,26 +128,26 @@ jobs:
         id: instance-resource-group
         uses: ./github-actions/resource-group
         with:
-          resource-group-name: ${{ matrix.resourceGroup }}
+          resource-group-name: ${{ env.resource-group-name }}
           resource-group-location: australiaeast
       - name: Instance log analytics
         id: instance-log-analytics
         uses: ./github-actions/log-analytics
         with:
-          resource-group-name: ${{ matrix.resourceGroup }}
-          resource-prefix: ${{ matrix.resourcePrefix }}
+          resource-group-name: ${{ env.resource-group-name }}
+          resource-prefix: ${{ env.resource-prefix }}
       - name: Instance SQL database
         id: instance-sql-db
         uses: ./github-actions/sql-db
         with:
-          resource-prefix: ${{ matrix.resourcePrefix }}
+          resource-prefix: ${{ env.resource-prefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           elastic-pool-name: ${{ vars.SQL_ELASTIC_POOL_NAME }}
       - name: Deploy instance
         id: deploy-instance
         uses: ./github-actions/instance
         with:
-          instance: ${{ matrix.instance }}
+          instance: ${{ inputs.instance }}
           node-env: production
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
@@ -209,9 +159,9 @@ jobs:
           azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
           azure-subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
-          resource-group-name: ${{ matrix.resourceGroup }}
+          resource-group-name: ${{ env.resource-group-name }}
           resource-group-unique-string: ${{ steps.instance-resource-group.outputs.resource-group-unique-string }}
-          resource-prefix: ${{ matrix.resourcePrefix }}
+          resource-prefix: ${{ env.resource-prefix }}
           deployment-service-principal-object-id: ${{ vars.PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
           vnet-name: ${{ vars.PROD_VNET_NAME }}
 
@@ -266,6 +216,6 @@ jobs:
         uses: ./github-actions/sql-db-audit
         with:
           resource-group-name: vo-platform-shared-infra
-          resource-prefix: ${{ matrix.resourcePrefix }}
+          resource-prefix: ${{ env.resource-prefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}

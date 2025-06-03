@@ -49,6 +49,9 @@ const config: DeepPartial<Config> = {
       clientId: 'f3b8e4d5-6dc1-4949-8523-1f5180fa723e',
     },
   },
+  platformManagement: {
+    remoteUrl: 'http://management.api.verifiedorchestration.com/graphql',
+  },
 }
 
 module.exports = config
