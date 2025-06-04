@@ -56,3 +56,5 @@ foreach ($name in $alertsToDelete) {
 if (-not $foundAny) {
   Write-Host "No legacy web tests or alerts found for cleanup."
 }
+
+exit 0
