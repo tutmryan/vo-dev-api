@@ -72,44 +72,44 @@ az ad app update `
 Write-Output 'Set app roles and enabling id token issuance...'
 
 
-$apiSecret = az ad app credential list `
-  --id $appRegistrationObjectId | `
-  ConvertFrom-Json | `
-  Where-Object -FilterScript { $_.displayName -eq $constants.apiSecretName }[0]
+function Test-SecretExpiringSoon {
+  param (
+    [Parameter(Mandatory = $true)]
+    [string]$EndDateTime,
+    [int]$ThresholdDays = 90
+  )
 
-if ($null -ne $apiSecret) {
-  Write-Output ('Found an existing API secret expiring on {0}' -f $apiSecret.endDateTime)
-} else {
-  Write-Output ('Creating a new API secret')
-
-  $newApiSecret = az ad app credential reset `
-    --append `
-    --id $appRegistrationObjectId `
-    --display-name $constants.apiSecretName `
-    --years 2 | ConvertFrom-Json
-
-  Write-Output ('Created a new API secret')
-  Write-Output "apiSecret=$($newApiSecret.password)" >> $Env:GITHUB_OUTPUT
+  $expiry = [datetime]::Parse($EndDateTime)
+  return (($expiry - (Get-Date)).TotalDays -lt $ThresholdDays)
 }
 
+function Set-AppSecretIfExpired {
+  param (
+    [Parameter(Mandatory = $true)][string]$AppId,
+    [Parameter(Mandatory = $true)][string]$SecretName,
+    [Parameter(Mandatory = $true)][string]$EnvOutputKey
+  )
 
-$staticSiteSecret = az ad app credential list `
-  --id $appRegistrationObjectId | `
-  ConvertFrom-Json | `
-  Where-Object -FilterScript { $_.displayName -eq $constants.staticSiteSecretName }[0]
-if ($null -ne $staticSiteSecret) {
-  Write-Output ('Found an existing static site AUTH secret expiring on {0}' -f $staticSiteSecret.endDateTime)
-} else {
-  Write-Output ('Creating a new static site AUTH secret')
-  $newStaticSiteSecret = az ad app credential reset `
-    --append `
-    --id $appRegistrationObjectId `
-    --display-name $constants.staticSiteSecretName `
-    --years 2 |  ConvertFrom-Json
+  $secret = az ad app credential list --id $AppId | ConvertFrom-Json |
+  Where-Object { $_.displayName -eq $SecretName } | Select-Object -First 1
 
-  Write-Output ('Created a new static site AUTH secret')
-  Write-Output "staticSiteSecret=$($newStaticSiteSecret.password)" >> $Env:GITHUB_OUTPUT
+  if (-not $secret -or (Test-SecretExpiringSoon -EndDateTime $secret.endDateTime)) {
+    Write-Output ('{0} secret is missing or expiring soon. Rotating...' -f $SecretName)
+    $newSecret = az ad app credential reset `
+      --append `
+      --id $AppId `
+      --display-name $SecretName `
+      --years 2 | ConvertFrom-Json
+
+    Write-Output "Created new $SecretName secret"
+    Write-Output "$EnvOutputKey=$($newSecret.password)" >> $Env:GITHUB_OUTPUT
+  } else {
+    Write-Output ('Found valid existing {0} secret expiring on {1}' -f $SecretName, $secret.endDateTime)
+  }
 }
+
+Set-AppSecretIfExpired -AppId $appRegistrationObjectId -SecretName $constants.apiSecretName -EnvOutputKey 'apiSecret'
+Set-AppSecretIfExpired -AppId $appRegistrationObjectId -SecretName $constants.staticSiteSecretName -EnvOutputKey 'staticSiteSecret'
 
 $setInformationalUrlsPayload = @{
   info = @{
