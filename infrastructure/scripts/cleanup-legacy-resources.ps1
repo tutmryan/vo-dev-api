@@ -10,7 +10,6 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$PSNativeCommandUseErrorActionPreference = $true
 
 $webTestsToDelete = @(
   "$ResourcePrefix-msgraphservice-health-test",
