@@ -1021,6 +1021,66 @@ exports[`shield rules are setup correctly 1`] = `
     "deleteOidcClientResource": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
       "cache": "contextual"
+    },
+    "revokeIssuance": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "revokeIssuances": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "revokeContractIssuances": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "revokeIdentityIssuances": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "revokeUserIssuances": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
     }
   },
   "Subscription": {
