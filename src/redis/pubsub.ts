@@ -65,7 +65,7 @@ export function subscribeToCachedEvents<TEventData>({
       // eagerly end iteration when done
       if (done) return { done: true, value: undefined }
 
-      // on the first iteraction, check for cached final event data
+      // on the first iteration, check for cached final event data
       if (count++ === 0) {
         const cached = await getFromCache(eventId)
         if (cached && eventIsFinal(cached)) {

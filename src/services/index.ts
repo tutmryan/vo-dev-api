@@ -57,17 +57,17 @@ function createGraphService() {
 export async function testGraphService(): Promise<boolean> {
   const graphService = createGraphService()
 
-  if (!graphService.isConfigured) {
-    return true // Considered 'OK' if the service is not configured
-  }
+  // This service is optional, so if it's not configured, we consider it healthy
+  if (!graphService.isConfigured) return true
 
   try {
     await graphService.findUsers({ nameStartsWith: 'a' }, 1)
     return true
   } catch (error) {
     logger.error('Test for MS Graph service integration failed', { error })
-    return false
   }
+
+  return false
 }
 
 export function createVerifiedIdAdminService(logger: BaseContext['logger'], correlationId?: string) {
@@ -96,8 +96,9 @@ export async function testVidService(): Promise<boolean> {
     return true
   } catch (error) {
     logger.error('Test for VID service integration failed', { error })
-    return false
   }
+
+  return false
 }
 
 function createVerifiedIdRequestService(context: BaseContext) {

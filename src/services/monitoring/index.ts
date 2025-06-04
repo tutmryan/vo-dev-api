@@ -1,22 +1,30 @@
 import { testGraphService, testVidService } from '..'
 
-export type ServiceState = {
-  ['ms-graph']: boolean | undefined
-  ['verified-id']: boolean | undefined
+export const monitoredServices = {
+  MSGraph: 'ms-graph',
+  VerifiedID: 'verified-id',
+} as const
+
+type MonitoredService = (typeof monitoredServices)[keyof typeof monitoredServices]
+export type ServiceState = Record<MonitoredService, boolean>
+
+// Default to successful (true) to avoid false positives on startup
+const serviceStatuses: ServiceState = {
+  [monitoredServices.MSGraph]: true,
+  [monitoredServices.VerifiedID]: true,
 }
 
-export const serviceState: ServiceState = {
-  'ms-graph': undefined,
-  'verified-id': undefined,
+export function getServiceStatus(service: MonitoredService): boolean {
+  return serviceStatuses[service]
 }
 
 export async function testServices(): Promise<ServiceState> {
   return {
-    'ms-graph': await testGraphService(),
-    'verified-id': await testVidService(),
+    [monitoredServices.MSGraph]: await testGraphService(),
+    [monitoredServices.VerifiedID]: await testVidService(),
   }
 }
 
 export function updateServiceState(newState: ServiceState): void {
-  Object.assign(serviceState, newState)
+  Object.assign(serviceStatuses, newState)
 }

@@ -42,3 +42,5 @@ registerInstrumentations({
   tracerProvider,
   instrumentations,
 })
+
+import './metrics-setup'

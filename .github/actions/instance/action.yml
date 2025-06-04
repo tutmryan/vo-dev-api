@@ -408,6 +408,14 @@ runs:
         subscription-id: ${{ inputs.azure-subscription-id }}
         enable-AzPSSession: true
 
+    - name: Clean up legacy resources
+      id: clean-up-legacy-resources
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/cleanup-legacy-resources.ps1
+        -ResourceGroupName '${{ inputs.resource-group-name }}'
+        -ResourcePrefix '${{ inputs.resource-prefix }}'
+
     - name: Set up CNAME record for API domain
       id: set-up-api-cname-record
       shell: pwsh

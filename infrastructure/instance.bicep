@@ -1426,7 +1426,7 @@ resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
     'hidden-link:${apiAppInsights.id}': 'Resource'
   }
   properties: {
-    Description: 'Availbility test for the API'
+    Description: 'Availbility test for the API using the well known oidc endpoint'
     Enabled: true
     Frequency: availabilityTestFrequency
     Kind: 'standard'
@@ -1435,12 +1435,19 @@ resource apiAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
     Request: {
       HttpVerb: 'GET'
       ParseDependentRequests: false
-      RequestUrl: 'https://${instance}.api.${domain}/health'
+      RequestUrl: 'https://${instance}.api.${domain}/oidc/.well-known/openid-configuration'
     }
     RetryEnabled: true
     SyntheticMonitorId: '${resourcePrefix}-api-availability-webtest'
     Timeout: 30
-    ValidationRules: commonValidationRules
+    ValidationRules: {
+      ...commonValidationRules
+      ContentValidation: {
+        ContentMatch: '"issuer"' // Validate JSON by checking the presence of the key "issuer"
+        IgnoreCase: true
+        PassIfTextFound: true
+      }
+    }
   }
 }
 
@@ -1475,55 +1482,36 @@ resource apiAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if 
   }
 }
 
-resource msGraphServiceHealthTest 'Microsoft.Insights/webtests@2022-06-15' = {
-  name: '${resourcePrefix}-msgraphservice-health-test'
-  location: location
-  kind: 'standard'
-  tags: {
-    'hidden-link:${apiAppInsights.id}': 'Resource'
-  }
-  properties: {
-    Description: 'Health check for MS Graph service'
-    Enabled: true
-    Frequency: availabilityTestFrequency
-    Kind: 'standard'
-    Locations: availabilityTestLocations
-    Name: '${resourcePrefix}-msgraphservice-health-webtest'
-    Request: {
-      HttpVerb: 'GET'
-      ParseDependentRequests: false
-      RequestUrl: 'https://${instance}.api.${domain}/health/services/ms-graph'
-    }
-    RetryEnabled: true
-    SyntheticMonitorId: '${resourcePrefix}-msgraphservice-health-webtest'
-    Timeout: 30
-    ValidationRules: commonValidationRules
-  }
-}
-
-resource msGraphServiceHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
-  name: '${resourcePrefix}-msgraphservice-health-alert'
+resource msGraphServiceHealthAlert 'microsoft.insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
+  name: '${resourcePrefix}-msgraphservice-health-alert-v2'
   location: 'global'
-  tags: {
-    'hidden-link:${apiAppInsights.id}': 'Resource'
-    'hidden-link:${msGraphServiceHealthTest.id}': 'Resource'
-  }
   properties: {
     description: 'Triggers when MS Graph service health check fails'
     severity: 1
     enabled: true
     scopes: [
       apiAppInsights.id
-      msGraphServiceHealthTest.id
     ]
-    evaluationFrequency: alertEvaluationFrequency
-    windowSize: alertWindowSize
+    evaluationFrequency: 'PT1M'
+    windowSize: 'PT5M'
     criteria: {
-      'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
-      webTestId: msGraphServiceHealthTest.id
-      componentId: apiAppInsights.id
-      failedLocationCount: 2
+      allOf: [
+        {
+          threshold: json('1')
+          name: 'Metric1'
+          metricNamespace: 'Azure.ApplicationInsights'
+          metricName: 'ms-graph-service'
+          operator: 'LessThan'
+          timeAggregation: 'Minimum'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+      ]
+      'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
     }
+    autoMitigate: true
+    targetResourceType: 'Microsoft.Insights/components'
+    targetResourceRegion: 'australiaeast'
     actions: [
       {
         actionGroupId: actionGroupAlertId
@@ -1532,119 +1520,36 @@ resource msGraphServiceHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' 
   }
 }
 
-resource vidServiceHealthTest 'Microsoft.Insights/webtests@2022-06-15' = {
-  name: '${resourcePrefix}-vidservice-health-test'
-  location: location
-  kind: 'standard'
-  tags: {
-    'hidden-link:${apiAppInsights.id}': 'Resource'
-  }
-  properties: {
-    Description: 'Health check for Verified ID service'
-    Enabled: true
-    Frequency: availabilityTestFrequency
-    Kind: 'standard'
-    Locations: availabilityTestLocations
-    Name: '${resourcePrefix}-vidservice-health-webtest'
-    Request: {
-      HttpVerb: 'GET'
-      ParseDependentRequests: false
-      RequestUrl: 'https://${instance}.api.${domain}/health/services/verified-id'
-    }
-    RetryEnabled: true
-    SyntheticMonitorId: '${resourcePrefix}-vidservice-health-webtest'
-    Timeout: 30
-    ValidationRules: commonValidationRules
-  }
-}
-
 resource vidServiceHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
-  name: '${resourcePrefix}-vidservice-health-alert'
+  name: '${resourcePrefix}-vidservice-health-alert-v2'
   location: 'global'
-  tags: {
-    'hidden-link:${apiAppInsights.id}': 'Resource'
-    'hidden-link:${vidServiceHealthTest.id}': 'Resource'
-  }
   properties: {
     description: 'Triggers when Verified ID service health check fails'
     severity: 1
     enabled: true
     scopes: [
       apiAppInsights.id
-      vidServiceHealthTest.id
     ]
-    evaluationFrequency: alertEvaluationFrequency
-    windowSize: alertWindowSize
+    evaluationFrequency: 'PT1M'
+    windowSize: 'PT5M'
     criteria: {
-      'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
-      webTestId: vidServiceHealthTest.id
-      componentId: apiAppInsights.id
-      failedLocationCount: 2
+      allOf: [
+        {
+          threshold: json('1')
+          name: 'Metric1'
+          metricNamespace: 'Azure.ApplicationInsights'
+          metricName: 'verified-id-service'
+          operator: 'LessThan'
+          timeAggregation: 'Minimum'
+          skipMetricValidation: false
+          criterionType: 'StaticThresholdCriterion'
+        }
+      ]
+      'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
     }
-    actions: [
-      {
-        actionGroupId: actionGroupAlertId
-      }
-    ]
-  }
-}
-
-resource oidcAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
-  name: '${resourcePrefix}-oidc-availability-test'
-  location: location
-  kind: 'standard'
-  tags: {
-    'hidden-link:${apiAppInsights.id}': 'Resource'
-  }
-  properties: {
-    Description: 'Availability test for the OIDC endpoint'
-    Enabled: true
-    Frequency: availabilityTestFrequency
-    Kind: 'standard'
-    Locations: availabilityTestLocations
-    Name: '${resourcePrefix}-oidc-availability-webtest'
-    Request: {
-      HttpVerb: 'GET'
-      ParseDependentRequests: false
-      RequestUrl: 'https://${instance}.api.${domain}/oidc/.well-known/openid-configuration'
-    }
-    RetryEnabled: true
-    SyntheticMonitorId: '${resourcePrefix}-oidc-availability-webtest'
-    Timeout: 30
-    ValidationRules: {
-      ...commonValidationRules
-      ContentValidation: {
-        ContentMatch: '"issuer"' // Validate JSON by checking the presence of the key "issuer"
-        IgnoreCase: true
-        PassIfTextFound: true
-      }
-    }
-  }
-}
-
-resource oidcAvailabilityAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
-  name: '${resourcePrefix}-oidc-availability-alert'
-  location: 'global'
-  tags: {
-    'hidden-link:${apiAppInsights.id}': 'Resource'
-    'hidden-link:${oidcAvailabilityTest.id}': 'Resource'
-  }
-  properties: {
-    description: 'Triggers when OIDC healthchecks fail'
-    severity: 0
-    enabled: true
-    scopes: [
-      apiAppInsights.id
-      oidcAvailabilityTest.id
-    ]
-    evaluationFrequency: alertEvaluationFrequency
-    windowSize: alertWindowSize
-    criteria: {
-      'odata.type': 'Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria'
-      webTestId: oidcAvailabilityTest.id
-      componentId: apiAppInsights.id
-      failedLocationCount: 2
-    }
+    autoMitigate: true
+    targetResourceType: 'Microsoft.Insights/components'
+    targetResourceRegion: 'australiaeast'
     actions: [
       {
         actionGroupId: actionGroupAlertId
