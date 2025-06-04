@@ -2,18 +2,22 @@
 sidebar_position: 13
 ---
 
+import { AdminLink } from '@site/src/components/admin-link'
+
 # Instance configuration
 
 The following configuration settings can be administered for each instance of the Verified Orchestration platform.
 
-Send your configuration values to the Verified Orchestration team.
+These settings are controlled via the <AdminLink path="/configuration">Configuration</AdminLink> page in Composer.
+
+To change settings, you will need to be a member of the [Instance admin user role](/docs/guides/onboarding-users#instance-admin).
 
 ## CORS origins
 
-If you are accessing the Verified Orchestration API from a web application, CORS origins will need to be configured against each instance (sandbox and production).
+If you are accessing the Verified Orchestration API or OIDC endpoint from a web application, CORS origins will need to be configured against each instance (sandbox and production).
 
-- Subdomains can be matched using a regular expression; e.g. `^https://([a-z0-9]+[.])+yourcompany\\.com$`
-- For your sandbox, you may want to allow local development origins e.g. `^http://localhost:\d+$`
+- Subdomains can be matched using a regular expression; e.g. `^https://([a-z0-9]+[.])*yourcompany\.com$`
+- For your sandbox, you may want to allow local development origins e.g. `^http(s?)://localhost(:\d+)?$`
 
 ## Additional tenant IDs
 
@@ -50,12 +54,11 @@ Example issuer label mapping:
 
 The Verified Orchestration API uses GraphQL for querying and mutating data. To ensure the API is not misused, the following security settings are configured out of the box with sensible defaults. However, these settings can be adjusted to suit your requirements.
 
-
-
 | Rule           | Default | Description                                           |
-|----------------|---------|-------------------------------------------------------|
+| -------------- | ------- | ----------------------------------------------------- |
 | Max Aliases    | 30      | Limit the number of aliases in a GraphQL document.    |
 | Max Depth      | 12      | Limit the depth of a GraphQL document.                |
 | Max Directives | 50      | Limit the number of directives in a GraphQL document. |
 | Max Tokens     | 2500    | Limit the number of tokens in a GraphQL document.     |
 
+If you need to adjust GraphQL security settings, please contact the Verified Orchestration team to make changes on your behalf.
