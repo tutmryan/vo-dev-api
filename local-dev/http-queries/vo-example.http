@@ -1,0 +1,55 @@
+// The Azure AD V2 login flow is used to authenticate users and obtain an access token for Microsoft Graph API or Client API.
+// Note this flow uses the device code flow, and requires the Entra ID App to Allow public client flows
+@AADV2_LOGIN={{$aadV2Token scopes:f24dc8de-66da-4b8b-928b-be4c6657d1cc/.default,openid,profile,offline_access tenantId:a4577872-4a36-4a93-9846-b29a1220ca89 clientId:f24dc8de-66da-4b8b-928b-be4c6657d1cc }}
+
+###
+# Query the API for Me
+# @name queryMe
+POST https://50a03284edd1.ngrok.app/graphql
+Content-Type: application/json
+Authorization: Bearer {{AADV2_LOGIN}}
+X-REQUEST-TYPE: GraphQL
+
+query {
+  me {
+    ... on User {
+      id
+      email
+      isApp
+      name
+    }
+    ... on Identity {
+      id
+      issuer
+      issuerLabel
+      identifier
+      name
+      isDeletable
+      issuanceCount
+    }
+  }
+}
+
+###
+# Find identities matching the name returned from the queryMe
+# @name findIdentities
+POST https://50a03284edd1.ngrok.app/graphql
+Content-Type: application/json
+Authorization: Bearer {{AADV2_LOGIN}}
+X-REQUEST-TYPE: GraphQL
+
+query($where: IdentityWhere) {
+  findIdentities(where: $where) {
+    id
+    name
+    issuer
+    issuerLabel
+    identifier
+  }
+}
+
+{
+  "where": {
+    "name": "{{queryMe.response.body.data.me.name}}"
+  }
+}

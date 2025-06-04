@@ -1,13 +1,16 @@
 {
   "recommendations": [
+    "davidanson.vscode-markdownlint",
+    "dbaeumer.vscode-eslint",
     "EditorConfig.EditorConfig",
     "esbenp.prettier-vscode",
-    "dbaeumer.vscode-eslint",
+    "github.vscode-github-actions",
+    "graphql.vscode-graphql-syntax",
     "GraphQL.vscode-graphql",
-    "Orta.vscode-jest",
-    "ms-vscode.powershell",
+    "humao.rest-client",
     "ms-azuretools.vscode-bicep",
-    "redhat.vscode-yaml",
-    "davidanson.vscode-markdownlint"
+    "ms-vscode.powershell",
+    "Orta.vscode-jest",
+    "redhat.vscode-yaml"
   ]
 }

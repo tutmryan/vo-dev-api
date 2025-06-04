@@ -1,0 +1,50 @@
+// These configurations values are for the DEV environment.
+@PLATFORM_TENANT_ID = 5c14bb50-7602-4c0d-b785-5dee865e4665
+@BASE_URL=https://verifiedid.did.msidentity.com
+@APP_SCOPE=6a8b4b39-c021-437c-b060-5a14a3fd65f3/.default
+@API_CLIENT_ID=f24dc8de-66da-4b8b-928b-be4c6657d1cc
+@API_CLIENT_SECRET={{$dotenv API_CLIENT_SECRET}}
+@VID_AUTHORITY_ID=5db71aa7-41ed-9199-40f5-54c789d7d5a4
+
+###
+# Authenticate as a client application
+# @name login
+POST https://login.microsoftonline.com/{{PLATFORM_TENANT_ID}}/oauth2/v2.0/token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+client_id={{API_CLIENT_ID}}
+&client_secret={{API_CLIENT_SECRET}}
+&grant_type=client_credentials
+&scope={{APP_SCOPE}}
+
+###
+# MS Admin List authorities
+# @name listAuthorities
+@BEARER_TOKEN = {{login.response.body.access_token}}
+
+GET {{BASE_URL}}/v1.0/verifiableCredentials/authorities HTTP/1.1
+Authorization: Bearer {{BEARER_TOKEN}}
+
+###
+# MS Admin Get authority
+# @name getAuthority
+@BEARER_TOKEN = {{login.response.body.access_token}}
+
+GET {{BASE_URL}}/v1.0/verifiableCredentials/authorities/{{VID_AUTHORITY_ID}} HTTP/1.1
+Authorization: Bearer {{BEARER_TOKEN}}
+
+###
+# MS generate well-known DID configuration
+# @name generateWellKnown
+@BEARER_TOKEN = {{login.response.body.access_token}}
+
+POST {{BASE_URL}}/v1.0/verifiableCredentials/authorities/{{VID_AUTHORITY_ID}}/generateDidDocument HTTP/1.1
+Authorization: Bearer {{BEARER_TOKEN}}
+
+###
+# MS validate well-known DID configuration
+# @name validateVelKnown
+@BEARER_TOKEN = {{login.response.body.access_token}}
+
+POST {{BASE_URL}}/v1.0/verifiableCredentials/authorities/{{VID_AUTHORITY_ID}}/validateWellKnownDidConfiguration HTTP/1.1
+Authorization: Bearer {{BEARER_TOKEN}}
