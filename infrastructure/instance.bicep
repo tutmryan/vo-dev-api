@@ -1503,7 +1503,7 @@ resource msGraphServiceHealthAlert 'microsoft.insights/metricAlerts@2018-03-01' 
           metricName: 'ms-graph-service'
           operator: 'LessThan'
           timeAggregation: 'Minimum'
-          skipMetricValidation: false
+          skipMetricValidation: true
           criterionType: 'StaticThresholdCriterion'
         }
       ]
@@ -1541,7 +1541,7 @@ resource vidServiceHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if
           metricName: 'verified-id-service'
           operator: 'LessThan'
           timeAggregation: 'Minimum'
-          skipMetricValidation: false
+          skipMetricValidation: true
           criterionType: 'StaticThresholdCriterion'
         }
       ]
