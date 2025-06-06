@@ -1,8 +1,8 @@
 import { omit } from 'lodash'
 import type { Account, AccountClaims, FindAccount } from 'oidc-provider'
 import { oidcStorageService } from '.'
-import { instance } from '../../config'
 import { logger } from '../../logger'
+import { mergeWithArrays } from '../../util/merge'
 import {
   faceCheckAmr,
   OpenIdEmailClaim,
@@ -34,7 +34,7 @@ export const findAccount: FindAccount = async (_ctx, id) => {
 }
 
 export function accountToClaims(account: PresentationLoginAccount): AccountClaims {
-  const { accountId: sub, presentationId, issuanceId, identity, did, credentialType, credentialClaims } = account
+  const { accountId: sub, presentationId, issuanceId, identity, did, credentialType, credentialClaims, mappedCredentialClaims } = account
   const hasIdentity = !!identity
   const presentationClaimData = hasIdentity ? omit(credentialClaims, 'name') : credentialClaims
   const claims: AccountClaims = {
@@ -56,12 +56,8 @@ export function accountToClaims(account: PresentationLoginAccount): AccountClaim
   }
   if (account.faceCheckMatchConfidenceScore) claims.amr = [...presentationLoginStandardClaims['amr'], faceCheckAmr]
 
-  // Temp for Matt Zendesk demo in dev part 2 of 3
-  if (instance === 'dev' && credentialType.toLowerCase() === 'vosupportagent') {
-    claims[OpenIdProfileClaim.PreferredUsername] = credentialClaims?.email
-  }
-
-  return claims
+  // merge mapped claims into the standard claims
+  return mergeWithArrays(mappedCredentialClaims, claims)
 }
 
 function normalizeBoolean(value: unknown): boolean | undefined {

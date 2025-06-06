@@ -9,6 +9,7 @@ import { addUserToManager } from '../auditing/user-context-helper'
 import { IssuanceEntity } from '../issuance/entities/issuance-entity'
 import { PartnerEntity } from '../partners/entities/partner-entity'
 import { createSystemUser, SYSTEM_USER_OID, UserEntity } from '../users/entities/user-entity'
+import { mappedClaims, resourceScopes, staticDemoClaimMappings, type ClaimMapping } from './claims'
 import { OidcClientEntity } from './entities/oidc-client-entity'
 import { OidcClientResourceEntity } from './entities/oidc-client-resource-entity'
 import { OidcResourceEntity } from './entities/oidc-resource-entity'
@@ -24,6 +25,8 @@ export type OidcData = {
   resources: OidcResourceEntity[]
   resourceScopes: Record<string, string[]>
   partners: PartnerEntity[]
+  claimMappings: ClaimMapping[]
+  mappedClaims?: Record<string, string[]>
 }
 
 export async function loadOidcData(): Promise<OidcData> {
@@ -32,8 +35,10 @@ export async function loadOidcData(): Promise<OidcData> {
     clients,
     clientMetadata: clients.map(toOidcClientMetadata),
     resources,
-    resourceScopes: resources.reduce<Record<string, string[]>>((acc, r) => ({ ...acc, [r.resourceIndicator]: r.scopes }), {}),
+    resourceScopes: resourceScopes(resources),
     partners,
+    claimMappings: staticDemoClaimMappings,
+    mappedClaims: mappedClaims(staticDemoClaimMappings),
   }
 }
 

@@ -1,8 +1,10 @@
+import { isLocalDev } from '@makerx/node-common'
+import { renderFile } from 'ejs'
 import type { Configuration, UnknownObject } from 'oidc-provider'
+import path from 'path'
+import { instance } from '../../config'
 import type { VerifiedOrchestrationEntity } from '../../data/verified-orchestration-entity'
 import { logger } from '../../logger'
-import { renderFile } from 'ejs'
-import path from 'path'
 import type { AuditedAndTrackedEntity } from '../auditing/entities/audited-and-tracked-entity'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
 import { voLogoUrl } from './logos'
@@ -58,5 +60,6 @@ export const errorHandler: Configuration['renderError'] = async (ctx, errorOut, 
     logoUrl: logo,
     backgroundColor,
     backgroundImageUrl: backgroundImage,
+    showDebug: isLocalDev || instance === 'dev',
   })
 }

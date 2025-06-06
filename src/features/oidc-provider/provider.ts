@@ -1,4 +1,4 @@
-import type { Constructor } from '@graphql-tools/utils'
+import { type Constructor } from '@graphql-tools/utils'
 import type { Express, RequestHandler } from 'express'
 import type { JWK } from 'jose'
 import { debounce } from 'lodash'
@@ -10,6 +10,7 @@ import { pubsub } from '../../redis/pubsub'
 import { dynamicImport } from '../../util/dynamic-import'
 import { invariant } from '../../util/invariant'
 import { Lazy } from '../../util/lazy'
+import { mergeWithArrays } from '../../util/merge'
 import { throwError } from '../../util/throw-error'
 import { findAccount } from './account'
 import { openidClaims, presentationLoginStandardClaims } from './claims'
@@ -61,7 +62,7 @@ async function createProvider() {
   if (dataPromise.status === 'rejected') throw dataPromise.reason
   const data = { ...dataPromise.value, keys: jwksKeys }
 
-  const { clients, clientMetadata, resources, resourceScopes } = data
+  const { clients, clientMetadata, resources, resourceScopes, mappedClaims } = data
 
   // Temp for Matt Zendesk demo in dev part 1 of 3
   if (instance === 'dev') {
@@ -75,6 +76,8 @@ async function createProvider() {
     addSecretToClient('8258a626-b6a2-4751-aca7-4693f4f32d22', 'demo-secret')
   }
 
+  const claims = mergeWithArrays(openidClaims, resourceScopes, mappedClaims)
+
   const provider = new Provider(issuer, {
     clients: clientMetadata,
     clientAuthMethods: ['none'],
@@ -83,7 +86,7 @@ async function createProvider() {
       keys: [cookieSession.secret ?? throwError('cookieSession.secret is required')],
     },
     acrValues: [presentationLoginStandardClaims.acr],
-    claims: { ...openidClaims, ...resourceScopes },
+    claims,
     conformIdTokenClaims: false,
     extraTokenClaims,
     issueRefreshToken,

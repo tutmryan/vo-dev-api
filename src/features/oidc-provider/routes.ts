@@ -182,6 +182,9 @@ export function routes(app: Express, route: string): void {
       const loginInteractionData = await getLoginInteractionData(uid)
       invariant(loginInteractionData, 'login interaction data not found')
 
+      const uniqueClaimsForSubjectId = getClient(clientId).uniqueClaimsForSubjectId ?? []
+      const claimMappings = getData().claimMappings.filter((mapping) => mapping.clientIds.includes(clientId))
+
       const loginResult = await completeLogin(
         {
           interactionId: uid,
@@ -189,7 +192,8 @@ export function routes(app: Express, route: string): void {
           clientId,
           uniqueClaimForSubParam: params.vc_unique_claim_for_sub as string | undefined,
         },
-        getClient(clientId).uniqueClaimsForSubjectId ?? [],
+        uniqueClaimsForSubjectId,
+        claimMappings,
       )
 
       logger.audit('OIDC login complete', {
