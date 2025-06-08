@@ -1,7 +1,7 @@
 import type { EntitySubscriberInterface, InsertEvent, UpdateEvent } from 'typeorm'
 import { EventSubscriber } from 'typeorm'
+import { getUserFromManager } from '../../data/user-context-helper'
 import { AuditedAndTrackedEntity } from './entities/audited-and-tracked-entity'
-import { getUserFromManager } from './user-context-helper'
 
 @EventSubscriber()
 export class TrackingEventSubscriber implements EntitySubscriberInterface {

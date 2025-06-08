@@ -1,6 +1,6 @@
 import type { EntityManager } from 'typeorm'
-import type { VerifiedOrchestrationEntityManager } from '../../data/entity-manager'
-import { throwError } from '../../util/throw-error'
+import { throwError } from '../util/throw-error'
+import type { VerifiedOrchestrationEntityManager } from './entity-manager'
 
 const contextMap = new WeakMap<EntityManager | VerifiedOrchestrationEntityManager, string>()
 

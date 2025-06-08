@@ -1,6 +1,6 @@
 import type { CommandContext } from '../cqs'
 import { dataSource, ISOLATION_LEVEL } from '../data'
-import { addUserToManager } from '../features/auditing/user-context-helper'
+import { addUserToManager } from '../data/user-context-helper'
 import { createDatabase, dropDatabase } from '../util/local-database-init'
 
 export const setup = async () => {

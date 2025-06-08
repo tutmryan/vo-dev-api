@@ -1,11 +1,11 @@
 import { codeExpiryMinutes, isThrottledOrSetThrottle, setVerificationCode } from '..'
 import type { TransactionalCommandContext } from '../../../cqs'
+import { addUserToManager } from '../../../data/user-context-helper'
 import type { SendAsyncIssuanceVerificationResponse } from '../../../generated/graphql'
 import { CommunicationError } from '../../../services/communications-service'
 import { invariant } from '../../../util/invariant'
 import { randomDigits } from '../../../util/random-digits'
 import { AsyncIssuanceEntity } from '../../async-issuance/entities/async-issuance-entity'
-import { addUserToManager } from '../../auditing/user-context-helper'
 
 export async function SendAsyncIssuanceVerificationCommand(
   this: TransactionalCommandContext,

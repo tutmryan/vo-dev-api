@@ -1,7 +1,7 @@
 import type { CommandContext, QueryContext, TransactionalCommandContext } from '.'
 import type { GraphQLContext } from '../context'
 import { entityManager, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../data'
-import { addUserToManager } from '../features/auditing/user-context-helper'
+import { addUserToManager } from '../data/user-context-helper'
 import { userIsUserEntity } from '../util/user-invariant'
 import { performFeatureCheck } from './feature-map'
 

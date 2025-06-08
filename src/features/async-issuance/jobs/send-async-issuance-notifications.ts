@@ -1,9 +1,9 @@
 import type { JobHandler, JobPayload } from '../../../background-jobs/jobs'
 import type { JobType } from '../../../background-jobs/queue'
 import { dataSource, ISOLATION_LEVEL } from '../../../data'
+import { addUserToManager } from '../../../data/user-context-helper'
 import { CommunicationError } from '../../../services/communications-service'
 import { isObject } from '../../../util/type-helpers'
-import { addUserToManager } from '../../auditing/user-context-helper'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 import { sendAsyncIssuanceNotification } from '../notification'
 
