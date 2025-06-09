@@ -1,5 +1,5 @@
 import { IsNull } from 'typeorm'
-import { addToJobQueue } from '../../../background-jobs/queue'
+import { addToJobQueue } from '../../../background-jobs'
 import type { CommandContext } from '../../../cqs'
 import type { ActionApprovalRequestInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
@@ -24,7 +24,7 @@ export async function ActionApprovalRequestCommand(this: CommandContext, id: str
 
   const approvedRequest = await repo.findOneByOrFail({ id })
   if (approvedRequest.callbackInput)
-    await addToJobQueue({ name: 'invokeApprovalCallback', payload: { userId: user.entity.id, approvedRequestId: approvedRequest.id } })
+    await addToJobQueue('invokeApprovalCallback', { userId: user.entity.id, approvedRequestId: approvedRequest.id })
 
   return approvedRequest
 }

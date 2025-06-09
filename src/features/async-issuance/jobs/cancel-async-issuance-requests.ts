@@ -1,21 +1,17 @@
-import type { Job } from 'bullmq'
 import { type FindOptionsWhere, In } from 'typeorm'
-import type { JobHandler, JobPayload, WorkerContext } from '../../../background-jobs/jobs'
-import type { JobType } from '../../../background-jobs/queue'
+import type { HandlerContext, JobHandler } from '../../../background-jobs/jobs'
 import { dataSource, ISOLATION_LEVEL } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
 import { invariant } from '../../../util/invariant'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 import { convertAsyncIssuanceExpiryDaysToRequestExpiry } from '../index'
 
-export type CancelAsyncIssuanceRequestsJobName = 'cancelAsyncIssuanceRequests'
-export type CancelAsyncIssuanceRequestsJobPayload = JobPayload & { asyncIssuanceRequestIds: string[] }
-export type CancelAsyncIssuanceRequestsJobType = JobType<CancelAsyncIssuanceRequestsJobName, CancelAsyncIssuanceRequestsJobPayload>
+export type CancelAsyncIssuanceRequestsJobPayload = { asyncIssuanceRequestIds: string[] }
 
-export const cancelAsyncIssuanceRequestsHandler: JobHandler<CancelAsyncIssuanceRequestsJobPayload> = async (context, job) =>
-  cancelAsyncIssuanceRequests(job, context, { id: In(job.data.asyncIssuanceRequestIds) })
+export const cancelAsyncIssuanceRequestsHandler: JobHandler<CancelAsyncIssuanceRequestsJobPayload> = async (context, payload) =>
+  cancelAsyncIssuanceRequests(context, { id: In(payload.asyncIssuanceRequestIds) })
 
-const cancelAsyncIssuanceRequests = async (job: Job, context: WorkerContext, where: FindOptionsWhere<AsyncIssuanceEntity>) => {
+const cancelAsyncIssuanceRequests = async (context: HandlerContext, where: FindOptionsWhere<AsyncIssuanceEntity>) => {
   const errorMessages = []
   const {
     logger,
@@ -49,7 +45,7 @@ const cancelAsyncIssuanceRequests = async (job: Job, context: WorkerContext, whe
       logger.error(`Error occurred when canceling the async issuance request ${request.id}`, err)
       errorMessages.push(`Error occurred when canceling the async issuance request ${request.id}: ${(err as Error).message}`)
     } finally {
-      await job.updateProgress(Math.floor(((i + 1) / requests.length) * 100))
+      await context.updateProgress(Math.floor(((i + 1) / requests.length) * 100))
     }
   }
 

@@ -1,35 +1,15 @@
+import type { JobsOptions } from 'bullmq'
 import { isNil } from 'lodash'
 import { logger } from '../logger'
 import { pubsub } from '../redis/pubsub'
-import { monitorServicesResultHandler } from '../services/monitoring/job'
-import type { PartialRecord } from '../util/partial-record'
-import { jobOptions, type JobNames, type JobTypes } from './jobs'
+import { getJobConfig, jobs, type JobSchedule } from './jobs'
 import { jobQueue } from './queue'
-
-type ResultHandlerMap<T extends { name: JobNames }> = {
-  [J in T as J['name']]?: (result: any) => void | Promise<void>
-}
-
-// https://docs.bullmq.io/guide/job-schedulers/repeat-strategies
-type JobSchedule = { every: number } | { pattern: string }
-
-// To add a new scheduled job:
-// 1. Configure the job (in the usual way) in src/background-jobs/jobs.ts
-// 2. Add the schedule to scheduledJobConfig
-// 3. Optionally add a result handler to scheduledJobResultHandlers
-
-const scheduledJobConfig: PartialRecord<JobNames, JobSchedule> = {
-  monitorServices: { every: 5 * 60 * 1000 }, // every 5 minutes
-  applyOidcSigningKeysRotation: { pattern: '0 0 1 * * *' }, // every day at 1am
-}
-
-const scheduledJobResultHandlers: ResultHandlerMap<JobTypes> = {
-  monitorServices: monitorServicesResultHandler,
-}
 
 const SCHEDULED_JOB_RESULT_TOPIC = 'scheduledJobResult'
 
-export const publishScheduledJobResult = (jobName: JobNames, result: any) =>
+type ScheduledJobResult = { jobName: string; result: any }
+
+export const publishScheduledJobResult = ({ jobName, result }: ScheduledJobResult) =>
   pubsub().publish(`${SCHEDULED_JOB_RESULT_TOPIC}.${jobName}`, { jobName, result: JSON.stringify(result) })
 
 export async function initialiseScheduledJobs() {
@@ -41,27 +21,41 @@ function subscribeToScheduledJobResults() {
   return pubsub().subscribe(`${SCHEDULED_JOB_RESULT_TOPIC}.*`, handleScheduledJobResult, { pattern: true })
 }
 
-async function handleScheduledJobResult({ jobName, result }: { jobName: JobNames; result: any }) {
-  const handler = scheduledJobResultHandlers[jobName as JobNames]
+async function handleScheduledJobResult({ jobName, result }: ScheduledJobResult) {
+  const handler = getJobConfig(jobName)?.scheduledJobResultHandler
   if (handler) {
     try {
       await handler(isNil(result) ? undefined : JSON.parse(result))
     } catch (error) {
-      logger.error(`Error handling scheduled job result for job ${jobName}`, { error })
+      logger.error(`Error running scheduled job result handler for job: ${jobName}`, { error })
     }
   }
 }
 
 async function scheduleJobs() {
-  for (const [jobName, schedule] of Object.entries(scheduledJobConfig)) {
-    await scheduleJob({ name: jobName } as JobTypes, schedule)
+  for (const [name, data] of Object.entries(jobs)) {
+    if (data.schedule) await scheduleJob(name, data.schedule, data.options)
   }
+
+  // clear out old scheduled jobs no longer in config, or they will continue to run
+  const jobSchedulers = await jobQueue().getJobSchedulers()
+  jobSchedulers.forEach(async (scheduler) => {
+    // Despite the typing, It has been observed that the name is undefined but the key is set
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    const nameOrKey = scheduler.name ?? scheduler.key
+    const job = getJobConfig(nameOrKey)
+    if (!job?.schedule) {
+      logger.warn(`Scheduled job ${nameOrKey} is not defined with a schedule in current config, removing scheduler...`)
+      const removed = await jobQueue().removeJobScheduler(nameOrKey)
+      if (removed) logger.warn(`Scheduled job ${nameOrKey} has been removed`)
+      else logger.error(`Scheduled job ${nameOrKey} could not be removed`)
+    }
+  })
 }
 
-async function scheduleJob(jobType: JobTypes, schedule: JobSchedule) {
-  const options = jobOptions[jobType.name]
-  await jobQueue().upsertJobScheduler(jobType.name, schedule, {
-    name: jobType.name,
+async function scheduleJob(name: string, schedule: JobSchedule, options?: JobsOptions) {
+  await jobQueue().upsertJobScheduler(name, schedule, {
+    name,
     opts: { removeDependencyOnFailure: true, ...options },
   })
 }

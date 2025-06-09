@@ -2,7 +2,7 @@ import { isLocalDev } from '@makerx/node-common'
 import http from 'http'
 import { startApolloServer } from './apollo'
 import { initializeAzurite } from './azurite'
-import { useBackgroundJob } from './background-jobs'
+import { useBackgroundJobs } from './background-jobs'
 import { apiUrl, server } from './config'
 import { dataSource } from './data'
 import { getExpressApp } from './express'
@@ -18,7 +18,7 @@ export const runApi = async () => {
   await dataSource.initialize()
 
   logger.info('Starting background job processing')
-  const jobRunnerCleanup = await useBackgroundJob()
+  const jobRunnerCleanup = await useBackgroundJobs()
 
   logger.info('Initialising express app')
   const app = await getExpressApp()

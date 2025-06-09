@@ -25,7 +25,7 @@ export const mockedServices = {
 
 export function loadMocks() {
   // Note: imports ../services/__mocks__/* have side effects
-  jest.mock('../background-jobs/queue')
+  jest.mock('../background-jobs/index')
   jest.mock('../util/data-url', () => {
     const originalModule = jest.requireActual('../util/data-url')
     return {

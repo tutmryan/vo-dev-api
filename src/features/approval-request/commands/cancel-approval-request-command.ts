@@ -1,4 +1,4 @@
-import { addToJobQueue } from '../../../background-jobs/queue'
+import { addToJobQueue } from '../../../background-jobs'
 import type { CommandContext } from '../../../cqs'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
 import { UserRoles } from '../../../roles'
@@ -30,5 +30,5 @@ export async function CancelApprovalRequestCommand(this: CommandContext, id: str
   await entityManager.getRepository(ApprovalRequestEntity).save(approvalRequest)
 
   if (approvalRequest.callbackInput)
-    await addToJobQueue({ name: 'invokeApprovalCallback', payload: { userId: user.entity.id, approvedRequestId: approvalRequest.id } })
+    await addToJobQueue('invokeApprovalCallback', { userId: user.entity.id, approvedRequestId: approvalRequest.id })
 }

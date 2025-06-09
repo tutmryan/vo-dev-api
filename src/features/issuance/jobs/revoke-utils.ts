@@ -1,7 +1,6 @@
-import type { Job } from 'bullmq'
 import { omit } from 'lodash'
 import type { FindOptionsWhere } from 'typeorm'
-import type { WorkerContext } from '../../../background-jobs/jobs'
+import type { HandlerContext } from '../../../background-jobs/jobs'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
 import { IssuanceStatus } from '../../../generated/graphql'
@@ -19,12 +18,7 @@ import { IssuanceEntity } from '../entities/issuance-entity'
  * @param where
  * @param contract When revoking contract issuances, use this arg to optimise and avoid reloading the contract for every issuance.
  */
-export const revokeIssuances = async (
-  job: Job,
-  context: WorkerContext,
-  where: FindOptionsWhere<IssuanceEntity>,
-  contract?: ContractEntity,
-) => {
+export const revokeIssuances = async (context: HandlerContext, where: FindOptionsWhere<IssuanceEntity>, contract?: ContractEntity) => {
   const errorMessages = []
   const {
     logger,
@@ -47,7 +41,7 @@ export const revokeIssuances = async (
           if (result) {
             addUserToManager(entityManager, user.id)
             await entityManager.getRepository(IssuanceEntity).save(result)
-            logger.audit('Issuance revoked', { issuance: omit(result, '__contract__', '__revokedBy__'), jobId: job.id, jobData: job.data })
+            logger.audit('Issuance revoked', { issuance: omit(result, '__contract__', '__revokedBy__'), ...context.jobAuditMetadata })
           }
         })
       }
@@ -55,7 +49,7 @@ export const revokeIssuances = async (
       logger.error(`Error occurred when revoking the issuance ${issuance.id}`, err)
       errorMessages.push(`Error occurred when revoking the issuance ${issuance.id}: ${(err as Error).message}`)
     } finally {
-      job.updateProgress(Math.floor(((index + 1) / issuances.length) * 100))
+      context.updateProgress(Math.floor(((index + 1) / issuances.length) * 100))
     }
   }
   if (errorMessages.length > 0) {

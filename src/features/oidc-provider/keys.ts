@@ -25,7 +25,7 @@ export async function keys(): Promise<JWK[]> {
   }
 
   // key initialization must be run in a deduplicated job to prevent concurrent initialization attempts from multiple instances
-  await runDeduplicatedJob({ name: 'initialiseOidcKeys', payload: undefined }, true)
+  await runDeduplicatedJob('initialiseOidcKeys', {}, true)
   const keys = await oidcStorageService().loadExistingKeys()
   invariant(keys, 'OIDC keys were not initialized')
   return keys.map((k) => k.jwk)

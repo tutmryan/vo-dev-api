@@ -1,19 +1,10 @@
 import type { DefaultJobOptions } from 'bullmq'
 import { Queue, QueueEvents } from 'bullmq'
-import { randomUUID } from 'crypto'
-import { BackgroundJobStatus } from '../generated/graphql'
 import { logger } from '../logger'
 import { redisOptions } from '../redis'
 import { Lazy } from '../util/lazy'
-import type { JobPayload, JobTypes } from './jobs'
-import { jobOptions } from './jobs'
-import { eventIsFinal, subscribeToBackgroundJobEvents } from './pubsub'
 
 export const JobQueueName = 'jobQueue'
-export type JobType<TName extends string, TPayload extends JobPayload> = {
-  name: TName
-  payload: TPayload
-}
 
 export const defaultJobOptions: DefaultJobOptions = {
   removeOnComplete: true,
@@ -36,45 +27,16 @@ export const jobQueueEvents = Lazy(() => {
   const events = new QueueEvents(JobQueueName, { connection: redisOptions })
 
   events.on('paused', () => {
-    logger.info(`${JobQueueName} has been paused`)
+    logger.info(`Job queue ${JobQueueName} has been paused`)
   })
 
   events.on('resumed', () => {
-    logger.info(`${JobQueueName} has been resumed`)
+    logger.info(`Job queue ${JobQueueName} has been resumed`)
   })
 
   events.on('error', (error) => {
-    logger.error(`${JobQueueName} encountered an error`, error)
+    logger.error(`Job queue ${JobQueueName} encountered an error`, error)
   })
 
   return events
 })
-
-export const addToJobQueue = async (jobType: JobTypes, jobId: string = randomUUID()): Promise<string> => {
-  const options = jobOptions[jobType.name]
-  await jobQueue().add(jobType.name, jobType.payload, { jobId, removeDependencyOnFailure: true, ...options })
-  return jobId
-}
-
-/**
- * Runs a deduplicated background job and optionally waits for its completion.
- * BullMQ deduplicates jobs by job ID, so we use the job type name as the job ID and await completion via the name.
- */
-export const runDeduplicatedJob = async (jobType: JobTypes, awaitCompletion: boolean): Promise<void> => {
-  logger.info(`Running deduplicated job: ${jobType.name}`)
-  const jobId = jobType.name
-  await addToJobQueue(jobType, jobId)
-  if (!awaitCompletion) return
-  const iterator = subscribeToBackgroundJobEvents({ where: { jobId } })
-  logger.info(`Waiting for deduplicated job completion: ${jobType.name}`)
-  for await (const data of iterator) {
-    if (eventIsFinal(data)) {
-      if (data.event.status === BackgroundJobStatus.Failed) {
-        logger.error(`Deduplicated job failed to completed: ${jobType.name}`, { data })
-        return
-      }
-      logger.info(`Deduplicated job completed: ${jobType.name}`)
-      return
-    }
-  }
-}

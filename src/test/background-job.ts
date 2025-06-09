@@ -1,13 +1,16 @@
 import type { Job } from 'bullmq'
 import { randomUUID } from 'crypto'
-import type { JobHandler, JobPayload, WorkerContext } from '../background-jobs/jobs'
-import { createWorkerContext } from '../background-jobs/worker'
+import type { HandlerContext, JobHandler, JobPayload } from '../background-jobs/jobs'
 import { dataSource } from '../data'
 import { UserEntity } from '../features/users/entities/user-entity'
+import { logger } from '../logger'
+import { createVerifiedIdAdminService } from '../services'
+import { AsyncIssuanceService } from '../services/async-issuance-service'
+import { CommunicationsService } from '../services/communications-service'
 
 let workerOid: string
 
-export const createTestWorkerContext = async (): Promise<WorkerContext> => {
+export const createTestWorkerContext = async (): Promise<HandlerContext> => {
   // Create a background worker user if it doesn't exist
   const userRepo = dataSource.getRepository(UserEntity)
   let user = workerOid ? await userRepo.findOneBy({ oid: workerOid }) : undefined
@@ -24,7 +27,18 @@ export const createTestWorkerContext = async (): Promise<WorkerContext> => {
     workerOid = user.oid
   }
 
-  return createWorkerContext(user.id)
+  return {
+    logger,
+    user,
+    entityManager: dataSource.manager,
+    updateProgress: jest.fn(),
+    jobAuditMetadata: { jobId: randomUUID(), jobData: {} },
+    services: {
+      verifiedIdAdmin: createVerifiedIdAdminService(logger),
+      asyncIssuances: new AsyncIssuanceService(),
+      communications: new CommunicationsService(logger),
+    },
+  }
 }
 
 export const createJobMock = <TPayload>(payload: TPayload): Job<TPayload> => {
@@ -39,5 +53,5 @@ export const createJobMock = <TPayload>(payload: TPayload): Job<TPayload> => {
 
 export const executeJob = async <TPayload extends JobPayload = JobPayload>(jobHandler: JobHandler<TPayload>, payload: TPayload) => {
   const workerContext = await createTestWorkerContext()
-  await jobHandler(workerContext, createJobMock(payload))
+  await jobHandler(workerContext, payload)
 }

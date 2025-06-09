@@ -68,7 +68,7 @@ type SourceOidcData = [OidcClientEntity[], OidcResourceEntity[], PartnerEntity[]
 async function loadOrInitialise(): Promise<SourceOidcData> {
   const data = await loadExistingData()
   if (dataIsInitialised(data)) return data
-  await runDeduplicatedJob({ name: 'initialiseOidcData', payload: undefined }, true)
+  await runDeduplicatedJob('initialiseOidcData', {}, true)
   const initialised = await loadExistingData()
   if (!dataIsInitialised(initialised)) throw new Error('Failed to initialise OIDC data')
   return initialised

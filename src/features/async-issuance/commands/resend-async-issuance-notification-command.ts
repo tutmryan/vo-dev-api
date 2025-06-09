@@ -8,13 +8,13 @@ export async function ResendAsyncNotificationCommand(
   this: TransactionalCommandContext,
   asyncIssuanceRequestId: string,
 ): Promise<AsyncIssuanceEntity> {
-  const { logger, services, user, inTransaction } = this
+  const { services, user, inTransaction } = this
 
   userInvariant(user)
 
   try {
     return await inTransaction((entityManager) => {
-      return sendAsyncIssuanceNotification({ logger, services, user: user.entity }, entityManager, asyncIssuanceRequestId)
+      return sendAsyncIssuanceNotification({ services }, entityManager, asyncIssuanceRequestId)
     })
   } catch (error) {
     await inTransaction(async (entityManager) => {

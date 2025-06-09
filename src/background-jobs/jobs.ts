@@ -1,107 +1,62 @@
+import type { BaseRequestInfo } from '@makerx/graphql-core'
 import { isLocalDev } from '@makerx/node-common'
-import type { Job, JobsOptions } from 'bullmq'
-import type {
-  InvokeApprovalCallbackJobName,
-  InvokeApprovalCallbackJobType,
-} from '../features/approval-request/jobs/invoke-approval-callback'
+import type { JobsOptions } from 'bullmq'
+import type { VerifiedOrchestrationEntityManager } from '../data/entity-manager'
+import type { InvokeApprovalCallbackJobPayload } from '../features/approval-request/jobs/invoke-approval-callback'
 import { invokeApprovalCallbackJobHandler } from '../features/approval-request/jobs/invoke-approval-callback'
-import type {
-  CancelAsyncIssuanceRequestsJobName,
-  CancelAsyncIssuanceRequestsJobType,
-} from '../features/async-issuance/jobs/cancel-async-issuance-requests'
+import type { CancelAsyncIssuanceRequestsJobPayload } from '../features/async-issuance/jobs/cancel-async-issuance-requests'
 import { cancelAsyncIssuanceRequestsHandler } from '../features/async-issuance/jobs/cancel-async-issuance-requests'
-import type {
-  SendAsyncIssuanceNotificationsJobName,
-  SendAsyncIssuanceNotificationsJobType,
-} from '../features/async-issuance/jobs/send-async-issuance-notifications'
+import type { SendAsyncIssuanceNotificationsJobPayload } from '../features/async-issuance/jobs/send-async-issuance-notifications'
 import { sendAsyncIssuanceNotificationsJobHandler } from '../features/async-issuance/jobs/send-async-issuance-notifications'
-import type { RevokeContractIssuancesJobName, RevokeContractIssuancesJobType } from '../features/issuance/jobs/revoke-contract-issuances'
+import type { RevokeContractIssuancesJobPayload } from '../features/issuance/jobs/revoke-contract-issuances'
 import { revokeContractIssuancesJobHandler } from '../features/issuance/jobs/revoke-contract-issuances'
-import type { RevokeIdentityIssuancesJobName, RevokeIdentityIssuancesJobType } from '../features/issuance/jobs/revoke-identity-issuances'
-import { revokeIdentityIssuancesJobHandler } from '../features/issuance/jobs/revoke-identity-issuances'
-import type { RevokeIssuancesJobName, RevokeIssuancesJobType } from '../features/issuance/jobs/revoke-issuances'
-import { revokeIssuancesJobHandler } from '../features/issuance/jobs/revoke-issuances'
-import type { RevokeUserIssuancesJobName, RevokeUserIssuancesJobType } from '../features/issuance/jobs/revoke-user-issuances'
-import { revokeUserIssuancesJobHandler } from '../features/issuance/jobs/revoke-user-issuances'
-import type {
-  ApplyOidcSigningKeysRotationJobName,
-  ApplyOidcSigningKeysRotationJobType,
-} from '../features/oidc-provider/jobs/apply-oidc-key-rotation'
-import { applyOidcSigningKeysRotationJobHandler } from '../features/oidc-provider/jobs/apply-oidc-key-rotation'
 import {
-  initialiseOidcDataJobHandler,
-  type InitialiseOidcDataJobName,
-  type InitialiseOidcDataJobType,
-} from '../features/oidc-provider/jobs/initialise-data-job-handler'
-import type { InitialiseOidcKeysJobName, InitialiseOidcKeysJobType } from '../features/oidc-provider/jobs/initialise-keys-job-handler'
+  revokeIdentityIssuancesJobHandler,
+  type RevokeIdentityIssuancesJobPayload,
+} from '../features/issuance/jobs/revoke-identity-issuances'
+import { revokeIssuancesJobHandler, type RevokeIssuancesJobPayload } from '../features/issuance/jobs/revoke-issuances'
+import { revokeUserIssuancesJobHandler, type RevokeUserIssuancesJobPayload } from '../features/issuance/jobs/revoke-user-issuances'
+import { applyOidcSigningKeysRotationJobHandler } from '../features/oidc-provider/jobs/apply-oidc-key-rotation'
+import { initialiseOidcDataJobHandler } from '../features/oidc-provider/jobs/initialise-data-job-handler'
 import { initialiseOidcKeysJobHandler } from '../features/oidc-provider/jobs/initialise-keys-job-handler'
 import type { UserEntity } from '../features/users/entities/user-entity'
 import type { logger } from '../logger'
 import { ONE_MINUTE_TTL } from '../redis/cache'
-import type { Services } from '../services'
-import { monitorServicesJobHandler, type MonitorServicesJobName, type MonitorServicesJobType } from '../services/monitoring/job'
-import type { PartialRecord } from '../util/partial-record'
+import type { AsyncIssuanceService } from '../services/async-issuance-service'
+import type { CommunicationsService } from '../services/communications-service'
+import type { ServiceState } from '../services/monitoring'
+import { monitorServicesJobHandler, monitorServicesResultHandler } from '../services/monitoring/job'
+import type { VerifiedIdAdminService } from '../services/verified-id/admin'
 
-export type WorkerContext = {
+export type JobPayload<TData = unknown> = {
+  userId?: string
+  requestInfo?: BaseRequestInfo
+} & TData
+
+export type HandlerContext = {
   logger: typeof logger
-  user?: UserEntity
-  services: Pick<Services, 'verifiedIdAdmin' | 'asyncIssuances' | 'communications'>
+  user: UserEntity
+  entityManager: VerifiedOrchestrationEntityManager
+  requestInfo?: BaseRequestInfo
+  updateProgress(progress: number | object): Promise<void>
+  jobAuditMetadata: { jobId: string; jobData: unknown }
+  services: {
+    verifiedIdAdmin: VerifiedIdAdminService
+    asyncIssuances: AsyncIssuanceService
+    communications: CommunicationsService
+  }
 }
 
-export type JobPayload =
-  | undefined
-  | {
-      userId: string
-      requestId?: string
-    }
-
-export type JobHandler<TPayload extends JobPayload = JobPayload, TResult = unknown> = (
-  context: WorkerContext,
-  job: Job<TPayload>,
-) => Promise<TResult>
-
-type HandlerMap<T extends { name: JobNames }> = {
-  [J in T as J['name']]?: JobHandler<any | never>
-}
-
-export type JobNames =
-  | RevokeIssuancesJobName
-  | RevokeContractIssuancesJobName
-  | RevokeIdentityIssuancesJobName
-  | RevokeUserIssuancesJobName
-  | InvokeApprovalCallbackJobName
-  | SendAsyncIssuanceNotificationsJobName
-  | CancelAsyncIssuanceRequestsJobName
-  | InitialiseOidcKeysJobName
-  | InitialiseOidcDataJobName
-  | MonitorServicesJobName
-  | ApplyOidcSigningKeysRotationJobName
-
-export type JobTypes =
-  | RevokeIssuancesJobType
-  | RevokeContractIssuancesJobType
-  | RevokeIdentityIssuancesJobType
-  | RevokeUserIssuancesJobType
-  | InvokeApprovalCallbackJobType
-  | SendAsyncIssuanceNotificationsJobType
-  | CancelAsyncIssuanceRequestsJobType
-  | InitialiseOidcKeysJobType
-  | InitialiseOidcDataJobType
-  | MonitorServicesJobType
-  | ApplyOidcSigningKeysRotationJobType
-
-export const handlers: HandlerMap<JobTypes> = {
-  revokeIssuances: revokeIssuancesJobHandler,
-  revokeContractIssuances: revokeContractIssuancesJobHandler,
-  revokeIdentityIssuances: revokeIdentityIssuancesJobHandler,
-  revokeUserIssuances: revokeUserIssuancesJobHandler,
-  invokeApprovalCallback: invokeApprovalCallbackJobHandler,
-  sendAsyncIssuanceNotifications: sendAsyncIssuanceNotificationsJobHandler,
-  cancelAsyncIssuanceRequests: cancelAsyncIssuanceRequestsHandler,
-  initialiseOidcKeys: initialiseOidcKeysJobHandler,
-  initialiseOidcData: initialiseOidcDataJobHandler,
-  monitorServices: monitorServicesJobHandler,
-  applyOidcSigningKeysRotation: applyOidcSigningKeysRotationJobHandler,
+// https://docs.bullmq.io/guide/job-schedulers/repeat-strategies
+export type JobSchedule = { every: number } | { pattern: string }
+export type JobHandler<TData = unknown> = (context: HandlerContext, payload: JobPayload<TData>) => Promise<unknown>
+export type JobResultHandler<TData = unknown> = (result: TData) => Promise<void>
+export type JobConfig<TData = unknown> = {
+  handler: JobHandler<TData>
+  options?: JobsOptions
+  schedule?: JobSchedule
+  scheduledJobResultHandler?: JobResultHandler<ServiceState>
+  resultCacheTtl?: number
 }
 
 // TTL for deduplication of initialisation jobs
@@ -113,23 +68,74 @@ const INIT_JOB_LOCALDEV_DEDUP_TTL = ONE_MINUTE_TTL
 const INIT_JOB_DEPLOYED_DEDUP_TTL = ONE_MINUTE_TTL * 10
 const INITIALISATION_JOBS_DEDUPLICATION_TTL = isLocalDev ? INIT_JOB_LOCALDEV_DEDUP_TTL : INIT_JOB_DEPLOYED_DEDUP_TTL
 
-// override default job options for specific job handlers
-export const jobOptions: PartialRecord<JobNames, JobsOptions & { resultCacheTtl?: number }> = {
-  invokeApprovalCallback: {
-    attempts: 18, // exponential backoff means final retry (2 ** 18 = 262144s) = 3 days
+export type Jobs = {
+  revokeIssuances: JobConfig<RevokeIssuancesJobPayload>
+  revokeContractIssuances: JobConfig<RevokeContractIssuancesJobPayload>
+  revokeIdentityIssuances: JobConfig<RevokeIdentityIssuancesJobPayload>
+  revokeUserIssuances: JobConfig<RevokeUserIssuancesJobPayload>
+  invokeApprovalCallback: JobConfig<InvokeApprovalCallbackJobPayload>
+  sendAsyncIssuanceNotifications: JobConfig<SendAsyncIssuanceNotificationsJobPayload>
+  cancelAsyncIssuanceRequests: JobConfig<CancelAsyncIssuanceRequestsJobPayload>
+  initialiseOidcKeys: JobConfig
+  initialiseOidcData: JobConfig
+  monitorServices: JobConfig
+  applyOidcSigningKeysRotation: JobConfig
+}
+
+export const jobs: Jobs = {
+  revokeIssuances: {
+    handler: revokeIssuancesJobHandler,
   },
-  initialiseOidcData: {
-    resultCacheTtl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
-    deduplication: {
-      id: 'initialiseOidcData',
-      ttl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
+  revokeContractIssuances: {
+    handler: revokeContractIssuancesJobHandler,
+  },
+  revokeIdentityIssuances: {
+    handler: revokeIdentityIssuancesJobHandler,
+  },
+  revokeUserIssuances: {
+    handler: revokeUserIssuancesJobHandler,
+  },
+  invokeApprovalCallback: {
+    handler: invokeApprovalCallbackJobHandler,
+    options: {
+      attempts: 18, // exponential backoff means final retry (2 ** 18 = 262144s) = 3 days
     },
+  },
+  sendAsyncIssuanceNotifications: {
+    handler: sendAsyncIssuanceNotificationsJobHandler,
+  },
+  cancelAsyncIssuanceRequests: {
+    handler: cancelAsyncIssuanceRequestsHandler,
   },
   initialiseOidcKeys: {
+    handler: initialiseOidcKeysJobHandler,
     resultCacheTtl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
-    deduplication: {
-      id: 'initialiseOidcKeys',
-      ttl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
+    options: {
+      deduplication: {
+        id: 'initialiseOidcKeys',
+        ttl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
+      },
     },
   },
+  initialiseOidcData: {
+    handler: initialiseOidcDataJobHandler,
+    resultCacheTtl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
+    options: {
+      deduplication: {
+        id: 'initialiseOidcData',
+        ttl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
+      },
+    },
+  },
+  monitorServices: {
+    handler: monitorServicesJobHandler,
+    scheduledJobResultHandler: monitorServicesResultHandler,
+  },
+  applyOidcSigningKeysRotation: {
+    handler: applyOidcSigningKeysRotationJobHandler,
+  },
+}
+
+export function getJobConfig(name: string) {
+  return jobs[name as keyof Jobs] as JobConfig | undefined
 }

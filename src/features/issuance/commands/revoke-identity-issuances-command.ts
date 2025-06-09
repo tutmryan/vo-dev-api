@@ -1,4 +1,4 @@
-import { addToJobQueue } from '../../../background-jobs/queue'
+import { addToJobQueue } from '../../../background-jobs'
 import type { CommandContext } from '../../../cqs'
 import { userInvariant } from '../../../util/user-invariant'
 
@@ -7,9 +7,6 @@ export async function RevokeIdentityIssuancesCommand(this: CommandContext, id: s
 
   userInvariant(user)
 
-  const jobId = await addToJobQueue({
-    name: 'revokeIdentityIssuances',
-    payload: { userId: user.entity.id, identityId: id, requestId: requestInfo.requestId },
-  })
+  const jobId = await addToJobQueue('revokeIdentityIssuances', { userId: user.entity.id, identityId: id, requestId: requestInfo.requestId })
   return jobId
 }

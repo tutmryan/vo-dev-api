@@ -1,5 +1,4 @@
-import type { JobHandler, JobPayload } from '../../../background-jobs/jobs'
-import type { JobType } from '../../../background-jobs/queue'
+import type { JobHandler } from '../../../background-jobs/jobs'
 import { dataSource, ISOLATION_LEVEL } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
 import { CommunicationError } from '../../../services/communications-service'
@@ -7,22 +6,20 @@ import { isObject } from '../../../util/type-helpers'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 import { sendAsyncIssuanceNotification } from '../notification'
 
-export type SendAsyncIssuanceNotificationsJobName = 'sendAsyncIssuanceNotifications'
-export type SendAsyncIssuanceNotificationsJobPayload = JobPayload & { asyncIssuanceRequestIds: string[] }
-export type SendAsyncIssuanceNotificationsJobType = JobType<SendAsyncIssuanceNotificationsJobName, SendAsyncIssuanceNotificationsJobPayload>
+export type SendAsyncIssuanceNotificationsJobPayload = { asyncIssuanceRequestIds: string[] }
 
-export const sendAsyncIssuanceNotificationsJobHandler: JobHandler<SendAsyncIssuanceNotificationsJobPayload> = async (context, job) => {
+export const sendAsyncIssuanceNotificationsJobHandler: JobHandler<SendAsyncIssuanceNotificationsJobPayload> = async (context, payload) => {
   const errorMessages = []
 
-  for (const [i, asyncIssuanceRequestId] of job.data.asyncIssuanceRequestIds.entries()) {
+  for (const [i, asyncIssuanceRequestId] of payload.asyncIssuanceRequestIds.entries()) {
     try {
       await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
-        addUserToManager(entityManager, job.data.userId)
+        addUserToManager(entityManager, context.user.id)
         await sendAsyncIssuanceNotification(context, entityManager, asyncIssuanceRequestId)
       })
     } catch (err: unknown) {
       await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
-        addUserToManager(entityManager, job.data.userId)
+        addUserToManager(entityManager, context.user.id)
         const repository = entityManager.getRepository(AsyncIssuanceEntity)
         const asyncIssuance = await repository.findOneByOrFail({ id: asyncIssuanceRequestId })
         asyncIssuance.failed('contact-failed')
@@ -38,7 +35,7 @@ export const sendAsyncIssuanceNotificationsJobHandler: JobHandler<SendAsyncIssua
       )
       // error is already logged in sendAsyncIssuanceNotification
     } finally {
-      await job.updateProgress(Math.floor(((i + 1) / job.data.asyncIssuanceRequestIds.length) * 100))
+      await context.updateProgress(Math.floor(((i + 1) / payload.asyncIssuanceRequestIds.length) * 100))
     }
   }
 

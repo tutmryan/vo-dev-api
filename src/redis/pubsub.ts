@@ -4,18 +4,21 @@ import { createRedisClient, redisOptions } from '.'
 import { redis } from '../config'
 import { Lazy } from '../util/lazy'
 
+const publisherClient = Lazy(() => (redis.host ? createRedisClient('publisher', { ...redisOptions, lazyConnect: true }) : undefined))
 const subscriberClient = Lazy(() => (redis.host ? createRedisClient('subscriber', { ...redisOptions, lazyConnect: true }) : undefined))
 
 /**
- * Initialises the subscriber client for the redis pubsub, ensuring it is connected.
+ * Initialises pubsub clients, ensuring they are connected before use.
  */
-export async function initialiseSubscriberClient() {
-  const client = subscriberClient()
-  if (client) await client.connect()
+export async function initialisePubsub() {
+  const publisher = publisherClient()
+  if (publisher) await publisher.connect()
+  const subscriber = subscriberClient()
+  if (subscriber) await subscriber.connect()
 }
 
 export const pubsub = Lazy(() =>
-  redis.host ? new RedisPubSub({ publisher: createRedisClient('publisher'), subscriber: subscriberClient() }) : new PubSub(),
+  redis.host ? new RedisPubSub({ publisher: publisherClient(), subscriber: subscriberClient() }) : new PubSub(),
 )
 
 /**
@@ -48,7 +51,7 @@ export function subscribeToCachedEvents<TEventData>({
   // when subscribing without eventId, subscribe to all events using pattern matching (filter externally, e.g. via the resolver filter)
   if (!eventId) {
     const iterator = pubsub().asyncIterator<TEventData>(`${topic}.*`, { pattern: true })
-    return { ...iterator, [Symbol.asyncIterator]: () => iterator }
+    return { ...iterator, next: iterator.next.bind(iterator), [Symbol.asyncIterator]: () => iterator }
   }
 
   // otherwise:

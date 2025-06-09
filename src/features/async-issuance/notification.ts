@@ -1,5 +1,5 @@
 import { startCase } from 'lodash'
-import type { WorkerContext } from '../../background-jobs/jobs'
+import type { HandlerContext } from '../../background-jobs/jobs'
 import { portalUrl } from '../../config'
 import type { VerifiedOrchestrationEntityManager } from '../../data/entity-manager'
 import { ContactMethod } from '../../generated/graphql'
@@ -11,7 +11,7 @@ import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
  * Sends an async issuance notification to the issuee and updates entity state.
  */
 export async function sendAsyncIssuanceNotification(
-  { services: { asyncIssuances, communications } }: WorkerContext,
+  { services: { asyncIssuances, communications } }: Pick<HandlerContext, 'services'>,
   entityManager: VerifiedOrchestrationEntityManager,
   requestId: string,
 ): Promise<AsyncIssuanceEntity> {

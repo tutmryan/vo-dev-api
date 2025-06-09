@@ -1,20 +1,17 @@
 import { extractErrorResponseInfo } from '@makerx/node-common'
 import { UnrecoverableError } from 'bullmq'
-import type { JobHandler, JobPayload } from '../../../background-jobs/jobs'
-import type { JobType } from '../../../background-jobs/queue'
+import type { JobHandler } from '../../../background-jobs/jobs'
 import { dataSource } from '../../../data'
 import type { ActionedApprovalData } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { ApprovalRequestEntity } from '../entities/approval-request-entity'
 
-export type InvokeApprovalCallbackJobName = 'invokeApprovalCallback'
-export type InvokeApprovalCallbackJobPayload = JobPayload & { approvedRequestId: string }
-export type InvokeApprovalCallbackJobType = JobType<InvokeApprovalCallbackJobName, InvokeApprovalCallbackJobPayload>
+export type InvokeApprovalCallbackJobPayload = { approvedRequestId: string }
 
-export const invokeApprovalCallbackJobHandler: JobHandler<InvokeApprovalCallbackJobPayload> = async (_context, job) => {
+export const invokeApprovalCallbackJobHandler: JobHandler<InvokeApprovalCallbackJobPayload> = async (_context, payload) => {
   const actionedApprovalRequest = await dataSource
     .getRepository(ApprovalRequestEntity)
-    .findOneOrFail({ where: { id: job.data.approvedRequestId }, relations: { presentation: { identity: true } } })
+    .findOneOrFail({ where: { id: payload.approvedRequestId }, relations: { presentation: { identity: true } } })
 
   if (!actionedApprovalRequest.callbackInput) throw new UnrecoverableError('Approval request does not have callback input')
 

@@ -1,4 +1,4 @@
-import { addToJobQueue } from '../../../background-jobs/queue'
+import { addToJobQueue } from '../../../background-jobs'
 import type { CommandContext } from '../../../cqs'
 import { userInvariant } from '../../../util/user-invariant'
 
@@ -7,9 +7,9 @@ export async function ResendAsyncIssuanceNotificationsCommand(this: CommandConte
 
   userInvariant(user)
 
-  const jobId = await addToJobQueue({
-    name: 'sendAsyncIssuanceNotifications',
-    payload: { userId: user.entity.id, asyncIssuanceRequestIds: asyncIssuanceRequestId },
+  const jobId = await addToJobQueue('sendAsyncIssuanceNotifications', {
+    userId: user.entity.id,
+    asyncIssuanceRequestIds: asyncIssuanceRequestId,
   })
   return jobId
 }

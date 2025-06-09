@@ -3,7 +3,7 @@ import { randomUUID } from 'crypto'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import { omit } from 'lodash'
 import { calculateExpiryFromNow, convertAsyncIssuanceRequestExpiryToDays } from '..'
-import { addToJobQueue } from '../../../background-jobs/queue'
+import { addToJobQueue } from '../../../background-jobs'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import { dataSource } from '../../../data'
@@ -224,9 +224,9 @@ export async function CreateAsyncIssuanceRequestCommand(
   }
 
   // Note: We're using the requests IDs to avoid the job queue from referencing PII data directly via the payload data
-  await addToJobQueue({
-    name: 'sendAsyncIssuanceNotifications',
-    payload: { userId: user.entity.id, asyncIssuanceRequestIds: response.asyncIssuanceRequestIds },
+  await addToJobQueue('sendAsyncIssuanceNotifications', {
+    userId: user.entity.id,
+    asyncIssuanceRequestIds: response.asyncIssuanceRequestIds,
   })
 
   logger.info(`Validated and saved ${response.asyncIssuanceRequestIds.length} async issuance requests`)
