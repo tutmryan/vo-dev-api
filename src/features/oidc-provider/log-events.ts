@@ -1,8 +1,11 @@
 import type { Request } from 'express'
+import { decodeJwt } from 'jose'
+import type { Context } from 'koa'
 import { isNil, omitBy } from 'lodash'
 import type Provider from 'oidc-provider'
 import type { KoaContextWithOIDC } from 'oidc-provider'
 import { logger } from '../../logger'
+import { redactValueObjectUnknown } from '../../util/redact-values'
 
 export function createRequestInfo(req: Request) {
   return omitBy(
@@ -41,7 +44,19 @@ function createLogParams(ctx: KoaContextWithOIDC) {
   }
 }
 
+function hasIdToken(response: unknown): response is { id_token: string } {
+  return typeof response === 'object' && response !== null && 'id_token' in response
+}
+
 export function logEvents(provider: Provider) {
+  provider.on('authorization.success', (_ctx: Context, response: unknown) => {
+    if (logger.isVerboseEnabled() && hasIdToken(response)) {
+      // When the response_type is id_token, we log the decoded id_token here for debugging purposes.
+      logger.verbose('OIDC event: authorization.success (id_token)', {
+        idToken: redactValueObjectUnknown(decodeJwt(response.id_token)),
+      })
+    }
+  })
   provider.on('authorization.error', (ctx, err) => {
     logger.error('OIDC event: authorization.error', { ...createLogParams(ctx), error: err })
   })
