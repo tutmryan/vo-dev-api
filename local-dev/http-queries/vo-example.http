@@ -5,7 +5,7 @@
 ###
 # Query the API for Me
 # @name queryMe
-POST https://50a03284edd1.ngrok.app/graphql
+POST {{$dotenv API_BASE_URL}}/graphql
 Content-Type: application/json
 Authorization: Bearer {{AADV2_LOGIN}}
 X-REQUEST-TYPE: GraphQL
@@ -33,7 +33,7 @@ query {
 ###
 # Find identities matching the name returned from the queryMe
 # @name findIdentities
-POST https://50a03284edd1.ngrok.app/graphql
+POST {{$dotenv API_BASE_URL}}/graphql
 Content-Type: application/json
 Authorization: Bearer {{AADV2_LOGIN}}
 X-REQUEST-TYPE: GraphQL
