@@ -77,6 +77,17 @@ Permissions:
 
 Limited access tokens support controlled access in client apps which do not have the ability to securely store a secret, such as Single Page Applications (SPA), mobile apps, etc. The following application roles allow a secure backend app to acquire limited access tokens to be used in such client apps.
 
+### Acquire presentation token
+
+Application role: `VerifiableCredential.AcquireLimitedAccessToken.Present`
+
+Permissions:
+
+- Create and read identity data
+- Acquire a limited access token with the ability to: perform presentations
+
+Note: Use this role when the identity of the presenter is known at the time of acquiring the token. If the presenter identity is not known, use the [acquire anonymous presentation token](#acquire-anonymous-presentation-token) role instead.
+
 ### Acquire anonymous presentation token
 
 Application role: `VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations`
@@ -86,7 +97,7 @@ Permissions:
 - Create and read identity data
 - Acquire a limited access token with the ability to: perform anonymous presentations
 
-### Acquire issue token
+### Acquire issuance token
 
 Application role: `VerifiableCredential.AcquireLimitedAccessToken.Issue`
 

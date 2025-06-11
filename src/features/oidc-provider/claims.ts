@@ -117,7 +117,7 @@ export const staticDemoClaimMappings: ClaimMapping[] =
               bank_name: 'bank_name',
               bank_account_name: 'account_name',
               bank_account_bsb: 'bsb',
-              bank_account_number: 'bank_account',
+              bank_account_number: 'bank_account_number',
             },
           },
         },
