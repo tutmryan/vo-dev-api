@@ -57,6 +57,7 @@ export type JobConfig<TData = unknown> = {
   schedule?: JobSchedule
   scheduledJobResultHandler?: JobResultHandler<ServiceState>
   resultCacheTtl?: number
+  disableImplicitTransaction?: boolean
 }
 
 // TTL for deduplication of initialisation jobs
@@ -85,15 +86,19 @@ export type Jobs = {
 export const jobs: Jobs = {
   revokeIssuances: {
     handler: revokeIssuancesJobHandler,
+    disableImplicitTransaction: true,
   },
   revokeContractIssuances: {
     handler: revokeContractIssuancesJobHandler,
+    disableImplicitTransaction: true,
   },
   revokeIdentityIssuances: {
     handler: revokeIdentityIssuancesJobHandler,
+    disableImplicitTransaction: true,
   },
   revokeUserIssuances: {
     handler: revokeUserIssuancesJobHandler,
+    disableImplicitTransaction: true,
   },
   invokeApprovalCallback: {
     handler: invokeApprovalCallbackJobHandler,
@@ -103,9 +108,11 @@ export const jobs: Jobs = {
   },
   sendAsyncIssuanceNotifications: {
     handler: sendAsyncIssuanceNotificationsJobHandler,
+    disableImplicitTransaction: true,
   },
   cancelAsyncIssuanceRequests: {
     handler: cancelAsyncIssuanceRequestsHandler,
+    disableImplicitTransaction: true,
   },
   initialiseOidcKeys: {
     handler: initialiseOidcKeysJobHandler,
@@ -126,6 +133,7 @@ export const jobs: Jobs = {
         ttl: INITIALISATION_JOBS_DEDUPLICATION_TTL,
       },
     },
+    disableImplicitTransaction: true,
   },
   monitorServices: {
     handler: monitorServicesJobHandler,

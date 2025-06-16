@@ -8,7 +8,7 @@ import { logger } from '../../logger'
 import { OidcScopes } from '../../roles'
 import { IssuanceEntity } from '../issuance/entities/issuance-entity'
 import { PartnerEntity } from '../partners/entities/partner-entity'
-import { createSystemUser, SYSTEM_USER_OID, UserEntity } from '../users/entities/user-entity'
+import { SYSTEM_USER_ID } from '../users/entities/user-entity'
 import { mappedClaims, resourceScopes, staticDemoClaimMappings, type ClaimMapping } from './claims'
 import { OidcClientEntity } from './entities/oidc-client-entity'
 import { OidcClientResourceEntity } from './entities/oidc-client-resource-entity'
@@ -138,14 +138,11 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
   logger.info('Initialising OIDC data')
 
   await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
-    const userRepo = entityManager.getRepository(UserEntity)
     const clientRepo = entityManager.getRepository(OidcClientEntity)
     const resourceRepo = entityManager.getRepository(OidcResourceEntity)
     const clientResourceRepo = entityManager.getRepository(OidcClientResourceEntity)
 
-    // this is the first time we need to run audited operations as the system with no user context
-    const systemUser = (await userRepo.findOneBy({ oid: SYSTEM_USER_OID })) ?? (await userRepo.save(createSystemUser()))
-    addUserToManager(entityManager, systemUser.id)
+    addUserToManager(entityManager, SYSTEM_USER_ID)
 
     const portalClient = await clientRepo.findOneBy({ id: portalClientId })
     const apiResource = await resourceRepo.findOneBy({ id: apiResourceId })

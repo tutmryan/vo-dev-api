@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "mssql": "^9.3.2",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.24"
   },
   "overrides": {
     "@azure/identity": "^4.3.0"

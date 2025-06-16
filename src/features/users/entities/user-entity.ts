@@ -1,9 +1,6 @@
 import { Column, Entity, Index } from 'typeorm'
-import { homeTenant } from '../../../config'
-import { dataSource } from '../../../data'
 import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
-import { Lazy } from '../../../util/lazy'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 
 export type UpdateIdentityInput = Pick<UserEntity, 'email' | 'name'>
@@ -45,21 +42,4 @@ export class UserEntity extends VerifiedOrchestrationEntity {
 }
 
 export const SYSTEM_USER_OID = 'faa690ac-d8d0-4ff8-aa38-2a9c53084ca9'
-
-export const resolveSystemUserId = Lazy(async () => {
-  return (
-    await dataSource.getRepository(UserEntity).findOneOrFail({
-      where: { oid: SYSTEM_USER_OID, tenantId: homeTenant.tenantId },
-    })
-  ).id
-})
-
-export function createSystemUser() {
-  return new UserEntity({
-    oid: SYSTEM_USER_OID,
-    tenantId: homeTenant.tenantId,
-    email: null,
-    name: 'System',
-    isApp: true,
-  })
-}
+export const SYSTEM_USER_ID = SYSTEM_USER_OID
