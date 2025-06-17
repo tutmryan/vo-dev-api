@@ -1,9 +1,1 @@
-{
-  "advisories": {
-    "GHSA-v6h2-p8h4-qcjw": {
-      "path": "brace-expansion",
-      "expires": "2025-06-18",
-      "reason": "No patch yet, check in one week"
-    }
-  }
-}
+{}

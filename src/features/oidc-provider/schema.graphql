@@ -95,6 +95,24 @@ extend type Mutation {
   Deletes an OIDC client resource
   """
   deleteOidcClientResource(clientId: ID!, resourceId: ID!): OidcClient!
+
+  """
+  Creates a new OIDC claim mapping
+  """
+  createOidcClaimMapping(input: OidcClaimMappingInput!): OidcClaimMapping!
+  """
+  Updates an existing OIDC claim mapping
+  """
+  updateOidcClaimMapping(id: ID!, input: OidcClaimMappingInput!): OidcClaimMapping!
+  """
+  Deletes an OIDC claim mapping
+  """
+  deleteOidcClaimMapping(id: ID!): OidcClaimMapping!
+
+  """
+  Updates the claim mappings for an OIDC client.
+  """
+  updateOidcClientClaimMappings(clientId: ID!, claimMappingIds: [ID!]!): OidcClient!
 }
 
 extend type Query {
@@ -112,6 +130,7 @@ extend type Query {
     orderBy: OidcClientOrderBy
     orderDirection: OrderDirection
   ): [OidcClient!]!
+
   """
   Returns a single OIDC resource by ID
   """
@@ -126,6 +145,21 @@ extend type Query {
     orderBy: OidcResourceOrderBy
     orderDirection: OrderDirection
   ): [OidcResource!]!
+
+  """
+  Returns a single OIDC claim mapping by ID
+  """
+  oidcClaimMapping(id: ID!): OidcClaimMapping!
+  """
+  Returns OIDC claim mappings, optionally matching the specified criteria.
+  """
+  findOidcClaimMappings(
+    where: OidcClaimMappingWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: OidcClaimMappingOrderBy
+    orderDirection: OrderDirection
+  ): [OidcClaimMapping!]!
 }
 
 """
@@ -134,6 +168,143 @@ The type of OIDC application.
 enum OidcApplicationType {
   web
   native
+}
+
+"""
+Input defining mapping for a single OIDC claim based on a credential claim.
+"""
+input ScopedClaimMappingInput {
+  """
+  The scope of the claim.
+  """
+  scope: String!
+  """
+  The claim to produce.
+  """
+  claim: String!
+  """
+  The source credential claim to use as the value for the claim.
+  """
+  credentialClaim: String!
+}
+
+"""
+Represents a mapping to produce a single OIDC claim based on a credential claim.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type ScopedClaimMapping {
+  """
+  The scope of the claim.
+  """
+  scope: String!
+  """
+  The claim to produce.
+  """
+  claim: String!
+  """
+  The source credential claim to use as the value for the claim.
+  """
+  credentialClaim: String!
+}
+
+"""
+Input defining mappings to produce scoped OIDC claims based on credential claims.
+"""
+input OidcClaimMappingInput {
+  """
+  The name of the claim mapping.
+  """
+  name: String!
+  """
+  Mappings, each defining the OIDC scope, claim and source credential claim.
+  """
+  mappings: [ScopedClaimMappingInput!]!
+  """
+  The optional set of types of credentials that this claim mapping should be limited to.
+  """
+  credentialTypes: [String!]!
+}
+
+"""
+A set of mappings to produce scoped OIDC claims based on credential claims.
+"""
+type OidcClaimMapping {
+  """
+  The unique identifier for the claim mapping.
+  """
+  id: ID!
+  """
+  The name of the claim mapping.
+  """
+  name: String!
+  """
+  Mappings, each defining the OIDC scope, claim and source credential claim.
+  """
+  mappings: [ScopedClaimMapping!]!
+  """
+  The (optional) types of credentials that this claim mapping should be limited to.
+  """
+  credentialTypes: [String!]
+
+  """
+  The user who created the mapping.
+  """
+  createdBy: User!
+  """
+  When the mapping was created.
+  """
+  createdAt: DateTime!
+
+  """
+  The user who last updated the mapping.
+  """
+  updatedBy: User
+  """
+  When the mapping was last updated.
+  """
+  updatedAt: DateTime
+  """
+  When the mapping was deleted.
+  """
+  deletedAt: DateTime
+}
+
+"""
+Criteria for finding OIDC claim mappings.
+"""
+input OidcClaimMappingWhere {
+  """
+  List only claim mappings matching this name.
+  """
+  name: String
+  """
+  List only claim mappings for this credential type.
+  """
+  credentialType: String
+  """
+  The ID of the user (Person or Application) that created the claim mapping.
+  """
+  createdById: ID
+  """
+  The start of the createdAt period to include.
+  """
+  createdFrom: DateTime
+  """
+  The end of the createdAt period to include.
+  """
+  createdTo: DateTime
+  """
+  List only the claim mappings which are, or are not, deleted.
+  """
+  isDeleted: Boolean
+}
+
+"""
+Fields that can be used for sorting OIDC claim mappings by.
+"""
+enum OidcClaimMappingOrderBy {
+  name
+  createdAt
+  updatedAt
 }
 
 """
@@ -285,6 +456,10 @@ type OidcClient {
   The resources that the client has access to, according to the defined resource scopes.
   """
   resources: [OidcClientResource!]
+  """
+  The claim mappings to be applied to this client.
+  """
+  claimMappings: [OidcClaimMapping!]!
   """
   The user who created the client.
   """

@@ -65,6 +65,13 @@ const documents = {
     "\n  mutation CreateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    createOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.CreateOidcClientResourceDocument,
     "\n  mutation UpdateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    updateOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.UpdateOidcClientResourceDocument,
     "\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n": types.DeleteOidcClientResourceDocument,
+    "\n  fragment OidcClaimMappingFragment on OidcClaimMapping {\n    id\n    name\n    credentialTypes\n    mappings {\n      scope\n      claim\n      credentialClaim\n    }\n    createdAt\n    createdBy {\n      id\n      name\n    }\n    updatedAt\n    updatedBy {\n      id\n      name\n    }\n    deletedAt\n  }\n": types.OidcClaimMappingFragmentFragmentDoc,
+    "\n  query OidcClaimMapping($id: ID!) {\n    oidcClaimMapping(id: $id) {\n      ...OidcClaimMappingFragment\n    }\n  }\n": types.OidcClaimMappingDocument,
+    "\n  query FindOidcClaimMappings(\n    $where: OidcClaimMappingWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcClaimMappingOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcClaimMappings(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcClaimMappingFragment\n    }\n  }\n": types.FindOidcClaimMappingsDocument,
+    "\n  mutation CreateOidcClaimMapping($input: OidcClaimMappingInput!) {\n    createOidcClaimMapping(input: $input) {\n      ...OidcClaimMappingFragment\n    }\n  }\n": types.CreateOidcClaimMappingDocument,
+    "\n  mutation UpdateOidcClaimMapping($id: ID!, $input: OidcClaimMappingInput!) {\n    updateOidcClaimMapping(id: $id, input: $input) {\n      ...OidcClaimMappingFragment\n    }\n  }\n": types.UpdateOidcClaimMappingDocument,
+    "\n  mutation DeleteOidcClaimMapping($id: ID!) {\n    deleteOidcClaimMapping(id: $id) {\n      ...OidcClaimMappingFragment\n    }\n  }\n": types.DeleteOidcClaimMappingDocument,
+    "\n  mutation UpdateOidcClientClaimMappings($clientId: ID!, $claimMappingIds: [ID!]!) {\n    updateOidcClientClaimMappings(clientId: $clientId, claimMappingIds: $claimMappingIds) {\n      ...OidcClientFragment\n      claimMappings {\n        ...OidcClaimMappingFragment\n      }\n    }\n  }\n": types.UpdateOidcClientClaimMappingsDocument,
     "\n  query Discovery{\n    discovery {\n      version\n    }\n  }\n": types.DiscoveryDocument,
     "\n  query Authority {\n    authority {\n      id\n    }\n  }\n": types.AuthorityDocument,
     "\nquery Me {\n  me {\n    ... on Identity {\n      presentations {\n        id\n      }\n      issuances {\n        id\n      }\n      asyncIssuanceRequests {\n        id\n      }\n    }\n  }\n}\n": types.MeDocument,
@@ -311,6 +318,34 @@ export function graphql(source: "\n  mutation UpdateOidcClientResource($clientId
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment OidcClaimMappingFragment on OidcClaimMapping {\n    id\n    name\n    credentialTypes\n    mappings {\n      scope\n      claim\n      credentialClaim\n    }\n    createdAt\n    createdBy {\n      id\n      name\n    }\n    updatedAt\n    updatedBy {\n      id\n      name\n    }\n    deletedAt\n  }\n"): (typeof documents)["\n  fragment OidcClaimMappingFragment on OidcClaimMapping {\n    id\n    name\n    credentialTypes\n    mappings {\n      scope\n      claim\n      credentialClaim\n    }\n    createdAt\n    createdBy {\n      id\n      name\n    }\n    updatedAt\n    updatedBy {\n      id\n      name\n    }\n    deletedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query OidcClaimMapping($id: ID!) {\n    oidcClaimMapping(id: $id) {\n      ...OidcClaimMappingFragment\n    }\n  }\n"): (typeof documents)["\n  query OidcClaimMapping($id: ID!) {\n    oidcClaimMapping(id: $id) {\n      ...OidcClaimMappingFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query FindOidcClaimMappings(\n    $where: OidcClaimMappingWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcClaimMappingOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcClaimMappings(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcClaimMappingFragment\n    }\n  }\n"): (typeof documents)["\n  query FindOidcClaimMappings(\n    $where: OidcClaimMappingWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcClaimMappingOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcClaimMappings(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcClaimMappingFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateOidcClaimMapping($input: OidcClaimMappingInput!) {\n    createOidcClaimMapping(input: $input) {\n      ...OidcClaimMappingFragment\n    }\n  }\n"): (typeof documents)["\n  mutation CreateOidcClaimMapping($input: OidcClaimMappingInput!) {\n    createOidcClaimMapping(input: $input) {\n      ...OidcClaimMappingFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateOidcClaimMapping($id: ID!, $input: OidcClaimMappingInput!) {\n    updateOidcClaimMapping(id: $id, input: $input) {\n      ...OidcClaimMappingFragment\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateOidcClaimMapping($id: ID!, $input: OidcClaimMappingInput!) {\n    updateOidcClaimMapping(id: $id, input: $input) {\n      ...OidcClaimMappingFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteOidcClaimMapping($id: ID!) {\n    deleteOidcClaimMapping(id: $id) {\n      ...OidcClaimMappingFragment\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteOidcClaimMapping($id: ID!) {\n    deleteOidcClaimMapping(id: $id) {\n      ...OidcClaimMappingFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateOidcClientClaimMappings($clientId: ID!, $claimMappingIds: [ID!]!) {\n    updateOidcClientClaimMappings(clientId: $clientId, claimMappingIds: $claimMappingIds) {\n      ...OidcClientFragment\n      claimMappings {\n        ...OidcClaimMappingFragment\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateOidcClientClaimMappings($clientId: ID!, $claimMappingIds: [ID!]!) {\n    updateOidcClientClaimMappings(clientId: $clientId, claimMappingIds: $claimMappingIds) {\n      ...OidcClientFragment\n      claimMappings {\n        ...OidcClaimMappingFragment\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

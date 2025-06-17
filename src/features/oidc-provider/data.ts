@@ -9,7 +9,8 @@ import { OidcScopes } from '../../roles'
 import { IssuanceEntity } from '../issuance/entities/issuance-entity'
 import { PartnerEntity } from '../partners/entities/partner-entity'
 import { SYSTEM_USER_ID } from '../users/entities/user-entity'
-import { mappedClaims, resourceScopes, staticDemoClaimMappings, type ClaimMapping } from './claims'
+import { mappedClaims, resourceScopes } from './claims'
+import type { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entity'
 import { OidcClientEntity } from './entities/oidc-client-entity'
 import { OidcClientResourceEntity } from './entities/oidc-client-resource-entity'
 import { OidcResourceEntity } from './entities/oidc-resource-entity'
@@ -25,20 +26,24 @@ export type OidcData = {
   resources: OidcResourceEntity[]
   resourceScopes: Record<string, string[]>
   partners: PartnerEntity[]
-  claimMappings: ClaimMapping[]
   mappedClaims?: Record<string, string[]>
 }
 
 export async function loadOidcData(): Promise<OidcData> {
   const [clients, resources, partners] = await loadOrInitialise()
+  const claimMappings: OidcClaimMappingEntity[] = []
+  for (const client of clients) {
+    for (const mapping of await client.claimMappings) {
+      if (!claimMappings.some((m) => m.id === mapping.id)) claimMappings.push(mapping)
+    }
+  }
   return {
     clients,
     clientMetadata: clients.map(toOidcClientMetadata),
     resources,
     resourceScopes: resourceScopes(resources),
     partners,
-    claimMappings: staticDemoClaimMappings,
-    mappedClaims: mappedClaims(staticDemoClaimMappings),
+    mappedClaims: mappedClaims(claimMappings),
   }
 }
 
@@ -79,7 +84,7 @@ export function loadExistingData(): Promise<SourceOidcData> {
     const clientRepo = entityManager.getRepository(OidcClientEntity)
     const resourceRepo = entityManager.getRepository(OidcResourceEntity)
     const partnerRepo = entityManager.getRepository(PartnerEntity)
-    const clients = await clientRepo.find({ relations: { resources: true, partners: true } })
+    const clients = await clientRepo.find({ relations: { resources: true, partners: true, claimMappings: true } })
     const resources = await resourceRepo.find()
     const partners = await partnerRepo.find()
     return [clients, resources, partners]

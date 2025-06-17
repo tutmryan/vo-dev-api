@@ -174,7 +174,7 @@ const settings: OidcClientSettings = {
   redirect_uri: 'http://localhost:5173/',
   post_logout_redirect_uri: 'http://localhost:5173/',
   resource: 'https://example.com/api',
-  scope: 'openid profile offline_access email vc_info vc_presented_attributes vc_vo_presentation vc_vo_identity api:read api:write',
+  scope: 'openid profile offline_access vc_info vc_presented_attributes vc_vo_presentation vc_vo_identity api:read api:write',
 }
 ```
 
@@ -197,9 +197,16 @@ This demo shows how to set up resources, configure access for a client and obtai
 
 Claims are organised by scopes, which are used to request specific information about the credential presentation.
 
-The full list of scopes is available from the <ApiLink path="/oidc/.well-known/openid-configuration">OpenID discovery document</ApiLink>.
+Claims and scopes are both predefined (static) and configurable (dynamic):
 
-The Verified Orchestration OIDC provider supports standard scopes: `openid`, `profile`, `email`\* and `offline_access`\*.
+- Predefined claims and scopes are based on standard credential presentation data (see [definition below](#predefined-claims)).
+- Configurable claims and scopes are based on:
+  - [Resource definitions and scopes](#protect-resources)
+  - [Mapped claims and scopes](#mapped-claims)
+
+The complete list of available scopes and claims is shown in the <ApiLink path="/oidc/.well-known/openid-configuration">OpenID discovery document</ApiLink>.
+
+The Verified Orchestration OIDC provider supports standard OIDC scopes: `openid`, `profile` and `offline_access`\*.
 
 Additionally, credential info is available via the following scopes:
 
@@ -212,27 +219,27 @@ Additionally, credential info is available via the following scopes:
 
 :::note
 
-\* The `email` scope provides a claim value only when an `email` claim is present in the verifiable credential presentation. Similarly, the `email_verified` claim is included only when an `email_verified` claim is provided.
-:::
-
-:::note
-
 \* The `offline_access` scope is automatically included, granted, and does not require consent.
 
 :::
 
 ### Claims
 
-The following table describes all claims available and the scope required to access them:
+The Verified Orchestration OIDC provider supports both predefined (static) and mapped (configurable) claims:
+
+1. [Predefined claims](#predefined-claims)
+2. [Mapped claims](#mapped-claims)
+
+#### Predefined claims
+
+The following table describes the predefined claims and the scope required to access them:
 
 | Claim                                    | Scope                     | Description                                                                                                                                                                                                                                                                                |
 | ---------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `sub`                                    | `openid`                  | The subject identifier, derived from the Verified Orchestration issuance ID.<br /><br />Or, for partner credential presentations:<br /> - the value of the `vc_unique_claim_for_sub` parameter<br /> - the first matching **Unique claim for subject identifier** configured on the client |
 | `name`                                   | `profile`                 | The Verified Orchestration identity name (n/a for partner presentations).                                                                                                                                                                                                                  |
-| `email`                                  | `email`                   | The value of the `email` claim from the verifiable credential presentation, if present.                                                                                                                                                                                                    |
-| `email_verified`                         | `email`                   | A boolean indicating whether the email has been additionally verified, if present.                                                                                                                                                                                                         |
 | `vc_issuer`                              | `vc_info`                 | The issuer DID of the verifiable credential.                                                                                                                                                                                                                                               |
-| `vc_type`                                | `vc_info`                 | The type of the verifiable credential.                                                                                                                                                                                                                                                     |
+| `vc_type`                                | `vc_info`                 | Array: the type(s) of the verifiable credential.                                                                                                                                                                                                                                           |
 | `vc_revocation_status`                   | `vc_info`                 | The revocation status of the verifiable credential, either `VALID` or `REVOKED`.                                                                                                                                                                                                           |
 | `vc_presented_attributes`                | `vc_presented_attributes` | All claims from the verifiable credential presentation as a single object.                                                                                                                                                                                                                 |
 | `vc_vo_presentation_id`                  | `vc_vo_presentation`      | The Verified Orchestration presentation ID.                                                                                                                                                                                                                                                |
@@ -241,6 +248,18 @@ The following table describes all claims available and the scope required to acc
 | `vc_vo_identity_id`                      | `vc_vo_identity`          | The Verified Orchestration identity ID. Useful for referencing the identity reference in the Verified Orchestration platform.                                                                                                                                                              |
 | `vc_vo_identity_issuer`                  | `vc_vo_identity`          | The identity `issuer` value. Useful for referencing the source identity store.                                                                                                                                                                                                             |
 | `vc_vo_identity_identifier`              | `vc_vo_identity`          | The identity `identifier` value. Useful for referencing the identity in the source identity store.                                                                                                                                                                                         |
+
+#### Mapped claims
+
+If you need verifiable credential presentation claim values returned as individual top-level OIDC claims, instead of nested within the single claim `vc_presented_attributes` value, you can define and apply OIDC claim mapping:
+
+1. Navigate to the <AdminLink path='/oidc/claim-mappings'>Composer claim mappings page</AdminLink>.
+1. Create one or more claim mappings, specifying the scope, claim name and the source claim from the verifiable credential.
+1. Optionally specify credential types that the mapping applies to, or leave it empty to apply to all credential types.
+1. Navigate to the <AdminLink path='/oidc/clients'>Composer authentication clients page</AdminLink>.
+1. Edit your authentication client and select the claim mappings you want to apply to the client.
+
+Once you have defined the claim mappings and applied them to clients, the scopes and claims will be shown in the <ApiLink path="/oidc/.well-known/openid-configuration">OpenID discovery document</ApiLink>.
 
 ## Customize and brand your authentication client
 

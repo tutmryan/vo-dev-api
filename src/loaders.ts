@@ -3,7 +3,7 @@ import { asyncIssuanceContactLoader, asyncIssuanceLoader } from './features/asyn
 import { contractLoader } from './features/contracts/loaders'
 import { identityLoader, isIdentityDeletableLoader } from './features/identity/loaders'
 import { issuanceCountByContractLoader, issuanceCountByIdentityLoader, issuanceLoader } from './features/issuance/loaders'
-import { oidcClientLoader, oidcResourceLoader } from './features/oidc-provider/loaders'
+import { oidcClaimMappingsLoader, oidcClientLoader, oidcResourceLoader } from './features/oidc-provider/loaders'
 import { partnerByDidLoader, partnerLoader, presentationPartnersLoader } from './features/partners/loaders'
 import { presentationLoader } from './features/presentation/loaders'
 import { templateLoader } from './features/templates/loaders'
@@ -29,5 +29,6 @@ export const createDataLoaders = (services: Services) => ({
   asyncIssuanceContact: asyncIssuanceContactLoader(services.asyncIssuances),
   oidcClients: oidcClientLoader(),
   oidcResources: oidcResourceLoader(),
+  oidcClaimMappings: oidcClaimMappingsLoader(),
   isIdentityDeletable: isIdentityDeletableLoader(),
 })

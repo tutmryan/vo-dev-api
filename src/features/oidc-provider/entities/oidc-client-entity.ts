@@ -5,6 +5,7 @@ import { invariant } from '../../../util/invariant'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { PartnerEntity } from '../../partners/entities/partner-entity'
+import { OidcClaimMappingEntity } from './oidc-claim-mapping-entity'
 import { OidcClientResourceEntity } from './oidc-client-resource-entity'
 
 type RequiredArgs = Pick<OidcClientEntity, 'name' | 'redirectUris' | 'postLogoutUris'>
@@ -185,6 +186,16 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
    */
   @OneToMany(() => OidcClientResourceEntity, (clientResource) => clientResource.client)
   resources!: Promise<OidcClientResourceEntity[]>
+
+  /**
+   * The claim mappings applied to this client.
+   */
+  @ManyToMany(() => OidcClaimMappingEntity)
+  @JoinTable({ name: 'oidc_client_claim_mappings' })
+  claimMappings!: Promise<OidcClaimMappingEntity[]>
+
+  @RelationId((client: OidcClientEntity) => client.claimMappings)
+  claimMappingIds!: string[]
 
   update(args: CreateOrUpdateArgs) {
     typeSafeAssign(this, inflateArgs(args))

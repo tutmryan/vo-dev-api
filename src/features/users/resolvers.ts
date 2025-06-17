@@ -56,6 +56,9 @@ export const resolvers: Resolvers = {
   OidcResource: {
     ...createdByUpdatedBy,
   },
+  OidcClaimMapping: {
+    ...createdByUpdatedBy,
+  },
   Branding: {
     ...createdByUpdatedBy,
   },

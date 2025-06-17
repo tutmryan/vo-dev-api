@@ -1,6 +1,7 @@
 import DataLoader from 'dataloader'
 import { In } from 'typeorm'
 import { dataSource } from '../../data'
+import { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entity'
 import { OidcClientEntity } from './entities/oidc-client-entity'
 import { OidcResourceEntity } from './entities/oidc-resource-entity'
 
@@ -18,4 +19,12 @@ export const oidcResourceLoader = () =>
       .getRepository(OidcResourceEntity)
       .find({ comment: 'FindOidcResourcesById', where: { id: In(ids) }, withDeleted: true })
     return ids.map((id) => results.find((result) => result.id === id) ?? new Error(`OIDC resource not found: ${id}`))
+  })
+
+export const oidcClaimMappingsLoader = () =>
+  new DataLoader<string, OidcClaimMappingEntity>(async (ids) => {
+    const results = await dataSource
+      .getRepository(OidcClaimMappingEntity)
+      .find({ comment: 'FindOidcClaimMappingsById', where: { id: In(ids) }, withDeleted: true })
+    return ids.map((id) => results.find((r) => r.id === id) ?? new Error(`OIDC claim mapping not found: ${id}`))
   })

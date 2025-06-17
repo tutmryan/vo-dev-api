@@ -1,5 +1,6 @@
 import casual from 'casual'
 import { graphql } from '../../../generated'
+import type { OidcClaimMappingInput } from '../../../generated/graphql'
 import { type OidcClientInput, type OidcResourceInput } from '../../../generated/graphql'
 import { UserRoles } from '../../../roles'
 import { executeOperationAsUser } from '../../../test'
@@ -223,6 +224,109 @@ export const deleteOidcClientResourceMutation = graphql(`
   mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {
     deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {
       ...OidcClientFragment
+    }
+  }
+`)
+
+graphql(`
+  fragment OidcClaimMappingFragment on OidcClaimMapping {
+    id
+    name
+    credentialTypes
+    mappings {
+      scope
+      claim
+      credentialClaim
+    }
+    createdAt
+    createdBy {
+      id
+      name
+    }
+    updatedAt
+    updatedBy {
+      id
+      name
+    }
+    deletedAt
+  }
+`)
+
+export const oidcClaimMappingQuery = graphql(`
+  query OidcClaimMapping($id: ID!) {
+    oidcClaimMapping(id: $id) {
+      ...OidcClaimMappingFragment
+    }
+  }
+`)
+
+export const findOidcClaimMappingsQuery = graphql(`
+  query FindOidcClaimMappings(
+    $where: OidcClaimMappingWhere
+    $offset: PositiveInt
+    $limit: PositiveInt
+    $orderBy: OidcClaimMappingOrderBy
+    $orderDirection: OrderDirection
+  ) {
+    findOidcClaimMappings(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {
+      ...OidcClaimMappingFragment
+    }
+  }
+`)
+
+export const createOidcClaimMappingMutation = graphql(`
+  mutation CreateOidcClaimMapping($input: OidcClaimMappingInput!) {
+    createOidcClaimMapping(input: $input) {
+      ...OidcClaimMappingFragment
+    }
+  }
+`)
+
+export const updateOidcClaimMappingMutation = graphql(`
+  mutation UpdateOidcClaimMapping($id: ID!, $input: OidcClaimMappingInput!) {
+    updateOidcClaimMapping(id: $id, input: $input) {
+      ...OidcClaimMappingFragment
+    }
+  }
+`)
+
+export const deleteOidcClaimMappingMutation = graphql(`
+  mutation DeleteOidcClaimMapping($id: ID!) {
+    deleteOidcClaimMapping(id: $id) {
+      ...OidcClaimMappingFragment
+    }
+  }
+`)
+
+export function createOidcClaimMappingInput(input: Partial<OidcClaimMappingInput> = {}): OidcClaimMappingInput {
+  return {
+    name: casual.name,
+    credentialTypes: [casual.word],
+    mappings: [
+      {
+        scope: casual.word,
+        claim: casual.word,
+        credentialClaim: casual.word,
+      },
+    ],
+    ...input,
+  }
+}
+
+export async function createOidcClaimMapping(input: Partial<OidcClaimMappingInput> = {}) {
+  return executeOperationAsUser(
+    { query: createOidcClaimMappingMutation, variables: { input: createOidcClaimMappingInput(input) } },
+    UserRoles.oidcAdmin,
+  )
+}
+
+export const updateOidcClientClaimMappingsMutation = graphql(`
+  mutation UpdateOidcClientClaimMappings($clientId: ID!, $claimMappingIds: [ID!]!) {
+    updateOidcClientClaimMappings(clientId: $clientId, claimMappingIds: $claimMappingIds) {
+      ...OidcClientFragment
+      claimMappings {
+        ...OidcClaimMappingFragment
+      }
     }
   }
 `)

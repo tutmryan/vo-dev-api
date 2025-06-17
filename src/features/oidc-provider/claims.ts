@@ -1,6 +1,5 @@
-import { randomUUID } from 'node:crypto'
 import type { Configuration } from 'oidc-provider'
-import { instance } from '../../config'
+import type { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entity'
 import type { OidcResourceEntity } from './entities/oidc-resource-entity'
 
 export const presentationLoginStandardClaims = {
@@ -24,11 +23,6 @@ export enum OpenIdProfileClaim {
   Name = 'name',
 }
 
-export enum OpenIdEmailClaim {
-  Email = 'email',
-  EmailVerified = 'email_verified',
-}
-
 export enum VoIdentityClaim {
   IdentityId = 'vc_vo_identity_id',
   IdentityIssuer = 'vc_vo_identity_issuer',
@@ -43,7 +37,6 @@ export enum VoPresentationClaim {
 
 export const openidClaims = {
   openid: ['sub', ...Object.keys(presentationLoginStandardClaims)],
-  email: Object.values(OpenIdEmailClaim),
   profile: Object.values(OpenIdProfileClaim),
   vc_info: Object.values(VcInfoClaim),
   vc_presented_attributes: Object.values(VcPresentedAttributesClaim),
@@ -55,17 +48,10 @@ export const openidClaims = {
 export const resourceScopes = (resources: OidcResourceEntity[]) =>
   resources.reduce<Record<string, string[]>>((acc, r) => ({ ...acc, [r.resourceIndicator]: r.scopes }), {})
 
-export type ClaimMapping = {
-  id: string
-  name: string
-  clientIds: string[]
-  scopeMappings: Record<string, Record<string, string>>
-}
-
 // for the given mappings, returns a single map of claims by scope
-export const mappedClaims = (claimMappings: ClaimMapping[]) =>
+export const mappedClaims = (claimMappings: OidcClaimMappingEntity[]) =>
   claimMappings.reduce<Record<string, string[]>>((acc, mapping) => {
-    for (const [scope, claims] of Object.entries(mapping.scopeMappings)) {
+    for (const [scope, claims] of Object.entries(mapping.mapping)) {
       if (!acc[scope]) acc[scope] = []
       acc[scope] = [...new Set([...acc[scope], ...Object.keys(claims)])]
     }
@@ -73,53 +59,34 @@ export const mappedClaims = (claimMappings: ClaimMapping[]) =>
   }, {})
 
 // for the given claims and set of mappings, returns mapped claims
-export function mapClaims(claims: Record<string, any>, claimMappings: ClaimMapping[]): Record<string, any> {
-  const mapping: Record<string, string> = Object.assign({}, ...claimMappings.flatMap(({ scopeMappings }) => Object.values(scopeMappings)))
+export function mapClaims(claims: Record<string, any>, claimMappings: OidcClaimMappingEntity[]): Record<string, any> {
+  const mapping: Record<string, string> = Object.assign({}, ...claimMappings.flatMap(({ mapping }) => Object.values(mapping)))
   const mapped: Record<string, any> = {}
   for (const [toKey, fromKey] of Object.entries(mapping)) {
-    if (claims[fromKey] !== undefined) mapped[toKey] = claims[fromKey]
+    if (claims[fromKey] !== undefined) mapped[toKey] = parseCredentialClaim(toKey, claims[fromKey])
   }
   return mapped
 }
 
-// Temp for Matt 'Friendly Super' demo
-export const staticDemoClaimMappings: ClaimMapping[] =
-  instance === 'dev'
-    ? [
-        {
-          id: randomUUID(),
-          name: `Matt's demo mapping`,
-          clientIds: ['1b123dea-3c0b-48ee-848b-b499bc482ab0'],
-          scopeMappings: {
-            member: {
-              member_id: 'member_id',
-            },
-            phone: {
-              phone_number: 'mobile_phone',
-            },
-            profile: {
-              preferred_username: 'email',
-              given_name: 'first_name',
-              middle_name: 'middle_name',
-              family_name: 'surname',
-            },
-            address: {
-              country: 'country',
-              street_address: 'street_address',
-              unit_number: 'unit_number',
-              street_number: 'street_number',
-              street_type: 'street_type',
-              suburb: 'suburb',
-              state: 'state',
-              postcode: 'postcode',
-            },
-            bank: {
-              bank_name: 'bank_name',
-              bank_account_name: 'account_name',
-              bank_account_bsb: 'bsb',
-              bank_account_number: 'bank_account_number',
-            },
-          },
-        },
-      ]
-    : []
+function parseCredentialClaim(oidcClaim: string, credentialClaimValue: any): any {
+  switch (oidcClaim) {
+    case 'email_verified':
+      return normalizeBoolean(credentialClaimValue)
+    case 'phone_number_verified':
+      return normalizeBoolean(credentialClaimValue)
+    default:
+      return credentialClaimValue
+  }
+}
+
+function normalizeBoolean(value: unknown): boolean | undefined {
+  if (value === undefined || value === null) return undefined
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase()
+    if (['true', 'yes', '1', 'on'].includes(normalized)) return true
+    if (['false', 'no', '0', 'off'].includes(normalized)) return false
+    return Boolean(value)
+  }
+  return Boolean(value)
+}

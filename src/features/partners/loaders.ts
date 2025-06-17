@@ -15,7 +15,7 @@ export const presentationPartnersLoader = () =>
   new DataLoader<string, PartnerEntity[]>(async (presentationIds) => {
     const partners = await entityManager
       .getRepository(PartnerEntity)
-      .find({ where: { presentations: { id: In(presentationIds) } }, withDeleted: true })
+      .find({ where: { presentations: { id: In(presentationIds) } }, withDeleted: true, order: { name: 'ASC' } })
     return presentationIds.map((presentationId) => partners.filter((partner) => partner.presentationIds.includes(presentationId)))
   })
 
@@ -23,6 +23,6 @@ export const partnerByDidLoader = () =>
   new DataLoader<string, PartnerEntity | null>(async (dids) => {
     const results = await entityManager
       .getRepository(PartnerEntity)
-      .find({ where: { didHash: In(dids.map((did) => PartnerEntity.createDidHash(did))) }, withDeleted: true })
+      .find({ where: { didHash: In(dids.map((did) => PartnerEntity.createDidHash(did))) }, withDeleted: true, order: { name: 'ASC' } })
     return dids.map((did) => results.find((result) => result.didHash === PartnerEntity.createDidHash(did)) ?? null)
   })

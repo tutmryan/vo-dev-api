@@ -34,7 +34,15 @@ const minimalClientEntity = {
   OidcClientEntity,
   keyof Omit<
     OidcClientEntity,
-    keyof AuditedAndTrackedEntity | keyof VerifiedOrchestrationEntity | 'partners' | 'partnerIds' | 'resources' | 'update' | 'redirectUris'
+    | keyof AuditedAndTrackedEntity
+    | keyof VerifiedOrchestrationEntity
+    | 'partners'
+    | 'partnerIds'
+    | 'resources'
+    | 'update'
+    | 'redirectUris'
+    | 'claimMappings'
+    | 'claimMappingIds'
   >
 >
 

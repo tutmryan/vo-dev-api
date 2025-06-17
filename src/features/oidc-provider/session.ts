@@ -15,9 +15,9 @@ import { createKey } from '../../util/token'
 import type { PartnerEntity } from '../partners/entities/partner-entity'
 import { getPresentationDataFromCache } from '../presentation/callback/cache'
 import { PresentationEntity } from '../presentation/entities/presentation-entity'
-import type { ClaimMapping } from './claims'
 import { mapClaims } from './claims'
 import { resolveDynamicConstraintValue, valueIsDynamic } from './dynamic-constraint-values'
+import type { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entity'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
 import { ExtraParams } from './extra-params'
 import { whenEamAddPresentationConstraints, whenEamGetAccountId } from './integrations/entra-eam'
@@ -181,7 +181,7 @@ export type PresentationLoginAccount = {
   identity?: Pick<Identity, 'id' | 'identifier' | 'issuer' | 'name'>
   name?: string
   did: string
-  credentialType: string
+  credentialType: string[]
   credentialClaims?: Record<string, unknown>
   mappedCredentialClaims?: Record<string, string>
   revocationStatus?: string
@@ -237,7 +237,7 @@ export async function completeLogin(
     uniqueClaimForSubParam?: string
   },
   clientUniqueClaimsForSubjectId: string[],
-  clientClaimMappings: ClaimMapping[],
+  clientClaimMappings: OidcClaimMappingEntity[],
 ): Promise<PresentationLoginAccount> {
   // Verify the login interaction state
   const interactionData = await getLoginInteractionData(interactionId)
@@ -261,7 +261,8 @@ export async function completeLogin(
   invariant(credential, 'No credential in presentation data')
 
   // Build the login result
-  const { claims: allClaims, type: types, issuer } = credential
+  const { claims: allClaims, issuer } = credential
+  const [_, ...type] = credential.type
   const { issuanceId, photo, ...credentialClaims } = allClaims
 
   // Integrations hooks
@@ -271,12 +272,16 @@ export async function completeLogin(
     accountId = await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
   }
 
-  if (logger.isVerboseEnabled() && clientClaimMappings.length > 0)
+  const applicableClaimMappings = clientClaimMappings.filter(({ credentialTypes }) => {
+    if (!credentialTypes || credentialTypes.length === 0) return true
+    return credentialTypes.some((type) => type.includes(type))
+  })
+  if (logger.isVerboseEnabled() && applicableClaimMappings.length > 0)
     logger.verbose('OIDC applying claim mappings', {
       clientId,
       interactionId,
       requestId,
-      mappings: clientClaimMappings.map((mapping) => pick(mapping, 'id', 'name', 'scopeMappings')),
+      mappings: applicableClaimMappings.map((mapping) => pick(mapping, 'id', 'name', 'mappings', 'credentialTypes')),
     })
 
   const account: PresentationLoginAccount = {
@@ -286,9 +291,9 @@ export async function completeLogin(
     identity: identity ? pick(identity, ['id', 'issuer', 'identifier', 'name']) : undefined,
     name: identity?.name,
     did: issuer,
-    credentialType: types[1] ?? 'unknown',
+    credentialType: type,
     credentialClaims,
-    mappedCredentialClaims: mapClaims(credentialClaims, clientClaimMappings),
+    mappedCredentialClaims: mapClaims(credentialClaims, applicableClaimMappings),
     revocationStatus: credential.credentialState.revocationStatus as string | undefined,
     faceCheckMatchConfidenceScore: credential.faceCheck?.matchConfidenceScore,
   }

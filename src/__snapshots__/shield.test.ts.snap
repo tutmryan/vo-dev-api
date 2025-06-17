@@ -1022,6 +1022,22 @@ exports[`shield rules are setup correctly 1`] = `
       "name": "hasRole-VerifiableCredential.OidcAdmin",
       "cache": "contextual"
     },
+    "createOidcClaimMapping": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
+    "updateOidcClaimMapping": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
+    "deleteOidcClaimMapping": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
+    "updateOidcClientClaimMappings": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
     "revokeIssuance": {
       "rulesOr": [
         {
