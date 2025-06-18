@@ -9,5 +9,5 @@ const mergeWithArraysCustomizer: MergeWithCustomizer = (objValue, srcValue) => {
 }
 
 export function mergeWithArrays<TObject, TSource>(object: TObject, ...source: TSource[]): TObject & TSource {
-  return mergeWith(object, ...source, mergeWithArraysCustomizer)
+  return mergeWith({}, object, ...source, mergeWithArraysCustomizer)
 }
