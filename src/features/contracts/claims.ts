@@ -11,6 +11,9 @@ import { validateClaimInput, validateClaimValue, ValidationError } from '../../u
 
 export const displayClaimPrefix = 'vc.credentialSubject.'
 export const claimTypeString = 'String'
+// `image/jpg` is not a valid MIME type, however Android Authenticator is coded to only display photos with this type
+// Rohit Gulati (Microsoft) says: "we will fix it for Android in the coming release" (after 6.2505.3089)
+// once Android Authenticator is fixed, we can change this back to `image/jpeg`
 export const claimTypeImage = 'image/jpg;base64url'
 
 export const faceCheckPhotoClaimAttestation: Omit<AttestationClaimMapping, 'required'> = {
