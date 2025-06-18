@@ -11,7 +11,7 @@ import { validateClaimInput, validateClaimValue, ValidationError } from '../../u
 
 export const displayClaimPrefix = 'vc.credentialSubject.'
 export const claimTypeString = 'String'
-export const claimTypeImage = 'image/jpeg;base64url'
+export const claimTypeImage = 'image/jpg;base64url'
 
 export const faceCheckPhotoClaimAttestation: Omit<AttestationClaimMapping, 'required'> = {
   inputClaim: 'photo',
