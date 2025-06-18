@@ -92,6 +92,7 @@ const documents = {
     "\n  mutation CreateTemplate($input: TemplateInput!) {\n    createTemplate(input: $input) {\n      ...TemplateFragment\n    }\n  }\n": types.CreateTemplateDocument,
     "\n  query GetTemplate($id: ID!) {\n    template(id: $id) {\n      ...TemplateFragment\n    }\n  }": types.GetTemplateDocument,
     "\n  mutation UpdateTemplate($id: ID!, $input: TemplateInput!) {\n    updateTemplate(id: $id, input: $input) {\n      ...TemplateFragment\n    }\n  }\n": types.UpdateTemplateDocument,
+    "\n  query FindWallets($where: WalletWhere) {\n    findWallets(where: $where) {\n      firstUsed\n      lastUsed\n      subject\n      presentations {\n        identity {\n          id\n        }\n      }\n    }\n  }\n": types.FindWalletsDocument,
     "\n  mutation CreatePartnerShieldTest($input: CreatePartnerInput!) {\n    createPartner(input: $input) {\n      id\n    }\n  }\n": types.CreatePartnerShieldTestDocument,
     "\n    mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {\n      acquireLimitedAccessToken(input: $input) {\n        expires\n        token\n      }\n    }\n  ": types.AcquireLimitedAccessTokenDocument,
 };
@@ -426,6 +427,10 @@ export function graphql(source: "\n  query GetTemplate($id: ID!) {\n    template
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation UpdateTemplate($id: ID!, $input: TemplateInput!) {\n    updateTemplate(id: $id, input: $input) {\n      ...TemplateFragment\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateTemplate($id: ID!, $input: TemplateInput!) {\n    updateTemplate(id: $id, input: $input) {\n      ...TemplateFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query FindWallets($where: WalletWhere) {\n    findWallets(where: $where) {\n      firstUsed\n      lastUsed\n      subject\n      presentations {\n        identity {\n          id\n        }\n      }\n    }\n  }\n"): (typeof documents)["\n  query FindWallets($where: WalletWhere) {\n    findWallets(where: $where) {\n      firstUsed\n      lastUsed\n      subject\n      presentations {\n        identity {\n          id\n        }\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

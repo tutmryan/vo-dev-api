@@ -97,6 +97,10 @@ input IdentityWhere {
   List only the identities which can be deleted
   """
   isDeletable: Boolean
+  """
+  List only the identities related to a wallet
+  """
+  walletId: ID
 }
 
 """

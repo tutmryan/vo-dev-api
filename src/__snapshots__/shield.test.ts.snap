@@ -321,6 +321,118 @@ exports[`shield rules are setup correctly 1`] = `
         }
       ]
     },
+    "wallet": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isPresentationApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
+              "rulesOr": [
+                {
+                  "name": "isRequestIdFilterDefined",
+                  "cache": "strict"
+                },
+                {
+                  "name": "isValidLimitedIdentitierFilter",
+                  "cache": "strict"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual"
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
+        }
+      ]
+    },
+    "findWallets": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual"
+        },
+        {
+          "name": "isPresentationApp",
+          "cache": "contextual"
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual"
+            },
+            {
+              "rulesOr": [
+                {
+                  "name": "isRequestIdFilterDefined",
+                  "cache": "strict"
+                },
+                {
+                  "name": "isValidLimitedIdentitierFilter",
+                  "cache": "strict"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual"
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual"
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
+        }
+      ]
+    },
     "findNetworkIssuers": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
       "cache": "contextual"
@@ -1087,6 +1199,18 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "revokeUserIssuances": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.CredentialAdmin",
+          "cache": "contextual"
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "revokeWalletIssuances": {
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",

@@ -8,6 +8,7 @@ import { partnerByDidLoader, partnerLoader, presentationPartnersLoader } from '.
 import { presentationLoader } from './features/presentation/loaders'
 import { templateLoader } from './features/templates/loaders'
 import { userLoader } from './features/users/loaders'
+import { walletLoader, walletUsedDateLoader } from './features/wallet/loaders'
 import type { Services } from './services'
 
 export type DataLoaders = ReturnType<typeof createDataLoaders>
@@ -31,4 +32,7 @@ export const createDataLoaders = (services: Services) => ({
   oidcResources: oidcResourceLoader(),
   oidcClaimMappings: oidcClaimMappingsLoader(),
   isIdentityDeletable: isIdentityDeletableLoader(),
+  wallets: walletLoader(),
+  walletFirstUsed: walletUsedDateLoader('MIN'),
+  walletLastUsed: walletUsedDateLoader('MAX'),
 })

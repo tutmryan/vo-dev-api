@@ -15,6 +15,7 @@ import { OidcResourceEntity } from '../features/oidc-provider/entities/oidc-reso
 import { OidcClientResourceEntity } from '../features/oidc-provider/entities/oidc-client-resource-entity';
 import { OidcClaimMappingEntity } from '../features/oidc-provider/entities/oidc-claim-mapping-entity';
 import { BrandingEntity } from '../features/branding/entities/branding-entity';
+import { WalletEntity } from '../features/wallet/entities/wallet-entity';
 import { GraphQLContext } from '../context';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
@@ -1271,6 +1272,8 @@ export type ContractPresentationWhere = {
   requestedType?: InputMaybe<Scalars['String']['input']>;
   /** The end of the presentedAt period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the wallet who presented the credential */
+  walletId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Defines the filter criteria used to find contracts. */
@@ -1653,6 +1656,8 @@ export type IdentityPresentationWhere = {
   requestedType?: InputMaybe<Scalars['String']['input']>;
   /** The end of the presentedAt period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the wallet who presented the credential */
+  walletId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Defines the searchable fields usable to find identities */
@@ -1663,6 +1668,8 @@ export type IdentityWhere = {
   issuer?: InputMaybe<Scalars['String']['input']>;
   /** The name of the identity to match */
   name?: InputMaybe<Scalars['String']['input']>;
+  /** List only the identities related to a wallet */
+  walletId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Defines the input for templates and contracts. */
@@ -1846,6 +1853,8 @@ export type IssuancePresentationWhere = {
   requestedType?: InputMaybe<Scalars['String']['input']>;
   /** The end of the presentedAt period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the wallet who presented the credential */
+  walletId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /**
@@ -2205,6 +2214,8 @@ export type Mutation = {
   revokeIssuances: Scalars['ID']['output'];
   /** Revokes existing credentials issued by a user. */
   revokeUserIssuances: Scalars['ID']['output'];
+  /** Revokes existing credentials presented by a wallet. */
+  revokeWalletIssuances: Scalars['ID']['output'];
   /** Create or update a concierge branding config. */
   saveConciergeBranding: Branding;
   /** Creates or updates an identity based on its issuer and identifier */
@@ -2467,6 +2478,11 @@ export type MutationRevokeIssuancesArgs = {
 
 export type MutationRevokeUserIssuancesArgs = {
   userId: Scalars['ID']['input'];
+};
+
+
+export type MutationRevokeWalletIssuancesArgs = {
+  walletId: Scalars['ID']['input'];
 };
 
 
@@ -2823,6 +2839,8 @@ export type OidcClientPresentationWhere = {
   requestedType?: InputMaybe<Scalars['String']['input']>;
   /** The end of the presentedAt period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the wallet who presented the credential */
+  walletId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Represents an OIDC resource that an OIDC client has access to, according to the defined resource scopes. */
@@ -3006,6 +3024,8 @@ export type PartnerPresentationWhere = {
   requestedType?: InputMaybe<Scalars['String']['input']>;
   /** The end of the presentedAt period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the wallet who presented the credential */
+  walletId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Defines the searchable fields usable to find partners */
@@ -3110,6 +3130,8 @@ export type Presentation = {
   requestedBy: User;
   /** The credentials that were requested */
   requestedCredentials: Array<RequestedCredential>;
+  /** The wallet associated with this presentation. */
+  wallet?: Maybe<Wallet>;
 };
 
 /** The callback endpoint is called when a user scans the QR code, uses the deep link the authenticator app, or finishes the presentation process. */
@@ -3291,6 +3313,8 @@ export type PresentationWhere = {
   requestedType?: InputMaybe<Scalars['String']['input']>;
   /** The end of the presentedAt period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the wallet who presented the credential */
+  walletId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Loosely typed representation based on documentation / example event here: https://docs.microsoft.com/en-us/azure/active-directory/verifiable-credentials/presentation-request-api#callback-events */
@@ -3368,6 +3392,8 @@ export type Query = {
   findTenantIdentities: Array<TenantIdentity>;
   /** Returns users, optionally matching the specified criteria */
   findUsers: Array<User>;
+  /** Returns wallets, optionally matching the specified criteria */
+  findWallets: Array<Wallet>;
   /** No-op query to test if the server is up and running. */
   healthcheck?: Maybe<Scalars['Void']['output']>;
   /** Returns a list of identities for the given IDs */
@@ -3426,6 +3452,8 @@ export type Query = {
   templateCombinedData: TemplateParentData;
   /** Returns a user by ID */
   user: User;
+  /** Returns a wallet by ID. */
+  wallet?: Maybe<Wallet>;
 };
 
 
@@ -3585,6 +3613,13 @@ export type QueryFindUsersArgs = {
 };
 
 
+export type QueryFindWalletsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<WalletWhere>;
+};
+
+
 export type QueryIdentitiesArgs = {
   ids?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
@@ -3705,6 +3740,11 @@ export type QueryTemplateCombinedDataArgs = {
 
 
 export type QueryUserArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryWalletArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -4239,6 +4279,8 @@ export type UserPresentationWhere = {
   requestedType?: InputMaybe<Scalars['String']['input']>;
   /** The end of the presentedAt period to include. */
   to?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the wallet who presented the credential */
+  walletId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** Defines the searchable fields usable to find users */
@@ -4252,6 +4294,69 @@ export type UserWhere = {
   isApp?: InputMaybe<Scalars['Boolean']['input']>;
   /** The name of the user to match */
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Represents a wallet entity, uniquely identified by a decentralized identifier (DID). */
+export type Wallet = {
+  __typename?: 'Wallet';
+  /** The first time this wallet was used in a presentation. */
+  firstUsed: Scalars['DateTime']['output'];
+  /** The local id for this wallet. */
+  id: Scalars['ID']['output'];
+  /** The last time this wallet was used in a presentation. */
+  lastUsed: Scalars['DateTime']['output'];
+  /** Returns the successful credential presentations for this wallet. */
+  presentations: Array<Presentation>;
+  /** The DID associated with this wallet */
+  subject: Scalars['String']['output'];
+};
+
+
+/** Represents a wallet entity, uniquely identified by a decentralized identifier (DID). */
+export type WalletPresentationsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<WalletPresentationWhere>;
+};
+
+/** Criteria for filtering presentations. */
+export type WalletPresentationWhere = {
+  /** The ID of a contract that was presented. */
+  contractId?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the presentedAt period to include. */
+  from?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the identity who presented the credential (if known). */
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** Whether face check validation was requested. */
+  isFaceCheckRequested?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The issuance that was presented */
+  issuanceId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the OIDC client that requested authentication resulting in the presentation. */
+  oidcClientId?: InputMaybe<Scalars['ID']['input']>;
+  /** The partner who issued the credential that was presented */
+  partnerId?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential presented. */
+  presentedType?: InputMaybe<Scalars['String']['input']>;
+  /** The requestId of the presentation request. */
+  requestId?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the user (Person or Application) that requested & received the presentation data. */
+  requestedById?: InputMaybe<Scalars['ID']['input']>;
+  /** The type of credential requested. */
+  requestedType?: InputMaybe<Scalars['String']['input']>;
+  /** The end of the presentedAt period to include. */
+  to?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The ID of the wallet who presented the credential */
+  walletId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+/** Represents the criteria for filtering Wallets */
+export type WalletWhere = {
+  /** Returns wallets with the specified ID. */
+  id?: InputMaybe<Scalars['ID']['input']>;
+  /** Returns wallets linked to the specified identity. */
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  /** Returns wallets with the specified subject DID. */
+  subject?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** DID information for the Web model */
@@ -4791,6 +4896,13 @@ export type UpdateTemplateMutationVariables = Exact<{
 
 export type UpdateTemplateMutation = { __typename?: 'Mutation', updateTemplate: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, parent?: { __typename?: 'Template', id: string, name: string, description: string, isPublic?: boolean | null, validityIntervalInSeconds?: number | null } | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, image?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> | null } | null } };
 
+export type FindWalletsQueryVariables = Exact<{
+  where?: InputMaybe<WalletWhere>;
+}>;
+
+
+export type FindWalletsQuery = { __typename?: 'Query', findWallets: Array<{ __typename?: 'Wallet', firstUsed: Date, lastUsed: Date, subject: string, presentations: Array<{ __typename?: 'Presentation', identity?: { __typename?: 'Identity', id: string } | null }> }> };
+
 export type CreatePartnerShieldTestMutationVariables = Exact<{
   input: CreatePartnerInput;
 }>;
@@ -4877,6 +4989,7 @@ export const GetTemplateParentDataQueryDocument = {"kind":"Document","definition
 export const CreateTemplateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateTemplate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TemplateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]} as unknown as DocumentNode<CreateTemplateMutation, CreateTemplateMutationVariables>;
 export const GetTemplateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTemplate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"template"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]} as unknown as DocumentNode<GetTemplateQuery, GetTemplateQueryVariables>;
 export const UpdateTemplateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateTemplate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TemplateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]} as unknown as DocumentNode<UpdateTemplateMutation, UpdateTemplateMutationVariables>;
+export const FindWalletsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindWallets"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"WalletWhere"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findWallets"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"firstUsed"}},{"kind":"Field","name":{"kind":"Name","value":"lastUsed"}},{"kind":"Field","name":{"kind":"Name","value":"subject"}},{"kind":"Field","name":{"kind":"Name","value":"presentations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"identity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]}}]} as unknown as DocumentNode<FindWalletsQuery, FindWalletsQueryVariables>;
 export const CreatePartnerShieldTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePartnerShieldTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CreatePartnerInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPartner"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<CreatePartnerShieldTestMutation, CreatePartnerShieldTestMutationVariables>;
 
 
@@ -5181,6 +5294,9 @@ export type ResolversTypes = {
   UserPresentationWhere: UserPresentationWhere;
   UserWhere: UserWhere;
   Void: ResolverTypeWrapper<Scalars['Void']['output']>;
+  Wallet: ResolverTypeWrapper<WalletEntity>;
+  WalletPresentationWhere: WalletPresentationWhere;
+  WalletWhere: WalletWhere;
   WebDidModel: ResolverTypeWrapper<WebDidModel>;
 };
 
@@ -5380,6 +5496,9 @@ export type ResolversParentTypes = {
   UserPresentationWhere: UserPresentationWhere;
   UserWhere: UserWhere;
   Void: Scalars['Void']['output'];
+  Wallet: WalletEntity;
+  WalletPresentationWhere: WalletPresentationWhere;
+  WalletWhere: WalletWhere;
   WebDidModel: WebDidModel;
 };
 
@@ -5870,6 +5989,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   revokeIssuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<MutationRevokeIssuanceArgs, 'id'>>;
   revokeIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeIssuancesArgs, 'ids'>>;
   revokeUserIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeUserIssuancesArgs, 'userId'>>;
+  revokeWalletIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeWalletIssuancesArgs, 'walletId'>>;
   saveConciergeBranding?: Resolver<ResolversTypes['Branding'], ParentType, ContextType, RequireFields<MutationSaveConciergeBrandingArgs, 'input'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
   sendAsyncIssuanceVerification?: Resolver<ResolversTypes['SendAsyncIssuanceVerificationResponse'], ParentType, ContextType, RequireFields<MutationSendAsyncIssuanceVerificationArgs, 'asyncIssuanceRequestId'>>;
@@ -6027,6 +6147,7 @@ export type PresentationResolvers<ContextType = GraphQLContext, ParentType exten
   presentedCredentials?: Resolver<Array<ResolversTypes['PresentedCredential']>, ParentType, ContextType>;
   requestedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   requestedCredentials?: Resolver<Array<ResolversTypes['RequestedCredential']>, ParentType, ContextType>;
+  wallet?: Resolver<Maybe<ResolversTypes['Wallet']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -6104,6 +6225,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findTemplates?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType, RequireFields<QueryFindTemplatesArgs, 'limit'>>;
   findTenantIdentities?: Resolver<Array<ResolversTypes['TenantIdentity']>, ParentType, ContextType, RequireFields<QueryFindTenantIdentitiesArgs, 'limit' | 'where'>>;
   findUsers?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType, RequireFields<QueryFindUsersArgs, 'limit'>>;
+  findWallets?: Resolver<Array<ResolversTypes['Wallet']>, ParentType, ContextType, RequireFields<QueryFindWalletsArgs, 'limit'>>;
   healthcheck?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   identities?: Resolver<Array<Maybe<ResolversTypes['Identity']>>, ParentType, ContextType, Partial<QueryIdentitiesArgs>>;
   identitiesByIdentifiers?: Resolver<Array<Maybe<ResolversTypes['Identity']>>, ParentType, ContextType, Partial<QueryIdentitiesByIdentifiersArgs>>;
@@ -6130,6 +6252,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   template?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<QueryTemplateArgs, 'id'>>;
   templateCombinedData?: Resolver<ResolversTypes['TemplateParentData'], ParentType, ContextType, RequireFields<QueryTemplateCombinedDataArgs, 'templateId'>>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
+  wallet?: Resolver<Maybe<ResolversTypes['Wallet']>, ParentType, ContextType, RequireFields<QueryWalletArgs, 'id'>>;
 };
 
 export type RegexValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RegexValidation'] = ResolversParentTypes['RegexValidation']> = {
@@ -6319,6 +6442,15 @@ export interface VoidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
   name: 'Void';
 }
 
+export type WalletResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Wallet'] = ResolversParentTypes['Wallet']> = {
+  firstUsed?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  lastUsed?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<WalletPresentationsArgs, 'limit'>>;
+  subject?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type WebDidModelResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['WebDidModel'] = ResolversParentTypes['WebDidModel']> = {
   did?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   didDocumentStatus?: Resolver<ResolversTypes['DidDocumentStatus'], ParentType, ContextType>;
@@ -6427,6 +6559,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   User?: UserResolvers<ContextType>;
   UserCount?: UserCountResolvers<ContextType>;
   Void?: GraphQLScalarType;
+  Wallet?: WalletResolvers<ContextType>;
   WebDidModel?: WebDidModelResolvers<ContextType>;
 };
 

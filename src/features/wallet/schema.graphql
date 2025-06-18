@@ -1,0 +1,50 @@
+"""
+Represents a wallet entity, uniquely identified by a decentralized identifier (DID).
+"""
+type Wallet {
+  """
+  The local id for this wallet.
+  """
+  id: ID!
+  """
+  The DID associated with this wallet
+  """
+  subject: String!
+  """
+  The first time this wallet was used in a presentation.
+  """
+  firstUsed: DateTime!
+  """
+  The last time this wallet was used in a presentation.
+  """
+  lastUsed: DateTime!
+}
+
+extend type Query {
+  """
+  Returns a wallet by ID.
+  """
+  wallet(id: ID!): Wallet
+  """
+  Returns wallets, optionally matching the specified criteria
+  """
+  findWallets(where: WalletWhere, offset: PositiveInt, limit: PositiveInt = 100): [Wallet!]!
+}
+
+"""
+Represents the criteria for filtering Wallets
+"""
+input WalletWhere {
+  """
+  Returns wallets with the specified ID.
+  """
+  id: ID
+  """
+  Returns wallets with the specified subject DID.
+  """
+  subject: String
+  """
+  Returns wallets linked to the specified identity.
+  """
+  identityId: ID
+}

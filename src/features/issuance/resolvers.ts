@@ -8,6 +8,7 @@ import { RevokeIdentityIssuancesCommand } from './commands/revoke-identity-issua
 import { RevokeIssuanceCommand } from './commands/revoke-issuance-command'
 import { RevokeIssuancesCommand } from './commands/revoke-issuances-command'
 import { RevokeUserIssuancesCommand } from './commands/revoke-user-issuances-command'
+import { RevokeWalletIssuancesCommand } from './commands/revoke-wallet-issuances-command'
 import { CountIssuancesByContractQuery } from './queries/count-issuances-by-contract'
 import { CountIssuancesByUserQuery } from './queries/count-issuances-by-user-query'
 import { CountIssuancesQuery } from './queries/count-issuances-query'
@@ -30,6 +31,7 @@ export const resolvers: Resolvers = {
     revokeContractIssuances: (_, { contractId }, context) => dispatch(context, RevokeContractIssuancesCommand, contractId),
     revokeIdentityIssuances: (_, { identityId }, context) => dispatch(context, RevokeIdentityIssuancesCommand, identityId),
     revokeUserIssuances: (_, { userId }, context) => dispatch(context, RevokeUserIssuancesCommand, userId),
+    revokeWalletIssuances: (_, { walletId }, context) => dispatch(context, RevokeWalletIssuancesCommand, walletId),
   },
   Contract: {
     issuances: (contract, { where, offset, limit }, context) =>

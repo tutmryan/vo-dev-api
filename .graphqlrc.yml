@@ -30,6 +30,7 @@ extensions:
                 OidcClientResource: ../features/oidc-provider/entities/oidc-client-resource-entity#OidcClientResourceEntity
                 OidcClaimMapping: ../features/oidc-provider/entities/oidc-claim-mapping-entity#OidcClaimMappingEntity
                 Branding: ../features/branding/entities/branding-entity#BrandingEntity
+                Wallet: ../features/wallet/entities/wallet-entity#WalletEntity
         config:
           strictScalars: true
           scalars:

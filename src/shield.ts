@@ -133,6 +133,8 @@ export const rules: ShieldSchema<Resolvers> = {
     findIssuances: isAllowedToViewIssuances,
     findAsyncIssuanceRequests: isAllowedToViewAsyncIssuanceRequests,
     findPresentations: isAllowedToViewPresentations,
+    wallet: isAllowedToViewPresentations,
+    findWallets: isAllowedToViewPresentations,
     findNetworkIssuers: isPartnerAdminUser,
     networkContracts: isPartnerAdminUser,
     approvalRequest: or(isApprovalRequestAdminUser, and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId)),
@@ -214,6 +216,7 @@ export const rules: ShieldSchema<Resolvers> = {
     revokeContractIssuances: or(isCredentialAdminUser, isContractAdminApp),
     revokeIdentityIssuances: or(isCredentialAdminUser, isContractAdminApp),
     revokeUserIssuances: or(isCredentialAdminUser, isContractAdminApp),
+    revokeWalletIssuances: or(isCredentialAdminUser, isContractAdminApp),
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
   Subscription: {

@@ -300,6 +300,10 @@ type Mutation {
   Revokes existing credentials issued by a user.
   """
   revokeUserIssuances(userId: ID!): ID!
+  """
+  Revokes existing credentials presented by a wallet.
+  """
+  revokeWalletIssuances(walletId: ID!): ID!
 }
 
 """

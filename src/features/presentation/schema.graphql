@@ -371,6 +371,10 @@ type Presentation {
   The requesting OIDC client, if this presentation was made for OIDC authentication.
   """
   oidcClient: OidcClient
+  """
+  The wallet associated with this presentation.
+  """
+  wallet: Wallet
 }
 
 """
@@ -401,6 +405,10 @@ input ContractPresentationWhere {
   The ID of the OIDC client that requested authentication resulting in the presentation.
   """
   oidcClientId: ID
+  """
+  The ID of the wallet who presented the credential
+  """
+  walletId: ID
   """
   The start of the presentedAt period to include.
   """
@@ -465,6 +473,10 @@ input IdentityPresentationWhere {
   """
   oidcClientId: ID
   """
+  The ID of the wallet who presented the credential
+  """
+  walletId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -515,6 +527,10 @@ input UserPresentationWhere {
   """
   oidcClientId: ID
   """
+  The ID of the wallet who presented the credential
+  """
+  walletId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -561,6 +577,10 @@ input IssuancePresentationWhere {
   """
   oidcClientId: ID
   """
+  The ID of the wallet who presented the credential
+  """
+  walletId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -602,6 +622,10 @@ input PartnerPresentationWhere {
   The ID of the OIDC client that requested authentication resulting in the presentation.
   """
   oidcClientId: ID
+  """
+  The ID of the wallet who presented the credential
+  """
+  walletId: ID
   """
   The ID of a contract used to make the presentation request.
   """
@@ -664,6 +688,67 @@ input OidcClientPresentationWhere {
   """
   oidcClientId: ID
   """
+  The ID of the wallet who presented the credential
+  """
+  walletId: ID
+  """
+  The start of the presentedAt period to include.
+  """
+  from: DateTime
+  """
+  The end of the presentedAt period to include.
+  """
+  to: DateTime
+  """
+  The type of credential requested.
+  """
+  requestedType: String
+  """
+  The type of credential presented.
+  """
+  presentedType: String
+  """
+  Whether face check validation was requested.
+  """
+  isFaceCheckRequested: Boolean
+}
+"""
+Criteria for filtering presentations.
+"""
+input WalletPresentationWhere {
+  """
+  The requestId of the presentation request.
+  """
+  requestId: ID
+  """
+  The ID of the identity who presented the credential (if known).
+  """
+  identityId: ID
+  """
+  The ID of a contract that was presented.
+  """
+  contractId: ID
+  """
+  The ID of the user (Person or Application) that requested & received the presentation data.
+  """
+  requestedById: ID
+  """
+  The issuance that was presented
+  """
+  issuanceId: ID
+  """
+  The partner who issued the credential that was presented
+  """
+  partnerId: ID
+  """
+  The ID of the OIDC client that requested authentication resulting in the presentation.
+  """
+  oidcClientId: ID
+  """
+  The ID of the wallet who presented the credential
+  """
+  walletId: ID
+  """
   The start of the presentedAt period to include.
   """
   from: DateTime
@@ -717,6 +802,10 @@ input PresentationWhere {
   The ID of the OIDC client that requested authentication resulting in the presentation.
   """
   oidcClientId: ID
+  """
+  The ID of the wallet who presented the credential
+  """
+  walletId: ID
   """
   The start of the presentedAt period to include.
   """
@@ -785,6 +874,13 @@ extend type OidcClient {
   presentations(where: OidcClientPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
+extend type Wallet {
+  """
+  Returns the successful credential presentations for this wallet.
+  """
+  presentations(where: WalletPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
+}
+
 """
 Fields that can be used for sorting presentations.
 """
@@ -808,6 +904,7 @@ extend type Query {
   Returns a presentation by ID
   """
   presentation(id: ID!): Presentation!
+
   """
   Returns successful credential presentations, optionally matching the specified criteria.
   """

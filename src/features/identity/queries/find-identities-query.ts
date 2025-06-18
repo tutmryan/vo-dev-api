@@ -30,6 +30,16 @@ export async function FindIdentitiesQuery(
       ${joiner} ${op} (SELECT 1 FROM presentation p WHERE p.identity_id = i.id)
     `)
   }
+  if (criteria?.walletId) {
+    qb.andWhere(
+      `EXISTS (
+    SELECT 1 FROM presentation p
+    WHERE p.identity_id = i.id
+    AND LOWER(p.wallet_id) = LOWER(:walletId)
+  )`,
+      { walletId: criteria.walletId },
+    )
+  }
 
   const direction = orderDirection ?? OrderDirection.Asc
   const orderColumn = orderBy === IdentityOrderBy.Identifier ? 'i.identifier' : orderBy === IdentityOrderBy.Name ? 'i.name' : 'i.name'

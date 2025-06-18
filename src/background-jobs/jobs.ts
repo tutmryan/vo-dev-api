@@ -16,6 +16,7 @@ import {
 } from '../features/issuance/jobs/revoke-identity-issuances'
 import { revokeIssuancesJobHandler, type RevokeIssuancesJobPayload } from '../features/issuance/jobs/revoke-issuances'
 import { revokeUserIssuancesJobHandler, type RevokeUserIssuancesJobPayload } from '../features/issuance/jobs/revoke-user-issuances'
+import { revokeWalletIssuancesJobHandler, type RevokeWalletIssuancesJobPayload } from '../features/issuance/jobs/revoke-wallet-issuances'
 import { applyOidcSigningKeysRotationJobHandler } from '../features/oidc-provider/jobs/apply-oidc-key-rotation'
 import { initialiseOidcDataJobHandler } from '../features/oidc-provider/jobs/initialise-data-job-handler'
 import { initialiseOidcKeysJobHandler } from '../features/oidc-provider/jobs/initialise-keys-job-handler'
@@ -74,6 +75,7 @@ export type Jobs = {
   revokeContractIssuances: JobConfig<RevokeContractIssuancesJobPayload>
   revokeIdentityIssuances: JobConfig<RevokeIdentityIssuancesJobPayload>
   revokeUserIssuances: JobConfig<RevokeUserIssuancesJobPayload>
+  revokeWalletIssuances: JobConfig<RevokeWalletIssuancesJobPayload>
   invokeApprovalCallback: JobConfig<InvokeApprovalCallbackJobPayload>
   sendAsyncIssuanceNotifications: JobConfig<SendAsyncIssuanceNotificationsJobPayload>
   cancelAsyncIssuanceRequests: JobConfig<CancelAsyncIssuanceRequestsJobPayload>
@@ -98,6 +100,10 @@ export const jobs: Jobs = {
   },
   revokeUserIssuances: {
     handler: revokeUserIssuancesJobHandler,
+    disableImplicitTransaction: true,
+  },
+  revokeWalletIssuances: {
+    handler: revokeWalletIssuancesJobHandler,
     disableImplicitTransaction: true,
   },
   invokeApprovalCallback: {

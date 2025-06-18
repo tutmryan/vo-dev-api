@@ -25,6 +25,7 @@ export async function CountPresentationsQuery(this: QueryContext, criteria?: May
     where.partners = { id: criteria.partnerId }
   }
   if (criteria?.oidcClientId) where.oidcClientId = criteria.oidcClientId
+  if (criteria?.walletId) where.walletId = criteria.walletId
 
   if (criteria?.from && criteria.to) where.presentedAt = BetweenTimestamp(criteria.from, criteria.to)
   else if (criteria?.from) where.presentedAt = MoreThanOrEqualTimestamp(criteria.from)

@@ -26,6 +26,7 @@ export async function FindPresentationsQuery(
   if (criteria?.identityId) where.identityId = criteria.identityId
   if (criteria?.requestedById) where.requestedById = criteria.requestedById
   if (criteria?.oidcClientId) where.oidcClientId = criteria.oidcClientId
+  if (criteria?.walletId) where.walletId = criteria.walletId
   if (criteria?.contractId || criteria?.issuanceId) {
     relations.issuances = true
     const issuanceWhere: FindOptionsWhere<IssuanceEntity> = {}

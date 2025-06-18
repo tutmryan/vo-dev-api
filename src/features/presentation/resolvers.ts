@@ -49,6 +49,10 @@ export const resolvers: Resolvers = {
     presentations: (partner, { where, offset, limit }, context) =>
       query(context, FindPresentationsQuery, { partnerId: partner.id, ...where }, offset, limit),
   },
+  Wallet: {
+    presentations: (wallet, { where, offset, limit }, context) =>
+      query(context, FindPresentationsQuery, { walletId: wallet.id, ...where }, offset, limit),
+  },
   OidcClient: {
     presentations: (oidcClient, { where, offset, limit }, context) =>
       query(context, FindPresentationsQuery, { oidcClientId: oidcClient.id, ...where }, offset, limit),
