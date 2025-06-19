@@ -46,6 +46,7 @@ export function accountToClaims(account: PresentationLoginAccount): AccountClaim
     [VcPresentedAttributesClaim.PresentedAttributes]: presentationClaimData,
     [VoPresentationClaim.PresentationId]: presentationId,
     [VoPresentationClaim.IssuanceId]: issuanceId,
+    [VoPresentationClaim.SupportsFaceCheck]: account.credentialSupportsFaceCheck,
     [VoPresentationClaim.FaceCheckMatchConfidenceScore]: account.faceCheckMatchConfidenceScore,
     [VoIdentityClaim.IdentityId]: identity?.id,
     [VoIdentityClaim.IdentityIssuer]: identity?.issuer,

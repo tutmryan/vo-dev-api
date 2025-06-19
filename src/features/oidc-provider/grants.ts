@@ -1,6 +1,6 @@
 import type { Client, Configuration } from 'oidc-provider'
 import { invariant } from '../../util/invariant'
-import { openidClaims } from './claims'
+import { mappedClaims, openidClaims } from './claims'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
 import type { OidcResourceEntity } from './entities/oidc-resource-entity'
 
@@ -42,18 +42,26 @@ export function loadExistingGrant(clients: OidcClientEntity[], resources: OidcRe
         accountId: ctx.oidc.session.accountId,
       })
 
+      // for first party apps, grant all the OIDC scopes, configured resource scopes and mapping scopes, to avoid consent prompt
       if (isFirstParty(ctx.oidc.client)) {
-        // grant all the OIDC scopes and configured resource scopes to avoid consent prompt
         // Automatically include offline_access and all OIDC claims
         const oidcScopes = ['offline_access', ...Object.keys(openidClaims)].join(' ')
         grant.addOIDCScope(oidcScopes)
 
-        // if the client has access to resources, grant those scopes as well
+        // Find the client entity
         const clientId = ctx.oidc.client.clientId
         invariant(clientId, 'client must be available on oidc context')
         const client = clients.find((c) => c.id === clientId)
         invariant(client, `Client ${clientId} not found`)
 
+        // Add client mapped scopes
+        const clientMappedClaims = mappedClaims(await client.claimMappings)
+        const clientMappedScopes = Object.keys(clientMappedClaims)
+          .filter((scope) => !Object.keys(openidClaims).includes(scope))
+          .join(' ')
+        grant.addOIDCScope(clientMappedScopes)
+
+        // if the client has access to resources, grant those scopes as well
         for (const clientResource of await client.resources) {
           const resource = resources.find((r) => r.id === clientResource.resourceId)
           invariant(resource, `Resource ${clientResource.resourceId} not found`)

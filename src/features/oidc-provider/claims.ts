@@ -33,6 +33,7 @@ export enum VoPresentationClaim {
   PresentationId = 'vc_vo_presentation_id',
   IssuanceId = 'vc_vo_issuance_id',
   FaceCheckMatchConfidenceScore = 'vc_vo_facecheck_match_confidence_score',
+  SupportsFaceCheck = 'vc_vo_credential_supports_facecheck',
 }
 
 export const openidClaims = {

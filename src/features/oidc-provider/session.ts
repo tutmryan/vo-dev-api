@@ -3,7 +3,7 @@ import { compact, pick } from 'lodash'
 import type { UnknownObject } from 'oidc-provider'
 import { v5 as uuidv5 } from 'uuid'
 import { oidcProviderModule, oidcStorageService } from '.'
-import { limitedOidcAuthnAuth, limitedOidcClient } from '../../config'
+import { faceCheckEnabled, limitedOidcAuthnAuth, limitedOidcClient } from '../../config'
 import { dataSource } from '../../data'
 import type { ClaimConstraint, Identity, PresentationRequestForAuthnInput, RequestConfiguration } from '../../generated/graphql'
 import { logger } from '../../logger'
@@ -185,6 +185,7 @@ export type PresentationLoginAccount = {
   credentialClaims?: Record<string, unknown>
   mappedCredentialClaims?: Record<string, string>
   revocationStatus?: string
+  credentialSupportsFaceCheck?: boolean
   faceCheckMatchConfidenceScore?: number
 }
 
@@ -263,7 +264,7 @@ export async function completeLogin(
   // Build the login result
   const { claims: allClaims, issuer } = credential
   const [_, ...type] = credential.type
-  const { issuanceId, photo, ...credentialClaims } = allClaims
+  const { issuanceId, identityId, photo, ...credentialClaims } = allClaims
 
   // Integrations hooks
   let accountId = whenEamGetAccountId(interactionData, credential)
@@ -296,6 +297,7 @@ export async function completeLogin(
     mappedCredentialClaims: mapClaims(credentialClaims, applicableClaimMappings),
     revocationStatus: credential.credentialState.revocationStatus as string | undefined,
     faceCheckMatchConfidenceScore: credential.faceCheck?.matchConfidenceScore,
+    credentialSupportsFaceCheck: faceCheckEnabled && !!photo,
   }
 
   // Persist the account

@@ -1,5 +1,6 @@
 import { flatten, set } from 'lodash'
 import { In } from 'typeorm'
+import { faceCheckEnabled } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPresentationEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import type { PresentationRequestInput } from '../../../generated/graphql'
@@ -82,11 +83,12 @@ export async function CreatePresentationRequestCommand(
   }
 
   // set the sourcePhotoClaimName field on any requested credential where faceCheck is specified
-  // using `set` is a cheat to avoid creating several new types
-  // for the VID service representation of RequestedCredential > Configuration > Validation chain of types
   presentationRequest.requestedCredentials.forEach(({ configuration }) => {
-    if (configuration?.validation?.faceCheck)
+    if (configuration?.validation?.faceCheck) {
+      invariant(faceCheckEnabled, 'Face check is not enabled on this instance')
+      // use `set` to change the schema input type FaceCheckValidationInput into the VID service type `{sourcePhotoClaimName: string}`
       set(configuration.validation.faceCheck, 'sourcePhotoClaimName', faceCheckPhotoClaimAttestation.outputClaim)
+    }
   })
 
   // send it
