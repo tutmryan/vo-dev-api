@@ -11,7 +11,7 @@ import {
   faceCheckPhotoClaimAttestation,
   faceCheckPhotoDisplayClaim,
   standardClaimAttestations,
-  standardContractDislayClaims,
+  standardContractDisplayClaims,
 } from '../claims'
 import { ContractEntity } from '../entities/contract-entity'
 
@@ -103,7 +103,7 @@ function toCreateContractInput({
             required: !isOptional,
           })),
           ...(faceCheckSupport === FaceCheckPhotoSupport.None ? [] : [faceCheckPhotoDisplayClaim]),
-          ...standardContractDislayClaims,
+          ...standardContractDisplayClaims,
         ],
       },
     ],

@@ -59,7 +59,7 @@ export const standardClaimAttestations: AttestationClaimMapping[] = standardClai
   indexed: claim === StandardClaims.issuanceId,
 }))
 
-export const standardContractDislayClaims: DisplayClaim[] = standardClaims.map((claim) => ({
+export const standardContractDisplayClaims: DisplayClaim[] = standardClaims.map((claim) => ({
   claim: `${displayClaimPrefix}${claim}`,
   label: standardClaimLabels[claim as StandardClaims],
   type: claimTypeString,
