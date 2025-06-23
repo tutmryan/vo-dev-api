@@ -144,9 +144,13 @@ export const jobs: Jobs = {
   monitorServices: {
     handler: monitorServicesJobHandler,
     scheduledJobResultHandler: monitorServicesResultHandler,
+    schedule: { every: 5 * 60 * 1000 }, // every 5 minutes
   },
   applyOidcSigningKeysRotation: {
     handler: applyOidcSigningKeysRotationJobHandler,
+    schedule: {
+      pattern: '0 0 1 * * *', // every day at 1am
+    },
   },
 }
 
