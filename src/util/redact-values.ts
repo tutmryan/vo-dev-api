@@ -1,4 +1,6 @@
 import { cloneDeep, forOwn, get, isNil, isObject, set } from 'lodash'
+import { StandardClaims } from '../features/contracts/claims'
+import type { RequestCredential } from '../generated/graphql'
 
 /**
  * Recursively replaces values in an object with '<redacted>' for the specified keys. Enumerates arrays and applies the same redaction to elements.
@@ -108,4 +110,28 @@ export function redactValueEmail(input: string | unknown) {
 
   if (input.length < 8) return `<redacted>${domain}`
   return `${input.charAt(0)}*<redacted>*${input.charAt(atIndex + 1)}${domain}`
+}
+
+const safeClaimNames = new Set([StandardClaims.identityId, StandardClaims.issuanceId])
+
+export const redactConstraints = (requestCredentials: RequestCredential[]): RequestCredential[] => {
+  return requestCredentials.map((reqCred) => {
+    if (!reqCred.constraints) return reqCred
+
+    const redactedConstraints = reqCred.constraints.map((c) => {
+      const isSafe = safeClaimNames.has(c.claimName as StandardClaims)
+      if (c.values) {
+        return { claimName: c.claimName, values: isSafe ? c.values : null }
+      }
+      if (c.startsWith) {
+        return { claimName: c.claimName, startsWith: isSafe ? c.startsWith : null }
+      }
+      if (c.contains) {
+        return { claimName: c.claimName, contains: isSafe ? c.contains : null }
+      }
+      return { claimName: c.claimName }
+    })
+
+    return { ...reqCred, constraints: redactedConstraints }
+  })
 }

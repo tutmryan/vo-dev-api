@@ -4,6 +4,7 @@ import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { getPlatformIssuerDid } from '../../../services'
+import { redactConstraints } from '../../../util/redact-values'
 import type { PresentationCallbackHandler } from '../../callback'
 import { requestDetailsCache } from '../../callback/cache'
 import { StandardClaims } from '../../contracts/claims'
@@ -100,7 +101,7 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
       requestedById,
       identityId,
       issuanceIds,
-      requestedCredentials,
+      requestedCredentials: redactConstraints(requestedCredentials),
       presentedCredentials,
       partnerIds: partners.map((p) => p.id),
       oidcClientId: authInteractionData?.clientId ?? null,

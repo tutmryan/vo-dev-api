@@ -1,4 +1,5 @@
-import { redactValueEmail, redactValueInner, redactValueObjectUnknown, redactValues } from './redact-values'
+import { RequestCredential } from '../generated/graphql'
+import { redactConstraints, redactValueEmail, redactValueInner, redactValueObjectUnknown, redactValues } from './redact-values'
 
 describe('redactValues', () => {
   it('should redact values at the specified paths', () => {
@@ -327,6 +328,101 @@ describe('redactValueObjectUnknown', () => {
       email: 'u*<redacted>*e@example.com',
       age: '<redacted>',
       isActive: true,
+    })
+  })
+})
+
+describe('redactConstraints', () => {
+  describe('constraint redaction behavior', () => {
+    it.each([
+      {
+        description: 'retains values for "identityId" and "issuanceId"',
+        input: [
+          {
+            constraints: [
+              { claimName: 'identityId', values: ['abc-123'] },
+              { claimName: 'issuanceId', values: ['def-456'] },
+            ],
+          },
+        ],
+        expected: [
+          { claimName: 'identityId', values: ['abc-123'] },
+          { claimName: 'issuanceId', values: ['def-456'] },
+        ],
+      },
+      {
+        description: 'redacts "values" for non-standard claim',
+        input: [
+          {
+            constraints: [{ claimName: 'name', values: ['Alice', 'Bob'] }],
+          },
+        ],
+        expected: [{ claimName: 'name', values: null }],
+      },
+      {
+        description: 'redacts "startsWith" for non-standard claim',
+        input: [
+          {
+            constraints: [{ claimName: 'email', startsWith: 'user@' }],
+          },
+        ],
+        expected: [{ claimName: 'email', startsWith: null }],
+      },
+      {
+        description: 'redacts "contains" for non-standard claim',
+        input: [
+          {
+            constraints: [{ claimName: 'name', contains: 'alice' }],
+          },
+        ],
+        expected: [{ claimName: 'name', contains: null }],
+      },
+      {
+        description: 'retains "startsWith" for "identityId"',
+        input: [
+          {
+            constraints: [{ claimName: 'identityId', startsWith: 'abc' }],
+          },
+        ],
+        expected: [{ claimName: 'identityId', startsWith: 'abc' }],
+      },
+      {
+        description: 'preserves unknown operator (no redaction applied)',
+        input: [
+          {
+            constraints: [{ claimName: 'unknownField' }],
+          },
+        ],
+        expected: [{ claimName: 'unknownField' }],
+      },
+    ])('$description', ({ input, expected }) => {
+      const result = redactConstraints(input as RequestCredential[])
+      expect(result[0]?.constraints).toEqual(expected)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('returns empty array for empty constraints', () => {
+      const input = [
+        {
+          constraints: [],
+        },
+      ] as unknown as RequestCredential[]
+
+      const result = redactConstraints(input)
+      expect(result[0]?.constraints).toEqual([])
+    })
+
+    it('preserves undefined if constraints is missing', () => {
+      const input = [
+        {
+          type: 'SomeCredential',
+          // no constraints
+        },
+      ] as RequestCredential[]
+
+      const result = redactConstraints(input)
+      expect(result[0]?.constraints).toBeUndefined()
     })
   })
 })
