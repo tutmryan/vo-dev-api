@@ -94,6 +94,34 @@ type RequestedConfiguration {
 }
 
 """
+A constraint applied to a specific claim in the presentation request.
+"""
+type RequestedClaimConstraint {
+  """
+  The name of the claim this constraint applies to.
+  """
+  claimName: String!
+  """
+  The list of values. Only defined for standard claims like `identityId` and `issuanceId`.
+  """
+  values: [String!]
+  """
+  The operator used to evaluate the constraint (e.g. equals, startsWith, contains).
+  """
+  operator: ConstraintOperator!
+}
+
+"""
+The available constraint operators
+"""
+enum ConstraintOperator {
+  equals
+  startsWith
+  contains
+  unknown
+}
+
+"""
 Face check validation settings
 """
 input FaceCheckValidationInput {
@@ -207,6 +235,10 @@ type RequestedCredential {
   Optional settings for presentation validation.
   """
   configuration: RequestedConfiguration
+  """
+  The requested constraints of the presentation
+  """
+  constraints: [RequestedClaimConstraint!]
 }
 
 """

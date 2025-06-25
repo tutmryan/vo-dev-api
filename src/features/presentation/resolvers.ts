@@ -8,6 +8,7 @@ import { CountPresentationsByUserQuery } from './queries/count-presentations-by-
 import { CountPresentationsQuery } from './queries/count-presentations-query'
 import { FindPresentationsQuery } from './queries/find-presentations-query'
 import { WeeklyAveragePresentationsByContractQuery } from './queries/weekly-average-presentations-by-contract-query'
+import { resolveRequestedClaimConstraints } from './requested-claim-constraint-resolver'
 
 export const resolvers: Resolvers = {
   Query: {
@@ -26,6 +27,9 @@ export const resolvers: Resolvers = {
   Presentation: {
     presentedCredentials: (presentation, _, { user }) => resolvePresentedCredentials(presentation, user),
     oidcClient: ({ oidcClientId }, _, { dataLoaders: { oidcClients } }) => (oidcClientId ? oidcClients.load(oidcClientId) : null),
+  },
+  RequestedCredential: {
+    constraints: ({ constraints }) => resolveRequestedClaimConstraints(constraints),
   },
   Contract: {
     presentations: (contract, { where, offset, limit }, context) =>

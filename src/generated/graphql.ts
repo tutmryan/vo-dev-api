@@ -847,6 +847,14 @@ export type ConfigurationValidation = {
   validateLinkedDomain?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** The available constraint operators */
+export enum ConstraintOperator {
+  Contains = 'contains',
+  Equals = 'equals',
+  StartsWith = 'startsWith',
+  Unknown = 'unknown'
+}
+
 /** Represents the contact information. */
 export type Contact = {
   __typename?: 'Contact';
@@ -3852,6 +3860,17 @@ export type RequestInnerError = {
   target?: Maybe<Scalars['String']['output']>;
 };
 
+/** A constraint applied to a specific claim in the presentation request. */
+export type RequestedClaimConstraint = {
+  __typename?: 'RequestedClaimConstraint';
+  /** The name of the claim this constraint applies to. */
+  claimName: Scalars['String']['output'];
+  /** The operator used to evaluate the constraint (e.g. equals, startsWith, contains). */
+  operator: ConstraintOperator;
+  /** The list of values. Only defined for standard claims like `identityId` and `issuanceId`. */
+  values?: Maybe<Array<Scalars['String']['output']>>;
+};
+
 /** The configuration information used on the presentation request */
 export type RequestedConfiguration = {
   __typename?: 'RequestedConfiguration';
@@ -3865,6 +3884,8 @@ export type RequestedCredential = {
   acceptedIssuers?: Maybe<Array<Scalars['String']['output']>>;
   /** Optional settings for presentation validation. */
   configuration?: Maybe<RequestedConfiguration>;
+  /** The requested constraints of the presentation */
+  constraints?: Maybe<Array<RequestedClaimConstraint>>;
   /** The purpose of requesting presentation of the credential. */
   purpose?: Maybe<Scalars['String']['output']>;
   /** The verifiable credential type that was requested */
@@ -5125,6 +5146,7 @@ export type ResolversTypes = {
   CommunicationWhere: CommunicationWhere;
   ConciergeBrandingInput: ConciergeBrandingInput;
   ConfigurationValidation: ConfigurationValidation;
+  ConstraintOperator: ConstraintOperator;
   Contact: ResolverTypeWrapper<Contact>;
   ContactInput: ContactInput;
   ContactMethod: ContactMethod;
@@ -5262,6 +5284,7 @@ export type ResolversTypes = {
   RequestErrorResponse: ResolverTypeWrapper<RequestErrorResponse>;
   RequestErrorWithInner: ResolverTypeWrapper<RequestErrorWithInner>;
   RequestInnerError: ResolverTypeWrapper<RequestInnerError>;
+  RequestedClaimConstraint: ResolverTypeWrapper<RequestedClaimConstraint>;
   RequestedConfiguration: ResolverTypeWrapper<RequestedConfiguration>;
   RequestedCredential: ResolverTypeWrapper<RequestedCredential>;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
@@ -5465,6 +5488,7 @@ export type ResolversParentTypes = {
   RequestErrorResponse: RequestErrorResponse;
   RequestErrorWithInner: RequestErrorWithInner;
   RequestInnerError: RequestInnerError;
+  RequestedClaimConstraint: RequestedClaimConstraint;
   RequestedConfiguration: RequestedConfiguration;
   RequestedCredential: RequestedCredential;
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
@@ -6295,6 +6319,13 @@ export type RequestInnerErrorResolvers<ContextType = GraphQLContext, ParentType 
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type RequestedClaimConstraintResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestedClaimConstraint'] = ResolversParentTypes['RequestedClaimConstraint']> = {
+  claimName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  operator?: Resolver<ResolversTypes['ConstraintOperator'], ParentType, ContextType>;
+  values?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type RequestedConfigurationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestedConfiguration'] = ResolversParentTypes['RequestedConfiguration']> = {
   validation?: Resolver<Maybe<ResolversTypes['RequestConfigurationValidation']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -6303,6 +6334,7 @@ export type RequestedConfigurationResolvers<ContextType = GraphQLContext, Parent
 export type RequestedCredentialResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestedCredential'] = ResolversParentTypes['RequestedCredential']> = {
   acceptedIssuers?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   configuration?: Resolver<Maybe<ResolversTypes['RequestedConfiguration']>, ParentType, ContextType>;
+  constraints?: Resolver<Maybe<Array<ResolversTypes['RequestedClaimConstraint']>>, ParentType, ContextType>;
   purpose?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -6540,6 +6572,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   RequestErrorResponse?: RequestErrorResponseResolvers<ContextType>;
   RequestErrorWithInner?: RequestErrorWithInnerResolvers<ContextType>;
   RequestInnerError?: RequestInnerErrorResolvers<ContextType>;
+  RequestedClaimConstraint?: RequestedClaimConstraintResolvers<ContextType>;
   RequestedConfiguration?: RequestedConfigurationResolvers<ContextType>;
   RequestedCredential?: RequestedCredentialResolvers<ContextType>;
   ScopedClaimMapping?: ScopedClaimMappingResolvers<ContextType>;

@@ -112,7 +112,7 @@ export function redactValueEmail(input: string | unknown) {
   return `${input.charAt(0)}*<redacted>*${input.charAt(atIndex + 1)}${domain}`
 }
 
-const safeClaimNames = new Set([StandardClaims.identityId, StandardClaims.issuanceId])
+export const safeClaimNames = new Set([StandardClaims.identityId, StandardClaims.issuanceId])
 
 export const redactConstraints = (requestCredentials: RequestCredential[]): RequestCredential[] => {
   return requestCredentials.map((reqCred) => {
