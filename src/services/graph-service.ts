@@ -83,7 +83,7 @@ export class GraphService {
   }
 
   async findUsers({ nameStartsWith }: { nameStartsWith: string }, top: number): Promise<PartialUser[]> {
-    const nameInput = encodeURIComponent(nameStartsWith)
+    const nameInput = encodeURIComponent(nameStartsWith.replaceAll("'", "''")) //https://learn.microsoft.com/en-us/graph/query-parameters?tabs=javascript#escaping-single-quotes
     const result = (await this.client()
       .api('/users')
       .filter(`startswith(displayName,'${nameInput}') or startswith(givenName,'${nameInput}') or startswith(surname,'${nameInput}')`)
