@@ -3,7 +3,7 @@ import type { Express, RequestHandler } from 'express'
 import type { JWK } from 'jose'
 import { debounce } from 'lodash'
 import type { Configuration, Errors, Interaction, interactionPolicy, KoaContextWithOIDC, Provider } from 'oidc-provider'
-import { apiUrl, cookieSession, instance } from '../../config'
+import { apiUrl, cookieSession } from '../../config'
 import { logger } from '../../logger'
 import { createRedisClient, isRedisEnabled } from '../../redis'
 import { pubsub } from '../../redis/pubsub'
@@ -64,23 +64,11 @@ async function createProvider() {
 
   const { clients, clientMetadata, resources, resourceScopes, mappedClaims } = data
 
-  // Temp for Matt Zendesk demo in dev part 1 of 3
-  if (instance === 'dev') {
-    const addSecretToClient = (id: string, secret: string) => {
-      const client = clientMetadata.find((client) => client.client_id === id)
-      if (client) {
-        client.client_secret = secret
-      }
-    }
-    addSecretToClient('1b123dea-3c0b-48ee-848b-b499bc482ab0', 'demo-secret')
-    addSecretToClient('8258a626-b6a2-4751-aca7-4693f4f32d22', 'demo-secret')
-  }
-
   const claims = mergeWithArrays(openidClaims, resourceScopes, mappedClaims)
 
   const provider = new Provider(issuer, {
     clients: clientMetadata,
-    clientAuthMethods: ['none'],
+    clientAuthMethods: ['none', 'client_secret_post'],
     ...(isRedisEnabled ? { adapter: (name) => new RedisAdapter(name, redisClient()) } : {}),
     cookies: {
       keys: [cookieSession.secret ?? throwError('cookieSession.secret is required')],
@@ -108,7 +96,7 @@ async function createProvider() {
     },
     extraParams: { ...extraParams, ...eamExtraParams },
     jwks: { keys: jwksKeys },
-    // Expire browser sessions immediately, as this behaviour is problematic for VC based OIDC
+    // Expire browser sessions immediately, since each credential provides a distinct account / subject identifier / session
     expiresWithSession: () => false,
     ttl: {
       Session: 1,

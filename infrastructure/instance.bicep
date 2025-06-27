@@ -87,6 +87,34 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   }
 }
 
+resource oidcKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
+  name: 'vo-kv-oidc-${uniqueSuffix}'
+  location: location
+  properties: {
+    enabledForTemplateDeployment: true
+    tenantId: subscription().tenantId
+    sku: {
+      name: 'standard'
+      family: 'A'
+    }
+    enablePurgeProtection: true
+    publicNetworkAccess: 'Disabled'
+    accessPolicies: [
+      {
+        tenantId: subscription().tenantId
+        objectId: apiAppService.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+            'set'
+            'delete'
+          ]
+        }
+      }
+    ]
+  }
+}
+
 resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
   name: '${resourcePrefix}-kv-pe'
   location: location
@@ -106,8 +134,46 @@ resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01'
   }
 }
 
+resource oidcKeyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+  name: '${resourcePrefix}-oidc-kv-pe'
+  location: location
+  properties: {
+    subnet: {
+      id: privateEndpointsSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: '${resourcePrefix}-oidc-kv-private-link'
+        properties: {
+          privateLinkServiceId: oidcKeyVault.id
+          groupIds: ['vault']
+        }
+      }
+    ]
+  }
+}
+
 resource keyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
   parent: keyVaultPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config1'
+        properties: {
+          privateDnsZoneId: resourceId(
+            sharedResourceGroupName,
+            'Microsoft.Network/privateDnsZones',
+            'privatelink.vaultcore.azure.net'
+          )
+        }
+      }
+    ]
+  }
+}
+
+resource oidcKeyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
+  parent: oidcKeyVaultPrivateEndpoint
   name: 'default'
   properties: {
     privateDnsZoneConfigs: [
@@ -1299,6 +1365,7 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     BLOB_STORAGE_URL: 'https://${verifiedOrchestrationStorage.name}.blob.${az.environment().suffixes.storage}'
     PRIVATE_BLOB_STORAGE_URL: 'https://${privateStorageAccount.name}.blob.${az.environment().suffixes.storage}'
     PRIVATE_STORAGE_ENCRYPTION_KEY: '@Microsoft.KeyVault(SecretUri=${(empty(privateStorageClientEncryptionKey) ? privateStorageClientEncryptionKeySecretExisting : privateStorageClientEncryptionKeySecret).properties.secretUri})'
+    OIDC_KEY_VAULT_URL: oidcKeyVault.properties.vaultUri
     API_CLIENT_ID: apiClientId
     API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiClientSecret) ? apiClientSecretSecretExisting : apiClientSecretSecret).properties.secretUri})'
     API_CLIENT_URI: apiClientId

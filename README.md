@@ -14,7 +14,7 @@ The VO solution is known to work well with [VSCode](https://code.visualstudio.co
 
 When using VSCode, the VO recommendation is to use the extensions listed in the `./vscode/extensions.json` file. After opening the solution in VSCode, you will prompt to you install these extensions if you don't already have them.
 
-For webstorm users, the VO recommendation is to enable 'Optimize imports' on save. This can be done by going to `Settings -> Tools -> Actions on Save ` and check the optimize imports`.
+For webstorm users, the VO recommendation is to enable 'Optimize imports' on save. This can be done by going to `Settings -> Tools -> Actions on Save` and check the optimize imports.
 
 ## Getting started
 
@@ -49,8 +49,8 @@ To view the local storage account, you can use the [Azure Storage Explorer](http
 By default, the local instances that comprise the VO platform are hosted on the following local ports:
 
 - API: `http://localhost:4000`
-- Admin UI: `http://localhost:5471/2` (Depending on order of startup, this may be on port 5472)
-- Portal UI: `http://localhost:5471/2` (Depending on order of startup, this may be on port 5472)
+- Admin UI: `http://localhost:5473`
+- Portal UI: `http://localhost:5174`
 
 However, the default configuration suffers from not being able to issue credentials as the MS servers require publicly accessible endpoints.
 

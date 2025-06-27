@@ -211,6 +211,7 @@ export const rules: ShieldSchema<Resolvers> = {
     updateOidcClaimMapping: isOidcAdminUser,
     deleteOidcClaimMapping: isOidcAdminUser,
     updateOidcClientClaimMappings: isOidcAdminUser,
+    generateOidcClientSecret: isOidcAdminUser,
     revokeIssuance: or(isCredentialAdminUser, isContractAdminApp),
     revokeIssuances: or(isCredentialAdminUser, isContractAdminApp),
     revokeContractIssuances: or(isCredentialAdminUser, isContractAdminApp),

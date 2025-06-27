@@ -9,6 +9,7 @@ import {
   oidcClientQuery,
   updateOidcClientMutation,
 } from '.'
+import { OidcClientType } from '../../../generated/graphql'
 import { UserRoles } from '../../../roles'
 import {
   beforeAfterAll,
@@ -17,14 +18,18 @@ import {
   expectToBeDefined,
   expectUnauthorizedError,
 } from '../../../test'
+import { mockedServices } from '../../../test/mocks'
 
 const createInput = createOidcClientInput()
 const updateInput = createOidcClientInput()
 
 describe('createOidcClient mutation', () => {
   beforeAfterAll()
+  beforeEach(() => {
+    mockedServices.clearAllMocks()
+  })
 
-  it('can create a client', async () => {
+  it('can create a public web (default) client', async () => {
     const { data, errors } = await executeOperationAsUser(
       { query: createOidcClientMutation, variables: { input: createInput } },
       UserRoles.oidcAdmin,
@@ -39,6 +44,82 @@ describe('createOidcClient mutation', () => {
     expect(createOidcClient.createdAt).toBeDefined()
     expect(createOidcClient.createdBy).toBeDefined()
     expect(createOidcClient.updatedBy).toBeNull()
+  })
+
+  it('can create a confidential web client', async () => {
+    const confidentialInput = createOidcClientInput({ clientType: OidcClientType.Confidential, clientSecret: casual.uuid })
+    const { data, errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: confidentialInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const createOidcClient = data.createOidcClient
+
+    expect(createOidcClient).toMatchObject(omit(confidentialInput, 'clientSecret'))
+    expect(createOidcClient.clientType).toEqual(OidcClientType.Confidential)
+    expect(mockedServices.oidcSecretService.setClientSecret.lastCallArgs()).toEqual([createOidcClient.id, confidentialInput.clientSecret])
+  })
+
+  it('can update a confidential web client to public', async () => {
+    const confidentialInput = createOidcClientInput({ clientType: OidcClientType.Confidential, clientSecret: casual.uuid })
+    const { data, errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: confidentialInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const createOidcClient = data.createOidcClient
+
+    expect(createOidcClient).toMatchObject(omit(confidentialInput, 'clientSecret'))
+    expect(createOidcClient.clientType).toEqual(OidcClientType.Confidential)
+    expect(mockedServices.oidcSecretService.setClientSecret.lastCallArgs()).toEqual([createOidcClient.id, confidentialInput.clientSecret])
+
+    // update to public client
+    const publicInput = createOidcClientInput({ clientType: OidcClientType.Public })
+    const { data: updateData, errors: updateErrors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: createOidcClient.id, input: publicInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(updateErrors).toBeUndefined()
+    expectToBeDefined(updateData?.updateOidcClient)
+    const updatedOidcClient = updateData.updateOidcClient
+    expect(updatedOidcClient).toMatchObject(omit(publicInput, 'clientSecret'))
+    expect(updatedOidcClient.clientType).toEqual(OidcClientType.Public)
+    // client secret should be deleted
+    expect(mockedServices.oidcSecretService.deleteClientSecret.lastCallArgs()).toEqual([updatedOidcClient.id])
+  })
+
+  it(`can't create a confidential client without a secret`, async () => {
+    const confidentialInput = createOidcClientInput({ clientType: OidcClientType.Confidential, clientSecret: undefined })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: confidentialInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('Confidential clients must have a secret')
+  })
+
+  it(`can't update a public client to confidential without a secret`, async () => {
+    const publicInput = createOidcClientInput({ clientType: OidcClientType.Public })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: publicInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    const confidentialInput = createOidcClientInput({ clientType: OidcClientType.Confidential, clientSecret: undefined })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: confidentialInput } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(data?.updateOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('Confidential clients must have a secret')
   })
 
   it('returns an unauthorized error when accessed anonymously', async () => {

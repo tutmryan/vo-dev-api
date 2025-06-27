@@ -1,3 +1,4 @@
+import { generateOidcClientSecret } from '.'
 import { dispatch, query } from '../../cqs'
 import type { Resolvers } from '../../generated/graphql'
 import { compactErrors } from '../../util/compact-errors'
@@ -44,6 +45,8 @@ export const resolvers: Resolvers = {
     deleteOidcClaimMapping: async (_parent, { id }, context) => dispatch(context, DeleteOidcClaimMappingCommand, id),
     updateOidcClientClaimMappings: async (_parent, { clientId, claimMappingIds }, context) =>
       dispatch(context, UpdateOidcClientClaimMappingsCommand, clientId, claimMappingIds),
+
+    generateOidcClientSecret,
   },
   Query: {
     oidcClient: async (_parent, { id }, { dataLoaders: { oidcClients } }) => oidcClients.load(id),

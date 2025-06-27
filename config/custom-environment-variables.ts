@@ -61,6 +61,7 @@ const config: EnvVarSubstitution<Config> = {
     url: 'PRIVATE_BLOB_STORAGE_URL',
     clientEncryptionKey: 'PRIVATE_STORAGE_ENCRYPTION_KEY',
   },
+  oidcKeyVaultUrl: 'OIDC_KEY_VAULT_URL',
   sms: {
     secret: 'SMS_SECRET',
   },

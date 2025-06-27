@@ -1150,6 +1150,10 @@ exports[`shield rules are setup correctly 1`] = `
       "name": "hasRole-VerifiableCredential.OidcAdmin",
       "cache": "contextual"
     },
+    "generateOidcClientSecret": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual"
+    },
     "revokeIssuance": {
       "rulesOr": [
         {

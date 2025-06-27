@@ -4,6 +4,7 @@ import type { Configuration, UnknownObject } from 'oidc-provider'
 import path from 'path'
 import { instance } from '../../config'
 import type { VerifiedOrchestrationEntity } from '../../data/verified-orchestration-entity'
+import { OidcApplicationType } from '../../generated/graphql'
 import { logger } from '../../logger'
 import type { AuditedAndTrackedEntity } from '../auditing/entities/audited-and-tracked-entity'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
@@ -23,7 +24,7 @@ const minimalClientEntity = {
   backgroundImage: null,
   policyUrl: null,
   termsOfServiceUrl: null,
-  applicationType: null,
+  applicationType: OidcApplicationType.Web,
   requireFaceCheck: false,
   allowAnyPartner: false,
   postLogoutUris: [],
@@ -43,6 +44,7 @@ const minimalClientEntity = {
     | 'redirectUris'
     | 'claimMappings'
     | 'claimMappingIds'
+    | 'clientType'
   >
 >
 

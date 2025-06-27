@@ -18,6 +18,8 @@ export async function FindOidcClientsQuery(
   const order: FindOptionsOrder<OidcClientEntity> = {}
 
   if (criteria?.name) where.name = Like(`%${criteria.name}%`)
+  if (criteria?.applicationType) where.applicationType = criteria.applicationType
+  if (criteria?.clientType) where.clientType = criteria.clientType
   if (isNotNil(criteria?.allowAnyPartner)) where.allowAnyPartner = criteria.allowAnyPartner
   if (isNotNil(criteria?.isDeleted)) where.deletedAt = criteria.isDeleted ? Not(IsNull()) : IsNull()
   if (criteria?.createdById) where.createdById = criteria.createdById

@@ -195,7 +195,7 @@ export class OidcStorageService extends PrivateBlobStorageContainerService {
     // determine whether rotation is necessary
     const [firstBlob, secondBlob, thirdBlob, ...oldBlobs] = blobs
     invariant(firstBlob, 'No OIDC key blobs found')
-    const needsRotation = await this.shouldRotateKey(firstBlob)
+    const needsRotation = this.shouldRotateKey(firstBlob)
 
     // delete old blobs if necessary
     const blobsToDelete = compact(needsRotation ? [thirdBlob, ...oldBlobs] : oldBlobs)

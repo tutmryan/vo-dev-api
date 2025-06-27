@@ -1,17 +1,18 @@
 import { randomUUID } from 'crypto'
+import { isIP } from 'net'
 import { BeforeInsert, BeforeUpdate, Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, OneToMany, RelationId } from 'typeorm'
-import { OidcApplicationType } from '../../../generated/graphql'
+import { OidcApplicationType, OidcClientType } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
+import { assertExhaustive } from '../../../util/type-helpers'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { PartnerEntity } from '../../partners/entities/partner-entity'
 import { OidcClaimMappingEntity } from './oidc-claim-mapping-entity'
 import { OidcClientResourceEntity } from './oidc-client-resource-entity'
 
-type RequiredArgs = Pick<OidcClientEntity, 'name' | 'redirectUris' | 'postLogoutUris'>
+type RequiredArgs = Pick<OidcClientEntity, 'name' | 'applicationType' | 'clientType' | 'redirectUris' | 'postLogoutUris'>
 type OptionalArgs = Pick<
   OidcClientEntity,
-  | 'applicationType'
   | 'credentialTypes'
   | 'uniqueClaimsForSubjectId'
   | 'logo'
@@ -25,32 +26,13 @@ type OptionalArgs = Pick<
 >
 type CreateOrUpdateArgs = RequiredArgs & Partial<OptionalArgs>
 
-function inflateArgs(args: CreateOrUpdateArgs): RequiredArgs & OptionalArgs {
-  return {
-    name: args.name,
-    redirectUris: args.redirectUris,
-    postLogoutUris: args.postLogoutUris,
-    partnerIds: args.partnerIds ?? [],
-    allowAnyPartner: args.allowAnyPartner !== undefined ? args.allowAnyPartner : false,
-    requireFaceCheck: args.requireFaceCheck !== undefined ? args.requireFaceCheck : false,
-    applicationType: args.applicationType ?? null,
-    credentialTypes: args.credentialTypes ?? null,
-    uniqueClaimsForSubjectId: args.uniqueClaimsForSubjectId ?? null,
-    logo: args.logo ?? null,
-    backgroundColor: args.backgroundColor ?? null,
-    backgroundImage: args.backgroundImage ?? null,
-    policyUrl: args.policyUrl ?? null,
-    termsOfServiceUrl: args.termsOfServiceUrl ?? null,
-  }
-}
-
 @Entity('oidc_client')
 export class OidcClientEntity extends AuditedAndTrackedEntity {
   constructor(args?: CreateOrUpdateArgs & Pick<Partial<OidcClientEntity>, 'id'>) {
     super()
     if (args) {
       const { id, ...rest } = args
-      typeSafeAssign(this, { id: args.id ?? randomUUID(), ...inflateArgs(rest) })
+      typeSafeAssign(this, { id: args.id ?? randomUUID(), ...OidcClientEntity.validateInflateArgs(rest) })
     }
   }
 
@@ -95,17 +77,11 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
     this.termsOfServiceUrl = this.termsOfServiceUrl?.toString() ?? null
   }
 
-  @Column({ name: 'application_type', type: 'nvarchar', default: 'web' })
-  applicationType!: OidcApplicationType | null
-  @BeforeInsert()
-  @BeforeUpdate()
-  private setApplicationType() {
-    invariant(
-      this.applicationType === OidcApplicationType.Web || this.applicationType === null,
-      'Only web application types are currently supported',
-    )
-    this.applicationType = this.applicationType ?? OidcApplicationType.Web
-  }
+  @Column({ type: 'nvarchar', default: OidcApplicationType.Web })
+  applicationType!: OidcApplicationType
+
+  @Column({ type: 'nvarchar', default: OidcClientType.Public })
+  clientType!: OidcClientType
 
   @Column({ type: 'nvarchar', length: 'MAX' })
   private redirectUrisJson!: string
@@ -198,6 +174,63 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
   claimMappingIds!: string[]
 
   update(args: CreateOrUpdateArgs) {
-    typeSafeAssign(this, inflateArgs(args))
+    typeSafeAssign(this, OidcClientEntity.validateInflateArgs(args))
+  }
+
+  static validateInflateArgs(args: CreateOrUpdateArgs): RequiredArgs & OptionalArgs {
+    OidcClientEntity.validateUris('redirect', args.redirectUris, args.applicationType)
+    OidcClientEntity.validateUris('log out', args.postLogoutUris, args.applicationType)
+
+    return {
+      name: args.name,
+      applicationType: args.applicationType,
+      clientType: args.clientType,
+      redirectUris: args.redirectUris,
+      postLogoutUris: args.postLogoutUris,
+      partnerIds: args.partnerIds ?? [],
+      allowAnyPartner: args.allowAnyPartner !== undefined ? args.allowAnyPartner : false,
+      requireFaceCheck: args.requireFaceCheck !== undefined ? args.requireFaceCheck : false,
+      credentialTypes: args.credentialTypes ?? null,
+      uniqueClaimsForSubjectId: args.uniqueClaimsForSubjectId ?? null,
+      logo: args.logo ?? null,
+      backgroundColor: args.backgroundColor ?? null,
+      backgroundImage: args.backgroundImage ?? null,
+      policyUrl: args.policyUrl ?? null,
+      termsOfServiceUrl: args.termsOfServiceUrl ?? null,
+    }
+  }
+
+  static validateUris(type: 'redirect' | 'log out', uris: Array<string | URL>, applicationType: OidcApplicationType) {
+    if (type === 'redirect') {
+      invariant(uris.length > 0, `At least one ${type} URI is required`)
+    }
+
+    uris.forEach((uri) => {
+      const protocol = typeof uri === 'string' ? new URL(uri).protocol : uri.protocol
+      const isHttps = protocol === 'https:'
+      const hostname = typeof uri === 'string' ? new URL(uri).hostname : uri.hostname
+      const isLocalhost = hostname === 'localhost'
+
+      // https://openid.net/specs/openid-connect-registration-1_0.html#ClientMetadata
+      switch (applicationType) {
+        case OidcApplicationType.Web:
+          if (!isHttps) invariant(isLocalhost, `http: URLs can only be used with localhost`)
+          break
+        case OidcApplicationType.Native:
+          // Native Clients MUST only register redirect_uris using custom URI schemes or loopback URLs using the http scheme;
+          invariant(
+            isHttps === false,
+            `${applicationType} clients MUST only register redirect_uris using custom URI schemes or loopback URLs using the http scheme`,
+          )
+          // loopback URLs use localhost or the IP loopback literals 127.0.0.1 or [::1] as the hostname.
+          invariant(
+            isLocalhost || hostname === '127.0.0.1' || hostname === '[::1]' || isIP(hostname) === 0,
+            `${applicationType} client loopback URLs must use localhost or the IP loopback literals 127.0.0.1 or [::1] as the hostname`,
+          )
+          break
+        default:
+          assertExhaustive(applicationType, `Unknown application type: ${applicationType}`)
+      }
+    })
   }
 }

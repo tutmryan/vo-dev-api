@@ -54,3 +54,4 @@ export const verifiedIdRequest = config.get('verifiedIdRequest')
 export const localDev = config.has('localDev') ? config.get('localDev') : undefined
 export const graphQL = config.get('graphQL')
 export const platformManagement = config.get('platformManagement')
+export const oidcKeyVaultUrl = config.has('oidcKeyVaultUrl') ? config.get('oidcKeyVaultUrl') : undefined

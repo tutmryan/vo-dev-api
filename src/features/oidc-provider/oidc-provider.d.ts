@@ -1,9 +1,7 @@
 import 'oidc-provider'
-import type { errors, interactionPolicy as origInteractionPolicy, OIDCProviderError } from 'oidc-provider'
+import type { OIDCProviderError, interactionPolicy as origInteractionPolicy } from 'oidc-provider'
 
 declare module 'oidc-provider' {
-  export interface ClientMetadata {}
-
   // These are missing from the DefinitelyTyped file for oidc-provider.
   class InvalidAuthorizationDetails extends OIDCProviderError {
     constructor(description?: string, detail?: string)

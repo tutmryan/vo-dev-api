@@ -52,6 +52,7 @@ const config: DeepPartial<Config> = {
       accountName: 'devstoreaccount1',
       accountKey: 'Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==',
     },
+    localdevClientSecretsContainer: 'localdev-client-secrets',
   },
   sms: {
     sid: 'SK6f953274aa24929f409245f865b655e9',

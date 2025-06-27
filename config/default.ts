@@ -23,6 +23,8 @@ const config: DeepPartial<Config> = {
       'email',
       'token',
       'photo',
+      'clientSecret',
+      'generateOidcClientSecret',
     ],
     userClaimsToLog: ['oid', 'aud', 'tid', 'azp', 'iss', 'scp', 'roles'],
     requestInfoToLog: ['origin', 'requestId', 'correlationId', 'clientIp'],

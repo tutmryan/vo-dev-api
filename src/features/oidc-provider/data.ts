@@ -1,9 +1,10 @@
 import type { ClientMetadata } from 'oidc-provider'
+import { oidcSecretService } from '.'
 import { runDeduplicatedJob } from '../../background-jobs'
 import { apiUrl, portalUrl } from '../../config'
 import { dataSource, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../../data'
 import { addUserToManager } from '../../data/user-context-helper'
-import { OidcApplicationType } from '../../generated/graphql'
+import { OidcApplicationType, OidcClientType } from '../../generated/graphql'
 import { logger } from '../../logger'
 import { OidcScopes } from '../../roles'
 import { IssuanceEntity } from '../issuance/entities/issuance-entity'
@@ -39,7 +40,7 @@ export async function loadOidcData(): Promise<OidcData> {
   }
   return {
     clients,
-    clientMetadata: clients.map(toOidcClientMetadata),
+    clientMetadata: await Promise.all(clients.map(toOidcClientMetadata)),
     resources,
     resourceScopes: resourceScopes(resources),
     partners,
@@ -47,7 +48,7 @@ export async function loadOidcData(): Promise<OidcData> {
   }
 }
 
-const toOidcClientMetadata = ({
+const toOidcClientMetadata = async ({
   id,
   name,
   redirectUris,
@@ -55,17 +56,19 @@ const toOidcClientMetadata = ({
   termsOfServiceUrl,
   policyUrl,
   applicationType,
-}: OidcClientEntity): ClientMetadata => ({
+  clientType,
+}: OidcClientEntity): Promise<ClientMetadata> => ({
   client_id: id,
   client_name: name,
+  client_secret: clientType === OidcClientType.Confidential ? await oidcSecretService().getClientSecret(id) : undefined,
   redirect_uris: redirectUris,
   post_logout_redirect_uris: postLogoutUris,
   response_types: ['code', 'code id_token', 'id_token'],
   grant_types: ['authorization_code', 'refresh_token', 'implicit'],
-  token_endpoint_auth_method: 'none',
+  token_endpoint_auth_method: clientType === OidcClientType.Confidential ? 'client_secret_post' : 'none',
   tos_uri: termsOfServiceUrl ?? undefined,
   policy_uri: policyUrl ?? undefined,
-  application_type: applicationType ?? undefined,
+  application_type: applicationType,
 })
 
 type SourceOidcData = [OidcClientEntity[], OidcResourceEntity[], PartnerEntity[]]
@@ -189,6 +192,7 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
           id: portalClientId,
           name: 'Verified Orchestration Concierge',
           applicationType: OidcApplicationType.Web,
+          clientType: OidcClientType.Confidential,
           redirectUris: [portalRedirectUri, portalDemoRedirectUri],
           postLogoutUris: [portalRedirectUri, portalDemoRedirectUri],
           allowAnyPartner: true,

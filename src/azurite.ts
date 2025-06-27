@@ -21,4 +21,10 @@ export async function initializeAzurite() {
     new StorageSharedKeyCredential(privateBlobStorage.credentials.accountName, privateBlobStorage.credentials.accountKey),
   )
   await oidcAccountsBlobStorageClient.createIfNotExists({ access: 'blob' })
+
+  const oidcSecretLocaldevBlobStorageClient = new ContainerClient(
+    [privateBlobStorage.url, privateBlobStorage.localdevClientSecretsContainer].join('/'),
+    new StorageSharedKeyCredential(privateBlobStorage.credentials.accountName, privateBlobStorage.credentials.accountKey),
+  )
+  await oidcSecretLocaldevBlobStorageClient.createIfNotExists({ access: 'blob' })
 }

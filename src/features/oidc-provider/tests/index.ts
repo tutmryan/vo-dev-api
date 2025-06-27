@@ -1,7 +1,7 @@
 import casual from 'casual'
 import { graphql } from '../../../generated'
 import type { OidcClaimMappingInput } from '../../../generated/graphql'
-import { type OidcClientInput, type OidcResourceInput } from '../../../generated/graphql'
+import { OidcApplicationType, OidcClientType, type OidcClientInput, type OidcResourceInput } from '../../../generated/graphql'
 import { UserRoles } from '../../../roles'
 import { executeOperationAsUser } from '../../../test'
 
@@ -9,6 +9,8 @@ graphql(`
   fragment OidcClientFragment on OidcClient {
     id
     name
+    applicationType
+    clientType
     logo
     backgroundColor
     backgroundImage
@@ -166,6 +168,8 @@ export const oidcResourceQuery = graphql(`
 export function createOidcClientInput(input: Partial<OidcClientInput> = {}): OidcClientInput {
   return {
     name: casual.name,
+    applicationType: OidcApplicationType.Web,
+    clientType: OidcClientType.Public,
     redirectUris: [casual.url.toLowerCase().replace('http', 'https')],
     postLogoutUris: [casual.url.toLowerCase().replace('http', 'https')],
     requireFaceCheck: casual.boolean,

@@ -80,8 +80,10 @@ export type Config = {
     credentials?: BlobStorageCredentials
     asyncIssuanceContainer: string
     oidcContainer: string
+    localdevClientSecretsContainer: string
     clientEncryptionKey: string
   }
+  oidcKeyVaultUrl: string
   sms: {
     accountSid: string
     sid: string
