@@ -45,14 +45,23 @@ class OidcSecretKeyvaultService implements OidcSecretService {
     try {
       await this.secretClient().setSecret(OidcSecretKeyvaultService.secretName(clientId), secret)
     } catch (error) {
-      logger.error(`Failed to set client secret for ${clientId}`, { error })
+      logger.info(`Failed to set client secret for ${clientId}, attempting to recover and re-use soft-deleted secret`, { error })
+      try {
+        const task = await this.secretClient().beginRecoverDeletedSecret(OidcSecretKeyvaultService.secretName(clientId))
+        await task.pollUntilDone()
+        await this.secretClient().setSecret(OidcSecretKeyvaultService.secretName(clientId), secret)
+        return
+      } catch (recoveryError) {
+        logger.error(`Failed to recover and re-use soft-deleted client secret for ${clientId}`, { error, recoveryError })
+      }
       throw error
     }
   }
 
   async deleteClientSecret(clientId: string): Promise<void> {
     try {
-      await this.secretClient().beginDeleteSecret(OidcSecretKeyvaultService.secretName(clientId))
+      const task = await this.secretClient().beginDeleteSecret(OidcSecretKeyvaultService.secretName(clientId))
+      await task.pollUntilDone()
     } catch (error) {
       logger.error(`Failed to delete client secret for ${clientId}`, { error })
       throw error

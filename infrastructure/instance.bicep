@@ -108,6 +108,7 @@ resource oidcKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
             'get'
             'set'
             'delete'
+            'recover'
           ]
         }
       }
