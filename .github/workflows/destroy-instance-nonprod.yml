@@ -1,0 +1,38 @@
+name: Destroy instance (non prod)
+# DO NOT CHANGE THE FORMAT OF THE `run-name` FIELD
+# - it follows a standard pattern across all components
+# - it is used to derive the instance and environment
+run-name: Destroy ${{ inputs.instance || 'dev' }} in non-prod
+
+on:
+  workflow_dispatch:
+    inputs:
+      instance:
+        description: 'The instance to destroy'
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ inputs.instance || 'dev' }}
+  cancel-in-progress: true
+
+jobs:
+
+  destroy-instance:
+    name: Destroy Instance
+    runs-on: ubuntu-latest
+
+    environment:
+      name: ${{ inputs.instance || 'dev' }}
+
+    steps:
+      - name: Set variables
+        id: set-vars
+        shell: bash
+        run: |
+          instance=${{ inputs.instance || 'dev' }}
+          echo "instance=${instance}" >> $GITHUB_ENV
+          echo "resource-group-name=vo-${instance/./-}-instance" >> $GITHUB_ENV
+          echo "resource-prefix=vo-${instance/./-}" >> $GITHUB_ENV
