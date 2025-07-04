@@ -3168,6 +3168,8 @@ export type Presentation = {
   presentedAt: Scalars['DateTime']['output'];
   /** The credentials that were presented (excluding claims data) */
   presentedCredentials: Array<PresentedCredential>;
+  /** The receipt for with this presentation. */
+  receipt?: Maybe<Scalars['JSONObject']['output']>;
   /** The platform user (application or person) that requested the credential presentation. */
   requestedBy: User;
   /** The credentials that were requested */
@@ -6206,6 +6208,7 @@ export type PresentationResolvers<ContextType = GraphQLContext, ParentType exten
   partners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType>;
   presentedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   presentedCredentials?: Resolver<Array<ResolversTypes['PresentedCredential']>, ParentType, ContextType>;
+  receipt?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   requestedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   requestedCredentials?: Resolver<Array<ResolversTypes['RequestedCredential']>, ParentType, ContextType>;
   wallet?: Resolver<Maybe<ResolversTypes['Wallet']>, ParentType, ContextType>;

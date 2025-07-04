@@ -19,17 +19,18 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
       PresentationEntity,
       'requestId' | 'identityId' | 'requestedById' | 'issuanceIds' | 'requestedCredentials' | 'presentedCredentials' | 'partnerIds'
     > &
-      Partial<Pick<PresentationEntity, 'oidcClientId' | 'walletId'>>,
+      Partial<Pick<PresentationEntity, 'walletId' | 'oidcClientId' | 'receiptJson'>>,
   ) {
     super()
     if (!args) return
-    const { issuanceIds, partnerIds, oidcClientId, walletId, ...rest } = args
+    const { issuanceIds, partnerIds, oidcClientId, walletId, receiptJson, ...rest } = args
     typeSafeAssign(this, {
       ...rest,
       issuances: Promise.resolve(issuanceIds.map((id) => ({ id }) as IssuanceEntity)),
       partners: Promise.resolve(partnerIds.map((id) => ({ id }) as PartnerEntity)),
       oidcClientId: oidcClientId ?? null,
       walletId: walletId ?? null,
+      receiptJson: receiptJson ?? null,
     })
   }
 
@@ -85,6 +86,13 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
 
   set presentedCredentials(presentedCredentials: PresentedData[]) {
     this.presentedCredentialsJson = JSON.stringify(presentedCredentials)
+  }
+
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
+  receiptJson!: string | null
+
+  get receipt(): Record<string, unknown> | null {
+    return this.receiptJson ? JSON.parse(this.receiptJson) : null
   }
 
   @ManyToOne(() => OidcClientEntity)

@@ -1,6 +1,7 @@
 import { cloneDeep, forOwn, get, isNil, isObject, set } from 'lodash'
 import { StandardClaims } from '../features/contracts/claims'
 import type { RequestCredential } from '../generated/graphql'
+import { logger } from '../logger'
 
 /**
  * Recursively replaces values in an object with '<redacted>' for the specified keys. Enumerates arrays and applies the same redaction to elements.
@@ -133,5 +134,25 @@ export const redactConstraints = (requestCredentials: RequestCredential[]): Requ
     })
 
     return { ...reqCred, constraints: redactedConstraints }
+  })
+}
+
+export function redactPresentationReceipt(receipt: unknown): string | null {
+  if (!receipt || typeof receipt !== 'object' || !('id_token' in receipt) || typeof receipt.id_token !== 'string') {
+    logger.error('Failed to redact presentation receipt: missing or invalid id_token')
+    return null
+  }
+  const id_token = receipt.id_token
+  let faceCheck: string | null = null
+  if ('faceCheck' in receipt) {
+    if (typeof receipt.faceCheck !== 'string') {
+      logger.error('Unexpected faceCheck type in receipt, expected string')
+    } else {
+      faceCheck = receipt.faceCheck
+    }
+  }
+  return JSON.stringify({
+    id_token,
+    faceCheck,
   })
 }

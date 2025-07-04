@@ -113,10 +113,11 @@ export class VerifiedIdRequestService extends HttpClient<BaseContext> {
       },
     }
     // build the payload, overriding the upstream callback
-    const { callback: upstreamCallback, ...issuanceRequest } = request
+    const { callback: upstreamCallback, ...presentationRequest } = request
     const payload: PresentationRequest = {
       callback,
-      ...issuanceRequest,
+      ...presentationRequest,
+      includeReceipt: true,
     }
     // send it
     let response: PresentationRequestResponse

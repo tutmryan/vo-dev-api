@@ -4,7 +4,7 @@ import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { getPlatformIssuerDid } from '../../../services'
-import { redactConstraints } from '../../../util/redact-values'
+import { redactConstraints, redactPresentationReceipt } from '../../../util/redact-values'
 import type { PresentationCallbackHandler } from '../../callback'
 import { requestDetailsCache } from '../../callback/cache'
 import { StandardClaims } from '../../contracts/claims'
@@ -29,8 +29,13 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
 
   const { limitedApprovalKey, authnSessionKey, ...presentationRequestDetails } = JSON.parse(requestDetails) as PresentationRequestDetails
 
-  // presentation event data will contain everything, including claims
-  const topicData: PresentationTopicData = { ...presentationRequestDetails, event }
+  const topicData: PresentationTopicData = {
+    ...presentationRequestDetails,
+    event: {
+      ...event,
+      receipt: presentationRequestDetails.includeReceipt ? event.receipt : null,
+    },
+  }
 
   if (event.requestStatus === PresentationRequestStatus.PresentationVerified) {
     const entityManager = dataSource.createEntityManager()
@@ -104,10 +109,10 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
       requestedCredentials: redactConstraints(requestedCredentials),
       presentedCredentials,
       partnerIds: partners.map((p) => p.id),
-      oidcClientId: authInteractionData?.clientId ?? null,
+      oidcClientId: authInteractionData?.clientId,
       walletId,
+      receiptJson: redactPresentationReceipt(event.receipt),
     })
-
     const { id } = await entityManager.getRepository(PresentationEntity).save(presentationEntity)
     topicData.presentationId = id
 

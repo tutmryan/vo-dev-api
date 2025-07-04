@@ -1,5 +1,12 @@
 import { RequestCredential } from '../generated/graphql'
-import { redactConstraints, redactValueEmail, redactValueInner, redactValueObjectUnknown, redactValues } from './redact-values'
+import {
+  redactConstraints,
+  redactPresentationReceipt,
+  redactValueEmail,
+  redactValueInner,
+  redactValueObjectUnknown,
+  redactValues,
+} from './redact-values'
 
 describe('redactValues', () => {
   it('should redact values at the specified paths', () => {
@@ -424,5 +431,42 @@ describe('redactConstraints', () => {
       const result = redactConstraints(input)
       expect(result[0]?.constraints).toBeUndefined()
     })
+  })
+})
+
+describe('redactPresentationReceipt', () => {
+  it('returns null for undefined input', () => {
+    expect(redactPresentationReceipt(undefined)).toBeNull()
+  })
+
+  it('returns null for non-object input', () => {
+    expect(redactPresentationReceipt('string' as unknown)).toBeNull()
+  })
+
+  it('returns null for missing id_token', () => {
+    expect(redactPresentationReceipt({})).toBeNull()
+  })
+
+  it('returns id_token and faceCheck null if faceCheck is missing', () => {
+    const receipt = {
+      id_token: 'jwt1',
+      vp_token: 'shouldBeStripped',
+      state: 'shouldAlsoBeStripped',
+    }
+
+    const result = redactPresentationReceipt(receipt)
+    expect(result).toBe(JSON.stringify({ id_token: 'jwt1', faceCheck: null }))
+  })
+
+  it('includes faceCheck when present as string', () => {
+    const receiptWithFaceCheck = {
+      id_token: 'jwt1',
+      vp_token: ['shouldBeStripped'],
+      state: 'shouldAlsoBeStripped',
+      faceCheck: 'jwt2',
+    }
+
+    const result = redactPresentationReceipt(receiptWithFaceCheck)
+    expect(result).toBe(JSON.stringify({ id_token: 'jwt1', faceCheck: 'jwt2' }))
   })
 })

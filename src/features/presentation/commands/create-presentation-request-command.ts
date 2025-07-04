@@ -14,7 +14,7 @@ import { PartnerEntity } from '../../partners/entities/partner-entity'
 import type { PresentationEntity } from '../entities/presentation-entity'
 
 export type PresentationRequestDetails = Pick<PresentationEntity, 'requestedById' | 'identityId' | 'requestedCredentials'> &
-  PresentationContext
+  PresentationContext & { includeReceipt: boolean }
 type PresentationContext = { limitedApprovalKey?: string; authnSessionKey?: string }
 
 registerFeatureCheck(CreatePresentationRequestCommand, async (...[, input]) => isFaceCheckPresentationEnabled(input))
@@ -105,6 +105,7 @@ export async function CreatePresentationRequestCommand(
     requestedById: user.entity.id,
     identityId: identity?.id ?? null,
     requestedCredentials: presentationRequest.requestedCredentials,
+    includeReceipt: presentationRequest.includeReceipt ?? false,
     ...context,
   }
   await requestDetailsCache().set(response.requestId, JSON.stringify(requestDetails))
