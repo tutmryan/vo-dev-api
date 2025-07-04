@@ -1,8 +1,8 @@
-name: Destroy instance (non prod)
+name: Destroy instance (prod)
 # DO NOT CHANGE THE FORMAT OF THE `run-name` FIELD
 # - it follows a standard pattern across all components
 # - it is used to derive the instance and environment
-run-name: Destroy ${{ inputs.instance }} in non-prod
+run-name: Destroy ${{ inputs.instance }} in prod
 
 on:
   workflow_dispatch:
@@ -43,9 +43,9 @@ jobs:
         id: destroy-instance
         uses: ./.github/actions/destroy-instance
         with:
-          azure-client-id: ${{ vars.NON_PROD_AZURE_CLIENT_ID }}
-          azure-tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
-          azure-subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
+          azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
+          azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
+          azure-subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
           resource-group-name: ${{ env.resource-group-name }}
           resource-prefix: ${{ env.resource-prefix }}
 
@@ -58,4 +58,4 @@ jobs:
           dns-api-secret: ${{ secrets.PROD_DNS_API_SECRET }}
 
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
-          shared-resource-group-name: vo-nonprd-platform-shared-infra
+          shared-resource-group-name: vo-platform-shared-infra

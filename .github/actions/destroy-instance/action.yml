@@ -1,0 +1,171 @@
+name: Destroy instance
+description: Destroys the instance resources in Azure
+
+inputs:
+  azure-client-id:
+    description: App ID of the deployment app registration
+    required: true
+  azure-tenant-id:
+    description: ID of the target Azure AD tenant
+    required: true
+  azure-subscription-id:
+    description: ID of the target Azure subscription
+    required: true
+
+  resource-prefix:
+    description: Prefix to use for resource names
+    required: true
+  resource-group-name:
+    description: Name of the resource group to deploy resources to
+    required: true
+  shared-resource-group-name:
+    description: Name of the shared resource group
+    required: true
+
+  dns-api-key:
+    description: The API key to make calls to the DNS provider's API
+    required: true
+  dns-api-secret:
+    description: The API secret to make calls to the DNS provider's API
+    required: true
+
+  organisation-name:
+    description: The organisation name for Verified ID authority
+  organisation-domain:
+    description: The domain linked to Verified ID authority
+  home-tenant-authority-id:
+    description: The authority ID of the Verified ID service hosted in home tenant
+    required: false
+    default: ''
+
+  instance:
+    description: The name of the instance
+    required: true
+  domain:
+    description: The domain of the instance
+    default: 'verifiedorchestration.com'
+
+  sql-server-name:
+    description: Name of the SQL Server the instance will connect to
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Log in to Azure
+      uses: azure/login@v2
+      with:
+        client-id: ${{ inputs.azure-client-id }}
+        tenant-id: ${{ inputs.azure-tenant-id }}
+        subscription-id: ${{ inputs.azure-subscription-id }}
+        enable-AzPSSession: true
+
+    - name: Delete instance app registration
+      id: delete-instance-app-registration
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/delete-app-registration.ps1
+        -Name 'Verified Orchestration (${{ inputs.instance }})'
+
+    - name: Delete app registration for migration
+      id: delete-migration-app-registration
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/delete-app-registration.ps1
+        -Name 'Verified Orchestration Migration (${{ inputs.instance }})'
+
+    - name: Delete instance resource group
+      id: delete-instance-resource-group
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/delete-instance-resource-group.ps1
+        -ResourceGroupName '${{ inputs.resource-group-name }}'
+
+    - name: Check for authority in Verified ID service
+      id: check-vid-authority
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/check-verified-id-authority.ps1
+        -HomeTenantAuthorityId '${{ inputs.home-tenant-authority-id }}'
+        -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
+
+    - name: Delete hosted instance authority from Verified ID service
+      id: delete-vid-authority
+      shell: pwsh
+      if: steps.check-vid-authority.outputs.authorityExists != 'True'
+      run: >-
+        ./infrastructure/scripts/delete-verified-id-authority.ps1
+        -TenantId '${{ inputs.azure-tenant-id }}'
+        -SubscriptionId '${{ inputs.azure-subscription-id }}'
+        -OrganisationName '${{ inputs.organisation-name }}'
+        -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
+
+    - name: Delete instance SQL database
+      id: delete-sql-database
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/delete-sql-database.ps1
+        -ResourceGroupName '${{ inputs.shared-resource-group-name }}'
+        -SqlServerName '${{ inputs.sql-server-name }}'
+        -DatabaseName '${{ inputs.resource-prefix }}-sql-db'
+
+    - name: Delete CNAME record for DID documents host
+      id: delete-did-cname-record
+      shell: pwsh
+      if: steps.check-vid-authority.outputs.isVoSubdomain == 'True' && steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
+      run: >-
+        ./infrastructure/scripts/delete-dns-record.ps1
+        -DnsApiKey '${{ inputs.dns-api-key }}'
+        -DnsApiSecret '${{ inputs.dns-api-secret }}'
+        -RecordType 'CNAME'
+        -RecordName '${{ inputs.organisation-domain }}'
+
+    - name: Delete CNAME record for API domain
+      id: delete-api-cname-record
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/delete-dns-record.ps1
+        -DnsApiKey '${{ inputs.dns-api-key }}'
+        -DnsApiSecret '${{ inputs.dns-api-secret }}'
+        -RecordType 'CNAME'
+        -RecordName '${{ inputs.instance }}.api.${{ inputs.domain }}'
+
+    - name: Delete TXT record for API domain
+      id: delete-api-txt-record
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/delete-dns-record.ps1
+        -DnsApiKey '${{ inputs.dns-api-key }}'
+        -DnsApiSecret '${{ inputs.dns-api-secret }}'
+        -RecordType 'TXT'
+        -RecordName 'ausid.${{ inputs.instance }}.api.${{ inputs.domain }}'
+
+    - name: Delete CNAME record for docs site domain
+      id: delete-docs-cname-record
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/delete-dns-record.ps1
+        -DnsApiKey '${{ inputs.dns-api-key }}'
+        -DnsApiSecret '${{ inputs.dns-api-secret }}'
+        -RecordType 'CNAME'
+        -RecordName '${{ inputs.instance }}.docs.${{ inputs.domain }}'
+
+    - name: Delete CNAME record for admin domain
+      id: delete-admin-cname-record
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/delete-dns-record.ps1
+        -DnsApiKey '${{ inputs.dns-api-key }}'
+        -DnsApiSecret '${{ inputs.dns-api-secret }}'
+        -RecordType 'CNAME'
+        -RecordName '${{ inputs.instance }}.${{ inputs.domain }}'
+
+    - name: Delete CNAME record for portal domain
+      id: delete-portal-cname-record
+      shell: pwsh
+      run: >-
+        ./infrastructure/scripts/delete-dns-record.ps1
+        -DnsApiKey '${{ inputs.dns-api-key }}'
+        -DnsApiSecret '${{ inputs.dns-api-secret }}'
+        -RecordType 'CNAME'
+        -RecordName '${{ inputs.instance }}.portal.${{ inputs.domain }}'
