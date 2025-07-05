@@ -34,9 +34,13 @@ $name = $RecordName -replace (".{0}" -f $constants.rootDomain)
 $uri = "{0}/v1/domains/{1}/records/{2}/{3}" -f $constants.dnsApiRoot, $constants.rootDomain, $RecordType, $name
 
 Write-Output "Checking if DNS record exists at: $uri"
-$response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers -ErrorAction SilentlyContinue
+$response = Invoke-WebRequest -Uri $uri -Method GET -Headers $headers
 
-if ($response.StatusCode -eq 200) {
+# Parse the response body to check if the record actually exists
+$records = $response.Content | ConvertFrom-Json
+$matchingRecord = $records | Where-Object { $_.name -eq $name -and $_.type -eq $RecordType }
+
+if ($matchingRecord) {
   Write-Output "DNS record exists, will DELETE record at: $uri"
 
   Invoke-WebRequest -Uri $uri -Method DELETE -Headers $headers
