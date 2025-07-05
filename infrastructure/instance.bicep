@@ -1310,7 +1310,8 @@ var apiAppServiceProperties = {
   virtualNetworkSubnetId: appServiceSubnetId
   siteConfig: {
     alwaysOn: true
-    appCommandLine: 'pm2 start ./src/main.tracing.js -i max --no-daemon'
+    healthCheckPath: '/health'
+    appCommandLine: 'pm2 start ./src/main.tracing.js --no-daemon'
     ftpsState: 'Disabled'
     linuxFxVersion: 'NODE|22-lts'
     minTlsVersion: '1.2'

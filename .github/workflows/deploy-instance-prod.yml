@@ -177,7 +177,7 @@ jobs:
           shared-resource-group-name: vo-platform-shared-infra
           shared-action-group-alert-name: vo-alerts
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
-          redis-cache-sku: Basic
+          redis-cache-sku: ${{ startsWith(inputs.instance, 'sandbox.') && 'Basic' || 'Standard' }}
           redis-cache-family: C
           redis-cache-capacity: 0
 

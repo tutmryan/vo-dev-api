@@ -228,6 +228,9 @@ param appServicePlanSku string
 @description('App Service Plan Capacity (instances)')
 param appServicePlanCapacity int = 1
 
+@description('App Service Plan zone redundancy')
+param appServiceZoneRedundant bool = false
+
 resource appServicePlan1 'Microsoft.Web/serverfarms@2022-03-01' = {
   name: '${resourcePrefix}-app-service-plan-1'
   location: location
@@ -237,6 +240,7 @@ resource appServicePlan1 'Microsoft.Web/serverfarms@2022-03-01' = {
   }
   properties: {
     reserved: true
+    zoneRedundant: appServiceZoneRedundant
   }
   kind: 'linux'
 }
