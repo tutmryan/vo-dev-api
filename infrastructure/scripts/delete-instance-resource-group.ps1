@@ -20,7 +20,7 @@ if ($locks -and $locks.Count -gt 0) {
 
   foreach ($lock in $locks) {
     Write-Output "Deleting resource lock: $($lock.name) (Level: $($lock.level))"
-    # az lock delete --ids $lock.id
+    az lock delete --ids $lock.id
     Write-Output "Successfully deleted lock: $($lock.name)"
   }
 } else {
