@@ -92,12 +92,9 @@ runs:
     - name: Delete hosted instance authority from Verified ID service
       id: delete-vid-authority
       shell: pwsh
-      if: steps.check-vid-authority.outputs.authorityExists != 'True'
+      if: steps.check-vid-authority.outputs.isVoSubdomain == 'True' && steps.check-vid-authority.outputs.authorityExists == 'True'
       run: >-
         ./infrastructure/scripts/delete-verified-id-authority.ps1
-        -TenantId '${{ inputs.azure-tenant-id }}'
-        -SubscriptionId '${{ inputs.azure-subscription-id }}'
-        -OrganisationName '${{ inputs.organisation-name }}'
         -LinkedDomainUrl 'https://${{ inputs.organisation-domain }}/'
 
     - name: Delete instance SQL database

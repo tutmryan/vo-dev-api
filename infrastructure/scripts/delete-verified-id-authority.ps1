@@ -1,26 +1,6 @@
 [CmdletBinding()]
 param(
   [Parameter(Mandatory = $true)]
-  [string]
-  $TenantId,
-
-  [Parameter(Mandatory = $true)]
-  [string]
-  $SubscriptionId,
-
-  [Parameter(Mandatory = $true)]
-  [string]
-  $KeyVaultResourceGroupName,
-
-  [Parameter(Mandatory = $true)]
-  [string]
-  $KeyVaultName,
-
-  [Parameter(Mandatory = $true)]
-  [string]
-  $OrganisationName,
-
-  [Parameter(Mandatory = $true)]
   [ValidatePattern('^https://')]
   [string]
   $LinkedDomainUrl
