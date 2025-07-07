@@ -9,6 +9,7 @@ param elasticPoolCapacity = 50
 param appServicePlanSku = 'P1MV3'
 param appServicePlanCapacity = 2
 param appServiceZoneRedundant = true
+param appServiceAutoscale = true
 param gitHubEnterpriseDatabaseId = '139081'
 param actionGroupAlertName = 'vo-nonprd-alerts'
 param actionGroupAlertShortName = 'VO-Alerts NP'
