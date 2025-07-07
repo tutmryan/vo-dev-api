@@ -246,6 +246,7 @@ resource appServicePlan1 'Microsoft.Web/serverfarms@2022-03-01' = {
     zoneRedundant: appServiceZoneRedundant
     elasticScaleEnabled: appServiceAutoscale
     perSiteScaling: appServiceAutoscale
+    maximumElasticWorkerCount: 30
   }
   kind: 'linux'
 }
