@@ -89,6 +89,10 @@ inputs:
   app-service-plan-id:
     description: ID of the App Service Plan to use as the serverFarmId for the app service(s)
     required: true
+  app-service-zone-redundant:
+    description: Whether the App Service Plan is zone redundant
+    required: false
+    default: 'false'
   node-env:
     description: NODE_ENV value to set for the running API instance
     required: true
@@ -356,6 +360,7 @@ runs:
           docsSiteClientId=${{ steps.add-instance-app-registration.outputs.instanceAppId }}
           docsSiteClientSecret=${{ steps.add-instance-app-registration.outputs.staticSiteSecret }}
           appServicePlanId=${{ inputs.app-service-plan-id }}
+          appServiceZoneRedundant=${{ inputs.app-service-zone-redundant }}
           nodeEnv=${{ inputs.node-env }}
           instance=${{ inputs.instance }}
           releaseVersion="${{ env.RELEASE_VERSION }}"
