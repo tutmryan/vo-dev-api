@@ -133,6 +133,7 @@ export const rules: ShieldSchema<Resolvers> = {
     findIssuances: isAllowedToViewIssuances,
     findAsyncIssuanceRequests: isAllowedToViewAsyncIssuanceRequests,
     findPresentations: isAllowedToViewPresentations,
+    verifyPresentation: isAllowedToViewPresentations,
     wallet: isAllowedToViewPresentations,
     findWallets: isAllowedToViewPresentations,
     findNetworkIssuers: isPartnerAdminUser,

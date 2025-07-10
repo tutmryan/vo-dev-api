@@ -274,3 +274,157 @@ Upon successful presentation, the requesting application can receive data by any
 :::tip
 For complete code samples of different methods of receiving presentation events, view the presentation samples for [your development stack](/docs/guides/integration/).
 :::
+
+## Verify presentation
+
+Every presentation includes a receipt, a digital proof that a credential was presented. It consists of one or two JSON Web Tokens (JWTs) that bundle together claims and proof of presentation.
+
+The [`PresentationReceipt`](/docs/reference/types/inputs/presentation-receipt-input) has two properties:
+
+- `id_token` **(Required)**: Is a record of the presentation, signed by the user's wallet, proving ownership.
+- `faceCheck` **(Optional)**: Is a signed record of the biometric face check, if performed during the presentation process.
+
+### Using [`verifyPresentation`](/docs/reference/api/queries/verify-presentation) query
+
+VO provides a GraphQL query to verify the presentation receipt. This query checks the validity of the `id_token` and, if present, the `faceCheck` token.
+
+```graphql title="Example verifyPresentation query"
+query VerifyPresentation($receipt: PresentationReceiptInput!, $presentedAt: String!) {
+  verifyPresentation(receipt: $receipt, presentedAt: $presentedAt) {
+    faceCheckValid
+    idTokenValid
+  }
+}
+```
+
+```json title="Example variables"
+{
+  "request": {
+    "receipt": {
+      "faceCheck": "eyJhbG…gZmFqg.eyJzdW…Y2lvdHc.sgnNMi…HltdfA",
+      "id_token": "eyJ0eX…y5cCI6.eyJ1c2…Z2VybmFt.ZXlKaG…jdUxk"
+    },
+    "presentedAt": "2023-11-18T14:27:53.123Z"
+  }
+}
+```
+
+```json title="Example response"
+{
+  "data": {
+    "verifyPresentation": {
+      "faceCheckValid": true,
+      "idTokenValid": true,
+      "__typename": "VerifyPresentationResult"
+    }
+  }
+}
+```
+
+### Manual verification
+
+You can verify presentation receipts yourself without relying on VO queries. This guide shows you how to do it with [`jose`](https://github.com/panva/jose), a universal JWT library. [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) is another commonly used library for verification.
+
+The core of the process is the `jwtVerify` function from `jose`. To use it, you need to provide the token, the correct public key for verification, and a set of options to validate the token's claims.
+
+```typescript
+await jwtVerify(token, publicKey, options)
+```
+
+:::note
+Receipt tokens come with a 5 minute expiry, therefore validation must be run specifying the presentation timestamp i.e. via presentation.createdAt.
+:::
+
+Here’s how to get the required parameters for the `jwtVerify` function.
+
+#### 1. The `token`
+
+This is the raw, encoded JWT string from the presentation receipt. It will be either the `id_token` or the optional `faceCheck` token.
+
+#### 2. The `publicKey`
+
+The public key must be resolved from the **Key ID (`kid`)** found in the JWT's protected header. The `kid` is a Decentralized Identifier (DID) that points to the key.
+
+1.  Decode the Header: First, use `decodeProtectedHeader(token)` from `jose` to get the `kid` and signing algorithm (`alg`).
+2.  Resolve the Key from the DID: The prefix of the `kid` (e.g., `did:jwk:`, `did:web:`, `did:ion:`) determines how you retrieve the public key JWK.
+3.  Import the Key: Once you have the JWK, use `importJWK(jwk, alg)` to prepare it for the `jwtVerify` function.
+
+#### 3. The `options` Object
+
+The `options` object is crucial for validating the token's claims, such as the issuer and audience. These values differ depending on whether you are verifying the `id_token` or the `faceCheck` token.
+
+| Option        | For `id_token`                                        | For `faceCheck` token                                  |
+| :------------ | :---------------------------------------------------- | :----------------------------------------------------- |
+| `algorithms`  | `[alg]` (from header)                                 | `[alg]` (from header)                                  |
+| `issuer`      | `'https://self-issued.me/v2/openid-vc'`               | Your Verifier's DID (e.g., `did:web:your-domain.com`). |
+| `audience`    | Your Verifier's DID (e.g., `did:web:your-domain.com`) | `undefined` (do not include)                           |
+| `currentDate` | The `presentedAt` `Date` object                       | The `presentedAt` `Date` object                        |
+
+:::tip
+You can query for your Verifier's DID using [`Authority query`](/docs/reference/api/queries/authority)
+:::
+
+#### Code Sample
+
+This TypeScript example demonstrates the full verification flow for an `id_token` using `jose`.
+
+```ts
+import { Buffer } from 'buffer'
+import { decodeProtectedHeader, importJWK, jwtVerify } from 'jose'
+
+/**
+ * Resolves a public key from a DID in the 'kid' header.
+ * This is a simplified example focusing on the 'did:jwk' method.
+ */
+async function resolvePublicKey(kid: string, alg: string): Promise<CryptoKey> {
+  if (kid.startsWith('did:jwk:')) {
+    const jwkEncoded = kid.replace('did:jwk:', '').split('#')[0]
+    const jwkJson = Buffer.from(jwkEncoded, 'base64url').toString('utf8')
+    const jwk = JSON.parse(jwkJson)
+    return (await importJWK(jwk, alg)) as CryptoKey
+  }
+  // For other DID methods like 'did:web' or 'did:ion', you would add
+  // logic here to fetch the DID document and find the corresponding key.
+  throw new Error(`Unsupported DID method for this example: ${kid}`)
+}
+
+/**
+ * Manually verifies a presentation id_token.
+ */
+async function verifyPresentationToken(token: string, presentedAt: string, verifierDid: string) {
+  try {
+    // 1. Decode header to get key ID (kid) and algorithm (alg)
+    const { kid, alg } = decodeProtectedHeader(token)
+    if (!kid || !alg) {
+      throw new Error('JWT missing "kid" or "alg" in its header.')
+    }
+
+    // 2. Resolve the public key using the kid
+    const publicKey = await resolvePublicKey(kid, alg)
+
+    // 3. Construct the options object for verification
+    /**
+     * The https://self-issued.me/v2/openid-vc issuer claim used by Microsoft Authenticator and other SIOP v2-compliant wallets
+     * when issuing self-issued verifiable presentations.
+     *
+     * See:
+     * - https://openid.net/specs/openid-connect-self-issued-v2-1_0.html
+     */
+    const options = {
+      algorithms: [alg],
+      audience: verifierDid,
+      issuer: 'https://self-issued.me/v2/openid-vc',
+      currentDate: new Date(presentedAt),
+    }
+
+    // 4. Verify the token's signature and claims
+    const { payload } = await jwtVerify(token, publicKey, options)
+
+    console.log('✅ Verification Successful! Payload:', payload)
+    return { success: true, payload }
+  } catch (error) {
+    console.error('❌ Verification Failed:', error.message)
+    return { success: false, error: error.message }
+  }
+}
+```

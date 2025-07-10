@@ -3168,7 +3168,7 @@ export type Presentation = {
   presentedAt: Scalars['DateTime']['output'];
   /** The credentials that were presented (excluding claims data) */
   presentedCredentials: Array<PresentedCredential>;
-  /** The receipt for with this presentation. */
+  /** The receipt for with this presentation with `vp_token` redacted (to avoid retaining PII info). */
   receipt?: Maybe<Scalars['JSONObject']['output']>;
   /** The platform user (application or person) that requested the credential presentation. */
   requestedBy: User;
@@ -3250,6 +3250,26 @@ export enum PresentationOrderBy {
   RequestedByName = 'requestedByName'
 }
 
+/**
+ * Input type for verifying a presentation receipt.
+ * This input contains the raw JWTs (JSON Web Tokens) that serve as cryptographic receipts
+ * attesting to the authenticity and integrity of a presentation.
+ *
+ * Typically, these tokens are generated and returned as part of a credential presentation process.
+ */
+export type PresentationReceiptInput = {
+  /**
+   * An optional JWT receipt used for biometric verification (face check) if such a check
+   * was performed as part of the presentation.
+   */
+  faceCheck?: InputMaybe<Scalars['String']['input']>;
+  /**
+   * The primary JWT receipt for the presentation, known as the id_token.
+   * This token contains verifiable claims and must be provided for verification.
+   */
+  id_token: Scalars['String']['input'];
+};
+
 /** Input type for creating a new presentation request for authorization. */
 export type PresentationRequestForAuthnInput = {
   /**
@@ -3288,9 +3308,13 @@ export type PresentationRequestInput = {
    * Determines whether a receipt should be included in the response of this request.
    * Possible values are true or false (default).
    * The receipt contains the original payload sent from the authenticator to the Verifiable Credentials service.
-   * The receipt is useful for troubleshooting or if you have the need to ge the full details of the payload.
-   * There's otherwise no need be set this value to true by default.
+   * The receipt is useful for troubleshooting or if you have the need to get the full details of the payload.
+   * There's otherwise no need to set this value to true by default.
    * In the OpenId Connect SIOP request, the receipt contains the ID token from the original request.
+   *
+   * The receipt is internally redacted before being stored or logged to ensure
+   * sensitive values like `vp_token` and credential subjects are not persisted. Only selected fields such as `id_token`
+   * and `faceCheck` (if present) are retained.
    */
   includeReceipt?: InputMaybe<Scalars['Boolean']['input']>;
   registration: PresentationRequestRegistration;
@@ -3496,6 +3520,8 @@ export type Query = {
   templateCombinedData: TemplateParentData;
   /** Returns a user by ID */
   user: User;
+  /** Verifies the tokens in a presentation's receipt and returns the validity of each. */
+  verifyPresentation: VerifyPresentationResult;
   /** Returns a wallet by ID. */
   wallet?: Maybe<Wallet>;
 };
@@ -3785,6 +3811,12 @@ export type QueryTemplateCombinedDataArgs = {
 
 export type QueryUserArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryVerifyPresentationArgs = {
+  presentedAt: Scalars['String']['input'];
+  receipt: PresentationReceiptInput;
 };
 
 
@@ -4351,6 +4383,18 @@ export type UserWhere = {
   isApp?: InputMaybe<Scalars['Boolean']['input']>;
   /** The name of the user to match */
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Verification result for a Presentation's receipt tokens. */
+export type VerifyPresentationResult = {
+  __typename?: 'VerifyPresentationResult';
+  /**
+   * True if the faceCheck token in the receipt is valid, false if verification fails.
+   * Null if no faceCheck token is present.
+   */
+  faceCheckValid?: Maybe<Scalars['Boolean']['output']>;
+  /** True if the id_token in the receipt is valid, false if verification fails. */
+  idTokenValid: Scalars['Boolean']['output'];
 };
 
 /** Represents a wallet entity, uniquely identified by a decentralized identifier (DID). */
@@ -5303,6 +5347,7 @@ export type ResolversTypes = {
   PresentationEventData: ResolverTypeWrapper<Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversTypes['Presentation']> }>;
   PresentationEventWhere: PresentationEventWhere;
   PresentationOrderBy: PresentationOrderBy;
+  PresentationReceiptInput: PresentationReceiptInput;
   PresentationRequestForAuthnInput: PresentationRequestForAuthnInput;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
@@ -5353,6 +5398,7 @@ export type ResolversTypes = {
   UserOrderBy: UserOrderBy;
   UserPresentationWhere: UserPresentationWhere;
   UserWhere: UserWhere;
+  VerifyPresentationResult: ResolverTypeWrapper<VerifyPresentationResult>;
   Void: ResolverTypeWrapper<Scalars['Void']['output']>;
   Wallet: ResolverTypeWrapper<WalletEntity>;
   WalletPresentationWhere: WalletPresentationWhere;
@@ -5508,6 +5554,7 @@ export type ResolversParentTypes = {
   PresentationEvent: PresentationEvent;
   PresentationEventData: Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversParentTypes['Presentation']> };
   PresentationEventWhere: PresentationEventWhere;
+  PresentationReceiptInput: PresentationReceiptInput;
   PresentationRequestForAuthnInput: PresentationRequestForAuthnInput;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
@@ -5556,6 +5603,7 @@ export type ResolversParentTypes = {
   UserIssuanceWhere: UserIssuanceWhere;
   UserPresentationWhere: UserPresentationWhere;
   UserWhere: UserWhere;
+  VerifyPresentationResult: VerifyPresentationResult;
   Void: Scalars['Void']['output'];
   Wallet: WalletEntity;
   WalletPresentationWhere: WalletPresentationWhere;
@@ -6316,6 +6364,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   template?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<QueryTemplateArgs, 'id'>>;
   templateCombinedData?: Resolver<ResolversTypes['TemplateParentData'], ParentType, ContextType, RequireFields<QueryTemplateCombinedDataArgs, 'templateId'>>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
+  verifyPresentation?: Resolver<ResolversTypes['VerifyPresentationResult'], ParentType, ContextType, RequireFields<QueryVerifyPresentationArgs, 'presentedAt' | 'receipt'>>;
   wallet?: Resolver<Maybe<ResolversTypes['Wallet']>, ParentType, ContextType, RequireFields<QueryWalletArgs, 'id'>>;
 };
 
@@ -6510,6 +6559,12 @@ export type UserCountResolvers<ContextType = GraphQLContext, ParentType extends 
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type VerifyPresentationResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['VerifyPresentationResult'] = ResolversParentTypes['VerifyPresentationResult']> = {
+  faceCheckValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  idTokenValid?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export interface VoidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Void'], any> {
   name: 'Void';
 }
@@ -6631,6 +6686,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   UUID?: GraphQLScalarType;
   User?: UserResolvers<ContextType>;
   UserCount?: UserCountResolvers<ContextType>;
+  VerifyPresentationResult?: VerifyPresentationResultResolvers<ContextType>;
   Void?: GraphQLScalarType;
   Wallet?: WalletResolvers<ContextType>;
   WebDidModel?: WebDidModelResolvers<ContextType>;

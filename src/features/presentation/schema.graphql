@@ -968,6 +968,47 @@ extend type Query {
   Returns the successful presentation count, grouped by requesting User, optionally matching the specified criteria.
   """
   presentationCountByUser(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]!
+  """
+  Verifies the tokens in a presentation's receipt and returns the validity of each.
+  """
+  verifyPresentation(receipt: PresentationReceiptInput!, presentedAt: String!): VerifyPresentationResult!
+}
+
+"""
+Input type for verifying a presentation receipt.
+This input contains the raw JWTs (JSON Web Tokens) that serve as cryptographic receipts
+attesting to the authenticity and integrity of a presentation.
+
+Typically, these tokens are generated and returned as part of a credential presentation process.
+"""
+input PresentationReceiptInput {
+  """
+  The primary JWT receipt for the presentation, known as the id_token.
+  This token contains verifiable claims and must be provided for verification.
+  """
+  id_token: String!
+
+  """
+  An optional JWT receipt used for biometric verification (face check) if such a check
+  was performed as part of the presentation.
+  """
+  faceCheck: String
+}
+
+"""
+Verification result for a Presentation's receipt tokens.
+"""
+type VerifyPresentationResult {
+  """
+  True if the id_token in the receipt is valid, false if verification fails.
+  """
+  idTokenValid: Boolean!
+
+  """
+  True if the faceCheck token in the receipt is valid, false if verification fails.
+  Null if no faceCheck token is present.
+  """
+  faceCheckValid: Boolean
 }
 
 """

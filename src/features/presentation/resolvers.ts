@@ -7,6 +7,7 @@ import { CountPresentationsByContractQuery } from './queries/count-presentations
 import { CountPresentationsByUserQuery } from './queries/count-presentations-by-user-query'
 import { CountPresentationsQuery } from './queries/count-presentations-query'
 import { FindPresentationsQuery } from './queries/find-presentations-query'
+import { VerifyPresentationQuery } from './queries/verify-presentation-query'
 import { WeeklyAveragePresentationsByContractQuery } from './queries/weekly-average-presentations-by-contract-query'
 import { resolveRequestedClaimConstraints } from './requested-claim-constraint-resolver'
 
@@ -20,6 +21,7 @@ export const resolvers: Resolvers = {
       query(context, CountPresentationsByUserQuery, where, offset, limit),
     presentationCountByContract: (_parent, { where, offset, limit }, context) =>
       query(context, CountPresentationsByContractQuery, where, offset, limit),
+    verifyPresentation: (_parent, { receipt, presentedAt }, context) => query(context, VerifyPresentationQuery, receipt, presentedAt),
   },
   Mutation: {
     createPresentationRequest: (_parent, { request }, context) => dispatch(context, CreatePresentationRequestCommand, request),
