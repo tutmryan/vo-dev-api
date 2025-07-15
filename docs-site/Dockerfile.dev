@@ -5,5 +5,6 @@ RUN npm ci
 COPY tsconfig.json docusaurus.config.js babel.config.js sidebars.js ./
 COPY static ./static/
 COPY docs ./docs/
+COPY release-notes ./release-notes/
 COPY src ./src/
 CMD ["npm", "start", "--", "--host", "0.0.0.0", "--no-open"]

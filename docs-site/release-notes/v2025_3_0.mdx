@@ -1,0 +1,28 @@
+---
+title: v2025.3.0
+date: 2025-03-24T00:00
+description: An update that introduces custom branding for the Concierge and a series of usability improvements to the Composer.
+slug: v2025_3_0
+tags: [2025, v2025.3]
+---
+
+An update that introduces custom branding for the Concierge and a series of usability improvements to the Composer.
+
+<!-- truncate -->
+
+## 🚀 What’s new
+### New features
+- Support custom branding for the Concierge
+
+### Enhancements
+- When users access Composer with no RBAC roles, they can now press "reload" on the error message UI, to test for role assignment after new roles are assigned
+- Template options for "Show credential on the Entra Network" now support 3-way control (consistent with "Face Check" template options):
+  - Not specified (child credentials can be set to Public or not)
+  - Off (child credentials cannot be made Public)
+  - On (child credentials are always Public)
+- Add a tooltip for presentation "Requested types" when the value is "VerifiableCredential" to indicate that it matches "any type"
+- Add top-level OIDC profile claim email_verified alongside email
+
+## 🛠️ Notable fixes
+- Fix OIDC sign in page for MS Teams on Windows (embedded browser requires special handling)
+- Advertise new OIDC signing keys (JWKS) for a while before using, so that Microsoft EAM JWKS caching can catch up

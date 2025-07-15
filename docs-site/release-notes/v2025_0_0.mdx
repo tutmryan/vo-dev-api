@@ -1,0 +1,33 @@
+---
+title: v2025.0.0
+date: 2025-01-06T00:00
+description: Our first release for the year provides some Composer improvements to support managing contracts and remote issuance processes. We’ve also released more capability in our OIDC Provider, allowing the user interface at authentication time to be customised.
+slug: v2025_0_0
+tags: [2025, v2025.0]
+---
+
+Our first release for the year provides some Composer improvements to support managing contracts and remote issuance processes. We’ve also released more capability in our OIDC Provider, allowing the user interface at authentication time to be customised.
+
+<!-- truncate -->
+
+## 🚀 What’s new
+### Enhancements
+- Add application role 'Contract admin' for automating contract creation from client applications
+- Add support for filtering contracts via:
+  - 'isPublic' flag
+  - 'published' status
+- Rename first two bulk remote issuance CSV columns to clearly reflect corresponding identity attributes; add CSV column mapping definition table to remote issuance guide (docs); link to docs from Composer CSV preview UI
+- Display pending remote issuances for identities, contracts and users
+- Use regional 'from' numbers for SMS (initially supporting US and AU regions)
+- OIDC provider: Display authentication client background image and colour; add client branding/customisation guidelines to authentication guide (docs)
+- OIDC provider: Switch from unpkg to jsdelivr for improved reliability of JS client loading
+- Show release version tags in Composer and Concierge user menus
+- Add monitoring for Verified ID service and MS Graph service integrations
+- Enable app insights client telemetry from Concierge UI
+
+## 🛠️ Bug fixes
+- Composer menu toggle icon was sometimes misaligned
+- OIDC clients: Resetting client form showed validation errors on optional fields
+- OIDC provider: Access token claims were lost after token refresh
+- OIDC provider: Login UI content security policy was too restrictive on (production) instances with dev-tools disabled
+- Package vulnerability patching

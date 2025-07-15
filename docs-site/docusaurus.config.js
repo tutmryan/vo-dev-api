@@ -49,6 +49,18 @@ const config = {
 
   plugins: [
     [
+      '@docusaurus/plugin-content-blog',
+      {
+        id: 'release-notes',
+        routeBasePath: 'release-notes',
+        path: 'release-notes',
+        blogTitle: 'Release Notes',
+        blogDescription: 'Release Notes',
+        blogSidebarCount: 10,
+        blogSidebarTitle: 'Recent releases',
+      },
+    ],
+    [
       '@graphql-markdown/docusaurus',
       {
         schema: '../src/**/*.graphql',
@@ -59,6 +71,13 @@ const config = {
         },
       },
     ],
+  ],
+
+  stylesheets: [
+    {
+      href: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap',
+      type: 'text/css',
+    },
   ],
 
   themes: [
@@ -75,13 +94,22 @@ const config = {
     ({
       navbar: {
         style: 'primary',
-        title: 'Documentation Portal',
         logo: {
           alt: 'Verified Orchestration Logo',
           src: 'img/logo-secondary-greyscale-white.svg',
           srcDark: 'img/logo-primary-white.svg',
         },
         items: [
+          {
+            to: 'docs',
+            label: 'Documentation',
+            position: 'left',
+          },
+          {
+            to: 'release-notes',
+            label: 'Release Notes',
+            position: 'left',
+          },
           {
             label: 'Tools',
             position: 'left',

@@ -13,11 +13,16 @@
   --ifm-color-primary-light: #5e82f8;
   --ifm-color-primary-lighter: #6d8ef9;
   --ifm-color-primary-lightest: #9ab0fb;
-  --ifm-code-font-size: 95%;
+  --ifm-code-font-size: 90%;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
   --ifm-navbar-search-input-icon: url('/img/search-icon.svg');
   --ifm-navbar-search-input-color: #ffffff;
   --search-dropdown-no-result-color: #000000;
+
+  --ifm-font-size-base: 15px;
+  --ifm-font-weight-semibold: 500;
+  --ifm-font-family-base: 'Poppins', sans-serif;
+  /* --ifm-font-family-monospace: 'Courier New', monospace; */
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -71,3 +76,26 @@ html[data-theme='dark'] {
 .navbar__search [class^='noResults'] {
   color: var(--search-dropdown-no-result-color);
 }
+
+/* Sidebar item text */
+.menu__link {
+  font-weight: 400;
+}
+
+/* Optional: Bold the active sidebar item */
+.menu__link--active {
+  font-weight: 500;
+}
+
+.navbar__link--active {
+  text-shadow: 0 0 0.1em currentColor; /* Makes active navbar item bold while preventing items from moving when active item changes */
+}
+
+h1, h1.title_f1hy { font-size: 2.4rem !important; }
+h2, h2.title_f1Hy { font-size: 2rem !important; }
+h2.cardTitle_rnsV { font-size: 1.6rem !important; }
+
+h3.faqq { font-size: 1.2rem; font-weight: 500; margin: 1rem 0 0.2rem 0; }
+
+article.margin-bottom--xl { margin-bottom: 3rem !important; }
+footer.row { margin-top: 0.5rem; }
