@@ -52,6 +52,7 @@ const config: EnvVarSubstitution<Config> = {
   },
   redis: {
     host: 'REDIS_HOST',
+    port: 'REDIS_PORT',
     key: 'REDIS_KEY',
   },
   blobStorage: {

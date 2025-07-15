@@ -45,6 +45,9 @@ const config: DeepPartial<Config> = {
     secure: true,
     httpOnly: true,
   },
+  redis: {
+    port: 6380,
+  },
   database: {
     port: 1433,
     logging: true,

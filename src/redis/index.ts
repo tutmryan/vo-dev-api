@@ -15,7 +15,7 @@ if (!isRedisEnabled && !isLocalDev && environment !== 'test') {
 
 export const redisOptions: RedisOptions = {
   host: redisConfig.host,
-  port: 6380,
+  port: redisConfig.port,
   password: redisConfig.key,
   tls: redisConfig.key ? {} : undefined,
 }

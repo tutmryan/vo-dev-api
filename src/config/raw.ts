@@ -68,6 +68,7 @@ export type Config = {
   }
   redis: {
     host?: string
+    port: number
     key: string
   }
   blobStorage: {

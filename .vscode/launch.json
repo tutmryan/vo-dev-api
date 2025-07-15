@@ -1,7 +1,7 @@
 {
   "configurations": [
     {
-      "name": "API",
+      "name": "Launch API",
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "npm",
@@ -9,6 +9,17 @@
       "cwd": "${workspaceRoot}",
       "console": "integratedTerminal",
       "skipFiles": ["<node_internals>/**", "node_modules/**"],
+      "smartStep": true
+    },
+    {
+      "name": "Attach to API",
+      "type": "node",
+      "port": 4010,
+      "request": "attach",
+      "restart": true,
+      "remoteRoot": "/app",
+      "localRoot": "${workspaceFolder}",
+      "sourceMaps": true,
       "smartStep": true
     },
     {

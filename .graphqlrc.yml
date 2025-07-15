@@ -46,3 +46,9 @@ extensions:
             JSONObject: Record<string, unknown>
             EmailAddress: string
             UUID: string
+      ./src/generated/schema.json:
+        sort: true
+        plugins:
+          - introspection
+        config:
+          minify: true

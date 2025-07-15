@@ -1,17 +1,1 @@
-# Ignore everything
-*
-
-# Allow specific files and directories
-!/config
-!/src
-!/package.json
-!/package-lock.json
-!/tsconfig.json
-!/tsconfig.build.json
-
-# Exclude unecessary files within allowed directories
-**/*~
-**/*.log
-**/.DS_Store
-**/Thumbs.db
-**/node_modules/
+node_modules

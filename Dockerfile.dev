@@ -1,0 +1,11 @@
+FROM node:lts
+WORKDIR /app
+ADD package.json package-lock.json tsconfig.json ./
+COPY patches ./patches
+RUN npm ci
+COPY tsconfig.json ./
+COPY config ./config
+COPY scripts ./scripts
+COPY migrate-db ./migrate-db
+COPY src ./src/
+CMD ["npm", "run", "debug"]
