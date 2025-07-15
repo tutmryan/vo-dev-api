@@ -192,7 +192,7 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
           id: portalClientId,
           name: 'Verified Orchestration Concierge',
           applicationType: OidcApplicationType.Web,
-          clientType: OidcClientType.Confidential,
+          clientType: OidcClientType.Public,
           redirectUris: [portalRedirectUri, portalDemoRedirectUri],
           postLogoutUris: [portalRedirectUri, portalDemoRedirectUri],
           allowAnyPartner: true,
