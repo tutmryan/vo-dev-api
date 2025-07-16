@@ -84,6 +84,8 @@ export function redactValueObjectUnknown(object: Record<string, unknown>) {
         'tfn',
         // Remove PII from presentation request logging
         'values',
+        'sub',
+        's_hash',
       ].some((keyFragment) => keyLower.includes(keyFragment)) &&
       !['claimName'].includes(key)
     ) {

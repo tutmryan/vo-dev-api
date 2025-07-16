@@ -109,8 +109,14 @@ export function whenEamAddPresentationConstraints(loginData?: LoginInteractionDa
     },
   ]
 
-  logger.verbose('OIDC EAM hook:whenEamAddPresentationConstraints augmenting constraints', {
-    augmentedConstraints: augmentedConstraints.map((constraint) => redactValueObjectUnknown(constraint)),
+  logger.info('OIDC EAM hook:whenEamAddPresentationConstraints augmenting constraints', {
+    augmentedConstraints: augmentedConstraints.reduce(
+      (acc, constraint) => {
+        acc[constraint.claimName] = redactValueInner(constraint.values?.[0])
+        return acc
+      },
+      {} as Record<string, string | undefined>,
+    ),
   })
 
   return augmentedConstraints
@@ -125,10 +131,14 @@ export function whenEamGetAccountId(loginData: LoginInteractionData, credential:
 
   invariant(
     compareIgnoreCase(credential.claims[StandardClaims.identityId], loginData.integrations.entraEam.identityId),
-    'Identity ID mismatch during EAM account ID check',
+    'Identity ID mismatch during EAM OIDC account ID check',
   )
 
-  logger.verbose('OIDC EAM hook:whenEamGetAccountId account Id', { accountId: redactValueInner(loginData.integrations.entraEam.sub) })
+  logger.info('OIDC EAM hook:whenEamGetAccountId account Id', {
+    issuanceId: credential.claims[StandardClaims.issuanceId],
+    identityId: loginData.integrations.entraEam.identityId,
+    accountId: redactValueInner(loginData.integrations.entraEam.sub),
+  })
   return loginData.integrations.entraEam.sub
 }
 
@@ -141,10 +151,10 @@ export function isEamRequestAndLoginShouldFail(loginData?: LoginInteractionData)
 
   // Fail the login if the identity ID is not set
   if (loginData.integrations.entraEam.identityId === undefined) {
-    logger.verbose('OIDC EAM hook:isEamRequestAndLoginShouldFail identity ID not set', { result: 'fail' })
+    logger.warn('OIDC EAM hook:isEamRequestAndLoginShouldFail identity ID not set', { result: 'fail' })
     return true
   }
-  logger.verbose('OIDC EAM hook:isEamRequestAndLoginShouldFail identity ID is set', { result: 'pass' })
+  logger.info('OIDC EAM hook:isEamRequestAndLoginShouldFail identity ID is set', { result: 'pass' })
   return false
 }
 
@@ -184,24 +194,48 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
     !params.id_token_hint ||
     !params.nonce ||
     !params.state
-  )
+  ) {
+    logger.verbose('OIDC EAM hook:isEamRequest skipping non-EAM request due to shape of parameters not matching', {
+      params: extractLoggable(params),
+    })
     return false
+  }
+
+  const decodedIdTokenHint = decodeJwt<{ oid: string; tid: string }>(params.id_token_hint as string)
 
   // Confirm the EAM specific parameters
   // Client request ID is used by Entra to track login activity
-  if (!params[ExtraParams.clientRequestId]) return false
+  if (!params[ExtraParams.clientRequestId]) {
+    logger.info('OIDC EAM hook:isEamRequest skipping non-EAM request due to missing client request ID', {
+      params: extractLoggable(params, { header: {}, payload: decodedIdTokenHint }),
+    })
+    return false
+  }
 
   // Confirm the redirect URI is a valid MS login URI
-  if (mapMsLoginToAzureJwksUri((params.redirect_uri as string | undefined) ?? '') === undefined) return false
-
-  const decodedIdTokenHint = decodeJwt(params.id_token_hint as string)
+  if (mapMsLoginToAzureJwksUri((params.redirect_uri as string | undefined) ?? '') === undefined) {
+    logger.warn('OIDC EAM hook:isEamRequest skipping non-EAM request due to redirect URI not being a valid MS login URI', {
+      params: extractLoggable(params, { header: {}, payload: decodedIdTokenHint }),
+    })
+    return false
+  }
 
   // Confirm the EAM specific parameters (Object ID, Tenant ID, and Issuer)
-  if (!decodedIdTokenHint.oid || !decodedIdTokenHint.tid || !isMsLoginUri(decodedIdTokenHint.iss ?? '')) return false
+  if (!decodedIdTokenHint.oid || !decodedIdTokenHint.tid || !isMsLoginUri(decodedIdTokenHint.iss ?? '')) {
+    logger.warn('OIDC EAM hook:isEamRequest skipping non-EAM request due to missing EAM specific parameters (oid, tid, iss)', {
+      params: extractLoggable(params, { header: {}, payload: decodedIdTokenHint }),
+    })
+    return false
+  }
 
   // As this token wasn't issued by the client (us), the aud should not match the client ID
   // MS Docs say the value they send is the client ID registered in EAM, which is actually the spec (if we had issued it). However, the App ID registered for EAM is supplied in practice.
-  if (compareIgnoreCase(decodedIdTokenHint.aud, clientId)) return false
+  if (compareIgnoreCase(decodedIdTokenHint.aud, clientId)) {
+    logger.warn('OIDC EAM hook:isEamRequest skipping non-EAM request due to aud matching client ID', {
+      params: extractLoggable(params, { header: {}, payload: decodedIdTokenHint }),
+    })
+    return false
+  }
 
   // It is extremely unlikely that this is not an EAM request at this point. And if it isn't, it's an invalid request so breaking it by assuming it is EAM is fine
   return true
@@ -353,10 +387,12 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
       return original(ctx, next)
     }
 
-    const response = await original(ctx, next)
+    const response = (await original(ctx, next)) as { id_token: string } | undefined
+    invariant(response?.id_token, 'id_token not found in response during EAM auth flow')
+    const responseDecoded = decodeJwt(response.id_token)
 
-    logger.verbose('OIDC EAM hook:resume/get/processResponseTypes intercept end', {
-      response,
+    logger.info('OIDC EAM hook:resume/get/processResponseTypes intercept end', {
+      response: redactValueObjectUnknown(responseDecoded),
       params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint),
     })
 
