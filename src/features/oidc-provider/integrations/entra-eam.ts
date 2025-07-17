@@ -195,7 +195,7 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
     !params.nonce ||
     !params.state
   ) {
-    logger.verbose('OIDC EAM hook:isEamRequest skipping non-EAM request due to shape of parameters not matching', {
+    logger.info('OIDC EAM hook:isEamRequest skipping non-EAM request due to shape of parameters not matching', {
       params: extractLoggable(params),
     })
     return false
