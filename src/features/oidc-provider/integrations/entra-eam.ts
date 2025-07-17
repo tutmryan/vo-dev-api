@@ -396,7 +396,7 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
 
     logger.info('OIDC EAM hook:resume/get/processResponseTypes intercept end', {
       response: redactValueObjectUnknown(responseDecoded),
-      params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint),
+      params: extractLoggable(oidc.params!),
     })
 
     return response
