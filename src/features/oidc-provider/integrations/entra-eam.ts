@@ -238,6 +238,9 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
   }
 
   // It is extremely unlikely that this is not an EAM request at this point. And if it isn't, it's an invalid request so breaking it by assuming it is EAM is fine
+  logger.info('OIDC EAM hook:isEamRequest processing EAM request', {
+    params: extractLoggable(params, { header: {}, payload: decodedIdTokenHint }),
+  })
   return true
 }
 
