@@ -5,6 +5,11 @@ param resourcePrefix string
 @description('The ID of the deployment service principal')
 param deploymentServicePrincipalObjectId string
 
+@description('The number of days to retain data in App Insights')
+@minValue(30)
+@maxValue(365)
+param appInsightsRetentionInDays int = 180
+
 param location string = resourceGroup().location
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' existing = {
@@ -20,7 +25,7 @@ resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
     DisableIpMasking: false
     Flow_Type: 'Bluefield'
     Request_Source: 'rest'
-    RetentionInDays: 180
+    RetentionInDays: appInsightsRetentionInDays
     SamplingPercentage: 100
     WorkspaceResourceId: logAnalytics.id
   }

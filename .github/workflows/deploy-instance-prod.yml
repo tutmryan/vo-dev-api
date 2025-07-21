@@ -136,6 +136,7 @@ jobs:
         with:
           resource-group-name: ${{ env.resource-group-name }}
           resource-prefix: ${{ env.resource-prefix }}
+          retention-in-days: ${{ startsWith(inputs.instance, 'sandbox.') && 30 || 180 }}
       - name: Instance SQL database
         id: instance-sql-db
         uses: ./github-actions/sql-db
@@ -150,6 +151,7 @@ jobs:
           instance: ${{ inputs.instance }}
           node-env: production
           audit-log-streaming-enabled: ${{ vars.AUDIT_LOG_STREAMING_ENABLED }}
+          app-insights-retention-in-days: ${{ startsWith(inputs.instance, 'sandbox.') && 30 || 180 }}
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
           face-check-enabled: ${{ vars.FACE_CHECK_ENABLED }}
           demo-enabled: ${{ vars.DEMO_ENABLED  }}

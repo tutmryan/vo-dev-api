@@ -8,6 +8,9 @@ inputs:
   resource-prefix:
     description: Prefix to use for resource names
     required: true
+  retention-in-days:
+    description: The number of days to retain data in the Log Analytics workspace
+    default: '180'
 
 outputs:
   log-analytics-id:
@@ -30,4 +33,4 @@ runs:
         template: ./infrastructure/log-analytics.bicep
         parameters: >-
           resourcePrefix=${{ inputs.resource-prefix }}
-
+          retentionInDays=${{ inputs.retention-in-days }}
