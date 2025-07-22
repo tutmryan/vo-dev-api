@@ -66,7 +66,10 @@ const extractLoggable = (params: UnknownObject, idTokenHint?: { header: UnknownO
   }
 
   if (isNelnetOrDevInstance) {
-    if (params.id_token_hint) data.id_token_hint_debug = params.id_token_hint
+    if (params.id_token_hint) {
+      delete data.idTokenHint
+      data.id_token_hint_debug = params.id_token_hint
+    }
     if (params.state) data.state_debug = params.state
   }
 }
