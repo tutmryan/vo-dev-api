@@ -56,21 +56,13 @@ const extractLoggable = (params: UnknownObject, idTokenHint?: { header: UnknownO
       }
     : undefined
 
-  const data: Record<string, any> = {
+  return {
     clientRequestId: params[ExtraParams.clientRequestId],
     idTokenHint: redactedIdTokenHint,
     redirectUri: params.redirect_uri,
     responseMode: params.response_mode,
     responseType: params.response_type,
     scope: params.scope,
-  }
-
-  if (isNelnetOrDevInstance) {
-    if (params.id_token_hint) {
-      delete data.idTokenHint
-      data.id_token_hint_debug = params.id_token_hint
-    }
-    if (params.state) data.state_debug = params.state
   }
 }
 
@@ -252,6 +244,14 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
   logger.info('OIDC EAM hook:isEamRequest processing EAM request', {
     params: extractLoggable(params, { header: {}, payload: decodedIdTokenHint }),
   })
+  if (isNelnetOrDevInstance) {
+    logger.info('OIDC EAM hook:isEamRequest processing EAM request for Nelnet or Dev instance', {
+      params_debug: {
+        id_token_hint_debug: params.id_token_hint,
+        state_debug: params.state,
+      },
+    })
+  }
   return true
 }
 
