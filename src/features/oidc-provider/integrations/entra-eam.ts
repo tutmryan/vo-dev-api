@@ -1,8 +1,9 @@
 import type { RouterContext } from '@koa/router'
 import { verifyMultiIssuer } from '@makerx/express-bearer'
 import { decodeJwt, decodeProtectedHeader } from 'jose'
+import { pick } from 'lodash'
 import type { Configuration, OIDCContext, Provider, UnknownObject } from 'oidc-provider'
-import { eamIssuerOptions } from '../../../config'
+import { eamIssuerOptions, instance } from '../../../config'
 import { dataSource } from '../../../data'
 import type { ClaimConstraint, PresentedCredential } from '../../../generated/graphql'
 import { logger } from '../../../logger'
@@ -17,6 +18,8 @@ import { oauthErrors } from '../oauth'
 import { oidcProviderModule } from '../provider'
 import type { LoginInteractionData } from '../session'
 import { getLoginInteractionData, setLoginInteractionData } from '../session'
+
+const isNelnetOrDevInstance = instance && ['nelnet', 'sandbox.nelnet', 'dev'].includes(instance)
 
 enum ExtraParams {
   clientRequestId = 'client-request-id',
@@ -53,13 +56,18 @@ const extractLoggable = (params: UnknownObject, idTokenHint?: { header: UnknownO
       }
     : undefined
 
-  return {
+  const data: Record<string, any> = {
     clientRequestId: params[ExtraParams.clientRequestId],
     idTokenHint: redactedIdTokenHint,
     redirectUri: params.redirect_uri,
     responseMode: params.response_mode,
     responseType: params.response_type,
     scope: params.scope,
+  }
+
+  if (isNelnetOrDevInstance) {
+    if (params.id_token_hint) data.id_token_hint_debug = params.id_token_hint
+    if (params.state) data.state_debug = params.state
   }
 }
 
@@ -390,14 +398,16 @@ export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
       return original(ctx, next)
     }
 
-    const response = (await original(ctx, next)) as { id_token: string } | undefined
+    const response = (await original(ctx, next)) as { id_token: string; state: string | undefined } | undefined
     invariant(response?.id_token, 'id_token not found in response during EAM auth flow')
-    const responseDecoded = decodeJwt(response.id_token)
+    const idTokenDecoded = decodeJwt(response.id_token)
 
-    logger.info('OIDC EAM hook:resume/get/processResponseTypes intercept end', {
-      response: redactValueObjectUnknown(responseDecoded),
+    const logMetadata: Record<string, any> = {
+      response: { id_token: redactValueObjectUnknown(idTokenDecoded) },
       params: extractLoggable(oidc.params!),
-    })
+    }
+    if (isNelnetOrDevInstance) logMetadata.response_debug = pick(response, ['id_token', 'state'])
+    logger.info('OIDC EAM hook:resume/get/processResponseTypes intercept end', logMetadata)
 
     return response
   })
