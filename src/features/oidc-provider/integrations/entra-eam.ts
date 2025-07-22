@@ -247,8 +247,8 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
   if (isNelnetOrDevInstance) {
     logger.info('OIDC EAM hook:isEamRequest processing EAM request for Nelnet or Dev instance', {
       params_debug: {
-        id_token_hint_debug: params.id_token_hint,
-        state_debug: params.state,
+        id_token_hint: params.id_token_hint,
+        state: params.state,
       },
     })
   }
