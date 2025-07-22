@@ -159,3 +159,35 @@ grant_type:client_credentials
 ### Create approval request
 
 Follow the docs [create an approval request](https://dev.docs.verifiedorchestration.com/docs/guides/approvals#step-1-request-approval).
+
+## Limited access tokens
+
+To test limited access token clients, either set up a new App Registration or use the existing `Onboarding Demo API` client.
+
+### Test client
+
+First, obtain the client secret from the [Onboarding Demo API client secret](https://vault.bitwarden.com/#/vault?itemId=130c22e8-b7b5-4577-8240-b2840083881e&action=view) item in Bitwarden.
+
+This client is from the `Verified Orchestration Onboarding Demo` tenant. It has access to both `demo` and `dev` VO instances
+
+### Obtain access token
+
+Run the following authentication request to obtain an access token via Postman or whatever you prefer:
+
+POST to `https://login.microsoftonline.com/10b631d3-9e47-49e1-a938-cbd933f0488d/oauth2/v2.0/token`
+
+BODY should be `x-www-form-urlencoded`
+
+```
+client_id:9d663e0c-2931-4ddd-b57b-e2d05e867e21
+scope:f24dc8de-66da-4b8b-928b-be4c6657d1cc/.default
+client_secret:{FROM BitWarden}
+grant_type:client_credentials
+```
+
+### How to use
+
+1. Copy the access token into Apollo Sandbox and apply an `Authorization: Bearer {token}` header.
+2. Run the token acquisition mutation with this header applied.
+3. Receive the limited access token.
+4. Apply `Authorization: Bearer {token}` header using the limited access token for subsequent operations.
