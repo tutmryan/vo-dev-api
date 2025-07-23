@@ -1579,8 +1579,8 @@ resource msGraphServiceHealthAlert 'microsoft.insights/metricAlerts@2018-03-01' 
           name: 'Metric1'
           metricNamespace: 'Azure.ApplicationInsights'
           metricName: 'ms-graph-service'
-          operator: 'LessThan'
-          timeAggregation: 'Minimum'
+          operator: 'GreaterThanOrEqual'
+          timeAggregation: 'Maximum'
           skipMetricValidation: true
           criterionType: 'StaticThresholdCriterion'
         }
@@ -1617,8 +1617,8 @@ resource vidServiceHealthAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if
           name: 'Metric1'
           metricNamespace: 'Azure.ApplicationInsights'
           metricName: 'verified-id-service'
-          operator: 'LessThan'
-          timeAggregation: 'Minimum'
+          operator: 'GreaterThanOrEqual'
+          timeAggregation: 'Maximum'
           skipMetricValidation: true
           criterionType: 'StaticThresholdCriterion'
         }

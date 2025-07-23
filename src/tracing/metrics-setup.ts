@@ -6,11 +6,11 @@ const meter = metrics.getMeter('verifiable-orchestration-meter')
 Object.values(monitoredServices).forEach((serviceName) => {
   const reportedServiceName = `${serviceName}-service`
   const gauge = meter.createObservableGauge(reportedServiceName, {
-    description: `A metric used to indicate if the ${serviceName} is down. 0 = DOWN, 1 = UP`,
+    description: `A metric used to report if the ${serviceName} is down. 1 = DOWN`,
   })
 
   gauge.addCallback((observableResult) => {
-    observableResult.observe(getServiceStatus(serviceName) ? 1 : 0, {
+    observableResult.observe(getServiceStatus(serviceName) ? 0 : 1, {
       service: 'external-services',
       monitored: reportedServiceName,
     })
