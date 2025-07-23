@@ -10,8 +10,8 @@ import { instrumentations } from './instrumentations'
 import { RemoveSelect1SpansSampler } from './remove-select1-spans-sampler'
 
 const resource = Resource.EMPTY
-resource.attributes[SEMRESATTRS_SERVICE_NAME] = 'VerifiableOrchestration'
-resource.attributes[SEMRESATTRS_SERVICE_NAMESPACE] = 'verifiable-orchestration-api'
+resource.attributes[SEMRESATTRS_SERVICE_NAMESPACE] = 'VerifiableOrchestration'
+resource.attributes[SEMRESATTRS_SERVICE_NAME] = 'API'
 
 type DisabledBuiltinInstrumentations = {
   [name in keyof InstrumentationOptions]: { enabled: false }
