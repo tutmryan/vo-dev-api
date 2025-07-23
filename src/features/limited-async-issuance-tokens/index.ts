@@ -1,12 +1,21 @@
 import KeyvRedis from '@keyv/redis'
+import Redis from 'ioredis'
 import { newCacheSection } from '../../redis/cache'
 import { rateLimiter } from '../../redis/rate-limiter'
+import { invariant } from '../../util/invariant'
 import { Lazy } from '../../util/lazy'
 
 export const codeExpiryMinutes = 5
 
 const CACHE_TTL = 1000 * 60 * codeExpiryMinutes
 const verificationCache = Lazy(() => newCacheSection('asyncIssuanceVerificationCache', CACHE_TTL))
+const redisCacheClient = Lazy(() => {
+  const cache = verificationCache()
+  const store = cache.opts.store
+  invariant(store instanceof KeyvRedis, 'Verification throttle cache must use Redis store for atomic operations')
+  invariant(store.redis instanceof Redis, 'Verification throttle cache must use Redis store for atomic operations')
+  return store.redis
+})
 
 export const acquireAsyncIssuanceTokenLimiter = Lazy(() =>
   rateLimiter({
@@ -36,33 +45,24 @@ export async function redeemVerificationCode(asyncIssuanceRequestId: string, ver
 }
 
 const VERIFICATION_THROTTLE_TTL = 1000 * 120 - 1 // 2 minutes - 1 second for buffer
-const verificationThrottleCache = Lazy(() => newCacheSection('verificationThrottle', VERIFICATION_THROTTLE_TTL))
 function getVerificationThrottleKey(asyncIssuanceId: string) {
   return `asyncIssuanceVerification:${asyncIssuanceId.toLowerCase()}`
 }
 
 export async function clearVerificationThrottleForIssuance(asyncIssuanceId: string) {
   const throttleKey = getVerificationThrottleKey(asyncIssuanceId)
-  await verificationThrottleCache().delete(throttleKey)
+  const redis = redisCacheClient()
+  await redis.del(throttleKey)
 }
 
+/**
+ * Check if the async issuance ID is throttled or set a throttle.
+ * @param asyncIssuanceId The async issuance ID to check.
+ * @returns True if the ID is throttled, false otherwise.
+ */
 export async function isThrottledOrSetThrottle(asyncIssuanceId: string): Promise<boolean> {
-  const keyv = verificationThrottleCache()
-  const store = keyv.opts.store
   const throttleKey = getVerificationThrottleKey(asyncIssuanceId)
-
-  if (store instanceof KeyvRedis) {
-    const redisClient = store.redis
-    // Atomic
-    const result = await redisClient.set(throttleKey, true.toString(), 'NX', 'PX', VERIFICATION_THROTTLE_TTL)
-    return result === null
-  } else {
-    // Non-atomic fallback for other store types (e.g., memory, SQLite, etc.). This is prone to race conditions
-    const existing = await keyv.get(throttleKey)
-    if (existing) {
-      return true
-    }
-    await keyv.set(throttleKey, true.toString())
-    return false
-  }
+  const redis = redisCacheClient()
+  const result = await redis.set(throttleKey, true.toString(), 'PX', VERIFICATION_THROTTLE_TTL, 'NX')
+  return result !== 'OK' // If it returns 'OK', it means we set the key successfully, so not throttled
 }

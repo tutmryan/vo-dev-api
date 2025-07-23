@@ -1,5 +1,5 @@
 import { environment, isLocalDev } from '@makerx/node-common'
-import type { RedisOptions } from 'bullmq'
+import type { RedisOptions } from 'ioredis'
 import Redis from 'ioredis'
 import { camelCase } from 'lodash'
 import { redis as redisConfig } from '../config'
