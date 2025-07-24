@@ -63,37 +63,40 @@ const extractLoggable = (params: UnknownObject, idTokenHint?: { header: UnknownO
     responseMode: params.response_mode,
     responseType: params.response_type,
     scope: params.scope,
+    claims: params.claims,
   }
 }
 
-const eamPresentationLoginStandardClaims = {
-  // Note: EAM only allows a single amr value
-  amr: ['pop'],
-  // Note: sending only 'possession' as the acr value does not work
-  /*
-  | ACR                               | AMR    | result  | failure reason                                                                         |
-  |-----------------------------------|--------|---------|----------------------------------------------------------------------------------------|
-  | possessionorinherence             | pop    | success |                                                                                        |
-  | possessionorinherence             | face   | success |                                                                                        |
-  | possessionorinherence             | sms    | success |                                                                                        |
-  | possessionorinherence             | swk    | success |                                                                                        |
-  | possessionorinherence             | tel    | success |                                                                                        |
-  | possessionorinherence             | retina | success |                                                                                        |
-  | possessionorinherence             | fido   | success |                                                                                        |
-  | possessionorinherence             | yeet   | fail    | AADSTS5001257: Failed to validate external id_token: 'amr' claim has unexpected value. |
-  | knowledgeorpossession             | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-  | knowledgeorinherence              | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-  | knowledgeorpossessionorinherence  | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-  | knowledge                         | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-  | possession                        | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-  | inherence                         | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-  | knowledge                         | otp    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-  | possession                        | hwk    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-  | inherence                         | fpt    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-  | inherence                         | iris   | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-   */
-  acr: 'possessionorinherence',
-} as const
+export const knownEamAcrs = ['possessionorinherence', 'knowledgeorpossessionorinherence']
+
+// const eamPresentationLoginStandardClaims = {
+//   // Note: EAM only allows a single amr value
+//   amr: ['pop'],
+//   // Note: sending only 'possession' as the acr value does not work
+//   /*
+//   | ACR                               | AMR    | result  | failure reason                                                                         |
+//   |-----------------------------------|--------|---------|----------------------------------------------------------------------------------------|
+//   | possessionorinherence             | pop    | success |                                                                                        |
+//   | possessionorinherence             | face   | success |                                                                                        |
+//   | possessionorinherence             | sms    | success |                                                                                        |
+//   | possessionorinherence             | swk    | success |                                                                                        |
+//   | possessionorinherence             | tel    | success |                                                                                        |
+//   | possessionorinherence             | retina | success |                                                                                        |
+//   | possessionorinherence             | fido   | success |                                                                                        |
+//   | possessionorinherence             | yeet   | fail    | AADSTS5001257: Failed to validate external id_token: 'amr' claim has unexpected value. |
+//   | knowledgeorpossession             | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+//   | knowledgeorinherence              | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+//   | knowledgeorpossessionorinherence  | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+//   | knowledge                         | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+//   | possession                        | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+//   | inherence                         | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+//   | knowledge                         | otp    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+//   | possession                        | hwk    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+//   | inherence                         | fpt    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+//   | inherence                         | iris   | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
+//    */
+//   acr: 'possessionorinherence',
+// } as const
 
 export function whenEamAddPresentationConstraints(loginData?: LoginInteractionData, constraints?: ClaimConstraint[]) {
   // Ignore non-EAM requests
@@ -166,26 +169,56 @@ export const eamLoginFailResult = {
   error_description: 'No identity could be matched to the Entra user.',
 }
 
-export function whenEamApplyAmr(loginData: LoginInteractionData, amr: string[]) {
+export function whenEamApplyAmr(loginData: LoginInteractionData, amr: string[], rawClaims?: string) {
   // Ignore non-EAM requests
   if (!loginData.integrations?.entraEam) {
     logger.verbose('OIDC EAM hook:whenEamApplyAmr skipping non-EAM request')
     return amr
   }
 
-  logger.verbose('OIDC EAM hook:whenEamApplyAmr amr', { amr: eamPresentationLoginStandardClaims.amr })
-  return [...eamPresentationLoginStandardClaims.amr]
+  invariant(rawClaims, 'Claims must be provided to whenEamApplyAmr')
+
+  // This is temporary and will be replaced by production ready code soon
+  const claims = JSON.parse(rawClaims)
+  invariant(typeof claims === 'object', 'Claims must be an object')
+  invariant('id_token' in claims, 'Claims must contain id_token')
+  invariant(typeof claims.id_token === 'object', 'id_token must be an object')
+  invariant('amr' in claims.id_token, 'id_token must contain amr')
+  invariant('values' in claims.id_token.amr, 'id_token.amr must contain values')
+
+  // If values contains 'pop' use it, otherwise pick the first
+  const eamAmr = claims.id_token.amr.values.includes('pop') ? 'pop' : (claims.id_token.amr.values[0] as string)
+
+  logger.verbose('OIDC EAM hook:whenEamApplyAmr amr', { amr: eamAmr })
+  return [eamAmr]
 }
 
-export function whenEamApplyAcr(loginData: LoginInteractionData, acr: string) {
+export function whenEamApplyAcr(loginData: LoginInteractionData, acr: string, rawClaims?: string) {
   // Ignore non-EAM requests
   if (!loginData.integrations?.entraEam) {
     logger.verbose('OIDC EAM hook:whenEamApplyAcr skipping non-EAM request')
     return acr
   }
 
-  logger.verbose('OIDC EAM hook:whenEamApplyAcr acr', { acr: eamPresentationLoginStandardClaims.acr })
-  return eamPresentationLoginStandardClaims.acr as string
+  invariant(rawClaims, 'Claims must be provided to whenEamApplyAmr')
+
+  // This is temporary and will be replaced by production ready code soon
+  const claims = JSON.parse(rawClaims)
+  invariant(typeof claims === 'object', 'Claims must be an object')
+  invariant('id_token' in claims, 'Claims must contain id_token')
+  invariant(typeof claims.id_token === 'object', 'id_token must be an object')
+  invariant('acr' in claims.id_token, 'id_token must contain acr')
+  invariant('values' in claims.id_token.acr, 'id_token.acr must contain values')
+  invariant(Array.isArray(claims.id_token.acr.values), 'id_token.acr.values must be an array')
+
+  // Allow any ACRs entra says are valid, for now
+  //const filteredAcrs = (claims.id_token.acr.values as string[]).filter((v) => knownEamAcrs.includes(v))
+  //invariant(filteredAcrs.length > 0, 'id_token.acr.values must contain at least one known EAM ACR')
+
+  const eamAcr = claims.id_token.acr.values[0] as string
+
+  logger.verbose('OIDC EAM hook:whenEamApplyAcr acr', { acr: eamAcr })
+  return eamAcr
 }
 
 export const isEamRequest = (params: UnknownObject, clientId: string) => {

@@ -210,8 +210,8 @@ export function routes(app: Express, route: string): void {
       let acr = presentationLoginStandardClaims.acr as string
 
       // Integration hooks
-      amr = whenEamApplyAmr(loginInteractionData, amr)
-      acr = whenEamApplyAcr(loginInteractionData, acr)
+      amr = whenEamApplyAmr(loginInteractionData, amr, params.claims as string | undefined)
+      acr = whenEamApplyAcr(loginInteractionData, acr, params.claims as string | undefined)
 
       const result: InteractionResults = {
         login: {

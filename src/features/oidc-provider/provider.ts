@@ -19,7 +19,7 @@ import { loadOidcData } from './data'
 import { errorHandler } from './error-handler'
 import { extraParams } from './extra-params'
 import { loadExistingGrant } from './grants'
-import { eamExtraParams, hookAndApplyCustomEntraEamSpec } from './integrations/entra-eam'
+import { eamExtraParams, hookAndApplyCustomEntraEamSpec, knownEamAcrs } from './integrations/entra-eam'
 import { keys } from './keys'
 import { logEvents } from './log-events'
 import { middleware } from './middleware'
@@ -73,7 +73,7 @@ async function createProvider() {
     cookies: {
       keys: [cookieSession.secret ?? throwError('cookieSession.secret is required')],
     },
-    acrValues: [presentationLoginStandardClaims.acr],
+    acrValues: [presentationLoginStandardClaims.acr, ...knownEamAcrs],
     claims,
     conformIdTokenClaims: false,
     extraTokenClaims,
@@ -87,6 +87,9 @@ async function createProvider() {
       resourceIndicators: {
         enabled: true,
         getResourceServerInfo: getResourceServerInfo(clients, resources),
+      },
+      claimsParameter: {
+        enabled: true,
       },
     },
     interactions: {
