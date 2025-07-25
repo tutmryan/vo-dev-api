@@ -70,15 +70,15 @@ This example shows how to get an access token to call the Verification Orchestra
 
 ```ts title="Get access token to call Verification Orchestration platform using the client secret."
 const getAccessTokenToCallPlatformService = async () => {
-  // <tenant ID> to be provided by your tenant administrator
-  const authority = 'https://login.microsoftonline.com/<tenant ID>'
-  // <client ID> provided during onboarding of the app
-  const clientId = '<client ID>'
-  // <client secret> provided during onboarding of the app; retrieved from a secure storage such as Azure Key Vault
-  const clientSecret = '<client secret>'
-  // <scope> see tip below for the scope for this Verified Orchestration platform instance
-  // e.g. '<instance app id>/.default'
-  const scope = '<scope>'
+  // Tenant ID to be provided by your tenant administrator
+  const authority = 'https://login.microsoftonline.com/{yourTenantId}'
+  // Client ID provided during onboarding of the app
+  const clientId = '{yourClientId}'
+  // Client secret provided during onboarding of the app; retrieved from a secure storage such as Azure Key Vault
+  const clientSecret = '{yourClientSecret}'
+  // Scope for this Verified Orchestration platform instance
+  // e.g. '{yourInstanceAppId}/.default'
+  const scope = '{yourScope}'
 
   const msalClientApplication = new ConfidentialClientApplication({
     auth: {
@@ -101,7 +101,7 @@ The scope for this Verified Orchestration platform instance is: **<ApiScope />**
 
 ### Save identity information
 
-This example shows how to save an identity reference via the [`saveIdentity` mutation](/docs/reference/api/mutations/save-identity), so that limited access tokens work (only) for the logged-in user identity.
+This example shows how to save an identity reference via the [`saveIdentity` mutation](/api-reference/api/mutations/save-identity), so that limited access tokens work (only) for the logged-in user identity.
 
 ```ts title="Save identity information (unless limited access token is requested for anonymous presentations)."
 type Identity = {
@@ -136,7 +136,7 @@ const saveIdentity = async (user: JwtPayload | undefined) => {
 
 ### Get limited access token from the Verified Orchestration platform
 
-This example illustrates how to invoke the [`AcquireLimitedAccessToken` mutation](/docs/reference/api/mutations/acquire-limited-access-token) with appropriate inputs to obtain limited access tokens for client applications to use.
+This example illustrates how to invoke the [`AcquireLimitedAccessToken` mutation](/api-reference/api/mutations/acquire-limited-access-token) with appropriate inputs to obtain limited access tokens for client applications to use.
 
 ```ts title="Invoke the AcquireLimitedAccessToken mutation with appropriate inputs."
 type AcquireLimitedAccessTokenInput = {

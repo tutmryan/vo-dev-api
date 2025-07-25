@@ -37,7 +37,7 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: require.resolve('./sidebars.js'),
+          sidebarPath: require.resolve('./sidebarsDocumentation.js'),
         },
         blog: false,
         theme: {
@@ -48,6 +48,15 @@ const config = {
   ],
 
   plugins: [
+    [
+      '@docusaurus/plugin-content-docs',
+      {
+        id: 'api-reference',
+        path: 'api-reference',
+        routeBasePath: 'api-reference',
+        sidebarPath: './sidebarsApiReference.js',
+      },
+    ],
     [
       '@docusaurus/plugin-content-blog',
       {
@@ -64,8 +73,9 @@ const config = {
       '@graphql-markdown/docusaurus',
       {
         schema: '../src/**/*.graphql',
-        baseURL: 'reference',
-        linkRoot: '/docs',
+        rootPath: '.',
+        baseURL: 'api-reference',
+        linkRoot: '/',
         loaders: {
           GraphQLFileLoader: '@graphql-tools/graphql-file-loader',
         },
@@ -103,6 +113,11 @@ const config = {
           {
             to: 'docs',
             label: 'Documentation',
+            position: 'left',
+          },
+          {
+            to: 'api-reference',
+            label: 'API reference',
             position: 'left',
           },
           {

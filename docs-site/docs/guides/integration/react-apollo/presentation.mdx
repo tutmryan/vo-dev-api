@@ -33,7 +33,7 @@ Create a presentation request specifying the requested credentials and optionall
 - whether revoked credentials can be presented
 - callback info, if presentation event data should also be sent to a server-side endpoint
 
-The [CreatePresentationRequest](/docs/reference/api/mutations/create-presentation-request) mutation returns the presentation request details, including a URL to open in the browser or a QR code to scan.
+The [CreatePresentationRequest](/api-reference/api/mutations/create-presentation-request) mutation returns the presentation request details, including a URL to open in the browser or a QR code to scan.
 
 ```tsx title="Create a presentation request"
 const presentationRequest = graphql(`
@@ -117,7 +117,7 @@ return (
 
 ### 4. Handle presentation events
 
-The [PresentationEvent](/docs/reference/api/subscriptions/presentation-event) subscription returns event data during the presentation process. The `requestStatus` field can be used to determine the current state of the presentation:
+The [PresentationEvent](/api-reference/api/subscriptions/presentation-event) subscription returns event data during the presentation process. The `requestStatus` field can be used to determine the current state of the presentation:
 
 - `request_retrieved`: the credential holder has opened the presentation link
 - `presentation_verified`: the credential holder has presented the requested credentials

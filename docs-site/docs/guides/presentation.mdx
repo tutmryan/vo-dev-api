@@ -29,10 +29,10 @@ Presentation is a multi-step process:
 To create a presentation request definition and explore the presentation API, use the <AdminLink path="/presentation-builder">presentation builder</AdminLink> as a starting point.
 :::
 
-The [presentation request input](/docs/reference/types/inputs/presentation-request-input) specifies:
+The [presentation request input](/api-reference/types/inputs/presentation-request-input) specifies:
 
 1. One or more requested credentials. For partner types, the issuer must be specified, otherwise just the credential type is required.
-   - Optionally, include [constraints](/docs/reference/types/inputs/claim-constraint) to narrow what credential can be presented
+   - Optionally, include [constraints](/api-reference/types/inputs/claim-constraint) to narrow what credential can be presented
    - "VerifiableCredential" is a special type that permits the presentation of any valid credential.
 1. The name of the requesting client application (for display in the wallet prompt)
 1. The identity who must present the credential. When specified, a constraint for identityId is added to each requested credential.
@@ -279,12 +279,12 @@ For complete code samples of different methods of receiving presentation events,
 
 Every presentation includes a receipt, a digital proof that a credential was presented. It consists of one or two JSON Web Tokens (JWTs) that bundle together claims and proof of presentation.
 
-The [`PresentationReceipt`](/docs/reference/types/inputs/presentation-receipt-input) has two properties:
+The [`PresentationReceipt`](/api-reference/types/inputs/presentation-receipt-input) has two properties:
 
 - `id_token` **(Required)**: Is a record of the presentation, signed by the user's wallet, proving ownership.
 - `faceCheck` **(Optional)**: Is a signed record of the biometric face check, if performed during the presentation process.
 
-### Using [`verifyPresentation`](/docs/reference/api/queries/verify-presentation) query
+### Using [`verifyPresentation`](/api-reference/api/queries/verify-presentation) query
 
 VO provides a GraphQL query to verify the presentation receipt. This query checks the validity of the `id_token` and, if present, the `faceCheck` token.
 
@@ -361,7 +361,7 @@ The `options` object is crucial for validating the token's claims, such as the i
 | `currentDate` | The `presentedAt` `Date` object                       | The `presentedAt` `Date` object                        |
 
 :::tip
-You can query for your Verifier's DID using [`Authority query`](/docs/reference/api/queries/authority)
+You can query for your Verifier's DID using [`Authority query`](/api-reference/api/queries/authority)
 :::
 
 #### Code Sample

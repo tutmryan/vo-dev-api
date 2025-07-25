@@ -9,11 +9,9 @@
 .cache-loader
 
 # Generated GraphQL docs
-/docs/reference/*
-!/docs/reference/_category_.json
-!/docs/reference/default.md
-!/docs/reference/sidebar-schema.js
-
+/api-reference/*
+!/api-reference/index.mdx
+!/api-reference/default.md
 
 # Misc
 .DS_Store

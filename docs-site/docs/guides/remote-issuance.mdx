@@ -107,7 +107,7 @@ The Composer provides the ability to:
 
 When bulk issuing through The Composer, you will upload CSV files with data arranged into specific columns. There are fixed columns (which are always required) and claim-data columns (which depend on the fields defined in the contract).
 
-Each row represents a single [async issuance request](/docs/reference/types/inputs/async-issuance-request-input) and each column corresponds to a field.
+Each row represents a single [async issuance request](/api-reference/types/inputs/async-issuance-request-input) and each column corresponds to a field.
 
 <table>
   <thead>
@@ -120,68 +120,68 @@ Each row represents a single [async issuance request](/docs/reference/types/inpu
   <tbody>
     <tr>
       <td>Identity Identifier</td>
-      <td>[AsyncIssuanceRequestInput.identity.identifier](/docs/reference/types/inputs/identity-input#identityinputidentifierstring--)</td>
+      <td>[AsyncIssuanceRequestInput.identity.identifier](/api-reference/types/inputs/identity-input#identityinputidentifierstring--)</td>
       <td>Unique identifier of the identity (see [Identity mapping](/docs/guides/identity-mapping) guide)</td>
     </tr>
     <tr>
       <td>Identity Issuer</td>
-      <td>[AsyncIssuanceRequestInput.identity.issuer](/docs/reference/types/inputs/identity-input#identityinputissuerstring--)</td>
+      <td>[AsyncIssuanceRequestInput.identity.issuer](/api-reference/types/inputs/identity-input#identityinputissuerstring--)</td>
       <td>Issuer of the identity (see [Identity mapping](/docs/guides/identity-mapping) guide)</td>
     </tr>
     <tr>
       <td>Recipient Name</td>
-      <td>[AsyncIssuanceRequestInput.identity.name](/docs/reference/types/inputs/identity-input#identityinputnamestring--)</td>
+      <td>[AsyncIssuanceRequestInput.identity.name](/api-reference/types/inputs/identity-input#identityinputnamestring--)</td>
       <td>Name of the identity (see [Identity mapping](/docs/guides/identity-mapping) guide)</td>
     </tr>
     <tr>
       <td>(Optional) Notification Method (email | sms)</td>
       <td>
-        [AsyncIssuanceRequestInput.contact.notification.method](/docs/reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputnotificationcontactinput-)
+        [AsyncIssuanceRequestInput.contact.notification.method](/api-reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputnotificationcontactinput-)
       </td>
-      <td>["email" or "sms"](/docs/reference/types/enums/contact-method)</td>
+      <td>["email" or "sms"](/api-reference/types/enums/contact-method)</td>
     </tr>
     <tr>
       <td>(Optional) Notification Value</td>
       <td>
-        [AsyncIssuanceRequestInput.contact.notification.value](/docs/reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputnotificationcontactinput-)
+        [AsyncIssuanceRequestInput.contact.notification.value](/api-reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputnotificationcontactinput-)
       </td>
       <td>Email or phone number for notification of issuance</td>
     </tr>
     <tr>
       <td>(Optional) Verification Method (email | sms)</td>
       <td>
-        [AsyncIssuanceRequestInput.contact.verification.method](/docs/reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputverificationcontactinput-)
+        [AsyncIssuanceRequestInput.contact.verification.method](/api-reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputverificationcontactinput-)
       </td>
-      <td>["email" or "sms"](/docs/reference/types/enums/contact-method)</td>
+      <td>["email" or "sms"](/api-reference/types/enums/contact-method)</td>
     </tr>
     <tr>
       <td>(Optional) Verification Value</td>
       <td>
-        [AsyncIssuanceRequestInput.contact.verification.value](/docs/reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputverificationcontactinput-)
+        [AsyncIssuanceRequestInput.contact.verification.value](/api-reference/types/inputs/async-issuance-contact-input#asyncissuancecontactinputverificationcontactinput-)
       </td>
       <td>Email or phone number for verification of issuance (OTP)</td>
     </tr>
     <tr>
       <td>Issuance Expiry (oneDay | oneMonth | oneWeek | threeDays | threeMonths | twoWeeks)</td>
       <td>
-        [AsyncIssuanceRequestInput.expiry](/docs/reference/types/inputs/async-issuance-request-input#asyncissuancerequestinputexpiryasyncissuancerequestexpiry--)
+        [AsyncIssuanceRequestInput.expiry](/api-reference/types/inputs/async-issuance-request-input#asyncissuancerequestinputexpiryasyncissuancerequestexpiry--)
       </td>
       <td>
         ["oneDay" or "threeDays" or "oneWeek" or "twoWeeks" or "oneMonth" or
-        "threeMonths"](/docs/reference/types/enums/async-issuance-request-expiry)
+        "threeMonths"](/api-reference/types/enums/async-issuance-request-expiry)
       </td>
     </tr>
     <tr>
       <td>(Optional) - Credential Expiry Date</td>
       <td>
-        [AsyncIssuanceRequestInput.expirationDate](/docs/reference/types/inputs/async-issuance-request-input#asyncissuancerequestinputexpirationdatedatetime-)
+        [AsyncIssuanceRequestInput.expirationDate](/api-reference/types/inputs/async-issuance-request-input#asyncissuancerequestinputexpirationdatedatetime-)
       </td>
-      <td>[Date-time string in ISO 8601 format](/docs/reference/types/scalars/date-time)</td>
+      <td>[Date-time string in ISO 8601 format](/api-reference/types/scalars/date-time)</td>
     </tr>
     <tr>
       <td>(Optional) - Post issuance redirect url</td>
       <td>
-        [AsyncIssuanceRequestInput.postIssuanceRedirectUrl](/docs/reference/types/inputs/async-issuance-request-input#asyncissuancerequestinputpostissuanceredirecturlurl-)
+        [AsyncIssuanceRequestInput.postIssuanceRedirectUrl](/api-reference/types/inputs/async-issuance-request-input#asyncissuancerequestinputpostissuanceredirecturlurl-)
       </td>
       <td>Redirect to this URL after issuance</td>
     </tr>
@@ -198,7 +198,7 @@ Each row represents a single [async issuance request](/docs/reference/types/inpu
 To create a remote issuance request definition and explore the API, use the <AdminLink path="/issuance-builder">issuance builder</AdminLink> and select 'Remote' as the 'Delivery method' option, as a starting point.
 :::
 
-The [async issuance request input](/docs/reference/types/inputs/async-issuance-request-input) specifies:
+The [async issuance request input](/api-reference/types/inputs/async-issuance-request-input) specifies:
 
 1. Which credential will be issued.
 1. The identity to whom the credential will be issued (recipient / issuee).

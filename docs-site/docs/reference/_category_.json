@@ -1,9 +1,0 @@
-{
-  "label": "Schema reference",
-  "position": 4,
-  "link": {
-    "slug": "reference",
-    "type": "generated-index",
-    "description": "The following sections describe elements of the Verified Orchestration GraphQL API schema. This reference will help you understand the capabilities of the API and details the data model it expresses."
-  }
-}

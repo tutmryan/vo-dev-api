@@ -31,7 +31,7 @@ const FeatureList: FeatureItem[] = [
     description: (
       <>
         Provide declarative, efficient data fetching to suit the requirements of your app with the help of explorable{' '}
-        <Link to="/docs/reference">Schema reference</Link>.
+        <Link to="/api-reference">API reference</Link>.
       </>
     ),
   },
