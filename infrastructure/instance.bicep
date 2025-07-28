@@ -1307,9 +1307,6 @@ resource oidcBlobContainerRoleAssignment 'Microsoft.Authorization/roleAssignment
 @description('The ID of the app service plan to host instance app services')
 param appServicePlanId string
 
-@description('App Service Plan zone redundancy')
-param appServiceZoneRedundant bool = false
-
 @description('Common properties for the API app service')
 var apiAppServiceProperties = {
   serverFarmId: appServicePlanId
@@ -1324,7 +1321,6 @@ var apiAppServiceProperties = {
     linuxFxVersion: 'NODE|22-lts'
     minTlsVersion: '1.2'
     vnetRouteAllEnabled: true
-    minimumElasticInstanceCount: appServiceZoneRedundant ? 2 : 1
   }
 }
 
