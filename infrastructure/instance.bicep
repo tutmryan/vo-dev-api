@@ -1324,7 +1324,7 @@ var apiAppServiceProperties = {
     linuxFxVersion: 'NODE|22-lts'
     minTlsVersion: '1.2'
     vnetRouteAllEnabled: true
-    minimumElasticInstanceCount: appServiceZoneRedundant ? 3 : 1
+    minimumElasticInstanceCount: appServiceZoneRedundant ? 2 : 1
   }
 }
 
