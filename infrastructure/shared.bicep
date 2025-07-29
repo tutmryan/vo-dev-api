@@ -109,24 +109,29 @@ var editionToSkuMap = {
   Basic: {
     name: 'BasicPool'
     tier: 'Basic'
+    unit: 'DTU'
   }
   Standard: {
     name: 'StandardPool'
     tier: 'Standard'
+    unit: 'DTU'
   }
   Premium: {
     name: 'PremiumPool'
     tier: 'Premium'
+    unit: 'DTU'
   }
   GP_Gen5: {
     family: 'Gen5'
     name: 'GP_Gen5'
     tier: 'GeneralPurpose'
+    unit: 'VCores'
   }
   BC_Gen5: {
     family: 'Gen5'
     name: 'BC_Gen5'
     tier: 'BusinessCritical'
+    unit: 'VCores'
   }
 }
 
@@ -293,38 +298,44 @@ resource sqlServerElasticPoolAlert 'Microsoft.Insights/metricAlerts@2018-03-01' 
     evaluationFrequency: 'PT1M'
     windowSize: 'PT5M'
     criteria: {
-      allOf: [
-        {
-          threshold: 70
-          name: 'Storage Percent'
-          metricNamespace: 'Microsoft.Sql/servers/elasticpools'
-          metricName: 'storage_percent'
-          operator: 'GreaterThan'
-          timeAggregation: 'Average'
-          skipMetricValidation: false
-          criterionType: 'StaticThresholdCriterion'
-        }
-        {
-          threshold: 70
-          name: 'CPU Percent'
-          metricNamespace: 'Microsoft.Sql/servers/elasticpools'
-          metricName: 'cpu_percent'
-          operator: 'GreaterThan'
-          timeAggregation: 'Average'
-          skipMetricValidation: false
-          criterionType: 'StaticThresholdCriterion'
-        }
-        {
-          threshold: 70
-          name: 'DTU Consumption Percent'
-          metricNamespace: 'Microsoft.Sql/servers/elasticpools'
-          metricName: 'dtu_consumption_percent'
-          operator: 'GreaterThan'
-          timeAggregation: 'Average'
-          skipMetricValidation: false
-          criterionType: 'StaticThresholdCriterion'
-        }
-      ]
+      allOf: concat(
+        [
+          {
+            threshold: 70
+            name: 'Storage Percent'
+            metricNamespace: 'Microsoft.Sql/servers/elasticpools'
+            metricName: 'storage_percent'
+            operator: 'GreaterThan'
+            timeAggregation: 'Average'
+            skipMetricValidation: false
+            criterionType: 'StaticThresholdCriterion'
+          }
+          {
+            threshold: 70
+            name: 'CPU Percent'
+            metricNamespace: 'Microsoft.Sql/servers/elasticpools'
+            metricName: 'cpu_percent'
+            operator: 'GreaterThan'
+            timeAggregation: 'Average'
+            skipMetricValidation: false
+            criterionType: 'StaticThresholdCriterion'
+          }
+        ],
+        editionToSkuMap[elasticPoolEdition].unit == 'DTU'
+          ? [
+              {
+                threshold: 70
+                name: 'DTU Consumption Percent'
+                metricNamespace: 'Microsoft.Sql/servers/elasticpools'
+                metricName: 'dtu_consumption_percent'
+                operator: 'GreaterThan'
+                timeAggregation: 'Average'
+                skipMetricValidation: false
+                criterionType: 'StaticThresholdCriterion'
+              }
+            ]
+          : []
+      )
       'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
     }
     autoMitigate: true
