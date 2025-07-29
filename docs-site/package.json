@@ -5,6 +5,7 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
+    "start:dev": "concurrently -n server,generator -c green,blue \"docusaurus start --host 0.0.0.0 --no-open\" \"nodemon -e graphql -w api-schema.json -x docusaurus graphql-to-doc \"",
     "build": "docusaurus build",
     "build:pr": "npm run generate-graphql-docs && npx --yes cross-env GRAPHQL_ENDPOINT=https://ci-graphql-endpoint ADMIN_URL=https://ci-admin-url PORTAL_URL=https://ci-portal-url npm run docusaurus build",
     "swizzle": "docusaurus swizzle",
@@ -26,7 +27,7 @@
     "@docusaurus/preset-classic": "^3.8.1",
     "@easyops-cn/docusaurus-search-local": "^0.45.0",
     "@graphql-markdown/docusaurus": "^1.24.2",
-    "@graphql-tools/graphql-file-loader": "^8.0.1",
+    "@graphql-tools/json-file-loader": "^8.0.20",
     "@mdx-js/react": "^3.0.1",
     "clsx": "^2.1.1",
     "prism-react-renderer": "^2.3.1",
@@ -38,6 +39,7 @@
     "@docusaurus/tsconfig": "3.4.0",
     "@docusaurus/types": "3.4.0",
     "@graphql-inspector/cli": "^5.0.6",
+    "concurrently": "^9.2.0",
     "dotenv": "^16.4.5",
     "nodemon": "^3.1.4",
     "typescript": "^5.5.2"

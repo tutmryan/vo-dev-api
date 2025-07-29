@@ -72,12 +72,12 @@ const config = {
     [
       '@graphql-markdown/docusaurus',
       {
-        schema: '../src/**/*.graphql',
+        schema: '../src/generated/schema.json',
         rootPath: '.',
         baseURL: 'api-reference',
         linkRoot: '/',
         loaders: {
-          GraphQLFileLoader: '@graphql-tools/graphql-file-loader',
+          JsonFileLoader: '@graphql-tools/json-file-loader',
         },
       },
     ],
