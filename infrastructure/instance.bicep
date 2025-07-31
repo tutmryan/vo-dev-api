@@ -5,6 +5,9 @@ param resourcePrefix string
 @description('The ID of the deployment service principal')
 param deploymentServicePrincipalObjectId string
 
+@description('The ID of the platform management service principal')
+param platformManagementServicePrincipalObjectId string
+
 @description('The number of days to retain data in App Insights')
 @minValue(30)
 @maxValue(365)
@@ -59,6 +62,8 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
     enablePurgeProtection: true
     publicNetworkAccess: 'Disabled'
     accessPolicies: [
+      // DO NOT, under any circumstances, enable reading of Key Vault secrets
+      // Only the API app service should have access, and only via application settings that are keyvault secret references
       {
         tenantId: subscription().tenantId
         objectId: apiAppService.identity.principalId
@@ -85,6 +90,15 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
         permissions: {
           secrets: [
             'list'
+          ]
+        }
+      }
+      {
+        tenantId: subscription().tenantId
+        objectId: platformManagementServicePrincipalObjectId
+        permissions: {
+          secrets: [
+            'write'
           ]
         }
       }

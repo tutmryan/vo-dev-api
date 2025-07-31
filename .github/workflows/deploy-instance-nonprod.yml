@@ -170,6 +170,7 @@ jobs:
           resource-prefix: ${{ env.resource-prefix }}
           deployment-service-principal-object-id: ${{ vars.NON_PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
           vnet-name: ${{ vars.NON_PROD_VNET_NAME }}
+          platform-management-service-principal-object-id: ${{ vars.NON_PROD_PLATFORM_MANAGEMENT_SERVICE_PRINCIPAL_OBJECT_ID }}
 
           key-vault-resource-group-name: ${{ vars.NON_PROD_KEY_VAULT_RESOURCE_GROUP_NAME }}
           key-vault-name: ${{ vars.NON_PROD_KEY_VAULT_NAME }}

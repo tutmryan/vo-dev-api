@@ -33,6 +33,9 @@ inputs:
   vnet-name:
     description: Name of the virtual network
     required: true
+  platform-management-service-principal-object-id:
+    description: Object ID of the platform management service principal
+    required: true
 
   key-vault-resource-group-name:
     description: The resource group which contains the shared key vault used by Verified ID
@@ -354,6 +357,7 @@ runs:
         parameters: >-
           vnetName=${{ inputs.vnet-name }}
           deploymentServicePrincipalObjectId=${{ inputs.deployment-service-principal-object-id }}
+          platformManagementServicePrincipalObjectId=${{ inputs.platform-management-service-principal-object-id }}
           resourcePrefix=${{ inputs.resource-prefix }}
           sqlServerName=${{ inputs.sql-server-name }}
           sharedResourceGroupName=${{ inputs.shared-resource-group-name }}
