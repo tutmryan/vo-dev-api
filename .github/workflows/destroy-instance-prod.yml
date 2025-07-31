@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       instance:
-        description: 'The instance to destroy'
+        description: 'The instance to 💥💣💀DESTROY💀💣💥'
         required: true
 
 concurrency:
