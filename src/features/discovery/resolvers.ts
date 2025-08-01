@@ -1,5 +1,6 @@
 import { demoEnabled, devToolsEnabled, docsUrl, faceCheckEnabled, oidcAuthorityUrl, oidcEnabled, portalUrl, version } from '../../config'
 import type { Resolvers } from '../../generated/graphql'
+import { MonitoredServices, serviceErrors } from '../../services/monitoring'
 
 export const resolvers: Resolvers = {
   Query: {
@@ -11,6 +12,10 @@ export const resolvers: Resolvers = {
         oidcAuthorityUrl: oidcEnabled ? oidcAuthorityUrl : undefined,
       },
       version,
+      serviceFailures: {
+        msGraph: serviceErrors[MonitoredServices.MSGraph],
+        verifiedId: serviceErrors[MonitoredServices.VerifiedID],
+      },
     }),
   },
 }

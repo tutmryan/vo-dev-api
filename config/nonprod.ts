@@ -50,7 +50,7 @@ const config: DeepPartial<Config> = {
     },
   },
   platformManagement: {
-    remoteUrl: 'http://nonprod.management.api.verifiedorchestration.com/graphql',
+    remoteUrl: 'https://nonprod.management.api.verifiedorchestration.com/graphql',
   },
 }
 

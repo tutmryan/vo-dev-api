@@ -191,3 +191,44 @@ grant_type:client_credentials
 2. Run the token acquisition mutation with this header applied.
 3. Receive the limited access token.
 4. Apply `Authorization: Bearer {token}` header using the limited access token for subsequent operations.
+
+## Platform Management API Integration
+
+Some instance configuration is controlled outside of the instance, via the Platform Management API.
+
+This is because:
+
+- Configuration variables and secrets are persisted before deployment in GitHub environments
+- Some configuration, such as feature flags, are controlled by VO staff according to contract terms
+
+As we introduce more self-service of configuration, some configuration can become database-backed and fully self-service within the instance.
+
+Other bits of configuration will remain controlled outside of the instance, e.g.:
+
+- Instance feature flags, use for infrastructure as well as instance runtime behaviour
+
+For now, the Platform Management API is used to manage at least some instance configuration e.g.:
+
+- Configuration required before the instance is first deployed, such as the:
+
+  - first authentication tenant ID
+  - VID authority ID, client ID and secret for instances with customer hosted authorities
+
+- Stuff that we haven't yet made self-service, such as:
+  - Back-office settings, e.g. LogLevel
+  - GraphQL security settings, for which have config support, but we aren't sure when customers might need to alter, and we haven't prioritised making self-service yet
+
+### How it works
+
+- A subset of the Platform Management API supports instance admin (role) authentication.
+- Each instance stitches a subset of the Platform Management API into its GraphQL schema.
+- Schema subset definition is in `config/default.ts` under `platformManagement.transformFilters`.
+- Platform Management API schema must be downloaded at development time, not runtime, since introspection is not supported in production.
+- The `remoteUrl` is defined in the environment-specific config files, e.g. `config/production.ts` and `config/nonprod.ts`.
+- The remote schema is exported from `features/platform-management/index` and stitched into the instance schema in `src/schema.ts`.
+- Authentication is controlled by the Platform Management API, so you do not need to add any shield rules for the stiched schema. Operations are simply passed through to the remote schema.
+
+### How to configure platform management API integration
+
+- After making changes to the schema subset config, run `npm run gql:download-remote` or the VS Code task to update the `features/platform-management/remote-schema.graphql` file.
+- Make sure all the required types, including scalar types, fields and input types are defined, or you may be unable to generate a valid schema subset.

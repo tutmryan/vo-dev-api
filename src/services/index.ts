@@ -54,20 +54,18 @@ function createGraphService() {
   return new GraphService({ tenantName, auth: { tenantId, ...graphCredentials } })
 }
 
-export async function testGraphService(): Promise<boolean> {
+export async function testGraphService(): Promise<string | undefined> {
   const graphService = createGraphService()
 
-  // This service is optional, so if it's not configured, we consider it healthy
-  if (!graphService.isConfigured) return true
+  if (!graphService.isConfigured) return
 
   try {
     await graphService.findUsers({ nameStartsWith: 'a' }, 1)
-    return true
+    return undefined
   } catch (error) {
     logger.error('Test for MS Graph service integration failed', { error })
+    return error instanceof Error ? error.message : String(error)
   }
-
-  return false
 }
 
 export function createVerifiedIdAdminService(logger: BaseContext['logger'], correlationId?: string) {
@@ -90,15 +88,14 @@ export const getPlatformIssuerDid = Lazy(async () => {
   return authority.didModel.did
 })
 
-export async function testVidService(): Promise<boolean> {
+export async function testVidService(): Promise<string | undefined> {
   try {
     await getPlatformIssuerDid()
-    return true
+    return undefined
   } catch (error) {
     logger.error('Test for VID service integration failed', { error })
+    return error instanceof Error ? error.message : String(error)
   }
-
-  return false
 }
 
 function createVerifiedIdRequestService(context: BaseContext) {

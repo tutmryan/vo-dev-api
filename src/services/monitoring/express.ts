@@ -1,12 +1,12 @@
 import type { Express } from 'express'
-import { getServiceStatus, monitoredServices } from '.'
+import { MonitoredServices, serviceErrors } from '.'
 import { logger } from '../../logger'
 
 export async function addServiceHealthEndpoints(app: Express): Promise<void> {
   // add service health endpoints
-  Object.values(monitoredServices).forEach((service) => {
+  Object.values(MonitoredServices).forEach((service) => {
     app.get(`/health/services/${service}`, (req, res) => {
-      if (getServiceStatus(service)) {
+      if (serviceErrors[service] === undefined) {
         res.status(200).send('OK').end()
       } else {
         res.status(503).send('Not OK').end()

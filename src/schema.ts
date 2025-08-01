@@ -65,7 +65,8 @@ export default function () {
   const localSchema = buildLocalSchema()
   const platformManagementRemoteSchema = buildRemoteSchema()
   if (!platformManagementRemoteSchema) logger.warn('Platform Management remote schema is not configured in this environment')
-  return platformManagementRemoteSchema ? stitchSchemas({ subschemas: [localSchema, platformManagementRemoteSchema] }) : localSchema
+  // when stitching schemas, apply the local schema last to ensure that scalar resolvers (validations) defined in the local schema take precedence
+  return platformManagementRemoteSchema ? stitchSchemas({ subschemas: [platformManagementRemoteSchema, localSchema] }) : localSchema
 }
 
 function requireExplicitResolversForScalars(schema: GraphQLSchema) {

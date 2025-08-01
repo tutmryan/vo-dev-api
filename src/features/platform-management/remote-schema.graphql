@@ -8,6 +8,15 @@ type Query {
 type Mutation {
   """Updates the configuration of an instance."""
   updateInstanceConfiguration(identifier: String!, configuration: InstanceConfigurationInput!): Instance!
+
+  """Saves the MS Graph client configuration of an instance."""
+  saveInstanceMsGraphClient(identifier: String!, graphClient: ClientCredentialsInput!): Instance!
+
+  """Deletes the MS Graph client of an instance."""
+  deleteInstanceMsGraphClient(identifier: String!): Instance!
+
+  """Updates the customer hosted authority client of an instance."""
+  updateInstanceAuthorityClient(identifier: String!, authorityClient: ClientCredentialsInput!): Instance!
 }
 
 """An instances of the Verified Orchestration platform"""
@@ -17,8 +26,34 @@ type Instance {
   """
   identifier: String!
 
+  """
+  The type of authority hosting:
+  - VO hosted
+  - VO hosted with customer DNS
+  - Customer hosted, requiring an authority client and authority ID to be configured.
+  """
+  authorityHosting: AuthorityHosting!
+
   """The current instance configuration."""
   configuration: InstanceConfiguration
+}
+
+"""The type of VC authority hosting."""
+enum AuthorityHosting {
+  VoHosted
+  VoHostedCustomerDns
+  CustomerHosted
+}
+
+"""
+Client credentials input, e.g. for a MS Graph client or VC Authority client
+"""
+input ClientCredentialsInput {
+  """The client ID."""
+  clientId: UUID!
+
+  """The client secret."""
+  clientSecret: String!
 }
 
 """The security settings for GraphQL operations."""
@@ -92,6 +127,11 @@ type InstanceConfiguration {
   """The GraphQL security settings for the instance."""
   graphQLSecuritySettings: GraphQLSecuritySettings
 }
+
+"""
+A field whose value is a generic Universally Unique Identifier: https://en.wikipedia.org/wiki/Universally_unique_identifier.
+"""
+scalar UUID
 
 """
 The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).

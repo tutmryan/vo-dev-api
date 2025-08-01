@@ -47,6 +47,16 @@ type FeatureUrls {
 }
 
 """
+The failures that occurred while trying to connect to external services.
+
+Note: Services are checked every 5 minutes, so this may not reflect the current state of the service.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type ServiceFailures {
+  msGraph: String
+  verifiedId: String
+}
+
+"""
 Returns discoverable information about this API instance
 """ # eslint-disable-next-line @graphql-eslint/strict-id-in-types
 type Discovery {
@@ -62,6 +72,10 @@ type Discovery {
   Returns the version of the API.
   """
   version: String!
+  """
+  Returns the failures that occurred while trying to connect to external services.
+  """
+  serviceFailures: ServiceFailures!
 }
 
 extend type Query {

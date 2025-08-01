@@ -118,11 +118,16 @@ const config: DeepPartial<Config> = {
   },
   platformManagement: {
     transformFilters: {
-      types: ['String', 'Int', 'JSONObject'],
+      types: ['String', 'Int', 'JSONObject', 'UUID', 'AuthorityHosting'],
       fields: {
-        Query: ['instanceByIdentifier'],
-        Mutation: ['updateInstanceConfiguration'],
-        Instance: ['identifier', 'configuration'],
+        Query: ['instanceByIdentifier', 'testMsGraphClient', 'testAuthorityClient'],
+        Mutation: [
+          'updateInstanceConfiguration',
+          'saveInstanceMsGraphClient',
+          'deleteInstanceMsGraphClient',
+          'updateInstanceAuthorityClient',
+        ],
+        Instance: ['identifier', 'authorityHosting', 'configuration'],
         InstanceConfiguration: [
           'additionalAuthTenantIds',
           'appOidLabels',
@@ -141,6 +146,7 @@ const config: DeepPartial<Config> = {
           'identityIssuerLabels',
         ],
         GraphQLSecuritySettingsInput: ['maxAliases', 'maxDirectives', 'maxDepth', 'maxTokens'],
+        ClientCredentialsInput: ['clientId', 'clientSecret'],
       },
     },
   },

@@ -25,7 +25,7 @@ import type { logger } from '../logger'
 import { ONE_MINUTE_TTL } from '../redis/cache'
 import type { AsyncIssuanceService } from '../services/async-issuance-service'
 import type { CommunicationsService } from '../services/communications-service'
-import type { ServiceState } from '../services/monitoring'
+import type { ServiceErrors } from '../services/monitoring'
 import { monitorServicesJobHandler, monitorServicesResultHandler } from '../services/monitoring/job'
 import type { VerifiedIdAdminService } from '../services/verified-id/admin'
 
@@ -56,7 +56,7 @@ export type JobConfig<TData = unknown> = {
   handler: JobHandler<TData>
   options?: JobsOptions
   schedule?: JobSchedule
-  scheduledJobResultHandler?: JobResultHandler<ServiceState>
+  scheduledJobResultHandler?: JobResultHandler<ServiceErrors>
   resultCacheTtl?: number
   disableImplicitTransaction?: boolean
 }

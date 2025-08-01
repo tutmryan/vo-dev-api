@@ -70,7 +70,7 @@ const config: DeepPartial<Config> = {
     credentials: {},
   },
   platformManagement: {
-    remoteUrl: 'http://example.com/graphql',
+    remoteUrl: 'https://example.com/graphql',
   },
 }
 

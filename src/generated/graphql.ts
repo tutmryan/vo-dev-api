@@ -601,6 +601,13 @@ export type Authority = {
   name: Scalars['String']['output'];
 };
 
+/** The type of VC authority hosting. */
+export enum AuthorityHosting {
+  CustomerHosted = 'CustomerHosted',
+  VoHosted = 'VoHosted',
+  VoHostedCustomerDns = 'VoHostedCustomerDns'
+}
+
 /** The background job active events are published as the jobs are waiting to be processed. */
 export type BackgroundJobActiveEvent = {
   __typename?: 'BackgroundJobActiveEvent';
@@ -769,6 +776,14 @@ export type ClaimValidationInput =
   |  { list?: never; number: NumberValidationInput; regex?: never; text?: never; }
   |  { list?: never; number?: never; regex: RegexValidationInput; text?: never; }
   |  { list?: never; number?: never; regex?: never; text: TextValidationInput; };
+
+/** Client credentials input, e.g. for a MS Graph client or VC Authority client */
+export type ClientCredentialsInput = {
+  /** The client ID. */
+  clientId: Scalars['UUID']['input'];
+  /** The client secret. */
+  clientSecret: Scalars['String']['input'];
+};
 
 /** Record of a communication sent to a recipient. */
 export type Communication = {
@@ -1435,6 +1450,8 @@ export type Discovery = {
   __typename?: 'Discovery';
   /** Returns the features enabled for this API instance. */
   features: Features;
+  /** Returns the failures that occurred while trying to connect to external services. */
+  serviceFailures: ServiceFailures;
   /** Returns the URLs for various features. */
   urls: FeatureUrls;
   /** Returns the version of the API. */
@@ -1695,6 +1712,13 @@ export type ImportInput = {
 /** An instances of the Verified Orchestration platform */
 export type Instance = {
   __typename?: 'Instance';
+  /**
+   * The type of authority hosting:
+   * - VO hosted
+   * - VO hosted with customer DNS
+   * - Customer hosted, requiring an authority client and authority ID to be configured.
+   */
+  authorityHosting: AuthorityHosting;
   /** The current instance configuration. */
   configuration?: Maybe<InstanceConfiguration>;
   /** The unique identifier of the instance, forming part of the URL, for example `company.sandbox` or `company`. */
@@ -2178,6 +2202,8 @@ export type Mutation = {
   deleteContract?: Maybe<Scalars['Void']['output']>;
   /** Deletes one or more identities by ID */
   deleteIdentities?: Maybe<Scalars['Void']['output']>;
+  /** Deletes the MS Graph client of an instance. */
+  deleteInstanceMsGraphClient: Instance;
   /** Deletes an OIDC claim mapping */
   deleteOidcClaimMapping: OidcClaimMapping;
   /** Deletes an OIDC client */
@@ -2230,6 +2256,8 @@ export type Mutation = {
   saveConciergeBranding: Branding;
   /** Creates or updates an identity based on its issuer and identifier */
   saveIdentity: Identity;
+  /** Saves the MS Graph client configuration of an instance. */
+  saveInstanceMsGraphClient: Instance;
   /**
    * Sends a verification code to the issuee.
    *
@@ -2250,6 +2278,8 @@ export type Mutation = {
   updateAsyncIssuanceContact?: Maybe<AsyncIssuanceContact>;
   /** Updates an existing contract */
   updateContract: Contract;
+  /** Updates the customer hosted authority client of an instance. */
+  updateInstanceAuthorityClient: Instance;
   /** Updates the configuration of an instance. */
   updateInstanceConfiguration: Instance;
   /** Updates an existing OIDC claim mapping */
@@ -2410,6 +2440,11 @@ export type MutationDeleteIdentitiesArgs = {
 };
 
 
+export type MutationDeleteInstanceMsGraphClientArgs = {
+  identifier: Scalars['String']['input'];
+};
+
+
 export type MutationDeleteOidcClaimMappingArgs = {
   id: Scalars['ID']['input'];
 };
@@ -2506,6 +2541,12 @@ export type MutationSaveIdentityArgs = {
 };
 
 
+export type MutationSaveInstanceMsGraphClientArgs = {
+  graphClient: ClientCredentialsInput;
+  identifier: Scalars['String']['input'];
+};
+
+
 export type MutationSendAsyncIssuanceVerificationArgs = {
   asyncIssuanceRequestId: Scalars['UUID']['input'];
 };
@@ -2531,6 +2572,12 @@ export type MutationUpdateAsyncIssuanceContactArgs = {
 export type MutationUpdateContractArgs = {
   id: Scalars['ID']['input'];
   input: ContractInput;
+};
+
+
+export type MutationUpdateInstanceAuthorityClientArgs = {
+  authorityClient: ClientCredentialsInput;
+  identifier: Scalars['String']['input'];
 };
 
 
@@ -4000,6 +4047,17 @@ export type SendAsyncIssuanceVerificationResponse = {
   method?: Maybe<ContactMethod>;
 };
 
+/**
+ * The failures that occurred while trying to connect to external services.
+ *
+ * Note: Services are checked every 5 minutes, so this may not reflect the current state of the service.
+ */
+export type ServiceFailures = {
+  __typename?: 'ServiceFailures';
+  msGraph?: Maybe<Scalars['String']['output']>;
+  verifiedId?: Maybe<Scalars['String']['output']>;
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   /** Returns event data when the background job progresses from being queued to completed or failed */
@@ -5204,6 +5262,7 @@ export type ResolversTypes = {
   AsyncIssuanceTokenResponse: ResolverTypeWrapper<AsyncIssuanceTokenResponse>;
   AuthnRequestCredential: AuthnRequestCredential;
   Authority: ResolverTypeWrapper<Authority>;
+  AuthorityHosting: AuthorityHosting;
   BackgroundJobActiveEvent: ResolverTypeWrapper<BackgroundJobActiveEvent>;
   BackgroundJobCompletedEvent: ResolverTypeWrapper<BackgroundJobCompletedEvent>;
   BackgroundJobErrorEvent: ResolverTypeWrapper<BackgroundJobErrorEvent>;
@@ -5219,6 +5278,7 @@ export type ResolversTypes = {
   ClaimType: ClaimType;
   ClaimValidation: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['ClaimValidation']>;
   ClaimValidationInput: ClaimValidationInput;
+  ClientCredentialsInput: ClientCredentialsInput;
   Communication: ResolverTypeWrapper<CommunicationEntity>;
   CommunicationOrderBy: CommunicationOrderBy;
   CommunicationPurpose: CommunicationPurpose;
@@ -5373,6 +5433,7 @@ export type ResolversTypes = {
   ScopedClaimMapping: ResolverTypeWrapper<ScopedClaimMapping>;
   ScopedClaimMappingInput: ScopedClaimMappingInput;
   SendAsyncIssuanceVerificationResponse: ResolverTypeWrapper<SendAsyncIssuanceVerificationResponse>;
+  ServiceFailures: ResolverTypeWrapper<ServiceFailures>;
   Subscription: ResolverTypeWrapper<{}>;
   Template: ResolverTypeWrapper<TemplateEntity>;
   TemplateDisplayClaim: ResolverTypeWrapper<Omit<TemplateDisplayClaim, 'validation'> & { validation?: Maybe<ResolversTypes['ClaimValidation']> }>;
@@ -5447,6 +5508,7 @@ export type ResolversParentTypes = {
   ClaimConstraint: ClaimConstraint;
   ClaimValidation: ResolversUnionTypes<ResolversParentTypes>['ClaimValidation'];
   ClaimValidationInput: ClaimValidationInput;
+  ClientCredentialsInput: ClientCredentialsInput;
   Communication: CommunicationEntity;
   CommunicationWhere: CommunicationWhere;
   ConciergeBrandingInput: ConciergeBrandingInput;
@@ -5579,6 +5641,7 @@ export type ResolversParentTypes = {
   ScopedClaimMapping: ScopedClaimMapping;
   ScopedClaimMappingInput: ScopedClaimMappingInput;
   SendAsyncIssuanceVerificationResponse: SendAsyncIssuanceVerificationResponse;
+  ServiceFailures: ServiceFailures;
   Subscription: {};
   Template: TemplateEntity;
   TemplateDisplayClaim: Omit<TemplateDisplayClaim, 'validation'> & { validation?: Maybe<ResolversParentTypes['ClaimValidation']> };
@@ -5906,6 +5969,7 @@ export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversT
 
 export type DiscoveryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Discovery'] = ResolversParentTypes['Discovery']> = {
   features?: Resolver<ResolversTypes['Features'], ParentType, ContextType>;
+  serviceFailures?: Resolver<ResolversTypes['ServiceFailures'], ParentType, ContextType>;
   urls?: Resolver<ResolversTypes['FeatureUrls'], ParentType, ContextType>;
   version?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -5979,6 +6043,7 @@ export type IdentityIssuerResolvers<ContextType = GraphQLContext, ParentType ext
 };
 
 export type InstanceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Instance'] = ResolversParentTypes['Instance']> = {
+  authorityHosting?: Resolver<ResolversTypes['AuthorityHosting'], ParentType, ContextType>;
   configuration?: Resolver<Maybe<ResolversTypes['InstanceConfiguration']>, ParentType, ContextType>;
   identifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -6082,6 +6147,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   deleteConciergeBranding?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
   deleteIdentities?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteIdentitiesArgs, 'ids'>>;
+  deleteInstanceMsGraphClient?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationDeleteInstanceMsGraphClientArgs, 'identifier'>>;
   deleteOidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<MutationDeleteOidcClaimMappingArgs, 'id'>>;
   deleteOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientArgs, 'id'>>;
   deleteOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientResourceArgs, 'clientId' | 'resourceId'>>;
@@ -6102,11 +6168,13 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   revokeWalletIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeWalletIssuancesArgs, 'walletId'>>;
   saveConciergeBranding?: Resolver<ResolversTypes['Branding'], ParentType, ContextType, RequireFields<MutationSaveConciergeBrandingArgs, 'input'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
+  saveInstanceMsGraphClient?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationSaveInstanceMsGraphClientArgs, 'graphClient' | 'identifier'>>;
   sendAsyncIssuanceVerification?: Resolver<ResolversTypes['SendAsyncIssuanceVerificationResponse'], ParentType, ContextType, RequireFields<MutationSendAsyncIssuanceVerificationArgs, 'asyncIssuanceRequestId'>>;
   suspendPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationSuspendPartnerArgs, 'id'>>;
   updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
   updateAsyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<MutationUpdateAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
+  updateInstanceAuthorityClient?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationUpdateInstanceAuthorityClientArgs, 'authorityClient' | 'identifier'>>;
   updateInstanceConfiguration?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationUpdateInstanceConfigurationArgs, 'configuration' | 'identifier'>>;
   updateOidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<MutationUpdateOidcClaimMappingArgs, 'id' | 'input'>>;
   updateOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientArgs, 'id' | 'input'>>;
@@ -6441,6 +6509,12 @@ export type SendAsyncIssuanceVerificationResponseResolvers<ContextType = GraphQL
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type ServiceFailuresResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ServiceFailures'] = ResolversParentTypes['ServiceFailures']> = {
+  msGraph?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  verifiedId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type SubscriptionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
   backgroundJobEvent?: SubscriptionResolver<ResolversTypes['BackgroundJobEventData'], "backgroundJobEvent", ParentType, ContextType, Partial<SubscriptionBackgroundJobEventArgs>>;
   issuanceEvent?: SubscriptionResolver<ResolversTypes['IssuanceEventData'], "issuanceEvent", ParentType, ContextType, Partial<SubscriptionIssuanceEventArgs>>;
@@ -6672,6 +6746,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   RequestedCredential?: RequestedCredentialResolvers<ContextType>;
   ScopedClaimMapping?: ScopedClaimMappingResolvers<ContextType>;
   SendAsyncIssuanceVerificationResponse?: SendAsyncIssuanceVerificationResponseResolvers<ContextType>;
+  ServiceFailures?: ServiceFailuresResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
   Template?: TemplateResolvers<ContextType>;
   TemplateDisplayClaim?: TemplateDisplayClaimResolvers<ContextType>;
