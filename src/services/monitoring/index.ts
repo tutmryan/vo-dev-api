@@ -19,6 +19,7 @@ export async function testServices(): Promise<ServiceErrors> {
   }
 }
 
-export function updateServiceState(newState: ServiceErrors): void {
-  Object.assign(serviceErrors, newState)
+export function updateServiceState(newState: Partial<ServiceErrors>): void {
+  serviceErrors[MonitoredServices.MSGraph] = newState[MonitoredServices.MSGraph] ?? undefined
+  serviceErrors[MonitoredServices.VerifiedID] = newState[MonitoredServices.VerifiedID] ?? undefined
 }
