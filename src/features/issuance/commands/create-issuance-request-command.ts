@@ -145,6 +145,11 @@ export async function CreateIssuanceRequestCommand(
   }
   claims = { ...claims, ...standardClaims }
 
+  // set or override the callback when defined in limitedAccessData (i.e. when it was provided as input to limited access token acquisition)
+  if (user.limitedAccessData?.callback) {
+    rest.callback = user.limitedAccessData.callback
+  }
+
   // create the issuance request
   const issuanceRequest: IssuanceRequest = {
     claims,

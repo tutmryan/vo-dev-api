@@ -91,6 +91,11 @@ export async function CreatePresentationRequestCommand(
     }
   })
 
+  // set or override the callback when defined in limitedAccessData (i.e. when it was provided as input to limited access token acquisition)
+  if (user.limitedAccessData?.callback) {
+    presentationRequest.callback = user.limitedAccessData.callback
+  }
+
   // send it
   const response = await verifiedIdRequest.createPresentationRequest({
     ...presentationRequest,
@@ -108,6 +113,7 @@ export async function CreatePresentationRequestCommand(
     includeReceipt: presentationRequest.includeReceipt ?? false,
     ...context,
   }
+
   await requestDetailsCache().set(response.requestId, JSON.stringify(requestDetails))
 
   return response

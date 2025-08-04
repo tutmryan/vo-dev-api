@@ -73,6 +73,8 @@ export type AcquireLimitedAccessTokenInput = {
    *   - The app acquiring the token must be granted the `VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations` role
    */
   allowAnonymousPresentation?: InputMaybe<Scalars['Boolean']['input']>;
+  /** Defines the callback for credential issuance or presentation operations made via the limited access token. */
+  callback?: InputMaybe<Callback>;
   /**
    * The ID of the (issuee) identity to which access will be limited.
    *

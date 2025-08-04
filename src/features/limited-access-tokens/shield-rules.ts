@@ -24,6 +24,8 @@ export const hasTokenAcquisitionRoleRequiringIdentityAccess = hasAnyRoleRuleWith
   LimitedAccessTokenAcquisitionRoles.listContracts,
 )
 
+const anonymousPresentationAllowedKeys = new Set(['allowAnonymousPresentation', 'requestableCredentials', 'callback']) // when allowAnonymousPresentation is true, only these keys are allowed in the input
+
 // validate input to acquire limited access token
 export const isValidAcquireLimitedAccessTokenRequest = rule('isValidAcquireLimitedAccessTokenRequest', { cache: 'strict' })(async (
   _,
@@ -37,7 +39,8 @@ export const isValidAcquireLimitedAccessTokenRequest = rule('isValidAcquireLimit
       input.requestableCredentials && input.requestableCredentials.length > 0,
       'requestableCredentials are required for limited presentation access',
     )
-    invariant(Object.keys(input).length === 2, 'allowAnonymousPresentation can only be used with requestableCredentials input')
+    const allInputKeysAllowed = Object.keys(input).every((key) => anonymousPresentationAllowedKeys.has(key))
+    invariant(allInputKeysAllowed, 'allowAnonymousPresentation can only be used with requestableCredentials and callback input')
   }
   if (input.issuableContractIds && input.issuableContractIds.length > 0) {
     if (!user.roles.includes(LimitedAccessTokenAcquisitionRoles.issuance)) return false

@@ -145,10 +145,16 @@ type AcquireLimitedAccessTokenInput = {
   issuableContractIds?: string[]
   listContracts?: boolean
   requestableCredentials?: RequestedCredentialSpecificationInput[]
+  callback?: Callback
 }
 type RequestedCredentialSpecificationInput = {
   acceptedIssuers?: string[]
   credentialType: string
+}
+type Callback = {
+  headers?: Record<string, string>
+  state?: any
+  url: string
 }
 type LimitedAccessToken = {
   expires: string

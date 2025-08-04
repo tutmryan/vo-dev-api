@@ -56,6 +56,10 @@ input AcquireLimitedAccessTokenInput {
     - Note: issuances and presentations of the contracts can be queried if a matching `identityId` is also supplied as criteria
   """
   listContracts: Boolean
+  """
+  Defines the callback for credential issuance or presentation operations made via the limited access token.
+  """
+  callback: Callback
 }
 
 """

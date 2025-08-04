@@ -51,6 +51,10 @@ Presentation tokens require:
 - a reference to the identity to which access (presentation and related data) will be limited
 - a list of the credentials that can be requested
 
+Note:
+
+- the presentation `callback` can optionally be defined in the limited access token input by the secure backend API, so that the client application does not need to provide it and it cannot be tampered with.
+
 ### Anonymous presentation tokens
 
 Anonymous presentation tokens require:
@@ -85,6 +89,12 @@ const variables: AcquireLimitedAccessTokenInput = {
   input: {
     identityId: savedIdentity.id,
     requestableCredentials: [{ credentialType: 'VerifiedEmployee' }],
+    callback: {
+      url: 'https://secure-backend.example/presentation/callback',
+      headers: {
+        Authorization: 'Bearer {token}',
+      },
+    },
   },
 }
 ```
