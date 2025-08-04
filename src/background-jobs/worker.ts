@@ -41,10 +41,10 @@ async function executeJob(job: Job<JobPayload>, jobConfig: JobConfig, entityMana
   const started = Date.now()
   const logMetadata = jobLogMetadata({ job, user: context.user })
 
-  logger.info(`Running handler for job ${name} as ${context.user.name}`, logMetadata)
+  logger.verbose(`Running handler for job ${name} as ${context.user.name}`, logMetadata)
   try {
     const result = await jobConfig.handler(context, payload)
-    logger.info(`Handler for job ${name} completed in ${Date.now() - started}ms`, logMetadata)
+    logger.verbose(`Handler for job ${name} completed in ${Date.now() - started}ms`, logMetadata)
     return result
   } catch (error) {
     logger.error(`Handler for job ${name} failed after ${Date.now() - started}ms`, { error, ...logMetadata })
