@@ -3,6 +3,20 @@
 type Query {
   """Returns a single instance by identifier."""
   instanceByIdentifier(identifier: String!): Instance!
+
+  """
+  Tests an MS Graph client by attempting to run a top(1) User query.
+  
+  Returns an error if the test fails.
+  """
+  testMsGraphClient(identifier: String!, graphClient: ClientCredentialsInput!): Void
+
+  """
+  Tests an authority client by attempting to read the specified authority.
+  
+  Returns an error if the test fails.
+  """
+  testAuthorityClient(identifier: String!, authorityClient: ClientCredentialsInput!): Authority!
 }
 
 type Mutation {
@@ -128,6 +142,18 @@ type InstanceConfiguration {
   graphQLSecuritySettings: GraphQLSecuritySettings
 }
 
+"""A configured authority or verifiable credential service instance"""
+type Authority
+
+"""DID information for the Web model"""
+type WebDidModel
+
+"""Status of the DID docs"""
+enum DidDocumentStatus {
+  submitted
+  published
+}
+
 """
 A field whose value is a generic Universally Unique Identifier: https://en.wikipedia.org/wiki/Universally_unique_identifier.
 """
@@ -137,3 +163,6 @@ scalar UUID
 The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSONObject
+
+"""Represents NULL values"""
+scalar Void

@@ -118,7 +118,20 @@ const config: DeepPartial<Config> = {
   },
   platformManagement: {
     transformFilters: {
-      types: ['String', 'Int', 'JSONObject', 'UUID', 'AuthorityHosting'],
+      types: [
+        'ID',
+        'String',
+        'Int',
+        'Boolean',
+        'JSONObject',
+        'UUID',
+        'Void',
+        'Url',
+        'DidDocumentStatus',
+        'AuthorityHosting',
+        'Authority',
+        'WebDidModel',
+      ],
       fields: {
         Query: ['instanceByIdentifier', 'testMsGraphClient', 'testAuthorityClient'],
         Mutation: [
