@@ -307,45 +307,53 @@ export function routes(app: Express, route: string): void {
 
   // Error-handling middleware to intercept errors passed to next(err)
   // so that a nice error page can be rendered
-  app.use(async (err: any, req: any, res: any, _next: any) => {
+  app.use(route, async (err: any, req: any, res: any, next: any) => {
     logger.error('OIDC provider route error', { error: err })
 
-    const { errors } = await oidcProviderModule()
-    const provider = getProvider()
-    const { uid, prompt, params, session } = await provider.interactionDetails(req, res)
+    try {
+      const { errors } = await oidcProviderModule()
+      const provider = getProvider()
+      const { uid, prompt, params, session } = await provider.interactionDetails(req, res)
 
-    const client = await provider.Client.find(params.client_id as string)
-    invariant(client, 'client not found')
+      const client = await provider.Client.find(params.client_id as string)
+      invariant(client, 'client not found')
 
-    const clientEntity = getClient(client.clientId)
-    const { logo, backgroundColor, backgroundImage } = clientEntity
+      const clientEntity = getClient(client.clientId)
+      const { logo, backgroundColor, backgroundImage } = clientEntity
 
-    if (err instanceof errors.OIDCProviderError) {
-      // OIDCProviderError is a class of errors that all the common errors the OIDC provider can throw inherit from.
-      // These errors include setting the status code for the response, hence we can use the status code from the error.
-      res.status(err.statusCode)
-    } else {
-      // Safe to assume this is a server error
+      if (err instanceof errors.OIDCProviderError) {
+        // OIDCProviderError is a class of errors that all the common errors the OIDC provider can throw inherit from.
+        // These errors include setting the status code for the response, hence we can use the status code from the error.
+        res.status(err.statusCode)
+      } else {
+        // Safe to assume this is a server error
+        res.status(500)
+      }
+
+      return res.render('error', {
+        client,
+        uid,
+        details: prompt.details,
+        params,
+        title: 'Unrecoverable error',
+        voLogoUrl,
+        logoUrl: logo,
+        backgroundColor,
+        backgroundImageUrl: backgroundImage,
+        showDebug,
+        session: session ? debug(session) : undefined,
+        dbg: {
+          params: debug(params),
+          prompt: debug(prompt),
+        },
+        error: showDebug ? err : undefined,
+      })
+    } catch (error) {
+      // If we can't render the error page, just send a generic error response
+      logger.error('OIDC provider route error while rendering error page', { error })
       res.status(500)
+      // Call the next error handler to fall back to the default OIDC provider error handler
+      next(error)
     }
-
-    return res.render('error', {
-      client,
-      uid,
-      details: prompt.details,
-      params,
-      title: 'Unrecoverable error',
-      voLogoUrl,
-      logoUrl: logo,
-      backgroundColor,
-      backgroundImageUrl: backgroundImage,
-      showDebug,
-      session: session ? debug(session) : undefined,
-      dbg: {
-        params: debug(params),
-        prompt: debug(prompt),
-      },
-      error: showDebug ? err : undefined,
-    })
   })
 }
