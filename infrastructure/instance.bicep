@@ -1360,6 +1360,29 @@ resource apiAppServiceSlot 'Microsoft.Web/sites/slots@2022-03-01' = {
   properties: apiAppServiceProperties
 }
 
+resource apiAppDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = if (nodeEnv == 'nonprod') {
+  name: 'WebAppServiceLogs'
+  scope: apiAppService
+  properties: {
+    workspaceId: logAnalytics.id
+    logs: [
+      {
+        category: 'AppServiceConsoleLogs'
+        enabled: true
+      }
+      {
+        category: 'AppServiceAppLogs'
+        enabled: true
+      }
+      {
+        category: 'AppServicePlatformLogs'
+        enabled: true
+      }
+    ]
+    metrics: []
+  }
+}
+
 output apiAppServicePrincipalId string = apiAppService.identity.principalId
 output apiAppServiceName string = apiAppService.name
 output apiAppServiceDefaultHostname string = apiAppService.properties.defaultHostName
