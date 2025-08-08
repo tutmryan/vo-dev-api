@@ -188,6 +188,7 @@
   "overrides": {
     "@azure/identity": "^4.3.0",
     "braces": "^3.0.3",
+    "tmp": "^0.2.4",
     "ws": "^8.17.1"
   }
 }

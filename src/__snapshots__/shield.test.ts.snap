@@ -1281,6 +1281,10 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual"
         }
       ]
+    },
+    "testServices": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
     }
   },
   "Subscription": {

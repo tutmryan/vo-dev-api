@@ -219,6 +219,7 @@ export const rules: ShieldSchema<Resolvers> = {
     revokeIdentityIssuances: or(isCredentialAdminUser, isContractAdminApp),
     revokeUserIssuances: or(isCredentialAdminUser, isContractAdminApp),
     revokeWalletIssuances: or(isCredentialAdminUser, isContractAdminApp),
+    testServices: isInstanceAdminUser,
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
   Subscription: {

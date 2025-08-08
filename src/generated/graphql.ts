@@ -1441,7 +1441,7 @@ export type CredentialTypesWhere = {
   includeTemplateTypes?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
-/** status of the DID */
+/** Status of the DID docs */
 export enum DidDocumentStatus {
   Published = 'published',
   Submitted = 'submitted'
@@ -2268,6 +2268,11 @@ export type Mutation = {
   sendAsyncIssuanceVerification: SendAsyncIssuanceVerificationResponse;
   /** Suspends a partner */
   suspendPartner: Partner;
+  /**
+   * Runs a test of external services to update the serviceFailures field.
+   * This is useful for verification after correcting service integration configuration.
+   */
+  testServices: Discovery;
   /** Updates an existing pending approval request. */
   updateApprovalRequest?: Maybe<Scalars['Void']['output']>;
   /**
@@ -3567,6 +3572,18 @@ export type Query = {
   template: Template;
   /** Returns the combined data of a template and its ancestors */
   templateCombinedData: TemplateParentData;
+  /**
+   * Tests an authority client by attempting to read the specified authority.
+   *
+   * Returns an error if the test fails.
+   */
+  testAuthorityClient: Authority;
+  /**
+   * Tests an MS Graph client by attempting to run a top(1) User query.
+   *
+   * Returns an error if the test fails.
+   */
+  testMsGraphClient?: Maybe<Scalars['Void']['output']>;
   /** Returns a user by ID */
   user: User;
   /** Verifies the tokens in a presentation's receipt and returns the validity of each. */
@@ -3855,6 +3872,18 @@ export type QueryTemplateArgs = {
 
 export type QueryTemplateCombinedDataArgs = {
   templateId: Scalars['ID']['input'];
+};
+
+
+export type QueryTestAuthorityClientArgs = {
+  authorityClient: ClientCredentialsInput;
+  identifier: Scalars['String']['input'];
+};
+
+
+export type QueryTestMsGraphClientArgs = {
+  graphClient: ClientCredentialsInput;
+  identifier: Scalars['String']['input'];
 };
 
 
@@ -6173,6 +6202,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   saveInstanceMsGraphClient?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationSaveInstanceMsGraphClientArgs, 'graphClient' | 'identifier'>>;
   sendAsyncIssuanceVerification?: Resolver<ResolversTypes['SendAsyncIssuanceVerificationResponse'], ParentType, ContextType, RequireFields<MutationSendAsyncIssuanceVerificationArgs, 'asyncIssuanceRequestId'>>;
   suspendPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationSuspendPartnerArgs, 'id'>>;
+  testServices?: Resolver<ResolversTypes['Discovery'], ParentType, ContextType>;
   updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
   updateAsyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<MutationUpdateAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
@@ -6433,6 +6463,8 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   presentationCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryPresentationCountByUserArgs>>;
   template?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<QueryTemplateArgs, 'id'>>;
   templateCombinedData?: Resolver<ResolversTypes['TemplateParentData'], ParentType, ContextType, RequireFields<QueryTemplateCombinedDataArgs, 'templateId'>>;
+  testAuthorityClient?: Resolver<ResolversTypes['Authority'], ParentType, ContextType, RequireFields<QueryTestAuthorityClientArgs, 'authorityClient' | 'identifier'>>;
+  testMsGraphClient?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<QueryTestMsGraphClientArgs, 'graphClient' | 'identifier'>>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType, RequireFields<QueryUserArgs, 'id'>>;
   verifyPresentation?: Resolver<ResolversTypes['VerifyPresentationResult'], ParentType, ContextType, RequireFields<QueryVerifyPresentationArgs, 'presentedAt' | 'receipt'>>;
   wallet?: Resolver<Maybe<ResolversTypes['Wallet']>, ParentType, ContextType, RequireFields<QueryWalletArgs, 'id'>>;

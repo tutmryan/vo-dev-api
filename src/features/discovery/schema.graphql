@@ -81,3 +81,11 @@ type Discovery {
 extend type Query {
   discovery: Discovery!
 }
+
+extend type Mutation {
+  """
+  Runs a test of external services to update the serviceFailures field.
+  This is useful for verification after correcting service integration configuration.
+  """
+  testServices: Discovery!
+}
