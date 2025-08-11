@@ -15,7 +15,7 @@ import { pubsub, subscribeToCachedEvents } from '../redis/pubsub'
 import { Lazy } from '../util/lazy'
 import { getJobConfig } from './jobs'
 
-const BACKGROUND_JOB_TOPIC = 'backgroundJob'
+export const BACKGROUND_JOB_TOPIC = 'backgroundJob'
 const BACKGROUND_JOB_EVENTS_TTL = ONE_MINUTE_TTL * 5 // 5 minutes
 const finishedBackgroundJobEvents = Lazy(() => newCacheSection('finishedBackgroundJobEvents', BACKGROUND_JOB_EVENTS_TTL))
 

@@ -1,6 +1,8 @@
 import type { ServiceErrors } from '.'
 import { testServices, updateServiceState } from '.'
-import type { JobHandler, JobResultHandler } from '../../background-jobs/jobs'
+import type { JobResultHandler } from '../../background-jobs/jobs'
 
-export const monitorServicesJobHandler: JobHandler = testServices
-export const monitorServicesResultHandler: JobResultHandler<Partial<ServiceErrors>> = async (result) => updateServiceState(result)
+export const monitorServicesJobHandler = testServices
+export const monitorServicesResultHandler: JobResultHandler<Partial<ServiceErrors>> = async (result) => {
+  updateServiceState(result)
+}

@@ -1,35 +1,10 @@
 import type { JobsOptions } from 'bullmq'
-import { isNil } from 'lodash'
 import { logger } from '../logger'
-import { pubsub } from '../redis/pubsub'
 import { getJobConfig, jobs, type JobSchedule } from './jobs'
 import { jobQueue } from './queue'
 
-const SCHEDULED_JOB_RESULT_TOPIC = 'scheduledJobResult'
-
-type ScheduledJobResult = { jobName: string; result: any }
-
-export const publishScheduledJobResult = ({ jobName, result }: ScheduledJobResult) =>
-  pubsub().publish(`${SCHEDULED_JOB_RESULT_TOPIC}.${jobName}`, { jobName, result: JSON.stringify(result) })
-
 export async function initialiseScheduledJobs() {
-  await subscribeToScheduledJobResults()
   await scheduleJobs()
-}
-
-function subscribeToScheduledJobResults() {
-  return pubsub().subscribe(`${SCHEDULED_JOB_RESULT_TOPIC}.*`, handleScheduledJobResult, { pattern: true })
-}
-
-async function handleScheduledJobResult({ jobName, result }: ScheduledJobResult) {
-  const handler = getJobConfig(jobName)?.scheduledJobResultHandler
-  if (handler) {
-    try {
-      await handler(isNil(result) ? undefined : JSON.parse(result))
-    } catch (error) {
-      logger.error(`Error running scheduled job result handler for job: ${jobName}`, { error })
-    }
-  }
 }
 
 async function scheduleJobs() {

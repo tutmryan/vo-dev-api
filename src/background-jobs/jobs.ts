@@ -50,13 +50,18 @@ export type HandlerContext = {
 
 // https://docs.bullmq.io/guide/job-schedulers/repeat-strategies
 export type JobSchedule = { every: number } | { pattern: string }
-export type JobHandler<TData = unknown> = (context: HandlerContext, payload: JobPayload<TData>) => Promise<unknown>
-export type JobResultHandler<TData = unknown> = (result: TData) => Promise<void>
-export type JobConfig<TData = unknown> = {
-  handler: JobHandler<TData>
+export type JobHandler<TData = unknown, TResult = unknown> = (context: HandlerContext, payload: JobPayload<TData>) => Promise<TResult>
+export type JobResultHandler<TResult = unknown> = (result: TResult) => Promise<void>
+export type JobConfig<TData = unknown, TResult = unknown> = {
+  handler: JobHandler<TData, TResult>
   options?: JobsOptions
   schedule?: JobSchedule
-  scheduledJobResultHandler?: JobResultHandler<ServiceErrors>
+  /**
+   * Optional handler for receiving the result of the job after it has completed successfully.
+   * This handler is invoked via pubsub subscription, on all instances, not just the one that processed the job.
+   * For example, updating in-memory state based on the result of a job.
+   */
+  jobResultHandler?: JobResultHandler<TResult>
   resultCacheTtl?: number
   disableImplicitTransaction?: boolean
 }
@@ -81,7 +86,7 @@ export type Jobs = {
   cancelAsyncIssuanceRequests: JobConfig<CancelAsyncIssuanceRequestsJobPayload>
   initialiseOidcKeys: JobConfig
   initialiseOidcData: JobConfig
-  monitorServices: JobConfig
+  monitorServices: JobConfig<unknown, ServiceErrors>
   applyOidcSigningKeysRotation: JobConfig
 }
 
@@ -143,8 +148,9 @@ export const jobs: Jobs = {
   },
   monitorServices: {
     handler: monitorServicesJobHandler,
-    scheduledJobResultHandler: monitorServicesResultHandler,
+    jobResultHandler: monitorServicesResultHandler,
     schedule: { every: 5 * 60 * 1000 }, // every 5 minutes
+    resultCacheTtl: 0, // no caching of results, as we want to always run the job when queued
   },
   applyOidcSigningKeysRotation: {
     handler: applyOidcSigningKeysRotationJobHandler,

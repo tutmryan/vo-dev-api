@@ -15,7 +15,6 @@ import type { JobConfig } from './jobs'
 import { getJobConfig, type HandlerContext, type JobPayload } from './jobs'
 import { publishBackgroundJobEvent } from './pubsub'
 import { defaultJobOptions, JobQueueName } from './queue'
-import { publishScheduledJobResult } from './scheduler'
 
 function jobLogMetadata({ job, user }: { job?: Job<JobPayload>; user?: UserEntity }) {
   return { job: job ? { name: job.name, id: job.id } : {}, user: user ? { id: user.id, name: user.name } : {} }
@@ -101,9 +100,6 @@ export const worker = Lazy(() => {
       jobName: job.name,
       userId: job.data.userId,
     })
-
-    // schedule job IDs are prefixed with 'repeat:'
-    if (job.id?.startsWith('repeat:')) publishScheduledJobResult({ jobName: job.name, result })
   })
 
   worker.on('failed', (job: Job<JobPayload> | undefined, error) => {
