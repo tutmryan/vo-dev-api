@@ -40,7 +40,7 @@ export function filterToRequestedClaimsAmr(amr: string[], requestedClaims: Claim
     const amrClaim = simplifyClaimParameter(requestedClaims.id_token.amr)
     if (amrClaim) {
       filteredAmr.push(...amr.filter((a) => amrClaim.values.includes(a)))
-      // Spec: Requests that the Claim be returned with one of a set of values, with the val  ues appearing in order of preference
+      // Spec: Requests that the Claim be returned with one of a set of values, with the values appearing in order of preference
       // Note: it likely doesn't matter for the AMR claim, but it's not hard either to honour the order requested
       filteredAmr.sort((a, b) => {
         const aIndex = amrClaim.values.indexOf(a)
