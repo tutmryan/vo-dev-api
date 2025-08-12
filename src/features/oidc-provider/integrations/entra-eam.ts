@@ -1,9 +1,7 @@
-import type { RouterContext } from '@koa/router'
 import { verifyMultiIssuer } from '@makerx/express-bearer'
 import { decodeJwt, decodeProtectedHeader } from 'jose'
-import { pick } from 'lodash'
-import type { Configuration, OIDCContext, Provider, UnknownObject } from 'oidc-provider'
-import { eamIssuerOptions, instance } from '../../../config'
+import type { AuthoriseResponse, Configuration, Errors, KoaContextWithOIDC, Provider, UnknownObject } from 'oidc-provider'
+import { eamIssuerOptions } from '../../../config'
 import { dataSource } from '../../../data'
 import type { ClaimConstraint, PresentedCredential } from '../../../generated/graphql'
 import { logger } from '../../../logger'
@@ -13,13 +11,13 @@ import { compareIgnoreCase } from '../../../util/string'
 import { throwError } from '../../../util/throw-error'
 import { StandardClaims } from '../../contracts/claims'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
-import { paramsToAuthParamsSpec, wrapOidcPipelineStep } from '../integration-hook'
+import { supportedAmrs } from '../claims'
+import { filterToRequestedClaimsAcr, filterToRequestedClaimsAmr } from '../claims-parameter'
+import { type ApplyIntercept, type ApplyPostIntercept, type RouterContextWithOIDC } from '../integration-hook'
 import { oauthErrors } from '../oauth'
 import { oidcProviderModule } from '../provider'
 import type { LoginInteractionData } from '../session'
 import { getLoginInteractionData, setLoginInteractionData } from '../session'
-
-const isNelnetOrDevInstance = instance && ['nelnet', 'sandbox.nelnet', 'dev'].includes(instance)
 
 enum ExtraParams {
   clientRequestId = 'client-request-id',
@@ -47,6 +45,35 @@ const mapMsLoginToAzureJwksUri = (uri: string) => {
   return undefined
 }
 
+const paramsToAuthParamsSpec = (params: Record<string, unknown>, errors: Errors) => {
+  const requiredString = (key: string) => {
+    if (!params[key] || typeof params[key] !== 'string') {
+      logger.error(`Missing required parameter: ${key}`)
+      throw new errors.InvalidRequest(`Missing required parameter: ${key}`)
+    }
+    return params[key]
+  }
+  const optionalString = (key: string) => {
+    return params[key] as string | undefined
+  }
+  return {
+    scope: requiredString('scope'),
+    response_type: requiredString('response_type'),
+    client_id: requiredString('client_id'),
+    redirect_uri: requiredString('redirect_uri'),
+    state: optionalString('state'),
+    response_mode: optionalString('response_mode'),
+    nonce: optionalString('nonce'),
+    display: optionalString('display'),
+    prompt: optionalString('prompt'),
+    max_age: optionalString('max_age'),
+    ui_locales: optionalString('ui_locales'),
+    id_token_hint: optionalString('id_token_hint'),
+    login_hint: optionalString('login_hint'),
+    acr_values: optionalString('acr_values'),
+  }
+}
+
 const extractLoggable = (params: UnknownObject, idTokenHint?: { header: UnknownObject; payload: UnknownObject }) => {
   const redactedIdTokenHint = idTokenHint
     ? {
@@ -67,44 +94,8 @@ const extractLoggable = (params: UnknownObject, idTokenHint?: { header: UnknownO
   }
 }
 
-export const knownEamAcrs = ['possessionorinherence', 'knowledgeorpossessionorinherence']
-
-// const eamPresentationLoginStandardClaims = {
-//   // Note: EAM only allows a single amr value
-//   amr: ['pop'],
-//   // Note: sending only 'possession' as the acr value does not work
-//   /*
-//   | ACR                               | AMR    | result  | failure reason                                                                         |
-//   |-----------------------------------|--------|---------|----------------------------------------------------------------------------------------|
-//   | possessionorinherence             | pop    | success |                                                                                        |
-//   | possessionorinherence             | face   | success |                                                                                        |
-//   | possessionorinherence             | sms    | success |                                                                                        |
-//   | possessionorinherence             | swk    | success |                                                                                        |
-//   | possessionorinherence             | tel    | success |                                                                                        |
-//   | possessionorinherence             | retina | success |                                                                                        |
-//   | possessionorinherence             | fido   | success |                                                                                        |
-//   | possessionorinherence             | yeet   | fail    | AADSTS5001257: Failed to validate external id_token: 'amr' claim has unexpected value. |
-//   | knowledgeorpossession             | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-//   | knowledgeorinherence              | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-//   | knowledgeorpossessionorinherence  | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-//   | knowledge                         | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-//   | possession                        | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-//   | inherence                         | pop    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-//   | knowledge                         | otp    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-//   | possession                        | hwk    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-//   | inherence                         | fpt    | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-//   | inherence                         | iris   | fail    | AADSTS5001258: Failed to validate external id_token: 'acr' claim has unexpected value. |
-//    */
-//   acr: 'possessionorinherence',
-// } as const
-
-export function whenEamAddPresentationConstraints(loginData?: LoginInteractionData, constraints?: ClaimConstraint[]) {
-  // Ignore non-EAM requests
-  if (!loginData?.integrations?.entraEam) {
-    logger.verbose('OIDC EAM hook:whenEamAddPresentationConstraints skipping non-EAM request')
-    return constraints
-  }
-
+export function addEamPresentationConstraints(loginData: LoginInteractionData, constraints?: ClaimConstraint[]) {
+  invariant(loginData.integrations?.entraEam, 'EAM integration not found during constraint build')
   invariant(loginData.integrations.entraEam.identityId, 'Identity ID not found during EAM identity constraint build')
 
   const augmentedConstraints = [
@@ -115,10 +106,11 @@ export function whenEamAddPresentationConstraints(loginData?: LoginInteractionDa
     },
   ]
 
-  logger.info('OIDC EAM hook:whenEamAddPresentationConstraints augmenting constraints', {
+  logger.info('OIDC EAM hook:addEamPresentationConstraints augmenting constraints', {
     augmentedConstraints: augmentedConstraints.reduce(
       (acc, constraint) => {
-        acc[constraint.claimName] = redactValueInner(constraint.values?.[0])
+        acc[constraint.claimName] =
+          constraint.claimName !== StandardClaims.identityId ? redactValueInner(constraint.values?.[0]) : constraint.values?.[0]
         return acc
       },
       {} as Record<string, string | undefined>,
@@ -128,19 +120,14 @@ export function whenEamAddPresentationConstraints(loginData?: LoginInteractionDa
   return augmentedConstraints
 }
 
-export function whenEamGetAccountId(loginData: LoginInteractionData, credential: PresentedCredential) {
-  // Ignore non-EAM requests
-  if (!loginData.integrations?.entraEam) {
-    logger.verbose('OIDC EAM hook:whenEamGetAccountId skipping non-EAM request')
-    return undefined
-  }
-
+export function getEamAccountId(loginData: LoginInteractionData, credential: PresentedCredential) {
+  invariant(loginData.integrations?.entraEam, 'EAM integration not found during constraint build')
   invariant(
     compareIgnoreCase(credential.claims[StandardClaims.identityId], loginData.integrations.entraEam.identityId),
     'Identity ID mismatch during EAM OIDC account ID check',
   )
 
-  logger.info('OIDC EAM hook:whenEamGetAccountId account Id', {
+  logger.info('OIDC EAM hook:getEamAccountId account Id', {
     issuanceId: credential.claims[StandardClaims.issuanceId],
     identityId: loginData.integrations.entraEam.identityId,
     accountId: redactValueInner(loginData.integrations.entraEam.sub),
@@ -157,7 +144,9 @@ export function isEamRequestAndLoginShouldFail(loginData?: LoginInteractionData)
 
   // Fail the login if the identity ID is not set
   if (loginData.integrations.entraEam.identityId === undefined) {
-    logger.warn('OIDC EAM hook:isEamRequestAndLoginShouldFail identity ID not set', { result: 'fail' })
+    logger.warn('OIDC EAM hook:isEamRequestAndLoginShouldFail identity ID not set. Most likely due to an incorrectly configured identity', {
+      result: 'fail',
+    })
     return true
   }
   logger.info('OIDC EAM hook:isEamRequestAndLoginShouldFail identity ID is set', { result: 'pass' })
@@ -169,56 +158,20 @@ export const eamLoginFailResult = {
   error_description: 'No identity could be matched to the Entra user.',
 }
 
-export function whenEamApplyAmr(loginData: LoginInteractionData, amr: string[], rawClaims?: string) {
-  // Ignore non-EAM requests
-  if (!loginData.integrations?.entraEam) {
-    logger.verbose('OIDC EAM hook:whenEamApplyAmr skipping non-EAM request')
-    return amr
-  }
+export function getEamAmr(loginData: LoginInteractionData): string[] {
+  // Entra will typically request ["face","fido","fpt","hwk","iris","otp","tel","pop","retina","sc","sms","swk","vbm","bio"]
+  const amr = filterToRequestedClaimsAmr([...supportedAmrs], loginData.requestedClaims!)
 
-  invariant(rawClaims, 'Claims must be provided to whenEamApplyAmr')
-
-  // This is temporary and will be replaced by production ready code soon
-  const claims = JSON.parse(rawClaims)
-  invariant(typeof claims === 'object', 'Claims must be an object')
-  invariant('id_token' in claims, 'Claims must contain id_token')
-  invariant(typeof claims.id_token === 'object', 'id_token must be an object')
-  invariant('amr' in claims.id_token, 'id_token must contain amr')
-  invariant('values' in claims.id_token.amr, 'id_token.amr must contain values')
-
-  // If values contains 'pop' use it, otherwise pick the first
-  const eamAmr = claims.id_token.amr.values.includes('pop') ? 'pop' : (claims.id_token.amr.values[0] as string)
-
-  logger.verbose('OIDC EAM hook:whenEamApplyAmr amr', { amr: eamAmr })
-  return [eamAmr]
+  invariant(amr.length > 0, 'No amr values post-filter')
+  logger.info('OIDC EAM hook:whenEamApplyAmr', { amr })
+  return [amr[0]!] // Entra only allows a single amr value, so we return an array with a single value.
 }
 
-export function whenEamApplyAcr(loginData: LoginInteractionData, acr: string, rawClaims?: string) {
-  // Ignore non-EAM requests
-  if (!loginData.integrations?.entraEam) {
-    logger.verbose('OIDC EAM hook:whenEamApplyAcr skipping non-EAM request')
-    return acr
-  }
-
-  invariant(rawClaims, 'Claims must be provided to whenEamApplyAmr')
-
-  // This is temporary and will be replaced by production ready code soon
-  const claims = JSON.parse(rawClaims)
-  invariant(typeof claims === 'object', 'Claims must be an object')
-  invariant('id_token' in claims, 'Claims must contain id_token')
-  invariant(typeof claims.id_token === 'object', 'id_token must be an object')
-  invariant('acr' in claims.id_token, 'id_token must contain acr')
-  invariant('values' in claims.id_token.acr, 'id_token.acr must contain values')
-  invariant(Array.isArray(claims.id_token.acr.values), 'id_token.acr.values must be an array')
-
-  // Allow any ACRs entra says are valid, for now
-  //const filteredAcrs = (claims.id_token.acr.values as string[]).filter((v) => knownEamAcrs.includes(v))
-  //invariant(filteredAcrs.length > 0, 'id_token.acr.values must contain at least one known EAM ACR')
-
-  const eamAcr = claims.id_token.acr.values[0] as string
-
-  logger.verbose('OIDC EAM hook:whenEamApplyAcr acr', { acr: eamAcr })
-  return eamAcr
+export function getEamAcr(loginData: LoginInteractionData) {
+  // Entra will typically request ["possessionorinherence"], but it can also request other acr values. (AS WE FOUND OUT!)
+  const acr = filterToRequestedClaimsAcr('possessionorinherence', loginData.requestedClaims!)
+  logger.info('OIDC EAM hook:getEamAcr', { acr })
+  return acr
 }
 
 export const isEamRequest = (params: UnknownObject, clientId: string) => {
@@ -229,9 +182,10 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
     params.response_mode !== 'form_post' ||
     !params.id_token_hint ||
     !params.nonce ||
-    !params.state
+    !params.state ||
+    !params.claims
   ) {
-    logger.info('OIDC EAM hook:isEamRequest skipping non-EAM request due to shape of parameters not matching', {
+    logger.info('OIDC EAM hook:isEamRequest skipping non-EAM request due mismatch with expected parameters', {
       params: extractLoggable(params),
     })
     return false
@@ -267,7 +221,7 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
   // As this token wasn't issued by the client (us), the aud should not match the client ID
   // MS Docs say the value they send is the client ID registered in EAM, which is actually the spec (if we had issued it). However, the App ID registered for EAM is supplied in practice.
   if (compareIgnoreCase(decodedIdTokenHint.aud, clientId)) {
-    logger.warn('OIDC EAM hook:isEamRequest skipping non-EAM request due to aud matching client ID', {
+    logger.warn('OIDC EAM hook:isEamRequest skipping non-EAM request due to aud not matching client ID', {
       params: extractLoggable(params, { header: {}, payload: decodedIdTokenHint }),
     })
     return false
@@ -277,174 +231,142 @@ export const isEamRequest = (params: UnknownObject, clientId: string) => {
   logger.info('OIDC EAM hook:isEamRequest processing EAM request', {
     params: extractLoggable(params, { header: {}, payload: decodedIdTokenHint }),
   })
-  if (isNelnetOrDevInstance) {
-    logger.info('OIDC EAM hook:isEamRequest processing EAM request for Nelnet or Dev instance', {
-      params_debug: {
-        id_token_hint: params.id_token_hint,
-        state: params.state,
-      },
-    })
-  }
   return true
 }
 
-export const hookAndApplyCustomEntraEamSpec = (provider: Provider) => {
-  // Override the authorization -> checkIdTokenHint pipeline step to apply custom logic for EAM requests
-  wrapOidcPipelineStep(provider, 'authorization', ['POST'], 'checkIdTokenHint', async (ctx, next, original) => {
-    const { oidc } = ctx as RouterContext & { oidc: OIDCContext }
-    const { errors } = await oidcProviderModule()
+export const isEamCheckIdTokenIntercept = async (ctx: RouterContextWithOIDC) => {
+  if (ctx.method !== 'POST') {
+    return false
+  }
 
-    if (!oidc.client?.clientId) {
-      logger.error(`Client ID not found in the OIDC context`, { params: extractLoggable(oidc.params!) })
-      throw new errors.InvalidClient('Client not found')
-    }
+  const { oidc } = ctx
+  const { errors } = await oidcProviderModule()
 
-    // Don't intercept non-EAM requests
-    if (!isEamRequest(oidc.params!, oidc.client.clientId)) {
-      logger.verbose('OIDC EAM hook:authorization/post/checkIdTokenHint skipping non-EAM request')
-      return original(ctx, next)
-    }
-
-    const authParams = paramsToAuthParamsSpec(oidc.params!, errors)
-
-    const decodedProtectedHeader = decodeProtectedHeader(authParams.id_token_hint!)
-    if (!decodedProtectedHeader.alg) {
-      logger.error(`id_token_hint does not contain an alg header`, { params: extractLoggable(oidc.params!) })
-      throw new errors.InvalidRequest('id_token_hint does not contain an alg header')
-    }
-
-    const payload = await verifyMultiIssuer(ctx.host, authParams.id_token_hint!, {
-      issuerOptions: eamIssuerOptions,
-      explicitNoAudienceValidation: true,
+  if (!oidc.client?.clientId) {
+    logger.error(`OIDC EAM hook:isEamCheckIdTokenIntercept Client ID not found in the OIDC context`, {
+      params: extractLoggable(oidc.params!),
     })
+    throw new errors.InvalidClient('Client not found')
+  }
 
-    oidc.entity('IdTokenHint', { payload, header: decodeProtectedHeader })
+  return isEamRequest(oidc.params!, oidc.client.clientId)
+}
 
-    // Although the VO OIDC provider is session-less, we'll force the prompt here.
-    // This ensures the implementation is accurate to a standard EAM flow,
-    const { prompts } = oidc // Do not inline, as this is a getter and a new instance is created each time
-    if (!prompts.has('login')) {
-      prompts.add('login')
-      oidc.params!.prompt = [...prompts].join(' ')
-    }
+export const applyEamCheckIdTokenHook: ApplyIntercept = async (ctx, next, _original) => {
+  const { oidc } = ctx
+  const { errors } = await oidcProviderModule()
+  const authParams = paramsToAuthParamsSpec(oidc.params!, errors)
+  const decodedProtectedHeader = decodeProtectedHeader(authParams.id_token_hint!)
 
-    logger.verbose(`OIDC EAM hook:authorization/post/checkIdTokenHint intercept end`, {
-      params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint),
+  if (!decodedProtectedHeader.alg) {
+    logger.error(`OIDC EAM hook:applyEamCheckIdTokenHook id_token_hint does not contain an alg header`, {
+      params: extractLoggable(oidc.params!),
     })
+    throw new errors.InvalidRequest('id_token_hint does not contain an alg header')
+  }
 
-    return next()
+  const payload = await verifyMultiIssuer(ctx.host, authParams.id_token_hint!, {
+    issuerOptions: eamIssuerOptions,
+    explicitNoAudienceValidation: true,
   })
 
-  // Override the authorization -> interactions pipeline step to save the EAM sub and state to the interaction data
-  wrapOidcPipelineStep(provider, 'authorization', ['POST'], 'interactions', async (ctx, next, original) => {
-    const { oidc } = ctx as RouterContext & { oidc: OIDCContext }
-    const { errors } = await oidcProviderModule()
+  oidc.entity('IdTokenHint', { payload, header: decodeProtectedHeader })
 
-    if (!oidc.client?.clientId) {
-      logger.error(`Client ID not found in the OIDC context`, { params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint) })
-      throw new errors.InvalidClient('Client not found')
-    }
+  // Although the VO OIDC provider is session-less, we'll force the prompt here.
+  // This ensures the implementation is accurate to a standard EAM flow,
+  const { prompts } = oidc // Do not inline, as this is a getter and a new instance is created each time
+  if (!prompts.has('login')) {
+    prompts.add('login')
+    oidc.params!.prompt = [...prompts].join(' ')
+  }
+
+  logger.verbose(`OIDC EAM hook:applyEamCheckIdTokenHook intercept end`, {
+    params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint),
+  })
+
+  // Note: we don't call the original step here, as we want to override it completely.
+  return next()
+}
+
+export const isEamInteractionsIntercept = isEamCheckIdTokenIntercept
+
+export const applyEamInteractionsHook: ApplyPostIntercept = async (ctx) => {
+  const { oidc } = ctx
+
+  // Started interactions will redirect, so if we're not redirecting, we should not apply the custom logic
+  if (ctx.response.status !== 303) {
+    logger.warn(`OIDC EAM hook:applyEamInteractionsHook Interactions pipeline step did not redirect`, {
+      params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint),
+    })
+    return
+  }
+
+  invariant(oidc.entities.Interaction, 'Interaction entity not found post interactions during EAM auth flow')
+  const interactionData = await getLoginInteractionData(oidc.entities.Interaction.uid)
+  if (interactionData) invariant(interactionData.state === 'pre-start', 'Interaction data was in an incorrect state for EAM auth flow')
+
+  invariant(oidc.entities.IdTokenHint, 'IdTokenHint entity not found post interactions event during EAM auth flow')
+  const objectId = (oidc.entities.IdTokenHint.payload.oid as string | undefined) ?? ''
+  const tenantId = (oidc.entities.IdTokenHint.payload.tid as string | undefined) ?? ''
+
+  invariant(objectId && tenantId, 'Both oid and tid are required to be present in the id_token_hint during an EAM flow')
+  const identity = await dataSource.getRepository(IdentityEntity).findOne({
+    where: {
+      identifier: objectId,
+      issuer: tenantId,
+    },
+  })
+
+  if (!identity) {
+    logger.warn('OIDC EAM hook:applyEamInteractionsHook identity could be matched during a EAM auth flow', {
+      params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint),
+    })
+  }
+
+  invariant(oidc.params, 'Params not found post interactions')
+
+  await setLoginInteractionData({
+    ...(interactionData ?? {}),
+    interactionId: oidc.entities.Interaction.uid,
+    state: 'pre-start',
+    integrations: {
+      entraEam: {
+        sub:
+          (oidc.entities.IdTokenHint.payload.sub as string | undefined) ?? throwError('sub not found in IdTokenHint during EAM auth flow'),
+        identityId: identity?.id,
+      },
+    },
+  })
+
+  if (logger.isVerboseEnabled()) {
+    logger.verbose('OIDC EAM hook:applyEamInteractionsHook intercept end', {
+      preInteractionData: redactValueObjectUnknown(interactionData ?? {}),
+      postInteractionData: redactValueObjectUnknown((await getLoginInteractionData(oidc.entities.Interaction.uid)) ?? {}),
+      identity: { id: identity?.id, name: redactValueInner(identity?.name) },
+      params: extractLoggable(oidc.params!),
+    })
+  }
+}
+
+export const registerEamEventListeners = (provider: Provider) => {
+  provider.on('authorization.success', (ctx: KoaContextWithOIDC, response: AuthoriseResponse) => {
+    const { oidc } = ctx
+
+    invariant(oidc.client?.clientId, 'Client not found in OIDC context during EAM auth flow')
 
     // Don't intercept non-EAM requests
     if (!isEamRequest(oidc.params!, oidc.client.clientId)) {
-      logger.verbose('OIDC EAM hook:authorization/post/interactions skipping non-EAM request')
-      return original(ctx, next)
-    }
-
-    // This intercept is a special case, because the provider doesn't call next if the interaction is started
-    await original(ctx, next)
-
-    // Started interactions will redirect, so if we're not redirecting, we should not apply the custom logic
-    if (ctx.response.status !== 303) {
-      logger.warn(`Interactions pipeline step did not redirect`, { params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint) })
+      logger.verbose('OIDC EAM hook:event:authorization.success skipping non-EAM request')
       return
     }
 
-    invariant(oidc.entities.Interaction, 'Interaction entity not found post interactions during EAM auth flow')
-    const interactionData = await getLoginInteractionData(oidc.entities.Interaction.uid)
-    if (interactionData) invariant(interactionData.state !== 'pre-start', 'Interaction data was in an incorrect state for EAM auth flow')
-
-    invariant(oidc.entities.IdTokenHint, 'IdTokenHint entity not found post interactions event during EAM auth flow')
-    const objectId = (oidc.entities.IdTokenHint.payload.oid as string | undefined) ?? ''
-    const tenantId = (oidc.entities.IdTokenHint.payload.tid as string | undefined) ?? ''
-
-    invariant(objectId && tenantId, 'Both oid and tid are required to be present in the id_token_hint during an EAM flow')
-    const identity = await dataSource.getRepository(IdentityEntity).findOne({
-      where: {
-        identifier: objectId,
-        issuer: tenantId,
-      },
-    })
-
-    if (!identity) {
-      logger.warn('No identity could be matched during a EAM auth flow', {
-        params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint),
-      })
-    }
-
-    invariant(oidc.params, 'Params not found post interactions')
-
-    await setLoginInteractionData({
-      ...(interactionData ?? {}),
-      interactionId: oidc.entities.Interaction.uid,
-      state: 'pre-start',
-      integrations: {
-        entraEam: {
-          sub:
-            (oidc.entities.IdTokenHint.payload.sub as string | undefined) ??
-            throwError('sub not found in IdTokenHint during EAM auth flow'),
-          iss:
-            (oidc.entities.IdTokenHint.payload.iss as string | undefined) ??
-            throwError('iss not found in IdTokenHint during EAM auth flow'),
-          state: (oidc.params.state as string | undefined) ?? throwError('state not found in params during EAM auth flow'),
-          nonce: (oidc.params.nonce as string | undefined) ?? throwError('nonce not found in params during EAM auth flow'),
-          clientRequestId:
-            (oidc.params[ExtraParams.clientRequestId] as string | undefined) ??
-            throwError('client_request_id not found in params during EAM auth flow'),
-          identityId: identity?.id,
-        },
-      },
-    })
-
-    if (logger.isVerboseEnabled()) {
-      logger.verbose('OIDC EAM hook:authorization/post/interactions intercept end', {
-        preInteractionData: redactValueObjectUnknown(interactionData ?? {}),
-        postInteractionData: redactValueObjectUnknown((await getLoginInteractionData(oidc.entities.Interaction.uid)) ?? {}),
-        identity: { id: identity?.id, name: redactValueInner(identity?.name) },
-        params: extractLoggable(oidc.params!),
-      })
-    }
-  })
-
-  // Override the resume -> processResponseTypes pipeline step to log the return token when verbose logging is enabled
-  // The actual step we're targeting is `respond`, but `respond` calls `processResponseTypes` internally which returns the token. If we were to intercept `respond`, we would not have access to the token
-  // unless we dug through http response to locate it. This is much cleaner.
-  wrapOidcPipelineStep(provider, 'resume', ['GET'], 'processResponseTypes', async (ctx, next, original) => {
-    const { oidc } = ctx as RouterContext & { oidc: OIDCContext }
-    const { errors } = await oidcProviderModule()
-
-    if (!oidc.client?.clientId) {
-      logger.error(`Client ID not found in the OIDC context`, { params: extractLoggable(oidc.params!, oidc.entities.IdTokenHint) })
-      throw new errors.InvalidClient('Client not found')
-    }
-
-    // Don't intercept non-EAM requests
-    if (!isEamRequest(oidc.params!, oidc.client.clientId)) {
-      logger.verbose('OIDC EAM hook:resume/get/processResponseTypes skipping non-EAM request')
-      return original(ctx, next)
-    }
-
-    const response = (await original(ctx, next)) as { id_token: string; state: string | undefined } | undefined
-    invariant(response?.id_token, 'id_token not found in response during EAM auth flow')
+    invariant(response.id_token, 'id_token not found in response during EAM auth flow')
     const idTokenDecoded = decodeJwt(response.id_token)
 
     const logMetadata: Record<string, any> = {
       response: { id_token: redactValueObjectUnknown(idTokenDecoded) },
       params: extractLoggable(oidc.params!),
     }
-    if (isNelnetOrDevInstance) logMetadata.response_debug = pick(response, ['id_token', 'state'])
-    logger.info('OIDC EAM hook:resume/get/processResponseTypes intercept end', logMetadata)
-
-    return response
+    logger.info('OIDC EAM hook:event:authorization.success intercept end', logMetadata)
   })
 }

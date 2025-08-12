@@ -12,6 +12,7 @@ import {
   VoIdentityClaim,
   VoPresentationClaim,
 } from './claims'
+import { filterToRequestedClaimsAcr, filterToRequestedClaimsAmr } from './claims-parameter'
 import { checkIssuanceIsNotRevoked } from './data'
 import type { PresentationLoginAccount } from './session'
 
@@ -36,9 +37,18 @@ export function accountToClaims(account: PresentationLoginAccount): AccountClaim
   const { accountId: sub, presentationId, issuanceId, identity, did, credentialType, credentialClaims, mappedCredentialClaims } = account
   const hasIdentity = !!identity
   const presentationClaimData = hasIdentity ? omit(credentialClaims, 'name') : credentialClaims
+
+  let acr: string = presentationLoginStandardClaims.acr
+  acr = filterToRequestedClaimsAcr(acr, account.requestedClaims || {})
+
+  let amr: string[] = [...presentationLoginStandardClaims.amr]
+  if (account.faceCheckMatchConfidenceScore) amr.push(faceCheckAmr)
+  amr = filterToRequestedClaimsAmr(amr, account.requestedClaims || {})
+
   const claims: AccountClaims = {
     sub,
-    ...presentationLoginStandardClaims,
+    acr,
+    amr,
     [OpenIdProfileClaim.Name]: identity?.name ?? credentialClaims?.name,
     [VcInfoClaim.Issuer]: did,
     [VcInfoClaim.Type]: credentialType,
@@ -52,7 +62,6 @@ export function accountToClaims(account: PresentationLoginAccount): AccountClaim
     [VoIdentityClaim.IdentityIssuer]: identity?.issuer,
     [VoIdentityClaim.IdentityIdentifier]: identity?.identifier,
   }
-  if (account.faceCheckMatchConfidenceScore) claims.amr = [...presentationLoginStandardClaims['amr'], faceCheckAmr]
 
   // merge mapped claims into the standard claims
   return mergeWithArrays(mappedCredentialClaims, claims)

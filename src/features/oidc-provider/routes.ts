@@ -13,7 +13,8 @@ import { logger } from '../../logger'
 import { invariant } from '../../util/invariant'
 import { redactValueObjectUnknown } from '../../util/redact-values'
 import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
-import { eamLoginFailResult, isEamRequestAndLoginShouldFail, whenEamApplyAcr, whenEamApplyAmr } from './integrations/entra-eam'
+import { filterToRequestedClaimsAcr, filterToRequestedClaimsAmr } from './claims-parameter'
+import { eamLoginFailResult, getEamAcr, getEamAmr, isEamRequestAndLoginShouldFail } from './integrations/entra-eam'
 import { createRequestInfo } from './log-events'
 import { voLogoUrl } from './logos'
 import { getClient, getData, getProvider, oidcProviderModule } from './provider'
@@ -204,14 +205,25 @@ export function routes(app: Express, route: string): void {
       })
 
       let amr: string[] = [...presentationLoginStandardClaims.amr]
-
       if (loginResult.faceCheckMatchConfidenceScore) amr.push(faceCheckAmr)
+
+      if (loginInteractionData.requestedClaims) {
+        amr = filterToRequestedClaimsAmr(amr, loginInteractionData.requestedClaims)
+      }
+
+      // EAM Integration hooks
+      if (loginInteractionData.integrations?.entraEam) amr = getEamAmr(loginInteractionData)
 
       let acr = presentationLoginStandardClaims.acr as string
 
-      // Integration hooks
-      amr = whenEamApplyAmr(loginInteractionData, amr, params.claims as string | undefined)
-      acr = whenEamApplyAcr(loginInteractionData, acr, params.claims as string | undefined)
+      if (loginInteractionData.requestedClaims) {
+        acr = filterToRequestedClaimsAcr(acr, loginInteractionData.requestedClaims)
+      }
+
+      // EAM Integration hooks
+      if (loginInteractionData.integrations?.entraEam) {
+        acr = getEamAcr(loginInteractionData)
+      }
 
       const result: InteractionResults = {
         login: {

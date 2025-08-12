@@ -3,11 +3,23 @@ import type { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entit
 import type { OidcResourceEntity } from './entities/oidc-resource-entity'
 
 export const presentationLoginStandardClaims = {
-  amr: ['vc_authn'],
+  amr: ['pop', 'vc_authn'],
   acr: 'possession',
 } as const
 
+// Entra EAM arc list https://learn.microsoft.com/en-us/entra/identity/authentication/concept-authentication-external-method-provider#supported-acr-claims
+export const supportedAcrs = [
+  presentationLoginStandardClaims.acr,
+  'inherence',
+  'knowledge',
+  'knowledgeorpossessionorinherence',
+  'knowledgeorinherence',
+  'knowledgeorpossession',
+  'possessionorinherence',
+] as const
+
 export const faceCheckAmr = 'face'
+export const supportedAmrs = ['pop', 'vc_authn', faceCheckAmr] as const
 
 export enum VcInfoClaim {
   Issuer = 'vc_issuer',

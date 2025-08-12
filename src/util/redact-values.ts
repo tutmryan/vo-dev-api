@@ -47,6 +47,11 @@ export function redactValueObjectUnknown(object: Record<string, unknown>) {
 
     if (typeof value === 'object') {
       if (Array.isArray(value)) {
+        if (['amr'].includes(key)) {
+          result[key] = value
+          continue
+        }
+
         result[key] = value.map((item) => {
           if (typeof item === 'object') {
             if (Array.isArray(item)) return '<redacted-array>'
@@ -101,7 +106,8 @@ export function redactValueObjectUnknown(object: Record<string, unknown>) {
 export function redactValueInner(input: string | unknown) {
   if (!input || typeof input !== 'string') return undefined
   if (input.length < 8) return '<redacted>'
-  return `${input.substring(0, 2)}*<redacted>*${input.substring(input.length - 2)}`
+  if (input.length < 12) return `${input.substring(0, 2)}*<redacted>*${input.substring(input.length - 2)}`
+  return `${input.substring(0, 4)}*<redacted>*${input.substring(input.length - 4)}`
 }
 
 export function redactValueEmail(input: string | unknown) {

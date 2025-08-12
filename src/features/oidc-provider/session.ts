@@ -1,6 +1,6 @@
 import { getClientCredentialsToken, type AccessTokenResponse } from '@makerx/node-common'
 import { compact, pick } from 'lodash'
-import type { UnknownObject } from 'oidc-provider'
+import type { ClaimsParameter, UnknownObject } from 'oidc-provider'
 import { v5 as uuidv5 } from 'uuid'
 import { oidcProviderModule, oidcStorageService } from '.'
 import { faceCheckEnabled, limitedOidcAuthnAuth, limitedOidcClient } from '../../config'
@@ -16,11 +16,12 @@ import type { PartnerEntity } from '../partners/entities/partner-entity'
 import { getPresentationDataFromCache } from '../presentation/callback/cache'
 import { PresentationEntity } from '../presentation/entities/presentation-entity'
 import { mapClaims } from './claims'
+import { simplifyClaimParameter } from './claims-parameter'
 import { resolveDynamicConstraintValue, valueIsDynamic } from './dynamic-constraint-values'
 import type { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entity'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
 import { ExtraParams } from './extra-params'
-import { whenEamAddPresentationConstraints, whenEamGetAccountId } from './integrations/entra-eam'
+import { addEamPresentationConstraints, getEamAccountId } from './integrations/entra-eam'
 
 const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
 const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', ONE_HOUR_TTL))
@@ -34,13 +35,10 @@ type LoginInteractionDataPostStart = {
   sessionKey: string
   requestId?: string
   presentationId?: string
+  requestedClaims?: ClaimsParameter
   integrations?: {
     entraEam?: {
       sub: string
-      iss: string
-      state: string
-      nonce: string
-      clientRequestId?: string
       identityId?: string
     }
   }
@@ -145,15 +143,17 @@ export async function buildAuthnPresentationRequest(
     ]
   }
 
-  // Integration hooks
-  constraints = whenEamAddPresentationConstraints(loginInteractionData, constraints)
+  // EAM Integration hooks
+  if (loginInteractionData?.integrations?.entraEam) {
+    constraints = addEamPresentationConstraints(loginInteractionData, constraints)
+  }
 
   return {
     requestedCredentials: [
       {
         type,
         acceptedIssuers: vcIssuerParam ? [vcIssuerParam] : undefined,
-        configuration: buildRequestConfiguration(params, client),
+        configuration: buildRequestConfiguration(params, client, loginInteractionData),
         constraints,
       },
     ],
@@ -164,13 +164,22 @@ const faceCheckMinConfidenceThreshold = 50
 const faceCheckMaxConfidenceThreshold = 70
 const faceCheckOn: RequestConfiguration = { validation: { faceCheck: {} } }
 
-function buildRequestConfiguration(params: UnknownObject, client: OidcClientEntity): RequestConfiguration | undefined {
+function buildRequestConfiguration(
+  params: UnknownObject,
+  client: OidcClientEntity,
+  loginInteractionData?: LoginInteractionData,
+): RequestConfiguration | undefined {
   const faceCheckParam = params[ExtraParams.vc_facecheck] as string | undefined
   const faceCheckClientDefault = client.requireFaceCheck ? faceCheckOn : undefined
   if (faceCheckParam === 'true') return faceCheckOn
   const asNumber = Number(faceCheckParam)
   if (!Number.isNaN(asNumber) && asNumber >= faceCheckMinConfidenceThreshold && asNumber <= faceCheckMaxConfidenceThreshold)
     return { validation: { faceCheck: { matchConfidenceThreshold: asNumber } } }
+  if (
+    !loginInteractionData?.integrations?.entraEam && // don't apply to EAM requests
+    simplifyClaimParameter(loginInteractionData?.requestedClaims?.id_token?.amr ?? undefined)?.values.includes('face')
+  )
+    return faceCheckOn
   return faceCheckClientDefault
 }
 
@@ -187,6 +196,7 @@ export type PresentationLoginAccount = {
   revocationStatus?: string
   credentialSupportsFaceCheck?: boolean
   faceCheckMatchConfidenceScore?: number
+  requestedClaims?: ClaimsParameter
 }
 
 /**
@@ -266,12 +276,10 @@ export async function completeLogin(
   const [_, ...type] = credential.type
   const { issuanceId, identityId, photo, ...credentialClaims } = allClaims
 
-  // Integrations hooks
-  let accountId = whenEamGetAccountId(interactionData, credential)
-
-  if (!accountId) {
-    accountId = await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
-  }
+  // When EAM integration is present, use the EAM account ID
+  const accountId = interactionData.integrations?.entraEam
+    ? getEamAccountId(interactionData, credential)
+    : await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
 
   const applicableClaimMappings = clientClaimMappings.filter(({ credentialTypes }) => {
     if (!credentialTypes || credentialTypes.length === 0) return true
@@ -298,6 +306,7 @@ export async function completeLogin(
     revocationStatus: credential.credentialState.revocationStatus as string | undefined,
     faceCheckMatchConfidenceScore: credential.faceCheck?.matchConfidenceScore,
     credentialSupportsFaceCheck: faceCheckEnabled && !!photo,
+    requestedClaims: interactionData.requestedClaims,
   }
 
   // Persist the account

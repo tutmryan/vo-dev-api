@@ -222,10 +222,16 @@ describe('redactValues', () => {
 })
 
 describe('redactValueInner', () => {
-  it('should redact a string value', () => {
+  it('should redact a short string value', () => {
     const input = '1234567890'
     const result = redactValueInner(input)
     expect(result).toBe('12*<redacted>*90')
+  })
+
+  it('should redact a long string value', () => {
+    const input = 'ABCD_1234567_EFGH'
+    const result = redactValueInner(input)
+    expect(result).toBe('ABCD*<redacted>*EFGH')
   })
 
   it('should return undefined for non-string values', () => {
@@ -297,14 +303,14 @@ describe('redactValueObjectUnknown', () => {
       email: 'u*<redacted>*e@example.com',
       name: 'Jo*<redacted>*oe',
       firstName: 'Jo*<redacted>*oe',
-      phone: '12*<redacted>*90',
+      phone: '123-*<redacted>*7890',
       presentationRequest: {
         requestedCredentials: [
           {
             constraints: [
               {
                 claimName: 'email',
-                values: ['bi*<redacted>*om'],
+                values: ['bill*<redacted>*.com'],
               },
             ],
             type: 'VOSupportAgent',
@@ -316,7 +322,7 @@ describe('redactValueObjectUnknown', () => {
       nested: {
         user: {
           name: 'Ja*<redacted>*oe',
-          phone: '98*<redacted>*10',
+          phone: '987-*<redacted>*3210',
         },
       },
     })

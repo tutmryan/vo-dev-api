@@ -13,20 +13,21 @@ import { Lazy } from '../../util/lazy'
 import { mergeWithArrays } from '../../util/merge'
 import { throwError } from '../../util/throw-error'
 import { findAccount } from './account'
-import { openidClaims, presentationLoginStandardClaims } from './claims'
+import { openidClaims, supportedAcrs } from './claims'
+import { assertClaimsParameter } from './claims-parameter'
 import type { OidcData } from './data'
 import { loadOidcData } from './data'
 import { errorHandler } from './error-handler'
 import { extraParams } from './extra-params'
 import { loadExistingGrant } from './grants'
-import { eamExtraParams, hookAndApplyCustomEntraEamSpec, knownEamAcrs } from './integrations/entra-eam'
+import { applyOIDCProviderHooks } from './integration-hook'
+import { eamExtraParams, registerEamEventListeners } from './integrations/entra-eam'
 import { keys } from './keys'
 import { logEvents } from './log-events'
 import { middleware } from './middleware'
 import RedisAdapter from './redis-adapter'
 import { getResourceServerInfo } from './resource-indicators'
 import { routes } from './routes'
-import { hookAndApplyCustomOfflineScopeHandling } from './scopes'
 import { logoutSource } from './source'
 import { extraTokenClaims, issueRefreshToken } from './tokens'
 
@@ -72,8 +73,12 @@ async function createProvider() {
     ...(isRedisEnabled ? { adapter: (name) => new RedisAdapter(name, redisClient()) } : {}),
     cookies: {
       keys: [cookieSession.secret ?? throwError('cookieSession.secret is required')],
+      long: {
+        sameSite: 'none', // The default is `lax`, but cookies are sent with the POST verb, so we need to set it to `none`
+        secure: true, // Cookies are sent over HTTPS only
+      },
     },
-    acrValues: [presentationLoginStandardClaims.acr, ...knownEamAcrs],
+    acrValues: [...supportedAcrs],
     claims,
     conformIdTokenClaims: false,
     extraTokenClaims,
@@ -90,6 +95,7 @@ async function createProvider() {
       },
       claimsParameter: {
         enabled: true,
+        assertClaimsParameter,
       },
     },
     interactions: {
@@ -105,6 +111,7 @@ async function createProvider() {
       Session: 1,
     },
     renderError: errorHandler,
+    enableHttpPostMethods: true,
   } satisfies Configuration)
 
   // allow http + localhost for redirect URIs
@@ -124,10 +131,9 @@ async function createProvider() {
   provider.proxy = true
   logEvents(provider)
   provider.use(middleware)
-  // VO Customisation
-  hookAndApplyCustomOfflineScopeHandling(provider)
-  // Integrations
-  hookAndApplyCustomEntraEamSpec(provider)
+  // Integrations & Customisations
+  applyOIDCProviderHooks(provider)
+  registerEamEventListeners(provider)
 
   // Post set up
   providerHandler = provider.callback()

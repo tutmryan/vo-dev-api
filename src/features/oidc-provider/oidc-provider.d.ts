@@ -10,6 +10,25 @@ declare module 'oidc-provider' {
     constructor(description?: string, detail?: string)
   }
 
+  export interface ClaimsParameter {
+    id_token?: {
+      [key: string]: null | ClaimsParameterMember
+    }
+    userinfo?: {
+      [key: string]: null | ClaimsParameterMember
+    }
+  }
+
+  export type AuthoriseResponse = {
+    id_token?: string
+    state?: string
+  }
+
+  interface Provider {
+    addListener(event: 'authorization.success', listener: (ctx: KoaContextWithOIDC, out: AuthoriseResponse) => void): this
+    on(event: 'authorization.success', listener: (ctx: KoaContextWithOIDC, out: AuthoriseResponse) => void): this
+  }
+
   // The definitely typed file for oidc-provider exports interactionPolicy as a namespace, but it's actually an object.
   // The base method cannot be reached from the namespace too, so we need to export it correctly.
   export type interactionPolicy = {

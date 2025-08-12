@@ -89,6 +89,69 @@ This demo shows how to add authentication to a React application using the `reac
 
 Server side authentication implementations vary wildly depending on the technology stack. The server-side authentication code sample can be pasted straight into an Express.js application, for a basic working example of server-side PKCE.
 
+## Supported Authentication Context Class References (ACRs)
+
+The Verified Orchestration OIDC provider supports the following Authentication Context Class References (ACRs):
+
+| ACR Value                          | Description                                            |
+| ---------------------------------- | ------------------------------------------------------ |
+| `possession`                       | Default ACR indicating possession-based authentication |
+| `inherence`                        | Inherence-based authentication (something you are)     |
+| `knowledge`                        | Knowledge-based authentication (something you know)    |
+| `knowledgeorpossessionorinherence` | Any combination of knowledge, possession, or inherence |
+| `knowledgeorinherence`             | Knowledge or inherence-based authentication            |
+| `knowledgeorpossession`            | Knowledge or possession-based authentication           |
+| `possessionorinherence`            | Possession or inherence-based authentication           |
+
+### Requesting specific ACRs
+
+You can request specific Authentication Context Class References (ACRs) using the OIDC standard `claims` parameter.
+
+Example requesting a specific ACR:
+
+```tsx
+const claims = {
+  id_token: {
+    acr: {
+      value: 'inherence',
+    },
+  },
+}
+```
+
+## Supported Authentication Method References (AMRs)
+
+The Verified Orchestration OIDC provider supports the following Authentication Method References (AMRs):
+
+| AMR Value  | Description                                                                          |
+| ---------- | ------------------------------------------------------------------------------------ |
+| `vc_authn` | `Default` Verifiable credential authentication method                                |
+| `pop`      | `Default` Proof of possession authentication method                                  |
+| `face`     | Included if the presentation involved the Face check biometric authentication method |
+
+### Requesting specific AMRs
+
+You can request specific Authentication Method References (AMRs) using the OIDC standard `claims` parameter.
+
+Example requesting a specific AMR:
+
+```tsx
+const claims = {
+  id_token: {
+    amr: {
+      values: ['pop', 'face'],
+    },
+  },
+}
+
+export const oidcConfig: OidcClientSettings = {
+  // ... other settings
+  extraQueryParams: {
+    claims: JSON.stringify(claims),
+  },
+}
+```
+
 ## Control authentication within an application
 
 The Verified Orchestration OIDC provider allows you to control authentication behaviour within an application by providing additional parameters.
@@ -117,8 +180,9 @@ const signInWithPassport = useCallback(
 
 | Parameter                 | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `claims`                  | [OIDC standard claims parameter](https://openid.net/specs/openid-connect-core-1_0.html#ClaimsParameter) for requesting specific ACRs or AMRs. Use JSON format with `id_token.acr.values` for ACRs and `id_token.amr.values` for AMRs.<br /><br />Example: `{"id_token":{"acr":{"values":["inherence"]},"amr":{"values":["face"]}}}`<br /><br />Import Note: The VO OIDC implementation does not support requesting claims via the `claims` parameter. Only scopes can be used to request claims.                                    |
 | `vc_type`                 | The type of credential to be presented.<br /><br />Note: If a single type is configured with the client, it need not be specified.                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `vc_facecheck`            | Whether face check is required for biometric authentication.<br /><br />Note: If forced via client configuration, it need not be specified.                                                                                                                                                                                                                                                                                                                                                                                         |
+| `vc_facecheck`            | Whether face check is required for biometric authentication. Requesting an AMR value of `face` via the claims parameter will force a face check during presentation.<br /><br />Note: If forced via client configuration, it need not be specified.                                                                                                                                                                                                                                                                                 |
 | `vc_issuer`               | The partner issuer DID (authenticating using partner credentials).<br /><br />Note: `vc_unique_claim_for_sub` must also be supplied or values configured with the client.                                                                                                                                                                                                                                                                                                                                                           |
 | `vc_unique_claim_for_sub` | The claim from which a unique identifier can be derived when authenticating using partner credentials.<br /><br />Note: Only required for partner credentials when values are not configured with the client or one specific claim needs to be used.                                                                                                                                                                                                                                                                                |
 | `vc_constraint_name`      | The claim key to match when applying a constraint value as specified by `vc_constraint_operator` and `vc_constraint_value`.                                                                                                                                                                                                                                                                                                                                                                                                         |
