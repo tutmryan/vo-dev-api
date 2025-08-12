@@ -196,11 +196,12 @@
 <% const fontClass = (client?.clientName?.length > 30) ? 'title-sm' : ''; %>
 
 <body>
-  <div class="d-flex justify-content-center mb-3"><img src="<%- voLogoUrl %>" alt="Verified Orchestration Logo"
-      style="max-width:10rem"></div>
   <div class="login-card">
     <% if (logoUrl) { %>
     <div class="d-flex justify-content-center mb-2"><img src="<%- logoUrl %>" alt="<%= client.clientName %>"
+        style="max-width:30%"></div>
+    <% } else { %>
+    <div class="d-flex justify-content-center mb-2"><img src="<%- voLogoUrl %>" alt="Verified Orchestration Logo"
         style="max-width:30%"></div>
     <% } %>
     <h1>Sorry! An error occurred</h1>
