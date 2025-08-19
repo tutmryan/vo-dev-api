@@ -11,7 +11,6 @@ export const presentationLoginStandardClaims = {
 export const supportedAcrs = [
   presentationLoginStandardClaims.acr,
   'inherence',
-  'knowledge',
   'knowledgeorpossessionorinherence',
   'knowledgeorinherence',
   'knowledgeorpossession',
