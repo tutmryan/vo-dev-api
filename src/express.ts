@@ -79,6 +79,17 @@ export async function getExpressApp(): Promise<Express> {
     logger.info(`Added ${vcLogoProxyTokenRoute}`)
   }
 
+  app.get('/health', (req, res) => res.send('OK').end())
+  logger.info('Added GET /health')
+
+  addServiceHealthEndpoints(app)
+
+  // Azure start-up probe (Don't use the known default and make the custom one unlikely to be discovered)
+  app.get('/azure-startup-probe-40nt0001ihrkbxdry635', (_req, res) => {
+    logger.info('Azure start-up probe hit')
+    res.status(200).send('OK').end()
+  })
+
   const notOidcRoute = /^\/(?!oidc).*$/
 
   if (devToolsEnabled) {
@@ -139,11 +150,6 @@ export async function getExpressApp(): Promise<Express> {
     app.get(demoPresentationTokenRoute, ...demoPresentationTokenHandlers)
     logger.info(`Added ${demoPresentationTokenRoute}`)
   }
-
-  app.get('/health', (req, res) => res.send('OK').end())
-  logger.info('Added GET /health')
-
-  addServiceHealthEndpoints(app)
 
   // add bearer auth to all requests
   app.use(

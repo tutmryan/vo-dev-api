@@ -1448,6 +1448,10 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     GRAPHQL_MAX_DIRECTIVES: graphqlMaxDirectives
     GRAPHQL_MAX_TOKENS: graphqlMaxTokens
     LOG_LEVEL: logLevel
+    WEBSITE_WARMUP_PATH: '/azure-startup-probe-40nt0001ihrkbxdry635'
+    WEBSITE_WARMUP_STATUSES: '200'
+    // The default is 230 (3:50), increase to 600 (10:00)
+    WEBSITES_CONTAINER_START_TIME_LIMIT: '600'
   }
 }
 
