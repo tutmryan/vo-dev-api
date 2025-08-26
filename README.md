@@ -131,6 +131,16 @@ To test the Entra ID EAM setup, use the following steps:
 4. Upon successful presentation, you will be signed in and redirected to the My Apps portal.<br/><br/>
    ![EAM Second Factor Success](/docs/assets/entra-id-eam-success-signin.png)
 
+#### Different ACR via the claims parameter
+
+To test EAM with a non-default `"possessionorinherence` ACR, follow these steps:
+
+1. Log in with the `Entra ID EAM VO OIDC LocalDev Multi-MFA - User` identity
+2. Go to https://mysignins.microsoft.com/security-info and remove the `EAM VO OIDC LocalDev (external provider)` method if present
+3. Logout
+4. Login (using a passkey registered in the Authenticator app) and go to https://mysignins.microsoft.com/security-info adding back the `EAM VO OIDC LocalDev (external provider)` method
+5. The claims parameter should request an ACR of `knowledgeorpossessionorinherence`
+
 ## Approvals
 
 Approvals allow integrating apps to create an approval request which can be actioned by someone presenting a credential.
