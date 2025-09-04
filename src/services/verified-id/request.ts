@@ -78,7 +78,7 @@ export class VerifiedIdRequestService extends HttpClient<BaseContext> {
       },
     }
     // build the payload, overriding the upstream callback
-    const { callback: upstreamCallback, ...issuanceRequest } = request
+    const { callback: _upstreamCallback, ...issuanceRequest } = request
     const payload: IssuanceRequest = {
       callback,
       ...issuanceRequest,
@@ -113,7 +113,7 @@ export class VerifiedIdRequestService extends HttpClient<BaseContext> {
       },
     }
     // build the payload, overriding the upstream callback
-    const { callback: upstreamCallback, ...presentationRequest } = request
+    const { callback: _upstreamCallback, ...presentationRequest } = request
     const payload: PresentationRequest = {
       callback,
       ...presentationRequest,

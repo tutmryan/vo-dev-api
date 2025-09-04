@@ -39,9 +39,9 @@ export const extractEmails = (to: MailTo, filterMode: 'allow' | 'block', filterL
       }
     }
     if (filterMode === 'allow') {
-      matched ? allowed.push(email) : blocked.push(email)
+      ;(matched ? allowed : blocked).push(email)
     } else {
-      matched ? blocked.push(email) : allowed.push(email)
+      ;(matched ? blocked : allowed).push(email)
     }
   }
 

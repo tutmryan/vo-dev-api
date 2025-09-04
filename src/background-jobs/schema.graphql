@@ -112,7 +112,7 @@ type BackgroundJobEventData {
   user: User
 }
 
-# eslint-disable-next-line @graphql-eslint/require-description, @graphql-eslint/no-unreachable-types
+# eslint-disable-next-line @graphql-eslint/require-description
 type Subscription {
   """
   Returns event data when the background job progresses from being queued to completed or failed

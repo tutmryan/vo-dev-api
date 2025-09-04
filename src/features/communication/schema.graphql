@@ -92,12 +92,10 @@ enum CommunicationOrderBy {
   """
   When the communication was sent.
   """
-  # eslint-disable-next-line @graphql-eslint/naming-convention
   sentAt
   """
   The name of the communication recipient.
   """
-  # eslint-disable-next-line @graphql-eslint/naming-convention
   recipientName
 }
 

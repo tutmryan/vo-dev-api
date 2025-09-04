@@ -59,7 +59,7 @@ ${failures
 })
 
 function getPackageVersion(packageName: string): string {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   return require(path.join(getPackageNodeModulesDirectory(packageName), 'package.json')).version
 }
 

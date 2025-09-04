@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker/locale/en'
+import { fakerEN as faker } from '@faker-js/faker'
 import { graphql } from '../../generated'
 import {
   CreatePartnerInput,

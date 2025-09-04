@@ -314,7 +314,7 @@ type TemplateDisplayConsent {
 
 """
 Supplemental data when the verifiable credential is issued
-""" # eslint-disable @graphql-eslint/strict-id-in-types
+"""
 input CreateUpdateTemplateDisplayConsentInput {
   """
   Title of the consent
@@ -366,7 +366,7 @@ type TemplateDisplayClaim {
 
 """
 Defines a claim included in a verifiable credential
-""" # eslint-disable @graphql-eslint/strict-id-in-types
+"""
 input CreateUpdateTemplateDisplayClaimInput {
   """
   The label of the claim.

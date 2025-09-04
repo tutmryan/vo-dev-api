@@ -5334,7 +5334,7 @@ export type ResolversTypes = {
   ContractDisplayCredentialInput: ContractDisplayCredentialInput;
   ContractDisplayCredentialLogo: ResolverTypeWrapper<ContractDisplayCredentialLogo>;
   ContractDisplayCredentialLogoInput: ContractDisplayCredentialLogoInput;
-  ContractDisplayModel: ResolverTypeWrapper<ContractDisplayModel>;
+  ContractDisplayModel: ResolverTypeWrapper<Omit<ContractDisplayModel, 'claims'> & { claims: Array<ResolversTypes['ContractDisplayClaim']> }>;
   ContractDisplayModelInput: ContractDisplayModelInput;
   ContractImportInput: ContractImportInput;
   ContractInput: ContractInput;
@@ -5471,10 +5471,10 @@ export type ResolversTypes = {
   TemplateDisplayConsent: ResolverTypeWrapper<TemplateDisplayConsent>;
   TemplateDisplayCredential: ResolverTypeWrapper<TemplateDisplayCredential>;
   TemplateDisplayCredentialLogo: ResolverTypeWrapper<TemplateDisplayCredentialLogo>;
-  TemplateDisplayModel: ResolverTypeWrapper<TemplateDisplayModel>;
+  TemplateDisplayModel: ResolverTypeWrapper<Omit<TemplateDisplayModel, 'claims'> & { claims?: Maybe<Array<ResolversTypes['TemplateDisplayClaim']>> }>;
   TemplateImportInput: TemplateImportInput;
   TemplateInput: TemplateInput;
-  TemplateParentData: ResolverTypeWrapper<TemplateParentData>;
+  TemplateParentData: ResolverTypeWrapper<Omit<TemplateParentData, 'display'> & { display?: Maybe<ResolversTypes['TemplateDisplayModel']> }>;
   TemplateWhere: TemplateWhere;
   TenantIdentity: ResolverTypeWrapper<TenantIdentity>;
   TenantIdentityWhere: TenantIdentityWhere;
@@ -5559,7 +5559,7 @@ export type ResolversParentTypes = {
   ContractDisplayCredentialInput: ContractDisplayCredentialInput;
   ContractDisplayCredentialLogo: ContractDisplayCredentialLogo;
   ContractDisplayCredentialLogoInput: ContractDisplayCredentialLogoInput;
-  ContractDisplayModel: ContractDisplayModel;
+  ContractDisplayModel: Omit<ContractDisplayModel, 'claims'> & { claims: Array<ResolversParentTypes['ContractDisplayClaim']> };
   ContractDisplayModelInput: ContractDisplayModelInput;
   ContractImportInput: ContractImportInput;
   ContractInput: ContractInput;
@@ -5679,10 +5679,10 @@ export type ResolversParentTypes = {
   TemplateDisplayConsent: TemplateDisplayConsent;
   TemplateDisplayCredential: TemplateDisplayCredential;
   TemplateDisplayCredentialLogo: TemplateDisplayCredentialLogo;
-  TemplateDisplayModel: TemplateDisplayModel;
+  TemplateDisplayModel: Omit<TemplateDisplayModel, 'claims'> & { claims?: Maybe<Array<ResolversParentTypes['TemplateDisplayClaim']>> };
   TemplateImportInput: TemplateImportInput;
   TemplateInput: TemplateInput;
-  TemplateParentData: TemplateParentData;
+  TemplateParentData: Omit<TemplateParentData, 'display'> & { display?: Maybe<ResolversParentTypes['TemplateDisplayModel']> };
   TemplateWhere: TemplateWhere;
   TenantIdentity: TenantIdentity;
   TenantIdentityWhere: TenantIdentityWhere;

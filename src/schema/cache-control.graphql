@@ -1,6 +1,8 @@
+# eslint-disable-next-line @graphql-eslint/require-description, @graphql-eslint/no-unreachable-types
 enum CacheControlScope {
   PUBLIC
   PRIVATE
 }
 
+# eslint-disable-next-line @graphql-eslint/require-description, @graphql-eslint/no-unreachable-types
 directive @cacheControl(maxAge: Int, scope: CacheControlScope, inheritMaxAge: Boolean) on FIELD_DEFINITION | OBJECT | INTERFACE | UNION

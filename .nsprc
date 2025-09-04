@@ -1,6 +1,2 @@
 {
-  "1106735": {
-    "notes": "Waiting for upstream fix. Koa is only used in the OIDC feature. The vuln is low severity",
-    "expiry": "2025/09/01"
-  }
 }

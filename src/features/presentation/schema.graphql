@@ -1052,7 +1052,7 @@ type PresentationEventData {
   presentation: Presentation
 }
 
-# eslint-disable-next-line @graphql-eslint/require-description, @graphql-eslint/no-unreachable-types
+# eslint-disable-next-line @graphql-eslint/require-description
 type Subscription {
   """
   Returns event data when an presentation callback is received

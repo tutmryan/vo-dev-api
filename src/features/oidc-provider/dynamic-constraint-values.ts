@@ -13,6 +13,7 @@ export const valueIsDynamic = (value: unknown): value is DynamicValue => {
 
 export const resolveDynamicConstraintValue = (value: DynamicValue, params: UnknownObject): string => {
   switch (value) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     case DynamicConstraintValues.loginHint: {
       if (!params.login_hint) logger.warn(`OIDC dynamic constraint value ${DynamicConstraintValues.loginHint} was mapped to an empty value`)
       return params.login_hint as string

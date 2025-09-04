@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-restricted-imports
 import config from 'config'
 
 import type { Configuration as MsalConfiguration } from '@azure/msal-node'

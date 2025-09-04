@@ -25,7 +25,7 @@ export async function FindOidcClientsQuery(
   if (criteria?.createdById) where.createdById = criteria.createdById
   where.createdAt = OptionalRange(criteria?.createdFrom, criteria?.createdTo)
 
-  const direction = orderDirection ?? !!orderBy ? OrderDirection.Asc : OrderDirection.Desc
+  const direction = orderDirection ?? (orderBy ? OrderDirection.Asc : OrderDirection.Desc)
   switch (orderBy) {
     case OidcClientOrderBy.Name:
       order.name = direction

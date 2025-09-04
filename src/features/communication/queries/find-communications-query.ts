@@ -33,9 +33,8 @@ export async function FindCommunicationsQuery(
 
   // default order direction to desc if orderBy is sentAt and not filtered to a single async issuance
   const direction =
-    orderDirection ?? (orderBy === CommunicationOrderBy.SentAt && !criteria?.asyncIssuanceRequestId)
-      ? OrderDirection.Desc
-      : OrderDirection.Asc
+    orderDirection ??
+    (orderBy === CommunicationOrderBy.SentAt && !criteria?.asyncIssuanceRequestId ? OrderDirection.Desc : OrderDirection.Asc)
 
   switch (orderBy) {
     case CommunicationOrderBy.RecipientName:

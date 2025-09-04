@@ -6,7 +6,7 @@ const config: Config.InitialOptions = {
   globalSetup: '<rootDir>/../jest.setup.ts',
   globalTeardown: '<rootDir>/../jest.teardown.ts',
   setupFilesAfterEnv: ['<rootDir>/../jest.setup-after-env.ts'],
-  prettierPath: require.resolve('prettier-2'),
+  prettierPath: 'prettier-2',
   // GH runners currently have 2 cores. However by default, Jest will use core count - 1,
   // so setting it to 2 will help with performance and memory usage
   ...(process.env.GITHUB_REPOSITORY ? { maxWorkers: 2 } : {}),

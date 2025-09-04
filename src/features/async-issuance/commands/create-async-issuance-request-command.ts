@@ -195,7 +195,7 @@ export async function CreateAsyncIssuanceRequestCommand(
     const asyncIssuance = new AsyncIssuanceEntity({
       id: randomUUID(),
       contractId,
-      identityId: identityId ? identityId : identityMap.get(identityInputKey(identity!)) ?? throwError('Identity not found'),
+      identityId: (identityId ? identityId : identityMap.get(identityInputKey(identity!))) ?? throwError('Identity not found'),
       expiryPeriodInDays: convertAsyncIssuanceRequestExpiryToDays(expiry),
       postIssuanceRedirectUrl: asyncIssuanceInput.postIssuanceRedirectUrl ?? null,
     })

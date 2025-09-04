@@ -1,3 +1,4 @@
+# eslint-disable-next-line @graphql-eslint/require-description
 enum OrderDirection {
   ASC
   DESC

@@ -355,7 +355,7 @@ type ContractDisplayConsent {
 
 """
 Supplemental data when the verifiable credential is issued
-""" # eslint-disable @graphql-eslint/strict-id-in-types
+"""
 input ContractDisplayConsentInput {
   """
   Title of the consent
