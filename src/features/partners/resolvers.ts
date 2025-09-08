@@ -29,5 +29,7 @@ export const resolvers: Resolvers = {
   },
   Partner: {
     suspendedAt: (parent) => parent.deletedAt,
+    contracts: ({ tenantId, issuerId }, _, { services: { verifiedIdAdmin } }) =>
+      tenantId && issuerId ? verifiedIdAdmin.networkContracts(tenantId, issuerId) : [],
   },
 }

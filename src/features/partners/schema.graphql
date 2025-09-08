@@ -78,6 +78,12 @@ type Partner {
   credentialTypes: [String!]!
 
   """
+  Lists the contracts published by this partner
+  See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
+  """
+  contracts: [NetworkContract!]!
+
+  """
   The Azure AD tenant identifier if the partner is on Entra network
   """
   tenantId: ID

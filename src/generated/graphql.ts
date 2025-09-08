@@ -3047,6 +3047,11 @@ export enum OrderDirection {
 /** A credential issuer partner trusted by the platform */
 export type Partner = {
   __typename?: 'Partner';
+  /**
+   * Lists the contracts published by this partner
+   * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
+   */
+  contracts: Array<NetworkContract>;
   /** When the partner was created. */
   createdAt: Scalars['DateTime']['output'];
   /** The user who created the partner. */
@@ -6306,6 +6311,7 @@ export type OidcResourceResolvers<ContextType = GraphQLContext, ParentType exten
 };
 
 export type PartnerResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Partner'] = ResolversParentTypes['Partner']> = {
+  contracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
