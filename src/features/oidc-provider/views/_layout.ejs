@@ -94,7 +94,8 @@
       color: #999;
     }
 
-    .grant-debug {
+    .grant-debug,
+    .error-debug {
       text-align: center;
       font-family: Fixed, monospace;
       font-size: 12px;
@@ -217,6 +218,29 @@
           <%- dbg.prompt %>
         </dd>
       </dl>
+    </details>
+  </div>
+  <% } %>
+  <% if (showErrorDebug) { %>
+  <div class="error-debug debug">
+    <details>
+      <summary style="text-align: center;">(Click to expand) ERROR information</summary>
+      <div>
+        <dl>
+          <dt>message</dt>
+          <dd><%= error.message %></dd>
+          <dt>stack</dt>
+          <dd><code><%= error.stack %></code></dd>
+          <dt>cause</dt>
+          <dd><%= error.cause %></dd>
+          <dt>fileName</dt>
+          <dd><%= error.fileName %></dd>
+          <dt>column #</dt>
+          <dd><%= error.column %></dd>
+          <dt>line #</dt>
+          <dd><%= error.line %></dd>
+        </dl>
+      </div>
     </details>
   </div>
   <% } %>

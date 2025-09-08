@@ -60,8 +60,13 @@ export function routes(app: Express, route: string): void {
 
   app.use((_req, res, next) => {
     const orig = res.render
-    // you'll probably want to use a fully blown render engine capable of layouts
     res.render = (view, locals) => {
+      if (view === 'no-session') {
+        // orig is overloaded, and the correct overload type is lost so we cast locals to any
+        orig.call(res, view, locals as any)
+        return
+      }
+
       app.render(view, locals, (err, html) => {
         if (err as Error | undefined) {
           // An empty _layout fill will render. There's not much we can do to improve this.
@@ -131,6 +136,7 @@ export function routes(app: Express, route: string): void {
             backgroundColor,
             backgroundImageUrl: backgroundImage,
             showDebug,
+            showErrorDebug: false,
             session: session ? debug(session) : undefined,
             dbg: {
               params: debug(params),
@@ -141,23 +147,46 @@ export function routes(app: Express, route: string): void {
         case 'consent': {
           const clientEntity = getClient(client.clientId)
           const { logo, backgroundColor, backgroundImage } = clientEntity
-          return res.render('interaction', {
+          return res.render('unsupported-operation', {
             client,
             uid,
             details: prompt.details,
             params,
-            title: 'Authorize',
+            title: 'Unsupported operation',
             voLogoUrl,
             logoUrl: logo,
             backgroundColor,
             backgroundImageUrl: backgroundImage,
             showDebug,
+            showErrorDebug: false,
             session: session ? debug(session) : undefined,
             dbg: {
               params: debug(params),
               prompt: debug(prompt),
             },
           })
+          // The VO solution currently auto-consents, and doesn't support the concept of an auth session
+          // If the provider is wanting the user to consent, it's very likely to be a configuration issue,
+          // such as a missing mapping of claims or incorrect scope(s) requested.
+
+          // return res.render('interaction', {
+          //   client,
+          //   uid,
+          //   details: prompt.details,
+          //   params,
+          //   title: 'Authorize',
+          //   voLogoUrl,
+          //   logoUrl: logo,
+          //   backgroundColor,
+          //   backgroundImageUrl: backgroundImage,
+          //   showDebug,
+          //   showErrorDebug: false,
+          //   session: session ? debug(session) : undefined,
+          //   dbg: {
+          //     params: debug(params),
+          //     prompt: debug(prompt),
+          //   },
+          // })
         }
         default:
           return undefined
@@ -353,6 +382,7 @@ export function routes(app: Express, route: string): void {
         backgroundColor,
         backgroundImageUrl: backgroundImage,
         showDebug,
+        showErrorDebug: showDebug,
         session: session ? debug(session) : undefined,
         dbg: {
           params: debug(params),
@@ -361,6 +391,13 @@ export function routes(app: Express, route: string): void {
         error: showDebug ? err : undefined,
       })
     } catch (error) {
+      const { errors } = await oidcProviderModule()
+      if (error instanceof errors.SessionNotFound) {
+        return res.render('no-session', {
+          voLogoUrl,
+        })
+      }
+
       // If we can't render the error page, just send a generic error response
       logger.error('OIDC provider route error while rendering error page', { error })
       res.status(500)
