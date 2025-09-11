@@ -75,7 +75,7 @@ const revokeIssuanceBatch = async (context: HandlerContext, issuances: IssuanceE
           if (result) {
             addUserToManager(entityManager, user.id)
             await entityManager.getRepository(IssuanceEntity).save(result)
-            logger.audit('Issuance revoked', { issuance: omit(result, '__contract__', '__revokedBy__'), ...context.jobAuditMetadata })
+            auditLogRevocation(logger, result)
           }
         })
       }
@@ -89,6 +89,10 @@ const revokeIssuanceBatch = async (context: HandlerContext, issuances: IssuanceE
   if (errorMessages.length > 0) {
     throw new Error(errorMessages.join('\n'))
   }
+}
+
+export const auditLogRevocation = (log: typeof logger, revokedIssuance: IssuanceEntity) => {
+  log.audit('Issuance revoked', { issuance: omit(revokedIssuance, '__contract__', '__revokedBy__') })
 }
 
 const revokeIssuance = async (

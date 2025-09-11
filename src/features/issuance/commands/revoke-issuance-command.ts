@@ -3,6 +3,7 @@ import { IssuanceStatus } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { IssuanceEntity } from '../entities/issuance-entity'
+import { auditLogRevocation } from '../jobs/revoke-utils'
 
 export async function RevokeIssuanceCommand(this: CommandContext, id: string) {
   const {
@@ -33,5 +34,6 @@ export async function RevokeIssuanceCommand(this: CommandContext, id: string) {
   await verifiedIdAdmin.revokeCredential(contractExternalId, credential.id)
 
   issuance.markAsRevoked(user.entity)
+  auditLogRevocation(logger, issuance)
   return await issuanceRepository.save(issuance)
 }
