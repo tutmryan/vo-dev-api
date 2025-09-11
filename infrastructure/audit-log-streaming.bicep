@@ -120,7 +120,7 @@ resource extractAuditTracesJob 'Microsoft.StreamAnalytics/streamingjobs@2021-10-
               sharedAccessPolicyName: '${resourcePrefix}-extract-app-traces-job-policy'
               sharedAccessPolicyKey: appTracesEventHubRule.listKeys().primaryKey
               eventHubName: appTracesEventHub.name
-              consumerGroupName: '${resourcePrefix}-extract-audit-traces-job-consumer-group'
+              consumerGroupName: '${resourcePrefix}-extract-audit-traces'
             }
           }
         }
