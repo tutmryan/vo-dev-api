@@ -46,7 +46,7 @@ resource appTracesEventHubRule 'Microsoft.EventHub/namespaces/eventhubs/authoriz
 }
 
 resource appTracesEventHubConsumerGroups 'Microsoft.EventHub/namespaces/eventhubs/consumergroups@2022-10-01-preview' = {
-  name: '${resourcePrefix}-extract-audit-traces-job-consumer-group'
+  name: '${resourcePrefix}-extract-audit-traces'
   parent: appTracesEventHub
 }
 
