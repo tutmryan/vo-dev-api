@@ -1,7 +1,6 @@
 import { isLocalDev } from '@makerx/node-common'
 import { createLogger } from '@makerx/node-winston'
 import { pid } from 'node:process'
-import { configs } from 'triple-beam'
 import type { LoggerOptions, QueryRunner, Logger as TypeOrmLoggerInterface } from 'typeorm'
 import type { Logger as WinstonLogger } from 'winston'
 import * as winston from 'winston'
@@ -12,18 +11,34 @@ import { redactValues } from './util/redact-values'
  * set up 'audit' log level, replacing 'http' level
  */
 export type Logger = ReturnType<typeof createLogger> & { audit: winston.LeveledLogMethod } & Pick<WinstonLogger, 'isVerboseEnabled'>
-// extract http from levels and colors
-const { http: httpLevel, ...levelsRest } = configs.npm.levels
-const { http: httpColor, ...colorsRest } = configs.npm.colors
-// configure levels
-export const levels: winston.config.AbstractConfigSetLevels & { audit: number } = { ...levelsRest, audit: httpLevel as number }
+
+const logLevels = {
+  audit: 0, // Audit logs must always be captured
+  error: 1,
+  warn: 2,
+  info: 3,
+  verbose: 4,
+  debug: 5,
+  silly: 6,
+}
+
+const logColours: Record<keyof typeof logLevels, string> = {
+  audit: 'green',
+  error: 'red',
+  warn: 'yellow',
+  info: 'green',
+  debug: 'blue',
+  verbose: 'cyan',
+  silly: 'magenta',
+}
+
 // configure colors
-winston.addColors({ ...colorsRest, audit: httpColor as string })
+winston.addColors({ ...logColours })
 
 const baseLogger = createLogger({
   consoleFormat: isLocalDev ? 'pretty' : 'json',
   consoleOptions: logging.consoleOptions,
-  loggerOptions: { ...logging.loggerOptions, levels, defaultMeta: { pid } },
+  loggerOptions: { ...logging.loggerOptions, levels: logLevels, defaultMeta: { pid } },
   omitPaths: logging.omitPaths,
 }) as Logger
 

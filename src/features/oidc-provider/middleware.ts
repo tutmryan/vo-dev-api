@@ -1,9 +1,11 @@
+import type { Request } from 'express'
 import { decodeJwt } from 'jose'
 import type Provider from 'oidc-provider'
 import type { OIDCContext } from 'oidc-provider'
 import { logger } from '../../logger'
 import { redactValueEmail, redactValueInner, redactValueObjectUnknown } from '../../util/redact-values'
 import { deleteAccount } from './account'
+import { createRequestInfo } from './log-events'
 
 type Middleware = Parameters<Provider['use']>[0]
 type Context = Parameters<Middleware>[0]
@@ -45,7 +47,7 @@ function deleteAccountOnLogout(ctx: Context, oidc: OIDCContext) {
   if (oidc.route === 'end_session') {
     const accountId = oidc.entities.IdTokenHint?.payload.sub as string | undefined
     if (accountId) {
-      logger.audit(`OIDC account ${accountId} logged out, deleting account`)
+      logger.audit(`OIDC account logged out`, { accountId, request: createRequestInfo(ctx.req as Request) })
       deleteAccount(accountId).catch((error) => {
         logger.error(`Failed to delete OIDC account ${accountId}`, { error })
       })
