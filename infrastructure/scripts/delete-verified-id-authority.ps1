@@ -21,13 +21,13 @@ $authorities = az rest `
 $authority = $authorities | Where-Object -FilterScript { $_.didModel.linkedDomainUrls -eq $LinkedDomainUrl }[0]
 
 if ($null -ne $authority) {
-  Write-Output 'Deleting Verified ID Authority for linked domain URL: {0}' -f $LinkedDomainUrl
+  Write-Output ('Deleting Verified ID Authority for linked domain URL: {0}' -f $LinkedDomainUrl)
   Write-Output ('Authority ID is: {0}' -f $authority.id)
   Write-Output ('Authority Name is: {0}' -f $authority.name)
 
   az rest `
     --method delete `
-    --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities/$authority.id `
+    --url https://verifiedid.did.msidentity.com/beta/verifiableCredentials/authorities/$authority.id `
     --resource $constants.didResourceId
 
   Write-Output ('Deleted Authority ID: {0} ✅' -f $authority.id)
