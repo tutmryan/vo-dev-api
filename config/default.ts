@@ -33,7 +33,7 @@ const config: DeepPartial<Config> = {
       defaultMeta: {
         service: 'verified-orchestration-api',
       },
-      level: 'audit',
+      level: 'info',
     },
     consoleOptions: {
       silent: false,
