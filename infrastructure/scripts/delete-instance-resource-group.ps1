@@ -27,6 +27,9 @@ if ($locks -and $locks.Count -gt 0) {
   Write-Output "No resource locks found in resource group '$ResourceGroupName'"
 }
 
+# Pause briefly to ensure locks are fully deleted before proceeding
+Start-Sleep -Seconds 10
+
 # Step 2: Delete the resource group
 Write-Output "Deleting resource group: $ResourceGroupName"
 
