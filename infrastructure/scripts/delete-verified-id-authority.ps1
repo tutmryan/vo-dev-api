@@ -27,7 +27,7 @@ if ($null -ne $authority) {
 
   az rest `
     --method delete `
-    --url https://verifiedid.did.msidentity.com/beta/verifiableCredentials/authorities/$authority.id `
+    --url "https://verifiedid.did.msidentity.com/beta/verifiableCredentials/authorities/$($authority.id)" `
     --resource $constants.didResourceId
 
   Write-Output ('Deleted Authority ID: {0} ✅' -f $authority.id)
