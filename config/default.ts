@@ -39,6 +39,7 @@ const config: DeepPartial<Config> = {
       silent: false,
     },
   },
+  auditLogStreaming: {},
   cookieSession: {
     maxAge: 3600000,
     sameSite: 'none',

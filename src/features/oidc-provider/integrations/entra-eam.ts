@@ -4,7 +4,7 @@ import type { AuthoriseResponse, Configuration, Errors, KoaContextWithOIDC, Prov
 import { eamIssuerOptions } from '../../../config'
 import { dataSource } from '../../../data'
 import type { ClaimConstraint, PresentedCredential } from '../../../generated/graphql'
-import { logger } from '../../../logger'
+import { type Logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
 import { redactValueEmail, redactValueInner, redactValueObjectUnknown } from '../../../util/redact-values'
 import { compareIgnoreCase } from '../../../util/string'
@@ -14,6 +14,7 @@ import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { supportedAmrs } from '../claims'
 import { filterToRequestedClaimsAcr, filterToRequestedClaimsAmr } from '../claims-parameter'
 import { type ApplyIntercept, type ApplyPostIntercept, type RouterContextWithOIDC } from '../integration-hook'
+import { buildRequestLogger } from '../logger'
 import { oauthErrors } from '../oauth'
 import { oidcProviderModule } from '../provider'
 import type { LoginInteractionData } from '../session'
@@ -45,7 +46,7 @@ const mapMsLoginToAzureJwksUri = (uri: string) => {
   return undefined
 }
 
-const paramsToAuthParamsSpec = (params: Record<string, unknown>, errors: Errors) => {
+const paramsToAuthParamsSpec = (params: Record<string, unknown>, errors: Errors, logger: Logger) => {
   const requiredString = (key: string) => {
     if (!params[key] || typeof params[key] !== 'string') {
       logger.error(`Missing required parameter: ${key}`)
@@ -94,7 +95,7 @@ const extractLoggable = (params: UnknownObject, idTokenHint?: { header: UnknownO
   }
 }
 
-export function addEamPresentationConstraints(loginData: LoginInteractionData, constraints?: ClaimConstraint[]) {
+export function addEamPresentationConstraints(loginData: LoginInteractionData, constraints: ClaimConstraint[] | undefined, logger: Logger) {
   invariant(loginData.integrations?.entraEam, 'EAM integration not found during constraint build')
   invariant(loginData.integrations.entraEam.identityId, 'Identity ID not found during EAM identity constraint build')
 
@@ -120,7 +121,7 @@ export function addEamPresentationConstraints(loginData: LoginInteractionData, c
   return augmentedConstraints
 }
 
-export function getEamAccountId(loginData: LoginInteractionData, credential: PresentedCredential) {
+export function getEamAccountId(loginData: LoginInteractionData, credential: PresentedCredential, logger: Logger) {
   invariant(loginData.integrations?.entraEam, 'EAM integration not found during constraint build')
   invariant(
     compareIgnoreCase(credential.claims[StandardClaims.identityId], loginData.integrations.entraEam.identityId),
@@ -135,7 +136,7 @@ export function getEamAccountId(loginData: LoginInteractionData, credential: Pre
   return loginData.integrations.entraEam.sub
 }
 
-export function isEamRequestAndLoginShouldFail(loginData?: LoginInteractionData) {
+export function isEamRequestAndLoginShouldFail(loginData: LoginInteractionData | undefined, logger: Logger) {
   // Ignore non-EAM requests
   if (!loginData?.integrations?.entraEam) {
     logger.verbose('OIDC EAM hook:isEamRequestAndLoginShouldFail skipping non-EAM request')
@@ -158,7 +159,7 @@ export const eamLoginFailResult = {
   error_description: 'No identity could be matched to the Entra user.',
 }
 
-export function getEamAmr(loginData: LoginInteractionData): string[] {
+export function getEamAmr(loginData: LoginInteractionData, logger: Logger): string[] {
   // Entra will typically request ["face","fido","fpt","hwk","iris","otp","tel","pop","retina","sc","sms","swk","vbm","bio"]
   const amr = filterToRequestedClaimsAmr([...supportedAmrs], loginData.requestedClaims!)
 
@@ -167,14 +168,14 @@ export function getEamAmr(loginData: LoginInteractionData): string[] {
   return [amr[0]!] // Entra only allows a single amr value, so we return an array with a single value.
 }
 
-export function getEamAcr(loginData: LoginInteractionData) {
+export function getEamAcr(loginData: LoginInteractionData, logger: Logger): string {
   // Entra will typically request ["possessionorinherence"], but it can also request other acr values. (AS WE FOUND OUT!)
   const acr = filterToRequestedClaimsAcr('possessionorinherence', loginData.requestedClaims!)
   logger.info('OIDC EAM hook:getEamAcr', { acr })
   return acr
 }
 
-export const isEamRequest = (params: UnknownObject, clientId: string) => {
+export const isEamRequest = (params: UnknownObject, clientId: string, logger: Logger) => {
   // Confirm the basic OIDC parameters line up with expected EAM values
   if (
     !((params.scope as string | undefined) ?? '').includes('openid') ||
@@ -241,6 +242,7 @@ export const isEamCheckIdTokenIntercept = async (ctx: RouterContextWithOIDC) => 
 
   const { oidc } = ctx
   const { errors } = await oidcProviderModule()
+  const logger = buildRequestLogger(ctx.request)
 
   if (!oidc.client?.clientId) {
     logger.error(`OIDC EAM hook:isEamCheckIdTokenIntercept Client ID not found in the OIDC context`, {
@@ -249,13 +251,14 @@ export const isEamCheckIdTokenIntercept = async (ctx: RouterContextWithOIDC) => 
     throw new errors.InvalidClient('Client not found')
   }
 
-  return isEamRequest(oidc.params!, oidc.client.clientId)
+  return isEamRequest(oidc.params!, oidc.client.clientId, logger)
 }
 
 export const applyEamCheckIdTokenHook: ApplyIntercept = async (ctx, next, _original) => {
   const { oidc } = ctx
   const { errors } = await oidcProviderModule()
-  const authParams = paramsToAuthParamsSpec(oidc.params!, errors)
+  const logger = buildRequestLogger(ctx.request)
+  const authParams = paramsToAuthParamsSpec(oidc.params!, errors, logger)
   const decodedProtectedHeader = decodeProtectedHeader(authParams.id_token_hint!)
 
   if (!decodedProtectedHeader.alg) {
@@ -292,6 +295,7 @@ export const isEamInteractionsIntercept = isEamCheckIdTokenIntercept
 
 export const applyEamInteractionsHook: ApplyPostIntercept = async (ctx) => {
   const { oidc } = ctx
+  const logger = buildRequestLogger(ctx.request)
 
   // Started interactions will redirect, so if we're not redirecting, we should not apply the custom logic
   if (ctx.response.status !== 303) {
@@ -351,11 +355,12 @@ export const applyEamInteractionsHook: ApplyPostIntercept = async (ctx) => {
 export const registerEamEventListeners = (provider: Provider) => {
   provider.on('authorization.success', (ctx: KoaContextWithOIDC, response: AuthoriseResponse) => {
     const { oidc } = ctx
+    const logger = buildRequestLogger(ctx.request)
 
     invariant(oidc.client?.clientId, 'Client not found in OIDC context during EAM auth flow')
 
     // Don't intercept non-EAM requests
-    if (!isEamRequest(oidc.params!, oidc.client.clientId)) {
+    if (!isEamRequest(oidc.params!, oidc.client.clientId, logger)) {
       logger.verbose('OIDC EAM hook:event:authorization.success skipping non-EAM request')
       return
     }

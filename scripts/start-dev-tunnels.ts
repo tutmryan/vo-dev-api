@@ -145,6 +145,7 @@ const startNgrok = async () => {
   // Composer
   console.log('Updating the Composer .env.local file with the new API URL...')
   replaceValueInEnvConfigFile('VITE_API_URL', `${apiURL}/graphql`, pathToComposer, '.env.local')
+  replaceValueInEnvConfigFile('VITE_API_SCHEMA_URL', `${apiURL}/graphql`, pathToComposer, '.env.local')
   replaceValueInEnvConfigFile('VITE_PORTAL_URL', conciergeURL, pathToComposer, '.env.local')
 
   // Concierge

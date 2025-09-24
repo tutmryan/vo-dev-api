@@ -35,6 +35,12 @@ const config: EnvVarSubstitution<Config> = {
       level: 'LOG_LEVEL',
     },
   },
+  auditLogStreaming: {
+    dataCollectionEndpoint: 'AUDIT_DATA_COLLECTION_ENDPOINT',
+    dataCollectionRuleId: 'AUDIT_DATA_COLLECTION_RULE_ID',
+    dataCollectionClientId: 'AUDIT_DATA_COLLECTION_CLIENT_ID',
+    dataCollectionClientSecret: 'AUDIT_DATA_COLLECTION_CLIENT_SECRET',
+  },
   instance: 'INSTANCE',
   version: 'VERSION',
   devToolsEnabled: json('DEV_TOOLS_ENABLED'),

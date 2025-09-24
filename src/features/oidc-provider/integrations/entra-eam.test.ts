@@ -1,5 +1,6 @@
 import type { ClaimsParameter } from 'oidc-provider'
 import type { ClaimConstraint, PresentedCredential } from '../../../generated/graphql'
+import { logger } from '../../../logger'
 import { InvariantError } from '../../../util/invariant'
 import { StandardClaims } from '../../contracts/claims'
 import { supportedAcrs, supportedAmrs } from '../claims'
@@ -35,7 +36,7 @@ describe('addEamPresentationConstraints', () => {
     const loginData = baseLoginData()
 
     // Act
-    const result = addEamPresentationConstraints(loginData, undefined)
+    const result = addEamPresentationConstraints(loginData, undefined, logger)
 
     // Assert
     expect(result).toHaveLength(1)
@@ -48,7 +49,7 @@ describe('addEamPresentationConstraints', () => {
     const originalConstraints: ClaimConstraint[] = []
 
     // Act
-    const result = addEamPresentationConstraints(loginData, originalConstraints)
+    const result = addEamPresentationConstraints(loginData, originalConstraints, logger)
 
     // Assert - new array returned
     expect(result).toHaveLength(1)
@@ -61,7 +62,7 @@ describe('addEamPresentationConstraints', () => {
     const existingConstraint: ClaimConstraint = { claimName: 'someClaim', values: ['someValue'] }
 
     // Act
-    const result = addEamPresentationConstraints(loginData, [existingConstraint])
+    const result = addEamPresentationConstraints(loginData, [existingConstraint], logger)
 
     // Assert
     expect(result).toHaveLength(2)
@@ -75,8 +76,8 @@ describe('addEamPresentationConstraints', () => {
     delete loginData.integrations?.entraEam
 
     // Act & Assert
-    expect(() => addEamPresentationConstraints(loginData)).toThrow(InvariantError)
-    expect(() => addEamPresentationConstraints(loginData)).toThrow('EAM integration not found during constraint build')
+    expect(() => addEamPresentationConstraints(loginData, undefined, logger)).toThrow(InvariantError)
+    expect(() => addEamPresentationConstraints(loginData, undefined, logger)).toThrow('EAM integration not found during constraint build')
   })
 
   it('throws when identityId is missing inside EAM integration', () => {
@@ -85,8 +86,10 @@ describe('addEamPresentationConstraints', () => {
     delete loginData.integrations?.entraEam?.identityId
 
     // Act & Assert
-    expect(() => addEamPresentationConstraints(loginData)).toThrow(InvariantError)
-    expect(() => addEamPresentationConstraints(loginData)).toThrow('Identity ID not found during EAM identity constraint build')
+    expect(() => addEamPresentationConstraints(loginData, undefined, logger)).toThrow(InvariantError)
+    expect(() => addEamPresentationConstraints(loginData, undefined, logger)).toThrow(
+      'Identity ID not found during EAM identity constraint build',
+    )
   })
 })
 
@@ -96,7 +99,7 @@ describe('getEamAmr', () => {
     const loginData = withRequestedClaims({})
 
     // Act
-    const result = getEamAmr(loginData)
+    const result = getEamAmr(loginData, logger)
 
     // Assert
     expect(result).toEqual([supportedAmrs[0]])
@@ -113,7 +116,7 @@ describe('getEamAmr', () => {
     })
 
     // Act
-    const result = getEamAmr(loginData)
+    const result = getEamAmr(loginData, logger)
 
     // Assert
     expect(result).toEqual(['face'])
@@ -130,7 +133,7 @@ describe('getEamAmr', () => {
     })
 
     // Act
-    const result = getEamAmr(loginData)
+    const result = getEamAmr(loginData, logger)
 
     // Assert
     expect(result).toEqual([supportedAmrs[0]])
@@ -145,7 +148,7 @@ describe('getEamAcr', () => {
     })
 
     // Act
-    const result = getEamAcr(loginData)
+    const result = getEamAcr(loginData, logger)
 
     // Assert
     expect(result).toEqual('possessionorinherence')
@@ -162,7 +165,7 @@ describe('getEamAcr', () => {
     })
 
     // Act
-    const result = getEamAcr(loginData)
+    const result = getEamAcr(loginData, logger)
 
     // Assert
     expect(result).toEqual('possessionorinherence')
@@ -179,7 +182,7 @@ describe('getEamAcr', () => {
     })
 
     // Act
-    const result = getEamAcr(loginData)
+    const result = getEamAcr(loginData, logger)
 
     // Assert
     expect(result).toEqual(acr)
@@ -205,7 +208,7 @@ describe('getEamAccountId', () => {
     credential.claims[StandardClaims.identityId] = loginData.integrations!.entraEam!.identityId?.toLocaleUpperCase()
 
     // Act
-    const result = getEamAccountId(loginData, credential)
+    const result = getEamAccountId(loginData, credential, logger)
 
     // Assert
     expect(result).toBe(loginData.integrations!.entraEam!.sub)
@@ -218,8 +221,8 @@ describe('getEamAccountId', () => {
     const credential = baseCredential()
 
     // Act & Assert
-    expect(() => getEamAccountId(loginData, credential)).toThrow(InvariantError)
-    expect(() => getEamAccountId(loginData, credential)).toThrow('EAM integration not found during constraint build')
+    expect(() => getEamAccountId(loginData, credential, logger)).toThrow(InvariantError)
+    expect(() => getEamAccountId(loginData, credential, logger)).toThrow('EAM integration not found during constraint build')
   })
 
   it('throws when identityId does not match', () => {
@@ -229,7 +232,7 @@ describe('getEamAccountId', () => {
     credential.claims[StandardClaims.identityId] = 'different-identity-id'
 
     // Act & Assert
-    expect(() => getEamAccountId(loginData, credential)).toThrow(InvariantError)
-    expect(() => getEamAccountId(loginData, credential)).toThrow('Identity ID mismatch during EAM OIDC account ID check')
+    expect(() => getEamAccountId(loginData, credential, logger)).toThrow(InvariantError)
+    expect(() => getEamAccountId(loginData, credential, logger)).toThrow('Identity ID mismatch during EAM OIDC account ID check')
   })
 })

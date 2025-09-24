@@ -220,7 +220,6 @@ Other bits of configuration will remain controlled outside of the instance, e.g.
 For now, the Platform Management API is used to manage at least some instance configuration e.g.:
 
 - Configuration required before the instance is first deployed, such as the:
-
   - first authentication tenant ID
   - VID authority ID, client ID and secret for instances with customer hosted authorities
 
@@ -242,3 +241,11 @@ For now, the Platform Management API is used to manage at least some instance co
 
 - After making changes to the schema subset config, run `npm run gql:download-remote` or the VS Code task to update the `features/platform-management/remote-schema.graphql` file.
 - Make sure all the required types, including scalar types, fields and input types are defined, or you may be unable to generate a valid schema subset.
+
+## Audit logging during local dev
+
+When logging via the `logger.audit` method, the logs are sent to both the normal logging sinks (console, Seq, etc) and the audit log service. When configured via the `.env`, the Dev VO Instance Log Analytics workspace will also be sent these logs. When not configured, the logs will be ignored.
+
+To enable other destinations, you must add the `Verified Orchestration (dev)` Service Principal with the role `Monitoring Metrics Publisher` (ID: 3913510d-42f4-4e42-8a64-420c390055eb) to the Log Collection Rule (Note: it takes up to 1 hour for role assignments to propagate). It looks like this, sitting alongside the Managed Identity the API instance uses:
+
+![Log Collection Rule](./docs/assets/data-collection-rule-local-dev.png)

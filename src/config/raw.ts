@@ -34,6 +34,12 @@ export type Config = {
     }
     consoleOptions: Omit<ConsoleTransportOptions, 'format'>
   }
+  auditLogStreaming: {
+    dataCollectionEndpoint: string
+    dataCollectionRuleId: string
+    dataCollectionClientId: string
+    dataCollectionClientSecret: string
+  }
   cookieSession: CookieSessionInterfaces.CookieSessionOptions
   auth: {
     bearer: Omit<BearerConfig, 'jwksUri'>

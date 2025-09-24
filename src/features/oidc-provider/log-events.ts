@@ -6,22 +6,7 @@ import type Provider from 'oidc-provider'
 import type { KoaContextWithOIDC } from 'oidc-provider'
 import { logger } from '../../logger'
 import { redactValueObjectUnknown } from '../../util/redact-values'
-
-export function createRequestInfo(req: Request) {
-  return omitBy(
-    {
-      protocol: req.protocol as 'http' | 'https',
-      host: req.hostname,
-      method: req.method,
-      url: redactAuthParams(req.originalUrl),
-      origin: req.get('Origin') ?? undefined,
-      referer: req.headers.referer?.toString() ?? undefined,
-      clientIp: req.headers['x-forwarded-for']?.toString() ?? req.socket.remoteAddress,
-      userAgent: req.headers['user-agent']?.toString() ?? undefined,
-    },
-    isNil,
-  )
-}
+import { createRequestInfo } from './logger'
 
 function createOidcInfo(ctx: KoaContextWithOIDC) {
   return omitBy(
@@ -33,14 +18,10 @@ function createOidcInfo(ctx: KoaContextWithOIDC) {
   )
 }
 
-function redactAuthParams(url: string) {
-  return url.replace(/(code|state|session_state|access_token|id_token|error|error_description|error_uri)=[^&]+/g, '$1=[redacted]')
-}
-
 function createLogParams(ctx: KoaContextWithOIDC) {
   return {
     oidc: createOidcInfo(ctx),
-    request: createRequestInfo(ctx.req as Request),
+    requestInfo: createRequestInfo(ctx.req as Request), // aligns with the GraphQl context requestInfo
   }
 }
 

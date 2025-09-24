@@ -27,6 +27,8 @@ export * from './expanded'
 // export all other top level configs
 export const server = config.get('server')
 export const logging = config.get('logging')
+export const auditLogStreaming = config.get('auditLogStreaming')
+export const platformTenant = config.get('platformTenant')
 export const cookieSession = config.get('cookieSession')
 export const database = config.get('database')
 export const redis = config.get('redis')

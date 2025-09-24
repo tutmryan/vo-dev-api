@@ -57,6 +57,16 @@ const plugins = (
       logLevel: 'audit',
       contextCreationFailureLogger: logger,
       includeMutationResponseData: true,
+      augmentLogEntry(ctx) {
+        return {
+          user: {
+            id: ctx.user?.id,
+            name: ctx.user?.name,
+            roles: ctx.user?.roles,
+          },
+          request: ctx.requestInfo,
+        }
+      },
     }),
     introspectionControlPlugin as ApolloServerPlugin<GraphQLContext>,
     ApolloServerPluginDrainHttpServer({ httpServer }),

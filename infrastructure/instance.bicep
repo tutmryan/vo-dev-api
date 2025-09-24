@@ -19,6 +19,14 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' exis
   name: '${resourcePrefix}-la'
 }
 
+resource auditTracesDataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' existing = {
+  name: '${resourcePrefix}-dcr-audit-traces'
+}
+
+resource auditTracesDataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2023-03-11' existing = {
+  name: '${resourcePrefix}-dce-audit-traces'
+}
+
 resource apiAppInsights 'Microsoft.Insights/components@2020-02-02' = {
   name: '${resourcePrefix}-api-insights'
   location: location
@@ -1388,6 +1396,21 @@ output apiAppServiceName string = apiAppService.name
 output apiAppServiceDefaultHostname string = apiAppService.properties.defaultHostName
 output apiAppServiceCustomDomainVerificationId string = apiAppService.properties.customDomainVerificationId
 
+resource monitoringMetricsPublisherRoleDefinition 'Microsoft.Authorization/roleDefinitions@2022-04-01' existing = {
+  scope: subscription()
+  name: '3913510d-42f4-4e42-8a64-420c390055eb'
+}
+
+resource webAppToDcrRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(auditTracesDataCollectionRule.id, apiAppService.id, monitoringMetricsPublisherRoleDefinition.id)
+  scope: auditTracesDataCollectionRule
+  properties: {
+    roleDefinitionId: monitoringMetricsPublisherRoleDefinition.id
+    principalId: apiAppService.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 param sqlServerName string
 param nodeEnv string
 param apiClientId string
@@ -1454,6 +1477,8 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     WEBSITE_SWAP_WARMUP_PING_STATUSES: '200'
     // The default is 230 (3:50), increase to 600 (10:00)
     WEBSITES_CONTAINER_START_TIME_LIMIT: '600'
+    AUDIT_DATA_COLLECTION_ENDPOINT: auditTracesDataCollectionEndpoint.properties.logsIngestion.endpoint
+    AUDIT_DATA_COLLECTION_RULE_ID: auditTracesDataCollectionRule.properties.immutableId
   }
 }
 

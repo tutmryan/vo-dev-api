@@ -9,13 +9,12 @@ import { inspect } from 'node:util'
 import type { Grant, InteractionResults } from 'oidc-provider'
 import { instance } from '../../config'
 import { requestOrigin } from '../../express'
-import { logger } from '../../logger'
 import { invariant } from '../../util/invariant'
 import { redactValueObjectUnknown } from '../../util/redact-values'
 import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
 import { filterToRequestedClaimsAcr, filterToRequestedClaimsAmr } from './claims-parameter'
 import { eamLoginFailResult, getEamAcr, getEamAmr, isEamRequestAndLoginShouldFail } from './integrations/entra-eam'
-import { createRequestInfo } from './log-events'
+import { buildRequestLogger } from './logger'
 import { voLogoUrl } from './logos'
 import { getClient, getData, getProvider, oidcProviderModule } from './provider'
 import { acquireLoginPresentationToken, buildAuthnPresentationRequest, completeLogin, getLoginInteractionData } from './session'
@@ -58,7 +57,8 @@ export function routes(app: Express, route: string): void {
   app.set('views', path.join(__dirname, 'views'))
   app.set('view engine', 'ejs')
 
-  app.use((_req, res, next) => {
+  app.use((req, res, next) => {
+    const logger = buildRequestLogger(req)
     const orig = res.render
     res.render = (view, locals) => {
       if (view === 'no-session') {
@@ -90,6 +90,7 @@ export function routes(app: Express, route: string): void {
 
   app.get(`${route}/interaction/:uid`, noCache, async (req, res, next) => {
     const provider = getProvider()
+    const logger = buildRequestLogger(req)
 
     try {
       const { uid, prompt, params, session } = await provider.interactionDetails(req, res)
@@ -105,13 +106,19 @@ export function routes(app: Express, route: string): void {
           const clientEntity = getClient(client.clientId)
 
           // Integration hooks
-          if (isEamRequestAndLoginShouldFail(loginInteractionData)) {
+          if (isEamRequestAndLoginShouldFail(loginInteractionData, logger)) {
             await provider.interactionFinished(req, res, eamLoginFailResult, { mergeWithLastSubmission: false })
             return
           }
 
           // TODO: handle param validation errors with a better UX
-          const presentationRequest = await buildAuthnPresentationRequest(params, clientEntity, getData().partners, loginInteractionData)
+          const presentationRequest = await buildAuthnPresentationRequest(
+            params,
+            clientEntity,
+            getData().partners,
+            loginInteractionData,
+            logger,
+          )
           logger.verbose('OIDC login presentation request', {
             presentationRequest: redactValueObjectUnknown(presentationRequest),
           })
@@ -198,6 +205,7 @@ export function routes(app: Express, route: string): void {
 
   app.post(`${route}/interaction/:uid/login`, noCache, body, async (req, res, next) => {
     const provider = getProvider()
+    const logger = buildRequestLogger(req)
 
     try {
       const {
@@ -223,6 +231,7 @@ export function routes(app: Express, route: string): void {
         },
         client.uniqueClaimsForSubjectId ?? [],
         await client.claimMappings,
+        logger,
       )
 
       logger.audit('OIDC login complete', {
@@ -230,7 +239,6 @@ export function routes(app: Express, route: string): void {
         requestId: req.body.requestId,
         clientId: params.client_id as string,
         ...pick(loginResult, 'accountId', 'presentationId'),
-        request: createRequestInfo(req),
       })
 
       let amr: string[] = [...presentationLoginStandardClaims.amr]
@@ -241,7 +249,7 @@ export function routes(app: Express, route: string): void {
       }
 
       // EAM Integration hooks
-      if (loginInteractionData.integrations?.entraEam) amr = getEamAmr(loginInteractionData)
+      if (loginInteractionData.integrations?.entraEam) amr = getEamAmr(loginInteractionData, logger)
 
       let acr = presentationLoginStandardClaims.acr as string
 
@@ -251,7 +259,7 @@ export function routes(app: Express, route: string): void {
 
       // EAM Integration hooks
       if (loginInteractionData.integrations?.entraEam) {
-        acr = getEamAcr(loginInteractionData)
+        acr = getEamAcr(loginInteractionData, logger)
       }
 
       const result: InteractionResults = {
@@ -349,6 +357,7 @@ export function routes(app: Express, route: string): void {
   // Error-handling middleware to intercept errors passed to next(err)
   // so that a nice error page can be rendered
   app.use(route, async (err: any, req: any, res: any, next: any) => {
+    const logger = buildRequestLogger(req)
     logger.error('OIDC provider route error', { error: err })
 
     try {

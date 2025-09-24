@@ -2,15 +2,16 @@ import type { Request } from 'express'
 import { decodeJwt } from 'jose'
 import type Provider from 'oidc-provider'
 import type { OIDCContext } from 'oidc-provider'
-import { logger } from '../../logger'
+import { logger as globalLogger } from '../../logger'
 import { redactValueEmail, redactValueInner, redactValueObjectUnknown } from '../../util/redact-values'
 import { deleteAccount } from './account'
-import { createRequestInfo } from './log-events'
+import { buildRequestLogger, createRequestInfo } from './logger'
 
 type Middleware = Parameters<Provider['use']>[0]
 type Context = Parameters<Middleware>[0]
 
 export const middleware: Middleware = async (ctx, next) => {
+  const logger = buildRequestLogger(ctx.request)
   const logRequest = checkOidcRequestLogging(ctx)
   if (logRequest) {
     logger.verbose(`pre OIDC middleware: ${ctx.method} ${ctx.path}`)
@@ -44,6 +45,7 @@ export const middleware: Middleware = async (ctx, next) => {
 }
 
 function deleteAccountOnLogout(ctx: Context, oidc: OIDCContext) {
+  const logger = buildRequestLogger(ctx.request)
   if (oidc.route === 'end_session') {
     const accountId = oidc.entities.IdTokenHint?.payload.sub as string | undefined
     if (accountId) {
@@ -56,7 +58,7 @@ function deleteAccountOnLogout(ctx: Context, oidc: OIDCContext) {
 }
 
 function checkOidcRequestLogging(ctx: Context) {
-  if (!logger.isVerboseEnabled()) return false
+  if (!globalLogger.isVerboseEnabled()) return false
   if (ctx.method === 'OPTIONS') return false
   if (ctx.path.endsWith('/.well-known/openid-configuration')) return false
   if (ctx.path.endsWith('/jwks')) return false

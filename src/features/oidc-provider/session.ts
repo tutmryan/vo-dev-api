@@ -6,7 +6,6 @@ import { oidcProviderModule, oidcStorageService } from '.'
 import { faceCheckEnabled, limitedOidcAuthnAuth, limitedOidcClient } from '../../config'
 import { dataSource } from '../../data'
 import type { ClaimConstraint, Identity, PresentationRequestForAuthnInput, RequestConfiguration } from '../../generated/graphql'
-import { logger } from '../../logger'
 import { newCacheSection, ONE_HOUR_TTL } from '../../redis/cache'
 import { getPlatformIssuerDid } from '../../services'
 import { invariant } from '../../util/invariant'
@@ -22,6 +21,7 @@ import type { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entit
 import type { OidcClientEntity } from './entities/oidc-client-entity'
 import { ExtraParams } from './extra-params'
 import { addEamPresentationConstraints, getEamAccountId } from './integrations/entra-eam'
+import type { Logger } from '../../logger'
 
 const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
 const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', ONE_HOUR_TTL))
@@ -71,7 +71,8 @@ export async function buildAuthnPresentationRequest(
   params: UnknownObject,
   client: OidcClientEntity,
   partners: PartnerEntity[],
-  loginInteractionData?: LoginInteractionData,
+  loginInteractionData: LoginInteractionData | undefined,
+  logger: Logger,
 ): Promise<PresentationRequestForAuthnInput> {
   const vcTypeParam = params[ExtraParams.vc_type] as string | undefined
   const vcIssuerParam = params[ExtraParams.vc_issuer] as string | undefined
@@ -145,7 +146,7 @@ export async function buildAuthnPresentationRequest(
 
   // EAM Integration hooks
   if (loginInteractionData?.integrations?.entraEam) {
-    constraints = addEamPresentationConstraints(loginInteractionData, constraints)
+    constraints = addEamPresentationConstraints(loginInteractionData, constraints, logger)
   }
 
   return {
@@ -249,6 +250,7 @@ export async function completeLogin(
   },
   clientUniqueClaimsForSubjectId: string[],
   clientClaimMappings: OidcClaimMappingEntity[],
+  logger: Logger,
 ): Promise<PresentationLoginAccount> {
   // Verify the login interaction state
   const interactionData = await getLoginInteractionData(interactionId)
@@ -278,7 +280,7 @@ export async function completeLogin(
 
   // When EAM integration is present, use the EAM account ID
   const accountId = interactionData.integrations?.entraEam
-    ? getEamAccountId(interactionData, credential)
+    ? getEamAccountId(interactionData, credential, logger)
     : await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
 
   const applicableClaimMappings = clientClaimMappings.filter(({ credentialTypes }) => {
