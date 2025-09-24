@@ -162,14 +162,16 @@ This is required for setting up blob storage contributor access for the API mana
 1. Navigate to the Subscription.
 1. Click on "Access control (IAM)".
 1. Click on "+ Add" > "Add role assignment".
-1. Pick the "Role Based Access Control Administrator" role, then click on "Next".
+1. Pick the "Role Based Access Control Administrator" privileged role, then click on "Next".
 1. Click on "+ Select members", then find the deployment service principal by its name.
 1. On the Conditions tab, select "Allow user to only assign selected roles to selected principals (fewer privileges)", then click on "Next".
 1. Click on "+ Select roles and principals".
 1. On "Constrain roles and principal types" click "Configure".
-1. Select "Storage Blob Data Contributor" and click "Select".
+1. On "Roles", select "Storage Blob Data Contributor" and "Monitoring Metrics Publisher".
 1. On "Principal types", select "Service principals".
 1. Click "Save".
+1. Update assignment type to "Active" and "Permanent", then click on "Next".
+1. Review + assign
 
 ## Give the deployment service principal the ability to add and remove delete locks
 
