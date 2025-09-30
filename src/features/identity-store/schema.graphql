@@ -1,0 +1,214 @@
+# eslint-disable @graphql-eslint/naming-convention
+"""
+A single identity store configuration
+"""
+type IdentityStore {
+  """
+  The local ID of the identity store
+  """
+  id: ID!
+  """
+  A unique identifier for this store
+  """
+  identifier: String!
+  """
+  A human-friendly name for this store
+  """
+  name: String!
+  """
+  What kind of store this is (e.g. 'entra')
+  """
+  type: IdentityStoreType!
+  """
+  Whether this store represents an Entra tenant from which users or applications will authenticate to Verified Orchestration.
+  """
+  isAuthenticationEnabled: Boolean!
+  """
+  Optional client ID (e.g. used for identity look ups)
+  """
+  clientId: String
+  """
+  The user who created this identity store
+  """
+  createdBy: User!
+  """
+  When this identity store was created
+  """
+  createdAt: DateTime!
+  """
+  The user who last updated this identity store
+  """
+  updatedBy: User
+  """
+  When this identity store was last updated
+  """
+  updatedAt: DateTime
+  """
+  When the identity store was suspended.
+  """
+  suspendedAt: DateTime
+}
+
+"""
+Input payload for creating an identity store
+"""
+input IdentityStoreInput {
+  """
+  A unique identifier for this store
+  """
+  identifier: String!
+  """
+  A human-friendly name for this store
+  """
+  name: String!
+  """
+  What kind of store this is (e.g. 'entra')
+  """
+  type: IdentityStoreType!
+
+  """
+  Whether users in this store are allowed to authenticate (i.e. log in)
+  """
+  isAuthenticationEnabled: Boolean!
+  """
+  The optional client ID, used for i.e identity lookups.
+  """
+  clientId: String
+  """
+  The optional client secret, applicable only to confidential clients.
+  """
+  clientSecret: String
+}
+"""
+Update payload for updating an identity store
+"""
+input UpdateIdentityStoreInput {
+  """
+  A human-friendly name for this store
+  """
+  name: String!
+  """
+  What kind of store this is (e.g. 'entra')
+  """
+  type: IdentityStoreType!
+  """
+  Whether users in this store are allowed to authenticate (i.e. log in)
+  """
+  isAuthenticationEnabled: Boolean!
+  """
+  The optional client ID, used for i.e identity lookups.
+  """
+  clientId: String
+  """
+  The optional client secret, applicable only to confidential clients.
+  """
+  clientSecret: String
+}
+
+"""
+Search criteria for identity stores
+"""
+input IdentityStoreWhere {
+  """
+  Partial match on the identifier
+  """
+  identifier: String
+  """
+  Partial match on the name
+  """
+  name: String
+  """
+  Exact match on the type
+  """
+  type: String
+  """
+  Filter by authentication enabled flag
+  """
+  isAuthenticationEnabled: Boolean
+  """
+  Whether to include deleted identity stores in the results.
+  """
+  includeDeleted: Boolean
+  """
+  List only the identity stores which are, or are not, deleted.
+  """
+  isDeleted: Boolean
+}
+
+"""
+Fields that can be used to sort identity stores
+"""
+enum IdentityStoreOrderBy {
+  """
+  Sort by identifier
+  """
+  identifier
+  """
+  Sort by name
+  """
+  name
+  """
+  Sort by type
+  """
+  type
+  """
+  Sort by creation timestamp
+  """
+  createdAt
+}
+
+"""
+The supported identity store types
+"""
+enum IdentityStoreType {
+  """
+  Microsoft Entra ID (Azure AD)
+  """
+  Entra
+  """
+  A manually managed identity store (no external directory backing)
+  """
+  Manual
+}
+
+extend type Query {
+  """
+  Fetch all identity stores
+  """
+  findIdentityStores(
+    where: IdentityStoreWhere
+    offset: PositiveInt
+    limit: PositiveInt
+    orderBy: IdentityStoreOrderBy
+    orderDirection: OrderDirection
+  ): [IdentityStore!]!
+  """
+  Fetch an identity store by its ID
+  """
+  identityStore(id: ID!): IdentityStore
+  """
+  Test the identity store's graph client configuration
+  """
+  testIdentityStoreGraphClient(identityStoreId: ID!): MsGraphFailure
+}
+
+extend type Mutation {
+  """
+  Create a new identity store
+  """
+  createIdentityStore(input: IdentityStoreInput!): IdentityStore!
+  """
+  Update an existing identity store
+  """
+  updateIdentityStore(id: ID!, input: UpdateIdentityStoreInput!): IdentityStore!
+
+  """
+  Suspends an identity store. Use resumeIdentityStore to reactivate.
+  """
+  suspendIdentityStore(id: ID!): IdentityStore!
+
+  """
+  Resumes a previously suspended identity store.
+  """
+  resumeIdentityStore(id: ID!): IdentityStore!
+}

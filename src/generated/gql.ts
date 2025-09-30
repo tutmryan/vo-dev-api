@@ -37,11 +37,23 @@ type Documents = {
     "\n  mutation ProvisionContract($id: ID!) {\n    provisionContract(id: $id) {\n      ...ContractFragment,\n      externalId,\n      provisionedAt,\n      lastProvisionedAt\n    }\n  }\n": typeof types.ProvisionContractDocument,
     "\n  mutation UpdateContract($id: ID!, $input: ContractInput!) {\n    updateContract(id: $id, input: $input) {\n      ...ContractFragment\n    }\n  }\n": typeof types.UpdateContractDocument,
     "\n  query Healthcheck {\n    healthcheck\n  }\n": typeof types.HealthcheckDocument,
+    "\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    clientId\n    suspendedAt\n  }\n": typeof types.IdentityStoreFieldsFragmentDoc,
+    "\n  mutation CreateIdentityStore($input: IdentityStoreInput!) {\n    createIdentityStore(input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n": typeof types.CreateIdentityStoreDocument,
+    "\n  mutation UpdateIdentityStore($id: ID!, $input: UpdateIdentityStoreInput!) {\n    updateIdentityStore(id: $id, input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n": typeof types.UpdateIdentityStoreDocument,
+    "\n  mutation SuspendIdentityStore($id: ID!) {\n    suspendIdentityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n": typeof types.SuspendIdentityStoreDocument,
+    "\n  mutation ResumeIdentityStore($id: ID!) {\n    resumeIdentityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n": typeof types.ResumeIdentityStoreDocument,
+    "\n  query FindIdentityStores {\n    findIdentityStores {\n      ...IdentityStoreFields\n    }\n  }\n": typeof types.FindIdentityStoresDocument,
+    "\n  query FindIdentityStoresWithWhere($where: IdentityStoreWhere) {\n    findIdentityStores(where: $where) {\n      ...IdentityStoreFields\n    }\n  }\n": typeof types.FindIdentityStoresWithWhereDocument,
+    "\n  query IdentityStoreById($id: ID!) {\n    identityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n": typeof types.IdentityStoreByIdDocument,
     "\n  query Identity($id: ID!) {\n    identity(id: $id) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": typeof types.IdentityDocument,
     "\n  query FindIdentities($where: IdentityWhere, $limit: PositiveInt, $offset: PositiveInt) {\n    findIdentities(where: $where, limit: $limit, offset: $offset) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": typeof types.FindIdentitiesDocument,
     "\n  mutation SaveIdentity($input: IdentityInput!) {\n    saveIdentity(input: $input) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": typeof types.SaveIdentityDocument,
     "\n  mutation DeleteIdentities($ids: [UUID!]!) {\n    deleteIdentities(ids: $ids)\n  }\n": typeof types.DeleteIdentitiesDocument,
     "\n  mutation Import($input: ImportInput!) {\n    import(input: $input)\n  }\n": typeof types.ImportDocument,
+    "\n  query GetApplicationLabelConfigs($identityStoreId: ID!) {\n    applicationLabelConfigs(identityStoreId: $identityStoreId) {\n      id\n      identifier\n      name\n    }\n  }\n": typeof types.GetApplicationLabelConfigsDocument,
+    "\n  mutation SetApplicationLabelConfigs($identityStoreId: ID!, $input: [ApplicationLabelConfigInput!]!) {\n    setApplicationLabelConfigs(identityStoreId: $identityStoreId, input: $input) {\n      id\n      identifier\n      name\n    }\n  }\n": typeof types.SetApplicationLabelConfigsDocument,
+    "\n  query GetCorsOriginConfigs {\n    corsOriginConfigs {\n      id\n      origin\n    }\n  }\n": typeof types.GetCorsOriginConfigsDocument,
+    "\n  mutation SetCorsOriginConfigs($input: [CorsOriginConfigInput!]!) {\n    setCorsOriginConfigs(input: $input) {\n      id\n      origin\n    }\n  }\n": typeof types.SetCorsOriginConfigsDocument,
     "\n  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {\n    createIssuanceRequest(request: $request) {\n      ... on IssuanceResponse {\n        requestId\n        url\n        qrCode\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n        }\n      }\n    }\n  }\n": typeof types.CreateIssuanceRequestDocument,
     "\n  mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {\n    acquireLimitedAccessToken(input: $input) {\n      expires\n      token\n    }\n  }\n": typeof types.AcquireLimitedAccessTokenDocument,
     "\n  query FindContracts($where: ContractWhere, $forIdentityId: ID) {\n    findContracts(where: $where) {\n      id\n      credentialTypes\n      display {\n        card {\n          title\n          issuedBy\n          backgroundColor\n          textColor\n          description\n          logo {\n            uri\n            description\n          }\n        }\n      }\n      issuances(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        issuedAt\n        expiresAt\n      }\n      presentations(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        presentedAt\n      }\n    }\n  }\n": typeof types.FindContractsDocument,
@@ -121,11 +133,23 @@ const documents: Documents = {
     "\n  mutation ProvisionContract($id: ID!) {\n    provisionContract(id: $id) {\n      ...ContractFragment,\n      externalId,\n      provisionedAt,\n      lastProvisionedAt\n    }\n  }\n": types.ProvisionContractDocument,
     "\n  mutation UpdateContract($id: ID!, $input: ContractInput!) {\n    updateContract(id: $id, input: $input) {\n      ...ContractFragment\n    }\n  }\n": types.UpdateContractDocument,
     "\n  query Healthcheck {\n    healthcheck\n  }\n": types.HealthcheckDocument,
+    "\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    clientId\n    suspendedAt\n  }\n": types.IdentityStoreFieldsFragmentDoc,
+    "\n  mutation CreateIdentityStore($input: IdentityStoreInput!) {\n    createIdentityStore(input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n": types.CreateIdentityStoreDocument,
+    "\n  mutation UpdateIdentityStore($id: ID!, $input: UpdateIdentityStoreInput!) {\n    updateIdentityStore(id: $id, input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n": types.UpdateIdentityStoreDocument,
+    "\n  mutation SuspendIdentityStore($id: ID!) {\n    suspendIdentityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n": types.SuspendIdentityStoreDocument,
+    "\n  mutation ResumeIdentityStore($id: ID!) {\n    resumeIdentityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n": types.ResumeIdentityStoreDocument,
+    "\n  query FindIdentityStores {\n    findIdentityStores {\n      ...IdentityStoreFields\n    }\n  }\n": types.FindIdentityStoresDocument,
+    "\n  query FindIdentityStoresWithWhere($where: IdentityStoreWhere) {\n    findIdentityStores(where: $where) {\n      ...IdentityStoreFields\n    }\n  }\n": types.FindIdentityStoresWithWhereDocument,
+    "\n  query IdentityStoreById($id: ID!) {\n    identityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n": types.IdentityStoreByIdDocument,
     "\n  query Identity($id: ID!) {\n    identity(id: $id) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": types.IdentityDocument,
     "\n  query FindIdentities($where: IdentityWhere, $limit: PositiveInt, $offset: PositiveInt) {\n    findIdentities(where: $where, limit: $limit, offset: $offset) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": types.FindIdentitiesDocument,
     "\n  mutation SaveIdentity($input: IdentityInput!) {\n    saveIdentity(input: $input) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n": types.SaveIdentityDocument,
     "\n  mutation DeleteIdentities($ids: [UUID!]!) {\n    deleteIdentities(ids: $ids)\n  }\n": types.DeleteIdentitiesDocument,
     "\n  mutation Import($input: ImportInput!) {\n    import(input: $input)\n  }\n": types.ImportDocument,
+    "\n  query GetApplicationLabelConfigs($identityStoreId: ID!) {\n    applicationLabelConfigs(identityStoreId: $identityStoreId) {\n      id\n      identifier\n      name\n    }\n  }\n": types.GetApplicationLabelConfigsDocument,
+    "\n  mutation SetApplicationLabelConfigs($identityStoreId: ID!, $input: [ApplicationLabelConfigInput!]!) {\n    setApplicationLabelConfigs(identityStoreId: $identityStoreId, input: $input) {\n      id\n      identifier\n      name\n    }\n  }\n": types.SetApplicationLabelConfigsDocument,
+    "\n  query GetCorsOriginConfigs {\n    corsOriginConfigs {\n      id\n      origin\n    }\n  }\n": types.GetCorsOriginConfigsDocument,
+    "\n  mutation SetCorsOriginConfigs($input: [CorsOriginConfigInput!]!) {\n    setCorsOriginConfigs(input: $input) {\n      id\n      origin\n    }\n  }\n": types.SetCorsOriginConfigsDocument,
     "\n  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {\n    createIssuanceRequest(request: $request) {\n      ... on IssuanceResponse {\n        requestId\n        url\n        qrCode\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n        }\n      }\n    }\n  }\n": types.CreateIssuanceRequestDocument,
     "\n  mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {\n    acquireLimitedAccessToken(input: $input) {\n      expires\n      token\n    }\n  }\n": types.AcquireLimitedAccessTokenDocument,
     "\n  query FindContracts($where: ContractWhere, $forIdentityId: ID) {\n    findContracts(where: $where) {\n      id\n      credentialTypes\n      display {\n        card {\n          title\n          issuedBy\n          backgroundColor\n          textColor\n          description\n          logo {\n            uri\n            description\n          }\n        }\n      }\n      issuances(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        issuedAt\n        expiresAt\n      }\n      presentations(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        presentedAt\n      }\n    }\n  }\n": types.FindContractsDocument,
@@ -291,6 +315,38 @@ export function graphql(source: "\n  query Healthcheck {\n    healthcheck\n  }\n
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    clientId\n    suspendedAt\n  }\n"): (typeof documents)["\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    clientId\n    suspendedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateIdentityStore($input: IdentityStoreInput!) {\n    createIdentityStore(input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n"): (typeof documents)["\n  mutation CreateIdentityStore($input: IdentityStoreInput!) {\n    createIdentityStore(input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateIdentityStore($id: ID!, $input: UpdateIdentityStoreInput!) {\n    updateIdentityStore(id: $id, input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateIdentityStore($id: ID!, $input: UpdateIdentityStoreInput!) {\n    updateIdentityStore(id: $id, input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation SuspendIdentityStore($id: ID!) {\n    suspendIdentityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n"): (typeof documents)["\n  mutation SuspendIdentityStore($id: ID!) {\n    suspendIdentityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation ResumeIdentityStore($id: ID!) {\n    resumeIdentityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n"): (typeof documents)["\n  mutation ResumeIdentityStore($id: ID!) {\n    resumeIdentityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query FindIdentityStores {\n    findIdentityStores {\n      ...IdentityStoreFields\n    }\n  }\n"): (typeof documents)["\n  query FindIdentityStores {\n    findIdentityStores {\n      ...IdentityStoreFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query FindIdentityStoresWithWhere($where: IdentityStoreWhere) {\n    findIdentityStores(where: $where) {\n      ...IdentityStoreFields\n    }\n  }\n"): (typeof documents)["\n  query FindIdentityStoresWithWhere($where: IdentityStoreWhere) {\n    findIdentityStores(where: $where) {\n      ...IdentityStoreFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query IdentityStoreById($id: ID!) {\n    identityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n"): (typeof documents)["\n  query IdentityStoreById($id: ID!) {\n    identityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "\n  query Identity($id: ID!) {\n    identity(id: $id) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n"): (typeof documents)["\n  query Identity($id: ID!) {\n    identity(id: $id) {\n      id\n      issuer\n      identifier\n      name\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -308,6 +364,22 @@ export function graphql(source: "\n  mutation DeleteIdentities($ids: [UUID!]!) {
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation Import($input: ImportInput!) {\n    import(input: $input)\n  }\n"): (typeof documents)["\n  mutation Import($input: ImportInput!) {\n    import(input: $input)\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query GetApplicationLabelConfigs($identityStoreId: ID!) {\n    applicationLabelConfigs(identityStoreId: $identityStoreId) {\n      id\n      identifier\n      name\n    }\n  }\n"): (typeof documents)["\n  query GetApplicationLabelConfigs($identityStoreId: ID!) {\n    applicationLabelConfigs(identityStoreId: $identityStoreId) {\n      id\n      identifier\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation SetApplicationLabelConfigs($identityStoreId: ID!, $input: [ApplicationLabelConfigInput!]!) {\n    setApplicationLabelConfigs(identityStoreId: $identityStoreId, input: $input) {\n      id\n      identifier\n      name\n    }\n  }\n"): (typeof documents)["\n  mutation SetApplicationLabelConfigs($identityStoreId: ID!, $input: [ApplicationLabelConfigInput!]!) {\n    setApplicationLabelConfigs(identityStoreId: $identityStoreId, input: $input) {\n      id\n      identifier\n      name\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query GetCorsOriginConfigs {\n    corsOriginConfigs {\n      id\n      origin\n    }\n  }\n"): (typeof documents)["\n  query GetCorsOriginConfigs {\n    corsOriginConfigs {\n      id\n      origin\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation SetCorsOriginConfigs($input: [CorsOriginConfigInput!]!) {\n    setCorsOriginConfigs(input: $input) {\n      id\n      origin\n    }\n  }\n"): (typeof documents)["\n  mutation SetCorsOriginConfigs($input: [CorsOriginConfigInput!]!) {\n    setCorsOriginConfigs(input: $input) {\n      id\n      origin\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

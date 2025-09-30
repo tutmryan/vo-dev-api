@@ -157,6 +157,26 @@ exports[`shield rules are setup correctly 1`] = `
         }
       ]
     },
+    "identityStore": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
+    },
+    "testIdentityStoreGraphClient": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
+    },
+    "findIdentityStores": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
+    },
+    "applicationLabelConfigs": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
+    },
+    "corsOriginConfigs": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
+    },
     "issuance": {
       "rulesOr": [
         {
@@ -967,6 +987,30 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual"
         }
       ]
+    },
+    "createIdentityStore": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
+    },
+    "updateIdentityStore": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
+    },
+    "suspendIdentityStore": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
+    },
+    "resumeIdentityStore": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
+    },
+    "setApplicationLabelConfigs": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
+    },
+    "setCorsOriginConfigs": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual"
     },
     "createPartner": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",

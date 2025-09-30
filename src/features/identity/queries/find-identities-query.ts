@@ -21,6 +21,9 @@ export async function FindIdentitiesQuery(
   if (criteria?.issuer) {
     qb.andWhere('LOWER(i.issuer) LIKE LOWER(:issuer)', { issuer: `%${criteria.issuer}%` })
   }
+  if (criteria?.identityStoreId) {
+    qb.andWhere('i.identity_store_id = :identityStoreId', { identityStoreId: criteria.identityStoreId })
+  }
   if (criteria?.isDeletable != null) {
     const op = criteria.isDeletable ? 'NOT EXISTS' : 'EXISTS'
     const joiner = criteria.isDeletable ? 'AND' : 'OR'

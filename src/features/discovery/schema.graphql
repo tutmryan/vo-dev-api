@@ -52,8 +52,15 @@ The failures that occurred while trying to connect to external services.
 Note: Services are checked every 5 minutes, so this may not reflect the current state of the service.
 """ # eslint-disable-next-line @graphql-eslint/strict-id-in-types
 type ServiceFailures {
-  msGraph: String
+  msGraph: [MsGraphFailure!]
   verifiedId: String
+}
+"""
+Returns information about a failure to connect to Microsoft Graph.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type MsGraphFailure {
+  identityStoreId: String!
+  error: String
 }
 
 """

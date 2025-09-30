@@ -30,8 +30,8 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
   })
   const updated = await repo.save(client)
 
-  if (input.clientSecret) await oidcSecretService().setClientSecret(client.id, input.clientSecret)
-  else if (clientChangedFromConfidentialToPublic) await oidcSecretService().deleteClientSecret(client.id)
+  if (input.clientSecret) await oidcSecretService().set(client.id, input.clientSecret)
+  else if (clientChangedFromConfidentialToPublic) await oidcSecretService().delete(client.id)
 
   notifyOidcDataChanged()
   return updated

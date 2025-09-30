@@ -1,0 +1,83 @@
+"""
+A human-friendly label for a specific application (by identifier)
+"""
+type ApplicationLabelConfig {
+  """
+  The local ID of the label config
+  """
+  id: ID!
+
+  """
+  A unique identifier for the application (typically an object ID)
+  """
+  identifier: String!
+
+  """
+  A human-friendly label for this application
+  """
+  name: String!
+}
+
+"""
+A config for allowed CORS origin
+"""
+type CorsOriginConfig {
+  """
+  The local ID of the CORS origin config
+  """
+  id: ID!
+
+  """
+  The origin value or regex pattern (e.g. https://example.com or ^https://.*\\.foo\\.com$)
+  """
+  origin: String!
+}
+
+"""
+Input payload for a application label config
+"""
+input ApplicationLabelConfigInput {
+  """
+  A unique identifier for the application (typically an object ID)
+  """
+  identifier: String!
+
+  """
+  A human-friendly label for the application
+  """
+  name: String!
+}
+
+"""
+Input payload for a CORS origin config
+"""
+input CorsOriginConfigInput {
+  """
+  The origin value or regex pattern (e.g. https://example.com or ^https://.*\\.foo\\.com$)
+  """
+  origin: String!
+}
+
+extend type Query {
+  """
+  List all application label configs for a given identity store
+  """
+  applicationLabelConfigs(identityStoreId: ID!): [ApplicationLabelConfig!]!
+
+  """
+  List all CORS origin configs
+  """
+  corsOriginConfigs: [CorsOriginConfig!]!
+}
+
+extend type Mutation {
+  """
+  Replace all user configurable application label configurations for a given identity stores
+  """
+  setApplicationLabelConfigs(identityStoreId: ID!, input: [ApplicationLabelConfigInput!]!): [ApplicationLabelConfig!]!
+
+  """
+  Replace user configurable CORS origin configurations for the VO API instance
+  """
+  setCorsOriginConfigs(input: [CorsOriginConfigInput!]!): [CorsOriginConfig!]!
+}

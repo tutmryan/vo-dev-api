@@ -4,9 +4,16 @@ import { TokenCredentialAuthenticationProvider } from '@microsoft/microsoft-grap
 import type { User as GraphUser } from '@microsoft/microsoft-graph-types'
 import 'cross-fetch/polyfill'
 import { randomUUID } from 'crypto'
+import { dataSource } from '../data'
+import { IdentityStoreEntity } from '../features/identity-store/entities/identity-store-entity'
+import type { MsGraphFailure } from '../generated/graphql'
+import { IdentityStoreType } from '../generated/graphql'
+import { logger } from '../logger'
 import { Lazy } from '../util/lazy'
+import { createIdentityStoreSecretService } from './identity-store-secret-service'
 
 export interface GraphServiceConfig {
+  identityStoreId: string
   auth: {
     tenantId: string
     clientId: string
@@ -39,6 +46,18 @@ export class GraphService {
       authProvider: authProvider,
     })
   })
+
+  async testConnection(): Promise<MsGraphFailure | undefined> {
+    try {
+      await this.findUsers({ nameStartsWith: 'a' }, 1)
+      return undefined
+    } catch (error) {
+      return {
+        identityStoreId: this.config.identityStoreId,
+        error: error instanceof Error ? error.message : String(error),
+      }
+    }
+  }
 
   async createUser({
     givenName,
@@ -93,5 +112,57 @@ export class GraphService {
     return result.value
   }
 }
+
+class GraphServiceManager {
+  private services: Record<string, GraphService> = {}
+
+  private initialised = false
+
+  async reload(): Promise<void> {
+    this.initialised = false
+    return this.init()
+  }
+
+  async init() {
+    if (this.initialised) return
+    const clientSecretService = createIdentityStoreSecretService()
+    this.services = {}
+    const stores = await dataSource.getRepository(IdentityStoreEntity).find({
+      where: { type: IdentityStoreType.Entra },
+      comment: 'GraphServiceManagerInit',
+    })
+
+    for (const store of stores) {
+      if (store.clientId && store.identifier) {
+        try {
+          const clientSecret = await clientSecretService.get(store.clientId)
+          if (!clientSecret) continue
+          this.services[store.id] = new GraphService({
+            tenantName: store.name,
+            identityStoreId: store.id,
+            auth: {
+              tenantId: store.identifier,
+              clientId: store.clientId,
+              clientSecret,
+            },
+          })
+        } catch (error) {
+          logger.error(`Failed to create GraphService for identity store ${store.id}`, { error })
+        }
+      }
+    }
+    this.initialised = true
+  }
+
+  get(identityStoreId: string): GraphService | undefined {
+    return this.services[identityStoreId]
+  }
+
+  get all(): GraphService[] {
+    return Object.values(this.services)
+  }
+}
+
+export const graphServiceManager = new GraphServiceManager()
 
 export type PartialUser = Pick<GraphUser, 'id' | 'displayName' | 'identities' | 'givenName' | 'surname' | 'userType'>

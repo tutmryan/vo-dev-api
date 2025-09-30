@@ -1,0 +1,397 @@
+import { faker } from '@faker-js/faker/locale/en'
+import { graphql } from '../../generated'
+import {
+  CreateIdentityStoreMutation,
+  IdentityStoreInput,
+  IdentityStoreType,
+  ResumeIdentityStoreMutation,
+  SuspendIdentityStoreMutation,
+  UpdateIdentityStoreInput,
+  UpdateIdentityStoreMutation,
+} from '../../generated/graphql'
+import { beforeAfterAll, executeOperationAnonymous, executeOperationAsInstanceAdmin, expectUnauthorizedError } from '../../test'
+import { mockedServices } from '../../test/mocks'
+
+faker.seed(Date.now())
+
+function getRequiredRandomInput(): IdentityStoreInput {
+  return {
+    identifier: faker.string.uuid(),
+    name: 'someName',
+    type: IdentityStoreType.Entra,
+    isAuthenticationEnabled: true,
+  }
+}
+
+function getRequiredUpdateRandomInput(): UpdateIdentityStoreInput {
+  return {
+    name: 'someUpdatedName',
+    type: IdentityStoreType.Entra,
+    isAuthenticationEnabled: true,
+  }
+}
+
+export const identityStoreFragment = graphql(`
+  fragment IdentityStoreFields on IdentityStore {
+    id
+    identifier
+    name
+    type
+    isAuthenticationEnabled
+    clientId
+    suspendedAt
+  }
+`)
+
+const createMutation = graphql(`
+  mutation CreateIdentityStore($input: IdentityStoreInput!) {
+    createIdentityStore(input: $input) {
+      ...IdentityStoreFields
+    }
+  }
+`)
+
+const updateMutation = graphql(`
+  mutation UpdateIdentityStore($id: ID!, $input: UpdateIdentityStoreInput!) {
+    updateIdentityStore(id: $id, input: $input) {
+      ...IdentityStoreFields
+    }
+  }
+`)
+
+const suspendMutation = graphql(`
+  mutation SuspendIdentityStore($id: ID!) {
+    suspendIdentityStore(id: $id) {
+      ...IdentityStoreFields
+    }
+  }
+`)
+
+const resumeMutation = graphql(`
+  mutation ResumeIdentityStore($id: ID!) {
+    resumeIdentityStore(id: $id) {
+      ...IdentityStoreFields
+    }
+  }
+`)
+
+const findQuery = graphql(`
+  query FindIdentityStores {
+    findIdentityStores {
+      ...IdentityStoreFields
+    }
+  }
+`)
+
+export const findQueryWithWhere = graphql(`
+  query FindIdentityStoresWithWhere($where: IdentityStoreWhere) {
+    findIdentityStores(where: $where) {
+      ...IdentityStoreFields
+    }
+  }
+`)
+const byIdQuery = graphql(`
+  query IdentityStoreById($id: ID!) {
+    identityStore(id: $id) {
+      ...IdentityStoreFields
+    }
+  }
+`)
+
+describe('IdentityStore', () => {
+  beforeAfterAll()
+  beforeEach(() => {
+    mockedServices.clearAllMocks()
+  })
+
+  describe('createIdentityStore', () => {
+    it('allows instance admins to create', async () => {
+      const input = getRequiredRandomInput()
+      const { data, errors } = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input } })
+      expect(errors).toBeUndefined()
+      expect(data?.createIdentityStore).toMatchObject({
+        id: expect.any(String),
+        ...input,
+      } satisfies Omit<CreateIdentityStoreMutation['createIdentityStore'], '__typename'>)
+      expect(mockedServices.identityStoreSecretService.set.mock()).not.toHaveBeenCalled()
+    })
+
+    it('returns unauthorized when called with unauthorized role', async () => {
+      const input = getRequiredRandomInput()
+      const { data, errors } = await executeOperationAnonymous({ query: createMutation, variables: { input } })
+      expect(data).toBeNull()
+      expectUnauthorizedError(errors)
+    })
+
+    it('returns BAD_USER_INPUT when only clientId is provided', async () => {
+      const input: IdentityStoreInput = { ...getRequiredRandomInput(), clientId: 'id-only' }
+      const { errors } = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input } })
+      expect(errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
+    })
+
+    it('returns BAD_USER_INPUT when only clientSecret is provided', async () => {
+      const input: IdentityStoreInput = { ...getRequiredRandomInput(), clientId: undefined, clientSecret: 'sec' }
+      const { errors } = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input } })
+      expect(errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
+    })
+
+    it('stores secret via service when both clientId and clientSecret provided', async () => {
+      const input: IdentityStoreInput = { ...getRequiredRandomInput(), clientId: 'abc', clientSecret: 'shh' }
+      const { data, errors } = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input } })
+      expect(errors).toBeUndefined()
+      expect(mockedServices.identityStoreSecretService.set.lastCallArgs()).toEqual(['abc', 'shh'])
+      expect(data?.createIdentityStore.clientId).toBe('abc')
+    })
+
+    it('fails the mutation if secret service set fails (and entity not created)', async () => {
+      const identifier = faker.string.uuid()
+      mockedServices.identityStoreSecretService.set.mock().mockRejectedValueOnce(new Error('kv failed'))
+      const input: IdentityStoreInput = {
+        ...getRequiredRandomInput(),
+        identifier,
+        clientId: 'cid',
+        clientSecret: 'sec',
+      }
+      const res = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input } })
+      expect(res.errors).toBeDefined()
+      const findRes = await executeOperationAsInstanceAdmin({ query: findQueryWithWhere, variables: { where: { identifier } } })
+      const identifiers = findRes.data?.findIdentityStores.map((s) => s.identifier)
+      expect(identifiers).not.toContain(identifier)
+    })
+  })
+
+  describe('updateIdentityStore', () => {
+    it('allows instance admins to update', async () => {
+      const createInput = getRequiredRandomInput()
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: createInput } })
+      const id = createRes.data!.createIdentityStore.id
+      const updateInput = getRequiredUpdateRandomInput()
+      const { data, errors } = await executeOperationAsInstanceAdmin({ query: updateMutation, variables: { id, input: updateInput } })
+      expect(errors).toBeUndefined()
+      expect(data?.updateIdentityStore).toMatchObject({
+        id,
+        identifier: createInput.identifier,
+        ...updateInput,
+      } satisfies Omit<UpdateIdentityStoreMutation['updateIdentityStore'], '__typename'>)
+      expect(mockedServices.identityStoreSecretService.set.mock()).not.toHaveBeenCalled()
+    })
+
+    it('returns unauthorized when called with unauthorized role', async () => {
+      const fakeId = faker.string.uuid()
+      const updateInput = getRequiredUpdateRandomInput()
+      const { data, errors } = await executeOperationAnonymous({ query: updateMutation, variables: { id: fakeId, input: updateInput } })
+      expect(data).toBeNull()
+      expectUnauthorizedError(errors)
+    })
+
+    it('returns BAD_USER_INPUT when only clientId is provided', async () => {
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: getRequiredRandomInput() } })
+      const id = createRes.data!.createIdentityStore.id
+      const updateInput: IdentityStoreInput = { ...getRequiredRandomInput(), clientId: 'id-only' }
+      const { errors } = await executeOperationAsInstanceAdmin({ query: updateMutation, variables: { id, input: updateInput } })
+      expect(errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
+    })
+
+    it('returns BAD_USER_INPUT when only clientSecret is provided', async () => {
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: getRequiredRandomInput() } })
+      const id = createRes.data!.createIdentityStore.id
+      const updateInput: UpdateIdentityStoreInput = { ...getRequiredUpdateRandomInput(), clientId: undefined, clientSecret: 'sec' }
+      const { errors } = await executeOperationAsInstanceAdmin({ query: updateMutation, variables: { id, input: updateInput } })
+      expect(errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
+    })
+
+    it('stores secret via service when both provided on update', async () => {
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: getRequiredRandomInput() } })
+      const id = createRes.data!.createIdentityStore.id
+      const updateInput: UpdateIdentityStoreInput = { ...getRequiredUpdateRandomInput(), clientId: 'xyz', clientSecret: 'top' }
+      const { errors } = await executeOperationAsInstanceAdmin({ query: updateMutation, variables: { id, input: updateInput } })
+      expect(errors).toBeUndefined()
+      expect(mockedServices.identityStoreSecretService.set.lastCallArgs()).toEqual(['xyz', 'top'])
+    })
+
+    it('fails the update if secret service set fails', async () => {
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: getRequiredRandomInput() } })
+      const id = createRes.data!.createIdentityStore.id
+      mockedServices.identityStoreSecretService.set.mock().mockRejectedValueOnce(new Error('kv failed'))
+      const updateInput: UpdateIdentityStoreInput = { ...getRequiredUpdateRandomInput(), clientId: 'xyz', clientSecret: 'top' }
+      const res = await executeOperationAsInstanceAdmin({ query: updateMutation, variables: { id, input: updateInput } })
+      expect(res.errors).toBeDefined()
+    })
+
+    it('clears clientId when explicitly set to null', async () => {
+      const clientId = '11111111-1111-1111-1111-111111111111'
+      const createInput = { ...getRequiredRandomInput(), clientId, clientSecret: 'someSecret' }
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: createInput } })
+      expect(createRes.data!.createIdentityStore.clientId).toBe(clientId)
+
+      const updateInput: UpdateIdentityStoreInput = { ...getRequiredUpdateRandomInput(), clientId: null }
+      const { data, errors } = await executeOperationAsInstanceAdmin({
+        query: updateMutation,
+        variables: { id: createRes.data!.createIdentityStore.id, input: updateInput },
+      })
+      expect(errors).toBeUndefined()
+      expect(data?.updateIdentityStore.clientId).toBeNull()
+    })
+  })
+
+  describe('suspend/resume', () => {
+    it('allows instance admins to suspend', async () => {
+      const createInput = getRequiredRandomInput()
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: createInput } })
+
+      const id = createRes.data!.createIdentityStore.id
+      const response = await executeOperationAsInstanceAdmin({ query: suspendMutation, variables: { id } })
+
+      expect(response.errors).toBeUndefined()
+      expect(response.data?.suspendIdentityStore).toMatchObject({
+        id,
+        suspendedAt: expect.any(Date),
+        ...createInput,
+      } satisfies Omit<SuspendIdentityStoreMutation['suspendIdentityStore'], '__typename'>)
+    })
+
+    it('allows instance admins to resume', async () => {
+      const createInput = getRequiredRandomInput()
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: createInput } })
+      const id = createRes.data!.createIdentityStore.id
+
+      await executeOperationAsInstanceAdmin({ query: suspendMutation, variables: { id } })
+      const resumeRes = await executeOperationAsInstanceAdmin({ query: resumeMutation, variables: { id } })
+
+      expect(resumeRes.errors).toBeUndefined()
+      expect(resumeRes.data?.resumeIdentityStore).toMatchObject({
+        id,
+        ...createInput,
+      } satisfies Omit<ResumeIdentityStoreMutation['resumeIdentityStore'], '__typename'>)
+    })
+
+    it('returns unauthorized when called with unauthorized role', async () => {
+      const fakeId = faker.string.uuid()
+      const { errors: suspendErrors } = await executeOperationAnonymous({ query: suspendMutation, variables: { id: fakeId } })
+      expectUnauthorizedError(suspendErrors)
+      const { errors: resumeErrors } = await executeOperationAnonymous({ query: resumeMutation, variables: { id: fakeId } })
+      expectUnauthorizedError(resumeErrors)
+    })
+  })
+
+  describe('queries', () => {
+    it('findIdentityStores returns a list', async () => {
+      await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: getRequiredRandomInput() } })
+      const res = await executeOperationAsInstanceAdmin({ query: findQuery })
+      expect(res.errors).toBeUndefined()
+      expect(Array.isArray(res.data?.findIdentityStores)).toBe(true)
+    })
+
+    it('identityStore by id returns matching identity store', async () => {
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: getRequiredRandomInput() } })
+      const id = createRes.data!.createIdentityStore.id
+      const res = await executeOperationAsInstanceAdmin({ query: byIdQuery, variables: { id } })
+      expect(res.errors).toBeUndefined()
+      expect(res.data?.identityStore).toMatchObject({ id, identifier: expect.any(String) })
+    })
+
+    it('returns unauthorized when called with unauthorized role', async () => {
+      const { data, errors } = await executeOperationAnonymous({ query: findQuery })
+      expect(data).toBeNull()
+      expectUnauthorizedError(errors)
+    })
+  })
+
+  describe('soft delete behavior', () => {
+    it('excludes suspended stores by default', async () => {
+      const input = getRequiredRandomInput()
+
+      const { data: createData } = await executeOperationAsInstanceAdmin({
+        query: createMutation,
+        variables: { input },
+      })
+
+      const id = createData!.createIdentityStore.id
+
+      await executeOperationAsInstanceAdmin({
+        query: suspendMutation,
+        variables: { id },
+      })
+
+      const res = await executeOperationAsInstanceAdmin({
+        query: findQuery,
+      })
+
+      const ids = res.data?.findIdentityStores.map((s) => s.id)
+      expect(ids).not.toContain(id)
+    })
+
+    it('includes suspended stores when includeDeleted is true', async () => {
+      const input = getRequiredRandomInput()
+
+      const { data: createData } = await executeOperationAsInstanceAdmin({
+        query: createMutation,
+        variables: { input },
+      })
+
+      const id = createData!.createIdentityStore.id
+
+      await executeOperationAsInstanceAdmin({
+        query: suspendMutation,
+        variables: { id },
+      })
+
+      const res = await executeOperationAsInstanceAdmin({
+        query: findQueryWithWhere,
+        variables: { where: { includeDeleted: true } },
+      })
+
+      const ids = res.data?.findIdentityStores.map((s) => s.id)
+      expect(ids).toContain(id)
+    })
+
+    it('only returns suspended stores when isDeleted is true', async () => {
+      const input = getRequiredRandomInput()
+
+      const { data: createData } = await executeOperationAsInstanceAdmin({
+        query: createMutation,
+        variables: { input },
+      })
+
+      const id = createData!.createIdentityStore.id
+
+      await executeOperationAsInstanceAdmin({
+        query: suspendMutation,
+        variables: { id },
+      })
+
+      const res = await executeOperationAsInstanceAdmin({
+        query: findQueryWithWhere,
+        variables: { where: { isDeleted: true } },
+      })
+
+      expect(res.errors).toBeUndefined()
+      const resultIds = res.data?.findIdentityStores.map((s) => s.id)
+      expect(resultIds).toContain(id)
+    })
+
+    it('excludes suspended stores when isDeleted is false', async () => {
+      const input = getRequiredRandomInput()
+
+      const { data: createData } = await executeOperationAsInstanceAdmin({
+        query: createMutation,
+        variables: { input },
+      })
+
+      const id = createData!.createIdentityStore.id
+
+      await executeOperationAsInstanceAdmin({
+        query: suspendMutation,
+        variables: { id },
+      })
+
+      const res = await executeOperationAsInstanceAdmin({
+        query: findQueryWithWhere,
+        variables: { where: { isDeleted: false } },
+      })
+
+      const resultIds = res.data?.findIdentityStores.map((s) => s.id)
+      expect(resultIds).not.toContain(id)
+    })
+  })
+})

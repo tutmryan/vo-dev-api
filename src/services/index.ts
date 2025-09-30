@@ -4,7 +4,6 @@ import {
   authorityId,
   blobStorage,
   callbackAuth,
-  homeTenant,
   issuanceCallbackRoute,
   presentationCallbackRoute,
   verifiedIdAdmin,
@@ -12,18 +11,19 @@ import {
   vidServiceAuth,
 } from '../config'
 import type { BaseContext } from '../context'
+import type { MsGraphFailure } from '../generated/graphql'
 import { logger } from '../logger'
 import { Lazy } from '../util/lazy'
 import { AsyncIssuanceService } from './async-issuance-service'
 import { BlobStorageContainerService } from './blob-storage-container-service'
 import { CommunicationsService } from './communications-service'
-import { GraphService } from './graph-service'
+import { graphServiceManager } from './graph-service'
 import { VerifiedIdAdminService, VerifiedIdRequestService } from './verified-id'
 
 export * from './graph-service'
 
 export interface Services {
-  homeTenantGraph: GraphService
+  graphServiceManager: typeof graphServiceManager
   verifiedIdAdmin: VerifiedIdAdminService
   verifiedIdRequest: VerifiedIdRequestService
   logoImages: BlobStorageContainerService
@@ -40,7 +40,7 @@ export const createLogoImagesService = () =>
 
 export const createServices = (context: BaseContext): Services => {
   return {
-    homeTenantGraph: createGraphService(),
+    graphServiceManager: graphServiceManager,
     verifiedIdAdmin: createVerifiedIdAdminService(context.logger, context.requestInfo.correlationId),
     verifiedIdRequest: createVerifiedIdRequestService(context),
     logoImages: createLogoImagesService(),
@@ -49,23 +49,25 @@ export const createServices = (context: BaseContext): Services => {
   }
 }
 
-function createGraphService() {
-  const { name: tenantName, tenantId, graphCredentials } = homeTenant
-  return new GraphService({ tenantName, auth: { tenantId, ...graphCredentials } })
-}
+export async function testAllGraphServices(): Promise<MsGraphFailure[] | undefined> {
+  // Runs in a background job, graphServiceManager may not be initialized yet
+  await graphServiceManager.init()
+  const failures: MsGraphFailure[] = []
 
-export async function testGraphService(): Promise<string | undefined> {
-  const graphService = createGraphService()
-
-  if (!graphService.isConfigured) return
-
-  try {
-    await graphService.findUsers({ nameStartsWith: 'a' }, 1)
-    return undefined
-  } catch (error) {
-    logger.error('Test for MS Graph service integration failed', { error })
-    return error instanceof Error ? error.message : String(error)
+  for (const graphService of graphServiceManager.all) {
+    if (!graphService.isConfigured) continue
+    try {
+      await graphService.findUsers({ nameStartsWith: 'a' }, 1)
+    } catch (error) {
+      logger.error('Test for MS Graph service integration failed', { error })
+      failures.push({
+        identityStoreId: graphService.config.identityStoreId,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
   }
+
+  return failures.length > 0 ? failures : undefined
 }
 
 export function createVerifiedIdAdminService(logger: BaseContext['logger'], correlationId?: string) {

@@ -19,6 +19,10 @@ export async function FindIssuancesQuery(
 
   if (criteria?.requestId) where.requestId = criteria.requestId
   if (criteria?.identityId) where.identityId = criteria.identityId
+  if (criteria?.identityStoreId) {
+    relations.identity = true
+    where.identity = { identityStoreId: criteria.identityStoreId }
+  }
   if (criteria?.contractId) where.contractId = criteria.contractId
   if (criteria?.issuedById) where.issuedById = criteria.issuedById
   if (criteria?.revokedById) where.revokedById = criteria.revokedById

@@ -34,6 +34,11 @@ export async function CountPresentationsQuery(this: QueryContext, criteria?: May
   if (criteria?.isFaceCheckRequested === true) where.requestedCredentialsJson = faceCheckRequested
   else if (criteria?.isFaceCheckRequested === false) where.requestedCredentialsJson = Not(faceCheckRequested)
 
+  if (criteria?.identityStoreId) {
+    relations.identity = true
+    where.identity = { identityStoreId: criteria.identityStoreId }
+  }
+
   const count = await this.entityManager.getRepository(PresentationEntity).count({
     comment: 'CountPresentationsQuery',
     relations,

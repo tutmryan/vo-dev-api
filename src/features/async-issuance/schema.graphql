@@ -466,6 +466,10 @@ input AsyncIssuanceRequestsWhere {
   """
   identityId: ID
   """
+  Return async issuance requests for the specified identity store.
+  """
+  identityStoreId: ID
+  """
   Return async issuance requests created by the specified user.
   """
   createdById: ID

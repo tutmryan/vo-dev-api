@@ -21,6 +21,7 @@ extensions:
                 Issuance: ../features/issuance/entities/issuance-entity#IssuanceEntity
                 Presentation: ../features/presentation/entities/presentation-entity#PresentationEntity
                 Identity: ../features/identity/entities/identity-entity#IdentityEntity
+                IdentityStore: ../features/identity-store/entities/identity-store-entity#IdentityStoreEntity
                 Partner: ../features/partners/entities/partner-entity#PartnerEntity
                 ApprovalRequest: ../features/approval-request/entities/approval-request-entity#ApprovalRequestEntity
                 AsyncIssuanceRequest: ../features/async-issuance/entities/async-issuance-entity#AsyncIssuanceEntity
@@ -31,6 +32,8 @@ extensions:
                 OidcClaimMapping: ../features/oidc-provider/entities/oidc-claim-mapping-entity#OidcClaimMappingEntity
                 Branding: ../features/branding/entities/branding-entity#BrandingEntity
                 Wallet: ../features/wallet/entities/wallet-entity#WalletEntity
+                ApplicationLabelConfig: ../features/instance-configs/entities/application-label-config-entity#ApplicationLabelConfigEntity
+                CorsOriginConfig: ../features/instance-configs/entities/cors-origins-config-entity#CorsOriginConfigEntity
         config:
           strictScalars: true
           scalars:

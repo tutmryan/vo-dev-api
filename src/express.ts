@@ -1,6 +1,5 @@
 import type { Configuration } from '@azure/msal-node'
 import { ConfidentialClientApplication } from '@azure/msal-node'
-import { multiIssuerBearerTokenMiddleware } from '@makerx/express-bearer'
 import type { AuthConfig } from '@makerx/express-msal'
 import {
   copySessionJwtToBearerHeader,
@@ -20,23 +19,22 @@ import helmet from 'helmet'
 import { clone, merge } from 'lodash'
 import {
   cookieSession as cookieSessionConfig,
-  cors as corsConfig,
   demoEnabled,
   devToolsEnabled,
   issuanceCallbackRoute,
-  issuerOptions,
   oidcEnabled,
   pkce,
   presentationCallbackRoute,
 } from './config'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
 import { demoPresentationTokenHandlers, demoPresentationTokenRoute } from './features/demo'
+import { corsConfig } from './features/instance-configs'
 import { vcLogoProxyHandler, vcLogoProxyTokenRoute } from './features/local-dev/vc-logo-proxy'
 import { addOidcProvider } from './features/oidc-provider'
 import { logger } from './logger'
 import { addServiceHealthEndpoints } from './services/monitoring/express'
 import { addVoyager } from './voyager'
-
+import { combinedBearerTokenMiddleware } from './authentication'
 export const requestOrigin = (req: Request): string => `${req.protocol}://${req.get('Host')}`
 
 const oidcOnlyCsp = {
@@ -152,14 +150,7 @@ export async function getExpressApp(): Promise<Express> {
   }
 
   // add bearer auth to all requests
-  app.use(
-    notOidcRoute,
-    multiIssuerBearerTokenMiddleware({
-      issuerOptions,
-      tokenIsRequired: false, // introspection requests are anonymous outside prod, so allow requests without tokens to pass through
-      logger,
-    }),
-  )
+  app.use(notOidcRoute, combinedBearerTokenMiddleware())
 
   // add issuance and presentation callback routes
   const jsonParser = bodyParser.json({ limit: '1mb' })

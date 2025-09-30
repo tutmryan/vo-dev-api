@@ -1,11 +1,14 @@
-import { testGraphService, testVidService } from '..'
+import { testAllGraphServices, testVidService } from '..'
+import type { MsGraphFailure } from '../../generated/graphql'
 
 export enum MonitoredServices {
   MSGraph = 'ms-graph',
   VerifiedID = 'verified-id',
 }
-
-export type ServiceErrors = Record<MonitoredServices, string | undefined>
+export type ServiceErrors = {
+  [MonitoredServices.MSGraph]: MsGraphFailure[] | undefined
+  [MonitoredServices.VerifiedID]: string | undefined
+}
 
 export const serviceErrors: ServiceErrors = {
   [MonitoredServices.MSGraph]: undefined,
@@ -14,7 +17,7 @@ export const serviceErrors: ServiceErrors = {
 
 export async function testServices(): Promise<ServiceErrors> {
   return {
-    [MonitoredServices.MSGraph]: await testGraphService(),
+    [MonitoredServices.MSGraph]: await testAllGraphServices(),
     [MonitoredServices.VerifiedID]: await testVidService(),
   }
 }

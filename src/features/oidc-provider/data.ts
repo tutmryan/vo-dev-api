@@ -60,7 +60,7 @@ const toOidcClientMetadata = async ({
 }: OidcClientEntity): Promise<ClientMetadata> => ({
   client_id: id,
   client_name: name,
-  client_secret: clientType === OidcClientType.Confidential ? await oidcSecretService().getClientSecret(id) : undefined,
+  client_secret: clientType === OidcClientType.Confidential ? await oidcSecretService().get(id) : undefined,
   redirect_uris: redirectUris,
   post_logout_redirect_uris: postLogoutUris,
   response_types: ['code', 'code id_token', 'id_token'],

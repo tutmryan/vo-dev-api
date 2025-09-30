@@ -1,7 +1,6 @@
 import { verifyMultiIssuer } from '@makerx/express-bearer'
 import { decodeJwt, decodeProtectedHeader } from 'jose'
 import type { AuthoriseResponse, Configuration, Errors, KoaContextWithOIDC, Provider, UnknownObject } from 'oidc-provider'
-import { eamIssuerOptions } from '../../../config'
 import { dataSource } from '../../../data'
 import type { ClaimConstraint, PresentedCredential } from '../../../generated/graphql'
 import { type Logger } from '../../../logger'
@@ -11,6 +10,7 @@ import { compareIgnoreCase } from '../../../util/string'
 import { throwError } from '../../../util/throw-error'
 import { StandardClaims } from '../../contracts/claims'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
+import { getEamIssuerOptions } from '../../instance-configs'
 import { supportedAmrs } from '../claims'
 import { filterToRequestedClaimsAcr, filterToRequestedClaimsAmr } from '../claims-parameter'
 import { type ApplyIntercept, type ApplyPostIntercept, type RouterContextWithOIDC } from '../integration-hook'
@@ -269,7 +269,7 @@ export const applyEamCheckIdTokenHook: ApplyIntercept = async (ctx, next, _origi
   }
 
   const payload = await verifyMultiIssuer(ctx.host, authParams.id_token_hint!, {
-    issuerOptions: eamIssuerOptions,
+    issuerOptions: getEamIssuerOptions(),
     explicitNoAudienceValidation: true,
   })
 

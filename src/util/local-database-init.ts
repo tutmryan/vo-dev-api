@@ -4,6 +4,10 @@ import { DataSource } from 'typeorm'
 import { dataSourceConfig } from '../data'
 import { wait } from './wait'
 
+// Set default values for environment variables required by identity store migration
+process.env.HOME_TENANT_ID ||= '11111111-1111-1111-1111-111111111111'
+process.env.HOME_TENANT_NAME ||= 'Test Home Tenant'
+
 export const createDatabase = async ({ runMigrations }: { runMigrations?: boolean } = {}) => {
   // create database and api_user login
   const saMasterDataSource = new DataSource({ ...dataSourceConfig, database: 'master', username: 'sa' })

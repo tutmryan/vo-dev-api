@@ -6,7 +6,7 @@ type EnvVarSubstitution<T> = {
   [key in keyof T]?:
     | Uppercase<string>
     | EnvVarParsingRule
-    | (T[key] extends Date ? never : T[key] extends object ? EnvVarSubstitution<T[key]> : never)
+    | (NonNullable<T[key]> extends object ? EnvVarSubstitution<NonNullable<T[key]>> : never)
 }
 
 const json = <T extends Uppercase<string>>(varName: T): { __name: T; __format: 'json' } => ({
@@ -69,6 +69,7 @@ const config: EnvVarSubstitution<Config> = {
     clientEncryptionKey: 'PRIVATE_STORAGE_ENCRYPTION_KEY',
   },
   oidcKeyVaultUrl: 'OIDC_KEY_VAULT_URL',
+  identityStoreKeyVaultUrl: 'IDENTITY_STORE_KEY_VAULT_URL',
   sms: {
     secret: 'SMS_SECRET',
   },

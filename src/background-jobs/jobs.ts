@@ -8,6 +8,7 @@ import type { CancelAsyncIssuanceRequestsJobPayload } from '../features/async-is
 import { cancelAsyncIssuanceRequestsHandler } from '../features/async-issuance/jobs/cancel-async-issuance-requests'
 import type { SendAsyncIssuanceNotificationsJobPayload } from '../features/async-issuance/jobs/send-async-issuance-notifications'
 import { sendAsyncIssuanceNotificationsJobHandler } from '../features/async-issuance/jobs/send-async-issuance-notifications'
+import { migrateHomeTenantGraphClientSecretsHandler } from '../features/identity-store/jobs/migrate-home-tenant-graph-client'
 import type { RevokeContractIssuancesJobPayload } from '../features/issuance/jobs/revoke-contract-issuances'
 import { revokeContractIssuancesJobHandler } from '../features/issuance/jobs/revoke-contract-issuances'
 import {
@@ -88,6 +89,7 @@ export type Jobs = {
   initialiseOidcData: JobConfig
   monitorServices: JobConfig<unknown, ServiceErrors>
   applyOidcSigningKeysRotation: JobConfig
+  migrateHomeTenantGraphClientSecrets: JobConfig
 }
 
 export const jobs: Jobs = {
@@ -157,6 +159,17 @@ export const jobs: Jobs = {
     schedule: {
       pattern: '0 0 1 * * *', // every day at 1am
     },
+  },
+  // Temporary one-time migration job:
+  // Reads Home Tenant Graph Client credentials from config (env-wired) and
+  // updates the existing Key Vault secret if present.
+  // Safe to remove after all instances are aligned.
+  migrateHomeTenantGraphClientSecrets: {
+    handler: migrateHomeTenantGraphClientSecretsHandler,
+    options: {
+      repeat: { limit: 1 },
+    },
+    schedule: { every: 1000 },
   },
 }
 

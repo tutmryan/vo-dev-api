@@ -57,3 +57,4 @@ export const localDev = config.has('localDev') ? config.get('localDev') : undefi
 export const graphQL = config.get('graphQL')
 export const platformManagement = config.get('platformManagement')
 export const oidcKeyVaultUrl = config.has('oidcKeyVaultUrl') ? config.get('oidcKeyVaultUrl') : undefined
+export const identityStoreKeyVaultUrl = config.has('identityStoreKeyVaultUrl') ? config.get('identityStoreKeyVaultUrl') : undefined

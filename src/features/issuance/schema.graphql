@@ -559,9 +559,13 @@ input IssuanceWhere {
   """
   requestId: ID
   """
-  The ID of the identity that was issued the credential.
+  List issuances by identity.
   """
   identityId: ID
+  """
+  List issuances by identity store.
+  """
+  identityStoreId: ID
   """
   The ID of the contract that was issued.
   """

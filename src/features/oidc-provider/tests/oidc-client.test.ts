@@ -58,7 +58,7 @@ describe('createOidcClient mutation', () => {
 
     expect(createOidcClient).toMatchObject(omit(confidentialInput, 'clientSecret'))
     expect(createOidcClient.clientType).toEqual(OidcClientType.Confidential)
-    expect(mockedServices.oidcSecretService.setClientSecret.lastCallArgs()).toEqual([createOidcClient.id, confidentialInput.clientSecret])
+    expect(mockedServices.oidcSecretService.set.lastCallArgs()).toEqual([createOidcClient.id, confidentialInput.clientSecret])
   })
 
   it('can update a confidential web client to public', async () => {
@@ -73,7 +73,7 @@ describe('createOidcClient mutation', () => {
 
     expect(createOidcClient).toMatchObject(omit(confidentialInput, 'clientSecret'))
     expect(createOidcClient.clientType).toEqual(OidcClientType.Confidential)
-    expect(mockedServices.oidcSecretService.setClientSecret.lastCallArgs()).toEqual([createOidcClient.id, confidentialInput.clientSecret])
+    expect(mockedServices.oidcSecretService.set.lastCallArgs()).toEqual([createOidcClient.id, confidentialInput.clientSecret])
 
     // update to public client
     const publicInput = createOidcClientInput({ clientType: OidcClientType.Public })
@@ -87,7 +87,7 @@ describe('createOidcClient mutation', () => {
     expect(updatedOidcClient).toMatchObject(omit(publicInput, 'clientSecret'))
     expect(updatedOidcClient.clientType).toEqual(OidcClientType.Public)
     // client secret should be deleted
-    expect(mockedServices.oidcSecretService.deleteClientSecret.lastCallArgs()).toEqual([updatedOidcClient.id])
+    expect(mockedServices.oidcSecretService.delete.lastCallArgs()).toEqual([updatedOidcClient.id])
   })
 
   it(`can't create a confidential client without a secret`, async () => {

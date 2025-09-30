@@ -587,6 +587,13 @@ runs:
       env:
         HOST: ${{ steps.instance-infra.outputs.databaseHost }}
         DATABASE: ${{inputs.resource-prefix}}-sql-db
+        HOME_TENANT_ID: ${{ inputs.home-tenant-id }}
+        HOME_TENANT_NAME: ${{ inputs.home-tenant-name }}
+        HOME_TENANT_GRAPH_CLIENT_ID: ${{ inputs.home-tenant-graph-client-id }}
+        PLATFORM_CONSUMER_APPS: ${{ inputs.platform-consumer-apps }}
+        IDENTITY_ISSUERS: ${{ inputs.identity-issuers }}
+        CORS_ORIGIN: ${{ inputs.cors-origin }}
+        ADDITIONAL_AUTH_TENANT_IDS: ${{ inputs.additional-auth-tenant-ids }}
 
     - name: Log back in to Azure as deployer after migration
       uses: azure/login@v2

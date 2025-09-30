@@ -22,6 +22,10 @@ export async function CountIssuancesQuery(this: QueryContext, criteria?: Maybe<I
       id: criteria.presentationId,
     }
   }
+  if (criteria?.identityStoreId) {
+    relations.identity = true
+    where.identity = { identityStoreId: criteria.identityStoreId }
+  }
 
   where.issuedAt = OptionalRange(criteria?.from, criteria?.to)
   where.expiresAt = OptionalRange(criteria?.expiresFrom, criteria?.expiresTo)

@@ -819,9 +819,13 @@ input PresentationWhere {
   """
   requestId: ID
   """
-  The ID of the identity who presented the credential (if known).
+  List presentations by identity.
   """
   identityId: ID
+  """
+  List presentations by identity store.
+  """
+  identityStoreId: ID
   """
   The ID of a contract that was presented.
   """

@@ -3,12 +3,13 @@ import { createContextFactory } from '@makerx/graphql-core'
 import { createSubscriptionContextFactory, extractTokenFromConnectionParams } from '@makerx/graphql-core/subscriptions'
 import type { JwtPayload } from 'jsonwebtoken'
 import type { DataSource } from 'typeorm'
-import { logging, oidcAuthorityUrl, platformConsumerApps } from './config'
+import { logging, oidcAuthorityUrl } from './config'
 import type { CommandLike, DispatchContext } from './cqs'
 import { dispatch } from './cqs'
 import { dataSource } from './data'
 import { getAsyncIssuanceDataForSession } from './features/async-issuance/session'
 import { IdentityEntity } from './features/identity/entities/identity-entity'
+import { getPlatformConsumerApps } from './features/instance-configs'
 import { getLimitedAccessData } from './features/limited-access-tokens'
 import { getLimitedApprovalData } from './features/limited-approval-tokens'
 import { getLimitedPhotoCaptureSession } from './features/limited-photo-capture-tokens'
@@ -141,7 +142,7 @@ export const findUpdateOrCreateUserEntity = async (claims: JwtPayload): Promise<
   const input: FindUpdateOrCreateUserInput = {
     tenantId,
     oid: claims.oid,
-    name: (isApp ? platformConsumerApps[claims.oid] : undefined) ?? claims.name ?? claims.sub,
+    name: (isApp ? getPlatformConsumerApps()[claims.oid] : undefined) ?? claims.name ?? claims.sub,
     email: claims.email ?? null,
     isApp,
   }

@@ -24,6 +24,10 @@ export async function FindPresentationsQuery(
 
   if (criteria?.requestId) where.requestId = criteria.requestId
   if (criteria?.identityId) where.identityId = criteria.identityId
+  if (criteria?.identityStoreId) {
+    relations.identity = true
+    where.identity = { identityStoreId: criteria.identityStoreId }
+  }
   if (criteria?.requestedById) where.requestedById = criteria.requestedById
   if (criteria?.oidcClientId) where.oidcClientId = criteria.oidcClientId
   if (criteria?.walletId) where.walletId = criteria.walletId

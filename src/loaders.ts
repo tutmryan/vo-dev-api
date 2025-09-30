@@ -1,7 +1,9 @@
 import { approvalRequestLoader } from './features/approval-request/loaders'
 import { asyncIssuanceContactLoader, asyncIssuanceLoader } from './features/async-issuance/loaders'
 import { contractLoader } from './features/contracts/loaders'
+import { identityStoreLoader } from './features/identity-store/loaders'
 import { identityLoader, isIdentityDeletableLoader } from './features/identity/loaders'
+import { applicationLabelConfigLoader, corsOriginConfigLoader } from './features/instance-configs/loaders'
 import { issuanceCountByContractLoader, issuanceCountByIdentityLoader, issuanceLoader } from './features/issuance/loaders'
 import { oidcClaimMappingsLoader, oidcClientLoader, oidcResourceLoader } from './features/oidc-provider/loaders'
 import { partnerByDidLoader, partnerLoader, presentationPartnersLoader } from './features/partners/loaders'
@@ -16,6 +18,7 @@ export type DataLoaders = ReturnType<typeof createDataLoaders>
 export const createDataLoaders = (services: Services) => ({
   users: userLoader(),
   identities: identityLoader(),
+  identityStores: identityStoreLoader(),
   contracts: contractLoader(),
   templates: templateLoader(),
   issuances: issuanceLoader(),
@@ -35,4 +38,6 @@ export const createDataLoaders = (services: Services) => ({
   wallets: walletLoader(),
   walletFirstUsed: walletUsedDateLoader('MIN'),
   walletLastUsed: walletUsedDateLoader('MAX'),
+  applicationLabelConfigs: applicationLabelConfigLoader(),
+  corsOriginConfigs: corsOriginConfigLoader(),
 })

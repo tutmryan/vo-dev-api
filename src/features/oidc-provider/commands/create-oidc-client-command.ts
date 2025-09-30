@@ -20,7 +20,7 @@ export async function CreateOidcClientCommand(this: CommandContext, input: OidcC
     }),
   )
 
-  if (input.clientSecret) await oidcSecretService().setClientSecret(client.id, input.clientSecret)
+  if (input.clientSecret) await oidcSecretService().set(client.id, input.clientSecret)
 
   notifyOidcDataChanged()
   return client

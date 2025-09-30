@@ -48,6 +48,10 @@ export async function FindAsyncIssuancesQuery(
   }
 
   if (criteria?.identityId) where.identityId = criteria.identityId
+  if (criteria?.identityStoreId) {
+    relations.identity = true
+    where.identity = { identityStoreId: criteria.identityStoreId }
+  }
   if (criteria?.contractId) where.contractId = criteria.contractId
   if (criteria?.createdById) where.createdById = criteria.createdById
 

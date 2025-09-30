@@ -15,9 +15,10 @@ import type { Express } from 'express'
 import { json } from 'express'
 import { createApollo4QueryValidationPlugin } from 'graphql-constraint-directive/apollo4'
 import type http from 'http'
-import { devToolsEnabled, graphQL, issuerOptions, logging } from './config'
+import { devToolsEnabled, graphQL, logging } from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
+import { getIssuerOptions } from './features/instance-configs'
 import type { Logger } from './logger'
 import { logger } from './logger'
 import { rateLimiterMiddleware } from './rate-limiter'
@@ -107,7 +108,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server, .
     createSubscriptionContext,
     jwtClaimsToLog: logging.userClaimsToLog,
     requireAuth: true,
-    verifyToken: (host, token) => verifyMultiIssuer(host, token, { issuerOptions }),
+    verifyToken: (host, token) => verifyMultiIssuer(host, token, { issuerOptions: getIssuerOptions() }),
   })
 
   logger.info('Starting apollo server')

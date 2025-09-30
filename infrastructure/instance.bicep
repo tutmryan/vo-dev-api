@@ -143,6 +143,43 @@ resource oidcKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   }
 }
 
+resource identityStoreKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
+  name: 'vo-kv-idst-${uniqueSuffix}'
+  location: location
+  properties: {
+    tenantId: subscription().tenantId
+    sku: {
+      name: 'standard'
+      family: 'A'
+    }
+    enabledForTemplateDeployment: true
+    enablePurgeProtection: true
+    publicNetworkAccess: 'Disabled'
+    accessPolicies: [
+      {
+        tenantId: subscription().tenantId
+        objectId: apiAppService.identity.principalId
+        permissions: {
+          secrets: [
+            'get'
+            'set'
+            'delete'
+            'recover'
+          ]
+        }
+      }
+    ]
+  }
+}
+
+resource homeTenantGraphClientSecretPreconfigured 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(homeTenantGraphClientId) && !empty(homeTenantGraphClientSecret)) {
+  name: 'identity-store-client-secret-${homeTenantGraphClientId}'
+  parent: identityStoreKeyVault
+  properties: {
+    value: homeTenantGraphClientSecret
+  }
+}
+
 resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
   name: '${resourcePrefix}-kv-pe'
   location: location
@@ -181,6 +218,25 @@ resource oidcKeyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05
   }
 }
 
+resource identityStoreKvPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+  name: '${resourcePrefix}-identity-store-kv-pe'
+  location: location
+  properties: {
+    subnet: {
+      id: privateEndpointsSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: '${resourcePrefix}-identity-store-kv-private-link'
+        properties: {
+          privateLinkServiceId: identityStoreKeyVault.id
+          groupIds: ['vault']
+        }
+      }
+    ]
+  }
+}
+
 resource keyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
   parent: keyVaultPrivateEndpoint
   name: 'default'
@@ -202,6 +258,25 @@ resource keyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/private
 
 resource oidcKeyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
   parent: oidcKeyVaultPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config1'
+        properties: {
+          privateDnsZoneId: resourceId(
+            sharedResourceGroupName,
+            'Microsoft.Network/privateDnsZones',
+            'privatelink.vaultcore.azure.net'
+          )
+        }
+      }
+    ]
+  }
+}
+
+resource identityStoreKeyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
+  parent: identityStoreKvPrivateEndpoint
   name: 'default'
   properties: {
     privateDnsZoneConfigs: [
@@ -1437,6 +1512,7 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     PRIVATE_BLOB_STORAGE_URL: 'https://${privateStorageAccount.name}.blob.${az.environment().suffixes.storage}'
     PRIVATE_STORAGE_ENCRYPTION_KEY: '@Microsoft.KeyVault(SecretUri=${(empty(privateStorageClientEncryptionKey) ? privateStorageClientEncryptionKeySecretExisting : privateStorageClientEncryptionKeySecret).properties.secretUri})'
     OIDC_KEY_VAULT_URL: oidcKeyVault.properties.vaultUri
+    IDENTITY_STORE_KEY_VAULT_URL: identityStoreKeyVault.properties.vaultUri
     API_CLIENT_ID: apiClientId
     API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiClientSecret) ? apiClientSecretSecretExisting : apiClientSecretSecret).properties.secretUri})'
     API_CLIENT_URI: apiClientId

@@ -1,6 +1,7 @@
 import { helper as asyncIssuanceServiceHelper } from '../services/__mocks__/async-issuance-service'
 import { helper as blobStorageContainerServiceHelper } from '../services/__mocks__/blob-storage-container-service'
 import { helper as communicationServiceHelper } from '../services/__mocks__/communications-service'
+import { helper as identityStoreSecretServiceHelper } from '../services/__mocks__/identity-store-secret-service'
 import { helper as oidcSecretServiceHelper } from '../services/__mocks__/oidc-secret-service'
 import { helper as oidcStorageServiceHelper } from '../services/__mocks__/oidc-storage-service'
 import { helper as adminServiceMockHelper } from '../services/__mocks__/verified-id'
@@ -16,6 +17,7 @@ export const mockedServices = {
     communicationServiceHelper.clearAllMocks()
     oidcStorageServiceHelper.clearAllMocks()
     oidcSecretServiceHelper.clearAllMocks()
+    identityStoreSecretServiceHelper.clearAllMocks()
   },
   adminService: adminServiceMockHelper,
   requestService: verifiedRequestServiceMockHelper,
@@ -24,6 +26,7 @@ export const mockedServices = {
   communicationsService: communicationServiceHelper,
   oidcStorageService: oidcStorageServiceHelper,
   oidcSecretService: oidcSecretServiceHelper,
+  identityStoreSecretService: identityStoreSecretServiceHelper,
 }
 
 export function loadMocks() {

@@ -90,6 +90,7 @@ export type Config = {
     clientEncryptionKey: string
   }
   oidcKeyVaultUrl: string
+  identityStoreKeyVaultUrl: string
   sms: {
     accountSid: string
     sid: string
@@ -106,7 +107,7 @@ export type Config = {
   homeTenant: {
     name: string
     tenantId: string
-    graphCredentials: ClientCredentials
+    graphCredentials?: ClientCredentials
     vidServiceCredentials: ClientCredentials
   }
   platformTenant: {

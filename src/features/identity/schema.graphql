@@ -20,6 +20,10 @@ type Identity {
   """
   identifier: String!
   """
+  The local ID of identity store this identity belongs to
+  """ # eslint-disable-next-line @graphql-eslint/no-typename-prefix
+  identityStoreId: String!
+  """
   The name of the identity
   """
   name: String!
@@ -47,21 +51,29 @@ type Identity {
 }
 
 """
-Input type representing an identity that is issued credentials
+Input type representing an identity that is issued credentials.
+Behavior / backward compatibility:
+- Supplying (issuer, identifier) will create or update the identity.
+- If no identity store exists whose identifier == issuer, one is created automatically
+  (lazy creation) with a derived name and inferred type. With that type being either Entra or Manual.
+- This keeps existing identity creation and updates flows compatible.
 """
 input IdentityInput {
   """
-  The issuer of the identity
+  The issuer of the identity.
+  Also serves as the identity store identifier. If an IdentityStore with this
+  identifier does not yet exist it will be created automatically with an inferred
+  type of Entra or Manual.
   """
   issuer: String! @constraint(minLength: 1)
 
   """
-  The unique identifier of the identity in the issuer
+  The unique identifier of the identity within the issuer (issuer-scoped).
   """
   identifier: String! @constraint(minLength: 1)
 
   """
-  The name of the identity
+  A human-readable name for the identity.
   """
   name: String! @constraint(minLength: 1)
 }
@@ -93,6 +105,10 @@ input IdentityWhere {
   The issuer of the identity to match
   """
   issuer: String
+  """
+  List identities from a specific Identity Store
+  """
+  identityStoreId: ID
   """
   List only the identities which can be deleted
   """
@@ -133,6 +149,10 @@ input TenantIdentityWhere {
   The partial name of the user to match
   """
   nameStartsWith: String!
+  """
+  The ID of the identity store to filter by
+  """
+  identityStoreId: ID!
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description

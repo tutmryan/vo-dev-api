@@ -6,7 +6,9 @@ import { useBackgroundJobs } from './background-jobs'
 import { apiUrl, server } from './config'
 import { dataSource } from './data'
 import { getExpressApp } from './express'
+import { initDbConfigs } from './features/instance-configs'
 import { logger } from './logger'
+import { graphServiceManager } from './services'
 
 export const runApi = async () => {
   if (isLocalDev) {
@@ -17,8 +19,14 @@ export const runApi = async () => {
   logger.info('Initialising data-source')
   await dataSource.initialize()
 
+  logger.info('Initialising graph client')
+  await graphServiceManager.init()
+
   logger.info('Starting background job processing')
   const jobRunnerCleanup = await useBackgroundJobs()
+
+  logger.info('Initialising db configs')
+  await initDbConfigs()
 
   logger.info('Initialising express app')
   const app = await getExpressApp()

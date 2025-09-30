@@ -40,6 +40,9 @@ export const resolvers: Resolvers = {
   Identity: {
     ...createdByUpdatedBy,
   },
+  IdentityStore: {
+    ...createdByUpdatedBy,
+  },
   Partner: {
     ...createdByUpdatedBy,
   },
