@@ -77,6 +77,9 @@ resource auditTracesTable 'Microsoft.OperationalInsights/workspaces/tables@2022-
 resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' = {
   name: '${resourcePrefix}-dcr-audit-traces'
   location: location
+  dependsOn: [
+    auditTracesTable
+  ]
   properties: {
     description: 'Data Collection Rule for audit traces ingestion'
     dataCollectionEndpointId: dataCollectionEndpoint.id

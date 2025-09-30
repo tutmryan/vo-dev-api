@@ -27,7 +27,11 @@ resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01
   name: '${resourcePrefix}-eh-audit-traces'
   parent: eventHubNamespace
   properties: {
-    partitionCount: 2
+    // Google recommends 40 https://cloud.google.com/chronicle/docs/administration/create-azure-feed#create-azure-event-hub
+    // AI says increasing the count may increase complexity for the consumers
+    // A rough guide (not from MS) is 1 partition per 1MB/s of ingress
+    // 10 seems like is a reasonable default for many scenarios
+    partitionCount: 10
     retentionDescription: {
       cleanupPolicy: 'Delete'
       retentionTimeInHours: 168
