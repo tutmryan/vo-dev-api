@@ -50,7 +50,7 @@ export type HandlerContext = {
 }
 
 // https://docs.bullmq.io/guide/job-schedulers/repeat-strategies
-export type JobSchedule = { every: number } | { pattern: string }
+export type JobSchedule = { every: number; limit?: number } | { pattern: string }
 export type JobHandler<TData = unknown, TResult = unknown> = (context: HandlerContext, payload: JobPayload<TData>) => Promise<TResult>
 export type JobResultHandler<TResult = unknown> = (result: TResult) => Promise<void>
 export type JobConfig<TData = unknown, TResult = unknown> = {
@@ -166,10 +166,7 @@ export const jobs: Jobs = {
   // Safe to remove after all instances are aligned.
   migrateHomeTenantGraphClientSecrets: {
     handler: migrateHomeTenantGraphClientSecretsHandler,
-    options: {
-      repeat: { limit: 1 },
-    },
-    schedule: { every: 1000 },
+    schedule: { every: 1000, limit: 1 },
   },
 }
 
