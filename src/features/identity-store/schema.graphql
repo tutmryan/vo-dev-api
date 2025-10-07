@@ -62,12 +62,12 @@ input IdentityStoreInput {
   """
   name: String!
   """
-  What kind of store this is (e.g. 'entra')
+  What kind of store this is (e.g. 'Entra')
   """
   type: IdentityStoreType!
 
   """
-  Whether users in this store are allowed to authenticate (i.e. log in)
+  Whether tokens issued from this tenant can be used to authenticate with the VO APIs.
   """
   isAuthenticationEnabled: Boolean!
   """

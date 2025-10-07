@@ -9,6 +9,11 @@ import { AdminLink } from '@site/src/components/admin-link'
 
 This guide describes how to use Verified Orchestration identity references, which are used by issuances and presentations to reliably link back to your organisation's own identities (e.g., internal users, partners, and customers).
 
+Verified Orchestration supports adding and grouping identities through the **Identity Store** feature.
+Identity mapping continues to be used to connect each credential or presentation to the correct person or entity in your organisation.
+
+For details on setup and configuration, see the [Identity Store documentation](/docs/guides/identity-stores).
+
 ## Verified Orchestration identity reference
 
 The Verified Orchestration platform minimises holding personal data. Instead, it stores and uses minimal identity references to link back into your organisation's own identity system.
@@ -96,6 +101,11 @@ function saveIdentity(user: JwtPayload) {
 
 :::info
 The `saveIdentity` mutation will create a new identity when an existing one cannot be matched by the `issuer` and `identifier` fields. In the case that the identity exists, the name will be updated if changed.
+:::
+
+:::info
+An identity store will always be created automatically if it does not already exist for the given issuer.
+If the identity store already exists, the identity will be added to it.
 :::
 
 #### Creating an identity with issuance

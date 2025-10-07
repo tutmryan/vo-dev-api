@@ -14,41 +14,61 @@ To change settings, you will need to be a member of the [Instance admin user rol
 
 ## CORS origins
 
-If you are accessing the Verified Orchestration API or OIDC endpoint from a web application, CORS origins will need to be configured against each instance (sandbox and production).
+CORS origins control which web applications can access the Verified Orchestration API or OIDC endpoint.
+You can configure allowed origins for each instance (sandbox and production).
 
-- Subdomains can be matched using a regular expression; e.g. `^https://([a-z0-9]+[.])*yourcompany\.com$`
-- For your sandbox, you may want to allow local development origins e.g. `^http(s?)://localhost(:\d+)?$`
+- Subdomains can be matched using a regular expression, e.g. `^https://([a-z0-9]+[.])*yourcompany\.com$`
+- For sandbox environments, you may want to allow local development origins, e.g. `^http(s?)://localhost(:\d+)?$`
 
-## Additional tenant IDs
+You can manage CORS origins in two ways:
 
-If you want to allow the users from the tenants other than your home tenant to access the Verified Orchestration API, those tenant IDs will need to be configured against each instance (sandbox and production).
+**In Composer:**
+Go to the <AdminLink path="/configuration">Configuration</AdminLink> page, find the CORS origins section, and add or edit allowed origins as needed.
 
-## Application labels
+**Via the API:**
+You can view all configured origins using the `corsOriginConfigs` query:
 
-As you onboard applications, you can supply user-friendly labels, helping users to understand which apps are issuing or requesting presentation of credentials.
+**Example GraphQL query:**
 
-To supply a label for an app, provide the app's object ID from the [Enterprise Apps list in the Azure Portal](https://portal.azure.com/#view/Microsoft_AAD_IAM/StartboardApplicationsMenuBlade/~/AppAppsPreview), along with the label.
+```graphql
+query CorsOriginConfigs {
+  corsOriginConfigs {
+    id
+    origin
+  }
+}
+```
 
-Example application label mapping:
+To set or update CORS origins, use the `setCorsOriginConfigs` mutation.
+This mutation replaces all existing origins for the instance with the new list you provide.
 
-| App object ID (OID)                  | Label         |
-| ------------------------------------ | ------------- |
-| 00000000-0000-0000-0000-000000000000 | Your app name |
+**Example GraphQL mutation:**
 
-## Identity issuer labels
+```graphql
+mutation SetCorsOriginConfigs($input: [CorsOriginConfigInput!]!) {
+  setCorsOriginConfigs(input: $input) {
+    id
+    origin
+  }
+}
+```
 
-You may integrate several identity providers as a source of issuee identity data. Identities are uniquely identified by the `issuer` and `identifier` fields. We recommend you standardise use of the `issuer` field across different applications to avoid duplicate representations of the same identity. We recommend using the tenant ID or `iss` (issuer) claim from JWTs for the `issuer` field.
+**Example variables:**
 
-To supply a label for an identity issuer, provide the issuer's identifier along with the label.
+```json
+{
+  "input": [
+    {
+      "origin": "^https://([a-z0-9]+[.])*yourcompany\\.com$"
+    },
+    {
+      "origin": "^http(s?)://localhost(:\\d+)?$"
+    }
+  ]
+}
+```
 
-Note: your home tenant is automatically labelled.
-
-Example issuer label mapping:
-
-| Issuer                                                                       | Label        |
-| ---------------------------------------------------------------------------- | ------------ |
-| 00000000-0000-0000-0000-000000000000                                         | Tenant label |
-| `https://b2cinstanceb2clogin.com/00000000-0000-0000-0000-000000000000/v2.0/` | B2C label    |
+> **Note:** The API uses a "set all" strategy—when you update CORS origins, you provide the full list for the instance, and it replaces any previous origins.
 
 ## GraphQL security settings
 

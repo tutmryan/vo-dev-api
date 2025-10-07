@@ -1775,11 +1775,11 @@ export type IdentityStoreInput = {
   clientSecret?: InputMaybe<Scalars['String']['input']>;
   /** A unique identifier for this store */
   identifier: Scalars['String']['input'];
-  /** Whether users in this store are allowed to authenticate (i.e. log in) */
+  /** Whether tokens issued from this tenant can be used to authenticate with the VO APIs. */
   isAuthenticationEnabled: Scalars['Boolean']['input'];
   /** A human-friendly name for this store */
   name: Scalars['String']['input'];
-  /** What kind of store this is (e.g. 'entra') */
+  /** What kind of store this is (e.g. 'Entra') */
   type: IdentityStoreType;
 };
 
