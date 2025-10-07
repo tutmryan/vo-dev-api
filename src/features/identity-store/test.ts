@@ -9,7 +9,13 @@ import {
   UpdateIdentityStoreInput,
   UpdateIdentityStoreMutation,
 } from '../../generated/graphql'
-import { beforeAfterAll, executeOperationAnonymous, executeOperationAsInstanceAdmin, expectUnauthorizedError } from '../../test'
+import {
+  beforeAfterAll,
+  executeOperationAnonymous,
+  executeOperationAsCredentialAdmin,
+  executeOperationAsInstanceAdmin,
+  expectUnauthorizedError,
+} from '../../test'
 import { mockedServices } from '../../test/mocks'
 
 faker.seed(Date.now())
@@ -235,69 +241,6 @@ describe('IdentityStore', () => {
   })
 
   describe('suspend/resume', () => {
-    it('allows instance admins to suspend', async () => {
-      const createInput = getRequiredRandomInput()
-      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: createInput } })
-
-      const id = createRes.data!.createIdentityStore.id
-      const response = await executeOperationAsInstanceAdmin({ query: suspendMutation, variables: { id } })
-
-      expect(response.errors).toBeUndefined()
-      expect(response.data?.suspendIdentityStore).toMatchObject({
-        id,
-        suspendedAt: expect.any(Date),
-        ...createInput,
-      } satisfies Omit<SuspendIdentityStoreMutation['suspendIdentityStore'], '__typename'>)
-    })
-
-    it('allows instance admins to resume', async () => {
-      const createInput = getRequiredRandomInput()
-      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: createInput } })
-      const id = createRes.data!.createIdentityStore.id
-
-      await executeOperationAsInstanceAdmin({ query: suspendMutation, variables: { id } })
-      const resumeRes = await executeOperationAsInstanceAdmin({ query: resumeMutation, variables: { id } })
-
-      expect(resumeRes.errors).toBeUndefined()
-      expect(resumeRes.data?.resumeIdentityStore).toMatchObject({
-        id,
-        ...createInput,
-      } satisfies Omit<ResumeIdentityStoreMutation['resumeIdentityStore'], '__typename'>)
-    })
-
-    it('returns unauthorized when called with unauthorized role', async () => {
-      const fakeId = faker.string.uuid()
-      const { errors: suspendErrors } = await executeOperationAnonymous({ query: suspendMutation, variables: { id: fakeId } })
-      expectUnauthorizedError(suspendErrors)
-      const { errors: resumeErrors } = await executeOperationAnonymous({ query: resumeMutation, variables: { id: fakeId } })
-      expectUnauthorizedError(resumeErrors)
-    })
-  })
-
-  describe('queries', () => {
-    it('findIdentityStores returns a list', async () => {
-      await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: getRequiredRandomInput() } })
-      const res = await executeOperationAsInstanceAdmin({ query: findQuery })
-      expect(res.errors).toBeUndefined()
-      expect(Array.isArray(res.data?.findIdentityStores)).toBe(true)
-    })
-
-    it('identityStore by id returns matching identity store', async () => {
-      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: getRequiredRandomInput() } })
-      const id = createRes.data!.createIdentityStore.id
-      const res = await executeOperationAsInstanceAdmin({ query: byIdQuery, variables: { id } })
-      expect(res.errors).toBeUndefined()
-      expect(res.data?.identityStore).toMatchObject({ id, identifier: expect.any(String) })
-    })
-
-    it('returns unauthorized when called with unauthorized role', async () => {
-      const { data, errors } = await executeOperationAnonymous({ query: findQuery })
-      expect(data).toBeNull()
-      expectUnauthorizedError(errors)
-    })
-  })
-
-  describe('soft delete behavior', () => {
     it('excludes suspended stores by default', async () => {
       const input = getRequiredRandomInput()
 
@@ -392,6 +335,82 @@ describe('IdentityStore', () => {
 
       const resultIds = res.data?.findIdentityStores.map((s) => s.id)
       expect(resultIds).not.toContain(id)
+    })
+
+    it('allows instance admins to suspend', async () => {
+      const createInput = getRequiredRandomInput()
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: createInput } })
+
+      const id = createRes.data!.createIdentityStore.id
+      const response = await executeOperationAsInstanceAdmin({ query: suspendMutation, variables: { id } })
+
+      expect(response.errors).toBeUndefined()
+      expect(response.data?.suspendIdentityStore).toMatchObject({
+        id,
+        suspendedAt: expect.any(Date),
+        ...createInput,
+      } satisfies Omit<SuspendIdentityStoreMutation['suspendIdentityStore'], '__typename'>)
+    })
+
+    it('allows instance admins to resume', async () => {
+      const createInput = getRequiredRandomInput()
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: createInput } })
+      const id = createRes.data!.createIdentityStore.id
+
+      await executeOperationAsInstanceAdmin({ query: suspendMutation, variables: { id } })
+      const resumeRes = await executeOperationAsInstanceAdmin({ query: resumeMutation, variables: { id } })
+
+      expect(resumeRes.errors).toBeUndefined()
+      expect(resumeRes.data?.resumeIdentityStore).toMatchObject({
+        id,
+        ...createInput,
+      } satisfies Omit<ResumeIdentityStoreMutation['resumeIdentityStore'], '__typename'>)
+    })
+
+    it('returns unauthorized when called with unauthorized role', async () => {
+      const fakeId = faker.string.uuid()
+      const { errors: suspendErrors } = await executeOperationAnonymous({ query: suspendMutation, variables: { id: fakeId } })
+      expectUnauthorizedError(suspendErrors)
+      const { errors: resumeErrors } = await executeOperationAnonymous({ query: resumeMutation, variables: { id: fakeId } })
+      expectUnauthorizedError(resumeErrors)
+    })
+  })
+
+  describe('queries', () => {
+    it('findIdentityStores returns a list', async () => {
+      await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: getRequiredRandomInput() } })
+      const res = await executeOperationAsInstanceAdmin({ query: findQuery })
+      expect(res.errors).toBeUndefined()
+      expect(Array.isArray(res.data?.findIdentityStores)).toBe(true)
+    })
+
+    it('identityStore by id returns matching identity store', async () => {
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: getRequiredRandomInput() } })
+      const id = createRes.data!.createIdentityStore.id
+      const res = await executeOperationAsInstanceAdmin({ query: byIdQuery, variables: { id } })
+      expect(res.errors).toBeUndefined()
+      expect(res.data?.identityStore).toMatchObject({ id, identifier: expect.any(String) })
+    })
+
+    it('returns unauthorized when called with unauthorized role', async () => {
+      const { data, errors } = await executeOperationAnonymous({ query: findQuery })
+      expect(data).toBeNull()
+      expectUnauthorizedError(errors)
+    })
+
+    it('allows credential admin to find identity stores', async () => {
+      const { data, errors } = await executeOperationAsCredentialAdmin({ query: findQuery })
+      expect(errors).toBeUndefined()
+      expect(data?.findIdentityStores).toBeInstanceOf(Array)
+    })
+
+    it('allows credential admin to find a single identity store by id', async () => {
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: getRequiredRandomInput() } })
+      const id = createRes.data!.createIdentityStore.id
+
+      const { data, errors } = await executeOperationAsCredentialAdmin({ query: byIdQuery, variables: { id } })
+      expect(errors).toBeUndefined()
+      expect(data?.identityStore).toMatchObject({ id })
     })
   })
 })
