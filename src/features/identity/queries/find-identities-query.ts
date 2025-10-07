@@ -48,5 +48,10 @@ export async function FindIdentitiesQuery(
   const orderColumn = orderBy === IdentityOrderBy.Identifier ? 'i.identifier' : orderBy === IdentityOrderBy.Name ? 'i.name' : 'i.name'
   qb.orderBy(orderColumn, direction)
 
+  // add tie-breaker when ordering by non-unique column to prevent random ordering, causing data duplication
+  if (orderBy !== IdentityOrderBy.Identifier) {
+    qb.addOrderBy('i.id', direction)
+  }
+
   return qb.getMany()
 }
