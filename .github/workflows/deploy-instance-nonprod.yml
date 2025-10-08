@@ -128,6 +128,8 @@ jobs:
           tenant-id: ${{ vars.NON_PROD_AZURE_TENANT_ID }}
           subscription-id: ${{ vars.NON_PROD_AZURE_SUBSCRIPTION_ID }}
           enable-AzPSSession: true
+      - name: Pause for 20 seconds to allow login to complete
+        run: sleep 20
       - name: Instance resource group
         id: instance-resource-group
         uses: ./github-actions/resource-group
