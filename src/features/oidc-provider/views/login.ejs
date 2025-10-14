@@ -36,14 +36,30 @@
     displayPresentationResponse(response)
   }
 
+  function openDeeplink(url) {
+    if (!url) return;
+
+    if (!/Chrome|Chromium/i.test(navigator.userAgent)) {
+      window.location.href = url;
+      return;
+    }
+
+    // If this is a Chromium-based mobile browser, use button to act as a user gesture, which prevents BFCache issues.
+    // see: https://issues.chromium.org/issues/40240372
+    const btn = document.createElement('button');
+    btn.style.display = 'none';
+    btn.onclick = () => {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    };
+    document.body.appendChild(btn);
+
+    setTimeout(() => btn.click(), 100);
+  }
+
   function displayPresentationResponse({ requestId, qrCode, url }) {
     document.querySelector('input[name="requestId"]').value = requestId;
     if (isMobile) {
-      // if this is a Chromium-based mobile browser, do not redirect automatically
-      // see: https://issues.chromium.org/issues/40240372
-      if (!/Chrome|Chromium/i.test(navigator.userAgent)) {
-        window.location.href = url
-      }
+      openDeeplink(url);
       displayMobile(url)
     } else {
       displayDesktop(qrCode, url)
