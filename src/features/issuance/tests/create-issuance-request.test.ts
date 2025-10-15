@@ -86,7 +86,7 @@ describe('createIssuanceRequest mutation', () => {
   beforeEach(() => {
     mockedServices.clearAllMocks()
   })
-  it('works with valid input ', async () => {
+  it('works with valid input', async () => {
     // Arrange
     withMockedServices()
     const { contract } = await givenContract({})
