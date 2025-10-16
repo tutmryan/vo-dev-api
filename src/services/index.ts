@@ -17,13 +17,13 @@ import { Lazy } from '../util/lazy'
 import { AsyncIssuanceService } from './async-issuance-service'
 import { BlobStorageContainerService } from './blob-storage-container-service'
 import { CommunicationsService } from './communications-service'
-import { graphServiceManager } from './graph-service'
+import { graphServiceManager, type IGraphServiceManager } from './graph-service'
 import { VerifiedIdAdminService, VerifiedIdRequestService } from './verified-id'
 
 export * from './graph-service'
 
 export interface Services {
-  graphServiceManager: typeof graphServiceManager
+  graphServiceManager: IGraphServiceManager
   verifiedIdAdmin: VerifiedIdAdminService
   verifiedIdRequest: VerifiedIdRequestService
   logoImages: BlobStorageContainerService

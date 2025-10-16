@@ -163,6 +163,7 @@ class GraphServiceManager {
   }
 }
 
+export type IGraphServiceManager = InstanceType<typeof GraphServiceManager>
 export const graphServiceManager = new GraphServiceManager()
 
 export type PartialUser = Pick<GraphUser, 'id' | 'displayName' | 'identities' | 'givenName' | 'surname' | 'userType'>
