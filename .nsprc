@@ -1,2 +1,7 @@
 {
+  "1108959": {
+    "active": true,
+    "notes": "validator.js has a URL validation bypass vulnerability in its isURL function. Waiting for upstream fix",
+    "expiry": "2025-12-01"
+  }
 }
