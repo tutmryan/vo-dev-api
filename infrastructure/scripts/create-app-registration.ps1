@@ -6,7 +6,10 @@ param (
 
   [Parameter(Mandatory = $true)]
   [string]
-  $HomePageUrl
+  $HomePageUrl,
+
+  [Parameter(Mandatory = $true)]
+  [string] $LogoPath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -127,6 +130,23 @@ az rest `
   --body $setInformationalUrlsPayloadJson
 
 Write-Output 'Set privacy statement and terms of service urls...'
+
+Write-Output ("Uploading app logo")
+$token = az account get-access-token --resource https://graph.microsoft.com --query accessToken -o tsv
+$appId = $appRegistrationObjectId
+$url = "https://graph.microsoft.com/v1.0/applications/$appId/logo"
+$headers = @(
+  "--header", "Authorization: Bearer $token"
+  "--header", "Content-Type: image/png"
+)
+$curlArgs = @(
+  "--request", "PUT"
+  $headers
+  "--data-binary", "@$LogoPath"
+  $url
+)
+& curl @curlArgs
+Write-Output "Uploaded app logo"
 
 # Setting verified publisher needs to be done manually via the Azure Portal.
 # Token received by the Azure CLI, `az login`, does not seem to have necessary scopes to call `setVerifiedPublisher` endpoint.
