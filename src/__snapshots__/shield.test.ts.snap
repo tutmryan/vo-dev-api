@@ -5,13 +5,31 @@ exports[`shield rules are setup correctly 1`] = `
   "Query": {
     "*": {
       "name": "isUserWithReadPermissions",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.Reader",
+        "VerifiableCredential.Issuer",
+        "VerifiableCredential.CredentialAdmin",
+        "VerifiableCredential.PartnerAdmin",
+        "VerifiableCredential.ApprovalRequestAdmin",
+        "VerifiableCredential.OidcAdmin",
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "discovery": {
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "hasApiResourceScope-VerifiableCredential.Issuee",
@@ -29,11 +47,23 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -41,11 +71,23 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -53,11 +95,23 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -65,25 +119,46 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "name": "isPresentationApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "name": "isValidLimitedContractRequest",
@@ -97,25 +172,46 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "name": "isPresentationApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "name": "hasLimitedAccessData-listContracts",
@@ -127,27 +223,48 @@ exports[`shield rules are setup correctly 1`] = `
     },
     "findApprovalRequests": {
       "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.ApprovalRequestAdmin"
+      ]
     },
     "identity": {
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "name": "isPresentationApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "name": "isValidLimitedIdentityRequest",
@@ -161,23 +278,35 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.InstanceAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "rulesOr": [
             {
               "name": "hasRole-VerifiableCredential.Issuer",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issuer"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             },
             {
               "rulesAnd": [
                 {
                   "name": "isLimitedAccessApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
                 },
                 {
                   "name": "hasLimitedAccessData-limitedIssuance",
@@ -187,11 +316,19 @@ exports[`shield rules are setup correctly 1`] = `
             },
             {
               "name": "hasRole-VerifiableCredential.CredentialAdmin",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.CredentialAdmin"
+              ]
             },
             {
               "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.AcquireLimitedAccessToken.Issue",
+                "VerifiableCredential.AcquireLimitedAccessToken.Present",
+                "VerifiableCredential.AcquireLimitedAccessToken.ListContracts"
+              ]
             }
           ]
         }
@@ -199,29 +336,44 @@ exports[`shield rules are setup correctly 1`] = `
     },
     "testIdentityStoreGraphClient": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "findIdentityStores": {
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.InstanceAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "rulesOr": [
             {
               "name": "hasRole-VerifiableCredential.Issuer",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issuer"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             },
             {
               "rulesAnd": [
                 {
                   "name": "isLimitedAccessApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
                 },
                 {
                   "name": "hasLimitedAccessData-limitedIssuance",
@@ -231,11 +383,19 @@ exports[`shield rules are setup correctly 1`] = `
             },
             {
               "name": "hasRole-VerifiableCredential.CredentialAdmin",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.CredentialAdmin"
+              ]
             },
             {
               "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.AcquireLimitedAccessToken.Issue",
+                "VerifiableCredential.AcquireLimitedAccessToken.Present",
+                "VerifiableCredential.AcquireLimitedAccessToken.ListContracts"
+              ]
             }
           ]
         }
@@ -243,11 +403,17 @@ exports[`shield rules are setup correctly 1`] = `
     },
     "applicationLabelConfigs": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "corsOriginConfigs": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "issuance": {
       "rulesOr": [
@@ -255,17 +421,32 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "isUserWithReadPermissions",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             },
             {
               "rulesAnd": [
                 {
                   "name": "isLimitedAccessApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
                 },
                 {
                   "rulesOr": [
@@ -285,7 +466,10 @@ exports[`shield rules are setup correctly 1`] = `
               "rulesAnd": [
                 {
                   "name": "isLimitedAsyncIssuanceApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAsyncIssuance"
+                  ]
                 },
                 {
                   "name": "isRequestIdFilterDefined",
@@ -305,17 +489,32 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "rulesOr": [
@@ -335,7 +534,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isLimitedAsyncIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -349,11 +551,23 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         }
       ]
     },
@@ -361,17 +575,32 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isPresentationApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "rulesOr": [
@@ -391,7 +620,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isLimitedApprovalApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -403,7 +635,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isOidcAuthnClient",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -417,17 +652,32 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isPresentationApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "rulesOr": [
@@ -447,7 +697,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isLimitedApprovalApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -459,7 +712,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isOidcAuthnClient",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -473,17 +729,32 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isPresentationApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "rulesOr": [
@@ -503,7 +774,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isLimitedApprovalApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -515,7 +789,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isOidcAuthnClient",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -529,17 +806,32 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isPresentationApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "rulesOr": [
@@ -559,7 +851,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isLimitedApprovalApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -571,7 +866,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isOidcAuthnClient",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -583,23 +881,35 @@ exports[`shield rules are setup correctly 1`] = `
     },
     "findNetworkIssuers": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.PartnerAdmin"
+      ]
     },
     "networkContracts": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.PartnerAdmin"
+      ]
     },
     "approvalRequest": {
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ApprovalRequestAdmin"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedApprovalApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
             },
             {
               "name": "hasApprovalRequestPresentationAndMatchesApprovalRequestId",
@@ -613,11 +923,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ApprovalRequestAdmin"
+          ]
         },
         {
           "name": "isApprovalRequestApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.RequestApproval"
+          ]
         }
       ]
     },
@@ -627,17 +943,26 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "hasRole-VerifiableCredential.Issuer",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issuer"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             },
             {
               "rulesAnd": [
                 {
                   "name": "isLimitedAccessApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
                 },
                 {
                   "name": "hasLimitedAccessData-limitedIssuance",
@@ -651,7 +976,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isLimitedAsyncIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
             },
             {
               "name": "asyncIssuanceRequiresPhotoCapture",
@@ -667,11 +995,23 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "isUserWithReadPermissions",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             }
           ]
         },
@@ -683,27 +1023,48 @@ exports[`shield rules are setup correctly 1`] = `
     },
     "asyncIssuanceContact": {
       "name": "hasRole-VerifiableCredential.Issuer",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.Issuer"
+      ]
     },
     "approvalRequestTypes": {
       "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.ApprovalRequestAdmin"
+      ]
     },
     "identityByIdentifier": {
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "name": "hasLimitedAccessData-limitedIssuance",
@@ -713,7 +1074,12 @@ exports[`shield rules are setup correctly 1`] = `
         },
         {
           "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.AcquireLimitedAccessToken.Issue",
+            "VerifiableCredential.AcquireLimitedAccessToken.Present",
+            "VerifiableCredential.AcquireLimitedAccessToken.ListContracts"
+          ]
         }
       ]
     },
@@ -721,17 +1087,32 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "name": "hasLimitedAccessData-limitedIssuance",
@@ -741,7 +1122,12 @@ exports[`shield rules are setup correctly 1`] = `
         },
         {
           "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.AcquireLimitedAccessToken.Issue",
+            "VerifiableCredential.AcquireLimitedAccessToken.Present",
+            "VerifiableCredential.AcquireLimitedAccessToken.ListContracts"
+          ]
         }
       ]
     },
@@ -752,7 +1138,16 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "hasApiResourceScope-VerifiableCredential.Issuee",
@@ -764,17 +1159,26 @@ exports[`shield rules are setup correctly 1`] = `
   "Mutation": {
     "*": {
       "name": "hasRole-VerifiableCredential.CredentialAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.CredentialAdmin"
+      ]
     },
     "createTemplate": {
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -782,11 +1186,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -794,11 +1204,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -806,11 +1222,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -818,11 +1240,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -830,11 +1258,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -842,11 +1276,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -854,11 +1294,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -866,11 +1312,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -878,7 +1330,13 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesAnd": [
         {
           "name": "hasLimitedAccessTokenAcquisitionRole",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.AcquireLimitedAccessToken.Issue",
+            "VerifiableCredential.AcquireLimitedAccessToken.Present",
+            "VerifiableCredential.AcquireLimitedAccessToken.ListContracts",
+            "VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations"
+          ]
         },
         {
           "name": "isValidAcquireLimitedAccessTokenRequest",
@@ -896,11 +1354,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issuer"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "rulesAnd": [
@@ -908,7 +1372,10 @@ exports[`shield rules are setup correctly 1`] = `
               "rulesAnd": [
                 {
                   "name": "isLimitedAccessApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
                 },
                 {
                   "name": "hasLimitedAccessData-limitedIssuance",
@@ -934,7 +1401,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isLimitedAsyncIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
             },
             {
               "name": "hasCorrectCreateIssuanceRequestForAsyncIssuanceArgs",
@@ -948,11 +1418,23 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isPresentationApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
         },
         {
           "rulesAnd": [
@@ -960,7 +1442,10 @@ exports[`shield rules are setup correctly 1`] = `
               "rulesAnd": [
                 {
                   "name": "isLimitedAccessApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
                 },
                 {
                   "name": "hasLimitedAccessData-limitedPresentation",
@@ -980,7 +1465,10 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesAnd": [
         {
           "name": "isOidcAuthnClient",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.LimitedOidcAuthn"
+          ]
         },
         {
           "name": "isValidOidcAuthnPresentationRequest",
@@ -990,27 +1478,42 @@ exports[`shield rules are setup correctly 1`] = `
     },
     "saveConciergeBranding": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "deleteConciergeBranding": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "saveIdentity": {
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issuer"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "name": "hasLimitedAccessData-limitedIssuance",
@@ -1020,11 +1523,19 @@ exports[`shield rules are setup correctly 1`] = `
         },
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.AcquireLimitedAccessToken.Issue",
+            "VerifiableCredential.AcquireLimitedAccessToken.Present",
+            "VerifiableCredential.AcquireLimitedAccessToken.ListContracts"
+          ]
         }
       ]
     },
@@ -1032,17 +1543,26 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issuer"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "name": "hasLimitedAccessData-limitedIssuance",
@@ -1052,71 +1572,121 @@ exports[`shield rules are setup correctly 1`] = `
         },
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.AcquireLimitedAccessToken.Issue",
+            "VerifiableCredential.AcquireLimitedAccessToken.Present",
+            "VerifiableCredential.AcquireLimitedAccessToken.ListContracts"
+          ]
         }
       ]
     },
     "createIdentityStore": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "updateIdentityStore": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "suspendIdentityStore": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "resumeIdentityStore": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "setApplicationLabelConfigs": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "setCorsOriginConfigs": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     },
     "createPartner": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.PartnerAdmin"
+      ]
     },
     "updatePartner": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.PartnerAdmin"
+      ]
     },
     "suspendPartner": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.PartnerAdmin"
+      ]
     },
     "resumePartner": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.PartnerAdmin"
+      ]
     },
     "createApprovalRequest": {
       "name": "isApprovalRequestApp",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.RequestApproval"
+      ]
     },
     "updateApprovalRequest": {
       "name": "isApprovalRequestApp",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.RequestApproval"
+      ]
     },
     "cancelApprovalRequest": {
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ApprovalRequestAdmin"
+          ]
         },
         {
           "name": "isApprovalRequestApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.RequestApproval"
+          ]
         }
       ]
     },
@@ -1124,7 +1694,10 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesAnd": [
         {
           "name": "isLimitedApprovalApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.LimitedApproval"
+          ]
         },
         {
           "name": "isValidLimitedPresentationRequestForApproval",
@@ -1136,7 +1709,10 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesAnd": [
         {
           "name": "isLimitedApprovalApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.LimitedApproval"
+          ]
         },
         {
           "name": "hasApprovalRequestPresentationAndMatchesApprovalRequestId",
@@ -1148,11 +1724,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issuer"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "rulesAnd": [
@@ -1160,7 +1742,10 @@ exports[`shield rules are setup correctly 1`] = `
               "rulesAnd": [
                 {
                   "name": "isLimitedAccessApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
                 },
                 {
                   "name": "hasLimitedAccessData-limitedIssuance",
@@ -1182,13 +1767,19 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "isLimitedPhotoCaptureUser",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedPhotoCapture"
+              ]
             },
             {
               "rulesAnd": [
                 {
                   "name": "isLimitedAsyncIssuanceApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAsyncIssuance"
+                  ]
                 },
                 {
                   "name": "asyncIssuanceRequiresPhotoCapture",
@@ -1208,11 +1799,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issuer"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         }
       ]
     },
@@ -1220,11 +1817,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issuer"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         }
       ]
     },
@@ -1238,11 +1841,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issuer"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         }
       ]
     },
@@ -1250,11 +1859,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issuer"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         }
       ]
     },
@@ -1262,79 +1877,133 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issuer"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         }
       ]
     },
     "createOidcClient": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "updateOidcClient": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "deleteOidcClient": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "createOidcResource": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "updateOidcResource": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "deleteOidcResource": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "createOidcClientResource": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "updateOidcClientResource": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "deleteOidcClientResource": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "createOidcClaimMapping": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "updateOidcClaimMapping": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "deleteOidcClaimMapping": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "updateOidcClientClaimMappings": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "generateOidcClientSecret": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
     },
     "revokeIssuance": {
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -1342,11 +2011,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -1354,11 +2029,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -1366,11 +2047,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -1378,11 +2065,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
@@ -1390,29 +2083,44 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "name": "isContractAdminApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
         }
       ]
     },
     "testServices": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
     }
   },
   "Subscription": {
     "*": {
       "name": "hasRole-VerifiableCredential.CredentialAdmin",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.CredentialAdmin"
+      ]
     },
     "presentationEvent": {
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "rulesAnd": [
@@ -1424,17 +2132,32 @@ exports[`shield rules are setup correctly 1`] = `
               "rulesOr": [
                 {
                   "name": "isUserWithReadPermissions",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.Reader",
+                    "VerifiableCredential.Issuer",
+                    "VerifiableCredential.CredentialAdmin",
+                    "VerifiableCredential.PartnerAdmin",
+                    "VerifiableCredential.ApprovalRequestAdmin",
+                    "VerifiableCredential.OidcAdmin",
+                    "VerifiableCredential.InstanceAdmin"
+                  ]
                 },
                 {
                   "name": "isPresentationApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.Present"
+                  ]
                 },
                 {
                   "rulesAnd": [
                     {
                       "name": "isLimitedAccessApp",
-                      "cache": "contextual"
+                      "cache": "contextual",
+                      "__roles": [
+                        "VerifiableCredential.LimitedAccess"
+                      ]
                     },
                     {
                       "name": "hasLimitedAccessData-limitedPresentation",
@@ -1446,7 +2169,10 @@ exports[`shield rules are setup correctly 1`] = `
                   "rulesAnd": [
                     {
                       "name": "isLimitedAccessApp",
-                      "cache": "contextual"
+                      "cache": "contextual",
+                      "__roles": [
+                        "VerifiableCredential.LimitedAccess"
+                      ]
                     },
                     {
                       "name": "hasLimitedAccessData-allowAnonymousPresentation",
@@ -1456,11 +2182,17 @@ exports[`shield rules are setup correctly 1`] = `
                 },
                 {
                   "name": "isLimitedApprovalApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedApproval"
+                  ]
                 },
                 {
                   "name": "isOidcAuthnClient",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedOidcAuthn"
+                  ]
                 }
               ]
             }
@@ -1472,11 +2204,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.Issuer",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issuer"
+          ]
         },
         {
           "name": "hasRole-VerifiableCredential.CredentialAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.CredentialAdmin"
+          ]
         },
         {
           "rulesAnd": [
@@ -1488,13 +2226,19 @@ exports[`shield rules are setup correctly 1`] = `
               "rulesOr": [
                 {
                   "name": "isIssuanceApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.Issue"
+                  ]
                 },
                 {
                   "rulesAnd": [
                     {
                       "name": "isLimitedAccessApp",
-                      "cache": "contextual"
+                      "cache": "contextual",
+                      "__roles": [
+                        "VerifiableCredential.LimitedAccess"
+                      ]
                     },
                     {
                       "name": "hasLimitedAccessData-limitedIssuance",
@@ -1504,7 +2248,10 @@ exports[`shield rules are setup correctly 1`] = `
                 },
                 {
                   "name": "isLimitedAsyncIssuanceApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAsyncIssuance"
+                  ]
                 },
                 {
                   "name": "hasApiResourceScope-VerifiableCredential.Issuee",
@@ -1522,17 +2269,26 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "hasRole-VerifiableCredential.Issuer",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issuer"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             },
             {
               "rulesAnd": [
                 {
                   "name": "isLimitedAccessApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
                 },
                 {
                   "name": "hasLimitedAccessData-limitedIssuance",
@@ -1546,7 +2302,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isLimitedAsyncIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
             },
             {
               "name": "asyncIssuanceRequiresPhotoCapture",
@@ -1562,17 +2321,32 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "rulesOr": [
@@ -1592,7 +2366,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isLimitedAsyncIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -1606,11 +2383,23 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         }
       ]
     },
@@ -1618,17 +2407,32 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isPresentationApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
         },
         {
           "rulesAnd": [
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "rulesOr": [
@@ -1648,7 +2452,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isLimitedApprovalApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -1660,7 +2467,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isOidcAuthnClient",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
             },
             {
               "name": "isRequestIdFilterDefined",
@@ -1676,27 +2486,53 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isUserWithReadPermissions",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
         },
         {
           "name": "isIssuanceApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
         },
         {
           "name": "isPresentationApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
         },
         {
           "name": "hasLimitedAccessTokenAcquisitionRoleRequiringIdentityAccess",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.AcquireLimitedAccessToken.Issue",
+            "VerifiableCredential.AcquireLimitedAccessToken.Present",
+            "VerifiableCredential.AcquireLimitedAccessToken.ListContracts"
+          ]
         },
         {
           "name": "isLimitedAccessApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.LimitedAccess"
+          ]
         },
         {
           "name": "isOidcAuthnClient",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.LimitedOidcAuthn"
+          ]
         },
         {
           "name": "hasApiResourceScope-VerifiableCredential.Issuee",
@@ -1710,17 +2546,32 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "isUserWithReadPermissions",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             },
             {
               "rulesAnd": [
                 {
                   "name": "isLimitedAccessApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
                 },
                 {
                   "rulesOr": [
@@ -1740,7 +2591,10 @@ exports[`shield rules are setup correctly 1`] = `
               "rulesAnd": [
                 {
                   "name": "isLimitedAsyncIssuanceApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAsyncIssuance"
+                  ]
                 },
                 {
                   "name": "isRequestIdFilterDefined",
@@ -1770,11 +2624,23 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "isUserWithReadPermissions",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             }
           ]
         },
@@ -1798,17 +2664,32 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "isUserWithReadPermissions",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
             },
             {
               "name": "isPresentationApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Present"
+              ]
             },
             {
               "rulesAnd": [
                 {
                   "name": "isLimitedAccessApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
                 },
                 {
                   "rulesOr": [
@@ -1828,7 +2709,10 @@ exports[`shield rules are setup correctly 1`] = `
               "rulesAnd": [
                 {
                   "name": "isLimitedApprovalApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedApproval"
+                  ]
                 },
                 {
                   "name": "isRequestIdFilterDefined",
@@ -1840,7 +2724,10 @@ exports[`shield rules are setup correctly 1`] = `
               "rulesAnd": [
                 {
                   "name": "isOidcAuthnClient",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedOidcAuthn"
+                  ]
                 },
                 {
                   "name": "isRequestIdFilterDefined",
@@ -1872,35 +2759,65 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "isUserWithReadPermissions",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             },
             {
               "name": "isPresentationApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Present"
+              ]
             },
             {
               "name": "isContractAdminApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.ContractAdmin"
+              ]
             },
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "name": "isLimitedApprovalApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
             },
             {
               "name": "isLimitedAsyncIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
             },
             {
               "name": "isOidcAuthnClient",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
             },
             {
               "name": "hasApiResourceScope-VerifiableCredential.Issuee",
@@ -1942,35 +2859,65 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "isUserWithReadPermissions",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             },
             {
               "name": "isPresentationApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Present"
+              ]
             },
             {
               "name": "isContractAdminApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.ContractAdmin"
+              ]
             },
             {
               "name": "isLimitedAccessApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
             },
             {
               "name": "isLimitedApprovalApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
             },
             {
               "name": "isLimitedAsyncIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
             },
             {
               "name": "isOidcAuthnClient",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
             },
             {
               "name": "hasApiResourceScope-VerifiableCredential.Issuee",
@@ -2008,7 +2955,13 @@ exports[`shield rules are setup correctly 1`] = `
   "AccessTokenResponse": {
     "*": {
       "name": "hasLimitedAccessTokenAcquisitionRole",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.AcquireLimitedAccessToken.Issue",
+        "VerifiableCredential.AcquireLimitedAccessToken.Present",
+        "VerifiableCredential.AcquireLimitedAccessToken.ListContracts",
+        "VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations"
+      ]
     }
   },
   "ApprovalRequest": {
@@ -2016,11 +2969,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "isLimitedApprovalApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.LimitedApproval"
+          ]
         },
         {
           "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ApprovalRequestAdmin"
+          ]
         }
       ]
     }
@@ -2028,7 +2987,10 @@ exports[`shield rules are setup correctly 1`] = `
   "ApprovalRequestResponse": {
     "*": {
       "name": "isApprovalRequestApp",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.RequestApproval"
+      ]
     }
   },
   "ApprovalTokenResponse": {
@@ -2041,11 +3003,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ApprovalRequestAdmin"
+          ]
         },
         {
           "name": "isApprovalRequestApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.RequestApproval"
+          ]
         }
       ]
     }
@@ -2055,11 +3023,17 @@ exports[`shield rules are setup correctly 1`] = `
       "rulesOr": [
         {
           "name": "hasRole-VerifiableCredential.ApprovalRequestAdmin",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ApprovalRequestAdmin"
+          ]
         },
         {
           "name": "isApprovalRequestApp",
-          "cache": "contextual"
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.RequestApproval"
+          ]
         }
       ]
     }
@@ -2076,17 +3050,26 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "hasRole-VerifiableCredential.Issuer",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issuer"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             },
             {
               "rulesAnd": [
                 {
                   "name": "isLimitedAccessApp",
-                  "cache": "contextual"
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
                 },
                 {
                   "name": "hasLimitedAccessData-limitedIssuance",
@@ -2100,7 +3083,10 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesAnd": [
             {
               "name": "isLimitedAsyncIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
             },
             {
               "name": "asyncIssuanceRequiresPhotoCapture",
@@ -2118,11 +3104,17 @@ exports[`shield rules are setup correctly 1`] = `
           "rulesOr": [
             {
               "name": "hasRole-VerifiableCredential.Issuer",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issuer"
+              ]
             },
             {
               "name": "isIssuanceApp",
-              "cache": "contextual"
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
             }
           ]
         },
@@ -2144,7 +3136,10 @@ exports[`shield rules are setup correctly 1`] = `
   "AsyncIssuanceContact": {
     "*": {
       "name": "hasRole-VerifiableCredential.Issuer",
-      "cache": "contextual"
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.Issuer"
+      ]
     }
   },
   "AsyncIssuanceTokenResponse": {

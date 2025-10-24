@@ -8,4 +8,5 @@ COPY api-reference ./api-reference/
 COPY release-notes ./release-notes/
 COPY static ./static/
 COPY src ./src/
+COPY scripts ./scripts/
 CMD ["npm", "run", "start:dev"]

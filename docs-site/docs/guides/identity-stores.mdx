@@ -4,11 +4,11 @@ sidebar_position: 9
 
 import { AdminLink } from '@site/src/components/admin-link'
 
-# Identity Stores
+# Identity stores
 
-Identity Stores make it easy to organise, group, and manage identities in Verified Orchestration. Each identity store represents a source of identities, such as your organisation’s directory or a manually managed group.
+Identity stores make it easy to organise, group, and manage identities in Verified Orchestration. Each identity store represents a source of identities, such as your organisation’s directory or a manually managed group.
 
-## What is an Identity Store?
+## What is an identity store?
 
 An identity store is a way to organise and group identities in Verified Orchestration.
 It also lets you manage related settings such as authentication options and application labels for each store.
@@ -20,7 +20,7 @@ An identity store can represent:
 
 Each identity store has a unique identifier and a human-friendly name for easy recognition.
 
-## Why Identity Stores?
+## Why identity stores?
 
 - **Group identities** by source and type
 - **View information** such as activity for each store
@@ -41,7 +41,7 @@ You can manage identity stores in two ways:
 
 To make changes to identity stores, you will need to be a member of the Instance admin user role.
 
-### Creating an Identity Store
+### Creating an identity store
 
 You can create and manage identity stores from the <AdminLink path="/issuee-stores">Composer Issuee stores page</AdminLink>.
 
@@ -100,7 +100,7 @@ mutation CreateIdentityStore($input: IdentityStoreInput!) {
 }
 ```
 
-### Editing an Identity Store
+### Editing an identity store
 
 To edit an identity store:
 
@@ -136,7 +136,7 @@ mutation UpdateIdentityStore($id: ID!, $input: UpdateIdentityStoreInput!) {
 }
 ```
 
-### Suspending an Identity Store
+### Suspending an identity store
 
 Suspending an identity store lets you disable its features without deleting it.
 
@@ -326,5 +326,5 @@ Secrets are managed securely for each identity store, using Azure Key Vault.
 
 ## More information
 
-- [Identity Mapping Guide](/docs/guides/identity-mapping)
-- [API Reference](/api-reference/api/mutations/create-identity-store)
+- [Identity mapping guide](/docs/guides/identity-mapping)
+- [API reference](/api-reference/api/mutations/create-identity-store)

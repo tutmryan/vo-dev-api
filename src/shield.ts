@@ -1,10 +1,8 @@
 import type { ShieldSchema } from '@makerx/graphql-core'
 import { isDev, isLocalDev } from '@makerx/node-common'
 import { GraphQLError } from 'graphql'
-import { allow, and, not, or, rule, shield } from 'graphql-shield'
+import { allow, and, not, or, shield } from 'graphql-shield'
 import type { IRules } from 'graphql-shield/typings/types'
-import { apiUrl } from './config'
-import type { GraphQLContext } from './context'
 import {
   asyncIssuanceIsToAuthenticatedUser,
   identityIsAuthenticatedUser,
@@ -20,8 +18,6 @@ import {
   isLimitedListContractsApp,
   isLimitedPresentationApp,
   isValidAcquireLimitedAccessTokenRequest,
-  isValidLimitedAccessIssuanceFilter,
-  isValidLimitedAccessPresentationFilter,
   isValidLimitedContractRequest,
   isValidLimitedIdentityRequest,
   isValidLimitedIssuanceRequest,
@@ -32,90 +28,37 @@ import {
   hasApprovalRequestPresentationAndMatchesApprovalRequestId,
   isApprovalRequestApp,
   isLimitedApprovalApp,
-  isValidLimitedApprovalPresentationFilter,
   isValidLimitedPresentationRequestForApproval,
 } from './features/limited-approval-tokens/shield-rules'
 import {
   isLimitedAsyncIssuanceApp,
   isLimitedAsyncIssuancePhotoCaptureUser,
   isValidCreateIssuanceRequestForAsyncIssuanceRequest,
-  isValidLimitedAsyncIssuanceIssuanceFilter,
 } from './features/limited-async-issuance-tokens/shield-rules'
-import {
-  isOidcAuthnClient,
-  isValidOidcAuthnPresentationFilter,
-  isValidOidcAuthnPresentationRequest,
-} from './features/oidc-provider/shield-rules'
+import { isOidcAuthnClient, isValidOidcAuthnPresentationRequest } from './features/oidc-provider/shield-rules'
 import { isValidCapturePhoto, isValidLimitedIssuancePhotoCaptureRequest } from './features/photo-capture/shield-rules'
 import type { Resolvers } from './generated/graphql'
-import { AppRoles, OidcScopes, UserRoles } from './roles'
-import { hasAnyRoleRuleWithName, hasRoleRule } from './util/shield-utils'
-
-function hasApiResourceScopeRule(scope: OidcScopes) {
-  return rule(`hasApiResourceScope-${scope}`, { cache: 'contextual' })((_, __, { user }: GraphQLContext) => {
-    if (!user) return false
-    if (user.claims.aud !== apiUrl) return false
-    return user.scopes.includes(scope)
-  })
-}
-
-const isUserWithReadPermissions = hasAnyRoleRuleWithName('isUserWithReadPermissions', ...Object.values(UserRoles))
-
-// user roles
-const isIssuerUser = hasRoleRule(UserRoles.issuer)
-const isCredentialAdminUser = hasRoleRule(UserRoles.credentialAdmin)
-const isPartnerAdminUser = hasRoleRule(UserRoles.partnerAdmin)
-const isApprovalRequestAdminUser = hasRoleRule(UserRoles.approvalRequestAdmin)
-const isOidcAdminUser = hasRoleRule(UserRoles.oidcAdmin)
-const isInstanceAdminUser = hasRoleRule(UserRoles.instanceAdmin)
-
-// app roles
-const isIssuanceApp = hasRoleRule(AppRoles.issue, 'isIssuanceApp')
-const isPresentationApp = hasRoleRule(AppRoles.present, 'isPresentationApp')
-const isContractAdminApp = hasRoleRule(AppRoles.contractAdmin, 'isContractAdminApp')
-
-// api resource scope rules
-const isIssuee = hasApiResourceScopeRule(OidcScopes.issuee)
-
-const isIssuer = or(isIssuerUser, isIssuanceApp, isLimitedIssuanceApp)
-const isAsyncIssuer = or(isIssuerUser, isIssuanceApp)
-
-const fallbackRule = or(
-  isUserWithReadPermissions,
-  isIssuanceApp,
-  isPresentationApp,
+import {
+  fallbackRule,
+  isAllowedToCreateAndDeleteIdentities,
+  isAllowedToViewAsyncIssuanceRequests,
+  isAllowedToViewIssuances,
+  isAllowedToViewPresentations,
+  isApprovalRequestAdminUser,
+  isAsyncIssuer,
   isContractAdminApp,
-  isLimitedAccessApp,
-  isLimitedApprovalApp,
-  isLimitedAsyncIssuanceApp,
-  isOidcAuthnClient,
-  isIssuee,
-)
-
-// issuance and presentation access rules
-const isAllowedToViewIssuances = or(
-  isUserWithReadPermissions,
-  isIssuanceApp,
-  isValidLimitedAccessIssuanceFilter,
-  isValidLimitedAsyncIssuanceIssuanceFilter,
-)
-const isAllowedToViewPresentations = or(
-  isUserWithReadPermissions,
-  isPresentationApp,
-  isValidLimitedAccessPresentationFilter,
-  isValidLimitedApprovalPresentationFilter,
-  isValidOidcAuthnPresentationFilter,
-)
-
-const isAllowedToCreateAndDeleteIdentities = or(
-  isIssuerUser,
-  isIssuanceApp,
-  isLimitedIssuanceApp,
   isCredentialAdminUser,
-  hasTokenAcquisitionRoleRequiringIdentityAccess,
-)
+  isInstanceAdminUser,
+  isIssuanceApp,
+  isIssuee,
+  isIssuer,
+  isIssuerUser,
+  isOidcAdminUser,
+  isPartnerAdminUser,
+  isPresentationApp,
+  isUserWithReadPermissions,
+} from './shield-rules'
 
-const isAllowedToViewAsyncIssuanceRequests = or(isUserWithReadPermissions, isIssuanceApp)
 export const rules: ShieldSchema<Resolvers> = {
   Query: {
     '*': isUserWithReadPermissions,
