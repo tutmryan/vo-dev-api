@@ -1,6 +1,6 @@
 import fs from 'fs'
 import mssql from 'mssql'
-import ngrok from 'ngrok'
+import { spawn } from 'node:child_process'
 import * as Path from 'node:path'
 import readline from 'node:readline'
 import open from 'open'
@@ -39,44 +39,59 @@ const checkProjectLayout = async () => {
 }
 
 let ngrokConfigPath = getNgrokConfigPath()
-let ngrokAuthToken = ``
-let isAuthenticated = false
+
+interface NgrokEndpoint {
+  name: string
+  url: string
+  upstream: {
+    url: number | string
+    protocol: string
+  }
+}
+
+interface NgrokConfig {
+  version?: string
+  agent?: {
+    authtoken?: string
+  }
+  endpoints?: NgrokEndpoint[]
+}
 
 const checkNgrokConfiguration = async () => {
   console.log('Checking Ngrok configuration...')
 
-  if (fs.existsSync(ngrokConfigPath)) {
-    const ngrokConfig = YAML.parse(fs.readFileSync(ngrokConfigPath, 'utf8')) as {
-      authtoken?: string
-      agent?: {
-        authtoken?: string
-      }
-    }
-    if (ngrokConfig.authtoken || (ngrokConfig.agent && ngrokConfig.agent.authtoken)) {
-      console.log('🙌 Ngrok configuration found and authtoken is present...')
-      console.log(`💡 If you get an auth error, update the authtoken in the configuration file located at ${ngrokConfigPath}`)
-      isAuthenticated = true
-    }
+  if (!fs.existsSync(ngrokConfigPath)) {
+    console.error(`No ngrok configuration file found at ${ngrokConfigPath}`)
+    console.error('Please create a configuration file with your tunnels.')
+    console.error('See: https://ngrok.com/docs/agent/config/')
+    process.exit(-1)
   }
 
-  // If the file does not exist, create it
-  if (!isAuthenticated) {
-    console.log('No ngrok configuration file was found or the authtoken was empty. One will be created for you...')
-    console.log('But before I do, you will need to provide me your authtoken. Okay?')
-    console.log('You can get your authtoken from https://dashboard.ngrok.com/get-started/your-authtoken')
-    console.log("I pinky promise I won't store it anywhere but the configuration file.")
+  const ngrokConfig = YAML.parse(fs.readFileSync(ngrokConfigPath, 'utf8')) as NgrokConfig
 
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    })
-    ngrokAuthToken = await new Promise((resolve) => {
-      rl.question('Please paste it here:', (token) => {
-        rl.close()
-        resolve(token)
-      })
-    })
+  if (!ngrokConfig.agent?.authtoken) {
+    console.error('No authtoken found in ngrok configuration file.')
+    console.error(`Please add your authtoken to ${ngrokConfigPath}`)
+    console.error('Get your authtoken from https://dashboard.ngrok.com/get-started/your-authtoken')
+    process.exit(-1)
   }
+
+  const requiredTunnels = ['api-tunnel', 'composer-tunnel', 'concierge-tunnel']
+  const configuredTunnels = ngrokConfig.endpoints?.map((e) => e.name) || []
+  const missingTunnels = requiredTunnels.filter((t) => !configuredTunnels.includes(t))
+
+  if (missingTunnels.length > 0) {
+    console.error(`Missing required tunnels in ngrok configuration: ${missingTunnels.join(', ')}`)
+    console.error(`Please add these tunnels to ${ngrokConfigPath}`)
+    console.error('Required tunnels: api-tunnel, composer-tunnel, concierge-tunnel')
+    console.error('Register your own subdomains for these tunnels at https://dashboard.ngrok.com/domains')
+    process.exit(-1)
+  }
+
+  console.log('🙌 Ngrok configuration found with all required tunnels...')
+  console.log(`💡 Config file: ${ngrokConfigPath}`)
+
+  return ngrokConfig
 }
 
 const replaceValueInEnvConfigFile = (key: string, value: string, projectPath: string, fileName: string) => {
@@ -99,42 +114,60 @@ const replaceValueInEnvConfigFile = (key: string, value: string, projectPath: st
   fs.writeFileSync(envConfigPath, updatedEnvConfig, 'utf8')
 }
 
-const startNgrok = async () => {
+let ngrokProcess: ReturnType<typeof spawn> | null = null
+
+const startNgrok = async (ngrokConfig: NgrokConfig) => {
   console.log('Starting Ngrok...')
 
-  if (!isAuthenticated && !ngrokAuthToken) {
-    console.error('No authtoken provided. Exiting...')
+  // Get tunnel URLs from config
+  const apiEndpoint = ngrokConfig.endpoints?.find((e) => e.name === 'api-tunnel')
+  const composerEndpoint = ngrokConfig.endpoints?.find((e) => e.name === 'composer-tunnel')
+  const conciergeEndpoint = ngrokConfig.endpoints?.find((e) => e.name === 'concierge-tunnel')
+
+  if (!apiEndpoint || !composerEndpoint || !conciergeEndpoint) {
+    console.error('Could not find required tunnel endpoints in config')
     process.exit(-1)
   }
 
-  if (!isAuthenticated) {
-    console.log('Creating Ngrok configuration file...')
-    ngrok.authtoken(ngrokAuthToken)
-    await new Promise((resolve) => {
-      setTimeout(resolve, 1000)
-    })
-  }
+  const apiURL = `https://${apiEndpoint.url}`
+  const composerURL = `https://${composerEndpoint.url}`
+  const conciergeURL = `https://${conciergeEndpoint.url}`
 
-  console.log('Creating tunnel to the API...')
-  const apiURL = await ngrok.connect({
-    proto: 'http',
-    addr: 4000,
-  })
-  console.log(`✅ API tunnel created at ${apiURL}`)
+  console.log('Starting ngrok tunnels...')
 
-  console.log('Creating tunnel to Composer...')
-  const composerURL = await ngrok.connect({
-    proto: 'http',
-    addr: 5173,
+  // Start ngrok with the config file
+  ngrokProcess = spawn('ngrok', ['start', 'api-tunnel', 'composer-tunnel', 'concierge-tunnel'], {
+    stdio: ['ignore', 'pipe', 'pipe'],
   })
-  console.log(`✅ Composer tunnel created at ${composerURL}`)
 
-  console.log('Creating tunnel to Concierge...')
-  const conciergeURL = await ngrok.connect({
-    proto: 'http',
-    addr: 5174,
+  ngrokProcess.stdout?.on('data', (data) => {
+    console.log(`[ngrok] ${data.toString().trim()}`)
   })
-  console.log(`✅ Concierge UI tunnel created at ${conciergeURL}`)
+
+  ngrokProcess.stderr?.on('data', (data) => {
+    console.error(`[ngrok error] ${data.toString().trim()}`)
+  })
+
+  ngrokProcess.on('error', (error) => {
+    console.error('Failed to start ngrok:', error.message)
+    console.error('Make sure ngrok CLI is installed: https://dashboard.ngrok.com/get-started/setup')
+    process.exit(-1)
+  })
+
+  ngrokProcess.on('exit', (code) => {
+    if (code !== 0 && !gracefulExit) {
+      console.error(`ngrok process exited with code ${code}`)
+      process.exit(code ?? -1)
+    }
+  })
+
+  // Wait a bit for ngrok to start
+  console.log('Waiting for ngrok to initialize...')
+  await new Promise((resolve) => setTimeout(resolve, 3000))
+
+  console.log(`✅ API tunnel: ${apiURL}`)
+  console.log(`✅ Composer tunnel: ${composerURL}`)
+  console.log(`✅ Concierge tunnel: ${conciergeURL}`)
 
   // API
   console.log('Updating the API .env file with the new API URL...')
@@ -253,7 +286,9 @@ const graceful = async () => {
   process.stdin.resume()
 
   console.log('Gracefully closing Ngrok tunnels...')
-  ngrok.kill()
+  if (ngrokProcess) {
+    ngrokProcess.kill('SIGTERM')
+  }
 
   console.log('Removing Ngrok configuration...')
   replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_API', '', pathToApi, '.env')
@@ -269,6 +304,6 @@ const graceful = async () => {
   process.on('SIGINT', graceful)
 
   await checkProjectLayout()
-  await checkNgrokConfiguration()
-  await startNgrok()
+  const ngrokConfig = await checkNgrokConfiguration()
+  await startNgrok(ngrokConfig)
 })()

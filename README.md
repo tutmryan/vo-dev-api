@@ -56,13 +56,48 @@ However, the default configuration suffers from not being able to issue credenti
 
 To resolve this, there's a small script that will configure Ngrok to expose the local instances to the internet. This script can be run by executing the following command: `npm run start:dev:tunnels`
 
+Before you run the command, there are a few prerequisites:
+
+Register your own domains in the Ngrok dashboard
+
+![Ngrok Domains](/docs/assets/ngrok-domains.png)
+
+Next, update the ngrok configuration file with endpoints that match your registered domains.
+
+Linux: `$HOME/.config/ngrok/ngrok.yml`
+Mac: `$HOME/Library/Application Support/ngrok/ngrok.yml`
+Windows: `%HOMEPATH%\.ngrok2\ngrok.yml`
+
+```yaml
+version: '3'
+agent:
+  authtoken: SUPER_SECRET_AUTH_TOKEN
+endpoints:
+  - name: api-tunnel
+    url: api-vo-your-custom-domain.ngrok.app
+    upstream:
+      url: 4000
+      protocol: http1
+  - name: composer-tunnel
+    url: composer-vo-your-custom-domain.ngrok.app
+    upstream:
+      url: 5173
+      protocol: http1
+  - name: concierge-tunnel
+    url: concierge-vo-your-custom-domain.ngrok.app
+    upstream:
+      url: 5171
+      protocol: http1
+```
+
 This will allow you to issue credentials and test the platform as if it were hosted on a public server. Once running successfully, you will find similar readout in your terminal:
 
-```
+```text
+------------------------------------------------
 Tunnels are open
-  API:       https://0649-159-196-209-217.ngrok-free.app
-  Admin UI:  https://8305-159-196-209-217.ngrok-free.app
-  Portal UI: https://7d6e-159-196-209-217.ngrok-free.app
+  API:       https://api-vo-wade.ngrok.app
+  Composer:  https://composer-vo-wade.ngrok.app
+  Concierge: https://concierge-vo-wade.ngrok.app
 
 Ngrok dashboard
   http://127.0.0.1:4040/
@@ -71,10 +106,13 @@ Ngrok dashboard
 
 Press Ctrl+C to close the tunnels and exit
 
-Enter `b` to open the API
-Enter `a` to open the Admin UI
-Enter `p` to open the Portal UI
-Enter `n` to open the ngrok dashboard
+Enter 1 or a to open API
+Enter 2 or c to open Composer
+Enter 3 or p to open Concierge
+Enter 4 or n to open the ngrok dashboard
+
+------------------------------------------------
+Enter `e` to edit the Ngrok configuration file
 ```
 
 Note: _this script requires the local folder layout to be as follows:_
