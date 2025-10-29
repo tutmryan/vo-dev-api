@@ -58,7 +58,7 @@ To resolve this, there's a small script that will configure Ngrok to expose the 
 
 Before you run the command, there are a few prerequisites:
 
-Register your own domains in the Ngrok dashboard
+Register your own domains in the Ngrok dashboard, making sure you choose the `ngrok.app` domain option!
 
 ![Ngrok Domains](/docs/assets/ngrok-domains.png)
 
