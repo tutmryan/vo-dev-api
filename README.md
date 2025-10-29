@@ -86,7 +86,7 @@ endpoints:
   - name: concierge-tunnel
     url: concierge-vo-your-custom-domain.ngrok.app
     upstream:
-      url: 5171
+      url: 5174
       protocol: http1
 ```
 
