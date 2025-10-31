@@ -17,7 +17,7 @@ const getNgrokConfigPath = () => {
   } else if (process.platform === 'linux') {
     return `${process.env.HOME}/.config/ngrok/ngrok.yml`
   } else if (process.platform === 'win32') {
-    return `${process.env.HOMEPATH}/AppData/Local/ngrok/ngrok.yml`
+    return `${process.env.USERPROFILE}\\AppData\\Local\\ngrok\\ngrok.yml`
   }
   throw new Error('Unsupported platform. Please add the path to the Ngrok configuration file logic.')
 }
