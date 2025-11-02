@@ -133,5 +133,14 @@
     "description": "Provides access to administer an instance",
     "displayName": "Instance admin",
     "value": "VerifiableCredential.InstanceAdmin"
+  },
+  {
+    "id": "82e29783-ba85-4f67-9893-f99e2dc8526f",
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access for support agents",
+    "displayName": "Support agent",
+    "value": "VerifiableCredential.SupportAgent"
   }
 ]
