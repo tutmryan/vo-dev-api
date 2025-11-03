@@ -95,6 +95,7 @@ export type Config = {
     accountSid: string
     sid: string
     secret: string
+    primaryToken: string
     from: Record<string, string> & { AU: string }
   }
   email: Pick<MailDataRequired, 'from'> & {

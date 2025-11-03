@@ -17,6 +17,7 @@ import express from 'express'
 import type { HelmetOptions } from 'helmet'
 import helmet from 'helmet'
 import { clone, merge } from 'lodash'
+import { combinedBearerTokenMiddleware } from './authentication'
 import {
   cookieSession as cookieSessionConfig,
   demoEnabled,
@@ -26,6 +27,7 @@ import {
   pkce,
   presentationCallbackRoute,
 } from './config'
+import { addAsyncIssuanceSmsStatusEndpoint as addAsyncIssuanceSmsStatusCallbackEndpoint } from './features/async-issuance/sms-status-callback'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
 import { demoPresentationTokenHandlers, demoPresentationTokenRoute } from './features/demo'
 import { corsConfig } from './features/instance-configs'
@@ -34,7 +36,6 @@ import { addOidcProvider } from './features/oidc-provider'
 import { logger } from './logger'
 import { addServiceHealthEndpoints } from './services/monitoring/express'
 import { addVoyager } from './voyager'
-import { combinedBearerTokenMiddleware } from './authentication'
 export const requestOrigin = (req: Request): string => `${req.protocol}://${req.get('Host')}`
 
 const oidcOnlyCsp = {
@@ -81,6 +82,7 @@ export async function getExpressApp(): Promise<Express> {
   logger.info('Added GET /health')
 
   addServiceHealthEndpoints(app)
+  addAsyncIssuanceSmsStatusCallbackEndpoint(app)
 
   // Azure start-up probe (Don't use the known default and make the custom one unlikely to be discovered)
   app.get('/azure-startup-probe-40nt0001ihrkbxdry635', (_req, res) => {

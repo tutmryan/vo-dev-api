@@ -8,14 +8,18 @@ export async function UpdateAsyncIssuanceContactCommand(
   asyncIssuanceRequestId: string,
   input?: Maybe<AsyncIssuanceContactInput>,
 ) {
-  const entity = await this.entityManager.getRepository(AsyncIssuanceEntity).findOneByOrFail({ id: asyncIssuanceRequestId })
-  invariant(!entity.isStatusFinal, 'Invalid status for updating contact')
+  const asyncIssuanceRepository = await this.entityManager.getRepository(AsyncIssuanceEntity)
+  const asyncIssuance = await asyncIssuanceRepository.findOneByOrFail({ id: asyncIssuanceRequestId })
+  invariant(!asyncIssuance.isStatusFinal, 'Invalid status for updating contact')
 
-  const asyncIssuance = await this.services.asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, entity.expiry)
-  invariant(asyncIssuance, 'Async issuance data not found')
+  const asyncIssuanceRequest = await this.services.asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, asyncIssuance.expiry)
+  invariant(asyncIssuanceRequest, 'Async issuance data not found')
 
-  asyncIssuance.contact = input
-  await this.services.asyncIssuances.uploadAsyncIssuance(asyncIssuanceRequestId, asyncIssuance)
+  asyncIssuanceRequest.contact = input
+  await this.services.asyncIssuances.uploadAsyncIssuance(asyncIssuanceRequestId, asyncIssuanceRequest)
+
+  asyncIssuance.contactUpdated()
+  await asyncIssuanceRepository.save(asyncIssuance)
 
   return input ?? null
 }

@@ -72,6 +72,7 @@ const config: EnvVarSubstitution<Config> = {
   identityStoreKeyVaultUrl: 'IDENTITY_STORE_KEY_VAULT_URL',
   sms: {
     secret: 'SMS_SECRET',
+    primaryToken: 'SMS_PRIMARY_TOKEN',
   },
   email: {
     apiKey: 'EMAIL_API_KEY',

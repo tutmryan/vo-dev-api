@@ -1,6 +1,8 @@
 import { isLocalDev } from '@makerx/node-common'
+import type { Request } from 'express'
 import parsePhoneNumberFromString from 'libphonenumber-js'
 import twilio from 'twilio'
+import z from 'zod'
 import { localDev, sms } from '../config'
 import { logger } from '../logger'
 import { Lazy } from './lazy'
@@ -32,6 +34,68 @@ const client = Lazy(() => {
   return twilio(sms.sid, sms.secret, { accountSid: sms.accountSid })
 })
 
+export const smsPayloadSchema = z
+  .object({
+    From: z.string(),
+    SmsSid: z.string(),
+    SmsStatus: z.string(),
+    MessageSid: z.string(),
+    MessageStatus: z.union([
+      z.literal('queued'),
+      z.literal('sending'),
+      z.literal('sent'),
+      z.literal('failed'),
+      z.literal('delivered'),
+      z.literal('undelivered'),
+      z.literal('receiving'),
+      z.literal('received'),
+      z.literal('accepted'),
+      z.literal('scheduled'),
+      z.literal('read'), // WhatsApp specific
+      z.literal('canceled'),
+    ]),
+    ErrorCode: z.string().optional(),
+  })
+  .transform((data) => ({
+    from: data.From,
+    smsSid: data.SmsSid,
+    smsStatus: data.SmsStatus,
+    messageSid: data.MessageSid,
+    messageStatus: data.MessageStatus,
+    errorCode: data.ErrorCode,
+  }))
+
+export type MessageStatuses = z.infer<typeof smsPayloadSchema>['messageStatus']
+
+export function toUserMessage(messageStatus: MessageStatuses, errorCode?: string): string {
+  if (errorCode === '30001') {
+    logger.error('SMS sending failed: The message queue overflowed')
+  }
+  switch (errorCode) {
+    case '30003':
+      return 'SMS sending failed: Handset is unreachable'
+    case '30004':
+      return 'SMS sending failed: Message blocked'
+    case '30005':
+      return 'SMS sending failed: Handset destination is unknown'
+    case '30006':
+      return 'SMS sending failed: Landline or unreachable carrier'
+    case '30007':
+      return 'SMS sending failed: Message filtered'
+  }
+  switch (messageStatus) {
+    case 'undelivered':
+      return `SMS sending failed: Could not be delivered`
+    case 'canceled':
+      return `SMS sending failed: Sending was canceled`
+  }
+  return `SMS sending failed: Unknown error`
+}
+
+export const validateSmsCallbackRequest = (req: Request) => {
+  return twilio.validateExpressRequest(req, sms.primaryToken)
+}
+
 const maskPhone = (phone: string) => phone.slice(0, -4).replace(/./g, '*') + phone.slice(-4)
 
 const getRegion = (to: string) => {
@@ -39,7 +103,7 @@ const getRegion = (to: string) => {
   return phoneNumber?.country ?? 'AU'
 }
 
-export function sendSms(to: string, message: string) {
+export function sendSms(to: string, message: string, statusCallbackUrl?: string) {
   if (isLocalDev) {
     if (!localDev) {
       logger.warn('Local dev is detected but no local dev config is provided. No sms will be sent until this is fixed.')
@@ -67,5 +131,6 @@ export function sendSms(to: string, message: string) {
     body: message,
     from,
     to,
+    statusCallback: statusCallbackUrl,
   })
 }

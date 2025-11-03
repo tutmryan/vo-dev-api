@@ -1,4 +1,5 @@
 import type { VerifiedOrchestrationEntityManager } from '../data/entity-manager'
+import { getIssuanceSmsStatusCallbackUrl, getVerificationSmsStatusCallbackUrl } from '../features/async-issuance/sms-status-callback'
 import { CommunicationEntity } from '../features/communication/entities/communication-entity'
 import { CommunicationPurpose, ContactMethod } from '../generated/graphql'
 import type { Logger } from '../logger'
@@ -79,6 +80,7 @@ export class CommunicationsService {
           await sendSms(
             to,
             `Dear ${identityName}, ${issuer} initiated the issuance of a ${contractName} digital credential to you.\n\nAccept it here: ${issuanceUrl}`,
+            getIssuanceSmsStatusCallbackUrl(asyncIssuanceId),
           )
         }
       },
@@ -116,7 +118,7 @@ export class CommunicationsService {
             issuerTeam: issuer,
           })
         } else {
-          await sendSms(to, `Your issuance verification code is: ${verificationCode}`)
+          await sendSms(to, `Your issuance verification code is: ${verificationCode}`, getVerificationSmsStatusCallbackUrl(asyncIssuanceId))
         }
       },
       { purpose: CommunicationPurpose.Verification, contactMethod, recipientId, createdById, asyncIssuanceId },

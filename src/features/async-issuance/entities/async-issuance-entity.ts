@@ -136,4 +136,9 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
     invariant(!this.isStatusFinal, cannotModifyInFinalStateMessage)
     this.state = 'contacted'
   }
+
+  public contactUpdated() {
+    invariant(!this.isStatusFinal, cannotModifyInFinalStateMessage)
+    this.state = 'contacted' // Allow re-contacting
+  }
 }

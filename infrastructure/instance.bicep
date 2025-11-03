@@ -374,6 +374,21 @@ resource smsSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   }
 }
 
+@description('The SMS primary token')
+@secure()
+param smsPrimaryToken string
+
+resource smsPrimaryTokenSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'SMS-PRIMARY-TOKEN'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: smsPrimaryToken
+  }
+}
+
 @description('The email API key')
 @secure()
 param emailApiKey string
@@ -1503,6 +1518,7 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     CORS_ORIGIN: corsOrigin
     COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiCookieSecret) ? apiCookieSecretSecretExisting : apiCookieSecretSecret).properties.secretUri})'
     SMS_SECRET: '@Microsoft.KeyVault(SecretUri=${smsSecretSecret.properties.secretUri})'
+    SMS_PRIMARY_TOKEN: '@Microsoft.KeyVault(SecretUri=${smsPrimaryTokenSecret.properties.secretUri})'
     EMAIL_API_KEY: '@Microsoft.KeyVault(SecretUri=${emailApiKeySecret.properties.secretUri})'
     DATABASE_HOST: '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
     DATABASE_NAME: '${resourcePrefix}-sql-db'

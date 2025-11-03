@@ -193,6 +193,7 @@ jobs:
           cors-origin: "${{ vars.CORS_ORIGIN }}"
 
           sms-secret: ${{ secrets.PROD_SMS_SECRET }}
+          sms-primary-token: ${{ secrets.PROD_SMS_PRIMARY_TOKEN }}
           email-api-key: ${{ secrets.PROD_EMAIL_API_KEY }}
 
           internal-client-secret: ${{ secrets.PROD_INTERNAL_CLIENT_SECRET }}
