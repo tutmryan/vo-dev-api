@@ -109,6 +109,9 @@ inputs:
   sms-secret:
     description: The SMS credential secret
     required: true
+  sms-primary-token:
+    description: The SMS primary token
+    required: true
   email-api-key:
     description: The email API key
     required: true
@@ -377,6 +380,7 @@ runs:
           apiCookieSecret=${{ steps.prepare-new-secrets.outputs.API-COOKIE-SECRET }}
           privateStorageClientEncryptionKey=${{ steps.prepare-new-secrets.outputs.PRIVATE-STORAGE-ENCRYPTION-KEY }}
           smsSecret=${{ inputs.sms-secret }}
+          smsPrimaryToken=${{ inputs.sms-primary-token }}
           emailApiKey=${{ inputs.email-api-key }}
           apiClientId=${{ steps.add-instance-app-registration.outputs.instanceAppId }}
           apiClientSecret=${{ steps.add-instance-app-registration.outputs.apiSecret }}
