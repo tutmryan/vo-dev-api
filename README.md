@@ -152,6 +152,7 @@ _Feel free to skip any steps that you have already completed._
   _Note: you may use this graphQL [query](http://localhost:4000/graphql?explorerURLState=N4IgJg9gxgrgtgUwHYBcQC4RxighigSwiQAIBlXANwQEkxlCUBPACgBICkAHHdEuhgWY1uOAIQBKEsAA6pEgGcqteqiGtOPFHw6iUU2fJIkCYOceNJcicxdOCAZgQQAnW8YIKFMV7YC%2Bcn4gADQglLguBLgARgA2CAoYIIbGMiCaOGl8KRZp9mpOvhgkaQBMpQBsABwADAAs0QCMALQxdQCczXUArA4AzM3RpVW4zRXtVQjtdQgA7BWzk2nB7iXpXj5uxWkI3WCN3bPdCM19fSNd49GDR7PNs42LIzX9szWly6tpVjbbIACiAEEALIkABqAHkSBCaAARADCJAAMtBcLFYQhKCRmiQAKoKIr%2BQIgPxAA) to create the identity_
 
 6. Issue a credential for yourself with the `EAM VO OIDC LocalDev - User` identity, as the credential will be needed for development and testing.
+7. Ensure you have a registered (or register when missing) identity store with the ID value of `e5d1575e-338a-469b-b757-71788a0f3702` and that identity store is configured to be used with authentication.
 
 ### Testing
 

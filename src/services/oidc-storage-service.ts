@@ -120,7 +120,7 @@ export class OidcStorageService extends PrivateBlobStorageContainerService {
       // Common name
       new pkijs.AttributeTypeAndValue({
         type: '2.5.4.3',
-        value: new asn1js.BmpString({ value: apiUrl }),
+        value: new asn1js.Utf8String({ value: apiUrl }),
       }),
     ]
     certificate.subject.typesAndValues = names
@@ -130,7 +130,7 @@ export class OidcStorageService extends PrivateBlobStorageContainerService {
     await certificate.subjectPublicKeyInfo.importKey(publicKey)
 
     // Sign the certificate using the private key
-    await certificate.sign(privateKey, 'SHA-1', engine)
+    await certificate.sign(privateKey, 'SHA-256', engine)
 
     // Export the certificate to PEM format
     const certBuffer = certificate.toSchema(true).toBER(false)

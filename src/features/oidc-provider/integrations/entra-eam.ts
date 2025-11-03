@@ -268,12 +268,19 @@ export const applyEamCheckIdTokenHook: ApplyIntercept = async (ctx, next, _origi
     throw new errors.InvalidRequest('id_token_hint does not contain an alg header')
   }
 
-  const payload = await verifyMultiIssuer(ctx.host, authParams.id_token_hint!, {
-    issuerOptions: getEamIssuerOptions(),
-    explicitNoAudienceValidation: true,
-  })
-
-  oidc.entity('IdTokenHint', { payload, header: decodeProtectedHeader })
+  try {
+    const payload = await verifyMultiIssuer(ctx.host, authParams.id_token_hint!, {
+      issuerOptions: getEamIssuerOptions(),
+      explicitNoAudienceValidation: true,
+    })
+    oidc.entity('IdTokenHint', { payload, header: decodeProtectedHeader })
+  } catch (err) {
+    logger.error(`OIDC EAM hook:applyEamCheckIdTokenHook id_token_hint could not be verified`, {
+      err,
+      params: extractLoggable(oidc.params!),
+    })
+    throw new errors.AccessDenied('id_token_hint could not be verified')
+  }
 
   // Although the VO OIDC provider is session-less, we'll force the prompt here.
   // This ensures the implementation is accurate to a standard EAM flow,
