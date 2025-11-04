@@ -61,6 +61,7 @@ export async function getExpressApp(): Promise<Express> {
               manifestSrc: [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
               frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
               workerSrc: [`'self'`, 'blob:'], // voyager needs blob:
+              connectSrc: [`'self'`, 'data:', 'https://cdn.jsdelivr.net'], // voyager needs self, data:, and cdn.jsdelivr.net
               formAction: oidcOnlyCsp.directives.formAction,
             },
           }
