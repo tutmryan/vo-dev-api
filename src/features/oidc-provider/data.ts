@@ -10,7 +10,7 @@ import { OidcScopes } from '../../roles'
 import { IssuanceEntity } from '../issuance/entities/issuance-entity'
 import { PartnerEntity } from '../partners/entities/partner-entity'
 import { SYSTEM_USER_ID } from '../users/entities/user-entity'
-import { mappedClaims, resourceScopes } from './claims'
+import { mappedClaims as mapClaims, resourceScopes as mapRsourceScopes } from './claims'
 import type { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entity'
 import { OidcClientEntity } from './entities/oidc-client-entity'
 import { OidcClientResourceEntity } from './entities/oidc-client-resource-entity'
@@ -33,18 +33,24 @@ export type OidcData = {
 export async function loadOidcData(): Promise<OidcData> {
   const [clients, resources, partners] = await loadOrInitialise()
   const claimMappings: OidcClaimMappingEntity[] = []
+
   for (const client of clients) {
     for (const mapping of await client.claimMappings) {
       if (!claimMappings.some((m) => m.id === mapping.id)) claimMappings.push(mapping)
     }
   }
+
+  const clientMetadata = await Promise.all(clients.map(toOidcClientMetadata))
+  const resourceScopes = mapRsourceScopes(resources)
+  const mappedClaims = mapClaims(claimMappings)
+
   return {
     clients,
-    clientMetadata: await Promise.all(clients.map(toOidcClientMetadata)),
+    clientMetadata,
     resources,
-    resourceScopes: resourceScopes(resources),
+    resourceScopes,
     partners,
-    mappedClaims: mappedClaims(claimMappings),
+    mappedClaims,
   }
 }
 
@@ -57,19 +63,33 @@ const toOidcClientMetadata = async ({
   policyUrl,
   applicationType,
   clientType,
-}: OidcClientEntity): Promise<ClientMetadata> => ({
-  client_id: id,
-  client_name: name,
-  client_secret: clientType === OidcClientType.Confidential ? await oidcSecretService().get(id) : undefined,
-  redirect_uris: redirectUris,
-  post_logout_redirect_uris: postLogoutUris,
-  response_types: ['code', 'code id_token', 'id_token'],
-  grant_types: ['authorization_code', 'refresh_token', 'implicit'],
-  token_endpoint_auth_method: clientType === OidcClientType.Confidential ? 'client_secret_post' : 'none',
-  tos_uri: termsOfServiceUrl ?? undefined,
-  policy_uri: policyUrl ?? undefined,
-  application_type: applicationType,
-})
+}: OidcClientEntity): Promise<ClientMetadata> => {
+  let clientSecret: string | undefined
+
+  if (clientType === OidcClientType.Confidential) {
+    try {
+      clientSecret = await oidcSecretService().get(id)
+    } catch (error) {
+      throw new Error(`Failed to retrieve secret for client ID=${id}`, { cause: error })
+    }
+  } else {
+    clientSecret = undefined
+  }
+
+  return {
+    client_id: id,
+    client_name: name,
+    client_secret: clientSecret,
+    redirect_uris: redirectUris,
+    post_logout_redirect_uris: postLogoutUris,
+    response_types: ['code', 'code id_token', 'id_token'],
+    grant_types: ['authorization_code', 'refresh_token', 'implicit'],
+    token_endpoint_auth_method: clientType === OidcClientType.Confidential ? 'client_secret_post' : 'none',
+    tos_uri: termsOfServiceUrl ?? undefined,
+    policy_uri: policyUrl ?? undefined,
+    application_type: applicationType,
+  }
+}
 
 type SourceOidcData = [OidcClientEntity[], OidcResourceEntity[], PartnerEntity[]]
 
