@@ -57,7 +57,7 @@ export async function getExpressApp(): Promise<Express> {
             // override helmet defaults with apollo sandbox + voyager config
             directives: {
               imgSrc: [`'self'`, 'data:', 'apollo-server-landing-page.cdn.apollographql.com'],
-              scriptSrc: [...oidcOnlyCsp.directives.scriptSrc, `https: 'unsafe-eval'`], // voyager needs unsafe-eval
+              scriptSrc: [...oidcOnlyCsp.directives.scriptSrc],
               manifestSrc: [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
               frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
               workerSrc: [`'self'`, 'blob:'], // voyager needs blob:
