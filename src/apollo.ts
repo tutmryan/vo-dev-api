@@ -15,6 +15,7 @@ import type { Express } from 'express'
 import { json } from 'express'
 import { createApollo4QueryValidationPlugin } from 'graphql-constraint-directive/apollo4'
 import type http from 'http'
+import { authenticatedIntrospectionPlugin } from './apollo.authenticatedIntrospectionPlugin'
 import { devToolsEnabled, graphQL, logging } from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
@@ -52,6 +53,7 @@ const plugins = (
   serverCleanup?: () => Promise<void>,
 ): ApolloServerPlugin<GraphQLContext>[] => {
   const plugins: ApolloServerPlugin<GraphQLContext>[] = [
+    authenticatedIntrospectionPlugin, // Require authentication for introspection queries
     // GraphQLArmor protection plugins
     ...protection.plugins,
     graphqlOperationLoggingPlugin<GraphQLContext, Logger>({

@@ -1,6 +1,9 @@
+import type { ApolloServerPlugin } from '@apollo/server'
 import { ApolloServer } from '@apollo/server'
 import { GraphQLArmorConfig } from '@escape.tech/graphql-armor-types'
+import { NoSchemaIntrospectionCustomRule, validate } from 'graphql'
 import { createArmorProtection } from './apollo'
+import { authenticatedIntrospectionPlugin } from './apollo.authenticatedIntrospectionPlugin'
 import { graphQL } from './config'
 import type { GraphQLContext } from './context'
 import { UserRoles } from './roles'
@@ -157,5 +160,60 @@ describe('GraphQl Armor', () => {
 
     // Assert
     expect(errorMessage).toBe(`Syntax Error: Token limit of ${graphQL.maxTokens} exceeded.`)
+  })
+
+  it('allows introspection for authenticated users', async () => {
+    const authenticatedIntrospectionPlugin: ApolloServerPlugin<GraphQLContext> = {
+      requestDidStart: async () => ({
+        didResolveOperation: async ({ schema, document, contextValue }) => {
+          if (!contextValue.user) {
+            const errors = validate(schema, document, [NoSchemaIntrospectionCustomRule])
+            if (errors.length) throw errors[0]
+          }
+        },
+      }),
+    }
+    const server = new ApolloServer<GraphQLContext>({
+      schema: schema(),
+      plugins: [authenticatedIntrospectionPlugin],
+    })
+    serversToCleanUp.add(server)
+
+    const query = `query { __schema { queryType { name } } }`
+    const { data, errors } = await executeOperationAsUser(
+      {
+        query,
+      },
+      server,
+    )
+
+    expect(errors).toBeUndefined()
+    expect(data).toBeDefined()
+    expect((data as { __schema: unknown }).__schema).toBeDefined()
+  })
+
+  it('does not allow introspection for unauthenticated users', async () => {
+    const server = new ApolloServer<GraphQLContext>({
+      schema: schema(),
+      plugins: [authenticatedIntrospectionPlugin],
+    })
+    serversToCleanUp.add(server)
+
+    const query = `query { __schema { queryType { name } } }`
+    const { data, errors } = await executeOperation(
+      {
+        query,
+      },
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      server,
+    )
+
+    expect(data).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors![0]!.message).toBe('GraphQL introspection has been disabled, but the requested query contained the field "__schema".')
   })
 })
