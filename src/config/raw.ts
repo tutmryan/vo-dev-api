@@ -98,7 +98,8 @@ export type Config = {
     primaryToken: string
     from: Record<string, string> & { AU: string }
   }
-  email: Pick<MailDataRequired, 'from'> & {
+  email: {
+    from: { name: string; email: string }
     apiKey: string
     templates: {
       issuance: EmailTemplateConfig

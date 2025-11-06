@@ -1,3 +1,4 @@
+# eslint-disable @graphql-eslint/strict-id-in-types
 """
 A human-friendly label for a specific application (by identifier)
 """
@@ -58,6 +59,36 @@ input CorsOriginConfigInput {
   origin: String!
 }
 
+"""
+A config for email sender (override)
+"""
+type EmailSenderConfig {
+  """
+  The sender name to use for emails
+  """
+  senderName: String!
+
+  """
+  The sender email address to use for emails
+  """
+  senderEmail: String!
+}
+
+"""
+Input payload for an Email Sender config
+"""
+input EmailSenderConfigInput {
+  """
+  The sender name to use for emails
+  """
+  senderName: String
+
+  """
+  The sender email address to use for emails
+  """
+  senderEmail: String
+}
+
 extend type Query {
   """
   List all application label configs for a given identity store
@@ -68,6 +99,12 @@ extend type Query {
   List all CORS origin configs
   """
   corsOriginConfigs: [CorsOriginConfig!]!
+
+  """
+  Get the current email sender configuration.
+  Returns null if no override is set.
+  """
+  emailSenderConfig: EmailSenderConfig!
 }
 
 extend type Mutation {
@@ -80,4 +117,9 @@ extend type Mutation {
   Replace user configurable CORS origin configurations for the VO API instance
   """
   setCorsOriginConfigs(input: [CorsOriginConfigInput!]!): [CorsOriginConfig!]!
+  """
+  Set or update the email sender configuration.
+  Passing null or omitting fields will unset the override and revert to defaults.
+  """
+  setEmailSenderConfig(input: EmailSenderConfigInput!): EmailSenderConfig!
 }

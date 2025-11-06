@@ -415,6 +415,13 @@ exports[`shield rules are setup correctly 1`] = `
         "VerifiableCredential.InstanceAdmin"
       ]
     },
+    "emailSenderConfig": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
+    },
     "issuance": {
       "rulesOr": [
         {
@@ -1624,6 +1631,13 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "setCorsOriginConfigs": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
+    },
+    "setEmailSenderConfig": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
       "cache": "contextual",
       "__roles": [

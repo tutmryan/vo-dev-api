@@ -1499,6 +1499,23 @@ export type Discovery = {
   version: Scalars['String']['output'];
 };
 
+/** A config for email sender (override) */
+export type EmailSenderConfig = {
+  __typename?: 'EmailSenderConfig';
+  /** The sender email address to use for emails */
+  senderEmail: Scalars['String']['output'];
+  /** The sender name to use for emails */
+  senderName: Scalars['String']['output'];
+};
+
+/** Input payload for an Email Sender config */
+export type EmailSenderConfigInput = {
+  /** The sender email address to use for emails */
+  senderEmail?: InputMaybe<Scalars['String']['input']>;
+  /** The sender name to use for emails */
+  senderName?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** The type of face check photo support */
 export enum FaceCheckPhotoSupport {
   /** A face check photo cannot be provided when issuing a credential with this contract */
@@ -2417,6 +2434,11 @@ export type Mutation = {
   setApplicationLabelConfigs: Array<ApplicationLabelConfig>;
   /** Replace user configurable CORS origin configurations for the VO API instance */
   setCorsOriginConfigs: Array<CorsOriginConfig>;
+  /**
+   * Set or update the email sender configuration.
+   * Passing null or omitting fields will unset the override and revert to defaults.
+   */
+  setEmailSenderConfig: EmailSenderConfig;
   /** Suspends an identity store. Use resumeIdentityStore to reactivate. */
   suspendIdentityStore: IdentityStore;
   /** Suspends a partner */
@@ -2732,6 +2754,11 @@ export type MutationSetApplicationLabelConfigsArgs = {
 
 export type MutationSetCorsOriginConfigsArgs = {
   input: Array<CorsOriginConfigInput>;
+};
+
+
+export type MutationSetEmailSenderConfigArgs = {
+  input: EmailSenderConfigInput;
 };
 
 
@@ -3679,6 +3706,11 @@ export type Query = {
    */
   credentialTypes: Array<Scalars['String']['output']>;
   discovery: Discovery;
+  /**
+   * Get the current email sender configuration.
+   * Returns null if no override is set.
+   */
+  emailSenderConfig: EmailSenderConfig;
   /** Returns approval requests, optionally matching the specified criteria. */
   findApprovalRequests: Array<ApprovalRequest>;
   /** Returns async issuance requests, optionally matching the specified criteria. */
@@ -5064,6 +5096,18 @@ export type SetCorsOriginConfigsMutationVariables = Exact<{
 
 export type SetCorsOriginConfigsMutation = { __typename?: 'Mutation', setCorsOriginConfigs: Array<{ __typename?: 'CorsOriginConfig', id: string, origin: string }> };
 
+export type GetEmailSenderConfigQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetEmailSenderConfigQuery = { __typename?: 'Query', emailSenderConfig: { __typename?: 'EmailSenderConfig', senderName: string, senderEmail: string } };
+
+export type SetEmailSenderConfigMutationVariables = Exact<{
+  input: EmailSenderConfigInput;
+}>;
+
+
+export type SetEmailSenderConfigMutation = { __typename?: 'Mutation', setEmailSenderConfig: { __typename?: 'EmailSenderConfig', senderName: string, senderEmail: string } };
+
 export type CreateIssuanceRequestMutationVariables = Exact<{
   request: IssuanceRequestInput;
 }>;
@@ -5467,6 +5511,8 @@ export const GetApplicationLabelConfigsDocument = {"kind":"Document","definition
 export const SetApplicationLabelConfigsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetApplicationLabelConfigs"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"identityStoreId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ApplicationLabelConfigInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setApplicationLabelConfigs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"identityStoreId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"identityStoreId"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"identifier"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}}]}}]} as unknown as DocumentNode<SetApplicationLabelConfigsMutation, SetApplicationLabelConfigsMutationVariables>;
 export const GetCorsOriginConfigsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetCorsOriginConfigs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"corsOriginConfigs"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"origin"}}]}}]}}]} as unknown as DocumentNode<GetCorsOriginConfigsQuery, GetCorsOriginConfigsQueryVariables>;
 export const SetCorsOriginConfigsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetCorsOriginConfigs"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CorsOriginConfigInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setCorsOriginConfigs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"origin"}}]}}]}}]} as unknown as DocumentNode<SetCorsOriginConfigsMutation, SetCorsOriginConfigsMutationVariables>;
+export const GetEmailSenderConfigDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetEmailSenderConfig"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"emailSenderConfig"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"senderName"}},{"kind":"Field","name":{"kind":"Name","value":"senderEmail"}}]}}]}}]} as unknown as DocumentNode<GetEmailSenderConfigQuery, GetEmailSenderConfigQueryVariables>;
+export const SetEmailSenderConfigDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetEmailSenderConfig"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"EmailSenderConfigInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setEmailSenderConfig"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"senderName"}},{"kind":"Field","name":{"kind":"Name","value":"senderEmail"}}]}}]}}]} as unknown as DocumentNode<SetEmailSenderConfigMutation, SetEmailSenderConfigMutationVariables>;
 export const CreateIssuanceRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateIssuanceRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"IssuanceRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createIssuanceRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"IssuanceResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"requestId"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"qrCode"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RequestErrorResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"error"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateIssuanceRequestMutation, CreateIssuanceRequestMutationVariables>;
 export const AcquireLimitedAccessTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AcquireLimitedAccessToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AcquireLimitedAccessTokenInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"acquireLimitedAccessToken"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"expires"}},{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<AcquireLimitedAccessTokenMutation, AcquireLimitedAccessTokenMutationVariables>;
 export const FindContractsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindContracts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ContractWhere"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"forIdentityId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findContracts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"issuances"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"identityId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"forIdentityId"}}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"issuedAt"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"presentations"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"identityId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"forIdentityId"}}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"presentedAt"}}]}}]}}]}}]} as unknown as DocumentNode<FindContractsQuery, FindContractsQueryVariables>;
@@ -5693,6 +5739,8 @@ export type ResolversTypes = {
   DidDocumentStatus: DidDocumentStatus;
   Discovery: ResolverTypeWrapper<Discovery>;
   EmailAddress: ResolverTypeWrapper<Scalars['EmailAddress']['output']>;
+  EmailSenderConfig: ResolverTypeWrapper<EmailSenderConfig>;
+  EmailSenderConfigInput: EmailSenderConfigInput;
   FaceCheckPhotoSupport: FaceCheckPhotoSupport;
   FaceCheckResult: ResolverTypeWrapper<FaceCheckResult>;
   FaceCheckValidation: ResolverTypeWrapper<FaceCheckValidation>;
@@ -5927,6 +5975,8 @@ export type ResolversParentTypes = {
   DateTime: Scalars['DateTime']['output'];
   Discovery: Discovery;
   EmailAddress: Scalars['EmailAddress']['output'];
+  EmailSenderConfig: EmailSenderConfig;
+  EmailSenderConfigInput: EmailSenderConfigInput;
   FaceCheckResult: FaceCheckResult;
   FaceCheckValidation: FaceCheckValidation;
   FaceCheckValidationInput: FaceCheckValidationInput;
@@ -6376,6 +6426,12 @@ export interface EmailAddressScalarConfig extends GraphQLScalarTypeConfig<Resolv
   name: 'EmailAddress';
 }
 
+export type EmailSenderConfigResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['EmailSenderConfig'] = ResolversParentTypes['EmailSenderConfig']> = {
+  senderEmail?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  senderName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type FaceCheckResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['FaceCheckResult'] = ResolversParentTypes['FaceCheckResult']> = {
   matchConfidenceScore?: Resolver<ResolversTypes['PositiveFloat'], ParentType, ContextType>;
   sourcePhotoQuality?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -6593,6 +6649,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   sendAsyncIssuanceVerification?: Resolver<ResolversTypes['SendAsyncIssuanceVerificationResponse'], ParentType, ContextType, RequireFields<MutationSendAsyncIssuanceVerificationArgs, 'asyncIssuanceRequestId'>>;
   setApplicationLabelConfigs?: Resolver<Array<ResolversTypes['ApplicationLabelConfig']>, ParentType, ContextType, RequireFields<MutationSetApplicationLabelConfigsArgs, 'identityStoreId' | 'input'>>;
   setCorsOriginConfigs?: Resolver<Array<ResolversTypes['CorsOriginConfig']>, ParentType, ContextType, RequireFields<MutationSetCorsOriginConfigsArgs, 'input'>>;
+  setEmailSenderConfig?: Resolver<ResolversTypes['EmailSenderConfig'], ParentType, ContextType, RequireFields<MutationSetEmailSenderConfigArgs, 'input'>>;
   suspendIdentityStore?: Resolver<ResolversTypes['IdentityStore'], ParentType, ContextType, RequireFields<MutationSuspendIdentityStoreArgs, 'id'>>;
   suspendPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationSuspendPartnerArgs, 'id'>>;
   testServices?: Resolver<ResolversTypes['Discovery'], ParentType, ContextType>;
@@ -6819,6 +6876,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   corsOriginConfigs?: Resolver<Array<ResolversTypes['CorsOriginConfig']>, ParentType, ContextType>;
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, Partial<QueryCredentialTypesArgs>>;
   discovery?: Resolver<ResolversTypes['Discovery'], ParentType, ContextType>;
+  emailSenderConfig?: Resolver<ResolversTypes['EmailSenderConfig'], ParentType, ContextType>;
   findApprovalRequests?: Resolver<Array<ResolversTypes['ApprovalRequest']>, ParentType, ContextType, RequireFields<QueryFindApprovalRequestsArgs, 'limit'>>;
   findAsyncIssuanceRequests?: Resolver<Array<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<QueryFindAsyncIssuanceRequestsArgs, 'limit'>>;
   findCommunications?: Resolver<Array<ResolversTypes['Communication']>, ParentType, ContextType, Partial<QueryFindCommunicationsArgs>>;
@@ -7129,6 +7187,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   DateTime?: GraphQLScalarType;
   Discovery?: DiscoveryResolvers<ContextType>;
   EmailAddress?: GraphQLScalarType;
+  EmailSenderConfig?: EmailSenderConfigResolvers<ContextType>;
   FaceCheckResult?: FaceCheckResultResolvers<ContextType>;
   FaceCheckValidation?: FaceCheckValidationResolvers<ContextType>;
   FeatureUrls?: FeatureUrlsResolvers<ContextType>;

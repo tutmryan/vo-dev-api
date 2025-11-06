@@ -3,6 +3,7 @@ import type { EmailData } from '@sendgrid/helpers/classes/email-address'
 import type { MailDataRequired } from '@sendgrid/mail'
 import client from '@sendgrid/mail'
 import { email, localDev } from '../config'
+import { getEmailSenderConfig } from '../features/instance-configs'
 import { logger } from '../logger'
 import { Lazy } from './lazy'
 import { isObject } from './type-helpers'
@@ -53,7 +54,7 @@ const maskEmail = (email: string) => {
   return `${box?.replace(/./g, '*')}@${domain}`
 }
 
-const sendEmail = async (to: MailTo, data: MailDataRequired) => {
+export const sendEmail = async (to: MailTo, data: MailDataRequired) => {
   if (isLocalDev) {
     if (!localDev) {
       logger.warn('Local dev is detected but no local dev config was provided. No emails will be sent until this is fixed.')
@@ -113,10 +114,12 @@ export const sendIssuanceEmail = async ({
 }: {
   to: MailTo
 } & IssuanceEmailTemplateData) => {
+  const from = getFromField()
+
   const data = {
     templateId: email.templates.issuance.id,
     asm: email.templates.issuance.asm,
-    from: email.from,
+    from,
     personalizations: [
       {
         to,
@@ -143,10 +146,11 @@ export const sendVerificationCodeEmail = async ({
 }: {
   to: MailDataRequired['to']
 } & VerificationCodeTemplateData) => {
+  const from = getFromField()
   const data = {
     templateId: email.templates.verification.id,
     asm: email.templates.verification.asm,
-    from: email.from,
+    from,
     personalizations: [
       {
         to,
@@ -155,4 +159,12 @@ export const sendVerificationCodeEmail = async ({
     ],
   } as MailDataRequired
   await sendEmail(to, data)
+}
+
+function getFromField() {
+  const { senderName, senderEmail } = getEmailSenderConfig()
+  return {
+    name: senderName,
+    email: senderEmail,
+  }
 }
