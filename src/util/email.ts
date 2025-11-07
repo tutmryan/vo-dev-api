@@ -2,8 +2,10 @@ import { isLocalDev } from '@makerx/node-common'
 import type { EmailData } from '@sendgrid/helpers/classes/email-address'
 import type { MailDataRequired } from '@sendgrid/mail'
 import client from '@sendgrid/mail'
+import { createHmac, timingSafeEqual } from 'crypto'
+import type { Request } from 'express'
+import z from 'zod'
 import { email, localDev } from '../config'
-import { getEmailSenderConfig } from '../features/instance-configs'
 import { logger } from '../logger'
 import { Lazy } from './lazy'
 import { isObject } from './type-helpers'
@@ -54,7 +56,61 @@ const maskEmail = (email: string) => {
   return `${box?.replace(/./g, '*')}@${domain}`
 }
 
-export const sendEmail = async (to: MailTo, data: MailDataRequired) => {
+// ***** WARNING: Changes to this schema must be reflected in the VO Sendgrid webhook forwarder *****
+export const emailPayloadSchema = z.object({
+  email: z.string(),
+  timestamp: z.number(),
+  sgEventId: z.string(),
+  sgMessageId: z.string(),
+  event: z.union([
+    z.literal('processed'),
+    z.literal('deferred'),
+    z.literal('delivered'),
+    z.literal('open'),
+    z.literal('click'),
+    z.literal('bounce'),
+    z.literal('dropped'),
+    z.literal('spamreport'),
+    z.literal('unsubscribe'),
+    z.literal('group_unsubscribe'),
+    z.literal('group_resubscribe'),
+  ]),
+  smtpId: z.string(),
+})
+
+// ***** WARNING: Changes to this value must be reflected in the VO Sendgrid webhook forwarder *****
+const voForwarderSignatureHeaderKey = 'X-VO-Webhook-Forwarder-Signature'
+
+export type EmailEventPayload = z.infer<typeof emailPayloadSchema>
+export type EmailEvents = EmailEventPayload['event']
+
+export function toUserErrorMessage(event: EmailEvents): string {
+  switch (event) {
+    case 'bounce':
+      return 'Email sending failed: Mailbox unavailable'
+    case 'deferred':
+      return 'Email sending failed: Message deferred (try again later)'
+    case 'dropped':
+      return 'Email sending failed: Message dropped by recipient server'
+  }
+  return `Email sending failed: Unknown error`
+}
+
+export const validateEmailCallbackRequest = (req: Request) => {
+  const hash = req.get(voForwarderSignatureHeaderKey)
+  if (!hash) return false
+
+  const hmac = createHmac('sha256', email.webhookForwarder.secret)
+  hmac.update(req.body, 'utf8')
+  const expectedSigBuf = Buffer.from(hmac.digest('hex'), 'hex')
+  const receivedSigBuf = Buffer.from(hash, 'hex')
+
+  if (expectedSigBuf.length !== receivedSigBuf.length) return false
+
+  return timingSafeEqual(new Uint8Array(expectedSigBuf), new Uint8Array(receivedSigBuf))
+}
+
+export const sendEmail = async (to: MailTo, data: MailDataRequired, callbackUrl?: string) => {
   if (isLocalDev) {
     if (!localDev) {
       logger.warn('Local dev is detected but no local dev config was provided. No emails will be sent until this is fixed.')
@@ -89,82 +145,14 @@ export const sendEmail = async (to: MailTo, data: MailDataRequired) => {
 
   data.to = allowed
 
-  return await mailClient().send(data)
-}
-
-interface IssuanceEmailTemplateData {
-  subjectOrganisation: string
-  subjectCredentialName: string
-  preheaderIdentityName: string
-  preheaderOrganisation: string
-  preheaderCredentialName: string
-  identityName: string
-  issuer: string
-  credentialName: string
-  verificationMethod: string
-  expiry: string
-  issuerContact: string
-  issuerTeam: string
-  issuanceUrl: string
-}
-
-export const sendIssuanceEmail = async ({
-  to,
-  ...dynamicTemplateData
-}: {
-  to: MailTo
-} & IssuanceEmailTemplateData) => {
-  const from = getFromField()
-
-  const data = {
-    templateId: email.templates.issuance.id,
-    asm: email.templates.issuance.asm,
-    from,
-    personalizations: [
-      {
-        to,
-        dynamicTemplateData,
-      },
-    ],
-  } as MailDataRequired
-  await sendEmail(to, data)
-}
-
-interface VerificationCodeTemplateData {
-  preheaderIdentityName: string
-  identityName: string
-  credentialName: string
-  code: string
-  codeLifetimeMinutes: string
-  issuerContact: string
-  issuerTeam: string
-}
-
-export const sendVerificationCodeEmail = async ({
-  to,
-  ...dynamicTemplateData
-}: {
-  to: MailDataRequired['to']
-} & VerificationCodeTemplateData) => {
-  const from = getFromField()
-  const data = {
-    templateId: email.templates.verification.id,
-    asm: email.templates.verification.asm,
-    from,
-    personalizations: [
-      {
-        to,
-        dynamicTemplateData,
-      },
-    ],
-  } as MailDataRequired
-  await sendEmail(to, data)
-}
-
-function getFromField() {
-  const { senderName, senderEmail } = getEmailSenderConfig()
-  return {
-    name: senderName,
-    email: senderEmail,
+  if (callbackUrl) {
+    data.customArgs = {
+      ...data.customArgs,
+      emailCallbackUrl: callbackUrl,
+      // When set, the forwarder will only act if it's the specified hostname. Otherwise, it'll assume that's another forwarder who will handle it
+      ...(callbackUrl && email.webhookForwarder.url ? { emailWebhookForwarderUrl: email.webhookForwarder.url } : {}),
+    }
   }
+
+  return await mailClient().send(data)
 }

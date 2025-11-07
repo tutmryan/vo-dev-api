@@ -1,30 +1,5 @@
 import { EmailJSON } from '@sendgrid/helpers/classes/email-address'
-import { email } from '../config'
-import { getEmailSenderConfig } from '../features/instance-configs'
-import * as emailUtil from './email'
-import { extractEmails, sendEmail, sendIssuanceEmail } from './email'
-
-jest.spyOn(emailUtil, 'sendEmail').mockImplementation(jest.fn())
-
-function getIssuanceEmailTestData(overrides = {}) {
-  return {
-    to: 'recipient@example.com',
-    subjectCredentialName: 'Test Credential',
-    subjectOrganisation: 'Test Org',
-    preheaderIdentityName: 'Test Identity',
-    preheaderOrganisation: 'Test Org',
-    preheaderCredentialName: 'Test Credential',
-    credentialName: 'Test Credential',
-    verificationMethod: 'email',
-    identityName: 'Test Identity',
-    issuer: 'Test Org',
-    issuerContact: 'Test Org',
-    issuerTeam: 'Test Org',
-    expiry: '2025-01-01T00:00:00Z',
-    issuanceUrl: 'https://example.com/issuance',
-    ...overrides,
-  }
-}
+import { extractEmails } from './email'
 
 describe('extractEmails', () => {
   it('returns empty arrays when no emails are provided', () => {
@@ -95,33 +70,5 @@ describe('extractEmails', () => {
       expect(result).toEqual({ blocked: [], allowed: to })
       expect(resultObjectBased).toEqual({ blocked: [], allowed: toObjectBased })
     })
-  })
-})
-
-describe('sendIssuanceEmail from field', () => {
-
-    it('calls with defaults sender config has not been set', async () => {
-    await sendIssuanceEmail(getIssuanceEmailTestData())
-
-    expect(sendEmail).toHaveBeenCalledWith(
-      'recipient@example.com',
-      expect.objectContaining({
-        from: { name: email.from.name, email: email.from.email },
-      }),
-    )
-  })
-  
-  it('uses emailSenderConfig if set', async () => {
-    const senderConfig = getEmailSenderConfig()
-    senderConfig.senderName = 'Test Sender'
-    senderConfig.senderEmail = 'test@sender.com'
-
-    await sendIssuanceEmail(getIssuanceEmailTestData())
-    expect(sendEmail).toHaveBeenCalledWith(
-      'recipient@example.com',
-      expect.objectContaining({
-        from: { name: 'Test Sender', email: 'test@sender.com' },
-      }),
-    )
   })
 })

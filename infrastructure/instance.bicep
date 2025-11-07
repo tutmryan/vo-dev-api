@@ -404,6 +404,21 @@ resource emailApiKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
   }
 }
 
+@description('The email webhook forwarder secret')
+@secure()
+param emailWebhookForwarderSecret string
+
+resource emailWebhookForwarderSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+  name: 'EMAIL-WEBHOOK-FORWARDER-SECRET'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    value: emailWebhookForwarderSecret
+  }
+}
+
 @description('The client secret of the API app registration in Azure AD')
 @secure()
 param apiClientSecret string
@@ -1520,6 +1535,7 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     SMS_SECRET: '@Microsoft.KeyVault(SecretUri=${smsSecretSecret.properties.secretUri})'
     SMS_PRIMARY_TOKEN: '@Microsoft.KeyVault(SecretUri=${smsPrimaryTokenSecret.properties.secretUri})'
     EMAIL_API_KEY: '@Microsoft.KeyVault(SecretUri=${emailApiKeySecret.properties.secretUri})'
+    EMAIL_WEBHOOK_FORWARDER_SECRET: '@Microsoft.KeyVault(SecretUri=${emailWebhookForwarderSecretSecret.properties.secretUri})'
     DATABASE_HOST: '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
     DATABASE_NAME: '${resourcePrefix}-sql-db'
     REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'

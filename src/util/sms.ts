@@ -67,7 +67,7 @@ export const smsPayloadSchema = z
 
 export type MessageStatuses = z.infer<typeof smsPayloadSchema>['messageStatus']
 
-export function toUserMessage(messageStatus: MessageStatuses, errorCode?: string): string {
+export function toUserErrorMessage(messageStatus: MessageStatuses, errorCode?: string): string {
   if (errorCode === '30001') {
     logger.error('SMS sending failed: The message queue overflowed')
   }

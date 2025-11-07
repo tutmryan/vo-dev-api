@@ -115,6 +115,9 @@ inputs:
   email-api-key:
     description: The email API key
     required: true
+  email-webhook-forwarder-secret:
+    description: The email webhook forwarder secret
+    required: true
 
   internal-client-secret:
     description: Client secret of the Internal app registration in Azure AD
@@ -382,6 +385,7 @@ runs:
           smsSecret=${{ inputs.sms-secret }}
           smsPrimaryToken=${{ inputs.sms-primary-token }}
           emailApiKey=${{ inputs.email-api-key }}
+          emailWebhookForwarderSecret=${{ inputs.email-webhook-forwarder-secret }}
           apiClientId=${{ steps.add-instance-app-registration.outputs.instanceAppId }}
           apiClientSecret=${{ steps.add-instance-app-registration.outputs.apiSecret }}
           internalClientSecret=${{ inputs.internal-client-secret }}

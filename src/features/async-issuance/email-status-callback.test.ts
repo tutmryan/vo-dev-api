@@ -7,11 +7,15 @@ import { CommunicationEntity } from '../communication/entities/communication-ent
 import { createIdentity } from '../identity/tests/create-identity'
 import { SYSTEM_USER_ID } from '../users/entities/user-entity'
 import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
-import { getIssuanceSmsStatusCallbackUrl, getVerificationSmsStatusCallbackUrl, handleSmsStatusCallback } from './sms-status-callback'
+import {
+  getIssuanceEmailStatusCallbackUrl,
+  getVerificationEmailStatusCallbackUrl,
+  handleEmailStatusCallback,
+} from './email-status-callback'
 import { createIssuanceRequest } from './tests/create-async-issuance'
 import { buildContact, givenContract } from './tests/index'
 
-describe('SMS status callback', () => {
+describe('Email status callback', () => {
   beforeAfterAll()
   beforeEach(() => {
     mockedServices.clearAllMocks()
@@ -23,35 +27,29 @@ describe('SMS status callback', () => {
     )
   })
 
-  describe('handleSmsStatusCallback', () => {
+  describe('handleEmailStatusCallback', () => {
     describe('with error status', () => {
       it.each<{
-        messageStatus: 'failed' | 'undelivered' | 'canceled'
-        errorCode?: string
+        event: 'deferred' | 'bounce' | 'dropped'
         expectedUserMessage: string
       }>([
         {
-          messageStatus: 'failed',
-          expectedUserMessage: 'SMS sending failed: Unknown error',
+          event: 'deferred',
+          expectedUserMessage: 'Email sending failed: Message deferred (try again later)',
         },
         {
-          messageStatus: 'undelivered',
-          expectedUserMessage: 'SMS sending failed: Could not be delivered',
+          event: 'bounce',
+          expectedUserMessage: 'Email sending failed: Mailbox unavailable',
         },
         {
-          messageStatus: 'canceled',
-          expectedUserMessage: 'SMS sending failed: Sending was canceled',
+          event: 'dropped',
+          expectedUserMessage: 'Email sending failed: Message dropped by recipient server',
         },
-        {
-          messageStatus: 'failed',
-          errorCode: '30004',
-          expectedUserMessage: 'SMS sending failed: Message blocked',
-        },
-      ])('handles $messageStatus with error code $errorCode for issuance', async ({ messageStatus, errorCode, expectedUserMessage }) => {
+      ])('handles $event for issuance', async ({ event, expectedUserMessage }) => {
         // Arrange
         const { contract } = await givenContract({})
         const identity = await createIdentity()
-        const contact = buildContact(false, ContactMethod.Sms)
+        const contact = buildContact(false, ContactMethod.Email)
         const createResponse = await createIssuanceRequest([
           {
             contractId: contract.id,
@@ -65,12 +63,16 @@ describe('SMS status callback', () => {
 
         // Act
         await inTransaction(async (entityManager) => {
-          await handleSmsStatusCallback(
+          await handleEmailStatusCallback(
             'issuance',
             requestId,
             {
-              messageStatus,
-              errorCode,
+              email: 'test@example.com',
+              timestamp: Date.now(),
+              sgEventId: casual.uuid,
+              sgMessageId: casual.uuid,
+              event,
+              smtpId: casual.uuid,
             },
             entityManager,
           )
@@ -88,7 +90,7 @@ describe('SMS status callback', () => {
           })
           expect(communications).toHaveLength(1)
           expect(communications[0]?.error).toBe(expectedUserMessage)
-          expect(communications[0]?.contactMethod).toBe(ContactMethod.Sms)
+          expect(communications[0]?.contactMethod).toBe(ContactMethod.Email)
           expect(communications[0]?.recipientId).toBe(identity.id)
         })
       })
@@ -97,7 +99,7 @@ describe('SMS status callback', () => {
         // Arrange
         const { contract } = await givenContract({})
         const identity = await createIdentity()
-        const contact = buildContact(false, ContactMethod.Sms)
+        const contact = buildContact(false, ContactMethod.Email)
         const createResponse = await createIssuanceRequest([
           {
             contractId: contract.id,
@@ -111,11 +113,16 @@ describe('SMS status callback', () => {
 
         // Act
         await inTransaction(async (entityManager) => {
-          await handleSmsStatusCallback(
+          await handleEmailStatusCallback(
             'verification',
             requestId,
             {
-              messageStatus: 'failed',
+              email: 'test@example.com',
+              timestamp: Date.now(),
+              sgEventId: casual.uuid,
+              sgMessageId: casual.uuid,
+              event: 'bounce',
+              smtpId: casual.uuid,
             },
             entityManager,
           )
@@ -132,25 +139,28 @@ describe('SMS status callback', () => {
             where: { asyncIssuanceId: requestId },
           })
           expect(communications).toHaveLength(1)
-          expect(communications[0]?.error).toBe('SMS sending failed: Unknown error')
+          expect(communications[0]?.error).toBe('Email sending failed: Mailbox unavailable')
         })
       })
     })
 
     describe('with success status', () => {
-      it.each<{ messageStatus: 'queued' | 'sending' | 'sent' | 'delivered' | 'accepted' | 'scheduled' | 'received' }>([
-        { messageStatus: 'queued' },
-        { messageStatus: 'sending' },
-        { messageStatus: 'sent' },
-        { messageStatus: 'delivered' },
-        { messageStatus: 'accepted' },
-        { messageStatus: 'scheduled' },
-        { messageStatus: 'received' },
-      ])('does not update database for $messageStatus status', async ({ messageStatus }) => {
+      it.each<{
+        event: 'processed' | 'delivered' | 'open' | 'click' | 'spamreport' | 'unsubscribe' | 'group_unsubscribe' | 'group_resubscribe'
+      }>([
+        { event: 'processed' },
+        { event: 'delivered' },
+        { event: 'open' },
+        { event: 'click' },
+        { event: 'spamreport' },
+        { event: 'unsubscribe' },
+        { event: 'group_unsubscribe' },
+        { event: 'group_resubscribe' },
+      ])('does not update database for $event status', async ({ event }) => {
         // Arrange
         const { contract } = await givenContract({})
         const identity = await createIdentity()
-        const contact = buildContact(false, ContactMethod.Sms)
+        const contact = buildContact(false, ContactMethod.Email)
         const createResponse = await createIssuanceRequest([
           {
             contractId: contract.id,
@@ -171,11 +181,16 @@ describe('SMS status callback', () => {
 
         // Act
         await inTransaction(async (entityManager) => {
-          await handleSmsStatusCallback(
+          await handleEmailStatusCallback(
             'issuance',
             requestId,
             {
-              messageStatus,
+              email: 'test@example.com',
+              timestamp: Date.now(),
+              sgEventId: casual.uuid,
+              sgMessageId: casual.uuid,
+              event,
+              smtpId: casual.uuid,
             },
             entityManager,
           )
@@ -203,10 +218,10 @@ describe('SMS status callback', () => {
       const asyncIssuanceId = casual.uuid
 
       // Act
-      const url = getIssuanceSmsStatusCallbackUrl(asyncIssuanceId)
+      const url = getIssuanceEmailStatusCallbackUrl(asyncIssuanceId)
 
       // Assert
-      expect(url).toContain('/external/callback/sms/async-issuance/issuance/')
+      expect(url).toContain('/external/callback/email/async-issuance/issuance/')
       expect(url).toContain(asyncIssuanceId)
     })
 
@@ -215,10 +230,10 @@ describe('SMS status callback', () => {
       const asyncIssuanceId = casual.uuid
 
       // Act
-      const url = getVerificationSmsStatusCallbackUrl(asyncIssuanceId)
+      const url = getVerificationEmailStatusCallbackUrl(asyncIssuanceId)
 
       // Assert
-      expect(url).toContain('/external/callback/sms/async-issuance/verification/')
+      expect(url).toContain('/external/callback/email/async-issuance/verification/')
       expect(url).toContain(asyncIssuanceId)
     })
   })

@@ -76,6 +76,10 @@ const config: EnvVarSubstitution<Config> = {
   },
   email: {
     apiKey: 'EMAIL_API_KEY',
+    webhookForwarder: {
+      url: 'EMAIL_WEBHOOK_FORWARDER_URL',
+      secret: 'EMAIL_WEBHOOK_FORWARDER_SECRET',
+    },
   },
   homeTenant: {
     name: 'HOME_TENANT_NAME',

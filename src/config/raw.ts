@@ -101,6 +101,10 @@ export type Config = {
   email: {
     from: { name: string; email: string }
     apiKey: string
+    webhookForwarder: {
+      url: string
+      secret: string
+    }
     templates: {
       issuance: EmailTemplateConfig
       verification: EmailTemplateConfig

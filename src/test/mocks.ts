@@ -29,6 +29,8 @@ export const mockedServices = {
   identityStoreSecretService: identityStoreSecretServiceHelper,
 }
 
+export const sendEmailMock = jest.fn()
+
 export function loadMocks() {
   // Note: imports ../services/__mocks__/* have side effects
   jest.mock('../background-jobs/index')
@@ -39,4 +41,10 @@ export function loadMocks() {
       downloadToDataUrl: jest.fn(fakeDownloadToDataURL),
     }
   })
+  jest.mock('../util/email', () => ({
+    sendEmail: sendEmailMock,
+    // Pass through other util email functions
+    toUserErrorMessage: jest.requireActual('../util/email').toUserErrorMessage,
+    extractEmails: jest.requireActual('../util/email').extractEmails,
+  }))
 }

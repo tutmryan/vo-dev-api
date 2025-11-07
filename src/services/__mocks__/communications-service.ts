@@ -10,6 +10,10 @@ const serviceMock: ServiceMock<CommunicationsService> = {
 
 jest.mock('../communications-service', () => ({
   CommunicationsService: jest.fn().mockImplementation(() => serviceMock),
+
+  // Pass through non-mocked functions
+  sendIssuanceEmail: jest.requireActual('../communications-service').sendIssuanceEmail,
+  sendVerificationCodeEmail: jest.requireActual('../communications-service').sendVerificationCodeEmail,
 }))
 
 export const helper = {

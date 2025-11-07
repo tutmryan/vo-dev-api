@@ -27,6 +27,7 @@ import {
   pkce,
   presentationCallbackRoute,
 } from './config'
+import { addAsyncIssuanceEmailStatusEndpoint } from './features/async-issuance/email-status-callback'
 import { addAsyncIssuanceSmsStatusEndpoint as addAsyncIssuanceSmsStatusCallbackEndpoint } from './features/async-issuance/sms-status-callback'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
 import { demoPresentationTokenHandlers, demoPresentationTokenRoute } from './features/demo'
@@ -84,6 +85,7 @@ export async function getExpressApp(): Promise<Express> {
 
   addServiceHealthEndpoints(app)
   addAsyncIssuanceSmsStatusCallbackEndpoint(app)
+  addAsyncIssuanceEmailStatusEndpoint(app)
 
   // Azure start-up probe (Don't use the known default and make the custom one unlikely to be discovered)
   app.get('/azure-startup-probe-40nt0001ihrkbxdry635', (_req, res) => {

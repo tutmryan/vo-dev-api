@@ -1,10 +1,14 @@
+import type { MailDataRequired } from '@sendgrid/mail'
+import { email } from '../config'
 import type { VerifiedOrchestrationEntityManager } from '../data/entity-manager'
+import { getIssuanceEmailStatusCallbackUrl } from '../features/async-issuance/email-status-callback'
 import { getIssuanceSmsStatusCallbackUrl, getVerificationSmsStatusCallbackUrl } from '../features/async-issuance/sms-status-callback'
 import { CommunicationEntity } from '../features/communication/entities/communication-entity'
 import { CommunicationPurpose, ContactMethod } from '../generated/graphql'
 import type { Logger } from '../logger'
-import { sendIssuanceEmail, sendVerificationCodeEmail } from '../util/email'
+import { sendEmail } from '../util/email'
 import { sendSms } from '../util/sms'
+import { getEmailSenderConfig } from '../features/instance-configs'
 
 export type IssuanceCommunicationData = CommunicationData & {
   contractName: string
@@ -38,6 +42,86 @@ type CommunicationData = Pick<CommunicationEntity, 'contactMethod' | 'recipientI
   asyncIssuanceId: string
 }
 
+interface IssuanceEmailTemplateData {
+  subjectOrganisation: string
+  subjectCredentialName: string
+  preheaderIdentityName: string
+  preheaderOrganisation: string
+  preheaderCredentialName: string
+  identityName: string
+  issuer: string
+  credentialName: string
+  verificationMethod: string
+  expiry: string
+  issuerContact: string
+  issuerTeam: string
+  issuanceUrl: string
+}
+
+function getFromField() {
+  const { senderName, senderEmail } = getEmailSenderConfig()
+  return {
+    name: senderName,
+    email: senderEmail,
+  }
+}
+
+export const sendIssuanceEmail = async ({
+  to,
+  asyncIssuanceId,
+  ...dynamicTemplateData
+}: {
+  to: MailDataRequired['to']
+  asyncIssuanceId: string
+} & IssuanceEmailTemplateData) => {
+  const from = getFromField()
+  const data = {
+    templateId: email.templates.issuance.id,
+    asm: email.templates.issuance.asm,
+    from,
+    personalizations: [
+      {
+        to,
+        dynamicTemplateData,
+      },
+    ],
+  } as MailDataRequired
+  await sendEmail(to, data, getIssuanceEmailStatusCallbackUrl(asyncIssuanceId))
+}
+
+interface VerificationCodeTemplateData {
+  preheaderIdentityName: string
+  identityName: string
+  credentialName: string
+  code: string
+  codeLifetimeMinutes: string
+  issuerContact: string
+  issuerTeam: string
+}
+
+const sendVerificationCodeEmail = async ({
+  to,
+  asyncIssuanceId,
+  ...dynamicTemplateData
+}: {
+  to: MailDataRequired['to']
+  asyncIssuanceId: string
+} & VerificationCodeTemplateData) => {
+  const from = getFromField()
+  const data = {
+    templateId: email.templates.verification.id,
+    asm: email.templates.verification.asm,
+    from,
+    personalizations: [
+      {
+        to,
+        dynamicTemplateData,
+      },
+    ],
+  } as MailDataRequired
+  await sendEmail(to, data, getVerificationSmsStatusCallbackUrl(asyncIssuanceId))
+}
+
 export class CommunicationsService {
   constructor(private readonly logger: Logger) {}
 
@@ -62,6 +146,7 @@ export class CommunicationsService {
         if (contactMethod === ContactMethod.Email) {
           await sendIssuanceEmail({
             to,
+            asyncIssuanceId,
             subjectCredentialName: contractName,
             subjectOrganisation: issuer,
             preheaderIdentityName: identityName,
@@ -109,6 +194,7 @@ export class CommunicationsService {
         if (contactMethod === ContactMethod.Email) {
           await sendVerificationCodeEmail({
             to,
+            asyncIssuanceId,
             code: verificationCode,
             codeLifetimeMinutes: `${codeExpiryMinutes}`,
             preheaderIdentityName: identityName,
