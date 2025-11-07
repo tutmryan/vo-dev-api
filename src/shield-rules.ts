@@ -12,7 +12,17 @@ import { isOidcAuthnClient, isValidOidcAuthnPresentationFilter } from './feature
 import { AppRoles, OidcScopes, UserRoles } from './roles'
 import { hasAnyRoleRuleWithName, hasApiResourceScopeRule, hasRoleRule } from './util/shield-utils'
 
-export const isUserWithReadPermissions = hasAnyRoleRuleWithName('isUserWithReadPermissions', ...Object.values(UserRoles))
+// Exclude Support Agent from blanket read to allow explicit grants only
+export const isUserWithReadPermissions = hasAnyRoleRuleWithName(
+  'isUserWithReadPermissions',
+  UserRoles.reader,
+  UserRoles.issuer,
+  UserRoles.credentialAdmin,
+  UserRoles.partnerAdmin,
+  UserRoles.approvalRequestAdmin,
+  UserRoles.oidcAdmin,
+  UserRoles.instanceAdmin,
+)
 
 // user roles
 export const isIssuerUser = hasRoleRule(UserRoles.issuer)
@@ -21,6 +31,7 @@ export const isPartnerAdminUser = hasRoleRule(UserRoles.partnerAdmin)
 export const isApprovalRequestAdminUser = hasRoleRule(UserRoles.approvalRequestAdmin)
 export const isOidcAdminUser = hasRoleRule(UserRoles.oidcAdmin)
 export const isInstanceAdminUser = hasRoleRule(UserRoles.instanceAdmin)
+export const isSupportAgentUser = hasRoleRule(UserRoles.supportAgent)
 
 // app roles
 export const isIssuanceApp = hasRoleRule(AppRoles.issue, 'isIssuanceApp')
@@ -45,12 +56,16 @@ export const fallbackRule = or(
   isIssuee,
 )
 
+export const anyUserRule = or(isUserWithReadPermissions, isSupportAgentUser)
+export const fallbackWithSupportAgentRule = or(fallbackRule, isSupportAgentUser)
+
 // issuance and presentation access rules
 export const isAllowedToViewIssuances = or(
   isUserWithReadPermissions,
   isIssuanceApp,
   isValidLimitedAccessIssuanceFilter,
   isValidLimitedAsyncIssuanceIssuanceFilter,
+  isSupportAgentUser,
 )
 export const isAllowedToViewPresentations = or(
   isUserWithReadPermissions,
@@ -58,6 +73,7 @@ export const isAllowedToViewPresentations = or(
   isValidLimitedAccessPresentationFilter,
   isValidLimitedApprovalPresentationFilter,
   isValidOidcAuthnPresentationFilter,
+  isSupportAgentUser,
 )
 
 export const isAllowedToCreateAndDeleteIdentities = or(
@@ -68,4 +84,4 @@ export const isAllowedToCreateAndDeleteIdentities = or(
   hasTokenAcquisitionRoleRequiringIdentityAccess,
 )
 
-export const isAllowedToViewAsyncIssuanceRequests = or(isUserWithReadPermissions, isIssuanceApp)
+export const isAllowedToViewAsyncIssuanceRequests = or(isUserWithReadPermissions, isIssuanceApp, isSupportAgentUser)

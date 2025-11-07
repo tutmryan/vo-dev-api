@@ -28,7 +28,7 @@ const acquireLimitedAccessTokenMutation = graphql(
 describe('smoke test shield rules application', () => {
   beforeAfterAll()
 
-  it.each([UserRoles.credentialAdmin, UserRoles.partnerAdmin, UserRoles.reader])(
+  it.each([UserRoles.credentialAdmin, UserRoles.partnerAdmin, UserRoles.reader, UserRoles.supportAgent])(
     'issuing a credential is not authorised for %s role',
     async () => {
       const { errors } = await executeOperationAsCredentialAdmin({
@@ -40,16 +40,19 @@ describe('smoke test shield rules application', () => {
     },
   )
 
-  it.each([UserRoles.credentialAdmin, UserRoles.issuer, UserRoles.reader])('creating a partner is not authorised for %s role', async () => {
-    const { errors } = await executeOperationAsCredentialAdmin({
-      query: createPartnerMutation,
-      variables: { input: { name: 'Partner-1', did: 'partner-did-1', credentialTypes: ['partner-type-1'] } as CreatePartnerInput },
-    })
-    expect(errors).toBeDefined()
-    expectUnauthorizedError(errors)
-  })
+  it.each([UserRoles.credentialAdmin, UserRoles.issuer, UserRoles.reader, UserRoles.supportAgent])(
+    'creating a partner is not authorised for %s role',
+    async () => {
+      const { errors } = await executeOperationAsCredentialAdmin({
+        query: createPartnerMutation,
+        variables: { input: { name: 'Partner-1', did: 'partner-did-1', credentialTypes: ['partner-type-1'] } as CreatePartnerInput },
+      })
+      expect(errors).toBeDefined()
+      expectUnauthorizedError(errors)
+    },
+  )
 
-  it.each([UserRoles.credentialAdmin, UserRoles.issuer, UserRoles.partnerAdmin, UserRoles.reader])(
+  it.each([UserRoles.credentialAdmin, UserRoles.issuer, UserRoles.partnerAdmin, UserRoles.reader, UserRoles.supportAgent])(
     'acquiring limited access token is not authorised for %s role',
     async (role) => {
       const { errors } = await executeOperationAs(
@@ -66,7 +69,7 @@ describe('smoke test shield rules application', () => {
     },
   )
 
-  it.each([UserRoles.partnerAdmin, UserRoles.issuer, UserRoles.reader])(
+  it.each([UserRoles.partnerAdmin, UserRoles.issuer, UserRoles.reader, UserRoles.supportAgent])(
     'updating a contract is not authorised for %s role',
     async (role) => {
       const { errors } = await executeOperationAs(
