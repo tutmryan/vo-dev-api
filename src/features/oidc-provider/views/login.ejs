@@ -21,7 +21,7 @@
       url: '<%- graphqlUrl %>',
       accessToken: '<%- presentationAccessToken %>',
     })
-    const request = <%- JSON.stringify(presentationRequest) %>
+    const request = <%-JSON.stringify(presentationRequest)%>
       client
         .createPresentationRequestForAuthn(request, handlePresentationEvent)
         .then(handlePresentation)
@@ -86,6 +86,7 @@
   }
 
   function displayMobile(url) {
+
     hide(document.querySelector('#progress'))
     show(document.querySelector('#mobile'))
     document.querySelector('#openUrl').addEventListener('click', () => window.location.href = url)
@@ -98,11 +99,18 @@
   }
 
   function displayQrCode(src, url) {
-    const el = document.querySelector('#qrCode')
-    el.src = src
-    el.alt = url
-    setTimeout(() => el.style.opacity = 1, 100)
+    const canvas = document.querySelector('#qrCodeCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = src;
   }
+
 
   function handleTimeout() {
     hide(document.querySelectorAll('#desktop, #mobile, #progress'))
@@ -110,9 +118,9 @@
   }
 
   function displayProgress(progress) {
-    hide(document.querySelectorAll('#desktop, #mobile, #error'))
+    hide(document.querySelectorAll('#desktop, #mobile, #error, #finish'))
     document.querySelector('#progressText').textContent = progress
-    show(document.querySelector('#progress'))
+    show(document.querySelector('#progress'), 'd-flex')
   }
 
   function displayFinish() {
@@ -128,15 +136,24 @@
 
   function hide(selectors) {
     if (!selectors.length) selectors = [selectors]
-    selectors.forEach(el => el.classList.add('d-none'))
+    selectors.forEach(el => {
+      el.classList.add('d-none')
+      el.classList.remove('d-flex')
+    })
   }
 
-  function show(selectors) {
+  function show(selectors, displayClass = null) {
     if (!selectors.length) selectors = [selectors]
-    selectors.forEach(el => el.classList.remove('d-none'))
+    selectors.forEach(el => {
+      el.classList.remove('d-none')
+      if (displayClass) {
+        el.classList.add(displayClass)
+      }
+    })
   }
 
 </script>
+
 
 <div id="progress" class="alert alert-info d-flex align-items-center" role="alert">
   <div class="spinner-border spinner-border-md text-primary me-3" role="status"></div>
@@ -145,17 +162,23 @@
   </div>
 </div>
 
-<div id="desktop" class="d-none">
-  <img id="qrCode" class="rounded mx-auto d-block img-thumbnail mb-3"
-    style="height:auto; width:100%; max-width: 55vw; max-height:100%; object-fit:contain; aspect-ratio:1/1; opacity:0; transition: opacity 1000ms ease-in-out;" />
-  <div class="alert alert-info d-flex align-items-center" role="alert">
-    <div class="text-primary me-3"><i class="bi-info-square text-primary" style="font-size: 2rem;"></i></div>
+<div id="desktop" class="d-none"> 
+  <canvas
+    id="qrCodeCanvas"
+    class="rounded mx-auto d-block img-thumbnail mb-3"
+  ></canvas>
+  <div id="scan-guide" class="alert alert-info d-flex align-items-center" role="alert" aria-live="polite" style="width:100%;box-sizing:border-box;">
     <div class="fw-light">
-      Scan this QR code on your phone to sign in with a credential from <a
+      <span>Scan this QR code on your phone to sign in with a credential from </span>
+      <a
         class="link-primary link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
-        href="https://www.microsoft.com/en-au/security/mobile-authenticator-app" target="_blank">Microsoft Authenticator
-      </a>.
-      <br />The QR code will expire in 5 minutes.
+        href="https://www.microsoft.com/en-au/security/mobile-authenticator-app"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Microsoft Authenticator app (opens in new tab)"
+      >Microsoft Authenticator</a>.
+      <br />
+      <span class="text-muted">The QR code will expire in 5 minutes.</span>
     </div>
   </div>
 </div>
@@ -199,7 +222,9 @@
   displayProgress(isMobile ? 'Generating presentation link...' : 'Generating QR code...')
 </script>
 <% if (isLegacyWebView) { %>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js/index.es6.min.js"></script>
+<script type="text/javascript"
+  src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js/index.es6.min.js"></script>
 <% } else { %>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js/index.min.js"></script>
+<script type="text/javascript"
+  src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js/index.min.js"></script>
 <% } %>

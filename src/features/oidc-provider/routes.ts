@@ -1,5 +1,6 @@
 import { isLocalDev } from '@makerx/node-common'
 import { urlencoded } from 'body-parser'
+import compression from 'compression'
 import type { Express, RequestHandler } from 'express'
 import { isEmpty, pick } from 'lodash'
 import { strict as assert } from 'node:assert'
@@ -56,6 +57,8 @@ const noCache: RequestHandler = (_req, res, next) => {
 export function routes(app: Express, route: string): void {
   app.set('views', path.join(__dirname, 'views'))
   app.set('view engine', 'ejs')
+
+  app.use(compression())
 
   app.use((req, res, next) => {
     const logger = buildRequestLogger(req)
