@@ -261,6 +261,9 @@ export const rules: ShieldSchema<Resolvers> = {
   ContractCount: {
     '*': fallbackWithSupportAgentRule,
   },
+  ContractDisplayClaim: {
+    '*': fallbackWithSupportAgentRule,
+  },
   ContractDisplayConsent: {
     '*': fallbackWithSupportAgentRule,
   },
@@ -346,6 +349,24 @@ export const rules: ShieldSchema<Resolvers> = {
   },
   SendAsyncIssuanceVerificationResponse: {
     '*': allow,
+  },
+  Template: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  TemplateDisplayClaim: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  TemplateDisplayCredential: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  TemplateDisplayCredentialLogo: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  TemplateDisplayModel: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  TemplateParentData: {
+    '*': fallbackWithSupportAgentRule,
   },
   User: {
     '*': fallbackWithSupportAgentRule,

@@ -3667,6 +3667,89 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     }
   },
+  "ContractDisplayClaim": {
+    "*": {
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
+            },
+            {
+              "name": "isPresentationApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Present"
+              ]
+            },
+            {
+              "name": "isContractAdminApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.ContractAdmin"
+              ]
+            },
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
+            },
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
+            },
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
+            },
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
+            },
+            {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
+    }
+  },
   "ContractDisplayConsent": {
     "*": {
       "rulesOr": [
@@ -5831,6 +5914,504 @@ exports[`shield rules are setup correctly 1`] = `
   "SendAsyncIssuanceVerificationResponse": {
     "*": {
       "rules": []
+    }
+  },
+  "Template": {
+    "*": {
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
+            },
+            {
+              "name": "isPresentationApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Present"
+              ]
+            },
+            {
+              "name": "isContractAdminApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.ContractAdmin"
+              ]
+            },
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
+            },
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
+            },
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
+            },
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
+            },
+            {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
+    }
+  },
+  "TemplateDisplayClaim": {
+    "*": {
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
+            },
+            {
+              "name": "isPresentationApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Present"
+              ]
+            },
+            {
+              "name": "isContractAdminApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.ContractAdmin"
+              ]
+            },
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
+            },
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
+            },
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
+            },
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
+            },
+            {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
+    }
+  },
+  "TemplateDisplayCredential": {
+    "*": {
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
+            },
+            {
+              "name": "isPresentationApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Present"
+              ]
+            },
+            {
+              "name": "isContractAdminApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.ContractAdmin"
+              ]
+            },
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
+            },
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
+            },
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
+            },
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
+            },
+            {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
+    }
+  },
+  "TemplateDisplayCredentialLogo": {
+    "*": {
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
+            },
+            {
+              "name": "isPresentationApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Present"
+              ]
+            },
+            {
+              "name": "isContractAdminApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.ContractAdmin"
+              ]
+            },
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
+            },
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
+            },
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
+            },
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
+            },
+            {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
+    }
+  },
+  "TemplateDisplayModel": {
+    "*": {
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
+            },
+            {
+              "name": "isPresentationApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Present"
+              ]
+            },
+            {
+              "name": "isContractAdminApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.ContractAdmin"
+              ]
+            },
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
+            },
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
+            },
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
+            },
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
+            },
+            {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
+    }
+  },
+  "TemplateParentData": {
+    "*": {
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
+            },
+            {
+              "name": "isPresentationApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Present"
+              ]
+            },
+            {
+              "name": "isContractAdminApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.ContractAdmin"
+              ]
+            },
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
+            },
+            {
+              "name": "isLimitedApprovalApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedApproval"
+              ]
+            },
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
+            },
+            {
+              "name": "isOidcAuthnClient",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedOidcAuthn"
+              ]
+            },
+            {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
     }
   },
   "User": {
