@@ -10,7 +10,7 @@
 
   // Polyfill for async iterator if not supported. Required for WebView/3.0
   if (typeof Symbol.asyncIterator === 'undefined') {
-    Symbol.asyncIterator = Symbol.for('Symbol.asyncIterator');
+    Symbol.asyncIterator = Symbol.for('Symbol.asyncIterator')
   }
 
   const isMobile = /Android|iPhone/i.test(navigator.userAgent)
@@ -37,29 +37,29 @@
   }
 
   function openDeeplink(url) {
-    if (!url) return;
+    if (!url) return
 
     if (!/Chrome|Chromium/i.test(navigator.userAgent)) {
-      window.location.href = url;
+      window.location.href = url
       return;
     }
 
     // If this is a Chromium-based mobile browser, use button to act as a user gesture, which prevents BFCache issues.
     // see: https://issues.chromium.org/issues/40240372
-    const btn = document.createElement('button');
-    btn.style.display = 'none';
+    const btn = document.createElement('button')
+    btn.style.display = 'none'
     btn.onclick = () => {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    };
-    document.body.appendChild(btn);
+      window.open(url, '_blank', 'noopener,noreferrer')
+    }
+    document.body.appendChild(btn)
 
-    setTimeout(() => btn.click(), 100);
+    setTimeout(() => btn.click(), 100)
   }
 
   function displayPresentationResponse({ requestId, qrCode, url }) {
-    document.querySelector('input[name="requestId"]').value = requestId;
+    document.querySelector('input[name="requestId"]').value = requestId
     if (isMobile) {
-      openDeeplink(url);
+      openDeeplink(url)
       displayMobile(url)
     } else {
       displayDesktop(qrCode, url)
@@ -86,7 +86,6 @@
   }
 
   function displayMobile(url) {
-
     hide(document.querySelector('#progress'))
     show(document.querySelector('#mobile'))
     document.querySelector('#openUrl').addEventListener('click', () => window.location.href = url)
@@ -99,18 +98,17 @@
   }
 
   function displayQrCode(src, url) {
-    const canvas = document.querySelector('#qrCodeCanvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.querySelector('#qrCodeCanvas')
+    const ctx = canvas.getContext('2d')
 
-    const img = new Image();
+    const img = new Image()
     img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+      canvas.width = img.width
+      canvas.height = img.height
+      ctx.drawImage(img, 0, 0)
     };
-    img.src = src;
+    img.src = src
   }
-
 
   function handleTimeout() {
     hide(document.querySelectorAll('#desktop, #mobile, #progress'))
@@ -154,7 +152,6 @@
 
 </script>
 
-
 <div id="progress" class="alert alert-info d-flex align-items-center" role="alert">
   <div class="spinner-border spinner-border-md text-primary me-3" role="status"></div>
   <div class="fw-light" id="progressText">
@@ -162,7 +159,7 @@
   </div>
 </div>
 
-<div id="desktop" class="d-none"> 
+<div id="desktop" class="d-none">
   <canvas
     id="qrCodeCanvas"
     class="rounded mx-auto d-block img-thumbnail mb-3"
