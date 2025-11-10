@@ -39,7 +39,9 @@ export function findKeysOverriding(
   { ignoreNulls, ignorePrivate }: { ignoreNulls?: boolean; ignorePrivate?: boolean } = {},
 ) {
   const flattenOpts = { removeNull: !!ignoreNulls, removePrivate: !!ignorePrivate }
-  const [flatA, flatB] = [flatten(a, flattenOpts), flatten(b, flattenOpts)]
+  let [flatA, flatB] = [flatten(a, flattenOpts), flatten(b, flattenOpts)]
+  flatA = normalizeColors(flatA)
+  flatB = normalizeColors(flatB)
 
   const overriddenKeys: string[] = []
   for (const property in flatA) {
@@ -52,4 +54,15 @@ export function findKeysOverriding(
   }
 
   return overriddenKeys
+}
+
+const COLOR_KEYS = ['display.card.backgroundColor', 'display.card.textColor']
+
+function normalizeColors(obj: Record<string, any>) {
+  for (const key of COLOR_KEYS) {
+    if (typeof obj[key] === 'string') {
+      obj[key] = obj[key].toLowerCase()
+    }
+  }
+  return obj
 }

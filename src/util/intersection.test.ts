@@ -1,4 +1,4 @@
-import { findKeysIntersection } from './intersection'
+import { findKeysIntersection, findKeysOverriding } from './intersection'
 
 describe('intersection', () => {
   const a = {
@@ -49,5 +49,25 @@ describe('intersection', () => {
         "bar.nested.deeply.nested.prop",
       ]
     `)
+  })
+
+  it('should NOT treat color keys as overridden if only case differs', () => {
+    const objA = {
+      display: {
+        card: {
+          backgroundColor: '#70BA44',
+          textColor: '#FFFFFF',
+        },
+      },
+    }
+    const objB = {
+      display: {
+        card: {
+          backgroundColor: '#70ba44',
+          textColor: '#ffffff',
+        },
+      },
+    }
+    expect(findKeysOverriding(objA, objB)).toEqual([])
   })
 })
