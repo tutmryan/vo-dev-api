@@ -305,10 +305,16 @@ export const rules: ShieldSchema<Resolvers> = {
   Issuance: {
     '*': and(fallbackWithSupportAgentRule, or(and(isIssuee, issuanceIsToAuthenticatedUser), not(isIssuee))),
   },
+  ListValidation: {
+    '*': fallbackWithSupportAgentRule,
+  },
   Me: {
     '*': fallbackWithSupportAgentRule,
   },
   MsGraphFailure: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  NumberValidation: {
     '*': fallbackWithSupportAgentRule,
   },
   OidcClaimMapping: {
@@ -333,6 +339,9 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': and(fallbackWithSupportAgentRule, or(and(isIssuee, presentationIsByAuthenticatedUser), not(isIssuee))),
   },
   PresentedCredential: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  RegexValidation: {
     '*': fallbackWithSupportAgentRule,
   },
   RequestConfigurationValidation: {
@@ -366,6 +375,9 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': fallbackWithSupportAgentRule,
   },
   TemplateParentData: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  TextValidation: {
     '*': fallbackWithSupportAgentRule,
   },
   User: {
