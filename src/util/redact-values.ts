@@ -115,10 +115,11 @@ export function redactValueEmail(input: string | unknown) {
 
   const atIndex = input.indexOf('@')
   if (atIndex === -1) return input
-  const domain = input.substring(atIndex)
+  const address = input.substring(0, atIndex)
+  const domain = input.substring(atIndex + 1)
 
-  if (input.length < 8) return `<redacted>${domain}`
-  return `${input.charAt(0)}*<redacted>*${input.charAt(atIndex + 1)}${domain}`
+  if (address.length < 6) return `<redacted>@${domain}`
+  return `${address.substring(0, 2)}*<redacted>*${address.substring(address.length - 2)}@${domain}`
 }
 
 export const safeClaimNames = new Set([StandardClaims.identityId, StandardClaims.issuanceId])

@@ -248,10 +248,24 @@ describe('redactValueInner', () => {
 })
 
 describe('redactValueEmail', () => {
-  it('should redact a valid email address', () => {
-    const input = 'user@example.com'
-    const result = redactValueEmail(input)
-    expect(result).toBe('u*<redacted>*e@example.com')
+  it('should redact valid email addresses with varying lengths', () => {
+    const testCases = [
+      { input: 'a@example.com', expected: '<redacted>@example.com' },
+      { input: 'ab@example.com', expected: '<redacted>@example.com' },
+      { input: 'abc@example.com', expected: '<redacted>@example.com' },
+      { input: 'abcd@example.com', expected: '<redacted>@example.com' },
+      { input: 'abcde@example.com', expected: '<redacted>@example.com' },
+      { input: 'abcdef@example.com', expected: 'ab*<redacted>*ef@example.com' },
+      { input: 'abcdefg@example.com', expected: 'ab*<redacted>*fg@example.com' },
+      { input: 'abcdefgh@example.com', expected: 'ab*<redacted>*gh@example.com' },
+      { input: 'abcdefghi@example.com', expected: 'ab*<redacted>*hi@example.com' },
+      { input: 'abcdefghij@example.com', expected: 'ab*<redacted>*ij@example.com' },
+    ]
+
+    testCases.forEach(({ input, expected }) => {
+      const result = redactValueEmail(input)
+      expect(result).toBe(expected)
+    })
   })
 
   it('should return undefined for non-string values', () => {
@@ -276,7 +290,7 @@ describe('redactValueEmail', () => {
 describe('redactValueObjectUnknown', () => {
   it('should redact sensitive keys based on fuzzy matching', () => {
     const obj = {
-      email: 'user@example.com',
+      email: 'user12@example.com',
       name: 'John Doe',
       firstName: 'John Doe',
       phone: '123-456-7890',
@@ -300,7 +314,7 @@ describe('redactValueObjectUnknown', () => {
 
     const result = redactValueObjectUnknown(obj)
     expect(result).toEqual({
-      email: 'u*<redacted>*e@example.com',
+      email: 'us*<redacted>*12@example.com',
       name: 'Jo*<redacted>*oe',
       firstName: 'Jo*<redacted>*oe',
       phone: '123-*<redacted>*7890',
@@ -330,7 +344,7 @@ describe('redactValueObjectUnknown', () => {
 
   it('should handle non-string and non-object values gracefully', () => {
     const obj = {
-      email: 'user@example.com',
+      email: 'user12@example.com',
       age: 30,
       isActive: true,
     }
@@ -338,7 +352,7 @@ describe('redactValueObjectUnknown', () => {
     const result = redactValueObjectUnknown(obj)
 
     expect(result).toEqual({
-      email: 'u*<redacted>*e@example.com',
+      email: 'us*<redacted>*12@example.com',
       age: '<redacted>',
       isActive: true,
     })
