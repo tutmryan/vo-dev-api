@@ -1,7 +1,7 @@
 import type { MailDataRequired } from '@sendgrid/mail'
 import { email } from '../config'
 import type { VerifiedOrchestrationEntityManager } from '../data/entity-manager'
-import { getIssuanceEmailStatusCallbackUrl } from '../features/async-issuance/email-status-callback'
+import { getIssuanceEmailStatusCallbackUrl, getVerificationEmailStatusCallbackUrl } from '../features/async-issuance/email-status-callback'
 import { getIssuanceSmsStatusCallbackUrl, getVerificationSmsStatusCallbackUrl } from '../features/async-issuance/sms-status-callback'
 import { CommunicationEntity } from '../features/communication/entities/communication-entity'
 import { CommunicationPurpose, ContactMethod } from '../generated/graphql'
@@ -119,7 +119,7 @@ const sendVerificationCodeEmail = async ({
       },
     ],
   } as MailDataRequired
-  await sendEmail(to, data, getVerificationSmsStatusCallbackUrl(asyncIssuanceId))
+  await sendEmail(to, data, getVerificationEmailStatusCallbackUrl(asyncIssuanceId))
 }
 
 export class CommunicationsService {
