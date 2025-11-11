@@ -186,6 +186,7 @@ export const rules: ShieldSchema<Resolvers> = {
   Subscription: {
     // Lock down presentations and issuance event subscriptions to the app that created the request (or admins)
     '*': isCredentialAdminUser,
+    backgroundJobEvent: fallbackWithSupportAgentRule,
     issuanceEvent: or(
       isIssuerUser,
       isCredentialAdminUser,
@@ -242,6 +243,24 @@ export const rules: ShieldSchema<Resolvers> = {
   },
   AsyncIssuanceTokenResponse: {
     '*': allow,
+  },
+  BackgroundJobEvent: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  BackgroundJobProgressEvent: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  BackgroundJobErrorEvent: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  BackgroundJobCompletedEvent: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  BackgroundJobActiveEvent: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  BackgroundJobEventData: {
+    '*': fallbackWithSupportAgentRule,
   },
   Branding: {
     '*': allow,
