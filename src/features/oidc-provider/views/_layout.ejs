@@ -267,7 +267,11 @@
 
     #client-logo {
       margin: 0 auto;
-      max-width: 30%;
+    }
+
+    #client-logo img {
+      max-width: 100%;
+      object-fit: contain;
     }
 
     .login-card {
@@ -330,9 +334,9 @@
     }
 
     /**
-    * Embedded browser in windows that may host this login page
+    * Embedded browser in Teams (Win/Mac) that may host this login page
     */
-    @media (max-width: 650px) and (max-height: 600px) {
+    @media (max-width: 650px) and (max-height: 650px) {
       .login-info-wrapper {
         flex: 0 0 30%;
         max-width: 200px;
@@ -579,10 +583,19 @@
     </div>
   </div>
   <% if (showDebug) { %>
+  <script>
+    window.addEventListener('load', () => {
+      document.getElementById('window-dimensions-debug').innerText =
+        `${window.innerWidth} (w) x ${window.innerHeight} (h)`
+    })
+  </script>
   <div class="grant-debug debug">
     <details>
       <summary style="text-align: center;">(Click to expand) DEBUG information</summary>
       <dl>
+        <dt>window size</dt>
+        <dd id="window-dimensions-debug"></dd>
+
         <dt>uid</dt>
         <dd><%= uid %></dd>
 
