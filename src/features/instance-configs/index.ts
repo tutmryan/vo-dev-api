@@ -209,8 +209,8 @@ export function getIssuerOptions(): MultiIssuerBearerAuthOptions['issuerOptions'
 export function getAdAuthConfig(decoded: JwtPayload) {
   if (!decoded.aud || !decoded.iss) return undefined
 
-  // Accept both API and internal client audiences
-  const validAudiences = [apiCredentials.clientId, internalClientIssuerOptions.verifyOptions.audience]
+  // Accept both API (including second- and third-party clients) and internal client audiences
+  const validAudiences = [apiCredentials.clientId, `api://${apiCredentials.clientId}`, internalClientIssuerOptions.verifyOptions.audience]
   if (!validAudiences.includes(decoded.aud as string)) return undefined
 
   const tenantIssuers = [...new Set([homeTenantId, ...dbAuthEnabledTenantIds])].map((tenantId) => `https://sts.windows.net/${tenantId}/`)
