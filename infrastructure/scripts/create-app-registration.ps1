@@ -75,19 +75,39 @@ az ad app update `
 Write-Output 'Set app roles and enabled id token issuance.'
 
 #
-# API scope and Application ID URI
+# Application ID URI
 #
-Write-Output 'Configuring API scope and Application ID URI...'
+# - Always set the Application ID URI to api://<applicationId> so the scope identifier is stable.
+#
+Write-Output "Setting Application ID URI to api://$appRegistrationAppId..."
+
 $graphApp = az rest `
   --method get `
   --url ("https://graph.microsoft.com/v1.0/applications/{0}" -f $appRegistrationObjectId) | ConvertFrom-Json
 
 $identifierUris = @("api://$appRegistrationAppId")
 
-# Safe reset behaviour
-# - Always set the Application ID URI to api://<objectId> so the scope identifier is stable.
+$setIdentifierUrisPayload = @{
+  identifierUris = $identifierUris
+}
+$setIdentifierUrisPayloadJson = ($setIdentifierUrisPayload | ConvertTo-Json -Depth 10 -Compress)
+
+az rest `
+  --method patch `
+  --headers Content-Type=application/json `
+  --url ("https://graph.microsoft.com/v1.0/applications/{0}" -f $appRegistrationObjectId) `
+  --body $setIdentifierUrisPayloadJson
+
+Write-Output "Set Application ID URI to api://$appRegistrationAppId."
+
+#
+# API scope
+#
 # - Preserve existing consent by reusing the existing 'user.access' scope GUID if present.
 # - Replace the API's scopes with exactly one 'user.access' scope configured below.
+#
+Write-Output 'Configuring API scope...'
+
 $existingScopes = @()
 if ($null -ne $graphApp.api -and $null -ne $graphApp.api.oauth2PermissionScopes) {
   $existingScopes = $graphApp.api.oauth2PermissionScopes
