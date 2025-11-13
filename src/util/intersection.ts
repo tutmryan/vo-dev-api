@@ -39,9 +39,8 @@ export function findKeysOverriding(
   { ignoreNulls, ignorePrivate }: { ignoreNulls?: boolean; ignorePrivate?: boolean } = {},
 ) {
   const flattenOpts = { removeNull: !!ignoreNulls, removePrivate: !!ignorePrivate }
-  let [flatA, flatB] = [flatten(a, flattenOpts), flatten(b, flattenOpts)]
-  flatA = normalizeColors(flatA)
-  flatB = normalizeColors(flatB)
+
+  const [flatA, flatB] = [normalizeColors(flatten(a, flattenOpts)), normalizeColors(flatten(b, flattenOpts))]
 
   const overriddenKeys: string[] = []
   for (const property in flatA) {
