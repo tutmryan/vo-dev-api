@@ -27,6 +27,8 @@ declare module 'oidc-provider' {
   interface Provider {
     addListener(event: 'authorization.success', listener: (ctx: KoaContextWithOIDC, out: AuthoriseResponse) => void): this
     on(event: 'authorization.success', listener: (ctx: KoaContextWithOIDC, out: AuthoriseResponse) => void): this
+
+    on(event: 'grant.success', listener: (ctx: KoaContextWithOIDC) => void): this
   }
 
   // The definitely typed file for oidc-provider exports interactionPolicy as a namespace, but it's actually an object.

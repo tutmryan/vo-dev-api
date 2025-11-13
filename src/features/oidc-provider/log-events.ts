@@ -1,6 +1,5 @@
 import type { Request } from 'express'
 import { decodeJwt } from 'jose'
-import type { Context } from 'koa'
 import { isNil, omitBy } from 'lodash'
 import type Provider from 'oidc-provider'
 import type { KoaContextWithOIDC } from 'oidc-provider'
@@ -30,13 +29,12 @@ function hasIdToken(response: unknown): response is { id_token: string } {
 }
 
 export function logEvents(provider: Provider) {
-  provider.on('authorization.success', (_ctx: Context, response: unknown) => {
-    if (logger.isVerboseEnabled() && hasIdToken(response)) {
-      // When the response_type is id_token, we log the decoded id_token here for debugging purposes.
-      logger.verbose('OIDC event: authorization.success (id_token)', {
-        idToken: redactValueObjectUnknown(decodeJwt(response.id_token)),
-      })
-    }
+  provider.on('authorization.success', (ctx: KoaContextWithOIDC, response: unknown) => {
+    const containsToken = hasIdToken(response)
+    logger.audit('OIDC event: authorization.success', {
+      ...createLogParams(ctx),
+      ...(containsToken ? { idToken: redactValueObjectUnknown(decodeJwt(response.id_token)) } : {}),
+    })
   })
   provider.on('authorization.error', (ctx, err) => {
     logger.error('OIDC event: authorization.error', { ...createLogParams(ctx), error: err })
@@ -46,6 +44,9 @@ export function logEvents(provider: Provider) {
   })
   provider.on('grant.error', (ctx, err) => {
     logger.error('OIDC event: grant.error', { ...createLogParams(ctx), error: err })
+  })
+  provider.on('grant.success', (ctx) => {
+    logger.audit('OIDC event: grant.success', { ...createLogParams(ctx) })
   })
 
   provider.on('discovery.error', (ctx, err) => {
