@@ -72,9 +72,87 @@ az ad app update `
   --enable-id-token-issuance $true `
   --web-home-page-url $HomePageUrl
 
-Write-Output 'Set app roles and enabling id token issuance...'
+Write-Output 'Set app roles and enabled id token issuance.'
 
+#
+# API scope and Application ID URI
+#
+Write-Output 'Configuring API scope and Application ID URI...'
+$graphApp = az rest `
+  --method get `
+  --url ("https://graph.microsoft.com/v1.0/applications/{0}" -f $appRegistrationObjectId) | ConvertFrom-Json
 
+$identifierUris = @("api://$appRegistrationAppId")
+
+# Safe reset behaviour
+# - Always set the Application ID URI to api://<objectId> so the scope identifier is stable.
+# - Preserve existing consent by reusing the existing 'user.access' scope GUID if present.
+# - Replace the API's scopes with exactly one 'user.access' scope configured below.
+$existingScopes = @()
+if ($null -ne $graphApp.api -and $null -ne $graphApp.api.oauth2PermissionScopes) {
+  $existingScopes = $graphApp.api.oauth2PermissionScopes
+}
+
+$scopeValue = 'user.access'
+$existingScope = $null
+if ($existingScopes) {
+  $existingScope = $existingScopes | Where-Object { $_.value -eq $scopeValue } | Select-Object -First 1
+}
+if ($null -eq $existingScope) {
+  $scopeId = ([guid]::NewGuid()).ToString()
+
+  $newScope = @{
+    id                         = $scopeId
+    value                      = $scopeValue
+    type                       = 'Admin'
+    isEnabled                  = $true
+    adminConsentDisplayName    = 'Access the API as the signed-in user'
+    adminConsentDescription    = "Allows this application to call the API on behalf of the signed-in user and include the user's role assignments in the access token."
+    userConsentDisplayName     = 'Access this API using your account'
+    userConsentDescription     = 'Lets the app act on your behalf using your existing permissions and roles.'
+  }
+
+  $updatedScopes = @()
+  if ($existingScopes -and $existingScopes.Count -gt 0) {
+    foreach ($s in $existingScopes) {
+      $id = [string]$s.id
+      $val = if ($null -ne $s.value -and -not [string]::IsNullOrWhiteSpace([string]$s.value)) { [string]$s.value } else { "scope" }
+      $t = if ($null -ne $s.type -and -not [string]::IsNullOrWhiteSpace([string]$s.type)) { [string]$s.type } else { "User" }
+      $adminDn = if ($null -ne $s.adminConsentDisplayName -and -not [string]::IsNullOrWhiteSpace([string]$s.adminConsentDisplayName)) { [string]$s.adminConsentDisplayName } else { "Admin consent for $val" }
+      $adminDd = if ($null -ne $s.adminConsentDescription -and -not [string]::IsNullOrWhiteSpace([string]$s.adminConsentDescription)) { [string]$s.adminConsentDescription } else { "Required for administrators to consent to $val." }
+      $userDn = if ($null -ne $s.userConsentDisplayName -and -not [string]::IsNullOrWhiteSpace([string]$s.userConsentDisplayName)) { [string]$s.userConsentDisplayName } else { "User consent for $val" }
+      $userDd = if ($null -ne $s.userConsentDescription -and -not [string]::IsNullOrWhiteSpace([string]$s.userConsentDescription)) { [string]$s.userConsentDescription } else { "Allows user consent to $val." }
+      $updatedScopes += @{
+        id                      = $id
+        value                   = $val
+        type                    = $t
+        isEnabled               = [bool]$s.isEnabled
+        adminConsentDisplayName = $adminDn
+        adminConsentDescription = $adminDd
+        userConsentDisplayName  = $userDn
+        userConsentDescription  = $userDd
+      }
+    }
+  }
+  $updatedScopes += $newScope
+
+  $patchPayload = @{ api = @{ oauth2PermissionScopes = $updatedScopes } }
+  $patchPayloadJson = ($patchPayload | ConvertTo-Json -Depth 10 -Compress)
+
+  az rest `
+    --method patch `
+    --headers Content-Type=application/json `
+    --url ("https://graph.microsoft.com/v1.0/applications/{0}" -f $appRegistrationObjectId) `
+    --body $patchPayloadJson
+
+  Write-Output ("Created API scope '{0}'." -f $scopeValue)
+} else {
+  Write-Output ("API scope '{0}' already exists. No changes made." -f $scopeValue)
+}
+
+#
+# Set secrets
+#
 function Test-SecretExpiringSoon {
   param (
     [Parameter(Mandatory = $true)]
