@@ -1,5 +1,4 @@
 import fs from 'fs'
-import mssql from 'mssql'
 import { spawn } from 'node:child_process'
 import * as Path from 'node:path'
 import readline from 'node:readline'
@@ -186,26 +185,6 @@ const startNgrok = async (ngrokConfig: NgrokConfig) => {
   replaceValueInEnvConfigFile('VITE_VO_API_URL', `${apiURL}/graphql`, pathToConcierge, '.env.local')
   replaceValueInEnvConfigFile('VITE_OIDC_AUTHORITY', `${apiURL}/oidc`, pathToConcierge, '.env.local')
 
-  // Patch local dev tunnel icon URLs
-  // TODO: Swap this over to the API DB infrastructure when we can import it without errors. 🙌 Yay for CJS/ESM interop.
-  const { host, db, user, pass } = {
-    host: process.env.DATABASE_HOST,
-    db: 'VerifiedOrchestration',
-    user: process.env.DATABASE_USERNAME,
-    pass: process.env.DATABASE_PASSWORD,
-  }
-  await mssql.connect(`Server=${host},1433;Database=${db};User Id=${user};Password=${pass};TrustServerCertificate=true;`)
-  await mssql.query`
-    WITH q AS
-    (
-      SELECT id, PATINDEX('%https://%.ngrok.app%', display_json) AS i, PATINDEX('%ppa.korgn.%//:sptth%', REVERSE(display_json)) AS ri, LEN(display_json) AS l
-      FROM contract
-    )
-    UPDATE contract
-    SET display_json = STUFF(display_json, q.i, q.l - (q.i + q.ri - 2), ${apiURL})
-    FROM q
-    WHERE contract.id = q.id`
-
   const renderUi = () => {
     console.log('')
     console.log('')
@@ -295,6 +274,9 @@ const graceful = async () => {
   replaceValueInEnvConfigFile('LOCAL_DEV_TUNNEL_PORTAL', '', pathToApi, '.env')
   replaceValueInEnvConfigFile('VITE_API_URL', `http://localhost:4000/graphql`, pathToComposer, '.env.local')
   replaceValueInEnvConfigFile('VITE_VO_API_URL', `http://localhost:4000/graphql`, pathToConcierge, '.env.local')
+  replaceValueInEnvConfigFile('VITE_API_SCHEMA_URL', `http://localhost:4000/graphql`, pathToComposer, '.env.local')
+  replaceValueInEnvConfigFile('VITE_PORTAL_URL', `http://localhost:5174`, pathToComposer, '.env.local')
+  replaceValueInEnvConfigFile('VITE_OIDC_AUTHORITY', `http://localhost:4000/oidc`, pathToConcierge, '.env.local')
 
   process.exit(0)
 }
