@@ -85,9 +85,9 @@ export const rules: ShieldSchema<Resolvers> = {
     findIdentityStores: or(isInstanceAdminUser, isAllowedToCreateAndDeleteIdentities),
     findIssuances: isAllowedToViewIssuances,
     findNetworkIssuers: isPartnerAdminUser,
-    findOidcClients: anyUserRule,
-    findOidcResources: anyUserRule,
-    findOidcClaimMappings: anyUserRule,
+    findOidcClients: isUserWithReadPermissions,
+    findOidcResources: isUserWithReadPermissions,
+    findOidcClaimMappings: isUserWithReadPermissions,
     findPresentations: isAllowedToViewPresentations,
     findTemplates: or(isUserWithReadPermissions, isContractAdminApp),
     findWallets: isAllowedToViewPresentations,
@@ -101,7 +101,7 @@ export const rules: ShieldSchema<Resolvers> = {
     issuanceCountByUser: anyUserRule,
     me: allow,
     networkContracts: isPartnerAdminUser,
-    oidcClient: anyUserRule,
+    oidcClient: isUserWithReadPermissions,
     photoCaptureStatus: or(isIssuer, isLimitedAsyncIssuancePhotoCaptureUser),
     presentation: anyUserRule,
     presentationCount: anyUserRule,
@@ -337,16 +337,16 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': fallbackWithSupportAgentRule,
   },
   OidcClaimMapping: {
-    '*': fallbackWithSupportAgentRule,
+    '*': fallbackRule,
   },
   OidcClient: {
     '*': fallbackWithSupportAgentRule,
   },
   OidcClientResource: {
-    '*': fallbackWithSupportAgentRule,
+    '*': fallbackRule,
   },
   OidcResource: {
-    '*': fallbackWithSupportAgentRule,
+    '*': fallbackRule,
   },
   PhotoCaptureEventData: {
     '*': or(isIssuer, isLimitedAsyncIssuancePhotoCaptureUser),
