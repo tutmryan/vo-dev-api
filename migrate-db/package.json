@@ -13,26 +13,25 @@
     "check-types": "tsc --noEmit",
     "audit": "npx --yes better-npm-audit audit",
     "build": "npm run clean && tsc && npm run build:copy-files && npm run build:install && npm run build:post-build",
-    "clean": "rimraf build",
-    "build:copy-files": "copyfiles \"package*.json\" host.json build",
+    "clean": "shx rm -rf build",
+    "build:copy-files": "shx cp package*.json build",
     "build:install": "npm ci --omit=dev --prefix build",
-    "build:post-build": "rimraf build/package-lock.json"
+    "build:post-build": "shx rm build/package-lock.json"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.6",
     "@types/node": "^24.3.0",
-    "copyfiles": "^2.4.1",
     "cross-env": "^10.0.0",
-    "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
   },
   "dependencies": {
     "mssql": "^11.0.1",
-    "typeorm": "^0.3.26"
+    "typeorm": "^0.3.27"
   },
   "overrides": {
     "@azure/identity": "^4.3.0",
+    "glob": "^12.0.0",
     "sha.js": "^2.4.12"
   }
 }

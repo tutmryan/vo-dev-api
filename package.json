@@ -192,7 +192,7 @@
     "titleTemplate": "{title}"
   },
   "overrides": {
-    "glob": "^11.1.0",
+    "glob": "^12.0.0",
     "js-yaml": "^4.1.1",
     "sha.js": "^2.4.12",
     "tmp": "^0.2.4",

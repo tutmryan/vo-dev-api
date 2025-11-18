@@ -1,7 +1,7 @@
 import type { Request } from 'express'
 import { decodeJwt } from 'jose'
 import type Provider from 'oidc-provider'
-import type { OIDCContext } from 'oidc-provider'
+import type { AccessToken, OIDCContext, RefreshToken } from 'oidc-provider'
 import { logger as globalLogger } from '../../logger'
 import { redactValueEmail, redactValueInner, redactValueObjectUnknown } from '../../util/redact-values'
 import { deleteAccount } from './account'
@@ -12,7 +12,7 @@ type Context = Parameters<Middleware>[0]
 
 export const middleware: Middleware = async (ctx, next) => {
   const logger = buildRequestLogger(ctx.request)
-  const logRequest = checkOidcRequestLogging(ctx)
+  const logRequest = shouldLogRequest(ctx)
   if (logRequest) {
     logger.verbose(`pre OIDC middleware: ${ctx.method} ${ctx.path}`)
   }
@@ -57,7 +57,7 @@ function deleteAccountOnLogout(ctx: Context, oidc: OIDCContext) {
   }
 }
 
-function checkOidcRequestLogging(ctx: Context) {
+function shouldLogRequest(ctx: Context) {
   if (!globalLogger.isVerboseEnabled()) return false
   if (ctx.method === 'OPTIONS') return false
   if (ctx.path.endsWith('/.well-known/openid-configuration')) return false
@@ -65,10 +65,23 @@ function checkOidcRequestLogging(ctx: Context) {
   return true
 }
 
+const logObjectWithRest = <T extends Record<string, any>>(
+  obj: T,
+  getterOrValues: Partial<{ [K in keyof T]: (value: T[K]) => any | any }>,
+): Record<keyof T, any> & { ['(otherKeys)']: (keyof T)[] } => {
+  const transformed = Object.entries(getterOrValues).map(([key, getterOrValue]) =>
+    getterOrValue ? { [key]: typeof getterOrValue === 'function' ? getterOrValue(obj[key]) : getterOrValue } : {},
+  )
+  const otherKeys = (Object.keys(obj) as (keyof T)[]).filter((key) => !(key in getterOrValues))
+
+  return Object.assign({}, ...transformed, { ['(otherKeys)']: otherKeys })
+}
+
 function buildLogOutput(ctx: Context, oidc: OIDCContext) {
   const { method, path } = ctx
   const { route } = oidc
-  const { Client, Interaction, AccessToken, IdTokenHint, RefreshToken } = oidc.entities
+  const { Client, Interaction, PushedAuthorizationRequest, AccessToken, IdTokenHint, RefreshToken } = oidc.entities
+
   return {
     method,
     path,
@@ -89,90 +102,87 @@ function buildLogOutput(ctx: Context, oidc: OIDCContext) {
       postLogoutRedirectUris: Client?.postLogoutRedirectUris,
       idTokenSignedResponseAlg: Client?.idTokenSignedResponseAlg,
     },
-    idTokenHint: IdTokenHint
-      ? {
-          ...redactValueObjectUnknown(IdTokenHint.payload),
-          sub: redactValueEmail(IdTokenHint.payload.sub),
-        }
-      : undefined,
-    interaction: Interaction
-      ? {
-          returnTo: Interaction.returnTo,
-          prompt: {
-            name: Interaction.prompt.name,
-            reasons: Interaction.prompt.reasons,
-          },
-          params: {
-            client_id: Interaction.params.client_id,
-            code_challenge: redactValueInner(Interaction.params.code_challenge),
-            code_challenge_method: Interaction.params.code_challenge_method,
-            redirect_uri: Interaction.params.redirect_uri,
-            resource: Interaction.params.resource,
-            response_type: Interaction.params.response_type,
-            scope: Interaction.params.scope,
-            state: redactValueInner(Interaction.params.state),
-            nonce: redactValueInner(Interaction.params.nonce),
-            prompt: Interaction.params.prompt,
-            response_mode: Interaction.params.response_mode,
-            vc_type: Interaction.params.vc_type,
-            login_hint: redactValueInner(Interaction.params.login_hint),
-            // Log the keys of params not listed above
-            nonLoggedParamKeys: Object.keys(Interaction.params).filter(
-              (key) =>
-                ![
-                  'client_id',
-                  'code_challenge',
-                  'code_challenge_method',
-                  'redirect_uri',
-                  'resource',
-                  'response_type',
-                  'scope',
-                  'state',
-                  'nonce',
-                  'prompt',
-                  'response_mode',
-                  'vc_type',
-                  'login_hint',
-                ].includes(key),
-            ),
-          },
-        }
-      : undefined,
-    accessToken: AccessToken
-      ? {
-          accountId: AccessToken.accountId,
-          aud: AccessToken.aud,
-          clientId: AccessToken.clientId,
-          expiresIn: AccessToken.expiration,
-          format: AccessToken.format,
-          grantType: AccessToken.gty,
-          jti: AccessToken.jti,
-          scope: AccessToken.scope,
-          tokenType: AccessToken.tokenType,
-          ...(AccessToken.extra
-            ? {
-                ...redactValueObjectUnknown(AccessToken.extra),
-                acr: AccessToken.extra.acr,
-                amr: AccessToken.extra.amr,
-                sub: redactValueEmail(AccessToken.extra.sub),
-                ...(AccessToken.extra.email_verified ? { email_verified: AccessToken.extra.email_verified } : {}),
-              }
-            : undefined),
-        }
-      : undefined,
-    refreshToken: RefreshToken
-      ? {
-          accountId: RefreshToken.accountId,
-          clientId: RefreshToken.clientId,
-          acr: RefreshToken.acr,
-          amr: RefreshToken.amr,
-          expiresIn: RefreshToken.expiration,
-          grantType: RefreshToken.gty,
-          jti: RefreshToken.jti,
-          resource: RefreshToken.resource,
-          scopes: RefreshToken.scope,
-          tokenType: 'tokenType' in RefreshToken ? RefreshToken.tokenType : undefined,
-        }
-      : undefined,
+    idTokenHint: IdTokenHint && {
+      ...redactValueObjectUnknown(IdTokenHint.payload),
+      sub: redactValueEmail(IdTokenHint.payload.sub),
+    },
+    interaction: Interaction && {
+      returnTo: Interaction.returnTo,
+      prompt: {
+        name: Interaction.prompt.name,
+        reasons: Interaction.prompt.reasons,
+      },
+      params: logObjectWithRest(Interaction.params, {
+        client_id: (v) => v,
+        code_challenge: (v) => redactValueInner(v),
+        code_challenge_method: (v) => v,
+        redirect_uri: (v) => v,
+        resource: (v) => v,
+        response_type: (v) => v,
+        scope: (v) => v,
+        state: (v) => redactValueInner(v),
+        nonce: (v) => redactValueInner(v),
+        prompt: (v) => v,
+        response_mode: (v) => v,
+        vc_type: (v) => v,
+        login_hint: (v) => redactValueInner(v),
+      }),
+    },
+    pushedAuthorizationRequest:
+      PushedAuthorizationRequest &&
+      logObjectWithRest(PushedAuthorizationRequest, {
+        exp: (v) => v,
+        isExpired: (v) => v,
+        isValid: (v) => v,
+        remainingTTL: (v) => v,
+        request: (v) =>
+          logObjectWithRest(decodeJwt(v), {
+            acr_values: (v) => v,
+            client_id: (v) => v,
+            code_challenge: (v) => redactValueInner(v),
+            code_challenge_method: (v) => v,
+            redirect_uri: (v) => v,
+            response_type: (v) => v,
+            scope: (v) => v,
+            state: (v) => redactValueInner(v),
+            nonce: (v) => redactValueInner(v),
+            prompt: (v) => v,
+            response_mode: (v) => v,
+          }),
+      }),
+    accessToken:
+      AccessToken &&
+      logObjectWithRest(AccessToken as AccessToken & { expiresIn: number; grantType: string }, {
+        accountId: (v) => v,
+        aud: (v) => v,
+        clientId: (v) => v,
+        expiresIn: (v) => v,
+        format: (v) => v,
+        grantType: (v) => v,
+        jti: (v) => v,
+        scope: (v) => v,
+        tokenType: (v) => v,
+        ...(AccessToken.extra && {
+          ...redactValueObjectUnknown(AccessToken.extra),
+          acr: AccessToken.extra.acr,
+          amr: AccessToken.extra.amr,
+          sub: redactValueEmail(AccessToken.extra.sub),
+          ...(AccessToken.extra.email_verified ? { email_verified: AccessToken.extra.email_verified } : {}),
+        }),
+      }),
+    refreshToken:
+      RefreshToken &&
+      logObjectWithRest(RefreshToken as RefreshToken & { expiresIn: number; grantType: string; tokenType: string }, {
+        accountId: (v) => v,
+        clientId: (v) => v,
+        acr: (v) => v,
+        amr: (v) => v,
+        expiresIn: (v) => v,
+        grantType: (v) => v,
+        jti: (v) => v,
+        resource: (v) => v,
+        scopes: (v) => v,
+        tokenType: (v) => v,
+      }),
   }
 }
