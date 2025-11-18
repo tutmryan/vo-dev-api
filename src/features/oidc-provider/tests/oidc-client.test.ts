@@ -1,3 +1,5 @@
+import { faker } from '@faker-js/faker/locale/en'
+
 import casual from 'casual'
 import { omit } from 'lodash'
 import {
@@ -7,9 +9,10 @@ import {
   deleteOidcClientMutation,
   findOidcClientsQuery,
   oidcClientQuery,
+  updateConciergeClientBrandingMutation,
   updateOidcClientMutation,
 } from '.'
-import { OidcClientType } from '../../../generated/graphql'
+import { OidcApplicationType, OidcClientType } from '../../../generated/graphql'
 import { UserRoles } from '../../../roles'
 import {
   beforeAfterAll,
@@ -17,8 +20,12 @@ import {
   executeOperationAsUser,
   expectToBeDefined,
   expectUnauthorizedError,
+  inTransaction,
 } from '../../../test'
 import { mockedServices } from '../../../test/mocks'
+import { UserEntity } from '../../users/entities/user-entity'
+import { portalClientId, portalClientName } from '../data'
+import { OidcClientEntity } from '../entities/oidc-client-entity'
 
 const createInput = createOidcClientInput()
 const updateInput = createOidcClientInput()
@@ -166,6 +173,153 @@ describe('updateOidcClient mutation', () => {
   })
 })
 
+async function insertConciergeOidcClient(overrides: Partial<OidcClientEntity> = {}) {
+  const userId = faker.string.uuid()
+  await inTransaction(async (em) => {
+    await em.getRepository(UserEntity).save({
+      id: userId,
+      oid: faker.string.uuid(),
+      tenantId: faker.string.uuid(),
+      email: 'test@example.com',
+      name: 'Test User',
+      isApp: false,
+    })
+  }, userId)
+
+  const client = new OidcClientEntity({
+    id: portalClientId,
+    name: portalClientName,
+    applicationType: OidcApplicationType.Web,
+    clientType: OidcClientType.Public,
+    redirectUris: ['https://example.com/cb'],
+    postLogoutUris: ['https://example.com/logout'],
+    ...overrides,
+  })
+
+  await inTransaction(async (em) => {
+    await em.getRepository(OidcClientEntity).save(client)
+  }, userId)
+
+  return client
+}
+describe('updateConciergeClientBranding mutation', () => {
+  beforeAfterAll()
+
+  let initClient: OidcClientEntity
+
+  beforeAll(async () => {
+    initClient = await insertConciergeOidcClient({
+      logo: 'http://www.somelogo.com/img.png',
+      backgroundColor: '#fff',
+      backgroundImage: 'http://www.bg.com/img.png',
+    })
+  })
+
+  it('can update only the name field', async () => {
+    const input = { name: 'New Concierge Name' }
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateConciergeClientBranding)
+    const updated = data.updateConciergeClientBranding
+    expect(updated.name).toEqual('New Concierge Name')
+    expect(updated.logo).toEqual(initClient.logo)
+    expect(updated.backgroundColor).toEqual(initClient.backgroundColor)
+    expect(updated.backgroundImage).toEqual(initClient.backgroundImage)
+    expect(updated.updatedAt).toBeDefined()
+    expect(updated.updatedBy).toBeDefined()
+  })
+
+  it('can update only the logo field', async () => {
+    const input = { logo: 'https://new.logo/image.png' }
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateConciergeClientBranding)
+    const updated = data.updateConciergeClientBranding
+    expect(updated.logo).toEqual(input.logo)
+    expect(updated.name).toEqual('New Concierge Name') // previously updated
+    expect(updated.backgroundColor).toEqual(initClient.backgroundColor)
+    expect(updated.backgroundImage).toEqual(initClient.backgroundImage)
+  })
+
+  it('can update multiple branding fields', async () => {
+    const input = {
+      name: '`SomeBrand`',
+      backgroundColor: '#123456',
+      backgroundImage: 'https://img.com/bg.png',
+    }
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateConciergeClientBranding)
+    const updated = data.updateConciergeClientBranding
+    expect(updated.name).toEqual(input.name)
+    expect(updated.backgroundColor).toEqual(input.backgroundColor)
+    expect(updated.backgroundImage).toEqual(input.backgroundImage)
+    expect(updated.logo).toEqual('https://new.logo/image.png') // previously updated
+  })
+
+  it('resets fields to null/default when null', async () => {
+    const input = {
+      name: null,
+      logo: null,
+      backgroundColor: null,
+      backgroundImage: null,
+    }
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateConciergeClientBranding)
+    const updated = data.updateConciergeClientBranding
+    expect(updated.name).toBeDefined()
+    expect(updated.logo).toBeNull()
+    expect(updated.backgroundColor).toBeNull()
+    expect(updated.backgroundImage).toBeNull()
+  })
+
+  it('does not change non-branding fields like redirectUris', async () => {
+    const { data: queryData } = await executeOperationAsUser(
+      { query: oidcClientQuery, variables: { id: portalClientId } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(queryData?.oidcClient)
+    const originalRedirectUris = queryData.oidcClient.redirectUris
+
+    const input = { name: 'BrandOnly' }
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateConciergeClientBranding)
+    const updated = data.updateConciergeClientBranding
+
+    expect(updated.redirectUris).toEqual(originalRedirectUris)
+  })
+
+  it('returns unauthorized error for non-admin roles', async () => {
+    const input = { name: 'ShouldNotWork' }
+    const { errors } = await executeOperationAsUser(
+      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      UserRoles.reader,
+    )
+    expect(errors).toBeDefined()
+    expectUnauthorizedError(errors)
+  })
+})
 describe('deleteOidcClient mutation', () => {
   beforeAfterAll()
 

@@ -11,6 +11,7 @@ import { DeleteOidcClaimMappingCommand } from './commands/delete-oidc-claim-mapp
 import { DeleteOidcClientCommand } from './commands/delete-oidc-client-command'
 import { DeleteOidcClientResourceCommand } from './commands/delete-oidc-client-resource-command'
 import { DeleteOidcResourceCommand } from './commands/delete-oidc-resource-command'
+import { UpdateConciergeClientBrandingCommand } from './commands/update-concierge-client-branding'
 import { UpdateOidcClaimMappingCommand } from './commands/update-oidc-claim-mapping'
 import { UpdateOidcClientClaimMappingsCommand } from './commands/update-oidc-client-claim-mappings-command'
 import { UpdateOidcClientCommand } from './commands/update-oidc-client-command'
@@ -45,7 +46,7 @@ export const resolvers: Resolvers = {
     deleteOidcClaimMapping: async (_parent, { id }, context) => dispatch(context, DeleteOidcClaimMappingCommand, id),
     updateOidcClientClaimMappings: async (_parent, { clientId, claimMappingIds }, context) =>
       dispatch(context, UpdateOidcClientClaimMappingsCommand, clientId, claimMappingIds),
-
+    updateConciergeClientBranding: async (_parent, { input }, context) => dispatch(context, UpdateConciergeClientBrandingCommand, input),
     generateOidcClientSecret,
   },
   Query: {

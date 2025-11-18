@@ -165,6 +165,14 @@ export const oidcResourceQuery = graphql(`
   }
 `)
 
+export const updateConciergeClientBrandingMutation = graphql(`
+  mutation UpdateConciergeClientBranding($input: ConciergeClientBrandingInput!) {
+    updateConciergeClientBranding(input: $input) {
+      ...OidcClientFragment
+    }
+  }
+`)
+
 export function createOidcClientInput(input: Partial<OidcClientInput> = {}): OidcClientInput {
   return {
     name: casual.name,

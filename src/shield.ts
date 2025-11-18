@@ -179,6 +179,7 @@ export const rules: ShieldSchema<Resolvers> = {
     updateOidcClientClaimMappings: isOidcAdminUser,
     updateOidcClientResource: isOidcAdminUser,
     updateOidcResource: isOidcAdminUser,
+    updateConciergeClientBranding: or(isOidcAdminUser, isInstanceAdminUser),
     updatePartner: isPartnerAdminUser,
     updateTemplate: or(isCredentialAdminUser, isContractAdminApp),
   },

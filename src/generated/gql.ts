@@ -77,6 +77,7 @@ type Documents = {
     "\n  mutation DeleteOidcResource($id: ID!) {\n    deleteOidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n": typeof types.DeleteOidcResourceDocument,
     "\n  query FindOidcResources(\n    $where: OidcResourceWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcResourceOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcResources(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcResourceFragment\n    }\n  }\n": typeof types.FindOidcResourcesDocument,
     "\n  query OidcResource($id: ID!) {\n    oidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n": typeof types.OidcResourceDocument,
+    "\n  mutation UpdateConciergeClientBranding($input: ConciergeClientBrandingInput!) {\n    updateConciergeClientBranding(input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": typeof types.UpdateConciergeClientBrandingDocument,
     "\n  mutation CreateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    createOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": typeof types.CreateOidcClientResourceDocument,
     "\n  mutation UpdateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    updateOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": typeof types.UpdateOidcClientResourceDocument,
     "\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n": typeof types.DeleteOidcClientResourceDocument,
@@ -175,6 +176,7 @@ const documents: Documents = {
     "\n  mutation DeleteOidcResource($id: ID!) {\n    deleteOidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n": types.DeleteOidcResourceDocument,
     "\n  query FindOidcResources(\n    $where: OidcResourceWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcResourceOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcResources(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcResourceFragment\n    }\n  }\n": types.FindOidcResourcesDocument,
     "\n  query OidcResource($id: ID!) {\n    oidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n": types.OidcResourceDocument,
+    "\n  mutation UpdateConciergeClientBranding($input: ConciergeClientBrandingInput!) {\n    updateConciergeClientBranding(input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.UpdateConciergeClientBrandingDocument,
     "\n  mutation CreateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    createOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.CreateOidcClientResourceDocument,
     "\n  mutation UpdateOidcClientResource($clientId: ID!, $input: OidcClientResourceInput!) {\n    updateOidcClientResource(clientId: $clientId, input: $input) {\n      ...OidcClientFragment\n    }\n  }\n": types.UpdateOidcClientResourceDocument,
     "\n  mutation DeleteOidcClientResource($clientId: ID!, $resourceId: ID!) {\n    deleteOidcClientResource(clientId: $clientId, resourceId: $resourceId) {\n      ...OidcClientFragment\n    }\n  }\n": types.DeleteOidcClientResourceDocument,
@@ -476,6 +478,10 @@ export function graphql(source: "\n  query FindOidcResources(\n    $where: OidcR
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  query OidcResource($id: ID!) {\n    oidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n"): (typeof documents)["\n  query OidcResource($id: ID!) {\n    oidcResource(id: $id) {\n      ...OidcResourceFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateConciergeClientBranding($input: ConciergeClientBrandingInput!) {\n    updateConciergeClientBranding(input: $input) {\n      ...OidcClientFragment\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateConciergeClientBranding($input: ConciergeClientBrandingInput!) {\n    updateConciergeClientBranding(input: $input) {\n      ...OidcClientFragment\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

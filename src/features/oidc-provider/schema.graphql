@@ -45,6 +45,28 @@ input AuthnRequestCredential {
   constraints: [ClaimConstraint!]
 }
 
+"""
+Branding fields for the concierge OIDC client.
+"""
+input ConciergeClientBrandingInput {
+  """
+  The display name shown in concierge flows.
+  """
+  name: String
+  """
+  The logo displayed during concierge authentication.
+  """
+  logo: URL
+  """
+  The background color for concierge authentication screens.
+  """
+  backgroundColor: String
+  """
+  The background image for concierge authentication screens.
+  """
+  backgroundImage: URL
+}
+
 extend type Mutation {
   """
   Creates a new presentation request for authorization.
@@ -118,6 +140,10 @@ extend type Mutation {
   Generates a secret suitable for an OIDC client.
   """
   generateOidcClientSecret: String!
+  """
+  Updates branding for the concierge OIDC client.
+  """
+  updateConciergeClientBranding(input: ConciergeClientBrandingInput!): OidcClient!
 }
 
 extend type Query {

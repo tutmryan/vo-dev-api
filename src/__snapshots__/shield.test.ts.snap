@@ -2519,6 +2519,24 @@ exports[`shield rules are setup correctly 1`] = `
         "VerifiableCredential.OidcAdmin"
       ]
     },
+    "updateConciergeClientBranding": {
+      "rulesOr": [
+        {
+          "name": "hasRole-VerifiableCredential.OidcAdmin",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.OidcAdmin"
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.InstanceAdmin",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.InstanceAdmin"
+          ]
+        }
+      ]
+    },
     "updatePartner": {
       "name": "hasRole-VerifiableCredential.PartnerAdmin",
       "cache": "contextual",
