@@ -177,7 +177,7 @@
     "qrcode": "^1.5.4",
     "rate-limiter-flexible": "^7.2.0",
     "twilio": "^5.8.2",
-    "typeorm": "^0.3.26",
+    "typeorm": "^0.3.27",
     "uuid": "^11.1.0",
     "ws": "^8.18.3",
     "yaml": "^2.8.1",
@@ -192,6 +192,7 @@
     "titleTemplate": "{title}"
   },
   "overrides": {
+    "glob": "^11.1.0",
     "js-yaml": "^4.1.1",
     "sha.js": "^2.4.12",
     "tmp": "^0.2.4",

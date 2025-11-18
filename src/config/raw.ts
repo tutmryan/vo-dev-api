@@ -96,7 +96,7 @@ export type Config = {
     sid: string
     secret: string
     primaryToken: string
-    from: Record<string, string> & { AU: string }
+    messagingServiceSid: string
   }
   email: {
     from: { name: string; email: string }

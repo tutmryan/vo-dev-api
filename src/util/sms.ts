@@ -1,9 +1,8 @@
 import { isLocalDev } from '@makerx/node-common'
 import type { Request } from 'express'
-import parsePhoneNumberFromString from 'libphonenumber-js'
 import twilio from 'twilio'
 import z from 'zod'
-import { localDev, sms } from '../config'
+import { localDev as localDevConfig, sms as smsConfig } from '../config'
 import { logger } from '../logger'
 import { Lazy } from './lazy'
 
@@ -31,7 +30,7 @@ export const RESERVED_TEST_PHONE_NUMBERS = new Set([
 ])
 
 const client = Lazy(() => {
-  return twilio(sms.sid, sms.secret, { accountSid: sms.accountSid })
+  return twilio(smsConfig.sid, smsConfig.secret, { accountSid: smsConfig.accountSid })
 })
 
 export const smsPayloadSchema = z
@@ -93,43 +92,35 @@ export function toUserErrorMessage(messageStatus: MessageStatuses, errorCode?: s
 }
 
 export const validateSmsCallbackRequest = (req: Request) => {
-  return twilio.validateExpressRequest(req, sms.primaryToken)
+  return twilio.validateExpressRequest(req, smsConfig.primaryToken)
 }
 
 const maskPhone = (phone: string) => phone.slice(0, -4).replace(/./g, '*') + phone.slice(-4)
 
-const getRegion = (to: string) => {
-  const phoneNumber = parsePhoneNumberFromString(to)
-  return phoneNumber?.country ?? 'AU'
-}
-
 export function sendSms(to: string, message: string, statusCallbackUrl?: string) {
   if (isLocalDev) {
-    if (!localDev) {
-      logger.warn('Local dev is detected but no local dev config is provided. No sms will be sent until this is fixed.')
+    if (!localDevConfig) {
+      logger.warn('Local dev is detected but no local dev config is provided. No SMS will be sent until this is fixed.')
       return
     }
-    if (localDev.sms.disabled) {
+    if (localDevConfig.sms.disabled) {
       logger.debug('SMS sending is disabled by the local dev config')
       return
     }
-    if (localDev.sms.allowList.length && !localDev.sms.allowList.includes(to)) {
-      logger.warn(`Blocked sending sms to ${maskPhone(to)}`)
+    if (localDevConfig.sms.allowList.length && !localDevConfig.sms.allowList.includes(to)) {
+      logger.warn(`Blocked sending SMS to ${maskPhone(to)}`)
       return
     }
   }
 
   if (RESERVED_TEST_PHONE_NUMBERS.has(to)) {
-    logger.warn(`Blocked sending sms to ${maskPhone(to)} as it is a reserved number for testing`)
+    logger.warn(`Blocked sending SMS to ${maskPhone(to)} as it is a reserved number for testing`)
     return
   }
 
-  const toRegion = getRegion(to)
-  const from = sms.from[toRegion] ?? sms.from['AU']
-
   return client().messages.create({
     body: message,
-    from,
+    messagingServiceSid: smsConfig.messagingServiceSid,
     to,
     statusCallback: statusCallbackUrl,
   })
