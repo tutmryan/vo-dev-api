@@ -267,11 +267,26 @@
 
     #client-logo {
       margin: 0 auto;
+      <% if (dropToEs5) { %>
+      max-width: 300px;
+      width: 100%;
+      display: block !important;
+      text-align: center;
+      <% } %>
     }
 
     #client-logo img {
+      <% if (!dropToEs5) { %>
       max-width: 100%;
       object-fit: contain;
+      <% } else { %>
+      display: inline-block;
+      max-width: 100%;
+      max-height: 150px;
+      width: auto;
+      height: auto;
+      vertical-align: middle;
+      <% } %>
     }
 
     .login-card {
@@ -324,14 +339,41 @@
     }
 
     #qrCodeCanvas {
+      max-width: 430px;
+      <% if (!dropToEs5) { %>
       height: auto;
       width: 100%;
-      max-width: 430px;
       max-height: 100%;
       object-fit: contain;
       aspect-ratio: 1 / 1;
       opacity: 1;
+      <% } else { %>
+      display: block;
+      margin: 0 auto;
+      max-height: 430px;
+      opacity: 1;
+      <% } %>
     }
+
+    <% if (dropToEs5) { %>
+    #desktop {
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .login-body-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    <% } %>
 
     /**
     * Embedded browser in Teams (Win/Mac) that may host this login page
@@ -346,7 +388,6 @@
         flex: 0 0 70%;
       }
     }
-
 
     /* Horizontal layout for when screen height is low  */
     @media (max-height: 700px) {
@@ -363,7 +404,11 @@
       }
 
       #qrCodeCanvas {
+        <% if (!dropToEs5) { %>
         max-width: min(55vw, 47vh);
+        <% } else { %>
+        max-width: 55vw;
+        <% } %>
         min-width: 100px;
       }
 
@@ -478,7 +523,12 @@
       margin-left: auto;
       margin-right: auto;
       display: block;
+      <% if (!dropToEs5) { %>
       padding-top: 10px;
+      <% } else { %>
+      margin-bottom: 1rem;
+      padding: 10px;
+      <% } %>
     }
 
     .debug dt {
@@ -584,9 +634,56 @@
   </div>
   <% if (showDebug) { %>
   <script>
-    window.addEventListener('load', () => {
-      document.getElementById('window-dimensions-debug').innerText =
-        `${window.innerWidth} (w) x ${window.innerHeight} (h)`
+    window.addEventListener('load', function() { // es5 compatibility
+      document.getElementById('window-dimensions-debug').innerText = window.innerWidth + ' (w) x ' + window.innerHeight + ' (h)'; // es5 compatibility
+
+      <% if (dropToEs5 || dropToEs6) { %>
+      (function() {
+        var testDetails = document.createElement('details');
+        if ('open' in testDetails) return;
+
+        var detailsElements = document.getElementsByTagName('details');
+        for (var i = 0; i < detailsElements.length; i++) {
+          var details = detailsElements[i];
+          var summaries = details.getElementsByTagName('summary');
+          if (summaries.length === 0) continue;
+          var summary = summaries[0];
+
+          // Hide content initially if not open
+          if (!details.hasAttribute('open')) {
+            var children = details.children;
+            for (var j = 0; j < children.length; j++) {
+              if (children[j] !== summary) {
+                children[j].style.display = 'none';
+              }
+            }
+          }
+
+          // Add click handler (using closure to capture details and summary)
+          (function(detailsEl, summaryEl) {
+            summaryEl.addEventListener('click', function(e) {
+              e.preventDefault();
+              var isOpen = detailsEl.hasAttribute('open');
+              var children = detailsEl.children;
+
+              for (var k = 0; k < children.length; k++) {
+                if (children[k] !== summaryEl) {
+                  children[k].style.display = isOpen ? 'none' : '';
+                }
+              }
+
+              if (isOpen) {
+                detailsEl.removeAttribute('open');
+              } else {
+                detailsEl.setAttribute('open', 'open');
+              }
+            });
+          })(details, summary);
+
+          summary.style.cursor = 'pointer';
+        }
+      })()
+      <% } %>
     })
   </script>
   <div class="grant-debug debug">

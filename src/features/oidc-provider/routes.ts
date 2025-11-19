@@ -64,6 +64,18 @@ export function routes(app: Express, route: string): void {
     const logger = buildRequestLogger(req)
     const orig = res.render
     res.render = (view, locals) => {
+      const userAgent = req.headers['user-agent'] ?? ''
+      // Old WebView (Chromium 70)
+      const dropToEs6 = userAgent.includes('WebView/3.0') && userAgent.includes('Chrome/70')
+      // Old trident (IE 11)
+      const dropToEs5 = userAgent.includes('Trident/7.0; rv:11.0') && userAgent.includes('Windows')
+
+      locals = {
+        ...locals,
+        dropToEs5,
+        dropToEs6,
+      }
+
       if (view === 'no-session') {
         // orig is overloaded, and the correct overload type is lost so we cast locals to any
         orig.call(res, view, locals as any)
@@ -127,12 +139,7 @@ export function routes(app: Express, route: string): void {
           })
           const { logo, backgroundColor, backgroundImage } = clientEntity
 
-          // Teams on Windows during authentication hands off to the OS, which then uses an old version of WebView based on Chromium 70. If it were
-          // Edge based (WebView2) it would not include WebView/3.0 in the user agent. Flag for legacy support.
-          const isLegacyWebView = req.headers['user-agent']?.includes('WebView/3.0') && req.headers['user-agent'].includes('Chrome/70')
-
           return res.render('login', {
-            isLegacyWebView,
             client,
             uid,
             details: prompt.details,

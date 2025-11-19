@@ -1,27 +1,20 @@
-<!--
-  * ********************************************************************************************** *
-  * WARNING: Ensure any changes to this file are compatible with WebView/3.0 used in the Teams for *
-  * Windows authentication flow. This is critical as the WebView/3.0 is based on an older version  *
-  * of Chromium (70), which may not support modern JavaScript features, like ??                    *
-  * ********************************************************************************************** *
--->
-
 <script type="text/javascript">
-
-  // Polyfill for async iterator if not supported. Required for WebView/3.0
-  if (typeof Symbol.asyncIterator === 'undefined') {
-    Symbol.asyncIterator = Symbol.for('Symbol.asyncIterator')
+  // Polyfill when missing
+  if (typeof Symbol !== 'undefined') {
+    if (typeof Symbol.asyncIterator === 'undefined') {
+      Symbol.asyncIterator = Symbol.for('Symbol.asyncIterator')
+    }
   }
 
   const isMobile = /Android|iPhone/i.test(navigator.userAgent)
 
-  let client
+  <% if (!dropToEs5) { %> let <% } else { %> var <% } %> client
   window.onload = function () {
     client = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
       url: '<%- graphqlUrl %>',
       accessToken: '<%- presentationAccessToken %>',
     })
-    const request = <%-JSON.stringify(presentationRequest)%>
+      <% if (!dropToEs5) { %> const <% } else { %> var <% } %> request = <%-JSON.stringify(presentationRequest)%>
       client
         .createPresentationRequestForAuthn(request, handlePresentationEvent)
         .then(handlePresentation)
@@ -46,17 +39,24 @@
 
     // If this is a Chromium-based mobile browser, use button to act as a user gesture, which prevents BFCache issues.
     // see: https://issues.chromium.org/issues/40240372
-    const btn = document.createElement('button')
+    <% if (!dropToEs5) { %> const <% } else { %> var <% } %> btn = document.createElement('button')
     btn.style.display = 'none'
-    btn.onclick = () => {
+    btn.onclick = function() { // es5 compatibility
       window.open(url, '_blank', 'noopener,noreferrer')
     }
     document.body.appendChild(btn)
 
-    setTimeout(() => btn.click(), 100)
+    setTimeout(function() { btn.click() }, 100) // es5 compatibility
   }
 
+  <% if (!dropToEs5) { %>
   function displayPresentationResponse({ requestId, qrCode, url }) {
+  <% } else { %>
+  function displayPresentationResponse(response) {
+    var requestId = response.requestId
+    var qrCode = response.qrCode
+    var url = response.url
+  <% } %>
     document.querySelector('input[name="requestId"]').value = requestId
     if (isMobile) {
       openDeeplink(url)
@@ -71,11 +71,16 @@
     if (data instanceof Error) {
       displayError(data)
     } else if (data.event.requestStatus === 'presentation_error') {
+      <% if (!dropToEs5) { %>
       const { code, message } = data.event.error
+      <% } else { %>
+      var code = data.event.error.code
+      var message = data.event.error.message
+      <% } %>
       if (code === 'vcExpiredError') {
         displayError('The Verifiable Credential you presented has expired. Please contact the issuer to obtain a new credential or for further assistance.')
       } else {
-        displayError(data.event.error ? `${code}: ${message}` : 'Presentation failed.')
+        displayError(data.event.error ? code + ': ' + message : 'Presentation failed.')
       }
     } else if (data.event.requestStatus === 'request_retrieved') {
       displayProgress('Scanned, waiting for presentation...')
@@ -88,7 +93,7 @@
   function displayMobile(url) {
     hide(document.querySelector('#progress'))
     show(document.querySelector('#mobile'))
-    document.querySelector('#openUrl').addEventListener('click', () => window.location.href = url)
+    document.querySelector('#openUrl').addEventListener('click', function() { window.location.href = url }) // es5 compatibility
   }
 
   function displayDesktop(qrCode, url) {
@@ -97,6 +102,7 @@
     displayQrCode(qrCode, url)
   }
 
+  <% if (!dropToEs5) { %>
   function displayQrCode(src, url) {
     const canvas = document.querySelector('#qrCodeCanvas')
     const ctx = canvas.getContext('2d')
@@ -109,6 +115,32 @@
     };
     img.src = src
   }
+  <% } else { %>
+  function displayQrCode(src, url) {
+    var canvas = document.querySelector('#qrCodeCanvas')
+    var ctx = canvas.getContext('2d')
+
+    var img = new Image()
+    img.onload = function() {
+      // Calculate the display size - make it square and constrained
+      var container = canvas.parentElement
+      var maxSize = 350
+      var containerWidth = container.offsetWidth
+      var displaySize = Math.min(maxSize, containerWidth - 40) // 40px for padding/margins
+
+      // Set both CSS display size and canvas internal size to the same dimensions
+      // This prevents stretching and maintains aspect ratio
+      canvas.style.width = displaySize + 'px'
+      canvas.style.height = displaySize + 'px'
+      canvas.width = displaySize
+      canvas.height = displaySize
+
+      // Draw the image scaled to fit
+      ctx.drawImage(img, 0, 0, displaySize, displaySize)
+    }
+    img.src = src
+  }
+  <% } %>
 
   function handleTimeout() {
     hide(document.querySelectorAll('#desktop, #mobile, #progress'))
@@ -128,10 +160,16 @@
 
   function displayError(error) {
     hide(document.querySelectorAll('#desktop, #mobile, #progress'))
+    <% if (!dropToEs5) { %>
     document.querySelector('#errorText').textContent = `${(error && error.message != null ? error.message : error)}`
+    <% } else { %>
+    var errorMessage = (error && error.message != null ? error.message : error)
+    document.querySelector('#errorText').textContent = String(errorMessage)
+    <% } %>
     show(document.querySelector('#error'))
   }
 
+  <% if (!dropToEs5) { %>
   function hide(selectors) {
     if (!selectors.length) selectors = [selectors]
     selectors.forEach(el => {
@@ -139,7 +177,19 @@
       el.classList.remove('d-flex')
     })
   }
+  <% } else { %>
+  function hide(selectors) {
+    // Convert NodeList to Array for IE11 compatibility
+    if (!selectors.length) selectors = [selectors]
+    var elements = Array.prototype.slice.call(selectors)
+    for (var i = 0; i < elements.length; i++) {
+      elements[i].classList.add('d-none')
+      elements[i].classList.remove('d-flex')
+    }
+  }
+  <% } %>
 
+  <% if (!dropToEs5) { %>
   function show(selectors, displayClass = null) {
     if (!selectors.length) selectors = [selectors]
     selectors.forEach(el => {
@@ -149,6 +199,19 @@
       }
     })
   }
+  <% } else { %>
+  function show(selectors, displayClass) {
+    // Convert NodeList to Array for IE11 compatibility
+    if (!selectors.length) selectors = [selectors]
+    var elements = Array.prototype.slice.call(selectors)
+    for (var i = 0; i < elements.length; i++) {
+      elements[i].classList.remove('d-none')
+      if (displayClass) {
+        elements[i].classList.add(displayClass)
+      }
+    }
+  }
+  <% } %>
 
 </script>
 
@@ -218,7 +281,12 @@
 <script type="text/javascript">
   displayProgress(isMobile ? 'Generating presentation link...' : 'Generating QR code...')
 </script>
-<% if (isLegacyWebView) { %>
+<% if (dropToEs5) { %>
+<script src="https://cdn.jsdelivr.net/npm/core-js-bundle@3/minified.js" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3/dist/fetch.umd.js" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js/index.es5.min.js"
+        type="text/javascript"></script>
+<% } else if (dropToEs6) { %>
 <script type="text/javascript"
   src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js/index.es6.min.js"></script>
 <% } else { %>
