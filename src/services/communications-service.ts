@@ -164,7 +164,7 @@ export class CommunicationsService {
         } else {
           await sendSms(
             to,
-            `Dear ${identityName}, ${issuer} initiated the issuance of a ${contractName} digital credential to you.\n\nAccept it here: ${issuanceUrl}\n\nReply STOP to unsubscribe`,
+            `Dear ${identityName}, ${issuer} initiated the issuance of a ${contractName} digital credential to you.\n\nAccept it here: ${issuanceUrl}`,
             getIssuanceSmsStatusCallbackUrl(asyncIssuanceId),
           )
         }
