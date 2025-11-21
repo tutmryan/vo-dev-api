@@ -13,6 +13,9 @@
 !/api-reference/index.mdx
 !/api-reference/default.md
 
+# Generated RBAC Permissions docs
+docs/guides/permissions.md
+
 # Misc
 .DS_Store
 .env.local
