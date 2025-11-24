@@ -60,7 +60,7 @@ jobs:
 
       - name: Generate permission docs
         shell: bash
-        run: npm run prebuild
+        run: npm run generate-permissions-docs
         working-directory: ./docs-site
 
       - name: Generate GraphQL docs
