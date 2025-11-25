@@ -8,6 +8,9 @@ export async function UpdateAsyncIssuanceContactCommand(
   asyncIssuanceRequestId: string,
   input?: Maybe<AsyncIssuanceContactInput>,
 ) {
+  this.logger.mergeMeta({
+    asyncIssuanceRequestId,
+  })
   const asyncIssuanceRepository = await this.entityManager.getRepository(AsyncIssuanceEntity)
   const asyncIssuance = await asyncIssuanceRepository.findOneByOrFail({ id: asyncIssuanceRequestId })
   invariant(!asyncIssuance.isStatusFinal, 'Invalid status for updating contact')
@@ -17,6 +20,8 @@ export async function UpdateAsyncIssuanceContactCommand(
 
   asyncIssuanceRequest.contact = input
   await this.services.asyncIssuances.uploadAsyncIssuance(asyncIssuanceRequestId, asyncIssuanceRequest)
+
+  this.logger.audit('Async issuance contact updated')
 
   asyncIssuance.contactUpdated()
   await asyncIssuanceRepository.save(asyncIssuance)

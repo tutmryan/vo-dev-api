@@ -11,7 +11,11 @@ export async function CreateIssuanceRequestForAsyncIssuanceCommand(
   asyncIssuanceRequestId: string,
   photo?: string,
 ): Promise<IssuanceRequestResponse> {
-  const { services, user, inTransaction } = this
+  const { services, user, inTransaction, logger } = this
+
+  logger.mergeMeta({
+    asyncIssuanceRequestId,
+  })
 
   // this command can be run in two scenarios:
   // 1. user has established a limited async issuance session via OTP verification
@@ -89,6 +93,8 @@ export async function CreateIssuanceRequestForAsyncIssuanceCommand(
             issuanceRequestId: response.requestId,
           })
         }
+
+        logger.audit('Issuance request created for async issuance')
       }
 
       response.postIssuanceRedirectUrl = asyncIssuance.postIssuanceRedirectUrl

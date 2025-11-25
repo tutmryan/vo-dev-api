@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto'
+import { In, type InsertResult } from 'typeorm'
 import type { EntityTarget } from 'typeorm/common/EntityTarget'
 import type { ObjectLiteral } from 'typeorm/common/ObjectLiteral'
 import type { FindOptionsWhere } from 'typeorm/find-options/FindOptionsWhere'
@@ -7,7 +8,6 @@ import { UserEntity } from '../features/users/entities/user-entity'
 import { chunkify } from '../util/chunkify'
 import { invariant } from '../util/invariant'
 import type { VerifiedOrchestrationEntityManager, VerifiedOrchestrationRepository } from './entity-manager'
-import { In } from 'typeorm'
 import type { VerifiedOrchestrationEntity } from './verified-orchestration-entity'
 
 // This controls the number of records that are inserted in a single batch
@@ -23,10 +23,12 @@ async function doBatchInsert<T extends ObjectLiteral>(
   repo: VerifiedOrchestrationRepository<T>,
   batchSize: number,
   additionalData?: object,
+  log?: (result: InsertResult) => void,
 ) {
   const chunks = chunkify(data, batchSize)
   for (const chunk of chunks) {
-    await repo.insert(additionalData ? chunk.map((c) => Object.assign(c, additionalData)) : chunk)
+    const result = await repo.insert(additionalData ? chunk.map((c) => Object.assign(c, additionalData)) : chunk)
+    log?.(result)
   }
 }
 
@@ -40,6 +42,7 @@ export async function bulkInsert<
   options?: {
     entityAuditTarget?: EntityTarget<TA>
     batchSize?: number
+    log?: (result: InsertResult) => void
   },
 ) {
   const { batchSize = DEFAULT_INSERT_BATCH_SIZE, entityAuditTarget } = options || {}
@@ -54,6 +57,7 @@ export async function bulkInsert<
     auditRepo
       ? { handoffInsert: (auditData: AuditData) => auditEntriesToSave.push(auditData) }
       : (undefined satisfies AuditOptimisationControl | undefined),
+    options?.log,
   )
 
   if (auditRepo) {

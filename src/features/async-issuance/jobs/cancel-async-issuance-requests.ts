@@ -23,6 +23,9 @@ const cancelAsyncIssuanceRequests = async (context: HandlerContext, where: FindO
 
   for (let i = 0; i < requests.length; i++) {
     const request = requests[i]!
+    logger.mergeMeta({
+      asyncIssuanceRequestId: request.id,
+    })
     try {
       if (request.state === 'cancelled') {
         continue
@@ -40,9 +43,11 @@ const cancelAsyncIssuanceRequests = async (context: HandlerContext, where: FindO
         )
         request.canceled()
         await entityManager.getRepository(AsyncIssuanceEntity).save(request)
+        logger.audit('Async issuance request cancelled')
       })
     } catch (err) {
       logger.error(`Error occurred when canceling the async issuance request ${request.id}`, err)
+      logger.audit('Failed to cancel async issuance request')
       errorMessages.push(`Error occurred when canceling the async issuance request ${request.id}: ${(err as Error).message}`)
     } finally {
       await context.updateProgress(Math.floor(((i + 1) / requests.length) * 100))

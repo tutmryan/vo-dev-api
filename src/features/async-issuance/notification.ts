@@ -11,10 +11,12 @@ import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
  * Sends an async issuance notification to the issuee and updates entity state.
  */
 export async function sendAsyncIssuanceNotification(
-  { services: { asyncIssuances, communications } }: Pick<HandlerContext, 'services'>,
+  { services: { asyncIssuances, communications }, logger }: Pick<HandlerContext, 'services' | 'logger'>,
   entityManager: VerifiedOrchestrationEntityManager,
   requestId: string,
 ): Promise<AsyncIssuanceEntity> {
+  logger.mergeMeta({ asyncIssuanceRequestId: requestId })
+
   // load the entity and contract
   const repo = entityManager.getRepository(AsyncIssuanceEntity)
   const entity = await repo.findOneOrFail({ where: { id: requestId }, relations: { contract: true } })
@@ -55,5 +57,9 @@ export async function sendAsyncIssuanceNotification(
   await communications.sendIssuance(notification.value, data, entityManager)
   entity.contacted()
 
-  return await repo.save(entity)
+  await repo.save(entity)
+
+  logger.audit('Async issuance notification sent', data)
+
+  return entity
 }

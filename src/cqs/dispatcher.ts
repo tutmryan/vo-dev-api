@@ -1,5 +1,5 @@
 import type { CommandContext, QueryContext, TransactionalCommandContext } from '.'
-import type { GraphQLContext } from '../context'
+import { type GraphQLContext } from '../context'
 import { entityManager, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../data'
 import { addUserToManager } from '../data/user-context-helper'
 import { userIsUserEntity } from '../util/user-invariant'
@@ -67,15 +67,14 @@ export const query = async <T extends QueryLike>(
   ...args: Parameters<T>
 ): Promise<Awaited<ReturnType<T>>> => {
   const { user, logger, services, dataLoaders } = context
-  return (await query.apply(
-    {
-      user,
-      entityManager,
-      logger,
-      services,
-      dataLoaders,
-      contextType: 'query',
-    },
-    args,
-  )) as Awaited<ReturnType<T>>
+  const queryContext: QueryContext = {
+    user,
+    entityManager,
+    logger,
+    services,
+    dataLoaders,
+    contextType: 'query',
+  }
+
+  return (await query.apply(queryContext, args)) as Awaited<ReturnType<T>>
 }

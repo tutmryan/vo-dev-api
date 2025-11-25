@@ -5,7 +5,7 @@ import { runInTransaction } from '../data'
 import { dataSource } from '../data/data-source'
 import { SYSTEM_USER_ID, UserEntity } from '../features/users/entities/user-entity'
 import { BackgroundJobStatus } from '../generated/graphql'
-import { logger } from '../logger'
+import { logger as globalLogger } from '../logger'
 import { redisOptions } from '../redis'
 import { createVerifiedIdAdminService } from '../services'
 import { AsyncIssuanceService } from '../services/async-issuance-service'
@@ -16,13 +16,14 @@ import { getJobConfig, type HandlerContext, type JobPayload } from './jobs'
 import { publishBackgroundJobEvent } from './pubsub'
 import { defaultJobOptions, JobQueueName } from './queue'
 
-function jobLogMetadata({ job, user }: { job?: Job<JobPayload>; user?: UserEntity }) {
+export function jobLogMetadata({ job, user }: { job?: Job<JobPayload>; user?: UserEntity }) {
   return { job: job ? { name: job.name, id: job.id } : {}, user: user ? { id: user.id, name: user.name } : {} }
 }
 
 async function executeJob(job: Job<JobPayload>, jobConfig: JobConfig, entityManager: EntityManager, systemUserId: string) {
   const { name, data: payload } = job
   const { userId, requestInfo } = payload
+  const logger = globalLogger.child(jobLogMetadata({ job }))
   const context: HandlerContext = {
     logger,
     entityManager,
@@ -36,17 +37,17 @@ async function executeJob(job: Job<JobPayload>, jobConfig: JobConfig, entityMana
       communications: new CommunicationsService(logger),
     },
   }
+  logger.mergeMeta({ user: context.user })
 
   const started = Date.now()
-  const logMetadata = jobLogMetadata({ job, user: context.user })
 
-  logger.verbose(`Running handler for job ${name} as ${context.user.name}`, logMetadata)
+  logger.verbose(`Running handler for job ${name} as ${context.user.name}`)
   try {
     const result = await jobConfig.handler(context, payload)
-    logger.verbose(`Handler for job ${name} completed in ${Date.now() - started}ms`, logMetadata)
+    logger.verbose(`Handler for job ${name} completed in ${Date.now() - started}ms`)
     return result
   } catch (error) {
-    logger.error(`Handler for job ${name} failed after ${Date.now() - started}ms`, { error, ...logMetadata })
+    logger.error(`Handler for job ${name} failed after ${Date.now() - started}ms`, { error })
     // Exceptions thrown from a worker must be an `Error` for BullMQ to handle them correctly
     // https://docs.bullmq.io/guide/retrying-failing-jobs
     throw new Error(`Job ${name} failed`, { cause: error })
@@ -118,11 +119,11 @@ export const worker = Lazy(() => {
         userId: job.data.userId,
       })
     }
-    logger.error(`Job ${job?.id} failed after attempt ${job?.attemptsMade}`, { error, ...jobLogMetadata({ job }) })
+    globalLogger.error(`Job ${job?.id} failed after attempt ${job?.attemptsMade}`, { error, ...jobLogMetadata({ job }) })
   })
 
   worker.on('error', (error) => {
-    logger.error('Background worker failed', { error })
+    globalLogger.error('Background worker failed', { error })
   })
 
   return worker

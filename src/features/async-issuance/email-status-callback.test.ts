@@ -6,14 +6,15 @@ import { throwError } from '../../util/throw-error'
 import { CommunicationEntity } from '../communication/entities/communication-entity'
 import { createIdentity } from '../identity/tests/create-identity'
 import { SYSTEM_USER_ID } from '../users/entities/user-entity'
-import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
 import {
   getIssuanceEmailStatusCallbackUrl,
   getVerificationEmailStatusCallbackUrl,
   handleEmailStatusCallback,
 } from './email-status-callback'
+import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
 import { createIssuanceRequest } from './tests/create-async-issuance'
 import { buildContact, givenContract } from './tests/index'
+import { logger } from '../../logger'
 
 describe('Email status callback', () => {
   beforeAfterAll()
@@ -75,6 +76,7 @@ describe('Email status callback', () => {
               smtpId: casual.uuid,
             },
             entityManager,
+            logger,
           )
         }, SYSTEM_USER_ID)
 
@@ -125,6 +127,7 @@ describe('Email status callback', () => {
               smtpId: casual.uuid,
             },
             entityManager,
+            logger,
           )
         }, SYSTEM_USER_ID)
 
@@ -193,6 +196,7 @@ describe('Email status callback', () => {
               smtpId: casual.uuid,
             },
             entityManager,
+            logger,
           )
         })
 

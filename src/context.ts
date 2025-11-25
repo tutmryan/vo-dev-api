@@ -21,7 +21,7 @@ import { FindUpdateOrCreateUser } from './features/users/commands/find-update-or
 import { UserEntity } from './features/users/entities/user-entity'
 import type { DataLoaders } from './loaders'
 import { createDataLoaders } from './loaders'
-import { logger } from './logger'
+import { logger as globalLogger, type LoggerWithMetaControl } from './logger'
 import { AppRoles, InternalClientRoles, InternalRoles, LimitedAccessTokenAcquisitionRoles, UserRoles } from './roles'
 import type { Services } from './services'
 import { createServices } from './services'
@@ -29,7 +29,7 @@ import { User } from './user'
 import { enumStringValues } from './util/enum-util'
 import { invariant } from './util/invariant'
 
-export type BaseContext = GraphQLContextBase<typeof logger, RequestInfo, User<UserEntity> | User<IdentityEntity> | undefined>
+export type BaseContext = GraphQLContextBase<LoggerWithMetaControl, RequestInfo, User<UserEntity> | User<IdentityEntity> | undefined>
 export type GraphQLContext = BaseContext & {
   dataSource: DataSource
   services: Services
@@ -159,7 +159,7 @@ export const dispatchWithoutContext = async <T extends CommandLike>(
   const context: DispatchContext = {
     dataSource,
     user: undefined,
-    logger,
+    logger: globalLogger.child({}),
     requestInfo: {} as any as RequestInfo,
     services: {} as any as Services,
     dataLoaders: {} as any as DataLoaders,
@@ -177,7 +177,7 @@ const augmentContext = (context: BaseContext) => {
 export const createContext = createContextFactory<GraphQLContext>({
   claimsToLog: logging.userClaimsToLog,
   requestInfoToLog: logging.requestInfoToLog,
-  requestLogger: (requestMetadata) => logger.child(requestMetadata),
+  requestLogger: (requestMetadata) => globalLogger.child(requestMetadata),
   createUser: ({ claims, req }) => findUpdateOrCreateUser(claims, req.headers.authorization?.substring(7)),
   augmentContext,
 })
@@ -185,7 +185,7 @@ export const createContext = createContextFactory<GraphQLContext>({
 export const createSubscriptionContext = createSubscriptionContextFactory<GraphQLContext>({
   claimsToLog: logging.userClaimsToLog,
   requestInfoToLog: logging.requestInfoToLog,
-  requestLogger: (requestMetadata) => logger.child(requestMetadata),
+  requestLogger: (requestMetadata) => globalLogger.child(requestMetadata),
   createUser: ({ claims, connectionParams }) => findUpdateOrCreateUser(claims, extractTokenFromConnectionParams(connectionParams)),
   augmentContext,
 })

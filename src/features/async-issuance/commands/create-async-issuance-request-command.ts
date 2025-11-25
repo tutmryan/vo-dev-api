@@ -17,7 +17,6 @@ import type {
   Maybe,
 } from '../../../generated/graphql'
 import { ContactMethod, FaceCheckPhotoSupport } from '../../../generated/graphql'
-import { logger } from '../../../logger'
 import { validateIssuanceRequestBodySize } from '../../../services/verified-id/utils'
 import { invariant } from '../../../util/invariant'
 import { throwError } from '../../../util/throw-error'
@@ -66,6 +65,7 @@ export async function CreateAsyncIssuanceRequestCommand(
     user,
     entityManager,
     services: { asyncIssuances },
+    logger,
   } = this
 
   userInvariant(user)
@@ -209,6 +209,13 @@ export async function CreateAsyncIssuanceRequestCommand(
     entityManager,
     {
       entityAuditTarget: AsyncIssuanceAudit,
+      log: (result) => {
+        result.identifiers.forEach((identifier) => {
+          logger.audit('Async issuance request created', {
+            asyncIssuanceRequestId: identifier.id,
+          })
+        })
+      },
     },
   )
 

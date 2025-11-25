@@ -10,6 +10,7 @@ import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
 import { getIssuanceSmsStatusCallbackUrl, getVerificationSmsStatusCallbackUrl, handleSmsStatusCallback } from './sms-status-callback'
 import { createIssuanceRequest } from './tests/create-async-issuance'
 import { buildContact, givenContract } from './tests/index'
+import { logger } from '../../logger'
 
 describe('SMS status callback', () => {
   beforeAfterAll()
@@ -73,6 +74,7 @@ describe('SMS status callback', () => {
               errorCode,
             },
             entityManager,
+            logger,
           )
         }, SYSTEM_USER_ID)
 
@@ -118,6 +120,7 @@ describe('SMS status callback', () => {
               messageStatus: 'failed',
             },
             entityManager,
+            logger,
           )
         }, SYSTEM_USER_ID)
 
@@ -178,6 +181,7 @@ describe('SMS status callback', () => {
               messageStatus,
             },
             entityManager,
+            logger,
           )
         })
 

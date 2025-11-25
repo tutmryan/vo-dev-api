@@ -10,8 +10,12 @@ export type SendAsyncIssuanceNotificationsJobPayload = { asyncIssuanceRequestIds
 
 export const sendAsyncIssuanceNotificationsJobHandler: JobHandler<SendAsyncIssuanceNotificationsJobPayload> = async (context, payload) => {
   const errorMessages = []
+  const { logger } = context
 
   for (const [i, asyncIssuanceRequestId] of payload.asyncIssuanceRequestIds.entries()) {
+    logger.mergeMeta({
+      asyncIssuanceRequestId,
+    })
     try {
       await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
         addUserToManager(entityManager, context.user.id)
@@ -28,6 +32,7 @@ export const sendAsyncIssuanceNotificationsJobHandler: JobHandler<SendAsyncIssua
         if (err instanceof CommunicationError) {
           await context.services.communications.recordCommunicationFailure(err, entityManager)
         }
+        logger.audit('Failed to send async issuance notification')
       })
 
       errorMessages.push(

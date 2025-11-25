@@ -8,7 +8,12 @@ export const cannotCancelError = 'Cannot cancel async issuance request'
 export async function CancelAsyncIssuanceRequestCommand(this: CommandContext, asyncIssuanceRequestId: string) {
   const {
     services: { asyncIssuances },
+    logger,
   } = this
+
+  logger.mergeMeta({
+    asyncIssuanceRequestId,
+  })
 
   const request = await this.entityManager.getRepository(AsyncIssuanceEntity).findOneByOrFail({
     id: asyncIssuanceRequestId,
@@ -20,6 +25,8 @@ export async function CancelAsyncIssuanceRequestCommand(this: CommandContext, as
   await asyncIssuances.deleteAsyncIssuanceIfExists(request.id, convertAsyncIssuanceExpiryDaysToRequestExpiry(request.expiryPeriodInDays))
   request.canceled()
   await this.entityManager.getRepository(AsyncIssuanceEntity).save(request)
+
+  logger.audit('Async issuance request cancelled')
 
   return request
 }

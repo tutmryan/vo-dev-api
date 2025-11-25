@@ -1,10 +1,11 @@
+import { buildBaseRequestInfo } from '@makerx/graphql-core'
 import bodyParser from 'body-parser'
 import type { Express } from 'express'
 import { apiUrl } from '../../config'
 import type { CommandContext } from '../../cqs'
 import { runInTransaction } from '../../data'
 import { CommunicationPurpose, ContactMethod } from '../../generated/graphql'
-import { logger } from '../../logger'
+import { logger as globalLogger, type Logger } from '../../logger'
 import { smsPayloadSchema, toUserErrorMessage, validateSmsCallbackRequest, type MessageStatuses } from '../../util/sms'
 import { CommunicationEntity } from '../communication/entities/communication-entity'
 import { SYSTEM_USER_ID } from '../users/entities/user-entity'
@@ -30,6 +31,7 @@ export async function handleSmsStatusCallback(
   asyncIssuanceId: string,
   payload: SmsStatusCallbackPayload,
   entityManager: CommandContext['entityManager'],
+  logger: Logger,
 ): Promise<void> {
   const errorStatuses: readonly MessageStatuses[] = ['failed', 'undelivered', 'canceled']
   if (!errorStatuses.includes(payload.messageStatus)) {
@@ -37,7 +39,6 @@ export async function handleSmsStatusCallback(
   }
 
   logger.info(`SMS ${type} message for async issuance ${asyncIssuanceId} failed with status ${payload.messageStatus}`, {
-    asyncIssuanceId,
     smsPayload: payload,
   })
 
@@ -47,9 +48,7 @@ export async function handleSmsStatusCallback(
   const userMessage = toUserErrorMessage(payload.messageStatus, payload.errorCode)
 
   logger.audit(`Recording SMS ${type} failure for async issuance`, {
-    asyncIssuanceId: asyncIssuance.id,
     identityId: asyncIssuance.identityId,
-    type,
     error: userMessage,
   })
 
@@ -69,21 +68,24 @@ export async function handleSmsStatusCallback(
 
 export async function addAsyncIssuanceSmsStatusEndpoint(app: Express): Promise<void> {
   app.post('/external/callback/sms/async-issuance/:type/:asyncIssuanceId', bodyParser.urlencoded({ extended: false }), async (req, res) => {
+    const logger = globalLogger.child({ request: buildBaseRequestInfo(req) })
+
     try {
       const { type, asyncIssuanceId } = req.params as { type: SmsStatusCallbackType; asyncIssuanceId: string }
+      logger.mergeMeta({ asyncIssuanceRequestId: asyncIssuanceId, type }) // asyncIssuanceRequestId is consistent with GraphQL param names
 
       if (!validateSmsCallbackRequest(req)) {
-        logger.warn(`Invalid SMS status callback request for async issuance ${type} ${asyncIssuanceId}`)
+        logger.warn('Invalid SMS status callback request for async issuance')
         return res.status(403).send('Invalid request').end()
       }
 
       const payload = smsPayloadSchema.parse(req.body)
       await runInTransaction(SYSTEM_USER_ID, async (entityManager) => {
-        await handleSmsStatusCallback(type, asyncIssuanceId, payload, entityManager)
+        await handleSmsStatusCallback(type, asyncIssuanceId, payload, entityManager, logger)
       })
       return res.status(200).end()
     } catch (error) {
-      logger.error(`Error processing SMS status callback: ${(error as Error).message}`, { error })
+      logger.error(`Error processing SMS status callback`, { error })
       return res.status(400).send('Error processing SMS status callback').end()
     }
   })

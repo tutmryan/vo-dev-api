@@ -12,7 +12,7 @@ import {
 } from '../config'
 import type { BaseContext } from '../context'
 import type { MsGraphFailure } from '../generated/graphql'
-import { logger } from '../logger'
+import { logger, type Logger } from '../logger'
 import { Lazy } from '../util/lazy'
 import { AsyncIssuanceService } from './async-issuance-service'
 import { BlobStorageContainerService } from './blob-storage-container-service'
@@ -70,7 +70,7 @@ export async function testAllGraphServices(): Promise<MsGraphFailure[] | undefin
   return failures.length > 0 ? failures : undefined
 }
 
-export function createVerifiedIdAdminService(logger: BaseContext['logger'], correlationId?: string) {
+export function createVerifiedIdAdminService(logger: Logger, correlationId?: string) {
   const { baseUrl, scope } = verifiedIdAdmin
 
   return new VerifiedIdAdminService(

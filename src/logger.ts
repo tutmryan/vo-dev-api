@@ -1,6 +1,7 @@
 import { isLocalDev } from '@makerx/node-common'
 import { createLogger } from '@makerx/node-winston'
 import { pid } from 'node:process'
+import type { Transform } from 'node:stream'
 import type { LoggerOptions, QueryRunner, Logger as TypeOrmLoggerInterface } from 'typeorm'
 import type { Logger as WinstonLogger } from 'winston'
 import * as winston from 'winston'
@@ -8,10 +9,19 @@ import { logging } from './config'
 import { auditService } from './services/audit-service'
 import { redactValues } from './util/redact-values'
 
-/**
- * set up 'audit' log level, replacing 'http' level
- */
 export type Logger = ReturnType<typeof createLogger> & { audit: winston.LeveledLogMethod } & Pick<WinstonLogger, 'isVerboseEnabled'>
+
+export type LoggerWithMetaControl = Logger & { mergeMeta: (meta: object) => void }
+
+// We duplicate type information here, but it's easier than having to cast everywhere, so the dev UX is better
+declare module 'winston' {
+  interface Logger {
+    child(options: object): Pick<WinstonLogger, 'child' | 'debug' | 'error' | 'info' | 'verbose' | 'warn' | 'log' | 'isVerboseEnabled'> & {
+      audit: winston.LeveledLogMethod
+      mergeMeta: (meta: object) => void
+    }
+  }
+}
 
 const logLevels = {
   audit: 0, // Audit logs must always be captured
@@ -33,7 +43,6 @@ const logColours: Record<keyof typeof logLevels, string> = {
   silly: 'magenta',
 }
 
-// configure colors
 winston.addColors({ ...logColours })
 
 const baseLogger = createLogger({
@@ -53,7 +62,7 @@ const baseLogger = createLogger({
 export const logger: Logger = Object.create(baseLogger, {
   write: {
     value: function ({ level, message, ...rest }: { level: any; message: any }) {
-      const transform = baseLogger as any
+      const transform = baseLogger as unknown as Transform // A winston logger extends Transform stream
       const redactedValues = redactValues(rest, ...logging.redactPaths)
 
       transform.write(Object.assign({}, { logLevel: level, level: level === 'audit' ? 'info' : level, message }, redactedValues))
@@ -61,6 +70,31 @@ export const logger: Logger = Object.create(baseLogger, {
       if (level === 'audit') {
         auditService.log(message, redactedValues)
       }
+    },
+  },
+  child: {
+    value: function (meta: Record<string, any>) {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      const logger = this // capture this (parent logger) for use in write-value closure below
+
+      return Object.create(logger, {
+        mergeMeta: {
+          value: function (additionalMeta: Record<string, any>) {
+            Object.assign(meta, additionalMeta)
+            return this
+          },
+        },
+        write: {
+          value: function (info: object) {
+            const infoClone = Object.assign({}, meta, info)
+            if (info instanceof Error) {
+              infoClone.message = info.message
+              infoClone.stack = info.stack
+            }
+            logger.write(infoClone)
+          },
+        },
+      })
     },
   },
 })

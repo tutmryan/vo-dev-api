@@ -1,9 +1,10 @@
 import type { Job } from 'bullmq'
 import { randomUUID } from 'crypto'
 import type { HandlerContext, JobHandler, JobPayload } from '../background-jobs/jobs'
+import { jobLogMetadata } from '../background-jobs/worker'
 import { dataSource } from '../data'
 import { UserEntity } from '../features/users/entities/user-entity'
-import { logger } from '../logger'
+import { logger as globalLogger } from '../logger'
 import { createVerifiedIdAdminService } from '../services'
 import { AsyncIssuanceService } from '../services/async-issuance-service'
 import { CommunicationsService } from '../services/communications-service'
@@ -26,6 +27,16 @@ export const createTestWorkerContext = async (): Promise<HandlerContext> => {
     )
     workerOid = user.oid
   }
+
+  const logger = globalLogger.child(
+    jobLogMetadata({
+      job: {
+        id: 'test-job-id',
+        name: 'test-job-name',
+      } as Job,
+      user,
+    }),
+  )
 
   return {
     logger,

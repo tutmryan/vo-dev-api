@@ -22,7 +22,7 @@ import { applyOidcSigningKeysRotationJobHandler } from '../features/oidc-provide
 import { initialiseOidcDataJobHandler } from '../features/oidc-provider/jobs/initialise-data-job-handler'
 import { initialiseOidcKeysJobHandler } from '../features/oidc-provider/jobs/initialise-keys-job-handler'
 import type { UserEntity } from '../features/users/entities/user-entity'
-import type { logger } from '../logger'
+import type { LoggerWithMetaControl } from '../logger'
 import { ONE_MINUTE_TTL } from '../redis/cache'
 import type { AsyncIssuanceService } from '../services/async-issuance-service'
 import type { CommunicationsService } from '../services/communications-service'
@@ -36,7 +36,7 @@ export type JobPayload<TData = unknown> = {
 } & TData
 
 export type HandlerContext = {
-  logger: typeof logger
+  logger: LoggerWithMetaControl
   user: UserEntity
   entityManager: VerifiedOrchestrationEntityManager
   requestInfo?: BaseRequestInfo

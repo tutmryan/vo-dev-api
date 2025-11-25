@@ -3,10 +3,11 @@ import { omit } from 'lodash'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
 import { IssuanceRequestStatus } from '../../../generated/graphql'
-import { logger } from '../../../logger'
+import { logger as globalLogger } from '../../../logger'
 import { createVerifiedIdAdminService } from '../../../services'
 import { invariant } from '../../../util/invariant'
 import { completeAsyncIssuance } from '../../async-issuance'
+import { getAsyncIssuanceDataBySessionKey } from '../../async-issuance/session'
 import type { IssuanceCallbackHandler } from '../../callback'
 import { requestDetailsCache } from '../../callback/cache'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
@@ -18,6 +19,7 @@ import { publishIssuanceEvent } from './pubsub'
 
 export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) => {
   const eventReceived = Date.now()
+  const logger = globalLogger.child({ correlationId: event.requestId })
 
   const requestDetails = await requestDetailsCache().get(event.requestId)
   if (!requestDetails) {
@@ -27,6 +29,13 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
 
   const { photoCaptureRequestId, asyncIssuanceKey, ...issuanceRequestDetails } = JSON.parse(requestDetails) as IssuanceRequestDetails
   const topicData: IssuanceTopicData = { ...issuanceRequestDetails, event }
+  const asyncIssuanceData = asyncIssuanceKey ? await getAsyncIssuanceDataBySessionKey(asyncIssuanceKey) : null
+
+  if (asyncIssuanceData)
+    logger.mergeMeta({
+      correlationId: asyncIssuanceData.asyncIssuanceRequestId,
+      asyncIssuanceRequestId: asyncIssuanceData.asyncIssuanceRequestId,
+    })
 
   if (event.requestStatus === IssuanceRequestStatus.IssuanceSuccessful) {
     await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
