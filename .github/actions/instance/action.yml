@@ -649,7 +649,7 @@ runs:
         API_CLIENT_ID: ${{ steps.add-instance-app-registration.outputs.instanceAppId }}
         INSTANCE: ${{ inputs.instance }}
       run: |
-        npm run build
+        npm run build --ignore-scripts
         sed -i "s|TENANT_ID|${{ inputs.home-tenant-id }}|g" ./build/staticwebapp.config.json
       # ^^^ replace the TENANT_ID placeholder with the home tenant ID
       working-directory: docs-site
