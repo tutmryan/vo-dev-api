@@ -142,5 +142,14 @@
     "description": "Provides access for support agents",
     "displayName": "Support agent",
     "value": "VerifiableCredential.SupportAgent"
+  },
+  {
+    "id": "3f8c8cb4-ad69-4a19-bf79-365f4771c826",
+    "allowedMemberTypes": ["User", "Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Can revoke credentials",
+    "displayName": "Credentials - Revoke",
+    "value": "credentials.revoke"
   }
 ]
