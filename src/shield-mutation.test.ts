@@ -209,39 +209,69 @@ describe('Shield Rules - Mutation Permissions', () => {
     })
 
     describe('revokeContractIssuances', () => {
-      testMutationPermissions([UserRoles.credentialAdmin, AppRoles.contractAdmin], false, revokeContractIssuancesMutation, {
-        contractId: 'abc',
-      })
+      testMutationPermissions(
+        [UserRoles.credentialAdmin, AppRoles.contractAdmin, UserRoles.credentialRevoker],
+        false,
+        revokeContractIssuancesMutation,
+        {
+          contractId: 'abc',
+        },
+      )
     })
 
     describe('revokeIdentityIssuances', () => {
-      testMutationPermissions([UserRoles.credentialAdmin, AppRoles.contractAdmin], false, revokeIdentityIssuancesMutation, {
-        identityId: 'abc',
-      })
+      testMutationPermissions(
+        [UserRoles.credentialAdmin, AppRoles.contractAdmin, UserRoles.credentialRevoker],
+        false,
+        revokeIdentityIssuancesMutation,
+        {
+          identityId: 'abc',
+        },
+      )
     })
 
     describe('revokeIssuance', () => {
-      testMutationPermissions([UserRoles.credentialAdmin, AppRoles.contractAdmin], false, revokeIssuanceMutation, {
-        id: 'abc',
-      })
+      testMutationPermissions(
+        [UserRoles.credentialAdmin, AppRoles.contractAdmin, UserRoles.credentialRevoker],
+        false,
+        revokeIssuanceMutation,
+        {
+          id: 'abc',
+        },
+      )
     })
 
     describe('revokeIssuances', () => {
-      testMutationPermissions([UserRoles.credentialAdmin, AppRoles.contractAdmin], false, revokeIssuancesMutation, {
-        ids: ['abc'],
-      })
+      testMutationPermissions(
+        [UserRoles.credentialAdmin, AppRoles.contractAdmin, UserRoles.credentialRevoker],
+        false,
+        revokeIssuancesMutation,
+        {
+          ids: ['abc'],
+        },
+      )
     })
 
     describe('revokeUserIssuances', () => {
-      testMutationPermissions([UserRoles.credentialAdmin, AppRoles.contractAdmin], false, revokeUserIssuancesMutation, {
-        userId: 'abc',
-      })
+      testMutationPermissions(
+        [UserRoles.credentialAdmin, AppRoles.contractAdmin, UserRoles.credentialRevoker],
+        false,
+        revokeUserIssuancesMutation,
+        {
+          userId: 'abc',
+        },
+      )
     })
 
     describe('revokeWalletIssuances', () => {
-      testMutationPermissions([UserRoles.credentialAdmin, AppRoles.contractAdmin], false, revokeWalletIssuancesMutation, {
-        walletId: 'abc',
-      })
+      testMutationPermissions(
+        [UserRoles.credentialAdmin, AppRoles.contractAdmin, UserRoles.credentialRevoker],
+        false,
+        revokeWalletIssuancesMutation,
+        {
+          walletId: 'abc',
+        },
+      )
     })
   })
 })

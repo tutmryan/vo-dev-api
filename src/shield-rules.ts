@@ -38,6 +38,9 @@ export const isIssuanceApp = hasRoleRule(AppRoles.issue, 'isIssuanceApp')
 export const isPresentationApp = hasRoleRule(AppRoles.present, 'isPresentationApp')
 export const isContractAdminApp = hasRoleRule(AppRoles.contractAdmin, 'isContractAdminApp')
 
+// user app common roles
+export const isCredentialRevoker = hasRoleRule(UserRoles.credentialRevoker)
+
 // api resource scope rules
 export const isIssuee = hasApiResourceScopeRule(OidcScopes.issuee)
 
@@ -83,5 +86,7 @@ export const isAllowedToCreateAndDeleteIdentities = or(
   isCredentialAdminUser,
   hasTokenAcquisitionRoleRequiringIdentityAccess,
 )
+
+export const isAllowedToRevokeCredentials = or(isCredentialAdminUser, isContractAdminApp, isCredentialRevoker)
 
 export const isAllowedToViewAsyncIssuanceRequests = or(isUserWithReadPermissions, isIssuanceApp, isSupportAgentUser)

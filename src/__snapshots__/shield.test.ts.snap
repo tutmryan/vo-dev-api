@@ -2229,6 +2229,13 @@ exports[`shield rules are setup correctly 1`] = `
           "__roles": [
             "VerifiableCredential.ContractAdmin"
           ]
+        },
+        {
+          "name": "hasRole-credentials.revoke",
+          "cache": "contextual",
+          "__roles": [
+            "credentials.revoke"
+          ]
         }
       ]
     },
@@ -2246,6 +2253,13 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual",
           "__roles": [
             "VerifiableCredential.ContractAdmin"
+          ]
+        },
+        {
+          "name": "hasRole-credentials.revoke",
+          "cache": "contextual",
+          "__roles": [
+            "credentials.revoke"
           ]
         }
       ]
@@ -2265,6 +2279,13 @@ exports[`shield rules are setup correctly 1`] = `
           "__roles": [
             "VerifiableCredential.ContractAdmin"
           ]
+        },
+        {
+          "name": "hasRole-credentials.revoke",
+          "cache": "contextual",
+          "__roles": [
+            "credentials.revoke"
+          ]
         }
       ]
     },
@@ -2282,6 +2303,13 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual",
           "__roles": [
             "VerifiableCredential.ContractAdmin"
+          ]
+        },
+        {
+          "name": "hasRole-credentials.revoke",
+          "cache": "contextual",
+          "__roles": [
+            "credentials.revoke"
           ]
         }
       ]
@@ -2301,6 +2329,13 @@ exports[`shield rules are setup correctly 1`] = `
           "__roles": [
             "VerifiableCredential.ContractAdmin"
           ]
+        },
+        {
+          "name": "hasRole-credentials.revoke",
+          "cache": "contextual",
+          "__roles": [
+            "credentials.revoke"
+          ]
         }
       ]
     },
@@ -2318,6 +2353,13 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual",
           "__roles": [
             "VerifiableCredential.ContractAdmin"
+          ]
+        },
+        {
+          "name": "hasRole-credentials.revoke",
+          "cache": "contextual",
+          "__roles": [
+            "credentials.revoke"
           ]
         }
       ]
@@ -5278,78 +5320,89 @@ exports[`shield rules are setup correctly 1`] = `
             {
               "rulesOr": [
                 {
-                  "name": "isUserWithReadPermissions",
-                  "cache": "contextual",
-                  "__roles": [
-                    "VerifiableCredential.Reader",
-                    "VerifiableCredential.Issuer",
-                    "VerifiableCredential.CredentialAdmin",
-                    "VerifiableCredential.PartnerAdmin",
-                    "VerifiableCredential.ApprovalRequestAdmin",
-                    "VerifiableCredential.OidcAdmin",
-                    "VerifiableCredential.InstanceAdmin"
+                  "rulesOr": [
+                    {
+                      "name": "isUserWithReadPermissions",
+                      "cache": "contextual",
+                      "__roles": [
+                        "VerifiableCredential.Reader",
+                        "VerifiableCredential.Issuer",
+                        "VerifiableCredential.CredentialAdmin",
+                        "VerifiableCredential.PartnerAdmin",
+                        "VerifiableCredential.ApprovalRequestAdmin",
+                        "VerifiableCredential.OidcAdmin",
+                        "VerifiableCredential.InstanceAdmin"
+                      ]
+                    },
+                    {
+                      "name": "isIssuanceApp",
+                      "cache": "contextual",
+                      "__roles": [
+                        "VerifiableCredential.Issue"
+                      ]
+                    },
+                    {
+                      "name": "isPresentationApp",
+                      "cache": "contextual",
+                      "__roles": [
+                        "VerifiableCredential.Present"
+                      ]
+                    },
+                    {
+                      "name": "isContractAdminApp",
+                      "cache": "contextual",
+                      "__roles": [
+                        "VerifiableCredential.ContractAdmin"
+                      ]
+                    },
+                    {
+                      "name": "isLimitedAccessApp",
+                      "cache": "contextual",
+                      "__roles": [
+                        "VerifiableCredential.LimitedAccess"
+                      ]
+                    },
+                    {
+                      "name": "isLimitedApprovalApp",
+                      "cache": "contextual",
+                      "__roles": [
+                        "VerifiableCredential.LimitedApproval"
+                      ]
+                    },
+                    {
+                      "name": "isLimitedAsyncIssuanceApp",
+                      "cache": "contextual",
+                      "__roles": [
+                        "VerifiableCredential.LimitedAsyncIssuance"
+                      ]
+                    },
+                    {
+                      "name": "isOidcAuthnClient",
+                      "cache": "contextual",
+                      "__roles": [
+                        "VerifiableCredential.LimitedOidcAuthn"
+                      ]
+                    },
+                    {
+                      "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+                      "cache": "contextual"
+                    }
                   ]
                 },
                 {
-                  "name": "isIssuanceApp",
+                  "name": "hasRole-VerifiableCredential.SupportAgent",
                   "cache": "contextual",
                   "__roles": [
-                    "VerifiableCredential.Issue"
+                    "VerifiableCredential.SupportAgent"
                   ]
-                },
-                {
-                  "name": "isPresentationApp",
-                  "cache": "contextual",
-                  "__roles": [
-                    "VerifiableCredential.Present"
-                  ]
-                },
-                {
-                  "name": "isContractAdminApp",
-                  "cache": "contextual",
-                  "__roles": [
-                    "VerifiableCredential.ContractAdmin"
-                  ]
-                },
-                {
-                  "name": "isLimitedAccessApp",
-                  "cache": "contextual",
-                  "__roles": [
-                    "VerifiableCredential.LimitedAccess"
-                  ]
-                },
-                {
-                  "name": "isLimitedApprovalApp",
-                  "cache": "contextual",
-                  "__roles": [
-                    "VerifiableCredential.LimitedApproval"
-                  ]
-                },
-                {
-                  "name": "isLimitedAsyncIssuanceApp",
-                  "cache": "contextual",
-                  "__roles": [
-                    "VerifiableCredential.LimitedAsyncIssuance"
-                  ]
-                },
-                {
-                  "name": "isOidcAuthnClient",
-                  "cache": "contextual",
-                  "__roles": [
-                    "VerifiableCredential.LimitedOidcAuthn"
-                  ]
-                },
-                {
-                  "name": "hasApiResourceScope-VerifiableCredential.Issuee",
-                  "cache": "contextual"
                 }
               ]
             },
             {
-              "name": "hasRole-VerifiableCredential.SupportAgent",
+              "name": "hasRole-credentials.revoke",
               "cache": "contextual",
               "__roles": [
-                "VerifiableCredential.SupportAgent"
+                "credentials.revoke"
               ]
             }
           ]

@@ -7,6 +7,7 @@ export enum UserRoles {
   oidcAdmin = 'VerifiableCredential.OidcAdmin',
   instanceAdmin = 'VerifiableCredential.InstanceAdmin',
   supportAgent = 'VerifiableCredential.SupportAgent',
+  credentialRevoker = 'credentials.revoke',
 }
 
 export enum OidcScopes {
@@ -18,6 +19,7 @@ export enum AppRoles {
   present = 'VerifiableCredential.Present',
   requestApproval = 'VerifiableCredential.RequestApproval',
   contractAdmin = 'VerifiableCredential.ContractAdmin',
+  revoke = 'credentials.revoke',
 }
 
 export enum LimitedAccessTokenAcquisitionRoles {
