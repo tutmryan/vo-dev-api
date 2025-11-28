@@ -10,6 +10,7 @@ import { inspect } from 'node:util'
 import type { Grant, InteractionResults } from 'oidc-provider'
 import { instance } from '../../config'
 import { requestOrigin } from '../../express'
+import { isIe11, isWebView3 } from '../../util/browser'
 import { invariant } from '../../util/invariant'
 import { redactValueObjectUnknown } from '../../util/redact-values'
 import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
@@ -65,15 +66,12 @@ export function routes(app: Express, route: string): void {
     const orig = res.render
     res.render = (view, locals) => {
       const userAgent = req.headers['user-agent'] ?? ''
-      // Old WebView (Chromium 70)
-      const dropToEs6 = userAgent.includes('WebView/3.0') && userAgent.includes('Chrome/70')
-      // Old trident (IE 11)
-      const dropToEs5 = userAgent.includes('Trident/7.0; rv:11.0') && userAgent.includes('Windows')
 
       locals = {
         ...locals,
-        dropToEs5,
-        dropToEs6,
+        dropToEs5: isIe11(userAgent),
+        dropToEs6: isWebView3(userAgent),
+        cspNonce: res.locals.cspNonce,
       }
 
       if (view === 'no-session') {

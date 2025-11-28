@@ -12,10 +12,12 @@ import { isLocalDev } from '@makerx/node-common'
 import bodyParser from 'body-parser'
 import cookieSession from 'cookie-session'
 import cors from 'cors'
+import { randomBytes } from 'crypto'
 import type { Express, Request } from 'express'
 import express from 'express'
 import type { HelmetOptions } from 'helmet'
 import helmet from 'helmet'
+import type { ServerResponse } from 'http'
 import { clone, merge } from 'lodash'
 import { combinedBearerTokenMiddleware } from './authentication'
 import {
@@ -36,19 +38,42 @@ import { vcLogoProxyHandler, vcLogoProxyTokenRoute } from './features/local-dev/
 import { addOidcProvider } from './features/oidc-provider'
 import { logger } from './logger'
 import { addServiceHealthEndpoints } from './services/monitoring/express'
+import { isWebView3 } from './util/browser'
 import { addVoyager } from './voyager'
+
 export const requestOrigin = (req: Request): string => `${req.protocol}://${req.get('Host')}`
+
+const getExpressCsp = (res: ServerResponse) => {
+  // A cast is required here because Helmet is using Node's Response and Express extends it
+  return (res as unknown as Express.Response).locals.cspNonce
+}
 
 const oidcOnlyCsp = {
   directives: {
-    scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
+    // https://cdn.jsdelivr.net is required for Windows embedded browser (The Chromium 70 used in the older WebView2)
+    scriptSrc: [
+      `'self'`,
+      `'strict-dynamic'`,
+      (req, _res) => (isWebView3(req.headers['user-agent'] ?? '') ? 'https://cdn.jsdelivr.net' : ''),
+      (_req, res) => `'nonce-${getExpressCsp(res)}'`,
+    ],
     formAction: null, // oidc form actions are dynamic - can't seem to wildcard this to a path blob expression
+    styleSrc: [`'self'`, (_req, res) => `'nonce-${getExpressCsp(res)}'`],
+    requireTrustedTypesFor: ["'script'"],
   },
 } satisfies HelmetOptions['contentSecurityPolicy']
 
 export async function getExpressApp(): Promise<Express> {
   const app = express()
   app.set('trust proxy', true)
+
+  app.use((_req, res, next) => {
+    // Must be a string of at least 128 bits (16 * 8 bit) of data from a cryptographically secure random number generator.
+    // Using 24 gives us 192 bits, so a bit of extra security margin.
+    // (Ref: https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Global_attributes/nonce)
+    res.locals.cspNonce = randomBytes(24).toString('hex')
+    next()
+  })
 
   app.use(
     helmet({
@@ -59,11 +84,13 @@ export async function getExpressApp(): Promise<Express> {
             directives: {
               imgSrc: [`'self'`, 'data:', 'apollo-server-landing-page.cdn.apollographql.com'],
               scriptSrc: [...oidcOnlyCsp.directives.scriptSrc],
+              styleSrc: [...oidcOnlyCsp.directives.styleSrc],
               manifestSrc: [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
               frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
               workerSrc: [`'self'`, 'blob:'], // voyager needs blob:
               connectSrc: [`'self'`, 'data:', 'https://cdn.jsdelivr.net'], // voyager needs self, data:, and cdn.jsdelivr.net
               formAction: oidcOnlyCsp.directives.formAction,
+              requireTrustedTypesFor: oidcOnlyCsp.directives.requireTrustedTypesFor,
             },
           }
         : oidcEnabled

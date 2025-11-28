@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <title>Sign-in</title>
-  <style>
+  <style nonce="<%-cspNonce%>">
     /* --- Minimal Bootstrap Replacements --- */
     /* for the specific classes used in this layout. */
     @keyframes spinner-border {
@@ -531,6 +531,11 @@
       <% } %>
     }
 
+    #client-errors-debug {
+      display: none;
+      margin-top: 1rem;
+    }
+
     .debug dt {
       font-weight: bold;
       text-align: left;
@@ -579,6 +584,10 @@
     button {
       cursor: pointer;
     }
+
+    .text-center {
+      text-align: center;
+    }
   </style>
 </head>
 
@@ -599,11 +608,12 @@
         <h1><%= title %></h1>
         <h2 class="<%= fontClass %>"><%= client.clientName %></h2>
       </div>
-
+      <% if(uid) { %>
       <div id="cancel-btn-horizontal" class="text-center">
         <a href="/oidc/interaction/<%= uid %>/abort"
           class="link-secondary link-offset-2 link-opacity-75 link-opacity-100-hover link-underline-opacity-25 link-underline-opacity-100-hover">Cancel</a>
       </div>
+      <% } %>
     </div>
 
     <div class="login-content-wrapper">
@@ -611,12 +621,13 @@
         <%- body %>
       </div>
 
-
       <div class="login-footer-content">
+        <% if(uid) { %>
         <div id="cancel-btn-vertical" class="text-center">
           <a href="/oidc/interaction/<%= uid %>/abort"
             class="link-secondary link-offset-2 link-opacity-75 link-opacity-100-hover link-underline-opacity-25 link-underline-opacity-100-hover">Cancel</a>
         </div>
+        <% } %>
         <div class="login-help">
           <% if (client.tosUri) { %>
           <a href="<%= client.tosUri %>" target="_blank"
@@ -633,12 +644,71 @@
     </div>
   </div>
   <% if (showDebug) { %>
-  <script>
+  <script nonce="<%-cspNonce%>">
+    // Queue to store errors that occur before DOM is ready
+    var pendingClientErrors = []
+
+    function showClientError(title, details) {
+      var container = document.getElementById('client-errors-debug')
+      var list = document.getElementById('client-errors-list')
+
+      if (container && list) {
+        container.style.display = 'block'
+
+        var dt = document.createElement('dt')
+        dt.textContent = title
+        dt.className = 'text-danger'
+
+        var dd = document.createElement('dd')
+        for (var key in details) {
+          if (details.hasOwnProperty(key)) { // es5 compatibility
+            var strong = document.createElement('strong')
+            strong.textContent = key + ':'
+            dd.appendChild(strong)
+            dd.appendChild(document.createTextNode(' ' + details[key]))
+            dd.appendChild(document.createElement('br'))
+          }
+        }
+
+        list.appendChild(dt)
+        list.appendChild(dd)
+      } else {
+        // DOM not ready yet, queue the error for later
+        pendingClientErrors.push({ title: title, details: details })
+      }
+    }
+
+    // Capture unhandled JavaScript errors immediately
+    window.onerror = function (message, source, lineno, colno, error) {
+      showClientError('JavaScript Error', {
+        message: message || 'Unknown error',
+        source: (source || 'unknown') + ':' + (lineno || '?') + ':' + (colno || '?'),
+        stack: error && error.stack ? error.stack : 'N/A'
+      })
+      return false // Let default handler run too
+    }
+
+    // Capture unhandled promise rejections immediately
+    window.addEventListener('unhandledrejection', function (event) {
+      var reason = event.reason
+      var reasonText = reason == null ? 'Unknown rejection' : String(reason)
+      showClientError('Unhandled Promise Rejection', {
+        reason: reasonText,
+        stack: reason && reason.stack ? reason.stack : 'N/A'
+      })
+    })
+
     window.addEventListener('load', function() { // es5 compatibility
       document.getElementById('window-dimensions-debug').innerText = window.innerWidth + ' (w) x ' + window.innerHeight + ' (h)'; // es5 compatibility
 
+      // Display any errors that were queued before DOM was ready
+      for (var i = 0; i < pendingClientErrors.length; i++) {
+        showClientError(pendingClientErrors[i].title, pendingClientErrors[i].details)
+      }
+      pendingClientErrors = []
+
       <% if (dropToEs5 || dropToEs6) { %>
-      (function() {
+      ;(function() {
         var testDetails = document.createElement('details');
         if ('open' in testDetails) return;
 
@@ -688,13 +758,15 @@
   </script>
   <div class="grant-debug debug">
     <details>
-      <summary style="text-align: center;">(Click to expand) DEBUG information</summary>
+      <summary class="text-center">(Click to expand) DEBUG information</summary>
       <dl>
         <dt>window size</dt>
         <dd id="window-dimensions-debug"></dd>
 
+        <% if(uid) { %>
         <dt>uid</dt>
         <dd><%= uid %></dd>
+        <% } %>
 
         <% if (session) { %>
         <dt>SESSION</dt>
@@ -704,6 +776,7 @@
         </dd>
         <% } %>
 
+        <% if(dbg) { %>
         <dt>PARAMS</dt>
         <dd>
           ======== <br>
@@ -715,14 +788,23 @@
           ======== <br>
           <%- dbg.prompt %>
         </dd>
+        <% } %>
       </dl>
+    </details>
+  </div>
+  <% } %>
+  <% if (showDebug) { %>
+  <div id="client-errors-debug" class="grant-debug debug">
+    <details open>
+      <summary class="text-center text-danger">Client-Side Errors</summary>
+      <dl id="client-errors-list"></dl>
     </details>
   </div>
   <% } %>
   <% if (showErrorDebug) { %>
   <div class="error-debug debug">
     <details>
-      <summary style="text-align: center;">(Click to expand) ERROR information</summary>
+      <summary class="text-center">(Click to expand) ERROR information</summary>
       <div>
         <dl>
           <dt>message</dt>

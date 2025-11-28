@@ -6,6 +6,7 @@ import { instance } from '../../config'
 import type { VerifiedOrchestrationEntity } from '../../data/verified-orchestration-entity'
 import { OidcApplicationType } from '../../generated/graphql'
 import { logger } from '../../logger'
+import { isIe11, isWebView3 } from '../../util/browser'
 import type { AuditedAndTrackedEntity } from '../auditing/entities/audited-and-tracked-entity'
 import type { OidcClientEntity } from './entities/oidc-client-entity'
 import { voLogoUrl } from './logos'
@@ -62,7 +63,14 @@ export const errorHandler: Configuration['renderError'] = async (ctx, errorOut, 
   const clientId = ctx.oidc.params?.client_id as string | undefined
   const clientEntity = tryGetClient(clientId)
   const { logo, backgroundColor, backgroundImage } = clientEntity
-  ctx.response.body = await renderFile(path.join(__dirname, 'views', 'error.ejs'), {
+  const userAgent = ctx.req.headers['user-agent'] ?? ''
+
+  const locals = {
+    title: 'Error',
+    uid: undefined,
+    session: undefined,
+    dbg: undefined,
+    showErrorDebug: false,
     error,
     errorOut,
     client: clientEntity,
@@ -71,5 +79,14 @@ export const errorHandler: Configuration['renderError'] = async (ctx, errorOut, 
     backgroundColor,
     backgroundImageUrl: backgroundImage,
     showDebug: isLocalDev || instance === 'dev',
+    dropToEs5: isIe11(userAgent),
+    dropToEs6: isWebView3(userAgent),
+    // A cast is required here because Koa is using Node's Response and Express extends it
+    cspNonce: (ctx.res as unknown as Express.Response).locals.cspNonce,
+  }
+
+  ctx.response.body = await renderFile(path.join(__dirname, 'views', '_layout.ejs'), {
+    ...locals,
+    body: await renderFile(path.join(__dirname, 'views', 'error.ejs'), locals),
   })
 }
