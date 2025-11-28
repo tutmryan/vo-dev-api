@@ -135,11 +135,6 @@ const config = {
                 prependBaseUrlToHref: false,
               },
               {
-                label: 'GraphQL Voyager',
-                href: `${process.env.GRAPHQL_ENDPOINT}/voyager`,
-                prependBaseUrlToHref: false,
-              },
-              {
                 label: 'Issuance builder',
                 href: `${process.env.ADMIN_URL}/issuance-builder`,
                 prependBaseUrlToHref: false,

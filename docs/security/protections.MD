@@ -70,16 +70,11 @@ The API optionally hosts developer tools. These are disabled by default for prod
 When enabled, additional functionality runs:
 
 - **GraphQL Playground**: An interactive GraphQL IDE hosted at `/graphql`.
-- **Voyager**: An interactive GraphQL schema visualizer hosted at `/voyager`.
 - **Interactive Authentication**: Microsoft PKCE authentication is performed for browser-based access to the developer tools, so that users can run authenticated operations from the tools against the API.
 
 ### Content Security Policy for developer tools
 
 When developer tools are enabled, the API host returns a more relaxed Content-Security-Policy header value to allow the developer tools to function.
-
-#### Notable inclusions in Content Security Policy for developer tools
-
-- `https: 'unsafe-eval'` is required for the Voyager to function.
 
 ## Static content
 

@@ -39,7 +39,6 @@ import { addOidcProvider } from './features/oidc-provider'
 import { logger } from './logger'
 import { addServiceHealthEndpoints } from './services/monitoring/express'
 import { isWebView3 } from './util/browser'
-import { addVoyager } from './voyager'
 
 export const requestOrigin = (req: Request): string => `${req.protocol}://${req.get('Host')}`
 
@@ -80,15 +79,14 @@ export async function getExpressApp(): Promise<Express> {
       strictTransportSecurity: !isLocalDev,
       contentSecurityPolicy: devToolsEnabled
         ? {
-            // override helmet defaults with apollo sandbox + voyager config
+            // override helmet defaults with apollo sandbox + oidc
             directives: {
               imgSrc: [`'self'`, 'data:', 'apollo-server-landing-page.cdn.apollographql.com'],
               scriptSrc: [...oidcOnlyCsp.directives.scriptSrc],
               styleSrc: [...oidcOnlyCsp.directives.styleSrc],
               manifestSrc: [`'self'`, 'apollo-server-landing-page.cdn.apollographql.com'],
               frameSrc: [`'self'`, 'sandbox.embed.apollographql.com'],
-              workerSrc: [`'self'`, 'blob:'], // voyager needs blob:
-              connectSrc: [`'self'`, 'data:', 'https://cdn.jsdelivr.net'], // voyager needs self, data:, and cdn.jsdelivr.net
+              workerSrc: [`'self'`],
               formAction: oidcOnlyCsp.directives.formAction,
               requireTrustedTypesFor: oidcOnlyCsp.directives.requireTrustedTypesFor,
             },
@@ -170,10 +168,6 @@ export async function getExpressApp(): Promise<Express> {
         ? interactiveAuthMiddleware(req, res, next)
         : next(),
     )
-
-    // add voyager
-    addVoyager(app)
-    logger.info(`Added /voyager`)
   }
 
   if (demoEnabled) {

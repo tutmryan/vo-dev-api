@@ -22,9 +22,6 @@ function HomepageHeader() {
               <Link className="button button--secondary button--lg" to={siteConfig.customFields.GRAPHQL_ENDPOINT as string}>
                 Sandbox
               </Link>
-              <Link className="button button--secondary button--lg" to={`${siteConfig.customFields.GRAPHQL_ENDPOINT}/voyager`}>
-                Voyager
-              </Link>
             </>
           )}
         </div>
