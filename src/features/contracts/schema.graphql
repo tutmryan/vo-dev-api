@@ -182,6 +182,10 @@ type Contract {
   When the contract was deprecated.
   """
   deprecatedAt: DateTime
+  """
+  The public manifest URL for the contract.
+  """
+  manifestUrl: String
 }
 
 """

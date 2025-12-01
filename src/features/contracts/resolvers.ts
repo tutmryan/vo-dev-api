@@ -9,6 +9,7 @@ import { ProvisionContractCommand } from './commands/provision-contract-command'
 import { UpdateContractCommand } from './commands/update-contract-command'
 import { getValidationTypeName } from './mapping'
 import { FindContractsQuery } from './queries/find-contracts-query'
+import { GetContractManifestUrlQuery } from './queries/get-contract-manifest-url-query'
 
 export const resolvers: Resolvers = {
   Query: {
@@ -31,6 +32,9 @@ export const resolvers: Resolvers = {
       if (!templateId) return null
       const template = await templates.load(templateId)
       return template.combinedData()
+    },
+    manifestUrl: async (contract, _, context) => {
+      return query(context, GetContractManifestUrlQuery, contract.externalId)
     },
   },
   Issuance: {

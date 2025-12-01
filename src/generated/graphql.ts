@@ -1006,6 +1006,8 @@ export type Contract = {
   lastProvisionedAt?: Maybe<Scalars['DateTime']['output']>;
   /** Who last provisioned the contract in the Verified ID service. */
   lastProvisionedBy?: Maybe<User>;
+  /** The public manifest URL for the contract. */
+  manifestUrl?: Maybe<Scalars['String']['output']>;
   /** The name of the contract */
   name: Scalars['String']['output'];
   /** Returns the weekly average of credential presentations for this contract. */
@@ -6371,6 +6373,7 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   issuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, RequireFields<ContractIssuancesArgs, 'limit'>>;
   lastProvisionedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   lastProvisionedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+  manifestUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   presentationWeeklyAverage?: Resolver<ResolversTypes['Float'], ParentType, ContextType, RequireFields<ContractPresentationWeeklyAverageArgs, 'where'>>;
   presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<ContractPresentationsArgs, 'limit'>>;
