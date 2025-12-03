@@ -52,12 +52,34 @@ const oidcOnlyCsp = {
     // https://cdn.jsdelivr.net is required for Windows embedded browser (The Chromium 70 used in the older WebView2)
     scriptSrc: [
       `'self'`,
-      `'strict-dynamic'`,
-      (req, _res) => (isWebView3(req.headers['user-agent'] ?? '') ? 'https://cdn.jsdelivr.net' : ''),
-      (_req, res) => `'nonce-${getExpressCsp(res)}'`,
+      (req, res) => {
+        const url = new URL(req.url ?? '', requestOrigin(req as Request))
+
+        // Apollo Sandbox requires special snow flaking
+        if (url.pathname.startsWith('/graphql')) return `https: 'unsafe-inline'`
+
+        const policies = [`'strict-dynamic'`, `'nonce-${getExpressCsp(res)}'`]
+
+        if (isWebView3(req.headers['user-agent'] ?? '')) {
+          // Required as webview3 (Chromium 70) does not support 'strict-dynamic'
+          policies.push('https://cdn.jsdelivr.net')
+        }
+
+        return policies.join(' ')
+      },
     ],
     formAction: null, // oidc form actions are dynamic - can't seem to wildcard this to a path blob expression
-    styleSrc: [`'self'`, (_req, res) => `'nonce-${getExpressCsp(res)}'`],
+    styleSrc: [
+      `'self'`,
+      (req, res) => {
+        const url = new URL(req.url ?? '', requestOrigin(req as Request))
+
+        // Apollo Sandbox requires special snow flaking
+        if (url.pathname.startsWith('/graphql')) return `https: 'unsafe-inline'`
+
+        return `'nonce-${getExpressCsp(res)}'`
+      },
+    ],
     requireTrustedTypesFor: ["'script'"],
   },
 } satisfies HelmetOptions['contentSecurityPolicy']
