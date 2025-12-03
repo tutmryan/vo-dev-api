@@ -58,11 +58,7 @@ To resolve this, there's a small script that will configure Ngrok to expose the 
 
 Before you run the command, there are a few prerequisites:
 
-Register your own domains in the Ngrok dashboard, making sure you choose the `ngrok.app` domain option!
-
-![Ngrok Domains](/docs/assets/ngrok-domains.png)
-
-Next, update the ngrok configuration file with endpoints that match your registered domains.
+Update the ngrok configuration file with endpoints that match your registered domains.
 
 Linux: `$HOME/.config/ngrok/ngrok.yml`
 Mac: `$HOME/Library/Application Support/ngrok/ngrok.yml`
@@ -74,17 +70,17 @@ agent:
   authtoken: SUPER_SECRET_AUTH_TOKEN
 endpoints:
   - name: api-tunnel
-    url: api-vo-your-custom-domain.ngrok.app
+    url: api-vo-your-custom-domain.local.idbyvo.com
     upstream:
       url: 4000
       protocol: http1
   - name: composer-tunnel
-    url: composer-vo-your-custom-domain.ngrok.app
+    url: composer-vo-your-custom-domain.local.idbyvo.com
     upstream:
       url: 5173
       protocol: http1
   - name: concierge-tunnel
-    url: concierge-vo-your-custom-domain.ngrok.app
+    url: concierge-vo-your-custom-domain.local.idbyvo.com
     upstream:
       url: 5174
       protocol: http1
@@ -95,9 +91,9 @@ This will allow you to issue credentials and test the platform as if it were hos
 ```text
 ------------------------------------------------
 Tunnels are open
-  API:       https://api-vo-wade.ngrok.app
-  Composer:  https://composer-vo-wade.ngrok.app
-  Concierge: https://concierge-vo-wade.ngrok.app
+  API:       https://api-wade.local.idbyvo.com
+  Composer:  https://composer-wade.local.idbyvo.com
+  Concierge: https://concierge-wade.local.idbyvo.com
 
 Ngrok dashboard
   http://127.0.0.1:4040/
