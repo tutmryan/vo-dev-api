@@ -12,14 +12,21 @@ import { instance } from '../../config'
 import { requestOrigin } from '../../express'
 import { isIe11, isWebView3 } from '../../util/browser'
 import { invariant } from '../../util/invariant'
-import { redactValueObjectUnknown } from '../../util/redact-values'
 import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
 import { filterToRequestedClaimsAcr, filterToRequestedClaimsAmr } from './claims-parameter'
 import { eamLoginFailResult, getEamAcr, getEamAmr, isEamRequestAndLoginShouldFail } from './integrations/entra-eam'
 import { buildRequestLogger } from './logger'
 import { voLogoUrl } from './logos'
 import { getClient, getData, getProvider, oidcProviderModule } from './provider'
-import { acquireLoginPresentationToken, buildAuthnPresentationRequest, completeLogin, getLoginInteractionData } from './session'
+import {
+  acquireLoginPresentationToken,
+  completeLogin,
+  extractRequestedCredentials,
+  getLoginInteractionData,
+  getSessionKey,
+  setLoginInteractionData,
+  setupLoginSession,
+} from './session'
 
 // taken from: https://github.com/panva/node-oidc-provider/blob/main/example/routes/express.js
 // - types hacked in
@@ -115,26 +122,25 @@ export function routes(app: Express, route: string): void {
 
       switch (prompt.name) {
         case 'login': {
-          const token = await acquireLoginPresentationToken({ interactionId: uid, clientId: client.clientId })
+          invariant(loginInteractionData === undefined || loginInteractionData.state === 'pre-start', 'Interaction session already exists')
+          const token = await acquireLoginPresentationToken()
+          const sessionKey = getSessionKey(token.access_token)
+          await setupLoginSession(uid, token)
           const clientEntity = getClient(client.clientId)
-
+          await setLoginInteractionData({
+            ...(loginInteractionData ?? {}),
+            interactionId: uid,
+            state: 'started',
+            clientId: client.clientId,
+            sessionKey,
+            requestedCredential: await extractRequestedCredentials(params, clientEntity, getData().partners, loginInteractionData, logger),
+          })
           // Integration hooks
           if (isEamRequestAndLoginShouldFail(loginInteractionData, logger)) {
             await provider.interactionFinished(req, res, eamLoginFailResult, { mergeWithLastSubmission: false })
             return
           }
 
-          // TODO: handle param validation errors with a better UX
-          const presentationRequest = await buildAuthnPresentationRequest(
-            params,
-            clientEntity,
-            getData().partners,
-            loginInteractionData,
-            logger,
-          )
-          logger.verbose('OIDC login presentation request', {
-            presentationRequest: redactValueObjectUnknown(presentationRequest),
-          })
           const { logo, backgroundColor, backgroundImage } = clientEntity
 
           return res.render('login', {
@@ -145,7 +151,6 @@ export function routes(app: Express, route: string): void {
             title: 'Sign in to',
             graphqlUrl: `${requestOrigin(req)}/graphql`,
             presentationAccessToken: token.access_token,
-            presentationRequest,
             voLogoUrl,
             logoUrl: logo,
             backgroundColor,

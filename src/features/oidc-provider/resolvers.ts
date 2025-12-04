@@ -23,8 +23,7 @@ import { FindOidcResourcesQuery } from './queries/find-oidc-resources-query'
 
 export const resolvers: Resolvers = {
   Mutation: {
-    createPresentationRequestForAuthn: async (_parent, { request }, context) =>
-      dispatch(context, CreatePresentationRequestForAuthnCommand, request),
+    createPresentationRequestForAuthn: async (_parent, _, context) => dispatch(context, CreatePresentationRequestForAuthnCommand),
 
     createOidcClient: async (_parent, { input }, context) => dispatch(context, CreateOidcClientCommand, input),
     updateOidcClient: async (_parent, { id, input }, context) => dispatch(context, UpdateOidcClientCommand, id, input),

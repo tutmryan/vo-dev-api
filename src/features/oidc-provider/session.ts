@@ -5,11 +5,13 @@ import { v5 as uuidv5 } from 'uuid'
 import { oidcProviderModule, oidcStorageService } from '.'
 import { faceCheckEnabled, limitedOidcAuthnAuth, limitedOidcClient } from '../../config'
 import { dataSource } from '../../data'
-import type { ClaimConstraint, Identity, PresentationRequestForAuthnInput, RequestConfiguration } from '../../generated/graphql'
+import type { ClaimConstraint, Identity, RequestConfiguration, RequestCredential } from '../../generated/graphql'
+import type { Logger } from '../../logger'
 import { newCacheSection, ONE_HOUR_TTL } from '../../redis/cache'
 import { getPlatformIssuerDid } from '../../services'
 import { invariant } from '../../util/invariant'
 import { Lazy } from '../../util/lazy'
+import { redactValueObjectUnknown } from '../../util/redact-values'
 import { createKey } from '../../util/token'
 import type { PartnerEntity } from '../partners/entities/partner-entity'
 import { getPresentationDataFromCache } from '../presentation/callback/cache'
@@ -21,7 +23,6 @@ import type { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entit
 import type { OidcClientEntity } from './entities/oidc-client-entity'
 import { ExtraParams } from './extra-params'
 import { addEamPresentationConstraints, getEamAccountId } from './integrations/entra-eam'
-import type { Logger } from '../../logger'
 
 const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
 const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', ONE_HOUR_TTL))
@@ -42,6 +43,7 @@ type LoginInteractionDataPostStart = {
       identityId?: string
     }
   }
+  requestedCredential?: RequestCredential
 }
 
 type LoginInteractionDataPreStart = {
@@ -51,29 +53,17 @@ type LoginInteractionDataPreStart = {
 
 export type LoginInteractionData = LoginInteractionDataPostStart | LoginInteractionDataPreStart
 
-export async function acquireLoginPresentationToken({
-  interactionId,
-  clientId,
-}: {
-  interactionId: string
-  clientId: string
-}): Promise<AccessTokenResponse> {
-  const interactionData = await getLoginInteractionData(interactionId)
-  invariant(interactionData === undefined || interactionData.state === 'pre-start', 'Interaction session already exists')
-  const token = await getClientCredentialsToken(limitedOidcAuthnAuth)
-  const sessionKey = getSessionKey(token.access_token)
-  await sessionInteractionCache().set(sessionKey, interactionId)
-  await setLoginInteractionData({ ...(interactionData ?? {}), interactionId, state: 'started', clientId, sessionKey })
-  return token
+export async function acquireLoginPresentationToken(): Promise<AccessTokenResponse> {
+  return await getClientCredentialsToken(limitedOidcAuthnAuth)
 }
 
-export async function buildAuthnPresentationRequest(
+export async function extractRequestedCredentials(
   params: UnknownObject,
   client: OidcClientEntity,
   partners: PartnerEntity[],
   loginInteractionData: LoginInteractionData | undefined,
   logger: Logger,
-): Promise<PresentationRequestForAuthnInput> {
+): Promise<RequestCredential> {
   const vcTypeParam = params[ExtraParams.vc_type] as string | undefined
   const vcIssuerParam = params[ExtraParams.vc_issuer] as string | undefined
 
@@ -149,16 +139,18 @@ export async function buildAuthnPresentationRequest(
     constraints = addEamPresentationConstraints(loginInteractionData, constraints, logger)
   }
 
-  return {
-    requestedCredentials: [
-      {
-        type,
-        acceptedIssuers: vcIssuerParam ? [vcIssuerParam] : undefined,
-        configuration: buildRequestConfiguration(params, client, loginInteractionData),
-        constraints,
-      },
-    ],
+  const requestedCredential = {
+    type,
+    acceptedIssuers: vcIssuerParam ? [vcIssuerParam] : undefined,
+    configuration: buildRequestConfiguration(params, client, loginInteractionData),
+    constraints,
   }
+
+  logger.verbose('OIDC login requested credential', {
+    requestedCredential: redactValueObjectUnknown(requestedCredential),
+  })
+
+  return requestedCredential
 }
 
 const faceCheckMinConfidenceThreshold = 50
@@ -331,6 +323,11 @@ export async function validateLoginSessionForPresentation(authnSessionKey: strin
 
 export async function setLoginInteractionData(data: LoginInteractionData): Promise<void> {
   await loginInteractionCache().set(data.interactionId, JSON.stringify(data))
+}
+
+export async function setupLoginSession(interactionId: string, token: AccessTokenResponse): Promise<void> {
+  const sessionKey = getSessionKey(token.access_token)
+  await sessionInteractionCache().set(sessionKey, interactionId)
 }
 
 export async function getLoginInteractionData(interactionId: string): Promise<LoginInteractionData | undefined> {

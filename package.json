@@ -153,7 +153,7 @@
     "dataloader": "^2.2.3",
     "date-fns": "^4.1.0",
     "ejs": "^3.1.10",
-    "express": "^4.19.2",
+    "express": "^4.22.0",
     "graphql": "^16.11.0",
     "graphql-constraint-directive": "^6.0.0",
     "graphql-middleware": "^6.1.35",

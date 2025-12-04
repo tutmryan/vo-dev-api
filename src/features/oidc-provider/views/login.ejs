@@ -14,11 +14,10 @@
       url: '<%- graphqlUrl %>',
       accessToken: '<%- presentationAccessToken %>',
     })
-      <% if (!dropToEs5) { %> const <% } else { %> var <% } %> request = <%-JSON.stringify(presentationRequest)%>
-      client
-        .createPresentationRequestForAuthn(request, handlePresentationEvent)
-        .then(handlePresentation)
-        .catch(displayError)
+    client
+      .createPresentationRequestForAuthn(handlePresentationEvent)
+      .then(handlePresentation)
+      .catch(displayError)
   }
 
   function handlePresentation(response) {
