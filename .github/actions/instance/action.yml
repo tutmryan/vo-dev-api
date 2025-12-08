@@ -73,6 +73,8 @@ inputs:
     description: The flag indicating whether the face check features (i.e. issuing credentials with face check photo, .etc) are available
   demo-enabled:
     description: The flag indicating whether the demo features (i.e. limited presentation token, presentation demo page, .etc) are available
+  mdoc-enabled:
+    description: The flag indicating whether the mdoc features are available
   identity-issuers:
     description: Mapping of identity issuer identifiers to labels (JSON Record<string, string>)
   platform-consumer-apps:
@@ -411,6 +413,7 @@ runs:
           devToolsEnabled=${{ inputs.dev-tools-enabled }}
           faceCheckEnabled=${{ inputs.face-check-enabled }}
           demoEnabled=${{ inputs.demo-enabled }}
+          mdocEnabled=${{ inputs.mdoc-enabled }}
           identityIssuers="${{ inputs.identity-issuers }}"
           platformConsumerApps="${{ inputs.platform-consumer-apps }}"
           additionalAuthTenantIds="${{ inputs.additional-auth-tenant-ids }}"

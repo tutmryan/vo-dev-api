@@ -2,6 +2,8 @@ import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { resolvePresentationEventData, subscribeToPresentationEventsWithFilter } from './callback/pubsub'
 import { CreatePresentationRequestCommand } from './commands/create-presentation-request-command'
+import { CreateMDocPresentationRequestCommand } from './commands/create-mdoc-presentation-request-command'
+import { ProcessMDocPresentationResponseCommand } from './commands/process-mdoc-presentation-response-command'
 import { resolvePresentedCredentials } from './presented-credentials-resolver'
 import { CountPresentationsByContractQuery } from './queries/count-presentations-by-contract-query'
 import { CountPresentationsByUserQuery } from './queries/count-presentations-by-user-query'
@@ -25,6 +27,9 @@ export const resolvers: Resolvers = {
   },
   Mutation: {
     createPresentationRequest: (_parent, { request }, context) => dispatch(context, CreatePresentationRequestCommand, request),
+    createMDocPresentationRequest: (_parent, { request }, context) => dispatch(context, CreateMDocPresentationRequestCommand, request),
+    processMDocPresentationResponse: (_parent, { response }, context) =>
+      dispatch(context, ProcessMDocPresentationResponseCommand, response),
   },
   Presentation: {
     presentedCredentials: (presentation, _, { user }) => resolvePresentedCredentials(presentation, user),
@@ -69,6 +74,12 @@ export const resolvers: Resolvers = {
   },
   PresentationRequestResponse: {
     __resolveType: (response) => ('error' in response ? 'RequestErrorResponse' : 'PresentationResponse'),
+  },
+  MDocPresentationRequestResponse: {
+    __resolveType: (response) => ('error' in response ? 'RequestErrorResponse' : 'MDocPresentationResponse'),
+  },
+  MDocProcessedResponseResult: {
+    __resolveType: (response) => ('error' in response ? 'RequestErrorResponse' : 'MDocProcessedResponse'),
   },
   Subscription: {
     presentationEvent: {

@@ -21,6 +21,7 @@ import {
   isValidLimitedContractRequest,
   isValidLimitedIdentityRequest,
   isValidLimitedIssuanceRequest,
+  isValidLimitedMdocPresentationRequest,
   isValidLimitedPresentationRequest,
   requestIdFilterDefined,
 } from './features/limited-access-tokens'
@@ -140,6 +141,8 @@ export const rules: ShieldSchema<Resolvers> = {
     createPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedPresentationRequest),
     createPresentationRequestForApproval: isValidLimitedPresentationRequestForApproval,
     createPresentationRequestForAuthn: isValidOidcAuthnPresentationRequest,
+    createMDocPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedMdocPresentationRequest),
+    processMDocPresentationResponse: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedMdocPresentationRequest),
     createTemplate: or(isCredentialAdminUser, isContractAdminApp),
     deleteConciergeBranding: isInstanceAdminUser,
     deleteContract: or(isCredentialAdminUser, isContractAdminApp),

@@ -132,6 +132,16 @@ export const isValidLimitedPresentationRequest = and(
   ),
 )
 
+export const isValidLimitedMdocPresentationRequest = and(
+  isLimitedPresentationApp,
+  rule('isValidLimitedMdocPresentationRequest', { cache: 'strict' })(
+    (_, _args: MutationCreatePresentationRequestArgs, _context: GraphQLContext) => {
+      // TODO (mdoc): Add mdoc specific validation here
+      return true
+    },
+  ),
+)
+
 // limited contract access
 export const isValidLimitedContractRequest = and(
   isLimitedAccessApp,

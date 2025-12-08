@@ -7,6 +7,13 @@ const config: Config.InitialOptions = {
   globalTeardown: '<rootDir>/../jest.teardown.ts',
   setupFilesAfterEnv: ['<rootDir>/../jest.setup-after-env.ts'],
   prettierPath: 'prettier-2',
+  // Transform ESM-only packages in node_modules so Jest can handle them
+  transformIgnorePatterns: ['node_modules/(?!(cbor2|@cto\\.af)/)'],
+  // Include transform for JS files from ESM packages
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest',
+    '^.+\\.jsx?$': 'ts-jest',
+  },
   // GH runners currently have 2 cores. However by default, Jest will use core count - 1,
   // so setting it to 2 will help with performance and memory usage
   ...(process.env.GITHUB_REPOSITORY ? { maxWorkers: 2 } : {}),

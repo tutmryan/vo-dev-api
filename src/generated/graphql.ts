@@ -43,6 +43,8 @@ export type Scalars = {
   EmailAddress: { input: string; output: string; }
   /** A field whose value is a hex color code: https://en.wikipedia.org/wiki/Web_colors. */
   HexColorCode: { input: string; output: string; }
+  /** The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
+  JSON: { input: unknown; output: unknown; }
   /** The `JSONObject` scalar type represents JSON objects as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf). */
   JSONObject: { input: Record<string, unknown>; output: Record<string, unknown>; }
   /** The locale in the format of a BCP 47 (RFC 5646) standard string */
@@ -162,6 +164,24 @@ export type ActionedBy = {
   id: Scalars['ID']['output'];
   /** The name of the identity */
   name: Scalars['String']['output'];
+};
+
+/** Android-specific presentation request using OpenID4VP protocol. */
+export type AndroidPresentationRequest = {
+  __typename?: 'AndroidPresentationRequest';
+  /** The protocol identifier for OpenID4VP. */
+  openId4VpProtocol: Scalars['String']['output'];
+  /** The OpenID4VP request as a JSON string, ready for use with the Digital Credential API. */
+  openId4VpRequest: Scalars['String']['output'];
+};
+
+/** Apple-specific presentation request using ISO18013-7 protocol. */
+export type ApplePresentationRequest = {
+  __typename?: 'ApplePresentationRequest';
+  /** The device request as a base64-encoded string. */
+  deviceRequest: Scalars['String']['output'];
+  /** Encryption information for the response as a base64-encoded string. */
+  encryptionInfo: Scalars['String']['output'];
 };
 
 /** A human-friendly label for a specific application (by identifier) */
@@ -2233,6 +2253,273 @@ export type ListValidationInput = {
   values: Array<Scalars['String']['input']>;
 };
 
+/** X.509 certificate validation details from the mDoc issuer authentication. */
+export type MDocCertificateValidation = {
+  __typename?: 'MDocCertificateValidation';
+  /** Whether the certificate chain validation succeeded. */
+  isValid: Scalars['Boolean']['output'];
+  /** The issuer distinguished name from the leaf certificate. */
+  issuer: Scalars['String']['output'];
+  /** Certificate serial number (hex format with colon separators). */
+  serialNumber: Scalars['String']['output'];
+  /** The subject distinguished name from the leaf certificate. */
+  subject: Scalars['String']['output'];
+  /** Certificate validity period. */
+  validity: MDocCertificateValidity;
+};
+
+/** Certificate validity period. */
+export type MDocCertificateValidity = {
+  __typename?: 'MDocCertificateValidity';
+  /** Certificate not valid after this date. */
+  notAfter: Scalars['DateTime']['output'];
+  /** Certificate not valid before this date. */
+  notBefore: Scalars['DateTime']['output'];
+};
+
+/**
+ * A single claim from an mDoc credential.
+ * Represents an IssuerSignedItem from the mDoc specification.
+ */
+export type MDocClaim = {
+  __typename?: 'MDocClaim';
+  /** The identifier of the data element (claim name). */
+  elementIdentifier: Scalars['String']['output'];
+  /**
+   * The value of the data element (claim value).
+   * Can be any JSON-compatible type (string, number, boolean, object, array, null).
+   */
+  elementValue?: Maybe<Scalars['JSON']['output']>;
+};
+
+/** Input for specifying an mDoc claim path. */
+export type MDocClaimPathInput = {
+  /**
+   * Optional flag indicating whether the verifier intends to retain the claim data.
+   * When true, signals to the wallet that the verifier plans to store this claim.
+   */
+  intentToRetain?: InputMaybe<Scalars['Boolean']['input']>;
+  /**
+   * The path to the claim in the mDoc (e.g., ["org.iso.18013.5.1", "family_name"]).
+   * The first element is typically the namespace, and the second is the claim name.
+   */
+  path: Array<Scalars['String']['input']>;
+  /**
+   * Optional flag indicating whether this claim should be used for identity creation/lookup.
+   * When true, this claim's value will be included in the hash used to create or find an identity.
+   * The identity will be created/found during processMDocPresentationResponse using:
+   * - identifier: hash of all claims marked with useForIdentity=true (sorted by path)
+   * - issuer: the docType of the presentation
+   */
+  useForIdentity?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Diagnostic information from the mDoc presentation response processing. */
+export type MDocDiagnostics = {
+  __typename?: 'MDocDiagnostics';
+  /** The decoded device response (as JSON string) */
+  deviceResponse?: Maybe<Scalars['String']['output']>;
+  /** The full decrypted JWT response (as JSON string) */
+  response?: Maybe<Scalars['String']['output']>;
+  /** Comprehensive validation results showing all checks performed according to ISO 18013-5. */
+  validation: MDocValidationResults;
+};
+
+/**
+ * Digest validation result for a single claim.
+ * Per ISO 18013-5 section 9.1.2.5, each IssuerSignedItem has a corresponding digest in the MSO
+ * that must be validated to ensure data integrity.
+ */
+export type MDocDigestValidation = {
+  __typename?: 'MDocDigestValidation';
+  /** The digest ID used to match the digest in the MSO. */
+  digestID: Scalars['Int']['output'];
+  /** The element identifier (claim name). */
+  elementIdentifier: Scalars['String']['output'];
+  /** Whether the digest validation passed. */
+  isValid: Scalars['Boolean']['output'];
+  /** The namespace (e.g., "org.iso.18013.5.1"). */
+  namespace: Scalars['String']['output'];
+};
+
+/**
+ * An mDoc document returned in the presentation response.
+ * Contains the document type and the issuer-signed claims organized by namespace.
+ */
+export type MDocDocument = {
+  __typename?: 'MDocDocument';
+  /** The document type (e.g., "org.iso.18013.5.1.mDL" for mobile driver's license). */
+  docType: Scalars['String']['output'];
+  /** The namespaces containing the issuer-signed claims. */
+  namespaces: Array<MDocNamespace>;
+};
+
+/**
+ * Validation results for a single mDoc document.
+ * Documents all validation steps performed according to ISO 18013-5 section 9.3.1.
+ */
+export type MDocDocumentValidation = {
+  __typename?: 'MDocDocumentValidation';
+  /** X.509 certificate chain validation details (ISO 18013-5 section 9.3.3). */
+  certificate: MDocCertificateValidation;
+  /** The digest algorithm used in the MSO (e.g., "SHA-256", "SHA-384", "SHA-512"). */
+  digestAlgorithm: Scalars['String']['output'];
+  /** Digest validation results for each claim (ISO 18013-5 section 9.3.1 step 3). */
+  digestValidations: Array<MDocDigestValidation>;
+  /** The doc type that was validated. */
+  docType: Scalars['String']['output'];
+  /** Whether the docType matches between request and response (ISO 18013-5 section 9.3.1 step 4). */
+  docTypeMatches: Scalars['Boolean']['output'];
+  /** Overall validation status - true if all checks passed for this document. */
+  isValid: Scalars['Boolean']['output'];
+  /**
+   * Whether the mDoc is currently within its validity period.
+   * Checks that current time is between validFrom and validUntil.
+   */
+  isWithinValidityPeriod: Scalars['Boolean']['output'];
+  /** MSO validity information (ISO 18013-5 section 9.3.1 step 5). */
+  msoValidityInfo: MDocMsoValidityInfo;
+  /** The received doc type from the MSO. */
+  receivedDocType: Scalars['String']['output'];
+  /** The requested doc type. */
+  requestedDocType: Scalars['String']['output'];
+  /** COSE_Sign1 signature verification status (ISO 18013-5 section 9.3.1 step 2). */
+  signatureVerified: Scalars['Boolean']['output'];
+};
+
+/**
+ * Mobile Security Object (MSO) validity information.
+ * Per ISO 18013-5, the MSO contains validity period information for the mDoc credential.
+ */
+export type MDocMsoValidityInfo = {
+  __typename?: 'MDocMsoValidityInfo';
+  /** Optional expected update date. */
+  expectedUpdate?: Maybe<Scalars['DateTime']['output']>;
+  /** When the MSO was signed by the issuer. */
+  signed: Scalars['DateTime']['output'];
+  /** The mDoc is valid from this date. */
+  validFrom: Scalars['DateTime']['output'];
+  /** The mDoc is valid until this date. */
+  validUntil: Scalars['DateTime']['output'];
+};
+
+/**
+ * A namespace containing a collection of claims from an mDoc credential.
+ * Each namespace groups related claims together (e.g., "org.iso.18013.5.1" for driver's license data).
+ */
+export type MDocNamespace = {
+  __typename?: 'MDocNamespace';
+  /** The claims contained within this namespace. */
+  claims: Array<MDocClaim>;
+  /** The namespace identifier (e.g., "org.iso.18013.5.1"). */
+  namespace: Scalars['String']['output'];
+};
+
+/** The platform that generated the mDoc presentation response. */
+export enum MDocPlatform {
+  /** Android using OpenID4VP protocol */
+  Android = 'android',
+  /** Apple using ISO18013-7 protocol */
+  Apple = 'apple'
+}
+
+/** Input for creating an mDoc presentation request. */
+export type MDocPresentationRequestInput = {
+  /** Optional callback configuration for receiving presentation responses. */
+  callback?: InputMaybe<Callback>;
+  /** A display name of the verifier. This name will be presented to the user. */
+  clientName: Scalars['String']['input'];
+  /** The mDoc document type to request (e.g., "org.iso.18013.5.1.mDL" for mobile driver's license). */
+  docType: Scalars['String']['input'];
+  /** The identity who will present (alternatively use the identityId property, if known). */
+  identity?: InputMaybe<IdentityInput>;
+  /** The ID of the identity who will present (alternatively use the identity property). */
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  /**
+   * The claims to request from the mDoc credential.
+   * Each claim is specified as a path array (e.g., ["org.iso.18013.5.1", "family_name"]).
+   */
+  requestedClaims: Array<MDocClaimPathInput>;
+  /**
+   * Optional signing configuration for the request. If provided, the request will be signed
+   * using a generated X.509 certificate and include the expected_origins for security validation.
+   * If not provided, the request will be unsigned.
+   */
+  signing?: InputMaybe<MDocRequestSigningInput>;
+};
+
+export type MDocPresentationRequestResponse = MDocPresentationResponse | RequestErrorResponse;
+
+/** Successful mDoc presentation request response. */
+export type MDocPresentationResponse = {
+  __typename?: 'MDocPresentationResponse';
+  /** The Android/Google-specific request data. */
+  androidRequest: AndroidPresentationRequest;
+  /** The Apple-specific request data. */
+  appleRequest: ApplePresentationRequest;
+  /** Indicates when the response will expire. */
+  expiry: Scalars['PositiveInt']['output'];
+  /** An autogenerated request ID for tracking this presentation request. */
+  requestId: Scalars['ID']['output'];
+};
+
+/** Input for processing an mDoc presentation response from a wallet. */
+export type MDocPresentationResponseInput = {
+  /** The platform that generated the response (android or apple). */
+  platform: MDocPlatform;
+  /** The request ID that was returned from createMDocPresentationRequest. */
+  requestId: Scalars['ID']['input'];
+  /** The encrypted presentation response from the wallet (as a JWE string for Android/OpenID4VP). */
+  response: Scalars['String']['input'];
+};
+
+/** The processed and validated mDoc presentation data. */
+export type MDocProcessedResponse = {
+  __typename?: 'MDocProcessedResponse';
+  /**
+   * Optional diagnostic information for troubleshooting and debugging.
+   * Contains the raw decrypted response and decoded device response.
+   */
+  diagnostics?: Maybe<MDocDiagnostics>;
+  /**
+   * The documents presented by the wallet.
+   * Typically contains one document, but may contain multiple in some cases.
+   */
+  documents: Array<MDocDocument>;
+  /** The identity ID associated with this presentation (if available). */
+  identityId?: Maybe<Scalars['ID']['output']>;
+  /** The platform that generated the response. */
+  platform: MDocPlatform;
+  /** The request ID associated with this presentation. */
+  requestId: Scalars['ID']['output'];
+};
+
+export type MDocProcessedResponseResult = MDocProcessedResponse | RequestErrorResponse;
+
+/** Configuration for signing an mDoc presentation request. */
+export type MDocRequestSigningInput = {
+  /**
+   * The expected origins that the wallet should validate against.
+   * The wallet will compare the request origin to this list to detect replay attacks.
+   * Each value should be a fully qualified origin (e.g., "https://example.com").
+   * At least one origin must be provided when signing is enabled.
+   */
+  expectedOrigins: Array<Scalars['String']['input']>;
+};
+
+/** Comprehensive validation results for the mDoc device response. */
+export type MDocValidationResults = {
+  __typename?: 'MDocValidationResults';
+  /** When the encrypted response was successfully decrypted. */
+  decryptedAt: Scalars['DateTime']['output'];
+  /** Validation results for each document in the response. */
+  documents: Array<MDocDocumentValidation>;
+  /** Overall validation status - true if all checks passed for all documents. */
+  isValid: Scalars['Boolean']['output'];
+  /** When the validation was performed. */
+  validatedAt: Scalars['DateTime']['output'];
+};
+
 /** Me is a union type representing all possible authenticated callers. */
 export type Me = Identity | User;
 
@@ -2321,6 +2608,11 @@ export type Mutation = {
    * Authenticated identities can optionally provide a photo to be used in the issuance as a [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) using base64 encoding.
    */
   createIssuanceRequestForAsyncIssuance: IssuanceRequestResponse;
+  /**
+   * Creates an mDoc presentation request for use with the Digital Credential API.
+   * Returns platform-specific request formats for both Android (OpenID4VP) and Apple (ISO18013-7).
+   */
+  createMDocPresentationRequest: MDocPresentationRequestResponse;
   /** Creates a new OIDC claim mapping */
   createOidcClaimMapping: OidcClaimMapping;
   /** Creates a new OIDC client */
@@ -2370,6 +2662,11 @@ export type Mutation = {
   generateOidcClientSecret: Scalars['String']['output'];
   /** Import contracts with associated templates, contracts, or templates. */
   import?: Maybe<Scalars['Void']['output']>;
+  /**
+   * Processes an mDoc presentation response from a wallet.
+   * Validates and decrypts the response, returning the presented credential data.
+   */
+  processMDocPresentationResponse: MDocProcessedResponseResult;
   /** Provisions or re-provisions a contract into the Verified ID service */
   provisionContract: Contract;
   /**
@@ -2555,6 +2852,11 @@ export type MutationCreateIssuanceRequestForAsyncIssuanceArgs = {
 };
 
 
+export type MutationCreateMDocPresentationRequestArgs = {
+  request: MDocPresentationRequestInput;
+};
+
+
 export type MutationCreateOidcClaimMappingArgs = {
   input: OidcClaimMappingInput;
 };
@@ -2650,6 +2952,11 @@ export type MutationDeprecateContractArgs = {
 
 export type MutationImportArgs = {
   input: ImportInput;
+};
+
+
+export type MutationProcessMDocPresentationResponseArgs = {
+  response: MDocPresentationResponseInput;
 };
 
 
@@ -5617,6 +5924,8 @@ export type ResolversUnionTypes<_RefType extends Record<string, unknown>> = {
   BackgroundJobEvent: ( BackgroundJobActiveEvent ) | ( BackgroundJobCompletedEvent ) | ( BackgroundJobErrorEvent ) | ( BackgroundJobProgressEvent );
   ClaimValidation: ( ListValidation ) | ( NumberValidation ) | ( RegexValidation ) | ( TextValidation );
   IssuanceRequestResponse: ( IssuanceResponse ) | ( RequestErrorResponse );
+  MDocPresentationRequestResponse: ( MDocPresentationResponse ) | ( RequestErrorResponse );
+  MDocProcessedResponseResult: ( MDocProcessedResponse ) | ( RequestErrorResponse );
   Me: ( IdentityEntity ) | ( UserEntity );
   PresentationRequestResponse: ( PresentationResponse ) | ( RequestErrorResponse );
 };
@@ -5634,6 +5943,8 @@ export type ResolversTypes = {
   ActionApprovalRequestInput: ActionApprovalRequestInput;
   ActionedApprovalData: ResolverTypeWrapper<ActionedApprovalData>;
   ActionedBy: ResolverTypeWrapper<ActionedBy>;
+  AndroidPresentationRequest: ResolverTypeWrapper<AndroidPresentationRequest>;
+  ApplePresentationRequest: ResolverTypeWrapper<ApplePresentationRequest>;
   ApplicationLabelConfig: ResolverTypeWrapper<ApplicationLabelConfigEntity>;
   ApplicationLabelConfigInput: ApplicationLabelConfigInput;
   ApprovalRequest: ResolverTypeWrapper<ApprovalRequestEntity>;
@@ -5764,10 +6075,30 @@ export type ResolversTypes = {
   IssuanceStatus: IssuanceStatus;
   IssuanceWhere: IssuanceWhere;
   IssuerIdentifierInput: IssuerIdentifierInput;
+  JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   JSONObject: ResolverTypeWrapper<Scalars['JSONObject']['output']>;
   ListValidation: ResolverTypeWrapper<ListValidation>;
   ListValidationInput: ListValidationInput;
   Locale: ResolverTypeWrapper<Scalars['Locale']['output']>;
+  MDocCertificateValidation: ResolverTypeWrapper<MDocCertificateValidation>;
+  MDocCertificateValidity: ResolverTypeWrapper<MDocCertificateValidity>;
+  MDocClaim: ResolverTypeWrapper<MDocClaim>;
+  MDocClaimPathInput: MDocClaimPathInput;
+  MDocDiagnostics: ResolverTypeWrapper<MDocDiagnostics>;
+  MDocDigestValidation: ResolverTypeWrapper<MDocDigestValidation>;
+  MDocDocument: ResolverTypeWrapper<MDocDocument>;
+  MDocDocumentValidation: ResolverTypeWrapper<MDocDocumentValidation>;
+  MDocMsoValidityInfo: ResolverTypeWrapper<MDocMsoValidityInfo>;
+  MDocNamespace: ResolverTypeWrapper<MDocNamespace>;
+  MDocPlatform: MDocPlatform;
+  MDocPresentationRequestInput: MDocPresentationRequestInput;
+  MDocPresentationRequestResponse: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['MDocPresentationRequestResponse']>;
+  MDocPresentationResponse: ResolverTypeWrapper<MDocPresentationResponse>;
+  MDocPresentationResponseInput: MDocPresentationResponseInput;
+  MDocProcessedResponse: ResolverTypeWrapper<MDocProcessedResponse>;
+  MDocProcessedResponseResult: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['MDocProcessedResponseResult']>;
+  MDocRequestSigningInput: MDocRequestSigningInput;
+  MDocValidationResults: ResolverTypeWrapper<MDocValidationResults>;
   Me: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['Me']>;
   MsGraphFailure: ResolverTypeWrapper<MsGraphFailure>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -5885,6 +6216,8 @@ export type ResolversParentTypes = {
   ActionApprovalRequestInput: ActionApprovalRequestInput;
   ActionedApprovalData: ActionedApprovalData;
   ActionedBy: ActionedBy;
+  AndroidPresentationRequest: AndroidPresentationRequest;
+  ApplePresentationRequest: ApplePresentationRequest;
   ApplicationLabelConfig: ApplicationLabelConfigEntity;
   ApplicationLabelConfigInput: ApplicationLabelConfigInput;
   ApprovalRequest: ApprovalRequestEntity;
@@ -5992,10 +6325,29 @@ export type ResolversParentTypes = {
   IssuanceResponse: IssuanceResponse;
   IssuanceWhere: IssuanceWhere;
   IssuerIdentifierInput: IssuerIdentifierInput;
+  JSON: Scalars['JSON']['output'];
   JSONObject: Scalars['JSONObject']['output'];
   ListValidation: ListValidation;
   ListValidationInput: ListValidationInput;
   Locale: Scalars['Locale']['output'];
+  MDocCertificateValidation: MDocCertificateValidation;
+  MDocCertificateValidity: MDocCertificateValidity;
+  MDocClaim: MDocClaim;
+  MDocClaimPathInput: MDocClaimPathInput;
+  MDocDiagnostics: MDocDiagnostics;
+  MDocDigestValidation: MDocDigestValidation;
+  MDocDocument: MDocDocument;
+  MDocDocumentValidation: MDocDocumentValidation;
+  MDocMsoValidityInfo: MDocMsoValidityInfo;
+  MDocNamespace: MDocNamespace;
+  MDocPresentationRequestInput: MDocPresentationRequestInput;
+  MDocPresentationRequestResponse: ResolversUnionTypes<ResolversParentTypes>['MDocPresentationRequestResponse'];
+  MDocPresentationResponse: MDocPresentationResponse;
+  MDocPresentationResponseInput: MDocPresentationResponseInput;
+  MDocProcessedResponse: MDocProcessedResponse;
+  MDocProcessedResponseResult: ResolversUnionTypes<ResolversParentTypes>['MDocProcessedResponseResult'];
+  MDocRequestSigningInput: MDocRequestSigningInput;
+  MDocValidationResults: MDocValidationResults;
   Me: ResolversUnionTypes<ResolversParentTypes>['Me'];
   MsGraphFailure: MsGraphFailure;
   Mutation: {};
@@ -6139,6 +6491,18 @@ export type ActionedApprovalDataResolvers<ContextType = GraphQLContext, ParentTy
 export type ActionedByResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ActionedBy'] = ResolversParentTypes['ActionedBy']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type AndroidPresentationRequestResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AndroidPresentationRequest'] = ResolversParentTypes['AndroidPresentationRequest']> = {
+  openId4VpProtocol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  openId4VpRequest?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ApplePresentationRequestResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApplePresentationRequest'] = ResolversParentTypes['ApplePresentationRequest']> = {
+  deviceRequest?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  encryptionInfo?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -6554,6 +6918,10 @@ export type IssuanceResponseResolvers<ContextType = GraphQLContext, ParentType e
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSON'], any> {
+  name: 'JSON';
+}
+
 export interface JsonObjectScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['JSONObject'], any> {
   name: 'JSONObject';
 }
@@ -6566,6 +6934,110 @@ export type ListValidationResolvers<ContextType = GraphQLContext, ParentType ext
 export interface LocaleScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Locale'], any> {
   name: 'Locale';
 }
+
+export type MDocCertificateValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocCertificateValidation'] = ResolversParentTypes['MDocCertificateValidation']> = {
+  isValid?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  serialNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  subject?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  validity?: Resolver<ResolversTypes['MDocCertificateValidity'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MDocCertificateValidityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocCertificateValidity'] = ResolversParentTypes['MDocCertificateValidity']> = {
+  notAfter?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  notBefore?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MDocClaimResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocClaim'] = ResolversParentTypes['MDocClaim']> = {
+  elementIdentifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  elementValue?: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MDocDiagnosticsResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocDiagnostics'] = ResolversParentTypes['MDocDiagnostics']> = {
+  deviceResponse?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  response?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  validation?: Resolver<ResolversTypes['MDocValidationResults'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MDocDigestValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocDigestValidation'] = ResolversParentTypes['MDocDigestValidation']> = {
+  digestID?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  elementIdentifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  isValid?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MDocDocumentResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocDocument'] = ResolversParentTypes['MDocDocument']> = {
+  docType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  namespaces?: Resolver<Array<ResolversTypes['MDocNamespace']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MDocDocumentValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocDocumentValidation'] = ResolversParentTypes['MDocDocumentValidation']> = {
+  certificate?: Resolver<ResolversTypes['MDocCertificateValidation'], ParentType, ContextType>;
+  digestAlgorithm?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  digestValidations?: Resolver<Array<ResolversTypes['MDocDigestValidation']>, ParentType, ContextType>;
+  docType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  docTypeMatches?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  isValid?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  isWithinValidityPeriod?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  msoValidityInfo?: Resolver<ResolversTypes['MDocMsoValidityInfo'], ParentType, ContextType>;
+  receivedDocType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  requestedDocType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  signatureVerified?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MDocMsoValidityInfoResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocMsoValidityInfo'] = ResolversParentTypes['MDocMsoValidityInfo']> = {
+  expectedUpdate?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  signed?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  validFrom?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  validUntil?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MDocNamespaceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocNamespace'] = ResolversParentTypes['MDocNamespace']> = {
+  claims?: Resolver<Array<ResolversTypes['MDocClaim']>, ParentType, ContextType>;
+  namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MDocPresentationRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocPresentationRequestResponse'] = ResolversParentTypes['MDocPresentationRequestResponse']> = {
+  __resolveType: TypeResolveFn<'MDocPresentationResponse' | 'RequestErrorResponse', ParentType, ContextType>;
+};
+
+export type MDocPresentationResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocPresentationResponse'] = ResolversParentTypes['MDocPresentationResponse']> = {
+  androidRequest?: Resolver<ResolversTypes['AndroidPresentationRequest'], ParentType, ContextType>;
+  appleRequest?: Resolver<ResolversTypes['ApplePresentationRequest'], ParentType, ContextType>;
+  expiry?: Resolver<ResolversTypes['PositiveInt'], ParentType, ContextType>;
+  requestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MDocProcessedResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocProcessedResponse'] = ResolversParentTypes['MDocProcessedResponse']> = {
+  diagnostics?: Resolver<Maybe<ResolversTypes['MDocDiagnostics']>, ParentType, ContextType>;
+  documents?: Resolver<Array<ResolversTypes['MDocDocument']>, ParentType, ContextType>;
+  identityId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  platform?: Resolver<ResolversTypes['MDocPlatform'], ParentType, ContextType>;
+  requestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MDocProcessedResponseResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocProcessedResponseResult'] = ResolversParentTypes['MDocProcessedResponseResult']> = {
+  __resolveType: TypeResolveFn<'MDocProcessedResponse' | 'RequestErrorResponse', ParentType, ContextType>;
+};
+
+export type MDocValidationResultsResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocValidationResults'] = ResolversParentTypes['MDocValidationResults']> = {
+  decryptedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  documents?: Resolver<Array<ResolversTypes['MDocDocumentValidation']>, ParentType, ContextType>;
+  isValid?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  validatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 
 export type MeResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Me'] = ResolversParentTypes['Me']> = {
   __resolveType: TypeResolveFn<'Identity' | 'User', ParentType, ContextType>;
@@ -6593,6 +7065,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createIdentityStore?: Resolver<ResolversTypes['IdentityStore'], ParentType, ContextType, RequireFields<MutationCreateIdentityStoreArgs, 'input'>>;
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
   createIssuanceRequestForAsyncIssuance?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestForAsyncIssuanceArgs, 'asyncIssuanceRequestId'>>;
+  createMDocPresentationRequest?: Resolver<ResolversTypes['MDocPresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateMDocPresentationRequestArgs, 'request'>>;
   createOidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<MutationCreateOidcClaimMappingArgs, 'input'>>;
   createOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationCreateOidcClientArgs, 'input'>>;
   createOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationCreateOidcClientResourceArgs, 'clientId' | 'input'>>;
@@ -6615,6 +7088,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   deprecateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationDeprecateContractArgs, 'id'>>;
   generateOidcClientSecret?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   import?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationImportArgs, 'input'>>;
+  processMDocPresentationResponse?: Resolver<ResolversTypes['MDocProcessedResponseResult'], ParentType, ContextType, RequireFields<MutationProcessMDocPresentationResponseArgs, 'response'>>;
   provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
   resendAsyncIssuanceNotification?: Resolver<Maybe<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<MutationResendAsyncIssuanceNotificationArgs, 'asyncIssuanceRequestId'>>;
   resendAsyncIssuanceNotifications?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationResendAsyncIssuanceNotificationsArgs, 'asyncIssuanceRequestIds'>>;
@@ -7139,6 +7613,8 @@ export type Resolvers<ContextType = GraphQLContext> = {
   AccessTokenResponse?: AccessTokenResponseResolvers<ContextType>;
   ActionedApprovalData?: ActionedApprovalDataResolvers<ContextType>;
   ActionedBy?: ActionedByResolvers<ContextType>;
+  AndroidPresentationRequest?: AndroidPresentationRequestResolvers<ContextType>;
+  ApplePresentationRequest?: ApplePresentationRequestResolvers<ContextType>;
   ApplicationLabelConfig?: ApplicationLabelConfigResolvers<ContextType>;
   ApprovalRequest?: ApprovalRequestResolvers<ContextType>;
   ApprovalRequestResponse?: ApprovalRequestResponseResolvers<ContextType>;
@@ -7188,9 +7664,24 @@ export type Resolvers<ContextType = GraphQLContext> = {
   IssuanceEventData?: IssuanceEventDataResolvers<ContextType>;
   IssuanceRequestResponse?: IssuanceRequestResponseResolvers<ContextType>;
   IssuanceResponse?: IssuanceResponseResolvers<ContextType>;
+  JSON?: GraphQLScalarType;
   JSONObject?: GraphQLScalarType;
   ListValidation?: ListValidationResolvers<ContextType>;
   Locale?: GraphQLScalarType;
+  MDocCertificateValidation?: MDocCertificateValidationResolvers<ContextType>;
+  MDocCertificateValidity?: MDocCertificateValidityResolvers<ContextType>;
+  MDocClaim?: MDocClaimResolvers<ContextType>;
+  MDocDiagnostics?: MDocDiagnosticsResolvers<ContextType>;
+  MDocDigestValidation?: MDocDigestValidationResolvers<ContextType>;
+  MDocDocument?: MDocDocumentResolvers<ContextType>;
+  MDocDocumentValidation?: MDocDocumentValidationResolvers<ContextType>;
+  MDocMsoValidityInfo?: MDocMsoValidityInfoResolvers<ContextType>;
+  MDocNamespace?: MDocNamespaceResolvers<ContextType>;
+  MDocPresentationRequestResponse?: MDocPresentationRequestResponseResolvers<ContextType>;
+  MDocPresentationResponse?: MDocPresentationResponseResolvers<ContextType>;
+  MDocProcessedResponse?: MDocProcessedResponseResolvers<ContextType>;
+  MDocProcessedResponseResult?: MDocProcessedResponseResultResolvers<ContextType>;
+  MDocValidationResults?: MDocValidationResultsResolvers<ContextType>;
   Me?: MeResolvers<ContextType>;
   MsGraphFailure?: MsGraphFailureResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;

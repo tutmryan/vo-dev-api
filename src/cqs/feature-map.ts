@@ -1,4 +1,4 @@
-import { faceCheckEnabled } from '../config'
+import { faceCheckEnabled, mdocEnabled } from '../config'
 import type { Maybe, PresentationRequestInput } from '../generated/graphql'
 import { FaceCheckPhotoSupport } from '../generated/graphql'
 import type { CommandContext } from './context'
@@ -42,4 +42,8 @@ export const isFaceCheckPresentationEnabled = ({ requestedCredentials }: Partial
   if (!faceCheckEnabled && !!faceCheckRequested) {
     throw faceCheckFeatureNotAvailableError
   }
+}
+
+export const isMDocEnabled = () => {
+  if (!mdocEnabled) throw new Error('ISO 18013-5 (mDL) presentation feature is not available')
 }

@@ -46,6 +46,7 @@ extensions:
             Locale: string
             HexColorCode: string
             Void: null | undefined | void
+            JSON: unknown
             JSONObject: Record<string, unknown>
             EmailAddress: string
             UUID: string

@@ -724,6 +724,8 @@ param devToolsEnabled string
 param faceCheckEnabled string
 @description('The flag indicating whether the demo features (i.e limited presentation token, presentation demo page, .etc) are deployed')
 param demoEnabled string
+@description('The flag indicating whether the mdoc features are available')
+param mdocEnabled string
 @description('JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant')
 param additionalAuthTenantIds string
 @description('Limit the number of aliases in a GraphQL document.')
@@ -1571,6 +1573,7 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     DEV_TOOLS_ENABLED: devToolsEnabled
     FACE_CHECK_ENABLED: faceCheckEnabled
     DEMO_ENABLED: demoEnabled
+    MDOC_ENABLED: mdocEnabled
     IDENTITY_ISSUERS: identityIssuers
     PLATFORM_CONSUMER_APPS: platformConsumerApps
     ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds

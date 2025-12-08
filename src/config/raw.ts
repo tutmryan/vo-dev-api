@@ -62,6 +62,7 @@ export type Config = {
   faceCheckEnabled: boolean
   demoEnabled: boolean
   oidcEnabled: boolean
+  mdocEnabled: boolean
   authorityId: string
   database: {
     host: string

@@ -1943,6 +1943,100 @@ exports[`shield rules are setup correctly 1`] = `
         }
       ]
     },
+    "createMDocPresentationRequest": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
+        },
+        {
+          "name": "isPresentationApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
+                },
+                {
+                  "name": "hasLimitedAccessData-limitedPresentation",
+                  "cache": "contextual"
+                }
+              ]
+            },
+            {
+              "name": "isValidLimitedMdocPresentationRequest",
+              "cache": "strict"
+            }
+          ]
+        }
+      ]
+    },
+    "processMDocPresentationResponse": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
+        },
+        {
+          "name": "isPresentationApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
+                },
+                {
+                  "name": "hasLimitedAccessData-limitedPresentation",
+                  "cache": "contextual"
+                }
+              ]
+            },
+            {
+              "name": "isValidLimitedMdocPresentationRequest",
+              "cache": "strict"
+            }
+          ]
+        }
+      ]
+    },
     "createTemplate": {
       "rulesOr": [
         {

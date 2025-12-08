@@ -47,6 +47,7 @@ const config: EnvVarSubstitution<Config> = {
   faceCheckEnabled: json('FACE_CHECK_ENABLED'),
   demoEnabled: json('DEMO_ENABLED'),
   oidcEnabled: json('OIDC_ENABLED'),
+  mdocEnabled: json('MDOC_ENABLED'),
   authorityId: 'VID_AUTHORITY_ID',
   database: {
     host: 'DATABASE_HOST',

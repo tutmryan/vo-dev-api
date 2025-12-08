@@ -24,6 +24,7 @@ const usedScalars = pick(
   'Locale',
   'HexColorCode',
   'Void',
+  'JSON',
   'JSONObject',
   'EmailAddress',
   'UUID',
@@ -73,7 +74,8 @@ function requireExplicitResolversForScalars(schema: GraphQLSchema) {
   const testSymbol = Symbol('testSymbol')
   const scalars = Object.values(schema.getTypeMap()).filter((t): t is GraphQLScalarType => t instanceof GraphQLScalarType)
   for (const scalar of scalars) {
-    if (scalar.name === 'Void') continue
+    // Skip scalars that intentionally accept any value without validation
+    if (scalar.name === 'Void' || scalar.name === 'JSON') continue
     try {
       scalar.parseValue(testSymbol)
     } catch {
