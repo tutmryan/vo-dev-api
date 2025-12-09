@@ -23,6 +23,7 @@ import {
   inTransaction,
 } from '../../../test'
 import { mockedServices } from '../../../test/mocks'
+import { PartnerEntity } from '../../partners/entities/partner-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 import { portalClientId, portalClientName } from '../data'
 import { OidcClientEntity } from '../entities/oidc-client-entity'
@@ -51,6 +52,30 @@ describe('createOidcClient mutation', () => {
     expect(createOidcClient.createdAt).toBeDefined()
     expect(createOidcClient.createdBy).toBeDefined()
     expect(createOidcClient.updatedBy).toBeNull()
+  })
+
+  it('can create a client with partnerIds', async () => {
+    const partner = await createPartner()
+    const input = createOidcClientInput({ partnerIds: [partner.id] })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+
+    const created = data!.createOidcClient
+
+    // Assert via GraphQL response
+    const responsePartnerIds = created.partners.map((p) => p.id)
+    expect(responsePartnerIds).toContain(partner.id)
+
+    // Assert persistence by reloading from the database
+    const reloaded = await inTransaction((em) =>
+      em.getRepository(OidcClientEntity).findOneOrFail({ where: { id: created.id }, relations: { partners: true } }),
+    )
+
+    const persistedPartnerIds = (await reloaded.partners).map((p) => p.id)
+    expect(persistedPartnerIds).toContain(partner.id)
   })
 
   it('can create a confidential web client', async () => {
@@ -171,6 +196,39 @@ describe('updateOidcClient mutation', () => {
     expect(updateOidcClient.updatedAt?.getTime()).toBeGreaterThan(updateOidcClient.createdAt?.getDate())
     expect(updateOidcClient.updatedBy).toBeDefined()
   })
+
+  it('can update client partners via partnerIds', async () => {
+    const partner1 = await createPartner()
+    const partner2 = await createPartner()
+
+    const { data: createClientData } = await createOidcClient()
+    expectToBeDefined(createClientData?.createOidcClient)
+    const client = createClientData!.createOidcClient
+
+    const input = createOidcClientInput({ partnerIds: [partner1.id, partner2.id] })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+
+    const updated = data!.updateOidcClient
+
+    // Assert via GraphQL response
+    const updatedPartnerIds = updated.partners.map((p) => p.id)
+    expect(updatedPartnerIds).toEqual(expect.arrayContaining([partner1.id, partner2.id]))
+
+    // Assert persistence by reloading from the database
+    const reloaded = await inTransaction((em) =>
+      em.getRepository(OidcClientEntity).findOneOrFail({ where: { id: client.id }, relations: { partners: true } }),
+    )
+
+    const persistedPartnerIds = (await reloaded.partners).map((p) => p.id)
+    expect(persistedPartnerIds).toEqual(expect.arrayContaining([partner1.id, partner2.id]))
+  })
 })
 
 async function insertConciergeOidcClient(overrides: Partial<OidcClientEntity> = {}) {
@@ -201,6 +259,40 @@ async function insertConciergeOidcClient(overrides: Partial<OidcClientEntity> = 
   }, userId)
 
   return client
+}
+
+async function createPartner(overrides: Partial<PartnerEntity> = {}) {
+  let partner: PartnerEntity
+
+  const userId = faker.string.uuid()
+
+  // Ensure a user is associated with the EntityManager for auditing
+  await inTransaction(async (em) => {
+    await em.getRepository(UserEntity).save({
+      id: userId,
+      oid: faker.string.uuid(),
+      tenantId: faker.string.uuid(),
+      email: 'test@example.com',
+      name: 'Test User',
+      isApp: false,
+    })
+  }, userId)
+
+  await inTransaction(async (em) => {
+    partner = await em.getRepository(PartnerEntity).save(
+      new PartnerEntity({
+        name: faker.company.name(),
+        did: `did:web:${faker.internet.domainName()}`,
+        credentialTypes: [casual.word],
+        tenantId: null,
+        issuerId: null,
+        linkedDomainUrls: null,
+        ...overrides,
+      }),
+    )
+  }, userId)
+
+  return partner!
 }
 describe('updateConciergeClientBranding mutation', () => {
   beforeAfterAll()

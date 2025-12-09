@@ -2,6 +2,7 @@ import { notifyOidcDataChanged, oidcSecretService } from '..'
 import type { CommandContext } from '../../../cqs'
 import { OidcApplicationType, OidcClientType, type OidcClientInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
+import type { PartnerEntity } from '../../partners/entities/partner-entity'
 import { OidcClientEntity } from '../entities/oidc-client-entity'
 import { systemClientInvariant } from './utils'
 
@@ -26,8 +27,12 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
     applicationType: applicationType ?? OidcApplicationType.Web,
     requireFaceCheck: requireFaceCheck ?? false,
     allowAnyPartner: allowAnyPartner ?? false,
-    partnerIds: partnerIds ?? [],
   })
+
+  if (partnerIds) {
+    client.partners = Promise.resolve(partnerIds.map((id) => ({ id }) as PartnerEntity))
+  }
+
   const updated = await repo.save(client)
 
   if (input.clientSecret) await oidcSecretService().set(client.id, input.clientSecret)
