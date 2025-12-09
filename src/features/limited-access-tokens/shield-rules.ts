@@ -135,8 +135,13 @@ export const isValidLimitedPresentationRequest = and(
 export const isValidLimitedMdocPresentationRequest = and(
   isLimitedPresentationApp,
   rule('isValidLimitedMdocPresentationRequest', { cache: 'strict' })(
-    (_, _args: MutationCreatePresentationRequestArgs, _context: GraphQLContext) => {
-      // TODO (mdoc): Add mdoc specific validation here
+    (_, _args: MutationCreatePresentationRequestArgs, { user }: GraphQLContext) => {
+      if (!user || !user.limitedAccessData) return false
+
+      // Until limited access constraints are defined for mdoc presentations, only allow access tokens for demo purposes
+      // Only the handler for /demo/presentation/token can create demo limited access tokens with the isDemoToken flag set to true
+      if (!user.limitedAccessData.isDemoToken) return false
+
       return true
     },
   ),

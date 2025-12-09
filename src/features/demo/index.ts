@@ -37,6 +37,7 @@ const acquireLimitedAccessTokenHandler: RequestHandler = async (req, res) => {
     const { token, expires } = await dispatchWithoutContext({ user }, AcquireLimitedAccessTokenCommand, {
       allowAnonymousPresentation: true,
       requestableCredentials: [{ credentialType: 'VerifiableCredential' }],
+      isDemoToken: true,
     })
     // Return the limited access token and its expiration date
     res.json({ token, expires }).end()

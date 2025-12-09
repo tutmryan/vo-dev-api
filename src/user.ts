@@ -2,6 +2,7 @@ import type { JwtPayload } from '@makerx/graphql-core'
 import { User as BaseUser } from '@makerx/graphql-core'
 import type { AsyncIssuanceSessionData } from './features/async-issuance/session'
 import type { IdentityEntity } from './features/identity/entities/identity-entity'
+import type { LimitedAccessDemoToken } from './features/limited-access-tokens'
 import type { LimitedApprovalData } from './features/limited-approval-tokens'
 import type { PhotoCaptureData } from './features/photo-capture'
 import type { UserEntity } from './features/users/entities/user-entity'
@@ -13,7 +14,7 @@ import type { AcquireLimitedAccessTokenInput } from './generated/graphql'
  */
 export class User<TEntity extends UserEntity | IdentityEntity> extends BaseUser {
   entity: TEntity
-  limitedAccessData?: AcquireLimitedAccessTokenInput
+  limitedAccessData?: AcquireLimitedAccessTokenInput & LimitedAccessDemoToken
   limitedApprovalData?: LimitedApprovalData
   limitedPhotoCaptureData?: PhotoCaptureData
   limitedAsyncIssuanceData?: AsyncIssuanceSessionData

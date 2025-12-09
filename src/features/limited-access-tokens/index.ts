@@ -8,7 +8,9 @@ export * from './shield-rules'
 
 const limitedAccessCache = Lazy(() => newCacheSection('limitedAccess', ONE_HOUR_TTL)) // 1 hour - access tokens are valid for 50 minutes + 10 minute buffer
 
-export type LimitedAccessData = AcquireLimitedAccessTokenInput & { userId: string }
+export type LimitedAccessDemoToken = { isDemoToken?: true }
+
+export type LimitedAccessData = AcquireLimitedAccessTokenInput & LimitedAccessDemoToken & { userId: string }
 
 export async function getLimitedAccessData(token: string): Promise<LimitedAccessData> {
   const key = createKey(token, limitedAccess.secret)
