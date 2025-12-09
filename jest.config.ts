@@ -1,5 +1,15 @@
 import type { Config } from '@jest/types'
 
+// Tests can't be guaranteed to run in a non-test environment
+if (process.env.NODE_ENV !== 'test') {
+  throw new Error('Tests should only be run in test environment')
+}
+
+// Tests will break if the .env values are loaded into process
+if (process.env.SMS_SECRET) {
+  throw new Error('Tests must not be run with the .env vars loaded into process')
+}
+
 const config: Config.InitialOptions = {
   preset: 'ts-jest',
   rootDir: 'src',

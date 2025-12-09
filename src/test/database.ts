@@ -1,11 +1,10 @@
 import type { CommandContext } from '../cqs'
 import { dataSource, ISOLATION_LEVEL } from '../data'
 import { addUserToManager } from '../data/user-context-helper'
-import { createDatabase, dropDatabase } from '../util/local-database-init'
+import { createDatabase, dropDatabase, dropExistingTestDatabases } from '../util/local-database-init'
 
 export const setup = async () => {
-  await dropDatabase()
-  await createDatabase({ runMigrations: true })
+  await dropExistingTestDatabases()
 }
 
 export const teardown = async () => {
@@ -14,11 +13,13 @@ export const teardown = async () => {
 
 export const beforeAfterAll = () => {
   beforeAll(async () => {
+    await createDatabase({ runMigrations: true })
     await dataSource.initialize()
-  })
+  }, 1000 * 60)
   afterAll(async () => {
     await dataSource.destroy()
-  })
+    await dropDatabase()
+  }, 1000 * 10)
 }
 
 export function inTransaction<T>(

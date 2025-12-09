@@ -6,10 +6,16 @@ import { database as databaseConfig } from '../config'
 import { AuditingEventSubscriber } from '../features/auditing/auditing-event-subscribers'
 import { TrackingEventSubscriber } from '../features/auditing/tracking-event-subscriber'
 import { LoggerForTypeOrm, logger } from '../logger'
+import { randomDigits } from '../util/random-digits'
 import type { VerifiedOrchestrationEntityManager } from './entity-manager'
 import { SnakeNamingStrategy } from './utils/snake-naming-strategy'
 
-const { logging, host, port, database } = databaseConfig
+const { logging, host, port } = databaseConfig
+let { database } = databaseConfig
+
+if (process.env.NODE_ENV === 'test') {
+  database = `${database}_${randomDigits(6)}`
+}
 
 const baseConfig: Pick<
   SqlServerConnectionOptions,

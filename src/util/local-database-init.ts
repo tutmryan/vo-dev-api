@@ -1,7 +1,9 @@
 import type { ConnectionPool } from 'mssql'
 import { connect } from 'mssql'
 import { DataSource } from 'typeorm'
+import { database as databaseConfig } from '../config'
 import { dataSourceConfig } from '../data'
+import { invariant } from './invariant'
 import { wait } from './wait'
 
 // Set default values for environment variables required by identity store migration
@@ -39,6 +41,18 @@ export const createDatabase = async ({ runMigrations }: { runMigrations?: boolea
     })
 
   await saDataSource.destroy()
+}
+
+export const dropExistingTestDatabases = async () => {
+  const saMasterDataSource = new DataSource({ ...dataSourceConfig, database: 'master', username: 'sa' })
+  await saMasterDataSource.initialize()
+
+  invariant(databaseConfig.database.endsWith('_test'), 'Refusing to drop non-test databases')
+  const result = await saMasterDataSource.query(`SELECT name FROM sys.databases WHERE name LIKE '${databaseConfig.database}_%'`)
+  for (const row of result) {
+    const dbName = row.name
+    await saMasterDataSource.query(`DROP DATABASE IF EXISTS ${dbName}`)
+  }
 }
 
 export const dropDatabase = async () => {
