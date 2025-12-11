@@ -44,7 +44,7 @@ export function loadMocks() {
   jest.mock('../util/email', () => ({
     sendEmail: sendEmailMock,
     // Pass through other util email functions
-    toUserErrorMessage: jest.requireActual('../util/email').toUserErrorMessage,
+    toUserMessage: jest.requireActual('../util/email').toUserMessage,
     extractEmails: jest.requireActual('../util/email').extractEmails,
   }))
 }

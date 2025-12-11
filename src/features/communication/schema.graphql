@@ -14,6 +14,7 @@ The possible statuses of a communication.
 enum CommunicationStatus {
   sent
   failed
+  informational
 }
 
 """
@@ -42,9 +43,17 @@ type Communication {
   """
   createdBy: User!
   """
+  The status this communication entry represents.
+  """
+  status: CommunicationStatus!
+  """
+  Additional details about the communication entry.
+  """
+  details: String
+  """
   The error while sending the communication, if any.
   """
-  error: String
+  error: String @deprecated(reason: "Use level and details fields instead")
 }
 
 """

@@ -1,5 +1,5 @@
 import casual from 'casual'
-import { AsyncIssuanceRequestExpiry, ContactMethod } from '../../generated/graphql'
+import { AsyncIssuanceRequestExpiry, CommunicationStatus, ContactMethod } from '../../generated/graphql'
 import { beforeAfterAll, expectResponseUnionToBe, inTransaction } from '../../test'
 import { mockedServices } from '../../test/mocks'
 import { throwError } from '../../util/throw-error'
@@ -89,7 +89,8 @@ describe('SMS status callback', () => {
             where: { asyncIssuanceId: requestId },
           })
           expect(communications).toHaveLength(1)
-          expect(communications[0]?.error).toBe(expectedUserMessage)
+          expect(communications[0]?.status).toBe(CommunicationStatus.Failed)
+          expect(communications[0]?.details).toBe(expectedUserMessage)
           expect(communications[0]?.contactMethod).toBe(ContactMethod.Sms)
           expect(communications[0]?.recipientId).toBe(identity.id)
         })
@@ -135,7 +136,8 @@ describe('SMS status callback', () => {
             where: { asyncIssuanceId: requestId },
           })
           expect(communications).toHaveLength(1)
-          expect(communications[0]?.error).toBe('SMS sending failed: Unknown error')
+          expect(communications[0]?.status).toBe(CommunicationStatus.Failed)
+          expect(communications[0]?.details).toBe('SMS sending failed: Unknown error')
         })
       })
     })

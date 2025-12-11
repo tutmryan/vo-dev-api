@@ -75,7 +75,7 @@ export const emailPayloadSchema = z.object({
     z.literal('group_unsubscribe'),
     z.literal('group_resubscribe'),
   ]),
-  smtpId: z.string(),
+  smtpId: z.string().optional(),
 })
 
 // ***** WARNING: Changes to this value must be reflected in the VO Sendgrid webhook forwarder *****
@@ -84,16 +84,33 @@ const voForwarderSignatureHeaderKey = 'X-VO-Webhook-Forwarder-Signature'
 export type EmailEventPayload = z.infer<typeof emailPayloadSchema>
 export type EmailEvents = EmailEventPayload['event']
 
-export function toUserErrorMessage(event: EmailEvents): string {
+export function toUserMessage(event: EmailEvents): string {
   switch (event) {
-    case 'bounce':
-      return 'Email sending failed: Mailbox unavailable'
+    case 'processed':
+      return `Email sending update: Processed for delivery`
     case 'deferred':
       return 'Email sending failed: Message deferred (try again later)'
+    case 'delivered':
+      return `Email sending update: Delivered to recipient`
+    case 'open':
+      return `Email sending update: Opened by recipient`
+    case 'click':
+      return `Email sending update: Clicked by recipient`
+    case 'bounce':
+      return 'Email sending failed: Mailbox unavailable'
     case 'dropped':
       return 'Email sending failed: Message dropped by recipient server'
+    case 'spamreport':
+      return 'Email sending update: Marked as spam by recipient'
+    case 'unsubscribe':
+      return 'Email sending update: Recipient unsubscribed'
+    case 'group_unsubscribe':
+      return 'Email sending update: Recipient unsubscribed' // testing shows group_unsubscribe is used when unsubscribe was expected
+    case 'group_resubscribe':
+      return 'Email sending update: Recipient resubscribed'
+    default:
+      return `Email sending failed: Unknown error`
   }
-  return `Email sending failed: Unknown error`
 }
 
 export const validateEmailCallbackRequest = (req: Request) => {

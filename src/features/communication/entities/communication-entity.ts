@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, Entity, Index, ManyToOne } from 'typeorm'
 import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
-import { CommunicationPurpose, ContactMethod } from '../../../generated/graphql'
+import { CommunicationPurpose, ContactMethod, CommunicationStatus } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AsyncIssuanceEntity } from '../../async-issuance/entities/async-issuance-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
@@ -13,7 +13,9 @@ const indexFor = (fields: [keyof CommunicationEntity]) => fields
 @Index(indexFor(['sentAt']))
 export class CommunicationEntity extends VerifiedOrchestrationEntity {
   constructor(
-    args?: Pick<CommunicationEntity, 'createdById' | 'recipientId' | 'contactMethod' | 'purpose' | 'error'> & { asyncIssuanceId?: string },
+    args?: Pick<CommunicationEntity, 'createdById' | 'recipientId' | 'contactMethod' | 'purpose' | 'status' | 'details'> & {
+      asyncIssuanceId?: string
+    },
   ) {
     super()
     if (!args) return
@@ -48,6 +50,9 @@ export class CommunicationEntity extends VerifiedOrchestrationEntity {
   @Column({ nullable: true, transformer: uuidLowerCaseTransformer })
   asyncIssuanceId!: string | null
 
+  @Column({ type: 'nvarchar', length: 255 })
+  status!: CommunicationStatus
+
   @Column({ type: 'nvarchar', nullable: true })
-  error?: string
+  details?: string
 }

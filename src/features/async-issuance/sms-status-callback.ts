@@ -4,7 +4,7 @@ import type { Express } from 'express'
 import { apiUrl } from '../../config'
 import type { CommandContext } from '../../cqs'
 import { runInTransaction } from '../../data'
-import { CommunicationPurpose, ContactMethod } from '../../generated/graphql'
+import { CommunicationPurpose, CommunicationStatus, ContactMethod } from '../../generated/graphql'
 import { logger as globalLogger, type Logger } from '../../logger'
 import { smsPayloadSchema, toUserErrorMessage, validateSmsCallbackRequest, type MessageStatuses } from '../../util/sms'
 import { CommunicationEntity } from '../communication/entities/communication-entity'
@@ -52,8 +52,11 @@ export async function handleSmsStatusCallback(
     error: userMessage,
   })
 
-  asyncIssuance.failed(type === 'issuance' ? 'contact-failed' : 'issuance-verification-failed')
-  await asyncIssuanceRepository.save(asyncIssuance)
+  if (!asyncIssuance.isStatusFinal) {
+    asyncIssuance.failed(type === 'issuance' ? 'contact-failed' : 'issuance-verification-failed')
+    await asyncIssuanceRepository.save(asyncIssuance)
+  }
+
   await communicationRepository.save(
     new CommunicationEntity({
       createdById: asyncIssuance.createdById,
@@ -61,7 +64,8 @@ export async function handleSmsStatusCallback(
       contactMethod: ContactMethod.Sms,
       purpose: type === 'issuance' ? CommunicationPurpose.Issuance : CommunicationPurpose.Verification,
       asyncIssuanceId: asyncIssuance.id,
-      error: userMessage,
+      status: CommunicationStatus.Failed,
+      details: userMessage,
     }),
   )
 }

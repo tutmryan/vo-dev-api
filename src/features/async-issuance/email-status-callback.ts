@@ -4,15 +4,9 @@ import type { Express } from 'express'
 import { apiUrl } from '../../config'
 import type { CommandContext } from '../../cqs'
 import { runInTransaction } from '../../data'
-import { CommunicationPurpose, ContactMethod } from '../../generated/graphql'
+import { CommunicationPurpose, CommunicationStatus, ContactMethod } from '../../generated/graphql'
 import { logger as globalLogger, type Logger } from '../../logger'
-import {
-  emailPayloadSchema,
-  toUserErrorMessage,
-  validateEmailCallbackRequest,
-  type EmailEventPayload,
-  type EmailEvents,
-} from '../../util/email'
+import { emailPayloadSchema, toUserMessage, validateEmailCallbackRequest, type EmailEventPayload, type EmailEvents } from '../../util/email'
 import { CommunicationEntity } from '../communication/entities/communication-entity'
 import { SYSTEM_USER_ID } from '../users/entities/user-entity'
 import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
@@ -34,28 +28,46 @@ export async function handleEmailStatusCallback(
   entityManager: CommandContext['entityManager'],
   logger: Logger,
 ): Promise<void> {
-  const errorStatuses: readonly EmailEvents[] = ['deferred', 'bounce', 'dropped']
+  const errorStatuses: readonly EmailEvents[] = ['bounce', 'dropped']
+  const targetStatuses: readonly EmailEvents[] = [
+    'processed',
+    'deferred',
+    'delivered',
+    'open',
+    'click',
+    'spamreport',
+    'unsubscribe',
+    'group_unsubscribe',
+    'group_resubscribe',
+    ...errorStatuses,
+  ]
 
-  if (!errorStatuses.includes(payload.event)) {
-    return // We only care about statuses indicating failure
+  if (!targetStatuses.includes(payload.event)) {
+    return
   }
 
-  logger.info(`Email ${type} message for async issuance ${asyncIssuanceId} failed with status ${payload.event}`, {
+  logger.info(`Email ${type} message for async issuance ${asyncIssuanceId} has a status change ${payload.event}`, {
     emailPayload: payload,
   })
 
   const asyncIssuanceRepository = entityManager.getRepository(AsyncIssuanceEntity)
   const asyncIssuance = await asyncIssuanceRepository.findOneByOrFail({ id: asyncIssuanceId })
   const communicationRepository = entityManager.getRepository(CommunicationEntity)
-  const userMessage = toUserErrorMessage(payload.event)
+  const userMessage = toUserMessage(payload.event)
 
-  logger.audit(`Recording Email ${type} failure for async issuance`, {
+  const auditMessage = errorStatuses.includes(payload.event)
+    ? `Recording Email ${type} failure for async issuance`
+    : `Recording Email ${type} status update for async issuance`
+  logger.audit(auditMessage, {
     identityId: asyncIssuance.identityId,
     error: userMessage,
   })
 
-  asyncIssuance.failed(type === 'issuance' ? 'contact-failed' : 'issuance-verification-failed')
-  await asyncIssuanceRepository.save(asyncIssuance)
+  if (errorStatuses.includes(payload.event) && !asyncIssuance.isStatusFinal) {
+    asyncIssuance.failed(type === 'issuance' ? 'contact-failed' : 'issuance-verification-failed')
+    await asyncIssuanceRepository.save(asyncIssuance)
+  }
+
   await communicationRepository.save(
     new CommunicationEntity({
       createdById: asyncIssuance.createdById,
@@ -63,7 +75,8 @@ export async function handleEmailStatusCallback(
       contactMethod: ContactMethod.Email,
       purpose: type === 'issuance' ? CommunicationPurpose.Issuance : CommunicationPurpose.Verification,
       asyncIssuanceId: asyncIssuance.id,
-      error: userMessage,
+      status: errorStatuses.includes(payload.event) ? CommunicationStatus.Failed : CommunicationStatus.Informational,
+      details: userMessage,
     }),
   )
 }

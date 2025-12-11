@@ -1,5 +1,5 @@
 import { query } from '../../cqs'
-import type { Resolvers } from '../../generated/graphql'
+import { CommunicationStatus, type Resolvers } from '../../generated/graphql'
 import { FindCommunicationsQuery } from './queries/find-communications-query'
 
 export const resolvers: Resolvers = {
@@ -10,6 +10,7 @@ export const resolvers: Resolvers = {
   Communication: {
     createdBy: async ({ createdById }, _, { dataLoaders: { users } }) => users.load(createdById),
     recipient: async ({ recipientId }, _, { dataLoaders: { identities } }) => identities.load(recipientId),
+    error: (communication) => (communication.status === CommunicationStatus.Failed ? communication.details : undefined) ?? null,
   },
   AsyncIssuanceRequest: {
     communications: async ({ id }, { where, offset, limit, orderBy, orderDirection }, context) =>

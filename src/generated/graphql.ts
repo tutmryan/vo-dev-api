@@ -810,7 +810,12 @@ export type Communication = {
   contactMethod: ContactMethod;
   /** The user (Person or Application) whose action resulted in the communication. */
   createdBy: User;
-  /** The error while sending the communication, if any. */
+  /** Additional details about the communication entry. */
+  details?: Maybe<Scalars['String']['output']>;
+  /**
+   * The error while sending the communication, if any.
+   * @deprecated Use level and details fields instead
+   */
   error?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   /** The purpose of the communication. */
@@ -819,6 +824,8 @@ export type Communication = {
   recipient: Identity;
   /** When the communication was sent. */
   sentAt: Scalars['DateTime']['output'];
+  /** The status this communication entry represents. */
+  status: CommunicationStatus;
 };
 
 /** Fields that can be used for sorting communications. */
@@ -838,6 +845,7 @@ export enum CommunicationPurpose {
 /** The possible statuses of a communication. */
 export enum CommunicationStatus {
   Failed = 'failed',
+  Informational = 'informational',
   Sent = 'sent'
 }
 
@@ -6655,11 +6663,13 @@ export type ClaimValidationResolvers<ContextType = GraphQLContext, ParentType ex
 export type CommunicationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Communication'] = ResolversParentTypes['Communication']> = {
   contactMethod?: Resolver<ResolversTypes['ContactMethod'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  details?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   purpose?: Resolver<ResolversTypes['CommunicationPurpose'], ParentType, ContextType>;
   recipient?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
   sentAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['CommunicationStatus'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

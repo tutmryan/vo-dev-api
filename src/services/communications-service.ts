@@ -4,11 +4,11 @@ import type { VerifiedOrchestrationEntityManager } from '../data/entity-manager'
 import { getIssuanceEmailStatusCallbackUrl, getVerificationEmailStatusCallbackUrl } from '../features/async-issuance/email-status-callback'
 import { getIssuanceSmsStatusCallbackUrl, getVerificationSmsStatusCallbackUrl } from '../features/async-issuance/sms-status-callback'
 import { CommunicationEntity } from '../features/communication/entities/communication-entity'
-import { CommunicationPurpose, ContactMethod } from '../generated/graphql'
+import { getEmailSenderConfig } from '../features/instance-configs'
+import { CommunicationPurpose, CommunicationStatus, ContactMethod } from '../generated/graphql'
 import type { Logger } from '../logger'
 import { sendEmail } from '../util/email'
 import { sendSms } from '../util/sms'
-import { getEmailSenderConfig } from '../features/instance-configs'
 
 export type IssuanceCommunicationData = CommunicationData & {
   contractName: string
@@ -256,7 +256,8 @@ export class CommunicationsService {
         recipientId,
         asyncIssuanceId,
         createdById,
-        error,
+        status: error ? CommunicationStatus.Failed : CommunicationStatus.Sent,
+        details: error,
       }),
     )
   }
