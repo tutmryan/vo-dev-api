@@ -1,6 +1,6 @@
-# Verified Orchestration API
+# VO API
 
-The verified orchestration platform GraphQL API backend repository.
+The VO platform GraphQL API backend repository.
 
 ## Developer prerequisites
 
