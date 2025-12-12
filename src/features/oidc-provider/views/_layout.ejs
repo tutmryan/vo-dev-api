@@ -276,13 +276,12 @@
     }
 
     #client-logo img {
-      <% if (!dropToEs5) { %>
       max-width: 100%;
+      max-height: 120px;
+      <% if (!dropToEs5) { %>
       object-fit: contain;
       <% } else { %>
       display: inline-block;
-      max-width: 100%;
-      max-height: 150px;
       width: auto;
       height: auto;
       vertical-align: middle;
@@ -390,7 +389,7 @@
     }
 
     /* Horizontal layout for when screen height is low  */
-    @media (max-height: 700px) {
+    @media (max-height: 900px) {
       #client-logo {
         min-width: 100px;
       }
@@ -450,10 +449,6 @@
         text-align: left;
       }
 
-      .login-footer-content .login-help {
-        text-align: left;
-      }
-
       .login-body-content {
         padding-left: 1rem;
         padding-right: 1rem;
@@ -472,6 +467,7 @@
 
 
     .login-card h1 {
+      font-size: 2.5rem;
       font-weight: 200;
       text-align: center;
     }
