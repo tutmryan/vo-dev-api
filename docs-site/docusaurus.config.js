@@ -130,7 +130,7 @@ const config = {
             position: 'left',
             items: [
               {
-                label: 'Apollo Sandbox',
+                label: 'Apollo Studio',
                 href: `${process.env.GRAPHQL_ENDPOINT}/graphql`,
                 prependBaseUrlToHref: false,
               },

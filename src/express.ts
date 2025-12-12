@@ -55,7 +55,7 @@ const oidcOnlyCsp = {
       (req, res) => {
         const url = new URL(req.url ?? '', requestOrigin(req as Request))
 
-        // Apollo Sandbox requires special snow flaking
+        // Apollo Studio requires special snow flaking
         if (url.pathname.startsWith('/graphql')) return `https: 'unsafe-inline'`
 
         const policies = [`'strict-dynamic'`, `'nonce-${getExpressCsp(res)}'`]
@@ -74,7 +74,7 @@ const oidcOnlyCsp = {
       (req, res) => {
         const url = new URL(req.url ?? '', requestOrigin(req as Request))
 
-        // Apollo Sandbox requires special snow flaking
+        // Apollo Studio requires special snow flaking
         if (url.pathname.startsWith('/graphql')) return `https: 'unsafe-inline'`
 
         return `'nonce-${getExpressCsp(res)}'`
@@ -101,7 +101,7 @@ export async function getExpressApp(): Promise<Express> {
       strictTransportSecurity: !isLocalDev,
       contentSecurityPolicy: devToolsEnabled
         ? {
-            // override helmet defaults with apollo sandbox + oidc
+            // override helmet defaults with apollo studio + oidc
             directives: {
               imgSrc: [`'self'`, 'data:', 'apollo-server-landing-page.cdn.apollographql.com'],
               scriptSrc: [...oidcOnlyCsp.directives.scriptSrc],

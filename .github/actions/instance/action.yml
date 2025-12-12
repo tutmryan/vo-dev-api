@@ -68,7 +68,7 @@ inputs:
     description: The number of days to retain data in App Insights
     default: '180'
   dev-tools-enabled:
-    description: The flag indicating whether the dev tools (i.e. Apollo Sandbox, .etc) are deployed
+    description: The flag indicating whether the dev tools (i.e. Apollo Studio, .etc) are deployed
   face-check-enabled:
     description: The flag indicating whether the face check features (i.e. issuing credentials with face check photo, .etc) are available
   demo-enabled:

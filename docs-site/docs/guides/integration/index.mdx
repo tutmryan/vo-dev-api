@@ -20,15 +20,15 @@ If you're using a different development stack, our guides and examples can still
 All data and operations are accessible through the API, which presents a strongly typed, documented and discoverable schema.
 
 <RenderIf flag='DEV_TOOLS_ENABLED'>
-### Apollo Sandbox UI
+### Apollo Studio
 
-Apollo Sandbox is a GraphQL IDE that enables you to explore the Verified Orchestration API. It's an ideal tool for delving into the schema, building and running queries, as well as referencing the documentation.
+Apollo Studio is a GraphQL IDE that enables you to explore the Verified Orchestration API. It's an ideal tool for delving into the schema, building and running queries, as well as referencing the documentation.
 
-You will need to be [onboarded as a platform user](../onboarding-users.mdx) to access Apollo Sandbox and the API.
+You will need to be [onboarded as a platform user](../onboarding-users.mdx) to access Apollo Studio and the API.
 
-<ApiLink>Access Apollo Sandbox here</ApiLink>
+<ApiLink>Access Apollo Studio here</ApiLink>
 
-#### Basic Apollo Sandbox usage
+#### Basic Apollo Studio usage
 
 - Navigate the schema and select operations, types, and fields using the Documentation tab in the Explorer view.
 - Define operation variables through the Variables tab.
@@ -36,21 +36,21 @@ You will need to be [onboarded as a platform user](../onboarding-users.mdx) to a
 - Generate a link to an operation definition using the Share button.
 - Export data in JSON or CSV format.
 
-![Apollo Sandbox Basic](../../../static/img/apollo-sandbox-basic.png)
+![Apollo Studio Basic](../../../static/img/apollo-sandbox-basic.png)
 
-![Apollo Sandbox Traces](../../../static/img/apollo-sandbox-traces.png)
+![Apollo Studio Traces](../../../static/img/apollo-sandbox-traces.png)
 
-#### Subscriptions in Apollo Sandbox
+#### Subscriptions in Apollo Studio
 
 Query and Mutation operations work _out of the box_ through cookie authentication (see the _Include cookies_ setting in _Connection settings_).
 
 To use subscription connections, which do not include cookies, you need to provide an Authorization header for the subscription operation.
 
 1. Copy an Authorization header value from the <AdminLink>Composer</AdminLink> using your browser dev tools
-1. Insert the Authorization header into the **Headers** section in Apollo Sandbox
+1. Insert the Authorization header into the **Headers** section in Apollo Studio
 
 You can now subscribe to events and see event data. Typically, an access token is valid for approximately 50 minutes, subject to your tenant configuration.
 
-![Apollo Sandbox Subscriptions](../../../static/img/apollo-sandbox-subscriptions.png)
+![Apollo Studio Subscriptions](../../../static/img/apollo-sandbox-subscriptions.png)
 
 </RenderIf>

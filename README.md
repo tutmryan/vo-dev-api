@@ -25,7 +25,7 @@ For webstorm users, the VO recommendation is to enable 'Optimize imports' on sav
 - run tasks: Start DB & Migrate DB
 - F5
 
-**Tip:** If you are getting `Not Authorised!` error when browsing to `http://localhost:4000` and running any query for the first time, then turn on `Include cookies` setting in `Connection settings` dialog of Apollo sandbox.
+**Tip:** If you are getting `Not Authorised!` error when browsing to `http://localhost:4000` and running any query for the first time, then turn on `Include cookies` setting in `Connection settings` dialog of Apollo Studio.
 
 **Tip:** When the local cert used for azurite https setup expires, you can use the following command to create a new pair.
 
@@ -232,7 +232,7 @@ grant_type:client_credentials
 
 ### How to use
 
-1. Copy the access token into Apollo Sandbox and apply an `Authorization: Bearer {token}` header.
+1. Copy the access token into Apollo Studio and apply an `Authorization: Bearer {token}` header.
 2. Run the token acquisition mutation with this header applied.
 3. Receive the limited access token.
 4. Apply `Authorization: Bearer {token}` header using the limited access token for subsequent operations.

@@ -718,7 +718,7 @@ param homeTenantVidServiceClientId string
 @description('The client secret of the home tenant VID service client (optional)')
 @secure()
 param homeTenantVidServiceClientSecret string
-@description('The flag indicating whether the dev tools (i.e. Apollo Sandbox, .etc) are deployed')
+@description('The flag indicating whether the dev tools (i.e. Apollo Studio, .etc) are deployed')
 param devToolsEnabled string
 @description('The flag indicating whether the face check features (i.e. issuing credentials with face check photo, .etc) are available')
 param faceCheckEnabled string
