@@ -90,7 +90,10 @@ const config: DeepPartial<Config> = {
     sms: { disabled: true, allowList: [] },
   },
   platformManagement,
-  mdocEnabled: true,
+  mdoc: {
+    presentationsEnabled: true,
+    multipazTestCertificatesEnabled: true,
+  },
 }
 
 module.exports = config

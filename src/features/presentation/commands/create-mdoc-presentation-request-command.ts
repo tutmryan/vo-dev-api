@@ -1,7 +1,7 @@
 import { randomUUID } from 'crypto'
 import { addMilliseconds } from 'date-fns'
 import type { CommandContext } from '../../../cqs'
-import { isMDocEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
+import { isMDocPresentationsEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import type { MDocPresentationRequestInput, MDocPresentationResponse } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
@@ -11,7 +11,7 @@ import { buildOpenId4VpRequest } from '../mdoc/openid4vp'
 import { MDOC_TTL, mdocRequestDetailsCache } from '../mdoc/shared-config'
 import type { MDocRequestClaimPath, MDocRequestDetails } from '../mdoc/types'
 
-registerFeatureCheck(CreateMDocPresentationRequestCommand, async (...[,]) => isMDocEnabled())
+registerFeatureCheck(CreateMDocPresentationRequestCommand, async (...[,]) => isMDocPresentationsEnabled())
 
 export async function CreateMDocPresentationRequestCommand(
   this: CommandContext,

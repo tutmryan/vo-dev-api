@@ -72,7 +72,10 @@ const config: DeepPartial<Config> = {
   platformManagement: {
     remoteUrl: 'https://example.com/graphql',
   },
-  mdocEnabled: true,
+  mdoc: {
+    presentationsEnabled: true,
+    multipazTestCertificatesEnabled: true,
+  },
 }
 
 module.exports = config

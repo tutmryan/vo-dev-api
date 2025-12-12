@@ -111,7 +111,10 @@ const config: DeepPartial<Config> = {
   devToolsEnabled: true,
   faceCheckEnabled: true,
   oidcEnabled: true,
-  mdocEnabled: false,
+  mdoc: {
+    presentationsEnabled: false,
+    multipazTestCertificatesEnabled: false,
+  },
   graphQL: {
     maxAliases: 30,
     maxDirectives: 50,

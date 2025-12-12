@@ -1,3 +1,4 @@
+import { mdoc } from '../../../../config'
 import { logger } from '../../../../logger'
 import { pemToDer } from '../../../../util/cryptography'
 import { invariant } from '../../../../util/invariant'
@@ -113,14 +114,15 @@ export async function fetchIacaCertificates(options?: { filterByDocType?: string
     }
   }
 
-  // Multipaz Test App
-  // To update
-  // 1. Download the source code from
-  // 2. Add a log to dump the public cert in method iacaInit in file samples/testapp/src/commonMain/kotlin/org/multipaz/testapp/App.kt
-  //   println("iacaCert: ${iacaCert.toPem()}")
-  // 3. Run the app and copy the PEM output
-  certificates.push(
-    pemToDer(`-----BEGIN CERTIFICATE-----
+  if (mdoc.multipazTestCertificatesEnabled) {
+    // Multipaz Test App
+    // To update
+    // 1. Download the source code from
+    // 2. Add a log to dump the public cert in method iacaInit in file samples/testapp/src/commonMain/kotlin/org/multipaz/testapp/App.kt
+    //   println("iacaCert: ${iacaCert.toPem()}")
+    // 3. Run the app and copy the PEM output
+    certificates.push(
+      pemToDer(`-----BEGIN CERTIFICATE-----
 MIICqDCCAi2gAwIBAgIQx8BcT0/ehfrMuw1NjPRuAzAKBggqhkjOPQQDAzAuMR8w
 HQYDVQQDDBZPV0YgTXVsdGlwYXogVEVTVCBJQUNBMQswCQYDVQQGDAJVUzAeFw0y
 NDEyMDEwMDAwMDBaFw0zNDEyMDEwMDAwMDBaMC4xHzAdBgNVBAMMFk9XRiBNdWx0
@@ -137,7 +139,8 @@ AwNpADBmAjEApicB3n7hJw627KOQ27/g88xKiv7b2dK+L5mcacbSY5S/xPbKivft
 H9CPH91juhgnAjEAtMDz0we8OFKAh7SzNgoC14xHqcrFTrHnQfUYB59amga6AUD4
 DaLde7n+ujB2gvsD
 -----END CERTIFICATE-----`),
-  )
+    )
+  }
 
   invariant(certificates.length > 0, 'No IACA certificates found in fetched VICALs or trust anchors')
 

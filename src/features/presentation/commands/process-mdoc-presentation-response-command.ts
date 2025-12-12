@@ -1,5 +1,5 @@
 import type { CommandContext } from '../../../cqs'
-import { isMDocEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
+import { isMDocPresentationsEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
 import type {
   MDocClaim,
   MDocDocument,
@@ -15,7 +15,7 @@ import { decodeAndValidateISO18013_7Response } from '../mdoc/iso18013-7'
 import { decodeAndValidateOpenId4VpResponse } from '../mdoc/openid4vp'
 import { mdocRequestDetailsCache } from '../mdoc/shared-config'
 
-registerFeatureCheck(ProcessMDocPresentationResponseCommand, async (...[,]) => isMDocEnabled())
+registerFeatureCheck(ProcessMDocPresentationResponseCommand, async (...[,]) => isMDocPresentationsEnabled())
 
 export async function ProcessMDocPresentationResponseCommand(
   this: CommandContext,
