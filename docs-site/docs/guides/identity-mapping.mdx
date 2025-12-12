@@ -7,16 +7,16 @@ import { AdminLink } from '@site/src/components/admin-link'
 
 # Identity mapping
 
-This guide describes how to use Verified Orchestration identity references, which are used by issuances and presentations to reliably link back to your organisation's own identities (e.g., internal users, partners, and customers).
+This guide describes how to use VO identity references, which are used by issuances and presentations to reliably link back to your organisation's own identities (e.g., internal users, partners, and customers).
 
-Verified Orchestration supports adding and grouping identities through the **Identity Store** feature.
+VO supports adding and grouping identities through the **Identity Store** feature.
 Identity mapping continues to be used to connect each credential or presentation to the correct person or entity in your organisation.
 
 For details on setup and configuration, see the [Identity Store documentation](/docs/guides/identity-stores).
 
-## Verified Orchestration identity reference
+## VO identity reference
 
-The Verified Orchestration platform minimises holding personal data. Instead, it stores and uses minimal identity references to link back into your organisation's own identity system.
+The VO platform minimises holding personal data. Instead, it stores and uses minimal identity references to link back into your organisation's own identity system.
 
 This allows identity-linked issuances and presentations to be resolved by identity references, facilitating abilities such as:
 
@@ -40,22 +40,22 @@ In the Composer, identity references are labelled as "Issuees".
 
 ## How does it work?
 
-Verified Orchestration assumes that your organisation has one or more identity stores. With each store having:
+VO assumes that your organisation has one or more identity stores. With each store having:
 
 - A unique **identifier for the store**. For example in Entra ID, the Tenant ID uniquely identifies the store and is available within an Entra ID JWT payload as the `tid` claim.
 - A unique **identifier for each identity** within a store. For example in Entra ID, the unique user Object ID is available within an Entra ID JWT payload as the `oid` claim.
 
-These two values form the unique key which is used to link a Verified Orchestration identity reference back to an identity within your organisation's identity stores.
+These two values form the unique key which is used to link a VO identity reference back to an identity within your organisation's identity stores.
 
 ### Example mapping of an Entra ID User
 
-The table below demonstrates how an Entra ID identity store user can be mapped to a Verified Orchestration identity reference. This reference includes both the Entra ID user attributes and under which claims the values are stored by an Entra ID produced JWT.
+The table below demonstrates how an Entra ID identity store user can be mapped to a VO identity reference. This reference includes both the Entra ID user attributes and under which claims the values are stored by an Entra ID produced JWT.
 
-| Entra ID User Attribute | JWT Payload Claim | Verified Orchestration Identity Field |
-| ----------------------- | ----------------- | ------------------------------------- |
-| Tenant ID               | `tid`             | `issuer`                              |
-| User Object ID          | `oid`             | `identifier`                          |
-| User Display name       | `name`            | `name`                                |
+| Entra ID User Attribute | JWT Payload Claim | VO Identity Field |
+| ----------------------- | ----------------- | ----------------- |
+| Tenant ID               | `tid`             | `issuer`          |
+| User Object ID          | `oid`             | `identifier`      |
+| User Display name       | `name`            | `name`            |
 
 ### What each identity reference looks like
 
@@ -110,7 +110,7 @@ If the identity store already exists, the identity will be added to it.
 
 #### Creating an identity with issuance
 
-When creating an issuance or remote issuance, you may optionally include the identity information instead supply the Verified Orchestration's identity ID. This can be more convenient, as the identity is saved or updated and linked to the issuance in a single operation.
+When creating an issuance or remote issuance, you may optionally include the identity information instead supply the VO's identity ID. This can be more convenient, as the identity is saved or updated and linked to the issuance in a single operation.
 
 ```graphql title="createIssuance mutation"
 mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
@@ -177,7 +177,7 @@ Once identity references are saved:
 
 ### Querying identity data
 
-Identities can be queried to return one or many by using either the Verified Orchestration identity ID or your organisation's own identity data (issuer and identifier unique key).
+Identities can be queried to return one or many by using either the VO identity ID or your organisation's own identity data (issuer and identifier unique key).
 
 The following queries are available:
 

@@ -28,7 +28,7 @@ export async function CreatePresentationRequestForApprovalCommand(
     ...approvalRequest.presentationRequestInput,
     includeQRCode: input?.includeQRCode,
     registration: {
-      clientName: 'Verified Orchestration Approvals',
+      clientName: 'VO Approvals',
     },
   }
 

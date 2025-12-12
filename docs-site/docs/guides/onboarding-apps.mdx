@@ -7,7 +7,7 @@ import { ApiScope } from '@site/src/components/api-scope'
 
 # Onboarding an app
 
-For apps to integrate with Verified Orchestration platform, they will need to be granted access to Verified Orchestration application roles. Which roles are granted will depend on the tasks the app will carry out and the access model used.
+For apps to integrate with VO platform, they will need to be granted access to VO application roles. Which roles are granted will depend on the tasks the app will carry out and the access model used.
 
 A tenant administrator can help onboarding an app in Microsoft Azure Portal. Use the following steps to onboard an app:
 
@@ -15,12 +15,12 @@ A tenant administrator can help onboarding an app in Microsoft Azure Portal. Use
 - [Assign app roles to applications](https://learn.microsoft.com/en-us/entra/identity-platform/howto-add-app-roles-in-apps#assign-app-roles-to-applications)
 
 :::tip
-The name of the Verified Orchestration platform application in Azure AD is: **Verified Orchestration (<Instance />)**
+The name of the VO platform application in Azure AD is: **VO (<Instance />)**
 :::
 
 ## Access models
 
-Primary access to the Verified Orchestration platform is via client credentials. A second access model, [limited access tokens](./limited-access-tokens/), supports controlled access by apps which do not have the ability to securely store a secret.
+Primary access to the VO platform is via client credentials. A second access model, [limited access tokens](./limited-access-tokens/), supports controlled access by apps which do not have the ability to securely store a secret.
 
 ## Conventional access via client credentials
 
@@ -122,7 +122,7 @@ For more information on how the limited access token works, refer to the [Limite
 Refer to the [client credentials flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow) documentation for info on how to [get an access token](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-client-creds-grant-flow#get-a-token).
 
 :::tip
-The scope for this Verified Orchestration platform instance is: **<ApiScope />**
+The scope for this VO platform instance is: **<ApiScope />**
 :::
 
 An example for getting an access token using the `@azure/msal-node` package is available in the [Secure backend API](/docs/guides/limited-access-tokens/secure-backend-api#get-access-token-to-call-verification-orchestration-platform) guide.
@@ -137,4 +137,4 @@ When you onboard an application, you can supply a user-friendly label, helping u
 
 ### CORS origin
 
-If you are using a web application to access the Verified Orchestration API, the host address must be configured as a CORS origin.
+If you are using a web application to access the VO API, the host address must be configured as a CORS origin.

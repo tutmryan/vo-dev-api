@@ -383,7 +383,7 @@ input OidcClientInput {
   The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
 
   Note:
-  - This is not needed for authentication using Verified Orchestration credentials, the issuanceId claim is used.
+  - This is not needed for authentication using VO credentials, the issuanceId claim is used.
   - The authentication client also can specify the claim to use via the `vc_unique_claim_for_sub` auth request parameter.
   - Multiple values can be specified here, if not specified via the client `vc_unique_claim_for_sub` auth request parameter, the first claim that is present in the partner presentation will be used.
   - If values are defined here and the `vc_unique_claim_for_sub` auth request parameter is provided, it is validated to be from this list.
@@ -461,7 +461,7 @@ type OidcClient {
   The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
 
   Note:
-  - This is not needed for authentication using Verified Orchestration credentials, the issuanceId claim is used.
+  - This is not needed for authentication using VO credentials, the issuanceId claim is used.
   - The authentication client also can specify the claim to use via the `vc_unique_claim_for_sub` auth request parameter.
   - Multiple values can be specified here, if not specified via the client `vc_unique_claim_for_sub` auth request parameter, the first claim that is present in the partner presentation will be used.
   - If values are defined here and the `vc_unique_claim_for_sub` auth request parameter is provided, it is validated to be from this list.

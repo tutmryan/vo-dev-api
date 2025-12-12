@@ -6,7 +6,7 @@ import { AdminLink } from '@site/src/components/admin-link'
 
 # Instance configuration
 
-The following configuration settings can be administered for each instance of the Verified Orchestration platform.
+The following configuration settings can be administered for each instance of the VO platform.
 
 These settings are controlled via the <AdminLink path="/configuration">Configuration</AdminLink> page in Composer.
 
@@ -14,7 +14,7 @@ To change settings, you will need to be a member of the [Instance admin user rol
 
 ## CORS origins
 
-CORS origins control which web applications can access the Verified Orchestration API or OIDC endpoint.
+CORS origins control which web applications can access the VO API or OIDC endpoint.
 You can configure allowed origins for each instance (sandbox and production).
 
 - Subdomains can be matched using a regular expression, e.g. `^https://([a-z0-9]+[.])*yourcompany\.com$`
@@ -72,7 +72,7 @@ mutation SetCorsOriginConfigs($input: [CorsOriginConfigInput!]!) {
 
 ## GraphQL security settings
 
-The Verified Orchestration API uses GraphQL for querying and mutating data. To ensure the API is not misused, the following security settings are configured out of the box with sensible defaults. However, these settings can be adjusted to suit your requirements.
+The VO API uses GraphQL for querying and mutating data. To ensure the API is not misused, the following security settings are configured out of the box with sensible defaults. However, these settings can be adjusted to suit your requirements.
 
 | Rule           | Default | Description                                           |
 | -------------- | ------- | ----------------------------------------------------- |
@@ -81,4 +81,4 @@ The Verified Orchestration API uses GraphQL for querying and mutating data. To e
 | Max Directives | 50      | Limit the number of directives in a GraphQL document. |
 | Max Tokens     | 2500    | Limit the number of tokens in a GraphQL document.     |
 
-If you need to adjust GraphQL security settings, please contact the Verified Orchestration team to make changes on your behalf.
+If you need to adjust GraphQL security settings, please contact the VO team to make changes on your behalf.

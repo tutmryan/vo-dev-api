@@ -23,7 +23,7 @@ msalInstance.acquireTokenSilent({ scopes: ['api://<your-backend-API>/.default'] 
   acquireIssuanceToken().then((data) => {
     // contruct a VerifiedOrchestrationClient with the issuance token
     verifiedOrchestrationClient = new verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
-      url: '<Verified Orchestration API URL>',
+      url: '<VO API URL>',
       accessToken: data.token,
     })
     // begin issuance

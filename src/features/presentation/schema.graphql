@@ -198,7 +198,7 @@ input RequestCredential {
   purpose: String
   """
   A collection of issuers' DIDs that could issue the type of verifiable credential that subjects can present.
-  If not specified, the Verified Orchestration platform issuer DID will be used.
+  If not specified, the VO platform issuer DID will be used.
   This field should only be used when requesting credentials from external issuers.
   """
   acceptedIssuers: [String!]

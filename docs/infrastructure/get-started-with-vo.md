@@ -5,7 +5,7 @@
 Assuming [Azure Command-Line Interface (CLI)](https://learn.microsoft.com/en-us/cli/azure/) is installed,
 
 1. Log in to the tenant you want to install the app into; `az login --tenant <tenant_id>`.
-1. Install the Verified Orchestration app; `az ad sp create --id <instance app registration client id>`.
+1. Install the VO app; `az ad sp create --id <instance app registration client id>`.
 1. Navigate to the Azure Active Directory blade in the Azure Portal: <https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/Overview>.
 1. In the "Manage" section, click on "Enterprise applications".
 1. Remove "Application type == Enterprise Applications" filter.

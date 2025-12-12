@@ -20,7 +20,7 @@ type IdentityStore {
   """
   type: IdentityStoreType!
   """
-  Whether this store represents an Entra tenant from which users or applications will authenticate to Verified Orchestration.
+  Whether this store represents an Entra tenant from which users or applications will authenticate to VO.
   """
   isAuthenticationEnabled: Boolean!
   """

@@ -129,7 +129,7 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
    * The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
    *
    * Note:
-   * - This is not needed for authentication using Verified Orchestration credentials, the issuanceId claim is used.
+   * - This is not needed for authentication using VO credentials, the issuanceId claim is used.
    * - Multiple values can be specified, the first claim that is present in the partner presentation will be used.
    * - The authentication client also can specify the claim to use via the `vc_unique_claim_for_sub` auth request parameter.
    * - If values are defined here and the `vc_unique_claim_for_sub` auth request parameter is provided, it is validated to be from this list.

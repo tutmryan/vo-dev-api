@@ -53,7 +53,7 @@ export function logoutSource(ctx: KoaContextWithOIDC, form: string) {
     </style>
   </head>
   <body>
-    <div class="d-flex justify-content-center mb-4"><img src="${voLogoUrl}" alt="Verified Orchestration Logo" style="max-width:10rem"></div>
+    <div class="d-flex justify-content-center mb-4"><img src="${voLogoUrl}" alt="VO Logo" style="max-width:10rem"></div>
     <div class="container">
       <h1>Sign out from</h1>
       <h2>${ctx.oidc.client?.clientName ?? ctx.host}</h2>

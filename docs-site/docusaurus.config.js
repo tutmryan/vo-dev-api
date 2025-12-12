@@ -9,7 +9,7 @@ const {
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'Verified Orchestration',
+  title: 'VO',
   tagline:
     'Empowering organizations with a user-centric approach to manage and integrate decentralized identity and verifiable credentials, simplifying deployment and fostering intuitive trust.',
   favicon: 'img/favicon.ico',
@@ -105,7 +105,7 @@ const config = {
       navbar: {
         style: 'primary',
         logo: {
-          alt: 'Verified Orchestration Logo',
+          alt: 'VO Logo',
           src: 'img/logo-secondary-greyscale-white.svg',
           srcDark: 'img/logo-primary-white.svg',
         },
@@ -152,11 +152,11 @@ const config = {
         style: 'dark',
         links: [],
         logo: {
-          alt: 'Verified Orchestration Logo',
+          alt: 'VO Logo',
           src: 'img/logo-primary-white.svg',
           width: '20%',
         },
-        copyright: `© ${new Date().getFullYear()} Verified Orchestration, all rights reserved.`,
+        copyright: `© ${new Date().getFullYear()} VO Tech, all rights reserved.`,
       },
       prism: {
         theme: lightCodeTheme,

@@ -18,7 +18,7 @@ import { OidcResourceEntity } from './entities/oidc-resource-entity'
 import { portalClientPolicyUrl, portalClientTermsOfServiceUrl } from './portal-client-data'
 import { oidcProviderModule } from './provider'
 
-export const portalClientName = 'Verified Orchestration Concierge'
+export const portalClientName = 'VO Concierge'
 export const portalClientId = '7cb4a314-2322-48bf-a764-b57e50766468'
 export const apiResourceId = 'f0d8ede0-18d2-4af3-b38a-4a6ad13c6eee'
 
@@ -201,7 +201,7 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
       await resourceRepo.save(
         new OidcResourceEntity({
           id: apiResourceId,
-          name: 'Verified Orchestration API',
+          name: 'VO API',
           resourceIndicator: apiUrl,
           scopes: [OidcScopes.issuee],
         }),

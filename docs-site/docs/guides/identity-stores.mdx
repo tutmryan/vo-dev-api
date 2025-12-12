@@ -6,11 +6,11 @@ import { AdminLink } from '@site/src/components/admin-link'
 
 # Identity stores
 
-Identity stores make it easy to organise, group, and manage identities in Verified Orchestration. Each identity store represents a source of identities, such as your organisation’s directory or a manually managed group.
+Identity stores make it easy to organise, group, and manage identities in VO. Each identity store represents a source of identities, such as your organisation’s directory or a manually managed group.
 
 ## What is an identity store?
 
-An identity store is a way to organise and group identities in Verified Orchestration.
+An identity store is a way to organise and group identities in VO.
 It also lets you manage related settings such as authentication options and application labels for each store.
 
 An identity store can represent:
@@ -57,7 +57,7 @@ You can create and manage identity stores from the <AdminLink path="/issuee-stor
    - **Type:** Select "Entra"
    - **Graph Client Credentials:** (optional) Client ID and secret for Graph API integration
      > **Note:** The Graph client is an app registration in Microsoft Entra, which this issuee store uses to securely access Microsoft Graph and retrieve user information from the directory. Enter the Client ID and Client Secret from the app registration.
-   - **Enable authentication:** Toggle if issued tokens from this tenant should be able to authenticate with Verified Orchestration API.
+   - **Enable authentication:** Toggle if issued tokens from this tenant should be able to authenticate with VO API.
 
    **For Manual type:**
    - **Name:** Human-friendly label for the store
@@ -71,7 +71,7 @@ You can create and manage identity stores from the <AdminLink path="/issuee-stor
 
 - **Name:** A human-readable name for the store (this replaces the previous issuer label configs)
 - **Type:** The source type (e.g. Entra, Manual)
-- **Authentication enabled:** Use the `isAuthenticationEnabled` setting to allow tokens issued from this tenant to be authenticated with the Verified Orchestration APIs
+- **Authentication enabled:** Use the `isAuthenticationEnabled` setting to allow tokens issued from this tenant to be authenticated with the VO APIs
 
 **Example GraphQL mutation:**
 
@@ -214,7 +214,7 @@ This behaviour may change in the future as support for additional store types is
 
 ## Adding an Identity to Identity Stores
 
-You can create identities in Verified Orchestration using either Composer or the API.
+You can create identities in VO using either Composer or the API.
 
 **In Composer:**
 

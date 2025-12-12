@@ -1784,7 +1784,7 @@ export type IdentityStore = {
   id: Scalars['ID']['output'];
   /** A unique identifier for this store */
   identifier: Scalars['String']['output'];
-  /** Whether this store represents an Entra tenant from which users or applications will authenticate to Verified Orchestration. */
+  /** Whether this store represents an Entra tenant from which users or applications will authenticate to VO. */
   isAuthenticationEnabled: Scalars['Boolean']['output'];
   /** A human-friendly name for this store */
   name: Scalars['String']['output'];
@@ -2599,7 +2599,7 @@ export type Mutation = {
    *
    * **Critical items** of note:
    *
-   * - This mutation has a hard limit of **1000 requests** per call. Verified Orchestration **strongly** recommends implementing a batching strategy when an unknown number of requests will be issued.
+   * - This mutation has a hard limit of **1000 requests** per call. VO **strongly** recommends implementing a batching strategy when an unknown number of requests will be issued.
    */
   createAsyncIssuanceRequest: AsyncIssuanceRequestResponse;
   /** Creates a new contract */
@@ -3329,7 +3329,7 @@ export type OidcClient = {
    * The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
    *
    * Note:
-   * - This is not needed for authentication using Verified Orchestration credentials, the issuanceId claim is used.
+   * - This is not needed for authentication using VO credentials, the issuanceId claim is used.
    * - The authentication client also can specify the claim to use via the `vc_unique_claim_for_sub` auth request parameter.
    * - Multiple values can be specified here, if not specified via the client `vc_unique_claim_for_sub` auth request parameter, the first claim that is present in the partner presentation will be used.
    * - If values are defined here and the `vc_unique_claim_for_sub` auth request parameter is provided, it is validated to be from this list.
@@ -3392,7 +3392,7 @@ export type OidcClientInput = {
    * The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
    *
    * Note:
-   * - This is not needed for authentication using Verified Orchestration credentials, the issuanceId claim is used.
+   * - This is not needed for authentication using VO credentials, the issuanceId claim is used.
    * - The authentication client also can specify the claim to use via the `vc_unique_claim_for_sub` auth request parameter.
    * - Multiple values can be specified here, if not specified via the client `vc_unique_claim_for_sub` auth request parameter, the first claim that is present in the partner presentation will be used.
    * - If values are defined here and the `vc_unique_claim_for_sub` auth request parameter is provided, it is validated to be from this list.
@@ -4489,7 +4489,7 @@ export type RequestConfigurationValidation = {
 export type RequestCredential = {
   /**
    * A collection of issuers' DIDs that could issue the type of verifiable credential that subjects can present.
-   * If not specified, the Verified Orchestration platform issuer DID will be used.
+   * If not specified, the VO platform issuer DID will be used.
    * This field should only be used when requesting credentials from external issuers.
    */
   acceptedIssuers?: InputMaybe<Array<Scalars['String']['input']>>;

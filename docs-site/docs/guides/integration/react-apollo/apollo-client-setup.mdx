@@ -1,8 +1,8 @@
 # Apollo Client setup
 
-Prior to writing any React code using GraphQL via Apollo Client, you will need to set up Apollo Client to work with the Verified Orchestration API.
+Prior to writing any React code using GraphQL via Apollo Client, you will need to set up Apollo Client to work with the VO API.
 
-This section assumes you will be using limited access tokens from your [secure backend API](../../limited-access-tokens/secure-backend-api.mdx) to authenticate with the Verified Orchestration API.
+This section assumes you will be using limited access tokens from your [secure backend API](../../limited-access-tokens/secure-backend-api.mdx) to authenticate with the VO API.
 
 :::info
 The code samples in this guide use the `getVerifiedOrchestrationToken` function and `useVerifiedOrchestrationSessionToken` hook from the [managing limited access tokens](#managing-limited-access-tokens) section below.
@@ -168,7 +168,7 @@ type VerifiedOrchestrationSessionToken = AccessTokenResponse & { inputKey: strin
 const storageKey = 'VerifiedOrchestrationAccessToken'
 
 /***
- * Gets the most recent Verified Orchestration Access Token response from session storage (to make it available outside of a React component e.g. the network stack).
+ * Gets the most recent VO Access Token response from session storage (to make it available outside of a React component e.g. the network stack).
  * If the token is expired, it will be removed from session storage and undefined will be returned.
  * Note: it may contain additional data returned by the access token fetcher.
  */
@@ -187,7 +187,7 @@ export function getVerifiedOrchestrationToken<
 }
 
 /***
- * Sets the Verified Orchestration Access Token response in session storage (to make it available to the network stack).
+ * Sets the VO Access Token response in session storage (to make it available to the network stack).
  */
 const setVerifiedOrchestrationSessionToken = (token: VerifiedOrchestrationSessionToken) =>
   sessionStorage.setItem(storageKey, JSON.stringify(token))

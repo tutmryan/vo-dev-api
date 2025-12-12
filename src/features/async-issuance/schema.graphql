@@ -248,7 +248,7 @@ extend type Mutation {
 
   **Critical items** of note:
 
-  - This mutation has a hard limit of **1000 requests** per call. Verified Orchestration **strongly** recommends implementing a batching strategy when an unknown number of requests will be issued.
+  - This mutation has a hard limit of **1000 requests** per call. VO **strongly** recommends implementing a batching strategy when an unknown number of requests will be issued.
   """
   createAsyncIssuanceRequest(request: [AsyncIssuanceRequestInput!]!): AsyncIssuanceRequestResponse!
   """

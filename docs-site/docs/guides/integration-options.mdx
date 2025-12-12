@@ -6,11 +6,11 @@ import { AdminLink } from '@site/src/components/admin-link'
 
 # Integration options
 
-The Verified Orchestration platform offers integration options to suit different use cases. The following sections describes options and considerations by function and architecture.
+The VO platform offers integration options to suit different use cases. The following sections describes options and considerations by function and architecture.
 
 ## Issuance
 
-[Issuance](./issuance.mdx) is the process of creating and delivering a credential to the recipient's wallet (Microsoft Authenticator). The Verified Orchestration platform supports issuance in the following ways:
+[Issuance](./issuance.mdx) is the process of creating and delivering a credential to the recipient's wallet (Microsoft Authenticator). The VO platform supports issuance in the following ways:
 
 ### In person issuance via the Composer
 
@@ -56,7 +56,7 @@ Bulk remote issuance allows you to issue credentials to many recipients at once.
 
 ### Remote issuance embedded in your applications
 
-Same as remote issuance via the Composer, but programmatically via the Verified Orchestration API.
+Same as remote issuance via the Composer, but programmatically via the VO API.
 
 Considerations:
 
@@ -68,7 +68,7 @@ Considerations:
 
 ## Presentation
 
-Presentation is the process of presenting a credential to a verifier. The Verified Orchestration platform supports presentation in the following ways:
+Presentation is the process of presenting a credential to a verifier. The VO platform supports presentation in the following ways:
 
 ### Presentation embedded in your applications
 
@@ -112,7 +112,7 @@ It is possible to manually run credential presentations using the <AdminLink pat
 
 ## Applications without a user interface
 
-Applications that do not have a user interface can integrate with the Verified Orchestration platform.
+Applications that do not have a user interface can integrate with the VO platform.
 
 Functions might include:
 
@@ -135,7 +135,7 @@ When a hybrid approach is possible, consider acquiring [limited access tokens](.
 
 ### Single Page or Mobile Applications
 
-Single Page or Mobile Applications will need at least a minimal secure server-side API to acquire [limited access tokens](./limited-access-tokens/) or perform other operations against the Verified Orchestration API.
+Single Page or Mobile Applications will need at least a minimal secure server-side API to acquire [limited access tokens](./limited-access-tokens/) or perform other operations against the VO API.
 
 Once a limited access token is acquired, the application can run issuance and presentation operations client-side, directly against the API using the limited access token, optionally via the [JavaScript client](./integration/javascript-client/) library which orchestrates multiple API calls including photo capture and can use polling or websockets to receive events.
 
@@ -143,11 +143,11 @@ All other types of operations must be run via server-side and be properly protec
 
 ## Considerations for all applications
 
-- Consider the effort required to implement a purely backend or API driven integration to Verified Orchestration vs a hybrid approach where issuance and presentation operations are executed from the client using limited access tokens.
+- Consider the effort required to implement a purely backend or API driven integration to VO vs a hybrid approach where issuance and presentation operations are executed from the client using limited access tokens.
 - Consider presentations embedded in your application vs using the OpenID Connect Provider for authentication based on presentations.
 - Consider use of callbacks, or queries to keep potentially sensitive presentation data server-side, for example:
   - Receive the status of issuance or presentation events client-side to update the user interface.
   - Receive or query potentially sensitive credential data server-side.
-- For applications that support authenticated home Entra ID tenant users, [On-Behalf-Of (OBO) authentication flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) can be used to run administrative API operations as the logged in user, for example executing revocation of all credentials for an issuee from your own off-boarding app instead of using the Verified Orchestration Composer.
+- For applications that support authenticated home Entra ID tenant users, [On-Behalf-Of (OBO) authentication flow](https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-on-behalf-of-flow) can be used to run administrative API operations as the logged in user, for example executing revocation of all credentials for an issuee from your own off-boarding app instead of using the VO Composer.
 - Anonymous presentations can be run using limited access tokens
 - All other operations should be properly protected via authenticated access

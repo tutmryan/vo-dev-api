@@ -29,7 +29,7 @@ The following outlines the steps the secure backend API has to perform, to get a
 
 1. [Get access token to call Verification Orchestration platform using the client secret](#get-access-token-to-call-verification-orchestration-platform).
 1. [Save identity information unless limited access token is requested for anonymous presentations](#save-identity-information).
-1. [Get limited access token from the Verified Orchestration platform](#get-limited-access-token-from-the-verified-orchestration-platform).
+1. [Get limited access token from the VO platform](#get-limited-access-token-from-the-verified-orchestration-platform).
 1. [Pass on the limited access token received from Verification Platform to the client application](#sample-secure-backend-api-using-express-web-framework).
 
 The following code snippets demonstrating the above steps are taken from [a sample secure backend API](#sample-secure-backend-api-using-express-web-framework) implemented using [Node.JS](https://nodejs.org/en/about), [Express](https://www.npmjs.com/package/express), and [@azure/msal-node](https://www.npmjs.com/package/@azure/msal-node).
@@ -76,7 +76,7 @@ const getAccessTokenToCallPlatformService = async () => {
   const clientId = '{yourClientId}'
   // Client secret provided during onboarding of the app; retrieved from a secure storage such as Azure Key Vault
   const clientSecret = '{yourClientSecret}'
-  // Scope for this Verified Orchestration platform instance
+  // Scope for this VO platform instance
   // e.g. '{yourInstanceAppId}/.default'
   const scope = '{yourScope}'
 
@@ -96,7 +96,7 @@ const getAccessTokenToCallPlatformService = async () => {
 ```
 
 :::tip
-The scope for this Verified Orchestration platform instance is: **<ApiScope />**
+The scope for this VO platform instance is: **<ApiScope />**
 :::
 
 ### Save identity information
@@ -127,14 +127,14 @@ const saveIdentity = async (user: JwtPayload | undefined) => {
     throw new Error(`Invalid user object ${JSON.stringify(user)}`)
   }
 
-  // `post` is a custom-built utility method for calling Verified Orchestration GraphQL API
+  // `post` is a custom-built utility method for calling VO GraphQL API
   const result = await post<typeof variables, { saveIdentity: Identity }>(saveIdentityMutation, variables)
   if (!result.data) throw new Error('Failed to save identity')
   return result.data.saveIdentity as Identity
 }
 ```
 
-### Get limited access token from the Verified Orchestration platform
+### Get limited access token from the VO platform
 
 This example illustrates how to invoke the [`AcquireLimitedAccessToken` mutation](/api-reference/api/mutations/acquire-limited-access-token) with appropriate inputs to obtain limited access tokens for client applications to use.
 
@@ -173,7 +173,7 @@ const acquireTokenForIssuanceAndListContracts = async (identityId: string) => {
   // e.g. ['AA7ED447-232D-400A-9D96-BD0C9F4E108D', '54EDC080-F6C5-4902-90C9-7C0A7CD479F3']
   const contractIds = ['<contract ID>', '<contract ID>']
 
-  // `post` is a custom-built utility method for calling Verified Orchestration GraphQL API
+  // `post` is a custom-built utility method for calling VO GraphQL API
   const result = await post<AcquireLimitedAccessTokenInput, { acquireLimitedAccessToken: LimitedAccessToken }>(
     acquireLimitedAccessTokenMutation,
     { identityId, issuableContractIds: contractIds, listContracts: true },
@@ -182,12 +182,12 @@ const acquireTokenForIssuanceAndListContracts = async (identityId: string) => {
   return result.data.acquireLimitedAccessToken
 }
 const acquireTokenForAnonymousPresentations = async () => {
-  // a list of Verified Orchestration credential types of which the client application
+  // a list of VO credential types of which the client application
   // can request presentation anonymously (without a logged in user) using limited access token
   // e.g. ['VerifiedContractor', 'MediumRigidLicense']
   const credentialTypes = ['<credential type>', '<credential type>']
 
-  // `post` is a custom-built utility method for calling Verified Orchestration GraphQL API
+  // `post` is a custom-built utility method for calling VO GraphQL API
   const result = await post<AcquireLimitedAccessTokenInput, { acquireLimitedAccessToken: LimitedAccessToken }>(
     acquireLimitedAccessTokenMutation,
     {
@@ -200,16 +200,16 @@ const acquireTokenForAnonymousPresentations = async () => {
 }
 ```
 
-### Utility method for calling Verified Orchestration GraphQL API
+### Utility method for calling VO GraphQL API
 
-This example shows a custom-built utility method for calling Verified Orchestration GraphQL API. You may prefer to use a GraphQL client library such as [Apollo Client](https://www.apollographql.com/docs/react) instead.
+This example shows a custom-built utility method for calling VO GraphQL API. You may prefer to use a GraphQL client library such as [Apollo Client](https://www.apollographql.com/docs/react) instead.
 
-```ts title="A custom-built utility method for calling Verified Orchestration GraphQL API"
+```ts title="A custom-built utility method for calling VO GraphQL API"
 const post = async <TVariables, TResult>(query: string, variables: TVariables) => {
   const platformAccessToken = await getAccessTokenToCallPlatformService()
-  // Verified Orchestration GraphQL API url; to be provided by an administrator of Verified Orchestration platform
+  // VO GraphQL API url; to be provided by an administrator of VO platform
   // e.g. 'https://vo-dev-verified-orchestration-api.azurewebsites.net/graphql'
-  const url = '<Verified Orchestration API URL>'
+  const url = '<VO API URL>'
   const response = await fetch(url, {
     method: 'POST',
     body: JSON.stringify({ query, variables: { input: variables } }),

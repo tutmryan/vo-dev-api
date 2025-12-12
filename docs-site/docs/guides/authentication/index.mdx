@@ -8,7 +8,7 @@ import { ApiLink } from '@site/src/components/api-link'
 
 # Authentication
 
-Your Verified Orchestration instance includes an OpenID Connect (OIDC) authentication provider, allowing applications to use credential presentation for authentication.
+Your VO instance includes an OpenID Connect (OIDC) authentication provider, allowing applications to use credential presentation for authentication.
 
 This feature supports:
 
@@ -64,11 +64,11 @@ Each application that requires authentication needs an authentication client.
 
 Exactly how you add authentication to an application depends on the application's technology stack and which authentication library you choose to use.
 
-The Verified Orchestration OIDC provider currently only supports the **Authorization Code Grant with Proof Key for Code Exchange (PKCE)** flow for web clients.
+The VO OIDC provider currently only supports the **Authorization Code Grant with Proof Key for Code Exchange (PKCE)** flow for web clients.
 
 The authentication client view page contains code samples for both front-end authentication using [react-oidc-context](https://github.com/authts/react-oidc-context) and server-side authentication using [openid-client](https://github.com/panva/openid-client).
 
-You can copy the sample code and paste it into your application. Any library supporting the PKCE flow should work with Verified Orchestration authentication. Choose the most appropriate library for your stack and reference the code samples for example configuration.
+You can copy the sample code and paste it into your application. Any library supporting the PKCE flow should work with VO authentication. Choose the most appropriate library for your stack and reference the code samples for example configuration.
 
 ### Demo 🎥
 
@@ -91,7 +91,7 @@ Server side authentication implementations vary wildly depending on the technolo
 
 ## Supported Authentication Context Class References (ACRs)
 
-The Verified Orchestration OIDC provider supports the following Authentication Context Class References (ACRs):
+The VO OIDC provider supports the following Authentication Context Class References (ACRs):
 
 | ACR Value                          | Description                                            |
 | ---------------------------------- | ------------------------------------------------------ |
@@ -120,7 +120,7 @@ const claims = {
 
 ## Supported Authentication Method References (AMRs)
 
-The Verified Orchestration OIDC provider supports the following Authentication Method References (AMRs):
+The VO OIDC provider supports the following Authentication Method References (AMRs):
 
 | AMR Value  | Description                                                                          |
 | ---------- | ------------------------------------------------------------------------------------ |
@@ -153,7 +153,7 @@ export const oidcConfig: OidcClientSettings = {
 
 ## Control authentication within an application
 
-The Verified Orchestration OIDC provider allows you to control authentication behaviour within an application by providing additional parameters.
+The VO OIDC provider allows you to control authentication behaviour within an application by providing additional parameters.
 
 The following parameter configuration forces the user to present a credential of type `passport` from a partner issuer, requires a biometric face check and constrains the presentation to a single passport number:
 
@@ -269,7 +269,7 @@ Claims and scopes are both predefined (static) and configurable (dynamic):
 
 The complete list of available scopes and claims is shown in the <ApiLink path="/oidc/.well-known/openid-configuration">OpenID discovery document</ApiLink>.
 
-The Verified Orchestration OIDC provider supports standard OIDC scopes: `openid`, `profile` and `offline_access`\*.
+The VO OIDC provider supports standard OIDC scopes: `openid`, `profile` and `offline_access`\*.
 
 Additionally, credential info is available via the following scopes:
 
@@ -277,8 +277,8 @@ Additionally, credential info is available via the following scopes:
 | ------------------------- | --------------------------------------------- |
 | `vc_info`                 | Standard verifiable credential info           |
 | `vc_presented_attributes` | Claim values from the credential presentation |
-| `vc_vo_presentation`      | Verified Orchestration presentation details   |
-| `vc_vo_identity`          | Verified Orchestration identity details       |
+| `vc_vo_presentation`      | VO presentation details                       |
+| `vc_vo_identity`          | VO identity details                           |
 
 :::note
 
@@ -288,7 +288,7 @@ Additionally, credential info is available via the following scopes:
 
 ### Claims
 
-The Verified Orchestration OIDC provider supports both predefined (static) and mapped (configurable) claims:
+The VO OIDC provider supports both predefined (static) and mapped (configurable) claims:
 
 1. [Predefined claims](#predefined-claims)
 2. [Mapped claims](#mapped-claims)
@@ -297,21 +297,21 @@ The Verified Orchestration OIDC provider supports both predefined (static) and m
 
 The following table describes the predefined claims and the scope required to access them:
 
-| Claim                                    | Scope                     | Description                                                                                                                                                                                                                                                                                |
-| ---------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `sub`                                    | `openid`                  | The subject identifier, derived from the Verified Orchestration issuance ID.<br /><br />Or, for partner credential presentations:<br /> - the value of the `vc_unique_claim_for_sub` parameter<br /> - the first matching **Unique claim for subject identifier** configured on the client |
-| `name`                                   | `profile`                 | The Verified Orchestration identity name (n/a for partner presentations).                                                                                                                                                                                                                  |
-| `vc_issuer`                              | `vc_info`                 | The issuer DID of the verifiable credential.                                                                                                                                                                                                                                               |
-| `vc_type`                                | `vc_info`                 | Array: the type(s) of the verifiable credential.                                                                                                                                                                                                                                           |
-| `vc_revocation_status`                   | `vc_info`                 | The revocation status of the verifiable credential, either `VALID` or `REVOKED`.                                                                                                                                                                                                           |
-| `vc_presented_attributes`                | `vc_presented_attributes` | All claims from the verifiable credential presentation as a single object.                                                                                                                                                                                                                 |
-| `vc_vo_presentation_id`                  | `vc_vo_presentation`      | The Verified Orchestration presentation ID.                                                                                                                                                                                                                                                |
-| `vc_vo_issuance_id`                      | `vc_vo_presentation`      | The Verified Orchestration issuance ID.                                                                                                                                                                                                                                                    |
-| `vc_vo_credential_supports_facecheck`    | `vc_vo_presentation`      | The presented credential has a `photo` claim and the VO instance supports face check.                                                                                                                                                                                                      |
-| `vc_vo_facecheck_match_confidence_score` | `vc_vo_presentation`      | The confidence score of the face check match, when available.                                                                                                                                                                                                                              |
-| `vc_vo_identity_id`                      | `vc_vo_identity`          | The Verified Orchestration identity ID. Useful for referencing the identity reference in the Verified Orchestration platform.                                                                                                                                                              |
-| `vc_vo_identity_issuer`                  | `vc_vo_identity`          | The identity `issuer` value. Useful for referencing the source identity store.                                                                                                                                                                                                             |
-| `vc_vo_identity_identifier`              | `vc_vo_identity`          | The identity `identifier` value. Useful for referencing the identity in the source identity store.                                                                                                                                                                                         |
+| Claim                                    | Scope                     | Description                                                                                                                                                                                                                                                            |
+| ---------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sub`                                    | `openid`                  | The subject identifier, derived from the VO issuance ID.<br /><br />Or, for partner credential presentations:<br /> - the value of the `vc_unique_claim_for_sub` parameter<br /> - the first matching **Unique claim for subject identifier** configured on the client |
+| `name`                                   | `profile`                 | The VO identity name (n/a for partner presentations).                                                                                                                                                                                                                  |
+| `vc_issuer`                              | `vc_info`                 | The issuer DID of the verifiable credential.                                                                                                                                                                                                                           |
+| `vc_type`                                | `vc_info`                 | Array: the type(s) of the verifiable credential.                                                                                                                                                                                                                       |
+| `vc_revocation_status`                   | `vc_info`                 | The revocation status of the verifiable credential, either `VALID` or `REVOKED`.                                                                                                                                                                                       |
+| `vc_presented_attributes`                | `vc_presented_attributes` | All claims from the verifiable credential presentation as a single object.                                                                                                                                                                                             |
+| `vc_vo_presentation_id`                  | `vc_vo_presentation`      | The VO presentation ID.                                                                                                                                                                                                                                                |
+| `vc_vo_issuance_id`                      | `vc_vo_presentation`      | The VO issuance ID.                                                                                                                                                                                                                                                    |
+| `vc_vo_credential_supports_facecheck`    | `vc_vo_presentation`      | The presented credential has a `photo` claim and the VO instance supports face check.                                                                                                                                                                                  |
+| `vc_vo_facecheck_match_confidence_score` | `vc_vo_presentation`      | The confidence score of the face check match, when available.                                                                                                                                                                                                          |
+| `vc_vo_identity_id`                      | `vc_vo_identity`          | The VO identity ID. Useful for referencing the identity reference in the VO platform.                                                                                                                                                                                  |
+| `vc_vo_identity_issuer`                  | `vc_vo_identity`          | The identity `issuer` value. Useful for referencing the source identity store.                                                                                                                                                                                         |
+| `vc_vo_identity_identifier`              | `vc_vo_identity`          | The identity `identifier` value. Useful for referencing the identity in the source identity store.                                                                                                                                                                     |
 
 #### Mapped claims
 

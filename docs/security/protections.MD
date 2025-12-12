@@ -1,10 +1,10 @@
 # Security Protections
 
-This page describes the security protections in place for the Verified Orchestration platform and associated hosted components including the OIDC endpoint, developer tools and associated interactive authentication.
+This page describes the security protections in place for the VO platform and associated hosted components including the OIDC endpoint, developer tools and associated interactive authentication.
 
 ## Vulnerabilities
 
-Verified Orchestration incorporates vulnerability scanning to ensure that no vulnerabilities (of any severity) can be present in deployable artifacts at deployment time.
+VO incorporates vulnerability scanning to ensure that no vulnerabilities (of any severity) can be present in deployable artifacts at deployment time.
 
 ## Authorization
 
