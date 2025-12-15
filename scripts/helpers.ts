@@ -8,7 +8,7 @@ import https from 'https'
 import path from 'path'
 
 export function downloadFile(apiPath: string, localPath: string) {
-  return new Promise((resolve) => {
+  return new Promise<void>((resolve) => {
     https.get(apiPath, (result: http.IncomingMessage) => {
       if (!fs.existsSync(path.dirname(localPath))) {
         fs.mkdirSync(path.dirname(localPath))

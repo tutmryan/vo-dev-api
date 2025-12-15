@@ -1,0 +1,31 @@
+diff --git a/node_modules/@azure/monitor-opentelemetry/dist/commonjs/logs/batchLogRecordProcessor.js b/node_modules/@azure/monitor-opentelemetry/dist/commonjs/logs/batchLogRecordProcessor.js
+index d42c5fd..ccec61e 100644
+--- a/node_modules/@azure/monitor-opentelemetry/dist/commonjs/logs/batchLogRecordProcessor.js
++++ b/node_modules/@azure/monitor-opentelemetry/dist/commonjs/logs/batchLogRecordProcessor.js
+@@ -5,6 +5,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.AzureBatchLogRecordProcessor = void 0;
+ const api_1 = require("@opentelemetry/api");
+ const sdk_logs_1 = require("@opentelemetry/sdk-logs");
++// PATCH ADDITION: Import the error serializer
++const { serializableErrorReplacer } = require("@makerx/node-winston/serialize-error");
++
+ /**
+  * Azure Monitor BatchLogRecord Processor.
+  * @internal
+@@ -26,6 +29,16 @@ class AzureBatchLogRecordProcessor extends sdk_logs_1.BatchLogRecordProcessor {
+                 }
+             }
+         }
++
++        // PATCH ADDITION: Ensure nested log attributes are serialized
++        if (logRecord.attributes) {
++            for (const [key, value] of Object.entries(logRecord.attributes)) {
++                if (typeof value === "object") {
++                    logRecord.attributes[key] = JSON.stringify(value, serializableErrorReplacer);
++                }
++            }
++        }
++
+         super.onEmit(logRecord);
+     }
+ }

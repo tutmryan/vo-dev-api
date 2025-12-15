@@ -352,7 +352,7 @@ describe('createIssuanceRequest mutation', () => {
         description: 'should return an error when a claim input does not match the expected contract claim type',
         contractClaims: [{ label: 'age', claim: 'age', type: ClaimType.Number, value: '30', isFixed: false }],
         claimsInput: { age: 'NotANumber' },
-        expectedError: 'Expected number',
+        expectedError: '[Claim Type: number] Invalid input: expected number, received NaN',
       },
       {
         description: 'should return an error when required claims are missing',

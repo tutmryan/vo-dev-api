@@ -1,0 +1,16 @@
+diff --git a/node_modules/@opentelemetry/sdk-logs/build/src/LogRecordImpl.js b/node_modules/@opentelemetry/sdk-logs/build/src/LogRecordImpl.js
+index 2252257..140ebf9 100644
+--- a/node_modules/@opentelemetry/sdk-logs/build/src/LogRecordImpl.js
++++ b/node_modules/@opentelemetry/sdk-logs/build/src/LogRecordImpl.js
+@@ -102,6 +102,11 @@ class LogRecordImpl {
+             api.diag.warn(`Invalid attribute key: ${key}`);
+             return this;
+         }
++        // Patch: Convert Error objects to plain objects
++        if (value instanceof Error) {
++            const { message, stack, ...rest } = value;
++            value = { message, stack, ...rest };
++        }
+         if (!(0, core_1.isAttributeValue)(value) &&
+             !(typeof value === 'object' &&
+                 !Array.isArray(value) &&

@@ -122,7 +122,7 @@ describe('template.parentData field', () => {
             "issuedBy": "Parent template",
             "logo": {
               "description": null,
-              "uri": "https://mock.blob.net/jpeg123==.jpeg",
+              "uri": "https://mock.blob.net/jpeg123==.jpg",
             },
             "textColor": null,
             "title": null,
@@ -213,7 +213,7 @@ describe('template.parentData field', () => {
             "issuedBy": "Root template Pty Ltd",
             "logo": {
               "description": null,
-              "uri": "https://mock.blob.net/jpeg123==.jpeg",
+              "uri": "https://mock.blob.net/jpeg123==.jpg",
             },
             "textColor": "#112233",
             "title": "Parent template card title",

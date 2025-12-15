@@ -1,4 +1,4 @@
-import mime from 'mime'
+import mime from 'mime-types'
 import { fakeBlobStorageHost } from '../../test/data-url'
 import { parseDataUrl } from '../../util/data-url'
 import type { ServiceMock } from '../../util/jest'

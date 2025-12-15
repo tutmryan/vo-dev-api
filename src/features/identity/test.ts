@@ -126,7 +126,7 @@ describe('Identity', () => {
         },
       })
 
-      expect(data).toBeUndefined()
+      expect(data?.deleteIdentities).toBeNull()
       expect(errors).toBeDefined()
       expect(errors).toHaveLength(1)
       expect(errors![0]!.message).toContain('Value is not a valid UUID')

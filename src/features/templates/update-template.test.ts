@@ -3,13 +3,13 @@ import { omit } from 'lodash'
 import { ClaimType, type TemplateFragmentFragment } from '../../generated/graphql'
 import { AppRoles } from '../../roles'
 import {
-  beforeAfterAll,
-  executeOperationAnonymous,
-  executeOperationAsApp,
-  executeOperationAsCredentialAdmin,
-  expectUnauthorizedError,
-  fakeJpegDataURL,
-  fakePngDataURL,
+    beforeAfterAll,
+    executeOperationAnonymous,
+    executeOperationAsApp,
+    executeOperationAsCredentialAdmin,
+    expectUnauthorizedError,
+    fakeJpegDataURL,
+    fakePngDataURL,
 } from '../../test'
 import { mockedServices } from '../../test/mocks'
 import { createTemplate, getEmptyTemplateInput } from './test/create-template'
@@ -172,7 +172,7 @@ describe('updateTemplate mutation', () => {
     expect(updatedTemplate.id).toBe(template.id)
     expect(omit(updatedTemplate, 'id')).toMatchInlineSnapshot(`
       {
-        "credentialTypes": null,
+        "credentialTypes": [],
         "description": "",
         "display": {
           "card": {

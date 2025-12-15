@@ -97,8 +97,9 @@ describe('createPhotoCaptureRequest mutation', () => {
 
     // Assert
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toMatchInlineSnapshot(
-      `"Variable "$request" got invalid value "123" at "request.contractId"; Value is not a valid UUID: 123"`,
+    expect(errors?.[0]?.message).toBe(
+      `Variable "$request" got invalid value "123" at "request.contractId"; Value is not a valid UUID: 123,
+Variable "$request" got invalid value "456" at "request.identityId"; Value is not a valid UUID: 456`,
     )
   })
 

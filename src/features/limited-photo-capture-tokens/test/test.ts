@@ -18,7 +18,7 @@ describe('acquireLimitedPhotoCaptureToken', () => {
       variables: { input: { photoCaptureRequestId: '123' } },
     })
 
-    expect(data).toBeUndefined()
+    expect(data).toBeNull()
     expect(errors?.[0]?.message).toMatchInlineSnapshot(
       `"Variable "$input" got invalid value "123" at "input.photoCaptureRequestId"; Value is not a valid UUID: 123"`,
     )

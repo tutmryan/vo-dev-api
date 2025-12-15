@@ -95,7 +95,7 @@ describe('GraphQl Armor', () => {
     )
 
     // Assert
-    expect(data).toBeUndefined()
+    expect(data).toBeFalsy()
     expect(errors).toBeDefined()
     expect(errors).toHaveLength(1)
     expect(errors![0]!.message).toBe(`Syntax Error: Aliases limit of ${graphQL.maxAliases} exceeded, found ${graphQL.maxAliases + 1}.`)
@@ -114,7 +114,7 @@ describe('GraphQl Armor', () => {
     )
 
     // Assert
-    expect(data).toBeUndefined()
+    expect(data).toBeFalsy()
     expect(errors).toBeDefined()
     expect(errors).toHaveLength(1)
     expect(errors![0]!.message).toBe(
@@ -135,7 +135,7 @@ describe('GraphQl Armor', () => {
     )
 
     // Assert
-    expect(data).toBeUndefined()
+    expect(data).toBeFalsy()
     expect(errors).toBeDefined()
     expect(errors).toHaveLength(1)
     expect(errors![0]!.message).toBe(`Syntax Error: Query depth limit of ${graphQL.maxDepth} exceeded, found ${graphQL.maxDepth + 1}.`)
@@ -212,7 +212,7 @@ describe('GraphQl Armor', () => {
       server,
     )
 
-    expect(data).toBeUndefined()
+    expect(data).toBeFalsy()
     expect(errors).toBeDefined()
     expect(errors![0]!.message).toBe('GraphQL introspection has been disabled, but the requested query contained the field "__schema".')
   })

@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-import type { SubschemaConfig } from '@graphql-tools/delegate'
 import { buildHTTPExecutor } from '@graphql-tools/executor-http'
 import { stitchSchemas } from '@graphql-tools/stitch'
 import { FilterInputObjectFields, FilterObjectFields, FilterTypes, schemaFromExecutor } from '@graphql-tools/wrap'
@@ -38,7 +37,7 @@ function transforms() {
   ]
 }
 
-async function introspectionSubschema(): Promise<SubschemaConfig> {
+async function introspectionSubschema() {
   return {
     schema: await schemaFromExecutor(buildHTTPExecutor({ endpoint: platformManagement.remoteUrl })),
     transforms: transforms(),

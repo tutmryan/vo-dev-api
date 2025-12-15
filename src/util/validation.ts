@@ -181,7 +181,7 @@ export function validateClaimValue(type: string, value: unknown, validation?: Co
 
   const result = schema.safeParse(value)
   if (!result.success) {
-    const errorMessage = result.error.errors.map((err) => `[Claim Type: ${type}] ${err.message}`).join(', ')
+    const errorMessage = result.error.issues.map((err) => `[Claim Type: ${type}] ${err.message}`).join(', ')
     throw new ValidationError(errorMessage)
   }
 }
