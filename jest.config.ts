@@ -16,6 +16,9 @@ const config: Config.InitialOptions = {
   globalSetup: '<rootDir>/../jest.setup.ts',
   globalTeardown: '<rootDir>/../jest.teardown.ts',
   setupFilesAfterEnv: ['<rootDir>/../jest.setup-after-env.ts'],
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/$1',
+  },
   prettierPath: 'prettier-2',
   // Transform ESM-only packages in node_modules so Jest can handle them
   transformIgnorePatterns: ['node_modules/(?!(cbor2|@cto\\.af)/)'],

@@ -9,7 +9,9 @@ import {
   isEamCheckIdTokenIntercept,
   isEamInteractionsIntercept,
 } from './integrations/entra-eam'
+import { buildRequestLogger } from './logger'
 import { applyPopulateInteractiveLoginDataHook } from './populate-interactive-login-data'
+import { getClient, oidcProviderModule } from './provider'
 import { applyCustomOfflineScopeHandling } from './scopes'
 
 export type RouterContextWithOIDC = RouterContext & { oidc: OIDCContext }
@@ -108,6 +110,38 @@ const wrapOidcPipelineStep = (
   }
 }
 
+export const enforceAllowedAuthorisationRequestTypesPerClient = async (ctx: RouterContextWithOIDC, next: Next, original: Middleware) => {
+  const { client, params } = ctx.oidc
+
+  if (!client || !params) {
+    return await original(ctx, next)
+  }
+
+  const clientEntity = getClient(client.clientId)
+
+  if (params.request === undefined) {
+    if (clientEntity.authorizationRequestsTypeStandardEnabled) {
+      return await original(ctx, next)
+    } else {
+      const logger = buildRequestLogger(ctx.request)
+      logger.info('Request rejected: standard authorization requests are disabled for this client')
+
+      const { errors } = await oidcProviderModule()
+      throw new errors.RequestNotSupported('Standard authorization requests are disabled for this client')
+    }
+  }
+
+  if (clientEntity.authorizationRequestsTypeJarEnabled) {
+    return await original(ctx, next)
+  } else {
+    const logger = buildRequestLogger(ctx.request)
+    logger.info('Request rejected: request objects are disabled for this client')
+
+    const { errors } = await oidcProviderModule()
+    throw new errors.RequestNotSupported('Request objects are disabled for this client')
+  }
+}
+
 /**
  * Applies all OIDC provider hooks to the given provider instance.
  *
@@ -146,6 +180,10 @@ export const applyOIDCProviderHooks = (provider: Provider) => {
     if (await isEamInteractionsIntercept(ctx)) {
       return await applyEamInteractionsHook(ctx)
     }
+  })
+
+  wrapOidcPipelineStep(provider, 'authorization', '*', 'processRequestObject', async (ctx, next, original) => {
+    return enforceAllowedAuthorisationRequestTypesPerClient(ctx, next, original)
   })
 
   wrapOidcPipelineStep(provider, 'authorization', '*', 'checkScope', async (ctx, next, original) => {

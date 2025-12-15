@@ -46,6 +46,9 @@ const minimalClientEntity = {
     | 'claimMappings'
     | 'claimMappingIds'
     | 'clientType'
+    | 'authorizationRequestsTypeJarEnabled'
+    | 'authorizationRequestsTypeStandardEnabled'
+    | 'relyingPartyJwksUri'
   >
 >
 

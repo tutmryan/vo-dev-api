@@ -398,6 +398,20 @@ input OidcClientInput {
   - If values are defined here and the `vc_type` auth request parameter is provided, it is validated to be from this list.
   """
   credentialTypes: [String!]
+  """
+  Indicates whether JWT-secured authorisation requests (JAR) are enabled for this client.
+  """
+  authorizationRequestsTypeJarEnabled: Boolean
+  """
+  Indicates whether standard authorisation requests (query params) are enabled for this client.
+  """
+  authorizationRequestsTypeStandardEnabled: Boolean
+  """
+  The relying party's JWKS URI to use when JAR is enabled.
+
+  This should be the discovery URI without the `.well-known/openid-configuration` suffix.
+  """
+  relyingPartyJwksUri: URL
 }
 
 """
@@ -445,6 +459,20 @@ type OidcClient {
   The post-logout URIs that the client is allowed to use.
   """
   postLogoutUris: [URL!]!
+  """
+  Indicates whether JWT-secured authorisation requests (JAR) are enabled for this client.
+  """
+  authorizationRequestsTypeJarEnabled: Boolean!
+  """
+  Indicates whether standard authorisation requests (query params) are enabled for this client.
+  """
+  authorizationRequestsTypeStandardEnabled: Boolean!
+  """
+  The relying party's JWKS URI to use when JAR is enabled.
+
+  This should be the discovery URI without the `.well-known/openid-configuration` suffix.
+  """
+  relyingPartyJwksUri: URL
   """
   Indicates this client must use face check with every authentication presentation.
   """

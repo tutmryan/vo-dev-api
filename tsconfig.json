@@ -8,7 +8,11 @@
     "rootDir": ".",
     "esModuleInterop": true,
     "noUncheckedIndexedAccess": true,
-    "useDefineForClassFields": false // required for typeorm decorator fields to work properly, as per ES2021 behavior
+    "useDefineForClassFields": false, // required for typeorm decorator fields to work properly, as per ES2021 behavior
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "files": ["src/express.d.ts"],
   "include": ["src", "config", "test", "scripts", "migrate-db", "jest.*.ts"]

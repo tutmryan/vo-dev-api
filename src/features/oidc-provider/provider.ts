@@ -97,6 +97,10 @@ async function createProvider() {
         enabled: true,
         assertClaimsParameter,
       },
+      requestObjects: {
+        enabled: true,
+        requireSignedRequestObject: false,
+      },
     },
     interactions: {
       url(_ctx: KoaContextWithOIDC, interaction: Interaction) {

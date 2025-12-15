@@ -64,6 +64,8 @@ const toOidcClientMetadata = async ({
   policyUrl,
   applicationType,
   clientType,
+  authorizationRequestsTypeJarEnabled,
+  relyingPartyJwksUri,
 }: OidcClientEntity): Promise<ClientMetadata> => {
   let clientSecret: string | undefined
 
@@ -77,6 +79,8 @@ const toOidcClientMetadata = async ({
     clientSecret = undefined
   }
 
+  const jwksUri = authorizationRequestsTypeJarEnabled ? (relyingPartyJwksUri ?? undefined) : undefined
+
   return {
     client_id: id,
     client_name: name,
@@ -89,6 +93,7 @@ const toOidcClientMetadata = async ({
     tos_uri: termsOfServiceUrl ?? undefined,
     policy_uri: policyUrl ?? undefined,
     application_type: applicationType,
+    jwks_uri: jwksUri,
   }
 }
 

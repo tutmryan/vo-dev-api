@@ -21,6 +21,8 @@ graphql(`
     postLogoutUris
     requireFaceCheck
     allowAnyPartner
+    authorizationRequestsTypeJarEnabled
+    relyingPartyJwksUri
     partners {
       id
       name

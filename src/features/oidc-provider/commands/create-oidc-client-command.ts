@@ -6,10 +6,18 @@ import type { PartnerEntity } from '../../partners/entities/partner-entity'
 import { OidcClientEntity } from '../entities/oidc-client-entity'
 
 export async function CreateOidcClientCommand(this: CommandContext, input: OidcClientInput) {
-  const { applicationType, requireFaceCheck, allowAnyPartner, partnerIds, ...rest } = input
+  const { applicationType, requireFaceCheck, allowAnyPartner, partnerIds, relyingPartyJwksUri, ...rest } = input
 
   if (input.clientType === OidcClientType.Confidential) invariant(input.clientSecret, 'Confidential clients must have a secret')
   if (input.clientSecret) invariant(input.clientType === OidcClientType.Confidential, 'Only confidential clients can have a secret')
+
+  const authorizationRequestsTypeJarEnabled = input.authorizationRequestsTypeJarEnabled ?? false
+  const authorizationRequestsTypeStandardEnabled = input.authorizationRequestsTypeStandardEnabled ?? true
+  invariant(
+    authorizationRequestsTypeJarEnabled || authorizationRequestsTypeStandardEnabled,
+    'At least one authorization requests type must be enabled',
+  )
+  if (authorizationRequestsTypeJarEnabled) invariant(input.relyingPartyJwksUri, 'Relying party JWKS URI is required when JAR is enabled')
 
   const repo = this.entityManager.getRepository(OidcClientEntity)
   const client = new OidcClientEntity({
@@ -17,6 +25,9 @@ export async function CreateOidcClientCommand(this: CommandContext, input: OidcC
     applicationType: applicationType ?? OidcApplicationType.Web,
     requireFaceCheck: requireFaceCheck ?? false,
     allowAnyPartner: allowAnyPartner ?? false,
+    authorizationRequestsTypeJarEnabled,
+    authorizationRequestsTypeStandardEnabled,
+    relyingPartyJwksUri: relyingPartyJwksUri?.toString() ?? null,
   })
 
   if (partnerIds && partnerIds.length > 0) {

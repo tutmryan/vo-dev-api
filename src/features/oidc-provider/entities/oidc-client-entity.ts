@@ -23,6 +23,9 @@ type OptionalArgs = Pick<
   | 'partnerIds'
   | 'allowAnyPartner'
   | 'requireFaceCheck'
+  | 'authorizationRequestsTypeJarEnabled'
+  | 'authorizationRequestsTypeStandardEnabled'
+  | 'relyingPartyJwksUri'
 >
 type CreateOrUpdateArgs = RequiredArgs & Partial<OptionalArgs>
 
@@ -110,6 +113,24 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
   requireFaceCheck!: boolean
 
   /**
+   * Indicates whether JWT-secured authorisation requests (JAR) are enabled for this client.
+   */
+  @Column({ type: 'bit', default: false, name: 'authorization_request_type_jar_enabled' })
+  authorizationRequestsTypeJarEnabled!: boolean
+
+  /**
+   * Indicates whether standard authorisation requests (query params) are enabled for this client.
+   */
+  @Column({ type: 'bit', default: true, name: 'authorization_request_type_standard_enabled' })
+  authorizationRequestsTypeStandardEnabled!: boolean
+
+  /**
+   * The relying party's JWKS URI to use when JAR is enabled.
+   */
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true, name: 'relying_party_jwks_uri' })
+  relyingPartyJwksUri!: string | null
+
+  /**
    * Allow the client to auth using presentations from any partner.
    */
   @Column({ type: 'bit' })
@@ -190,6 +211,11 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
       partnerIds: args.partnerIds ?? [],
       allowAnyPartner: args.allowAnyPartner !== undefined ? args.allowAnyPartner : false,
       requireFaceCheck: args.requireFaceCheck !== undefined ? args.requireFaceCheck : false,
+      authorizationRequestsTypeJarEnabled:
+        args.authorizationRequestsTypeJarEnabled !== undefined ? args.authorizationRequestsTypeJarEnabled : false,
+      authorizationRequestsTypeStandardEnabled:
+        args.authorizationRequestsTypeStandardEnabled !== undefined ? args.authorizationRequestsTypeStandardEnabled : true,
+      relyingPartyJwksUri: args.relyingPartyJwksUri ?? null,
       credentialTypes: args.credentialTypes ?? null,
       uniqueClaimsForSubjectId: args.uniqueClaimsForSubjectId ?? null,
       logo: args.logo ?? null,
