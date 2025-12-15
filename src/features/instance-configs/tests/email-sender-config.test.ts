@@ -79,7 +79,6 @@ describe('EmailSenderConfig', () => {
 
       const res = await executeOperationAsInstanceAdmin({ query: findQuery })
       expect(res.errors).toBeUndefined()
-      console.log('res.data?.emailSenderConfig?.senderName', res.data?.emailSenderConfig?.senderName)
       expect(res.data?.emailSenderConfig?.senderName).toBe('Verified Orchestration')
       expect(res.data?.emailSenderConfig?.senderEmail).toBe(initial.senderEmail)
     })
