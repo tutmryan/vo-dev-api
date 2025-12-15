@@ -199,6 +199,9 @@ export type Config = {
       inputFields: Record<string, string[]>
     }
   }
+  sdk: {
+    baseUrl: string
+  }
 }
 
 const typedConfig = createTypedConfig<Config>(config)

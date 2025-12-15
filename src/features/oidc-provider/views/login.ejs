@@ -295,12 +295,9 @@
         src="https://cdn.jsdelivr.net/npm/core-js-bundle@3/minified.js"></script>
 <script type="text/javascript" nonce="<%-cspNonce%>"
         src="https://cdn.jsdelivr.net/npm/whatwg-fetch@3/dist/fetch.umd.js"></script>
-<script type="text/javascript" nonce="<%-cspNonce%>"
-        src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js@1/index.es5.min.js"></script>
+<script type="text/javascript" nonce="<%-cspNonce%>" src="<%=sdkBaseUrl%>/index.es5.min.js"></script>
 <% } else if (dropToEs6) { %>
-<script type="text/javascript" nonce="<%-cspNonce%>"
-        src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js@1/index.es6.min.js"></script>
+<script type="text/javascript" nonce="<%-cspNonce%>" src="<%=sdkBaseUrl%>/index.es6.min.js"></script>
 <% } else { %>
-<script type="text/javascript" nonce="<%-cspNonce%>"
-        src="https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js@1/index.min.js"></script>
+<script type="text/javascript" nonce="<%-cspNonce%>" src="<%=sdkBaseUrl%>/index.min.js"></script>
 <% } %>

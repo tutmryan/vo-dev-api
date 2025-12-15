@@ -168,6 +168,9 @@ const config: DeepPartial<Config> = {
       },
     },
   },
+  sdk: {
+    baseUrl: 'https://cdn.jsdelivr.net/npm/@verified-orchestration/client-js@1',
+  },
 }
 
 module.exports = config

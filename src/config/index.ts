@@ -1,6 +1,17 @@
 import { omit } from 'lodash'
 import config from './raw'
 
+const sdkConfig = config.get('sdk')
+const sdkBaseUrl: string = sdkConfig.baseUrl
+const allowedSdkBaseUrlPatterns = [
+  /^https:\/\/cdn\.jsdelivr\.net\/npm\/@verified-orchestration\/client-js@\d+$/,
+  ...(process.env.ENVIRONMENT === 'localdev' ? [/^https:\/\/[^.]+\.local\.idbyvo\.com$/] : []),
+]
+
+if (!sdkBaseUrl || !allowedSdkBaseUrlPatterns.some((pattern) => pattern.test(sdkBaseUrl))) {
+  throw new Error(`Invalid SDK base URL configured: ${sdkBaseUrl}`)
+}
+
 /**
  * WHAT is going on with config in this project ???
  *
@@ -59,3 +70,4 @@ export const graphQL = config.get('graphQL')
 export const platformManagement = config.get('platformManagement')
 export const oidcKeyVaultUrl = config.has('oidcKeyVaultUrl') ? config.get('oidcKeyVaultUrl') : undefined
 export const identityStoreKeyVaultUrl = config.has('identityStoreKeyVaultUrl') ? config.get('identityStoreKeyVaultUrl') : undefined
+export const sdk = sdkConfig

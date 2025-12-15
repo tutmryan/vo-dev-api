@@ -8,7 +8,7 @@ import path from 'node:path'
 import { stringify } from 'node:querystring'
 import { inspect } from 'node:util'
 import type { Grant, InteractionResults } from 'oidc-provider'
-import { instance } from '../../config'
+import { instance, sdk } from '../../config'
 import { requestOrigin } from '../../express'
 import { isIe11, isWebView3 } from '../../util/browser'
 import { invariant } from '../../util/invariant'
@@ -69,6 +69,8 @@ export function routes(app: Express, route: string): void {
   app.use(compression())
 
   app.use((req, res, next) => {
+    invariant(sdk.baseUrl, 'SDK base URL should be configured')
+
     const logger = buildRequestLogger(req)
     const orig = res.render
     res.render = (view, locals) => {
@@ -79,6 +81,7 @@ export function routes(app: Express, route: string): void {
         dropToEs5: isIe11(userAgent),
         dropToEs6: isWebView3(userAgent),
         cspNonce: res.locals.cspNonce,
+        sdkBaseUrl: sdk.baseUrl,
       }
 
       if (view === 'no-session') {
@@ -427,31 +430,4 @@ export function routes(app: Express, route: string): void {
       next(error)
     }
   })
-
-  // This route is used in local development only to serve the VO SDK JS file from the local filesystem
-  // Steps to use this:
-  // 1. Uncomment the code below
-  // 2. Ensure you have the VO SDK repo checked out locally to the same parent directory as this repo
-  // 3. Run `npm run build` in the VO SDK repo to build the SDK (and each time you make changes)
-  // 4. Update the login.ejs file to load the SDK from this route instead of the CDN
-  // if (isLocalDev) {
-  //   app.get(`${route}/vosdk.js`, noCache, async (req, res, next) => {
-  //     console.log('✨ Serving vosdk.js from local file for development')
-  //     // get from local file system using a relative path
-  //     const filePath = path.join(__dirname, '../../../../verified-orchestration-client-js/dist/index.es6.js')
-  //     // load js file and return in response
-  //     fs.readFile(filePath, 'utf8', (err, data) => {
-  //       if (err) {
-  //         next(err)
-  //         return
-  //       }
-  //       // no-cache headers
-  //       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
-  //       res.setHeader('Pragma', 'no-cache')
-  //       res.setHeader('Expires', '0')
-  //       res.setHeader('Content-Type', 'application/javascript')
-  //       res.send(data)
-  //     })
-  //   })
-  // }
 }

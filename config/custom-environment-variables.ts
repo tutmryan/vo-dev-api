@@ -188,6 +188,9 @@ const config: EnvVarSubstitution<Config> = {
     maxDirectives: json('GRAPHQL_MAX_DIRECTIVES'),
     maxTokens: json('GRAPHQL_MAX_TOKENS'),
   },
+  sdk: {
+    baseUrl: 'SDK_BASE_URL',
+  },
 }
 
 export default config
