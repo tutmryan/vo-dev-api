@@ -19,7 +19,7 @@ export default [
       parser: tseslint.parser,
       parserOptions: {
         project: './tsconfig.json',
-        tsconfigRootDir: new URL('.', import.meta.url).pathname, // Flat config requires absolute tsconfig path when using project service
+        tsconfigRootDir: import.meta.dirname, // Flat config requires absolute tsconfig path when using project service
         // sourceType: 'module',
       },
     },
