@@ -23,6 +23,7 @@ We recommend creating Microsoft Entra ID groups mapped to each VO user role. Use
 - [Approval request admin](#approval-request-admin)
 - [OIDC admin](#oidc-admin)
 - [Instance admin](#instance-admin)
+- [Support agent](#support-agent)
 
 A tenant administrator can set up group-to-role mapping and add/remove users from the groups.
 
@@ -117,5 +118,22 @@ User role: `VerifiableCredential.InstanceAdmin`
 Permissions:
 
 - all the permissions of [Reader](#reader) role, and
-- modify Concierge branding
-- modify instance configuration
+- view, create, update, suspend and resume identity stores
+- view and modify Concierge branding
+- view and modify Concierge client branding
+- view and modify application label configurations
+- view and modify CORS origin configurations
+- view and modify email sender configuration
+
+## Support agent
+
+User role: `VerifiableCredential.SupportAgent`
+
+Permissions:
+
+- view remote issuance contact details
+- update contact details for pending remote issuances
+- resend remote issuance notifications
+- cancel pending remote issuances
+- view background job events
+- view communications

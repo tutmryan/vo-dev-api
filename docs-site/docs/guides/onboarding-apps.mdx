@@ -27,9 +27,10 @@ Primary access to the VO platform is via client credentials. A second access mod
 This model is suitable for apps which can securely store a secret, such as APIs, automation workflows, etc. The following application roles apply to this access model:
 
 - [Contract admin](#contract-admin)
-- [Issue](#issue)
-- [Present](#present)
-- [Request approval](#request-approval)
+- [Credential issuance](#credential-issuance)
+- [Credential presentation](#credential-presentation)
+- [Approval request integration](#approval-request-integration)
+- [Credentials - Revoke](#credentials---revoke)
 
 ### Contract admin
 
@@ -43,7 +44,7 @@ Permissions:
 - Deprecate contracts
 - Revoke issuances
 
-### Issue
+### Credential issuance
 
 Application role: `VerifiableCredential.Issue`
 
@@ -54,7 +55,7 @@ Permissions:
 - Create photo capture requests
 - Read contract data
 
-### Present
+### Credential presentation
 
 Application role: `VerifiableCredential.Present`
 
@@ -64,7 +65,7 @@ Permissions:
 - Read identity data
 - Read contract data
 
-### Request approval
+### Approval request integration
 
 Application role: `VerifiableCredential.RequestApproval`
 
@@ -73,11 +74,19 @@ Permissions:
 - Create approval requests
 - Manage approval requests (update, cancel) that were created by the app
 
+### Credentials - Revoke
+
+Application role: `credentials.revoke`
+
+Permissions:
+
+- Revoke credentials
+
 ## Limited access token model
 
 Limited access tokens support controlled access in client apps which do not have the ability to securely store a secret, such as Single Page Applications (SPA), mobile apps, etc. The following application roles allow a secure backend app to acquire limited access tokens to be used in such client apps.
 
-### Acquire presentation token
+### Acquire limited access token: present
 
 Application role: `VerifiableCredential.AcquireLimitedAccessToken.Present`
 
@@ -86,9 +95,9 @@ Permissions:
 - Create and read identity data
 - Acquire a limited access token with the ability to: perform presentations
 
-Note: Use this role when the identity of the presenter is known at the time of acquiring the token. If the presenter identity is not known, use the [acquire anonymous presentation token](#acquire-anonymous-presentation-token) role instead.
+Note: Use this role when the identity of the presenter is known at the time of acquiring the token. If the presenter identity is not known, use the [Acquire limited access token: anonymous presentations](#acquire-limited-access-token-anonymous-presentations) role instead.
 
-### Acquire anonymous presentation token
+### Acquire limited access token: anonymous presentations
 
 Application role: `VerifiableCredential.AcquireLimitedAccessToken.AnonymousPresentations`
 
@@ -97,7 +106,7 @@ Permissions:
 - Create and read identity data
 - Acquire a limited access token with the ability to: perform anonymous presentations
 
-### Acquire issuance token
+### Acquire limited access token: issue
 
 Application role: `VerifiableCredential.AcquireLimitedAccessToken.Issue`
 
@@ -106,7 +115,7 @@ Permissions:
 - Create and read identity data
 - Acquire a limited access token with the ability to: issue credentials and read issuance data
 
-### Acquire list contracts token
+### Acquire limited access token: list contracts
 
 Application role: `VerifiableCredential.AcquireLimitedAccessToken.ListContracts`
 
