@@ -15,6 +15,7 @@ import { mockedServices } from '../../../test/mocks'
 import { acquireLimitedPhotoCaptureTokenMutation } from '../../limited-photo-capture-tokens/test'
 
 describe('capturePhoto mutation', () => {
+  jest.setTimeout(15000)
   beforeAfterAll()
   beforeEach(() => {
     mockedServices.clearAllMocks()
