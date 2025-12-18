@@ -1,0 +1,272 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "Verified Orchestration Audit Events",
+  "version": "1.0.0",
+  "generatedAt": "2025-12-17T03:40:49.844Z",
+  "events": [
+    {
+      "eventTypeId": "VO0000",
+      "eventType": "system.unknown",
+      "category": "System",
+      "description": "Unknown or fallback event when eventTypeId is missing or invalid"
+    },
+    {
+      "eventTypeId": "VO0010",
+      "eventType": "api.graphql.operation",
+      "category": "API",
+      "description": "API GRAPHQL Operation"
+    },
+    {
+      "eventTypeId": "VO0011",
+      "eventType": "api.graphql.query",
+      "category": "API",
+      "description": "API GRAPHQL Query"
+    },
+    {
+      "eventTypeId": "VO0012",
+      "eventType": "api.graphql.mutation",
+      "category": "API",
+      "description": "API GRAPHQL Mutation"
+    },
+    {
+      "eventTypeId": "VO0013",
+      "eventType": "api.graphql.subscription",
+      "category": "API",
+      "description": "API GRAPHQL Subscription"
+    },
+    {
+      "eventTypeId": "VO0030",
+      "eventType": "oidc.interaction.started",
+      "category": "OIDC",
+      "description": "OIDC Interaction Started"
+    },
+    {
+      "eventTypeId": "VO0031",
+      "eventType": "oidc.interaction.ended",
+      "category": "OIDC",
+      "description": "OIDC Interaction Ended"
+    },
+    {
+      "eventTypeId": "VO0032",
+      "eventType": "oidc.par.succeeded",
+      "category": "OIDC",
+      "description": "OIDC PAR Succeeded"
+    },
+    {
+      "eventTypeId": "VO0033",
+      "eventType": "oidc.authorization.succeeded",
+      "category": "OIDC",
+      "description": "OIDC Authorization Succeeded"
+    },
+    {
+      "eventTypeId": "VO0034",
+      "eventType": "oidc.authorization.failed",
+      "category": "OIDC",
+      "description": "OIDC Authorization Failed"
+    },
+    {
+      "eventTypeId": "VO0035",
+      "eventType": "oidc.grant.succeeded",
+      "category": "OIDC",
+      "description": "OIDC Grant Succeeded"
+    },
+    {
+      "eventTypeId": "VO0036",
+      "eventType": "oidc.backchannel.succeeded",
+      "category": "OIDC",
+      "description": "OIDC Backchannel Succeeded"
+    },
+    {
+      "eventTypeId": "VO0037",
+      "eventType": "oidc.registration.created",
+      "category": "OIDC",
+      "description": "OIDC Registration Created"
+    },
+    {
+      "eventTypeId": "VO0038",
+      "eventType": "oidc.registration.updated",
+      "category": "OIDC",
+      "description": "OIDC Registration Updated"
+    },
+    {
+      "eventTypeId": "VO0039",
+      "eventType": "oidc.registration.deleted",
+      "category": "OIDC",
+      "description": "OIDC Registration Deleted"
+    },
+    {
+      "eventTypeId": "VO0040",
+      "eventType": "oidc.presentation.created",
+      "category": "OIDC",
+      "description": "OIDC Presentation Created"
+    },
+    {
+      "eventTypeId": "VO0041",
+      "eventType": "oidc.session.started",
+      "category": "OIDC",
+      "description": "OIDC Session Started"
+    },
+    {
+      "eventTypeId": "VO0042",
+      "eventType": "oidc.session.ended",
+      "category": "OIDC",
+      "description": "OIDC Session Ended"
+    },
+    {
+      "eventTypeId": "VO0060",
+      "eventType": "presentation.request.created",
+      "category": "Presentation",
+      "description": "Presentation Request Created"
+    },
+    {
+      "eventTypeId": "VO0061",
+      "eventType": "presentation.request.retrieved",
+      "category": "Presentation",
+      "description": "Presentation Request Retrieved"
+    },
+    {
+      "eventTypeId": "VO0062",
+      "eventType": "presentation.request.completed",
+      "category": "Presentation",
+      "description": "Presentation Request Completed"
+    },
+    {
+      "eventTypeId": "VO0063",
+      "eventType": "presentation.request.failed",
+      "category": "Presentation",
+      "description": "Presentation Request Failed"
+    },
+    {
+      "eventTypeId": "VO0080",
+      "eventType": "issuance.request.created",
+      "category": "Issuance",
+      "description": "Issuance Request Created"
+    },
+    {
+      "eventTypeId": "VO0081",
+      "eventType": "issuance.request.retrieved",
+      "category": "Issuance",
+      "description": "Issuance Request Retrieved"
+    },
+    {
+      "eventTypeId": "VO0082",
+      "eventType": "issuance.credential.issued",
+      "category": "Issuance",
+      "description": "Issuance Credential Issued"
+    },
+    {
+      "eventTypeId": "VO0083",
+      "eventType": "issuance.credential.revoked",
+      "category": "Issuance",
+      "description": "Issuance Credential Revoked"
+    },
+    {
+      "eventTypeId": "VO0084",
+      "eventType": "issuance.credential.failed",
+      "category": "Issuance",
+      "description": "Issuance Credential Failed"
+    },
+    {
+      "eventTypeId": "VO0100",
+      "eventType": "async-issuance.request.created",
+      "category": "Async Issuance",
+      "description": "Async Issuance Request Created"
+    },
+    {
+      "eventTypeId": "VO0101",
+      "eventType": "async-issuance.request.claimed",
+      "category": "Async Issuance",
+      "description": "Async Issuance Request Claimed"
+    },
+    {
+      "eventTypeId": "VO0102",
+      "eventType": "async-issuance.contact.fetched",
+      "category": "Async Issuance",
+      "description": "Async Issuance Contact Fetched"
+    },
+    {
+      "eventTypeId": "VO0103",
+      "eventType": "async-issuance.contact.updated",
+      "category": "Async Issuance",
+      "description": "Async Issuance Contact Updated"
+    },
+    {
+      "eventTypeId": "VO0104",
+      "eventType": "async-issuance.notification~email.sent",
+      "category": "Async Issuance",
+      "description": "Async Issuance Notification Email Sent"
+    },
+    {
+      "eventTypeId": "VO0105",
+      "eventType": "async-issuance.notification~sms.sent",
+      "category": "Async Issuance",
+      "description": "Async Issuance Notification SMS Sent"
+    },
+    {
+      "eventTypeId": "VO0106",
+      "eventType": "async-issuance.notification.resend~queued",
+      "category": "Async Issuance",
+      "description": "Async Issuance Notification Resend Queued"
+    },
+    {
+      "eventTypeId": "VO0107",
+      "eventType": "async-issuance.notification~email.status",
+      "category": "Async Issuance",
+      "description": "Async Issuance Notification Email Status"
+    },
+    {
+      "eventTypeId": "VO0108",
+      "eventType": "async-issuance.notification~sms.status",
+      "category": "Async Issuance",
+      "description": "Async Issuance Notification SMS Status"
+    },
+    {
+      "eventTypeId": "VO0109",
+      "eventType": "async-issuance.notification.resend~failed",
+      "category": "Async Issuance",
+      "description": "Async Issuance Notification Resend Failed"
+    },
+    {
+      "eventTypeId": "VO0110",
+      "eventType": "async-issuance.notification~email.failed",
+      "category": "Async Issuance",
+      "description": "Async Issuance Notification Email Failed"
+    },
+    {
+      "eventTypeId": "VO0111",
+      "eventType": "async-issuance.notification~sms.failed",
+      "category": "Async Issuance",
+      "description": "Async Issuance Notification SMS Failed"
+    },
+    {
+      "eventTypeId": "VO0112",
+      "eventType": "async-issuance.notification~job.failed",
+      "category": "Async Issuance",
+      "description": "Async Issuance Notification Job Failed"
+    },
+    {
+      "eventTypeId": "VO0113",
+      "eventType": "async-issuance.request.cancelled~queued",
+      "category": "Async Issuance",
+      "description": "Async Issuance Request Cancelled Queued"
+    },
+    {
+      "eventTypeId": "VO0114",
+      "eventType": "async-issuance.request.cancelled~command",
+      "category": "Async Issuance",
+      "description": "Async Issuance Request Cancelled Command"
+    },
+    {
+      "eventTypeId": "VO0115",
+      "eventType": "async-issuance.request.cancelled~job",
+      "category": "Async Issuance",
+      "description": "Async Issuance Request Cancelled Job"
+    },
+    {
+      "eventTypeId": "VO0116",
+      "eventType": "async-issuance.request.cancelled~failed",
+      "category": "Async Issuance",
+      "description": "Async Issuance Request Cancelled Failed"
+    }
+  ]
+}

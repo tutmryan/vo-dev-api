@@ -1,5 +1,6 @@
 import { omit } from 'lodash'
 import { In, type FindOptionsWhere } from 'typeorm'
+import { AuditEvents } from '../../../audit-types'
 import type { HandlerContext } from '../../../background-jobs/jobs'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
@@ -92,7 +93,9 @@ const revokeIssuanceBatch = async (context: HandlerContext, issuances: IssuanceE
 }
 
 export const auditLogRevocation = (log: typeof logger, revokedIssuance: IssuanceEntity) => {
-  log.audit('Issuance revoked', { issuance: omit(revokedIssuance, '__contract__', '__revokedBy__') })
+  log.auditEvent(AuditEvents.ISSUANCE_CREDENTIAL_REVOKED, {
+    issuance: omit(revokedIssuance, '__contract__', '__revokedBy__'),
+  })
 }
 
 const revokeIssuance = async (

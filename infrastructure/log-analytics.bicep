@@ -53,7 +53,22 @@ resource auditTracesTable 'Microsoft.OperationalInsights/workspaces/tables@2022-
         {
           name: 'TimeGenerated'
           type: 'datetime'
-          description: 'Time when the log was generated'
+          description: 'Time when the log was ingested by Azure'
+        }
+        {
+          name: 'EventTime'
+          type: 'datetime'
+          description: 'Time when the event actually occurred (application-generated)'
+        }
+        {
+          name: 'EventTypeId'
+          type: 'string'
+          description: 'Stable event code (e.g., VO0010) - never changes once assigned'
+        }
+        {
+          name: 'EventType'
+          type: 'string'
+          description: 'Semantic event type identifier (e.g., api.graphql.operation)'
         }
         {
           name: 'Message'
@@ -89,6 +104,18 @@ resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' 
           {
             name: 'TimeGenerated'
             type: 'datetime'
+          }
+          {
+            name: 'EventTime'
+            type: 'datetime'
+          }
+          {
+            name: 'EventTypeId'
+            type: 'string'
+          }
+          {
+            name: 'EventType'
+            type: 'string'
           }
           {
             name: 'Message'

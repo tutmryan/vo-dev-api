@@ -14,7 +14,7 @@ import { getEamIssuerOptions } from '../../instance-configs'
 import { supportedAmrs } from '../claims'
 import { filterToRequestedClaimsAcr, filterToRequestedClaimsAmr } from '../claims-parameter'
 import { type ApplyIntercept, type ApplyPostIntercept, type RouterContextWithOIDC } from '../integration-hook'
-import { buildRequestLogger } from '../logger'
+import { buildOidcRequestLogger, buildRequestLogger } from '../logger'
 import { oauthErrors } from '../oauth'
 import { oidcProviderModule } from '../provider'
 import type { LoginInteractionData } from '../session'
@@ -257,7 +257,7 @@ export const isEamCheckIdTokenIntercept = async (ctx: RouterContextWithOIDC) => 
 export const applyEamCheckIdTokenHook: ApplyIntercept = async (ctx, next, _original) => {
   const { oidc } = ctx
   const { errors } = await oidcProviderModule()
-  const logger = buildRequestLogger(ctx.request)
+  const logger = buildOidcRequestLogger(ctx)
   const authParams = paramsToAuthParamsSpec(oidc.params!, errors, logger)
   const decodedProtectedHeader = decodeProtectedHeader(authParams.id_token_hint!)
 
@@ -302,7 +302,7 @@ export const isEamInteractionsIntercept = isEamCheckIdTokenIntercept
 
 export const applyEamInteractionsHook: ApplyPostIntercept = async (ctx) => {
   const { oidc } = ctx
-  const logger = buildRequestLogger(ctx.request)
+  const logger = buildOidcRequestLogger(ctx)
 
   // Started interactions will redirect, so if we're not redirecting, we should not apply the custom logic
   if (ctx.response.status !== 303) {
@@ -362,7 +362,7 @@ export const applyEamInteractionsHook: ApplyPostIntercept = async (ctx) => {
 export const registerEamEventListeners = (provider: Provider) => {
   provider.on('authorization.success', (ctx: KoaContextWithOIDC, response: AuthoriseResponse) => {
     const { oidc } = ctx
-    const logger = buildRequestLogger(ctx.request)
+    const logger = buildOidcRequestLogger(ctx)
 
     invariant(oidc.client?.clientId, 'Client not found in OIDC context during EAM auth flow')
 

@@ -1,6 +1,7 @@
 import { buildBaseRequestInfo } from '@makerx/graphql-core'
 import bodyParser from 'body-parser'
 import type { Express } from 'express'
+import { AuditEvents } from '../../audit-types'
 import { apiUrl } from '../../config'
 import type { CommandContext } from '../../cqs'
 import { runInTransaction } from '../../data'
@@ -55,13 +56,18 @@ export async function handleEmailStatusCallback(
   const communicationRepository = entityManager.getRepository(CommunicationEntity)
   const userMessage = toUserMessage(payload.event)
 
-  const auditMessage = errorStatuses.includes(payload.event)
-    ? `Recording Email ${type} failure for async issuance`
-    : `Recording Email ${type} status update for async issuance`
-  logger.audit(auditMessage, {
-    identityId: asyncIssuance.identityId,
-    error: userMessage,
-  })
+  // Log appropriate audit event based on status
+  if (errorStatuses.includes(payload.event)) {
+    logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_NOTIFICATION_EMAIL_FAILED, {
+      identityId: asyncIssuance.identityId,
+      error: userMessage,
+    })
+  } else {
+    logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_NOTIFICATION_EMAIL_STATUS, {
+      identityId: asyncIssuance.identityId,
+      status: payload.event,
+    })
+  }
 
   if (errorStatuses.includes(payload.event) && !asyncIssuance.isStatusFinal) {
     asyncIssuance.failed(type === 'issuance' ? 'contact-failed' : 'issuance-verification-failed')

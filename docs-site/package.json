@@ -6,7 +6,7 @@
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "start:dev": "concurrently -n builder,graphql,roles -c green,blue,yellow \"docusaurus start --host 0.0.0.0 --no-open\" \"nodemon -e graphql -w ../src/generated/schema.json -x docusaurus graphql-to-doc \" \"npm run generate-permissions-docs\"",
-    "prebuild": "npm run generate-graphql-docs && npm run generate-permissions-docs",
+    "prebuild": "npm run generate-graphql-docs && npm run generate-permissions-docs && npm run generate-audit-docs",
     "build": "docusaurus build",
     "build:pr": "npx --yes cross-env GRAPHQL_ENDPOINT=https://ci-graphql-endpoint ADMIN_URL=https://ci-admin-url PORTAL_URL=https://ci-portal-url npm run build",
     "swizzle": "docusaurus swizzle",
@@ -21,7 +21,8 @@
     "generate-graphql-docs:watch": "nodemon -e graphql -w ../src/ -x npm run generate-graphql-docs",
     "delete-graphql-docs": "git clean -fdx -- ./api-reference",
     "graphql-inspector": "graphql-inspector",
-    "generate-permissions-docs": "tsx scripts/generate-permissions-docs.ts"
+    "generate-permissions-docs": "tsx scripts/generate-permissions-docs.ts",
+    "generate-audit-docs": "tsx scripts/generate-audit-docs.ts"
   },
   "dependencies": {
     "@docusaurus/core": "^3.8.1",

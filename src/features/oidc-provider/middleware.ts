@@ -1,11 +1,11 @@
-import type { Request } from 'express'
 import { decodeJwt } from 'jose'
 import type Provider from 'oidc-provider'
 import type { AccessToken, OIDCContext, RefreshToken } from 'oidc-provider'
+import { AuditEvents } from '../../audit-types'
 import { logger as globalLogger } from '../../logger'
 import { redactValueEmail, redactValueInner, redactValueObjectUnknown } from '../../util/redact-values'
 import { deleteAccount } from './account'
-import { buildRequestLogger, createRequestInfo } from './logger'
+import { buildRequestLogger } from './logger'
 
 type Middleware = Parameters<Provider['use']>[0]
 type Context = Parameters<Middleware>[0]
@@ -45,13 +45,15 @@ export const middleware: Middleware = async (ctx, next) => {
 }
 
 function deleteAccountOnLogout(ctx: Context, oidc: OIDCContext) {
-  const logger = buildRequestLogger(ctx.request)
   if (oidc.route === 'end_session') {
     const accountId = oidc.entities.IdTokenHint?.payload.sub as string | undefined
     if (accountId) {
-      logger.audit(`OIDC account logged out`, { accountId, request: createRequestInfo(ctx.req as Request) })
+      const logger = buildRequestLogger(ctx.request, {
+        oidc: { accountId, clientId: oidc.entities.Client?.clientId },
+      })
+      logger.auditEvent(AuditEvents.OIDC_SESSION_ENDED)
       deleteAccount(accountId).catch((error) => {
-        logger.error(`Failed to delete OIDC account ${accountId}`, { error })
+        logger.error(`Failed to delete OIDC account`, { error })
       })
     }
   }

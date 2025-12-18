@@ -1,3 +1,4 @@
+import { AuditEvents } from '../../../audit-types'
 import { type TransactionalCommandContext } from '../../../cqs'
 import { type IssuanceRequestResponse } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
@@ -94,7 +95,7 @@ export async function CreateIssuanceRequestForAsyncIssuanceCommand(
           })
         }
 
-        logger.audit('Issuance request created for async issuance')
+        logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_REQUEST_CLAIMED)
       }
 
       response.postIssuanceRedirectUrl = asyncIssuance.postIssuanceRedirectUrl

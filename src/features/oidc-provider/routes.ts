@@ -8,6 +8,7 @@ import path from 'node:path'
 import { stringify } from 'node:querystring'
 import { inspect } from 'node:util'
 import type { Grant, InteractionResults } from 'oidc-provider'
+import { AuditEvents } from '../../audit-types'
 import { instance, sdk } from '../../config'
 import { requestOrigin } from '../../express'
 import { isIe11, isWebView3 } from '../../util/browser'
@@ -113,7 +114,6 @@ export function routes(app: Express, route: string): void {
 
   app.get(`${route}/interaction/:uid`, noCache, async (req, res, next) => {
     const provider = getProvider()
-    const logger = buildRequestLogger(req)
 
     try {
       const { uid, prompt, params, session } = await provider.interactionDetails(req, res)
@@ -121,6 +121,7 @@ export function routes(app: Express, route: string): void {
       const client = await provider.Client.find(params.client_id as string)
       invariant(client, 'client not found')
 
+      const logger = buildRequestLogger(req, { oidc: { interactionId: uid, clientId: client.clientId } })
       const loginInteractionData = await getLoginInteractionData(uid)
 
       switch (prompt.name) {
@@ -221,7 +222,6 @@ export function routes(app: Express, route: string): void {
 
   app.post(`${route}/interaction/:uid/login`, noCache, body, async (req, res, next) => {
     const provider = getProvider()
-    const logger = buildRequestLogger(req)
 
     try {
       const {
@@ -233,6 +233,7 @@ export function routes(app: Express, route: string): void {
       const clientId = params.client_id as string
       assert.equal(name, 'login')
 
+      const logger = buildRequestLogger(req, { oidc: { interactionId: uid, clientId } })
       const loginInteractionData = await getLoginInteractionData(uid)
       invariant(loginInteractionData, 'login interaction data not found')
 
@@ -250,10 +251,8 @@ export function routes(app: Express, route: string): void {
         logger,
       )
 
-      logger.audit('OIDC login complete', {
-        interactionId: uid,
-        requestId: req.body.requestId,
-        clientId: params.client_id as string,
+      logger.auditEvent(AuditEvents.OIDC_SESSION_STARTED, {
+        presentationRequestId: req.body.requestId,
         ...pick(loginResult, 'accountId', 'presentationId'),
       })
 
@@ -373,7 +372,7 @@ export function routes(app: Express, route: string): void {
   // Error-handling middleware to intercept errors passed to next(err)
   // so that a nice error page can be rendered
   app.use(route, async (err: any, req: any, res: any, next: any) => {
-    const logger = buildRequestLogger(req)
+    let logger = buildRequestLogger(req)
     logger.error('OIDC provider route error', { error: err })
 
     try {
@@ -383,6 +382,9 @@ export function routes(app: Express, route: string): void {
 
       const client = await provider.Client.find(params.client_id as string)
       invariant(client, 'client not found')
+
+      // Enhance logger with OIDC context for subsequent logs
+      logger = buildRequestLogger(req, { oidc: { interactionId: uid, clientId: client.clientId } })
 
       const clientEntity = getClient(client.clientId)
       const { logo, backgroundColor, backgroundImage } = clientEntity

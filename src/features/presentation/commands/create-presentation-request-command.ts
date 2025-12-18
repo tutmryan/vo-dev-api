@@ -1,5 +1,6 @@
 import { flatten, set } from 'lodash'
 import { In } from 'typeorm'
+import { AuditEvents } from '../../../audit-types'
 import { faceCheckEnabled } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPresentationEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
@@ -115,6 +116,9 @@ export async function CreatePresentationRequestCommand(
   }
 
   await requestDetailsCache().set(response.requestId, JSON.stringify(requestDetails))
+
+  this.logger.mergeMeta({ presentationRequestId: response.requestId })
+  this.logger.auditEvent(AuditEvents.PRESENTATION_REQUEST_CREATED)
 
   return response
 }

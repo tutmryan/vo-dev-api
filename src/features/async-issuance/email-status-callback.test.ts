@@ -1,5 +1,6 @@
 import casual from 'casual'
 import { AsyncIssuanceRequestExpiry, CommunicationStatus, ContactMethod } from '../../generated/graphql'
+import { logger } from '../../logger'
 import { beforeAfterAll, expectResponseUnionToBe, inTransaction } from '../../test'
 import { mockedServices } from '../../test/mocks'
 import { throwError } from '../../util/throw-error'
@@ -14,7 +15,6 @@ import {
 import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
 import { createIssuanceRequest } from './tests/create-async-issuance'
 import { buildContact, givenContract } from './tests/index'
-import { logger } from '../../logger'
 
 describe('Email status callback', () => {
   beforeAfterAll()

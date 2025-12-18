@@ -1,3 +1,4 @@
+import { AuditEvents } from '../../../audit-types'
 import type { CommandContext } from '../../../cqs'
 import type { PresentationRequestInput, PresentationRequestResponse } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
@@ -48,6 +49,8 @@ export async function CreatePresentationRequestForAuthnCommand(this: CommandCont
   }
 
   const response = await CreatePresentationRequestCommand.apply(this, [presentationRequest, { authnSessionKey }])
+  this.logger.auditEvent(AuditEvents.OIDC_PRESENTATION_CREATED)
+
   if ('url' in response) await setLoginInteractionData({ ...loginInteractionData, state: 'in-progress', requestId: response.requestId })
 
   return response

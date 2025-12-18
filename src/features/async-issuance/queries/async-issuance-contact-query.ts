@@ -1,3 +1,4 @@
+import { AuditEvents } from '../../../audit-types'
 import type { QueryContext } from '../../../cqs'
 import { invariant } from '../../../util/invariant'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
@@ -19,7 +20,7 @@ export async function FindAsyncIssuanceContactQuery(this: QueryContext, asyncIss
   const asyncIssuance = await asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, asyncIssuanceEntity.expiry)
   invariant(asyncIssuance, 'Async issuance data was not found')
 
-  logger.audit('Fetched async issuance contact information')
+  logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_CONTACT_FETCHED)
 
   return asyncIssuance.contact ?? null
 }

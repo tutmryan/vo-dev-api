@@ -1,4 +1,5 @@
 import { startCase } from 'lodash'
+import { AuditEvents } from '../../audit-types'
 import type { HandlerContext } from '../../background-jobs/jobs'
 import { portalUrl } from '../../config'
 import type { VerifiedOrchestrationEntityManager } from '../../data/entity-manager'
@@ -59,7 +60,11 @@ export async function sendAsyncIssuanceNotification(
 
   await repo.save(entity)
 
-  logger.audit('Async issuance notification sent', data)
+  const auditEvent =
+    notification.method === ContactMethod.Email
+      ? AuditEvents.ASYNC_ISSUANCE_NOTIFICATION_EMAIL_SENT
+      : AuditEvents.ASYNC_ISSUANCE_NOTIFICATION_SMS_SENT
+  logger.auditEvent(auditEvent, data)
 
   return entity
 }

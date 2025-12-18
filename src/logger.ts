@@ -5,11 +5,18 @@ import type { Transform } from 'node:stream'
 import type { LoggerOptions, QueryRunner, Logger as TypeOrmLoggerInterface } from 'typeorm'
 import type { Logger as WinstonLogger } from 'winston'
 import * as winston from 'winston'
+import { AuditEventById, formatEventTypeAsMessage, type AuditEventType, type AuditEventTypeId } from './audit-types'
 import { logging } from './config'
 import { auditService } from './services/audit-service'
 import { redactValues } from './util/redact-values'
 
-export type Logger = ReturnType<typeof createLogger> & { audit: winston.LeveledLogMethod } & Pick<WinstonLogger, 'isVerboseEnabled'>
+type AuditEvent = { id: AuditEventTypeId; eventType: AuditEventType }
+type AuditEventMethod = (event: AuditEvent, properties?: Record<string, unknown>) => void
+
+export type Logger = ReturnType<typeof createLogger> & {
+  audit: winston.LeveledLogMethod
+  auditEvent: AuditEventMethod
+} & Pick<WinstonLogger, 'isVerboseEnabled'>
 
 export type LoggerWithMetaControl = Logger & { mergeMeta: (meta: object) => void }
 
@@ -18,6 +25,7 @@ declare module 'winston' {
   interface Logger {
     child(options: object): Pick<WinstonLogger, 'child' | 'debug' | 'error' | 'info' | 'verbose' | 'warn' | 'log' | 'isVerboseEnabled'> & {
       audit: winston.LeveledLogMethod
+      auditEvent: AuditEventMethod
       mergeMeta: (meta: object) => void
     }
   }
@@ -65,23 +73,49 @@ export const logger: Logger = Object.create(baseLogger, {
       const transform = baseLogger as unknown as Transform // A winston logger extends Transform stream
       const redactedValues = redactValues(rest, ...logging.redactPaths)
 
-      transform.write(Object.assign({}, { logLevel: level, level: level === 'audit' ? 'info' : level, message }, redactedValues))
+      // For audit logs with a known eventTypeId, derive the message from the event type
+      // This ensures consistent messages in both console and Azure Log Analytics
+      let resolvedMessage = message
+      if (level === 'audit' && redactedValues.eventTypeId) {
+        const eventMetadata = AuditEventById[redactedValues.eventTypeId as AuditEventTypeId] as { eventType: AuditEventType } | undefined
+        if (eventMetadata) {
+          resolvedMessage = formatEventTypeAsMessage(eventMetadata.eventType)
+        } else {
+          baseLogger.warn('Unknown audit eventTypeId received', { eventTypeId: redactedValues.eventTypeId })
+        }
+      }
+
+      transform.write(
+        Object.assign({}, { logLevel: level, level: level === 'audit' ? 'info' : level, message: resolvedMessage }, redactedValues),
+      )
 
       if (level === 'audit') {
-        auditService.log(message, redactedValues)
+        auditService.log(resolvedMessage, redactedValues)
       }
+    },
+  },
+  auditEvent: {
+    value: function (event: AuditEvent, properties?: Record<string, unknown>) {
+      const message = formatEventTypeAsMessage(event.eventType)
+      this.audit(message, { eventTypeId: event.id, ...properties })
     },
   },
   child: {
     value: function (meta: Record<string, any>) {
       // eslint-disable-next-line @typescript-eslint/no-this-alias
-      const logger = this // capture this (parent logger) for use in write-value closure below
+      const parentLogger = this // capture this (parent logger) for use in write-value closure below
 
-      return Object.create(logger, {
+      return Object.create(parentLogger, {
         mergeMeta: {
           value: function (additionalMeta: Record<string, any>) {
             Object.assign(meta, additionalMeta)
             return this
+          },
+        },
+        auditEvent: {
+          value: function (event: AuditEvent, properties?: Record<string, unknown>) {
+            const message = formatEventTypeAsMessage(event.eventType)
+            this.audit(message, { eventTypeId: event.id, ...properties })
           },
         },
         write: {
@@ -91,7 +125,7 @@ export const logger: Logger = Object.create(baseLogger, {
               infoClone.message = info.message
               infoClone.stack = info.stack
             }
-            logger.write(infoClone)
+            parentLogger.write(infoClone)
           },
         },
       })

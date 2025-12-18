@@ -40,6 +40,11 @@ declare module 'oidc-provider' {
   }
 
   // The definitely typed file for oidc-provider exports errors as a namespace, but it's actually an object.
+  // Patch Grant to include jti which exists at runtime but is missing from types
+  interface Grant {
+    jti?: string
+  }
+
   export type Errors = {
     // The base error class that extends the built-in Error class.
     OIDCProviderError: typeof errors.OIDCProviderError

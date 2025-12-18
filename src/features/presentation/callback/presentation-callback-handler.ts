@@ -1,5 +1,6 @@
 import { omit } from 'lodash'
 import { In } from 'typeorm'
+import { AuditEvents } from '../../../audit-types'
 import { dataSource } from '../../../data'
 import { PresentationRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
@@ -21,9 +22,11 @@ import type { PresentationTopicData } from './pubsub'
 import { publishPresentationEvent } from './pubsub'
 
 export const presentationCallbackHandler: PresentationCallbackHandler = async (event) => {
+  const callbackLogger = logger.child({ presentationRequestId: event.requestId })
+
   const requestDetails = await requestDetailsCache().get(event.requestId)
   if (!requestDetails) {
-    logger.error('Failed to locate a matching request details for presentation event', { event })
+    callbackLogger.error('Failed to locate a matching request details for presentation event', { event })
     return
   }
 
@@ -128,10 +131,10 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
     if (authInteractionData && authInteractionData.state !== 'pre-start')
       await setLoginInteractionData({ ...authInteractionData, state: 'complete', presentationId: id })
 
-    logger.audit('Presentation complete', { presentation: presentationEntity })
+    callbackLogger.auditEvent(AuditEvents.PRESENTATION_REQUEST_COMPLETED, { presentation: presentationEntity })
   } else if (event.requestStatus === PresentationRequestStatus.PresentationError)
-    logger.audit('Presentation error', { event: omit(event, 'state') })
-  else logger.audit('Presentation retrieved', { event: omit(event, 'state') })
+    callbackLogger.auditEvent(AuditEvents.PRESENTATION_REQUEST_FAILED, { event: omit(event, 'state') })
+  else callbackLogger.auditEvent(AuditEvents.PRESENTATION_REQUEST_RETRIEVED, { event: omit(event, 'state') })
 
   await publishPresentationEvent(topicData)
 }

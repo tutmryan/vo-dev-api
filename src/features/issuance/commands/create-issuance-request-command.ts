@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto'
+import { AuditEvents } from '../../../audit-types'
 import { issuanceRequestRegistration } from '../../../config'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
@@ -186,6 +187,8 @@ export async function CreateIssuanceRequestCommand(
     asyncIssuanceKey,
   }
   await requestDetailsCache().set(response.requestId, JSON.stringify(requestDetails))
+
+  this.logger.auditEvent(AuditEvents.ISSUANCE_REQUEST_CREATED, { requestId: response.requestId })
 
   return response
 }

@@ -16,6 +16,7 @@ import { json } from 'express'
 import { createApollo4QueryValidationPlugin } from 'graphql-constraint-directive/apollo4'
 import type http from 'http'
 import { authenticatedIntrospectionPlugin } from './apollo.authenticatedIntrospectionPlugin'
+import { AuditEvents } from './audit-types'
 import { devToolsEnabled, graphQL, logging } from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
@@ -24,6 +25,39 @@ import type { Logger } from './logger'
 import { logger } from './logger'
 import { rateLimiterMiddleware } from './rate-limiter'
 import createSchema from './schema'
+
+/**
+ * Returns the appropriate audit event based on the GraphQL operation type.
+ * Falls back to API_GRAPHQL_OPERATION if type is unknown.
+ */
+function getAuditEventForOperationType(operationType: GraphQLContext['operationType']) {
+  switch (operationType) {
+    case 'query':
+      return AuditEvents.API_GRAPHQL_QUERY
+    case 'mutation':
+      return AuditEvents.API_GRAPHQL_MUTATION
+    case 'subscription':
+      return AuditEvents.API_GRAPHQL_SUBSCRIPTION
+    default:
+      return AuditEvents.API_GRAPHQL_OPERATION
+  }
+}
+
+/**
+ * Plugin that captures the GraphQL operation type and stores it in context.
+ * Must run before the logging plugin so the type is available for audit logging.
+ */
+const operationTypePlugin: ApolloServerPlugin<GraphQLContext> = {
+  async requestDidStart() {
+    return {
+      async didResolveOperation({ operation, contextValue }) {
+        if (operation) {
+          contextValue.operationType = operation.operation
+        }
+      },
+    }
+  },
+}
 
 export function createArmorProtection(config?: GraphQLArmorConfig) {
   const armor = new ApolloArmor(
@@ -56,12 +90,15 @@ const plugins = (
     authenticatedIntrospectionPlugin, // Require authentication for introspection queries
     // GraphQLArmor protection plugins
     ...protection.plugins,
+    operationTypePlugin,
     graphqlOperationLoggingPlugin<GraphQLContext, Logger>({
       logLevel: 'audit',
       contextCreationFailureLogger: logger,
       includeMutationResponseData: true,
       augmentLogEntry(ctx) {
+        const auditEvent = getAuditEventForOperationType(ctx.operationType)
         return {
+          eventTypeId: auditEvent.id,
           user: {
             id: ctx.user?.id,
             name: ctx.user?.name,
@@ -111,6 +148,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server, .
     jwtClaimsToLog: logging.userClaimsToLog,
     requireAuth: true,
     verifyToken: (host, token) => verifyMultiIssuer(host, token, { issuerOptions: getIssuerOptions() }),
+    resolveSubscriptionOperationLogger: (context) => (context as GraphQLContext).logger as unknown as typeof logger,
   })
 
   logger.info('Starting apollo server')

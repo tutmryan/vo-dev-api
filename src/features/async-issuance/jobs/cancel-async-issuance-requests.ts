@@ -1,4 +1,5 @@
 import { type FindOptionsWhere, In } from 'typeorm'
+import { AuditEvents } from '../../../audit-types'
 import type { HandlerContext, JobHandler } from '../../../background-jobs/jobs'
 import { dataSource, ISOLATION_LEVEL } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
@@ -43,11 +44,11 @@ const cancelAsyncIssuanceRequests = async (context: HandlerContext, where: FindO
         )
         request.canceled()
         await entityManager.getRepository(AsyncIssuanceEntity).save(request)
-        logger.audit('Async issuance request cancelled')
+        logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_REQUEST_CANCELLED_JOB)
       })
     } catch (err) {
       logger.error(`Error occurred when canceling the async issuance request ${request.id}`, err)
-      logger.audit('Failed to cancel async issuance request')
+      logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_CANCELLATION_FAILED)
       errorMessages.push(`Error occurred when canceling the async issuance request ${request.id}: ${(err as Error).message}`)
     } finally {
       await context.updateProgress(Math.floor(((i + 1) / requests.length) * 100))

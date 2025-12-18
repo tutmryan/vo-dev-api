@@ -1,3 +1,4 @@
+import { AuditEvents } from '../../../audit-types'
 import type { JobHandler } from '../../../background-jobs/jobs'
 import { dataSource, ISOLATION_LEVEL } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
@@ -32,7 +33,7 @@ export const sendAsyncIssuanceNotificationsJobHandler: JobHandler<SendAsyncIssua
         if (err instanceof CommunicationError) {
           await context.services.communications.recordCommunicationFailure(err, entityManager)
         }
-        logger.audit('Failed to send async issuance notification')
+        logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_NOTIFICATION_JOB_FAILED)
       })
 
       errorMessages.push(

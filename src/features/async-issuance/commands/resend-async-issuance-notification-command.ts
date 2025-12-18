@@ -1,3 +1,4 @@
+import { AuditEvents } from '../../../audit-types'
 import type { TransactionalCommandContext } from '../../../cqs'
 import { CommunicationError } from '../../../services/communications-service'
 import { userInvariant } from '../../../util/user-invariant'
@@ -18,9 +19,7 @@ export async function ResendAsyncNotificationCommand(
 
   try {
     return await inTransaction((entityManager) => {
-      const result = sendAsyncIssuanceNotification({ services, logger }, entityManager, asyncIssuanceRequestId)
-      logger.audit('Resent async issuance notification')
-      return result
+      return sendAsyncIssuanceNotification({ services, logger }, entityManager, asyncIssuanceRequestId)
     })
   } catch (error) {
     await inTransaction(async (entityManager) => {
@@ -32,7 +31,7 @@ export async function ResendAsyncNotificationCommand(
       if (error instanceof CommunicationError) {
         await services.communications.recordCommunicationFailure(error, entityManager)
       }
-      logger.audit('Failed to resend async issuance notification')
+      logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_NOTIFICATION_RESEND_FAILED)
     })
     throw error
   }

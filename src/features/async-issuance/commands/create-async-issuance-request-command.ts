@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto'
 import { isValidPhoneNumber } from 'libphonenumber-js'
 import { omit } from 'lodash'
 import { calculateExpiryFromNow, convertAsyncIssuanceRequestExpiryToDays } from '..'
+import { AuditEvents } from '../../../audit-types'
 import { addToJobQueue } from '../../../background-jobs'
 import type { CommandContext } from '../../../cqs'
 import { isFaceCheckPhotoEnabled, registerFeatureCheck } from '../../../cqs/feature-map'
@@ -211,7 +212,7 @@ export async function CreateAsyncIssuanceRequestCommand(
       entityAuditTarget: AsyncIssuanceAudit,
       log: (result) => {
         result.identifiers.forEach((identifier) => {
-          logger.audit('Async issuance request created', {
+          logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_REQUEST_CREATED, {
             asyncIssuanceRequestId: identifier.id,
           })
         })

@@ -1,6 +1,7 @@
 import { ClientSecretCredential, DefaultAzureCredential } from '@azure/identity'
 import { LogsIngestionClient, isAggregateLogsUploadError } from '@azure/monitor-ingestion'
 import { isLocalDev } from '@makerx/node-common'
+import { AuditEventById, UNKNOWN_EVENT_TYPE, UNKNOWN_EVENT_TYPE_ID, type AuditEventTypeId } from '../audit-types'
 import { auditLogStreaming, platformTenant } from '../config'
 import { logger } from '../logger'
 
@@ -19,6 +20,9 @@ const logsIngestionClient = new LogsIngestionClient(auditLogStreaming.dataCollec
 // Changes to this type must be reflected in the Log Analytics workspace custom log definition
 // See the log-analytics.bicep file for the custom log definition
 type AuditLogEntry = {
+  EventTime: string // ISO 8601 timestamp of when the event occurred (distinct from Azure's TimeGenerated which is ingestion time)
+  EventTypeId: string // Stable event code (e.g., VO0010) - never changes once assigned
+  EventType: string // Semantic event type (e.g., api.graphql.operation) - human readable
   Message: string
   Properties: Record<string, unknown>
 }
@@ -26,10 +30,20 @@ type AuditLogEntry = {
 const createAuditService = () => {
   return {
     log: async (message: string, optionalParams: Record<string, unknown>) => {
-      const logEntry = {
+      const { eventTypeId, ...properties } = optionalParams
+
+      // Fall back gracefully if eventTypeId is not provided (e.g., from external logging plugins)
+      const eventMetadata = eventTypeId ? AuditEventById[eventTypeId as AuditEventTypeId] : undefined
+      const eventType = eventMetadata?.eventType ?? UNKNOWN_EVENT_TYPE
+      const resolvedEventTypeId = eventTypeId ? (eventTypeId as string) : UNKNOWN_EVENT_TYPE_ID
+
+      const logEntry: AuditLogEntry = {
+        EventTime: new Date().toISOString(),
+        EventTypeId: resolvedEventTypeId,
+        EventType: eventType,
         Message: message,
-        Properties: optionalParams,
-      } satisfies AuditLogEntry
+        Properties: properties,
+      }
 
       if (isLocalDev && !auditLogStreaming.dataCollectionClientSecret) {
         return // Local dev that's not shipping audit logs to a Log Analytics workspace

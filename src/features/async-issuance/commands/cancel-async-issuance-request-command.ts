@@ -1,3 +1,4 @@
+import { AuditEvents } from '../../../audit-types'
 import type { CommandContext } from '../../../cqs'
 import { invariant } from '../../../util/invariant'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
@@ -26,7 +27,7 @@ export async function CancelAsyncIssuanceRequestCommand(this: CommandContext, as
   request.canceled()
   await this.entityManager.getRepository(AsyncIssuanceEntity).save(request)
 
-  logger.audit('Async issuance request cancelled')
+  logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_REQUEST_CANCELLED_COMMAND)
 
   return request
 }

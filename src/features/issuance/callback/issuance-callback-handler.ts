@@ -1,5 +1,6 @@
 import { addSeconds } from 'date-fns'
 import { omit } from 'lodash'
+import { AuditEvents } from '../../../audit-types'
 import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
 import { IssuanceRequestStatus } from '../../../generated/graphql'
@@ -59,14 +60,14 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
       addUserToManager(entityManager, issuanceRequestDetails.issuedById)
       const { id } = await entityManager.getRepository(IssuanceEntity).save(issuance)
       topicData.issuanceId = id
-      logger.audit('Issuance complete', { issuance })
+      logger.auditEvent(AuditEvents.ISSUANCE_CREDENTIAL_ISSUED, { issuance })
 
       // if this was an async issuance, complete it
       if (asyncIssuanceKey) await completeAsyncIssuance(asyncIssuanceKey, issuance, entityManager)
     })
   } else if (event.requestStatus === IssuanceRequestStatus.RequestRetrieved)
-    logger.audit('Issuance retrieved', { event: omit(event, 'state') })
-  else logger.audit('Issuance error', { event: omit(event, 'state') })
+    logger.auditEvent(AuditEvents.ISSUANCE_REQUEST_RETRIEVED, { event: omit(event, 'state') })
+  else logger.auditEvent(AuditEvents.ISSUANCE_CREDENTIAL_FAILED, { event: omit(event, 'state') })
 
   await addIssuanceDataToCache(topicData)
   await publishIssuanceEvent(topicData)

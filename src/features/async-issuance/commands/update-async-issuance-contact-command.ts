@@ -1,3 +1,4 @@
+import { AuditEvents } from '../../../audit-types'
 import type { CommandContext } from '../../../cqs'
 import type { AsyncIssuanceContactInput, Maybe } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
@@ -21,7 +22,7 @@ export async function UpdateAsyncIssuanceContactCommand(
   asyncIssuanceRequest.contact = input
   await this.services.asyncIssuances.uploadAsyncIssuance(asyncIssuanceRequestId, asyncIssuanceRequest)
 
-  this.logger.audit('Async issuance contact updated')
+  this.logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_CONTACT_UPDATED)
 
   asyncIssuance.contactUpdated()
   await asyncIssuanceRepository.save(asyncIssuance)

@@ -348,3 +348,24 @@ export async function getLoginInteractionDataForSession(token: string): Promise<
 export function getSessionKey(token: string): string {
   return createKey(token, limitedOidcClient.secret)
 }
+
+export type OidcSessionContext = {
+  interactionId: string
+  clientId?: string
+}
+
+export async function getOidcSessionContext(token?: string, logger?: Logger): Promise<OidcSessionContext | undefined> {
+  if (!token) return undefined
+  try {
+    const loginInteractionData = await getLoginInteractionDataForSession(token)
+    if (!loginInteractionData) return undefined
+
+    return {
+      interactionId: loginInteractionData.interactionId,
+      clientId: loginInteractionData.state === 'pre-start' ? undefined : loginInteractionData.clientId,
+    }
+  } catch (error) {
+    logger?.verbose('Failed to get OIDC session context', { error })
+    return undefined
+  }
+}

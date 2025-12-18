@@ -1,6 +1,7 @@
 import { buildBaseRequestInfo } from '@makerx/graphql-core'
 import bodyParser from 'body-parser'
 import type { Express } from 'express'
+import { AuditEvents } from '../../audit-types'
 import { apiUrl } from '../../config'
 import type { CommandContext } from '../../cqs'
 import { runInTransaction } from '../../data'
@@ -34,20 +35,22 @@ export async function handleSmsStatusCallback(
   logger: Logger,
 ): Promise<void> {
   const errorStatuses: readonly MessageStatuses[] = ['failed', 'undelivered', 'canceled']
-  if (!errorStatuses.includes(payload.messageStatus)) {
-    return // We only care about statuses indicating failure
-  }
-
-  logger.info(`SMS ${type} message for async issuance ${asyncIssuanceId} failed with status ${payload.messageStatus}`, {
-    smsPayload: payload,
-  })
 
   const asyncIssuanceRepository = entityManager.getRepository(AsyncIssuanceEntity)
   const asyncIssuance = await asyncIssuanceRepository.findOneByOrFail({ id: asyncIssuanceId })
+
+  if (!errorStatuses.includes(payload.messageStatus)) {
+    logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_NOTIFICATION_SMS_STATUS, {
+      identityId: asyncIssuance.identityId,
+      status: payload.messageStatus,
+    })
+    return
+  }
+
   const communicationRepository = entityManager.getRepository(CommunicationEntity)
   const userMessage = toUserErrorMessage(payload.messageStatus, payload.errorCode)
 
-  logger.audit(`Recording SMS ${type} failure for async issuance`, {
+  logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_NOTIFICATION_SMS_FAILED, {
     identityId: asyncIssuance.identityId,
     error: userMessage,
   })

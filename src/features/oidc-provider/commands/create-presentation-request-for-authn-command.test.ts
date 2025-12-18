@@ -43,6 +43,7 @@ function createContext(overrides: Partial<CommandContext> = {}): CommandContext 
       info: jest.fn(),
       warn: jest.fn(),
       error: jest.fn(),
+      auditEvent: jest.fn(),
       withMeta: jest.fn().mockReturnThis(),
     } as unknown as LoggerWithMetaControl,
   }

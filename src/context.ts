@@ -3,6 +3,7 @@ import { createContextFactory } from '@makerx/graphql-core'
 import { createSubscriptionContextFactory, extractTokenFromConnectionParams } from '@makerx/graphql-core/subscriptions'
 import type { JwtPayload } from 'jsonwebtoken'
 import type { DataSource } from 'typeorm'
+import { AuditEvents } from './audit-types'
 import { logging, oidcAuthorityUrl } from './config'
 import type { CommandLike, DispatchContext } from './cqs'
 import { dispatch } from './cqs'
@@ -14,6 +15,7 @@ import { getLimitedAccessData } from './features/limited-access-tokens'
 import { getLimitedApprovalData } from './features/limited-approval-tokens'
 import { getLimitedPhotoCaptureSession } from './features/limited-photo-capture-tokens'
 import { VoIdentityClaim } from './features/oidc-provider/claims'
+import { getOidcSessionContext, type OidcSessionContext } from './features/oidc-provider/session'
 import type { PhotoCaptureData } from './features/photo-capture'
 import { getPhotoCaptureData } from './features/photo-capture'
 import type { FindUpdateOrCreateUserInput } from './features/users/commands/find-update-or-create-user'
@@ -29,11 +31,15 @@ import { User } from './user'
 import { enumStringValues } from './util/enum-util'
 import { invariant } from './util/invariant'
 
+export type { OidcSessionContext }
+
 export type BaseContext = GraphQLContextBase<LoggerWithMetaControl, RequestInfo, User<UserEntity> | User<IdentityEntity> | undefined>
 export type GraphQLContext = BaseContext & {
   dataSource: DataSource
   services: Services
   dataLoaders: DataLoaders
+  oidcSessionContext?: OidcSessionContext
+  operationType?: 'query' | 'mutation' | 'subscription'
 }
 
 const allClientRoles = [
@@ -168,10 +174,14 @@ export const dispatchWithoutContext = async <T extends CommandLike>(
   return dispatch(context, command, ...args)
 }
 
-const augmentContext = (context: BaseContext) => {
+const augmentContext = async (context: BaseContext) => {
   const services = createServices(context)
   const dataLoaders = createDataLoaders(services)
-  return { services, dataSource, dataLoaders }
+  const oidcSessionContext = await getOidcSessionContext(context.user?.token, context.logger)
+  if (oidcSessionContext) {
+    context.logger.mergeMeta({ oidc: oidcSessionContext })
+  }
+  return { services, dataSource, dataLoaders, oidcSessionContext }
 }
 
 export const createContext = createContextFactory<GraphQLContext>({
@@ -185,7 +195,7 @@ export const createContext = createContextFactory<GraphQLContext>({
 export const createSubscriptionContext = createSubscriptionContextFactory<GraphQLContext>({
   claimsToLog: logging.userClaimsToLog,
   requestInfoToLog: logging.requestInfoToLog,
-  requestLogger: (requestMetadata) => globalLogger.child(requestMetadata),
+  requestLogger: (requestMetadata) => globalLogger.child({ ...requestMetadata, eventTypeId: AuditEvents.API_GRAPHQL_SUBSCRIPTION.id }),
   createUser: ({ claims, connectionParams }) => findUpdateOrCreateUser(claims, extractTokenFromConnectionParams(connectionParams)),
   augmentContext,
 })
