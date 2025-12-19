@@ -7,7 +7,7 @@ import { throwError } from '../../../util/throw-error'
 import { createIdentity } from '../../identity/tests/create-identity'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 import { sendAsyncIssuanceNotificationsJobHandler } from '../jobs/send-async-issuance-notifications'
-import { createIssuanceRequest } from './create-async-issuance'
+import { createAsyncIssuanceRequest } from './create-async-issuance'
 import { getAsyncIssuance } from './get-async-issuance'
 import { buildContact, givenContract } from './index'
 import { resendAsyncIssuanceNotification } from './resend-async-issunace-notification'
@@ -40,7 +40,7 @@ describe('resendAsyncIssuanceNotification mutation', () => {
       const identity = await createIdentity()
       const contact = buildContact(useSingleFactor, useEmail ? ContactMethod.Email : ContactMethod.Sms)
 
-      const createResponse = await createIssuanceRequest([
+      const createResponse = await createAsyncIssuanceRequest([
         {
           contractId: contract.id,
           identityId: identity.id,

@@ -1,5 +1,6 @@
 import casual from 'casual'
 import { AsyncIssuanceRequestExpiry, CommunicationStatus, ContactMethod } from '../../generated/graphql'
+import { logger } from '../../logger'
 import { beforeAfterAll, expectResponseUnionToBe, inTransaction } from '../../test'
 import { mockedServices } from '../../test/mocks'
 import { throwError } from '../../util/throw-error'
@@ -8,9 +9,8 @@ import { createIdentity } from '../identity/tests/create-identity'
 import { SYSTEM_USER_ID } from '../users/entities/user-entity'
 import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
 import { getIssuanceSmsStatusCallbackUrl, getVerificationSmsStatusCallbackUrl, handleSmsStatusCallback } from './sms-status-callback'
-import { createIssuanceRequest } from './tests/create-async-issuance'
+import { createAsyncIssuanceRequest } from './tests/create-async-issuance'
 import { buildContact, givenContract } from './tests/index'
-import { logger } from '../../logger'
 
 describe('SMS status callback', () => {
   beforeAfterAll()
@@ -53,7 +53,7 @@ describe('SMS status callback', () => {
         const { contract } = await givenContract({})
         const identity = await createIdentity()
         const contact = buildContact(false, ContactMethod.Sms)
-        const createResponse = await createIssuanceRequest([
+        const createResponse = await createAsyncIssuanceRequest([
           {
             contractId: contract.id,
             identityId: identity.id,
@@ -101,7 +101,7 @@ describe('SMS status callback', () => {
         const { contract } = await givenContract({})
         const identity = await createIdentity()
         const contact = buildContact(false, ContactMethod.Sms)
-        const createResponse = await createIssuanceRequest([
+        const createResponse = await createAsyncIssuanceRequest([
           {
             contractId: contract.id,
             identityId: identity.id,
@@ -156,7 +156,7 @@ describe('SMS status callback', () => {
         const { contract } = await givenContract({})
         const identity = await createIdentity()
         const contact = buildContact(false, ContactMethod.Sms)
-        const createResponse = await createIssuanceRequest([
+        const createResponse = await createAsyncIssuanceRequest([
           {
             contractId: contract.id,
             identityId: identity.id,

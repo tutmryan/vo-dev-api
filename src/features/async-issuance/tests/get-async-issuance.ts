@@ -1,3 +1,4 @@
+import type { AsyncIssuanceRequestsOrderBy, AsyncIssuanceRequestsWhere, OrderDirection } from '@/generated/graphql'
 import { graphql } from '../../../generated'
 import { UserRoles } from '../../../roles'
 import { executeOperationAsUser } from '../../../test'
@@ -48,4 +49,54 @@ export async function getAsyncIssuance(id: string) {
   if (!data) throw new Error('No data returned')
 
   return data.asyncIssuanceRequest
+}
+
+const listAsyncIssuanceRequestsQuery = graphql(`
+  query ListAsyncIssuanceRequests(
+    $where: AsyncIssuanceRequestsWhere
+    $offset: PositiveInt
+    $limit: PositiveInt
+    $orderBy: AsyncIssuanceRequestsOrderBy
+    $orderDirection: OrderDirection
+  ) {
+    findAsyncIssuanceRequests(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {
+      id
+      identity {
+        id
+        identifier
+        issuer
+        issuerLabel
+        name
+      }
+      contract {
+        id
+        name
+      }
+      createdAt
+      createdBy {
+        id
+        name
+        isApp
+        email
+      }
+      status
+      expiry
+    }
+  }
+`)
+
+export async function executeListAsyncIssuanceRequests(variables: {
+  where?: AsyncIssuanceRequestsWhere
+  limit?: number
+  offset?: number
+  orderBy?: AsyncIssuanceRequestsOrderBy
+  orderDirection?: OrderDirection
+}) {
+  return executeOperationAsUser(
+    {
+      query: listAsyncIssuanceRequestsQuery,
+      variables,
+    },
+    UserRoles.issuer,
+  )
 }

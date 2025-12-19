@@ -3,8 +3,8 @@ import { beforeAfterAll, expectResponseUnionToBe } from '../../../test'
 import { mockedServices } from '../../../test/mocks'
 import { throwError } from '../../../util/throw-error'
 import { createIdentity } from '../../identity/tests/create-identity'
-import { createIssuanceRequest } from './create-async-issuance'
-import { givenContract, buildContact } from './index'
+import { createAsyncIssuanceRequest } from './create-async-issuance'
+import { buildContact, givenContract } from './index'
 import { updateAsyncIssuanceContact } from './update-async-issuance-contact'
 
 describe('updateAsyncIssuanceContact mutation', () => {
@@ -27,7 +27,7 @@ describe('updateAsyncIssuanceContact mutation', () => {
       const { contract } = await givenContract({})
       const identity = await createIdentity()
       const contact = buildContact(useSingleFactor, ContactMethod.Email)
-      const createResponse = await createIssuanceRequest([
+      const createResponse = await createAsyncIssuanceRequest([
         {
           contractId: contract.id,
           identityId: identity.id,

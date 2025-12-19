@@ -13,7 +13,7 @@ import {
   handleEmailStatusCallback,
 } from './email-status-callback'
 import { AsyncIssuanceEntity } from './entities/async-issuance-entity'
-import { createIssuanceRequest } from './tests/create-async-issuance'
+import { createAsyncIssuanceRequest } from './tests/create-async-issuance'
 import { buildContact, givenContract } from './tests/index'
 
 describe('Email status callback', () => {
@@ -47,7 +47,7 @@ describe('Email status callback', () => {
         const { contract } = await givenContract({})
         const identity = await createIdentity()
         const contact = buildContact(false, ContactMethod.Email)
-        const createResponse = await createIssuanceRequest([
+        const createResponse = await createAsyncIssuanceRequest([
           {
             contractId: contract.id,
             identityId: identity.id,
@@ -99,7 +99,7 @@ describe('Email status callback', () => {
         const { contract } = await givenContract({})
         const identity = await createIdentity()
         const contact = buildContact(false, ContactMethod.Email)
-        const createResponse = await createIssuanceRequest([
+        const createResponse = await createAsyncIssuanceRequest([
           {
             contractId: contract.id,
             identityId: identity.id,
@@ -151,7 +151,7 @@ describe('Email status callback', () => {
         const { contract } = await givenContract({})
         const identity = await createIdentity()
         const contact = buildContact(false, ContactMethod.Email)
-        const createResponse = await createIssuanceRequest([
+        const createResponse = await createAsyncIssuanceRequest([
           {
             contractId: contract.id,
             identityId: identity.id,
@@ -224,7 +224,7 @@ describe('Email status callback', () => {
         const { contract } = await givenContract({})
         const identity = await createIdentity()
         const contact = buildContact(false, ContactMethod.Email)
-        const createResponse = await createIssuanceRequest([
+        const createResponse = await createAsyncIssuanceRequest([
           {
             contractId: contract.id,
             identityId: identity.id,

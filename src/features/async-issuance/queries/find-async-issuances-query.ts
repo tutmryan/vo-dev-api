@@ -10,7 +10,7 @@ import {
 } from '../../../generated/graphql'
 import { assertExhaustive } from '../../../util/type-helpers'
 import { LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp, OptionalRange } from '../../../util/typeorm'
-import { AsyncIssuanceEntity, failedStates } from '../entities/async-issuance-entity'
+import { AsyncIssuanceEntity, expirableStates, failedStates } from '../entities/async-issuance-entity'
 
 export async function FindAsyncIssuancesQuery(
   this: QueryContext,
@@ -31,10 +31,12 @@ export async function FindAsyncIssuancesQuery(
         where.expiresOn = MoreThanOrEqualTimestamp(new Date())
         break
       case AsyncIssuanceRequestStatus.Expired:
+        where.state = In(expirableStates)
         where.expiresOn = LessThanOrEqualTimestamp(new Date())
         break
       case AsyncIssuanceRequestStatus.Failed:
         where.state = In(failedStates)
+        where.expiresOn = MoreThanOrEqualTimestamp(new Date())
         break
       case AsyncIssuanceRequestStatus.Issued:
         where.state = 'issued'

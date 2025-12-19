@@ -8,7 +8,7 @@ import { mockedServices } from '../../../test/mocks'
 import { throwError } from '../../../util/throw-error'
 import { createIdentity } from '../../identity/tests/create-identity'
 import { sendAsyncIssuanceNotificationsJobHandler } from '../jobs/send-async-issuance-notifications'
-import { createIssuanceRequest } from './create-async-issuance'
+import { createAsyncIssuanceRequest } from './create-async-issuance'
 import { createIssuanceRequestForAsyncIssuance } from './create-issuance-request-for-async-issuance'
 import { getAsyncIssuance } from './get-async-issuance'
 import { additonalContractClaims, buildContact, faceCheckPhoto, givenContract, validAdditonalClaimsInput } from './index'
@@ -77,7 +77,7 @@ describe('createIssuanceRequestForAsyncIssuance mutation', () => {
         const identity = await createIdentity()
         const contact = buildContact(useSingleFactor, useNotificationMethod, useVerificationMethod)
 
-        const createResponse = await createIssuanceRequest([
+        const createResponse = await createAsyncIssuanceRequest([
           {
             contractId: contract.id,
             identityId: identity.id,

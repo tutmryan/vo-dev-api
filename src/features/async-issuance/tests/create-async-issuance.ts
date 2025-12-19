@@ -19,7 +19,7 @@ export const createAsyncIssuanceRequestMutation = graphql(`
   }
 `)
 
-export async function createIssuanceRequest(request: NonEmptyArray<AsyncIssuanceRequestInput>) {
+export async function createAsyncIssuanceRequest(request: NonEmptyArray<AsyncIssuanceRequestInput>) {
   const { data, errors } = await executeOperationAsUser(
     {
       query: createAsyncIssuanceRequestMutation,

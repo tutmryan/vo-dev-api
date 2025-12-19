@@ -11,8 +11,8 @@ import { cannotCancelError } from '../commands/cancel-async-issuance-request-com
 import { AsyncIssuanceEntity, ValidCancellationStates } from '../entities/async-issuance-entity'
 import { cancelAsyncIssuanceRequestsHandler } from '../jobs/cancel-async-issuance-requests'
 import { cancelAsyncIssuanceRequest, cancelAsyncIssuanceRequestMutation } from './cancel-async-issuance'
-import { createIssuanceRequest } from './create-async-issuance'
-import { givenContract, buildContact } from './index'
+import { createAsyncIssuanceRequest } from './create-async-issuance'
+import { buildContact, givenContract } from './index'
 
 async function runCancellationTest(
   cancelAtState: ValidCancellationStates,
@@ -22,7 +22,7 @@ async function runCancellationTest(
   const { contract } = await givenContract({})
   const identity = await createIdentity()
   const contact = buildContact()
-  const createResponse = await createIssuanceRequest([
+  const createResponse = await createAsyncIssuanceRequest([
     {
       contractId: contract.id,
       identityId: identity.id,
@@ -126,7 +126,7 @@ describe('cancelAsyncIssuanceRequest mutation', () => {
       const { contract } = await givenContract({})
       const identity = await createIdentity()
       const contact = buildContact()
-      const createResponse = await createIssuanceRequest([
+      const createResponse = await createAsyncIssuanceRequest([
         {
           contractId: contract.id,
           identityId: identity.id,
