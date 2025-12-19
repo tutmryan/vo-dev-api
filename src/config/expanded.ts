@@ -114,7 +114,7 @@ export const apiUrl = instance
     ? config.get('localDev.tunnel.api')
     : 'http://localhost:4000'
 
-export const docsUrl = instance ? `https://${instance}.docs.verifiedorchestration.com` : 'http://localhost:3000'
+export const docsUrl = instance ? 'https://docs.idbyvo.com' : 'http://localhost:3000'
 
 // default demoEnabled to devToolsEnabled to align without having to set both flags in every environment
 export const demoEnabled = config.has('demoEnabled') ? config.get('demoEnabled') : config.get('devToolsEnabled')

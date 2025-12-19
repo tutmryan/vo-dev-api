@@ -99,3 +99,7 @@ h3.faqq { font-size: 1.2rem; font-weight: 500; margin: 1rem 0 0.2rem 0; }
 
 article.margin-bottom--xl { margin-bottom: 3rem !important; }
 footer.row { margin-top: 0.5rem; }
+
+.breadcrumbs {
+  display: flex;
+}

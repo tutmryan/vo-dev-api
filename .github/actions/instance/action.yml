@@ -373,8 +373,6 @@ runs:
           redisCacheSKU=${{ inputs.redis-cache-sku }}
           redisCacheFamily=${{ inputs.redis-cache-family }}
           redisCacheCapacity=${{ inputs.redis-cache-capacity }}
-          docsSiteClientId=${{ steps.add-instance-app-registration.outputs.instanceAppId }}
-          docsSiteClientSecret=${{ steps.add-instance-app-registration.outputs.staticSiteSecret }}
           appServicePlanId=${{ inputs.app-service-plan-id }}
           appServiceZoneRedundant=${{ inputs.app-service-zone-redundant }}
           nodeEnv=${{ inputs.node-env }}
@@ -482,35 +480,7 @@ runs:
           appServiceName=${{ steps.instance-infra.outputs.apiAppServiceName }}
           domain=${{ inputs.instance }}.api.${{ inputs.domain }}
 
-    - name: Set up CNAME record for docs site domain
-      id: set-up-docs-cname-record
-      shell: pwsh
-      run: >-
-        ./infrastructure/scripts/set-up-dns-record.ps1
-        -DnsApiKey '${{ inputs.dns-api-key }}'
-        -DnsApiSecret '${{ inputs.dns-api-secret }}'
-        -RecordType 'CNAME'
-        -RecordName '${{ inputs.instance }}.docs.${{ inputs.domain }}'
-        -RecordValue '${{ steps.instance-infra.outputs.docsSiteDefaultHostname }}'
 
-    - name: Wait for docs site DNS record propagation
-      id: wait-for-docs-dns
-      shell: pwsh
-      run: >-
-        ./infrastructure/scripts/verify-dns-records.ps1
-        -DnsRecords ${{ inputs.instance }}.docs.${{ inputs.domain }}
-        -TimeoutMinutes 3 -PollingIntervalSeconds 10
-
-    - name: Set up docs site domain
-      id: set-up-docs-domain
-      uses: azure/arm-deploy@v1
-      with:
-        deploymentName: ${{env.NOW}}-docs-domain-${{inputs.instance}}
-        resourceGroupName: ${{ inputs.resource-group-name }}
-        template: ./infrastructure/static-site-custom-domain.bicep
-        parameters: >-
-          staticSiteName=${{ steps.instance-infra.outputs.docsSiteName }}
-          domain=${{ inputs.instance }}.docs.${{ inputs.domain }}
 
     - name: Add API auth redirect URIs
       id: add-api-redirect-uris
@@ -521,13 +491,7 @@ runs:
         -WebRedirectUris https://${{ inputs.instance }}.api.${{ inputs.domain }}/auth
         -SpaRedirectUris https://${{ inputs.instance }}.${{ inputs.domain }}
 
-    - name: Add docs site auth redirect URI
-      id: add-docs-redirect-uris
-      shell: pwsh
-      run: >-
-        ./infrastructure/scripts/add-redirect-uris-to-app-registration.ps1
-        -AppRegistrationId ${{ steps.add-instance-app-registration.outputs.instanceAppId }}
-        -WebRedirectUris https://${{ inputs.instance }}.docs.${{ inputs.domain }}/.auth/login/aad/callback
+
 
     - name: 'Create database service principal setup scripts'
       shell: bash
@@ -631,48 +595,7 @@ runs:
         -ResourceGroupName '${{ inputs.resource-group-name }}'
         -AppServiceName '${{ steps.instance-infra.outputs.apiAppServiceName }}'
 
-    - name: Unzip docs site
-      shell: bash
-      run: |
-        unzip -qq docs-site/docs-site.zip -d ./docs-site
 
-    - name: Install npm packages
-      shell: bash
-      run: npm ci
-      working-directory: docs-site
-
-    - name: Build docs site
-      shell: bash
-      env:
-        GRAPHQL_ENDPOINT: https://${{ inputs.instance }}.api.${{ inputs.domain }}
-        ADMIN_URL: https://${{ inputs.instance }}.${{ inputs.domain }}
-        PORTAL_URL: https://${{ inputs.instance }}.portal.${{ inputs.domain }}
-        DEV_TOOLS_ENABLED: ${{ inputs.dev-tools-enabled }}
-        DEMO_ENABLED : ${{ inputs.demo-enabled }}
-        API_CLIENT_ID: ${{ steps.add-instance-app-registration.outputs.instanceAppId }}
-        INSTANCE: ${{ inputs.instance }}
-      run: |
-        npm run build --ignore-scripts
-        sed -i "s|TENANT_ID|${{ inputs.home-tenant-id }}|g" ./build/staticwebapp.config.json
-      # ^^^ replace the TENANT_ID placeholder with the home tenant ID
-      working-directory: docs-site
-
-    - name: Get deployment token for docs site
-      shell: bash
-      run: |
-        DOCS_SITE_WEB_APPS_TOKEN=$(az staticwebapp secrets list --name ${{ steps.instance-infra.outputs.docsSiteName }} --query "properties.apiKey" --output tsv)
-        echo "::add-mask::$DOCS_SITE_WEB_APPS_TOKEN"
-        echo DOCS_SITE_WEB_APPS_TOKEN=$DOCS_SITE_WEB_APPS_TOKEN >> $GITHUB_ENV
-
-    - name: Deploy docs site
-      id: deploy-docs-site
-      uses: Azure/static-web-apps-deploy@v1
-      with:
-        action: upload
-        azure_static_web_apps_api_token: ${{ env.DOCS_SITE_WEB_APPS_TOKEN }}
-        skip_app_build: true
-        skip_api_build: true
-        app_location: docs-site/build
 
     - name: Output DNS records to be set up
       id: output-did-dns-records

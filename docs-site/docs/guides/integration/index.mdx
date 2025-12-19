@@ -1,8 +1,9 @@
-import { AdminLink } from '@site/src/components/admin-link'
-import { ApiLink } from '@site/src/components/api-link'
-import { RenderIf } from '@site/src/components/render-if'
+---
+sidebar_position: 1
+---
 
-# Application integration
+import { ApiLink } from '@site/src/components/ApiLink'
+import { AdminLink } from '@site/src/components/AdminLink'
 
 The VO platform is based on a GraphQL API, facilitating seamless integration with custom applications.
 
@@ -19,14 +20,13 @@ If you're using a different development stack, our guides and examples can still
 
 All data and operations are accessible through the API, which presents a strongly typed, documented and discoverable schema.
 
-<RenderIf flag='DEV_TOOLS_ENABLED'>
-### Apollo Studio
+### Apollo Sandbox UI
 
 Apollo Studio is a GraphQL IDE that enables you to explore the VO API. It's an ideal tool for delving into the schema, building and running queries, as well as referencing the documentation.
 
 You will need to be [onboarded as a platform user](../onboarding-users.mdx) to access Apollo Studio and the API.
 
-<ApiLink>Access Apollo Studio here</ApiLink>
+<ApiLink>Access Apollo Sandbox</ApiLink>
 
 #### Basic Apollo Studio usage
 
@@ -51,6 +51,4 @@ To use subscription connections, which do not include cookies, you need to provi
 
 You can now subscribe to events and see event data. Typically, an access token is valid for approximately 50 minutes, subject to your tenant configuration.
 
-![Apollo Studio Subscriptions](../../../static/img/apollo-sandbox-subscriptions.png)
-
-</RenderIf>
+![Apollo Sandbox Subscriptions](../../../static/img/apollo-sandbox-subscriptions.png)

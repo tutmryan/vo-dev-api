@@ -3,9 +3,8 @@ sidebar_position: 7
 ---
 
 import ThemedImage from '@theme/ThemedImage'
-import { AdminLink } from '@site/src/components/admin-link'
-import { PortalLink } from '@site/src/components/portal-link'
-import { PortalUrl } from '@site/src/components/portal-url'
+import { AdminLink } from '@site/src/components/AdminLink'
+import { PortalLink } from '@site/src/components/PortalLink'
 
 # Remote issuance
 
@@ -79,8 +78,8 @@ If you prefer to send your own notification, you can include a link directly for
 
 Issuance URLs for the two verification methods are as follows, where the `$issuanceId` is the ID of the remote issuance:
 
-- OTP verification: <PortalUrl />/issuance/$issuanceId
-- Concierge sign-in verification: <PortalUrl />/issue/$issuanceId
+- <PortalLink path='/issuance/$issuanceId'>OTP verification</PortalLink>
+- <PortalLink path='/issue/$issuanceId'>Concierge sign-in verification</PortalLink>
 
 Alternatively, issuees can sign in to the Concierge and see all pending issuances at the top of their home page. They can click or tap on each pending issuance to accept the credential.
 

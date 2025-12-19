@@ -294,30 +294,6 @@ resource identityStoreKeyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndp
   }
 }
 
-resource staticSiteKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
-  name: 'vo-kv-stat-${uniqueSuffix}'
-  location: location
-  properties: {
-    enabledForTemplateDeployment: true
-    tenantId: subscription().tenantId
-    accessPolicies: [
-      {
-        tenantId: subscription().tenantId
-        objectId: docsSite.identity.principalId
-        permissions: {
-          secrets: [
-            'get'
-          ]
-        }
-      }
-    ]
-    sku: {
-      name: 'standard'
-      family: 'A'
-    }
-  }
-}
-
 resource keyVaultDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: 'diagnostics'
   scope: keyVault
@@ -659,24 +635,7 @@ resource limitedOidcSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022
   parent: keyVault
 }
 
-@description('The client secret of the docs site app registration in Azure AD')
-@secure()
-param docsSiteClientSecret string
-resource docsSiteClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(docsSiteClientSecret)) {
-  name: 'DOCS-SITE-CLIENT-SECRET'
-  parent: staticSiteKeyVault
-  properties: {
-    attributes: {
-      enabled: true
-    }
-    value: docsSiteClientSecret
-  }
-}
 
-resource docsSiteClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(docsSiteClientSecret)) {
-  name: 'DOCS-SITE-CLIENT-SECRET'
-  parent: staticSiteKeyVault
-}
 
 @description('The ID of the VID authority')
 @secure()
@@ -1595,36 +1554,7 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
 
 param sharedResourceGroupName string
 
-resource docsSite 'Microsoft.Web/staticSites@2022-03-01' = {
-  name: '${resourcePrefix}-docs-site'
-  // Static Web Apps is a global service, but ARM only accepts a few locations
-  // See https://learn.microsoft.com/en-us/azure/static-web-apps/faq#how-do-i-ensure-my-app-is-deployed-to-a-specific-azure-region-
-  #disable-next-line no-hardcoded-location
-  location: 'eastasia'
-  sku: {
-    name: 'Standard'
-    size: 'Standard'
-  }
-  identity: {
-    type: 'SystemAssigned'
-  }
-  properties: {}
-}
 
-output docsSiteName string = docsSite.name
-output docsSiteDefaultHostname string = docsSite.properties.defaultHostname
-
-@description('The client ID of the docs site app registration in Azure AD')
-param docsSiteClientId string
-resource docsSiteAppSettings 'Microsoft.Web/staticSites/config@2022-09-01' = {
-  name: 'appsettings'
-  kind: 'string'
-  parent: docsSite
-  properties: {
-    AZURE_CLIENT_ID: docsSiteClientId
-    AZURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(docsSiteClientSecret) ? docsSiteClientSecretSecretExisting : docsSiteClientSecretSecret).properties.secretUri})'
-  }
-}
 
 var rawWorkBookData = string(loadJsonContent('./workbook.json'))
 var serialisedWorkBookData = replace(

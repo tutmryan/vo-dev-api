@@ -34,7 +34,7 @@ Create an issuance request specifying the contract of the credential to be issue
 - a PIN code that the recipient must enter to retrieve the credential (best sent via a separate channel)
 - callback info, if issuance event data should also be sent to a server-side endpoint
 
-The [CreateIssuanceRequest](/api-reference/api/mutations/create-issuance-request) mutation returns the issuance request details, including a URL to open in the browser or a QR code to scan.
+The [CreateIssuanceRequest](/api-reference/operations/mutations/create-issuance-request) mutation returns the issuance request details, including a URL to open in the browser or a QR code to scan.
 
 ```tsx title="Create an issuance request"
 const createIssuanceMutation = graphql(`
@@ -100,7 +100,7 @@ return (
 
 ### 4. Handle issuance events
 
-The [IssuanceEvent](/api-reference/api/subscriptions/issuance-event) subscription returns event data during the issuance process. The `requestStatus` field can be used to determine the current state of the issuance:
+The [IssuanceEvent](/api-reference/operations/subscriptions/issuance-event) subscription returns event data during the issuance process. The `requestStatus` field can be used to determine the current state of the issuance:
 
 - `request_retrieved`: the recipient has opened the issuance link
 - `issuance_complete`: the recipient has completed the issuance process, the credential has been issued

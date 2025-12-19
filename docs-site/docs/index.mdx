@@ -2,9 +2,6 @@
 sidebar_position: 1
 ---
 
-import { AdminLink } from '@site/src/components/admin-link'
-import { ApiLink } from '@site/src/components/api-link'
-import { RenderIf } from '@site/src/components/render-if'
 import ThemedImage from '@theme/ThemedImage'
 
 # Introduction
@@ -13,14 +10,14 @@ VO is a platform that offers a seamless integration experience for consumer appl
 
 The platform is comprised of the following components:
 
-- <AdminLink path="/">Composer</AdminLink> offers a web interface for administrators of the platform to manage all aspects of the platform and
+- Composer offers a web interface for administrators of the platform to manage all aspects of the platform and
   credential lifecycle (including provisioning, issuance, revocation, etc.), templates, partners, approval workflows, remote issuance, users,
   applications, issuees, authentication integration tools and usage statistics.
 - [GraphQL API](/docs/guides/integration/#graphql-api) is the core of the platform, supporting rich and varied integration options for building compelling consumer apps and admin user experiences.
 - [OpenID Connect Provider](/docs/guides/authentication) allows applications to use credential presentation for authentication and resource (API) access.
 - [Auditing module](/docs/guides/audit) provides a stream of audit events which can be easily ingested into the consumer's SIEM (Security Information and Event Management) system of choice.
 - Concierge provides issuee user interfaces viewing their credentials and presentations, accepting remote issuances, actioning approval requests and photo capture for credential issuance with a selfie.
-- Developer docs and tools support integration of the platform into applications: Documentation website (you are here), <AdminLink path="/issuance-builder">Issuance builder</AdminLink>, <AdminLink path="/presentation-builder">Presentation builder</AdminLink>, <ApiLink path="/graphql">Apollo Studio</ApiLink>, [JavaScript client](/docs/guides/integration/javascript-client) library. Note: developer tools and demos are only enabled in non-production instances by default.
+- Developer docs and tools support integration of the platform into applications: Documentation website (you are here), Issuance builder, Presentation builder, Apollo Sandbox API IDE, [JavaScript client](/docs/guides/integration/javascript-client) library. Note: developer tools and demos are only enabled in non-production instances by default.
 
 ## Diagram of main components
 

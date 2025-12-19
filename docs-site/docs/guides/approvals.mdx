@@ -3,7 +3,7 @@ sidebar_position: 12
 ---
 
 import ThemedImage from '@theme/ThemedImage'
-import { AdminLink } from '@site/src/components/admin-link'
+import { AdminLink } from '@site/src/components/AdminLink'
 
 # Approvals
 
@@ -114,7 +114,7 @@ The GitHub application can then allow the deployment to proceed or cancel the de
 :::tip
 The `callbackSecret` is a shared secret between the GitHub application and the VO platform. It is returned from the call to the `CreateApprovalRequest` mutation when creating the approval request, and can be used to verify the authenticity of the callback data.
 
-Additionally, the GitHub application can call the [actionedApprovalData](/api-reference/api/queries/actioned-approval-data) query to obtain the actioned approval data by supplying the `approvalRequestId`.
+Additionally, the GitHub application can call the [actionedApprovalData](/api-reference/operations/queries/actioned-approval-data) query to obtain the actioned approval data by supplying the `approvalRequestId`.
 :::
 
 :::note
@@ -123,7 +123,7 @@ Callbacks will be re-tried in case of error until a 200 response is received, wi
 
 ### Callback or polling
 
-As an alternative to receiving a callback, applications coordinating approvals can poll for actioned approvals by calling the [actionedApprovalData](/api-reference/api/queries/actioned-approval-data) query and supplying the `approvalRequestId`. This query returns the [ActionedApprovalData](/api-reference/types/objects/actioned-approval-data), which is the same data the callback receives.
+As an alternative to receiving a callback, applications coordinating approvals can poll for actioned approvals by calling the [actionedApprovalData](/api-reference/operations/queries/actioned-approval-data) query and supplying the `approvalRequestId`. This query returns the [ActionedApprovalData](/api-reference/types/objects/actioned-approval-data), which is the same data the callback receives.
 
 ```graphql title="Example query to retrieve actioned approval data"
 query ActionedApprovalData($approvalRequestId: ID!) {

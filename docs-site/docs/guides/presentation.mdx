@@ -3,7 +3,7 @@ sidebar_position: 8
 ---
 
 import ThemedImage from '@theme/ThemedImage'
-import { AdminLink } from '@site/src/components/admin-link'
+import { AdminLink } from '@site/src/components/AdminLink'
 
 # Presentation
 
@@ -284,7 +284,7 @@ The [`PresentationReceipt`](/api-reference/types/inputs/presentation-receipt-inp
 - `id_token` **(Required)**: Is a record of the presentation, signed by the user's wallet, proving ownership.
 - `faceCheck` **(Optional)**: Is a signed record of the biometric face check, if performed during the presentation process.
 
-### Using [`verifyPresentation`](/api-reference/api/queries/verify-presentation) query
+### Using [`verifyPresentation`](/api-reference/operations/queries/verify-presentation) query
 
 VO provides a GraphQL query to verify the presentation receipt. This query checks the validity of the `id_token` and, if present, the `faceCheck` token.
 
@@ -361,7 +361,7 @@ The `options` object is crucial for validating the token's claims, such as the i
 | `currentDate` | The `presentedAt` `Date` object                       | The `presentedAt` `Date` object                        |
 
 :::tip
-You can query for your Verifier's DID using [`Authority query`](/api-reference/api/queries/authority)
+You can query for your Verifier's DID using [`Authority query`](/api-reference/operations/queries/authority)
 :::
 
 #### Code Sample

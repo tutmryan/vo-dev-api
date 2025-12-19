@@ -2,16 +2,15 @@
 sidebar_position: 1
 ---
 
-import { AdminLink } from '@site/src/components/admin-link'
-import { ApiLink } from '@site/src/components/api-link'
-import { Instance } from '@site/src/components/instance'
+import { AdminLink } from '@site/src/components/AdminLink'
+import { ApiLink } from '@site/src/components/ApiLink'
 
 # Onboarding a user
 
 Individuals who would like to access the <AdminLink path='/'>Composer</AdminLink> or <ApiLink path='/'>GraphQL API</ApiLink> will need to be granted access via VO enterprise application user roles.
 
 :::tip
-The name of the VO platform application in Azure AD is: **Verified Orchestration (<Instance />)**
+The name of the VO platform application in Azure AD is available in the **Composer** configuration.
 :::
 
 We recommend creating Microsoft Entra ID groups mapped to each VO user role. Users can then be added to one or more groups, according to the tasks they would like to carry out on the platform.

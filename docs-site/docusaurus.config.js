@@ -15,13 +15,17 @@ const config = {
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://your-docusaurus-test-site.com',
+  url: 'https://docs.idbyvo.com',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: '/',
 
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    },
+  },
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -63,8 +67,8 @@ const config = {
         id: 'release-notes',
         routeBasePath: 'release-notes',
         path: 'release-notes',
-        blogTitle: 'Release Notes',
-        blogDescription: 'Release Notes',
+        blogTitle: 'Release notes',
+        blogDescription: 'Release notes',
         blogSidebarCount: 10,
         blogSidebarTitle: 'Recent releases',
       },
@@ -79,6 +83,13 @@ const config = {
         loaders: {
           JsonFileLoader: '@graphql-tools/json-file-loader',
         },
+      },
+    ],
+    [
+      '@docusaurus/plugin-google-gtag',
+      {
+        trackingID: 'G-0GRTVWG5E5',
+        anonymizeIP: false,
       },
     ],
   ],
@@ -122,29 +133,8 @@ const config = {
           },
           {
             to: 'release-notes',
-            label: 'Release Notes',
+            label: 'Release notes',
             position: 'left',
-          },
-          {
-            label: 'Tools',
-            position: 'left',
-            items: [
-              {
-                label: 'Apollo Studio',
-                href: `${process.env.GRAPHQL_ENDPOINT}/graphql`,
-                prependBaseUrlToHref: false,
-              },
-              {
-                label: 'Issuance builder',
-                href: `${process.env.ADMIN_URL}/issuance-builder`,
-                prependBaseUrlToHref: false,
-              },
-              {
-                label: 'Presentation builder',
-                href: `${process.env.ADMIN_URL}/presentation-builder`,
-                prependBaseUrlToHref: false,
-              },
-            ],
           },
         ],
       },
@@ -163,15 +153,6 @@ const config = {
         darkTheme: darkCodeTheme,
       },
     }),
-  customFields: {
-    GRAPHQL_ENDPOINT: process.env.GRAPHQL_ENDPOINT,
-    ADMIN_URL: process.env.ADMIN_URL,
-    PORTAL_URL: process.env.PORTAL_URL,
-    DEV_TOOLS_ENABLED: (process.env.DEV_TOOLS_ENABLED ?? 'true').toLowerCase() === 'true',
-    DEMO_ENABLED: (process.env.DEMO_ENABLED ?? process.env.DEV_TOOLS_ENABLED ?? 'true').toLowerCase() === 'true',
-    INSTANCE: process.env.INSTANCE,
-    API_CLIENT_ID: process.env.API_CLIENT_ID,
-  },
 }
 
 module.exports = config

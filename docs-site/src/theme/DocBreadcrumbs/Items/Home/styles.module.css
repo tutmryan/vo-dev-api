@@ -1,0 +1,23 @@
+.breadcrumbHomeItemWrapper {
+  display: inline-flex;
+  align-items: center;
+}
+
+.breadcrumbHomeItem {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ifm-color-content);
+}
+
+.breadcrumbHomeIcon {
+  margin-right: 0;
+  width: 1.2rem;
+  height: 1.2rem;
+  vertical-align: middle;
+}
+
+.breadcrumbSeparator {
+  margin: 0 0.5rem;
+  color: var(--ifm-color-content-secondary);
+  user-select: none;
+}

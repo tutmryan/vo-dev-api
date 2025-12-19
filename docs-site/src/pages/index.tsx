@@ -17,20 +17,13 @@ function HomepageHeader() {
           <Link className="button button--secondary button--lg" to="/docs/">
             Documentation
           </Link>
-          {siteConfig.customFields.DEV_TOOLS_ENABLED && (
-            <>
-              <Link className="button button--secondary button--lg" to={siteConfig.customFields.GRAPHQL_ENDPOINT as string}>
-                Sandbox
-              </Link>
-            </>
-          )}
         </div>
       </div>
     </header>
   )
 }
 
-export default function Home(): JSX.Element {
+export default function Home(): React.JSX.Element {
   return (
     <Layout description="Description will go into a meta tag in <head />">
       <HomepageHeader />

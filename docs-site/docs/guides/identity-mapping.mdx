@@ -3,7 +3,7 @@ sidebar_position: 10
 ---
 
 import ThemedImage from '@theme/ThemedImage'
-import { AdminLink } from '@site/src/components/admin-link'
+import { AdminLink } from '@site/src/components/AdminLink'
 
 # Identity mapping
 
@@ -181,15 +181,15 @@ Identities can be queried to return one or many by using either the VO identity 
 
 The following queries are available:
 
-- [identity](/api-reference/api/queries/identity) finds a single identity by ID
-- [identities](/api-reference/api/queries/identities) finds multiple identities by ID
-- [identityByIdentifier](/api-reference/api/queries/identity-by-identifier) finds one identity by issuer and identifier unique key
-- [identitiesByIdentifiers](/api-reference/api/queries/identities-by-identifiers) finds one or more identities by issuer and identifier unique key
-- [findIdentities](/api-reference/api/queries/find-identities) finds identities by issuer and name partial match
+- [identity](/api-reference/operations/queries/identity) finds a single identity by ID
+- [identities](/api-reference/operations/queries/identities) finds multiple identities by ID
+- [identityByIdentifier](/api-reference/operations/queries/identity-by-identifier) finds one identity by issuer and identifier unique key
+- [identitiesByIdentifiers](/api-reference/operations/queries/identities-by-identifiers) finds one or more identities by issuer and identifier unique key
+- [findIdentities](/api-reference/operations/queries/find-identities) finds identities by issuer and name partial match
 
 You can also simply upsert and query identities in a single operation:
 
-- [saveIdentity](/api-reference/api/mutations/save-identity) performs an efficient upsert operation to save or update an identity by issuer and identifier unique key, data can be returned in the same operation
+- [saveIdentity](/api-reference/operations/mutations/save-identity) performs an efficient upsert operation to save or update an identity by issuer and identifier unique key, data can be returned in the same operation
 
 ### Example identity operations
 
