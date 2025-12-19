@@ -22,7 +22,7 @@ import { CorsOriginConfigEntity } from '../features/instance-configs/entities/co
 import { GraphQLContext } from '../context';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
-export type InputMaybe<T> = Maybe<T>;
+export type InputMaybe<T> = T | null | undefined;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
@@ -5200,14 +5200,20 @@ export type CreateAsyncIssuanceRequestMutationVariables = Exact<{
 }>;
 
 
-export type CreateAsyncIssuanceRequestMutation = { __typename?: 'Mutation', createAsyncIssuanceRequest: { __typename: 'AsyncIssuanceErrorResponse', errors: Array<string | null> } | { __typename: 'AsyncIssuanceResponse', asyncIssuanceRequestIds: Array<string> } };
+export type CreateAsyncIssuanceRequestMutation = { __typename?: 'Mutation', createAsyncIssuanceRequest:
+    | { __typename: 'AsyncIssuanceErrorResponse', errors: Array<string | null> }
+    | { __typename: 'AsyncIssuanceResponse', asyncIssuanceRequestIds: Array<string> }
+   };
 
 export type CreateIssuanceRequestForAsyncIssuanceMutationVariables = Exact<{
   asyncIssuanceRequestId: Scalars['UUID']['input'];
 }>;
 
 
-export type CreateIssuanceRequestForAsyncIssuanceMutation = { __typename?: 'Mutation', createIssuanceRequestForAsyncIssuance: { __typename: 'IssuanceResponse', requestId: string, url: string, qrCode?: string | null } | { __typename: 'RequestErrorResponse', requestId: string, date: Date, mscv: string, error: { __typename?: 'RequestErrorWithInner', code: string, message: string, innererror: { __typename?: 'RequestInnerError', code: string, message: string, target?: string | null } } } };
+export type CreateIssuanceRequestForAsyncIssuanceMutation = { __typename?: 'Mutation', createIssuanceRequestForAsyncIssuance:
+    | { __typename: 'IssuanceResponse', requestId: string, url: string, qrCode?: string | null }
+    | { __typename: 'RequestErrorResponse', requestId: string, date: Date, mscv: string, error: { __typename?: 'RequestErrorWithInner', code: string, message: string, innererror: { __typename?: 'RequestInnerError', code: string, message: string, target?: string | null } } }
+   };
 
 export type AsyncIssuanceRequestFragmentFragment = { __typename?: 'AsyncIssuanceRequest', id: string, status: AsyncIssuanceRequestStatus, isStatusFinal: boolean, failureReason?: string | null, expiry: AsyncIssuanceRequestExpiry, expiresOn: Date, createdAt: Date, updatedAt?: Date | null, identity: { __typename?: 'Identity', id: string }, issuance?: { __typename?: 'Issuance', id: string } | null, createdBy: { __typename?: 'User', id: string }, updatedBy?: { __typename?: 'User', id: string } | null };
 
@@ -5424,7 +5430,10 @@ export type CreateIssuanceRequestMutationVariables = Exact<{
 }>;
 
 
-export type CreateIssuanceRequestMutation = { __typename?: 'Mutation', createIssuanceRequest: { __typename?: 'IssuanceResponse', requestId: string, url: string, qrCode?: string | null } | { __typename?: 'RequestErrorResponse', error: { __typename?: 'RequestErrorWithInner', code: string, message: string } } };
+export type CreateIssuanceRequestMutation = { __typename?: 'Mutation', createIssuanceRequest:
+    | { __typename?: 'IssuanceResponse', requestId: string, url: string, qrCode?: string | null }
+    | { __typename?: 'RequestErrorResponse', error: { __typename?: 'RequestErrorWithInner', code: string, message: string } }
+   };
 
 export type AcquireLimitedAccessTokenMutationVariables = Exact<{
   input: AcquireLimitedAccessTokenInput;
@@ -5466,7 +5475,10 @@ export type CreatePresentationRequestMutationVariables = Exact<{
 }>;
 
 
-export type CreatePresentationRequestMutation = { __typename?: 'Mutation', createPresentationRequest: { __typename?: 'PresentationResponse', requestId: string, url: string, qrCode?: string | null, expiry: number } | { __typename?: 'RequestErrorResponse', error: { __typename?: 'RequestErrorWithInner', code: string, message: string, innererror: { __typename?: 'RequestInnerError', code: string, message: string, target?: string | null } } } };
+export type CreatePresentationRequestMutation = { __typename?: 'Mutation', createPresentationRequest:
+    | { __typename?: 'PresentationResponse', requestId: string, url: string, qrCode?: string | null, expiry: number }
+    | { __typename?: 'RequestErrorResponse', error: { __typename?: 'RequestErrorWithInner', code: string, message: string, innererror: { __typename?: 'RequestInnerError', code: string, message: string, target?: string | null } } }
+   };
 
 export type AcquireLimitedApprovalTokenMutationVariables = Exact<{
   input: AcquireLimitedApprovalTokenInput;
@@ -5660,7 +5672,10 @@ export type AuthorityQuery = { __typename?: 'Query', authority: { __typename?: '
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'Identity', presentations: Array<{ __typename?: 'Presentation', id: string }>, issuances: Array<{ __typename?: 'Issuance', id: string }>, asyncIssuanceRequests: Array<{ __typename?: 'AsyncIssuanceRequest', id: string }> } | { __typename?: 'User' } | null };
+export type MeQuery = { __typename?: 'Query', me?:
+    | { __typename?: 'Identity', presentations: Array<{ __typename?: 'Presentation', id: string }>, issuances: Array<{ __typename?: 'Issuance', id: string }>, asyncIssuanceRequests: Array<{ __typename?: 'AsyncIssuanceRequest', id: string }> }
+    | { __typename?: 'User' }
+   | null };
 
 export type AsyncIssuanceRequestQueryVariables = Exact<{
   asyncIssuanceRequestId: Scalars['UUID']['input'];
@@ -5887,7 +5902,7 @@ export type ResolverTypeWrapper<T> = Promise<T> | T;
 export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
   resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
 };
-export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
+export type Resolver<TResult, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
 
 export type ResolverFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
@@ -5924,21 +5939,21 @@ export type SubscriptionObject<TResult, TKey extends string, TParent, TContext, 
   | SubscriptionSubscriberObject<TResult, TKey, TParent, TContext, TArgs>
   | SubscriptionResolverObject<TResult, TParent, TContext, TArgs>;
 
-export type SubscriptionResolver<TResult, TKey extends string, TParent = {}, TContext = {}, TArgs = {}> =
+export type SubscriptionResolver<TResult, TKey extends string, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> =
   | ((...args: any[]) => SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>)
   | SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>;
 
-export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
+export type TypeResolveFn<TTypes, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>> = (
   parent: TParent,
   context: TContext,
   info: GraphQLResolveInfo
 ) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
 
-export type IsTypeOfResolverFn<T = {}, TContext = {}> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
+export type IsTypeOfResolverFn<T = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
 
 export type NextResolverFn<T> = () => Promise<T>;
 
-export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs = {}> = (
+export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> = (
   next: NextResolverFn<TResult>,
   parent: TParent,
   args: TArgs,
@@ -5946,25 +5961,53 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
   info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
 
+
+
 /** Mapping of union types */
 export type ResolversUnionTypes<_RefType extends Record<string, unknown>> = {
-  AsyncIssuanceRequestResponse: ( AsyncIssuanceErrorResponse ) | ( AsyncIssuanceResponse );
-  BackgroundJobEvent: ( BackgroundJobActiveEvent ) | ( BackgroundJobCompletedEvent ) | ( BackgroundJobErrorEvent ) | ( BackgroundJobProgressEvent );
-  ClaimValidation: ( ListValidation ) | ( NumberValidation ) | ( RegexValidation ) | ( TextValidation );
-  IssuanceRequestResponse: ( IssuanceResponse ) | ( RequestErrorResponse );
-  MDocPresentationRequestResponse: ( MDocPresentationResponse ) | ( RequestErrorResponse );
-  MDocProcessedResponseResult: ( MDocProcessedResponse ) | ( RequestErrorResponse );
-  Me: ( IdentityEntity ) | ( UserEntity );
-  PresentationRequestResponse: ( PresentationResponse ) | ( RequestErrorResponse );
+  AsyncIssuanceRequestResponse:
+    | ( AsyncIssuanceErrorResponse )
+    | ( AsyncIssuanceResponse )
+  ;
+  BackgroundJobEvent:
+    | ( BackgroundJobActiveEvent )
+    | ( BackgroundJobCompletedEvent )
+    | ( BackgroundJobErrorEvent )
+    | ( BackgroundJobProgressEvent )
+  ;
+  ClaimValidation:
+    | ( ListValidation )
+    | ( NumberValidation )
+    | ( RegexValidation )
+    | ( TextValidation )
+  ;
+  IssuanceRequestResponse:
+    | ( IssuanceResponse )
+    | ( RequestErrorResponse )
+  ;
+  MDocPresentationRequestResponse:
+    | ( MDocPresentationResponse )
+    | ( RequestErrorResponse )
+  ;
+  MDocProcessedResponseResult:
+    | ( MDocProcessedResponse )
+    | ( RequestErrorResponse )
+  ;
+  Me:
+    | ( IdentityEntity )
+    | ( UserEntity )
+  ;
+  PresentationRequestResponse:
+    | ( PresentationResponse )
+    | ( RequestErrorResponse )
+  ;
 };
 
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   AccessTokenResponse: ResolverTypeWrapper<AccessTokenResponse>;
-  String: ResolverTypeWrapper<Scalars['String']['output']>;
   AcquireLimitedAccessTokenInput: AcquireLimitedAccessTokenInput;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   AcquireLimitedApprovalTokenInput: AcquireLimitedApprovalTokenInput;
   AcquireLimitedPhotoCaptureTokenInput: AcquireLimitedPhotoCaptureTokenInput;
@@ -6026,8 +6069,6 @@ export type ResolversTypes = {
   ContactInput: ContactInput;
   ContactMethod: ContactMethod;
   Contract: ResolverTypeWrapper<ContractEntity>;
-  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
-  Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   ContractAsyncIssuanceRequestsWhere: ContractAsyncIssuanceRequestsWhere;
   ContractCount: ResolverTypeWrapper<Omit<ContractCount, 'contract'> & { contract: ResolversTypes['Contract'] }>;
   ContractDisplayClaim: ResolverTypeWrapper<Omit<ContractDisplayClaim, 'validation'> & { validation?: Maybe<ResolversTypes['ClaimValidation']> }>;
@@ -6129,7 +6170,7 @@ export type ResolversTypes = {
   MDocValidationResults: ResolverTypeWrapper<MDocValidationResults>;
   Me: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['Me']>;
   MsGraphFailure: ResolverTypeWrapper<MsGraphFailure>;
-  Mutation: ResolverTypeWrapper<{}>;
+  Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   NetworkContract: ResolverTypeWrapper<NetworkContract>;
   NetworkIssuer: ResolverTypeWrapper<NetworkIssuer>;
   NetworkIssuersWhere: NetworkIssuersWhere;
@@ -6180,7 +6221,7 @@ export type ResolversTypes = {
   PresentationResponse: ResolverTypeWrapper<PresentationResponse>;
   PresentationWhere: PresentationWhere;
   PresentedCredential: ResolverTypeWrapper<PresentedCredential>;
-  Query: ResolverTypeWrapper<{}>;
+  Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   RegexValidation: ResolverTypeWrapper<RegexValidation>;
   RegexValidationInput: RegexValidationInput;
   RequestConfiguration: RequestConfiguration;
@@ -6198,7 +6239,7 @@ export type ResolversTypes = {
   ScopedClaimMappingInput: ScopedClaimMappingInput;
   SendAsyncIssuanceVerificationResponse: ResolverTypeWrapper<SendAsyncIssuanceVerificationResponse>;
   ServiceFailures: ResolverTypeWrapper<ServiceFailures>;
-  Subscription: ResolverTypeWrapper<{}>;
+  Subscription: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Template: ResolverTypeWrapper<TemplateEntity>;
   TemplateDisplayClaim: ResolverTypeWrapper<Omit<TemplateDisplayClaim, 'validation'> & { validation?: Maybe<ResolversTypes['ClaimValidation']> }>;
   TemplateDisplayConsent: ResolverTypeWrapper<TemplateDisplayConsent>;
@@ -6230,14 +6271,16 @@ export type ResolversTypes = {
   WalletPresentationWhere: WalletPresentationWhere;
   WalletWhere: WalletWhere;
   WebDidModel: ResolverTypeWrapper<WebDidModel>;
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  String: ResolverTypeWrapper<Scalars['String']['output']>;
+  Float: ResolverTypeWrapper<Scalars['Float']['output']>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   AccessTokenResponse: AccessTokenResponse;
-  String: Scalars['String']['output'];
   AcquireLimitedAccessTokenInput: AcquireLimitedAccessTokenInput;
-  Boolean: Scalars['Boolean']['output'];
   ID: Scalars['ID']['output'];
   AcquireLimitedApprovalTokenInput: AcquireLimitedApprovalTokenInput;
   AcquireLimitedPhotoCaptureTokenInput: AcquireLimitedPhotoCaptureTokenInput;
@@ -6285,8 +6328,6 @@ export type ResolversParentTypes = {
   Contact: Contact;
   ContactInput: ContactInput;
   Contract: ContractEntity;
-  Int: Scalars['Int']['output'];
-  Float: Scalars['Float']['output'];
   ContractAsyncIssuanceRequestsWhere: ContractAsyncIssuanceRequestsWhere;
   ContractCount: Omit<ContractCount, 'contract'> & { contract: ResolversParentTypes['Contract'] };
   ContractDisplayClaim: Omit<ContractDisplayClaim, 'validation'> & { validation?: Maybe<ResolversParentTypes['ClaimValidation']> };
@@ -6378,7 +6419,7 @@ export type ResolversParentTypes = {
   MDocValidationResults: MDocValidationResults;
   Me: ResolversUnionTypes<ResolversParentTypes>['Me'];
   MsGraphFailure: MsGraphFailure;
-  Mutation: {};
+  Mutation: Record<PropertyKey, never>;
   NetworkContract: NetworkContract;
   NetworkIssuer: NetworkIssuer;
   NetworkIssuersWhere: NetworkIssuersWhere;
@@ -6419,7 +6460,7 @@ export type ResolversParentTypes = {
   PresentationResponse: PresentationResponse;
   PresentationWhere: PresentationWhere;
   PresentedCredential: PresentedCredential;
-  Query: {};
+  Query: Record<PropertyKey, never>;
   RegexValidation: RegexValidation;
   RegexValidationInput: RegexValidationInput;
   RequestConfiguration: RequestConfiguration;
@@ -6437,7 +6478,7 @@ export type ResolversParentTypes = {
   ScopedClaimMappingInput: ScopedClaimMappingInput;
   SendAsyncIssuanceVerificationResponse: SendAsyncIssuanceVerificationResponse;
   ServiceFailures: ServiceFailures;
-  Subscription: {};
+  Subscription: Record<PropertyKey, never>;
   Template: TemplateEntity;
   TemplateDisplayClaim: Omit<TemplateDisplayClaim, 'validation'> & { validation?: Maybe<ResolversParentTypes['ClaimValidation']> };
   TemplateDisplayConsent: TemplateDisplayConsent;
@@ -6468,6 +6509,10 @@ export type ResolversParentTypes = {
   WalletPresentationWhere: WalletPresentationWhere;
   WalletWhere: WalletWhere;
   WebDidModel: WebDidModel;
+  Boolean: Scalars['Boolean']['output'];
+  Int: Scalars['Int']['output'];
+  String: Scalars['String']['output'];
+  Float: Scalars['Float']['output'];
 };
 
 export type CacheControlDirectiveArgs = {
@@ -6500,7 +6545,6 @@ export type ConstraintDirectiveResolver<Result, Parent, ContextType = GraphQLCon
 export type AccessTokenResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AccessTokenResponse'] = ResolversParentTypes['AccessTokenResponse']> = {
   expires?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ActionedApprovalDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ActionedApprovalData'] = ResolversParentTypes['ActionedApprovalData']> = {
@@ -6513,32 +6557,27 @@ export type ActionedApprovalDataResolvers<ContextType = GraphQLContext, ParentTy
   requestData?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['ApprovalRequestStatus'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ActionedByResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ActionedBy'] = ResolversParentTypes['ActionedBy']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type AndroidPresentationRequestResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AndroidPresentationRequest'] = ResolversParentTypes['AndroidPresentationRequest']> = {
   openId4VpProtocol?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   openId4VpRequest?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ApplePresentationRequestResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApplePresentationRequest'] = ResolversParentTypes['ApplePresentationRequest']> = {
   deviceRequest?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   encryptionInfo?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ApplicationLabelConfigResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApplicationLabelConfig'] = ResolversParentTypes['ApplicationLabelConfig']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ApprovalRequestResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApprovalRequest'] = ResolversParentTypes['ApprovalRequest']> = {
@@ -6558,26 +6597,22 @@ export type ApprovalRequestResolvers<ContextType = GraphQLContext, ParentType ex
   status?: Resolver<ResolversTypes['ApprovalRequestStatus'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ApprovalRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApprovalRequestResponse'] = ResolversParentTypes['ApprovalRequestResponse']> = {
   callbackSecret?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   portalUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ApprovalTokenResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApprovalTokenResponse'] = ResolversParentTypes['ApprovalTokenResponse']> = {
   expires?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type AsyncIssuanceContactResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AsyncIssuanceContact'] = ResolversParentTypes['AsyncIssuanceContact']> = {
   notification?: Resolver<Maybe<ResolversTypes['Contact']>, ParentType, ContextType>;
   verification?: Resolver<Maybe<ResolversTypes['Contact']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type AsyncIssuanceErrorResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AsyncIssuanceErrorResponse'] = ResolversParentTypes['AsyncIssuanceErrorResponse']> = {
@@ -6603,7 +6638,6 @@ export type AsyncIssuanceRequestResolvers<ContextType = GraphQLContext, ParentTy
   status?: Resolver<ResolversTypes['AsyncIssuanceRequestStatus'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type AsyncIssuanceRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AsyncIssuanceRequestResponse'] = ResolversParentTypes['AsyncIssuanceRequestResponse']> = {
@@ -6619,7 +6653,6 @@ export type AsyncIssuanceTokenResponseResolvers<ContextType = GraphQLContext, Pa
   expires?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   photoCaptureRequestId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type AuthorityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Authority'] = ResolversParentTypes['Authority']> = {
@@ -6627,7 +6660,6 @@ export type AuthorityResolvers<ContextType = GraphQLContext, ParentType extends 
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   linkedDomainsVerified?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type BackgroundJobActiveEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobActiveEvent'] = ResolversParentTypes['BackgroundJobActiveEvent']> = {
@@ -6656,7 +6688,6 @@ export type BackgroundJobEventDataResolvers<ContextType = GraphQLContext, Parent
   jobId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   jobName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type BackgroundJobProgressEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['BackgroundJobProgressEvent'] = ResolversParentTypes['BackgroundJobProgressEvent']> = {
@@ -6673,7 +6704,6 @@ export type BrandingResolvers<ContextType = GraphQLContext, ParentType extends R
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ClaimValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ClaimValidation'] = ResolversParentTypes['ClaimValidation']> = {
@@ -6690,13 +6720,11 @@ export type CommunicationResolvers<ContextType = GraphQLContext, ParentType exte
   recipient?: Resolver<ResolversTypes['Identity'], ParentType, ContextType>;
   sentAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['CommunicationStatus'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ContactResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Contact'] = ResolversParentTypes['Contact']> = {
   method?: Resolver<ResolversTypes['ContactMethod'], ParentType, ContextType>;
   value?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ContractResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Contract'] = ResolversParentTypes['Contract']> = {
@@ -6729,13 +6757,11 @@ export type ContractResolvers<ContextType = GraphQLContext, ParentType extends R
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   validityIntervalInSeconds?: Resolver<ResolversTypes['PositiveInt'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ContractCountResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractCount'] = ResolversParentTypes['ContractCount']> = {
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType>;
   count?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ContractDisplayClaimResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayClaim'] = ResolversParentTypes['ContractDisplayClaim']> = {
@@ -6747,13 +6773,11 @@ export type ContractDisplayClaimResolvers<ContextType = GraphQLContext, ParentTy
   type?: Resolver<ResolversTypes['ClaimType'], ParentType, ContextType>;
   validation?: Resolver<Maybe<ResolversTypes['ClaimValidation']>, ParentType, ContextType>;
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ContractDisplayConsentResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayConsent'] = ResolversParentTypes['ContractDisplayConsent']> = {
   instructions?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ContractDisplayCredentialResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayCredential'] = ResolversParentTypes['ContractDisplayCredential']> = {
@@ -6763,14 +6787,12 @@ export type ContractDisplayCredentialResolvers<ContextType = GraphQLContext, Par
   logo?: Resolver<ResolversTypes['ContractDisplayCredentialLogo'], ParentType, ContextType>;
   textColor?: Resolver<ResolversTypes['HexColorCode'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ContractDisplayCredentialLogoResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayCredentialLogo'] = ResolversParentTypes['ContractDisplayCredentialLogo']> = {
   description?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   image?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   uri?: Resolver<ResolversTypes['URL'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ContractDisplayModelResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ContractDisplayModel'] = ResolversParentTypes['ContractDisplayModel']> = {
@@ -6778,13 +6800,11 @@ export type ContractDisplayModelResolvers<ContextType = GraphQLContext, ParentTy
   claims?: Resolver<Array<ResolversTypes['ContractDisplayClaim']>, ParentType, ContextType>;
   consent?: Resolver<ResolversTypes['ContractDisplayConsent'], ParentType, ContextType>;
   locale?: Resolver<ResolversTypes['Locale'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type CorsOriginConfigResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['CorsOriginConfig'] = ResolversParentTypes['CorsOriginConfig']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   origin?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
@@ -6796,7 +6816,6 @@ export type DiscoveryResolvers<ContextType = GraphQLContext, ParentType extends 
   serviceFailures?: Resolver<ResolversTypes['ServiceFailures'], ParentType, ContextType>;
   urls?: Resolver<ResolversTypes['FeatureUrls'], ParentType, ContextType>;
   version?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export interface EmailAddressScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['EmailAddress'], any> {
@@ -6806,25 +6825,21 @@ export interface EmailAddressScalarConfig extends GraphQLScalarTypeConfig<Resolv
 export type EmailSenderConfigResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['EmailSenderConfig'] = ResolversParentTypes['EmailSenderConfig']> = {
   senderEmail?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   senderName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type FaceCheckResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['FaceCheckResult'] = ResolversParentTypes['FaceCheckResult']> = {
   matchConfidenceScore?: Resolver<ResolversTypes['PositiveFloat'], ParentType, ContextType>;
   sourcePhotoQuality?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type FaceCheckValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['FaceCheckValidation'] = ResolversParentTypes['FaceCheckValidation']> = {
   matchConfidenceThreshold?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type FeatureUrlsResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['FeatureUrls'] = ResolversParentTypes['FeatureUrls']> = {
   docsUrl?: Resolver<ResolversTypes['URL'], ParentType, ContextType>;
   oidcAuthorityUrl?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
   portalUrl?: Resolver<ResolversTypes['URL'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Features'] = ResolversParentTypes['Features']> = {
@@ -6833,7 +6848,6 @@ export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends R
   faceCheckEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   findTenantIdentities?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   oidcEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GraphQlSecuritySettingsResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['GraphQLSecuritySettings'] = ResolversParentTypes['GraphQLSecuritySettings']> = {
@@ -6841,7 +6855,6 @@ export type GraphQlSecuritySettingsResolvers<ContextType = GraphQLContext, Paren
   maxDepth?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   maxDirectives?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   maxTokens?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['HexColorCode'], any> {
@@ -6870,7 +6883,6 @@ export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends R
 export type IdentityIssuerResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IdentityIssuer'] = ResolversParentTypes['IdentityIssuer']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   label?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type IdentityStoreResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IdentityStore'] = ResolversParentTypes['IdentityStore']> = {
@@ -6885,14 +6897,12 @@ export type IdentityStoreResolvers<ContextType = GraphQLContext, ParentType exte
   type?: Resolver<ResolversTypes['IdentityStoreType'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type InstanceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Instance'] = ResolversParentTypes['Instance']> = {
   authorityHosting?: Resolver<ResolversTypes['AuthorityHosting'], ParentType, ContextType>;
   configuration?: Resolver<Maybe<ResolversTypes['InstanceConfiguration']>, ParentType, ContextType>;
   identifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type InstanceConfigurationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['InstanceConfiguration'] = ResolversParentTypes['InstanceConfiguration']> = {
@@ -6901,7 +6911,6 @@ export type InstanceConfigurationResolvers<ContextType = GraphQLContext, ParentT
   corsOrigins?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   graphQLSecuritySettings?: Resolver<Maybe<ResolversTypes['GraphQLSecuritySettings']>, ParentType, ContextType>;
   identityIssuerLabels?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Issuance'] = ResolversParentTypes['Issuance']> = {
@@ -6918,7 +6927,6 @@ export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends R
   revokedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   revokedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['IssuanceStatus'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type IssuanceCallbackEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IssuanceCallbackEvent'] = ResolversParentTypes['IssuanceCallbackEvent']> = {
@@ -6926,13 +6934,11 @@ export type IssuanceCallbackEventResolvers<ContextType = GraphQLContext, ParentT
   requestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   requestStatus?: Resolver<ResolversTypes['IssuanceRequestStatus'], ParentType, ContextType>;
   state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type IssuanceEventDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IssuanceEventData'] = ResolversParentTypes['IssuanceEventData']> = {
   event?: Resolver<ResolversTypes['IssuanceCallbackEvent'], ParentType, ContextType>;
   issuance?: Resolver<Maybe<ResolversTypes['Issuance']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type IssuanceRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IssuanceRequestResponse'] = ResolversParentTypes['IssuanceRequestResponse']> = {
@@ -6971,26 +6977,22 @@ export type MDocCertificateValidationResolvers<ContextType = GraphQLContext, Par
   serialNumber?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   subject?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   validity?: Resolver<ResolversTypes['MDocCertificateValidity'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MDocCertificateValidityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocCertificateValidity'] = ResolversParentTypes['MDocCertificateValidity']> = {
   notAfter?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   notBefore?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MDocClaimResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocClaim'] = ResolversParentTypes['MDocClaim']> = {
   elementIdentifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   elementValue?: Resolver<Maybe<ResolversTypes['JSON']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MDocDiagnosticsResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocDiagnostics'] = ResolversParentTypes['MDocDiagnostics']> = {
   deviceResponse?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   response?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   validation?: Resolver<ResolversTypes['MDocValidationResults'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MDocDigestValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocDigestValidation'] = ResolversParentTypes['MDocDigestValidation']> = {
@@ -6998,13 +7000,11 @@ export type MDocDigestValidationResolvers<ContextType = GraphQLContext, ParentTy
   elementIdentifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   isValid?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MDocDocumentResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocDocument'] = ResolversParentTypes['MDocDocument']> = {
   docType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   namespaces?: Resolver<Array<ResolversTypes['MDocNamespace']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MDocDocumentValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocDocumentValidation'] = ResolversParentTypes['MDocDocumentValidation']> = {
@@ -7019,7 +7019,6 @@ export type MDocDocumentValidationResolvers<ContextType = GraphQLContext, Parent
   receivedDocType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   requestedDocType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   signatureVerified?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MDocMsoValidityInfoResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocMsoValidityInfo'] = ResolversParentTypes['MDocMsoValidityInfo']> = {
@@ -7027,13 +7026,11 @@ export type MDocMsoValidityInfoResolvers<ContextType = GraphQLContext, ParentTyp
   signed?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   validFrom?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   validUntil?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MDocNamespaceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocNamespace'] = ResolversParentTypes['MDocNamespace']> = {
   claims?: Resolver<Array<ResolversTypes['MDocClaim']>, ParentType, ContextType>;
   namespace?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MDocPresentationRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MDocPresentationRequestResponse'] = ResolversParentTypes['MDocPresentationRequestResponse']> = {
@@ -7066,7 +7063,6 @@ export type MDocValidationResultsResolvers<ContextType = GraphQLContext, ParentT
   documents?: Resolver<Array<ResolversTypes['MDocDocumentValidation']>, ParentType, ContextType>;
   isValid?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   validatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MeResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Me'] = ResolversParentTypes['Me']> = {
@@ -7076,7 +7072,6 @@ export type MeResolvers<ContextType = GraphQLContext, ParentType extends Resolve
 export type MsGraphFailureResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MsGraphFailure'] = ResolversParentTypes['MsGraphFailure']> = {
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   identityStoreId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
@@ -7160,7 +7155,6 @@ export type NetworkContractResolvers<ContextType = GraphQLContext, ParentType ex
   claims?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   types?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type NetworkIssuerResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['NetworkIssuer'] = ResolversParentTypes['NetworkIssuer']> = {
@@ -7170,7 +7164,6 @@ export type NetworkIssuerResolvers<ContextType = GraphQLContext, ParentType exte
   linkedDomainUrls?: Resolver<Array<ResolversTypes['URL']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   tenantId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export interface NonNegativeIntScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['NonNegativeInt'], any> {
@@ -7194,7 +7187,6 @@ export type OidcClaimMappingResolvers<ContextType = GraphQLContext, ParentType e
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type OidcClientResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['OidcClient'] = ResolversParentTypes['OidcClient']> = {
@@ -7225,13 +7217,11 @@ export type OidcClientResolvers<ContextType = GraphQLContext, ParentType extends
   uniqueClaimsForSubjectId?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type OidcClientResourceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['OidcClientResource'] = ResolversParentTypes['OidcClientResource']> = {
   resource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType>;
   resourceScopes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type OidcResourceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['OidcResource'] = ResolversParentTypes['OidcResource']> = {
@@ -7244,7 +7234,6 @@ export type OidcResourceResolvers<ContextType = GraphQLContext, ParentType exten
   scopes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PartnerResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Partner'] = ResolversParentTypes['Partner']> = {
@@ -7262,25 +7251,21 @@ export type PartnerResolvers<ContextType = GraphQLContext, ParentType extends Re
   tenantId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PhotoCaptureEventDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PhotoCaptureEventData'] = ResolversParentTypes['PhotoCaptureEventData']> = {
   status?: Resolver<ResolversTypes['PhotoCaptureStatus'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PhotoCaptureRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PhotoCaptureRequestResponse'] = ResolversParentTypes['PhotoCaptureRequestResponse']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   photoCaptureQrCode?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   photoCaptureUrl?: Resolver<ResolversTypes['URL'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PhotoCaptureTokenResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PhotoCaptureTokenResponse'] = ResolversParentTypes['PhotoCaptureTokenResponse']> = {
   expires?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export interface PositiveFloatScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['PositiveFloat'], any> {
@@ -7303,7 +7288,6 @@ export type PresentationResolvers<ContextType = GraphQLContext, ParentType exten
   requestedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   requestedCredentials?: Resolver<Array<ResolversTypes['RequestedCredential']>, ParentType, ContextType>;
   wallet?: Resolver<Maybe<ResolversTypes['Wallet']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PresentationCallbackEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationCallbackEvent'] = ResolversParentTypes['PresentationCallbackEvent']> = {
@@ -7314,7 +7298,6 @@ export type PresentationCallbackEventResolvers<ContextType = GraphQLContext, Par
   state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   subject?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   verifiedCredentialsData?: Resolver<Maybe<Array<ResolversTypes['PresentedCredential']>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PresentationEventResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationEvent'] = ResolversParentTypes['PresentationEvent']> = {
@@ -7323,13 +7306,11 @@ export type PresentationEventResolvers<ContextType = GraphQLContext, ParentType 
   credentialTypes?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   issuers?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   time?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PresentationEventDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationEventData'] = ResolversParentTypes['PresentationEventData']> = {
   event?: Resolver<ResolversTypes['PresentationCallbackEvent'], ParentType, ContextType>;
   presentation?: Resolver<Maybe<ResolversTypes['Presentation']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type PresentationRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationRequestResponse'] = ResolversParentTypes['PresentationRequestResponse']> = {
@@ -7351,7 +7332,6 @@ export type PresentedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
   faceCheck?: Resolver<Maybe<ResolversTypes['FaceCheckResult']>, ParentType, ContextType>;
   issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   type?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
@@ -7428,13 +7408,11 @@ export type RequestConfigurationValidationResolvers<ContextType = GraphQLContext
   allowRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   faceCheck?: Resolver<Maybe<ResolversTypes['FaceCheckValidation']>, ParentType, ContextType>;
   validateLinkedDomain?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type RequestErrorResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestError'] = ResolversParentTypes['RequestError']> = {
   code?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type RequestErrorResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestErrorResponse'] = ResolversParentTypes['RequestErrorResponse']> = {
@@ -7449,26 +7427,22 @@ export type RequestErrorWithInnerResolvers<ContextType = GraphQLContext, ParentT
   code?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   innererror?: Resolver<ResolversTypes['RequestInnerError'], ParentType, ContextType>;
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type RequestInnerErrorResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestInnerError'] = ResolversParentTypes['RequestInnerError']> = {
   code?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   message?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   target?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type RequestedClaimConstraintResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestedClaimConstraint'] = ResolversParentTypes['RequestedClaimConstraint']> = {
   claimName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   operator?: Resolver<ResolversTypes['ConstraintOperator'], ParentType, ContextType>;
   values?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type RequestedConfigurationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestedConfiguration'] = ResolversParentTypes['RequestedConfiguration']> = {
   validation?: Resolver<Maybe<ResolversTypes['RequestConfigurationValidation']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type RequestedCredentialResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['RequestedCredential'] = ResolversParentTypes['RequestedCredential']> = {
@@ -7477,25 +7451,21 @@ export type RequestedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
   constraints?: Resolver<Maybe<Array<ResolversTypes['RequestedClaimConstraint']>>, ParentType, ContextType>;
   purpose?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ScopedClaimMappingResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ScopedClaimMapping'] = ResolversParentTypes['ScopedClaimMapping']> = {
   claim?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   credentialClaim?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   scope?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type SendAsyncIssuanceVerificationResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SendAsyncIssuanceVerificationResponse'] = ResolversParentTypes['SendAsyncIssuanceVerificationResponse']> = {
   method?: Resolver<Maybe<ResolversTypes['ContactMethod']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type ServiceFailuresResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ServiceFailures'] = ResolversParentTypes['ServiceFailures']> = {
   msGraph?: Resolver<Maybe<Array<ResolversTypes['MsGraphFailure']>>, ParentType, ContextType>;
   verifiedId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type SubscriptionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Subscription'] = ResolversParentTypes['Subscription']> = {
@@ -7523,7 +7493,6 @@ export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends R
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   validityIntervalInSeconds?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type TemplateDisplayClaimResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayClaim'] = ResolversParentTypes['TemplateDisplayClaim']> = {
@@ -7535,13 +7504,11 @@ export type TemplateDisplayClaimResolvers<ContextType = GraphQLContext, ParentTy
   type?: Resolver<ResolversTypes['ClaimType'], ParentType, ContextType>;
   validation?: Resolver<Maybe<ResolversTypes['ClaimValidation']>, ParentType, ContextType>;
   value?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type TemplateDisplayConsentResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayConsent'] = ResolversParentTypes['TemplateDisplayConsent']> = {
   instructions?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type TemplateDisplayCredentialResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayCredential'] = ResolversParentTypes['TemplateDisplayCredential']> = {
@@ -7551,14 +7518,12 @@ export type TemplateDisplayCredentialResolvers<ContextType = GraphQLContext, Par
   logo?: Resolver<Maybe<ResolversTypes['TemplateDisplayCredentialLogo']>, ParentType, ContextType>;
   textColor?: Resolver<Maybe<ResolversTypes['HexColorCode']>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type TemplateDisplayCredentialLogoResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayCredentialLogo'] = ResolversParentTypes['TemplateDisplayCredentialLogo']> = {
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   image?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   uri?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type TemplateDisplayModelResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateDisplayModel'] = ResolversParentTypes['TemplateDisplayModel']> = {
@@ -7566,7 +7531,6 @@ export type TemplateDisplayModelResolvers<ContextType = GraphQLContext, ParentTy
   claims?: Resolver<Maybe<Array<ResolversTypes['TemplateDisplayClaim']>>, ParentType, ContextType>;
   consent?: Resolver<Maybe<ResolversTypes['TemplateDisplayConsent']>, ParentType, ContextType>;
   locale?: Resolver<Maybe<ResolversTypes['Locale']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type TemplateParentDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TemplateParentData'] = ResolversParentTypes['TemplateParentData']> = {
@@ -7575,7 +7539,6 @@ export type TemplateParentDataResolvers<ContextType = GraphQLContext, ParentType
   faceCheckSupport?: Resolver<Maybe<ResolversTypes['FaceCheckPhotoSupport']>, ParentType, ContextType>;
   isPublic?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   validityIntervalInSeconds?: Resolver<Maybe<ResolversTypes['PositiveInt']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type TenantIdentityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TenantIdentity'] = ResolversParentTypes['TenantIdentity']> = {
@@ -7583,7 +7546,6 @@ export type TenantIdentityResolvers<ContextType = GraphQLContext, ParentType ext
   issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   userType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type TextValidationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TextValidation'] = ResolversParentTypes['TextValidation']> = {
@@ -7613,13 +7575,11 @@ export type UserResolvers<ContextType = GraphQLContext, ParentType extends Resol
 export type UserCountResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['UserCount'] = ResolversParentTypes['UserCount']> = {
   count?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type VerifyPresentationResultResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['VerifyPresentationResult'] = ResolversParentTypes['VerifyPresentationResult']> = {
   faceCheckValid?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   idTokenValid?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export interface VoidScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Void'], any> {
@@ -7632,14 +7592,12 @@ export type WalletResolvers<ContextType = GraphQLContext, ParentType extends Res
   lastUsed?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<WalletPresentationsArgs, 'limit'>>;
   subject?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type WebDidModelResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['WebDidModel'] = ResolversParentTypes['WebDidModel']> = {
   did?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   didDocumentStatus?: Resolver<ResolversTypes['DidDocumentStatus'], ParentType, ContextType>;
   linkedDomainUrls?: Resolver<Array<ResolversTypes['URL']>, ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = GraphQLContext> = {
