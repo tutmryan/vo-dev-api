@@ -81,7 +81,7 @@ export const rules: ShieldSchema<Resolvers> = {
     discovery: or(anyUserRule, isIssuee),
     emailSenderConfig: isInstanceAdminUser,
     findApprovalRequests: isApprovalRequestAdminUser,
-    findAsyncIssuanceRequests: isAllowedToViewAsyncIssuanceRequests,
+    findAsyncIssuanceRequests: isAllowedToViewIssuances,
     findCommunications: anyUserRule,
     findContracts: or(anyUserRule, isIssuanceApp, isPresentationApp, isContractAdminApp, isLimitedListContractsApp),
     findIdentities: anyUserRule,
@@ -239,7 +239,7 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': anyUserRule,
   },
   AsyncIssuanceRequest: {
-    '*': or(isAsyncIssuer, and(isIssuee, asyncIssuanceIsToAuthenticatedUser), isSupportAgentUser),
+    '*': or(isAsyncIssuer, and(isIssuee, asyncIssuanceIsToAuthenticatedUser), isSupportAgentUser, isUserWithReadPermissions),
   },
   AsyncIssuanceRequestResponse: {
     '*': fallbackWithSupportAgentRule,

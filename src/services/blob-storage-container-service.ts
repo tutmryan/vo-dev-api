@@ -6,7 +6,7 @@ import type {
   BlobUploadCommonResponse,
   BlockBlobParallelUploadOptions,
 } from '@azure/storage-blob'
-import { ContainerClient, StorageSharedKeyCredential } from '@azure/storage-blob'
+import { ContainerClient, RestError, StorageSharedKeyCredential } from '@azure/storage-blob'
 import mime from 'mime-types'
 import type { BlobStorageCredentials } from '../config'
 import { parseDataUrl } from '../util/data-url'
@@ -56,7 +56,14 @@ export class BlobStorageContainerService {
 
   async downloadToBuffer(blobName: string): Promise<Buffer | undefined> {
     const blockBlobClient = this.containerClient().getBlockBlobClient(blobName)
-    return blockBlobClient.downloadToBuffer()
+    try {
+      return await blockBlobClient.downloadToBuffer()
+    } catch (error) {
+      if (error instanceof RestError && error.statusCode === 404) {
+        return undefined
+      }
+      throw error
+    }
   }
 
   async deleteIfExists(blobName: string): Promise<BlobDeleteIfExistsResponse> {

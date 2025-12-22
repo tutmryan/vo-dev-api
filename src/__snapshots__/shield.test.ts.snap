@@ -295,6 +295,44 @@ exports[`shield rules are setup correctly 1`] = `
           ]
         },
         {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
+            },
+            {
+              "rulesOr": [
+                {
+                  "name": "isRequestIdFilterDefined",
+                  "cache": "strict"
+                },
+                {
+                  "name": "isValidLimitedIdentitierFilter",
+                  "cache": "strict"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
+        },
+        {
           "name": "hasRole-VerifiableCredential.SupportAgent",
           "cache": "contextual",
           "__roles": [
@@ -3161,6 +3199,19 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual",
           "__roles": [
             "VerifiableCredential.SupportAgent"
+          ]
+        },
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.ApprovalRequestAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
           ]
         }
       ]
