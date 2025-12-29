@@ -1,0 +1,23 @@
+deployments:
+  environmentMapping:
+    production:
+    - "prod.*"
+    - "*.prod"
+    - "Production"
+    - "nelnet"
+    - "barhead"
+    - "mysmb"
+    - "openlearning"
+    staging:
+    - "sandbox"
+    - "sandbox.*"
+    - "*.sandbox"
+    testing:
+    - "demo"
+    - "demo.*"
+    - "*.demo"
+    development:
+    - "dev"
+    - "dev.*"
+    - "*.dev"
+    - "Non-production"
