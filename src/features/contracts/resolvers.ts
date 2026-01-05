@@ -1,5 +1,6 @@
 import { dispatch, query } from '../../cqs'
 import { type Resolvers } from '../../generated/graphql'
+import { graphServiceManager } from '../../services/graph-service'
 import { downloadToDataUrl } from '../../util/data-url'
 import { resolveUpdatedAt } from '../auditing/updated-at-resolver'
 import { CreateContractCommand } from './commands/create-contract-command'
@@ -16,6 +17,10 @@ export const resolvers: Resolvers = {
     findContracts: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindContractsQuery, where, offset, limit, orderBy, orderDirection),
     contract: (_, { id }, { dataLoaders: { contracts } }) => contracts.load(id),
+    accessPackages: async (_, { contractId }, { dataLoaders: { contracts } }) => {
+      const contract = await contracts.load(contractId)
+      return graphServiceManager.findAllAccessPackages(contract.credentialTypes)
+    },
   },
   Mutation: {
     createContract: (_, { input }, context) => dispatch(context, CreateContractCommand, input),

@@ -272,4 +272,20 @@ findIssuances(where: $where, limit: 10) {
       { where: { linkedDomainUrlsLike: '*' } },
     )
   })
+
+  describe('accessPackages', () => {
+    testQueryPermissions(
+      [UserRoles.credentialAdmin],
+      false,
+      `
+      query AccessPackagesShieldTest($contractId: ID!) {
+        accessPackages(contractId: $contractId) {
+          id
+          displayName
+        }
+      }
+    `,
+      { contractId: 'test-contract-id' },
+    )
+  })
 })

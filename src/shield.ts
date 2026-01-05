@@ -68,6 +68,7 @@ import {
 export const rules: ShieldSchema<Resolvers> = {
   Query: {
     '*': isUserWithReadPermissions,
+    accessPackages: isCredentialAdminUser,
     actionedApprovalData: or(isApprovalRequestAdminUser, isApprovalRequestApp),
     applicationLabelConfigs: isInstanceAdminUser,
     approvalRequest: or(isApprovalRequestAdminUser, and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId)),

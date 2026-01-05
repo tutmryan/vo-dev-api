@@ -9,8 +9,38 @@ import { IdentityStoreEntity } from '../features/identity-store/entities/identit
 import type { MsGraphFailure } from '../generated/graphql'
 import { IdentityStoreType } from '../generated/graphql'
 import { logger } from '../logger'
+import { newCacheSection } from '../redis/cache'
 import { Lazy } from '../util/lazy'
 import { createIdentityStoreSecretService } from './identity-store-secret-service'
+
+const FIFTEEN_MINUTES_TTL = 1000 * 60 * 15
+
+export interface AccessPackageAssignmentPolicy {
+  id: string
+  displayName: string
+  description?: string
+  accessPackage?: {
+    id: string
+    displayName: string
+    description?: string
+  }
+  verifiableCredentialSettings?: {
+    credentialTypes: Array<{
+      credentialType: string
+    }>
+  }
+}
+
+export interface AccessPackageResult {
+  id: string
+  displayName: string
+  description: string
+  credentialTypes: string[]
+  identityStoreName: string
+  identityStoreId: string
+  policyDisplayName: string
+  policyDisplayDescription?: string
+}
 
 export interface GraphServiceConfig {
   identityStoreId: string
@@ -111,7 +141,82 @@ export class GraphService {
       .get()) as { value: PartialUser[] }
     return result.value
   }
+
+  /**
+   * Fetches access package assignment policies from Microsoft Graph Entitlement Management API.
+   * Requires EntitlementManagement.Read.All permission.
+   * Results are cached for 15 minutes per identity store.
+   */
+  async getAccessPackageAssignmentPolicies(): Promise<AccessPackageAssignmentPolicy[]> {
+    const cacheKey = `assignmentPolicies:${this.config.identityStoreId}`
+    const cached = await accessPackagePoliciesCache().get(cacheKey)
+    if (cached) return cached
+
+    try {
+      const result = (await this.client()
+        .api('/identityGovernance/entitlementManagement/accessPackageAssignmentPolicies')
+        .version('beta')
+        .expand('accessPackage')
+        .get()) as { value: AccessPackageAssignmentPolicy[] }
+
+      const policies = result.value
+      await accessPackagePoliciesCache().set(cacheKey, policies)
+      return policies
+    } catch (error) {
+      // Silent failure is intentional - return empty array if EntitlementManagement.Read.All permission not granted
+      if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
+        logger.info(`Access package policies not available for identity store ${this.config.identityStoreId} - permission not granted`)
+        return []
+      }
+      logger.error(`Failed to fetch access package assignment policies for identity store ${this.config.identityStoreId}`, { error })
+      throw error
+    }
+  }
+
+  /**
+   * Finds access packages that can be assigned when a credential with any of the specified types is presented.
+   * Matches policies where at least one verifiableCredentialSettings.credentialType matches any of the provided types.
+   */
+  async findAccessPackages(credentialTypes: string[]): Promise<AccessPackageResult[]> {
+    const policies = await this.getAccessPackageAssignmentPolicies()
+
+    // Filter to only policies with accessPackage and matching credentialTypes
+    const filteredPolicies = policies.filter(
+      (
+        policy,
+      ): policy is AccessPackageAssignmentPolicy & { accessPackage: NonNullable<AccessPackageAssignmentPolicy['accessPackage']> } => {
+        if (!policy.accessPackage) return false
+        const policyTypes = policy.verifiableCredentialSettings?.credentialTypes
+        if (!policyTypes || policyTypes.length === 0) return false
+        const policyTypeStrings = policyTypes.map((ct) => ct.credentialType)
+        return credentialTypes.some((type) => policyTypeStrings.includes(type))
+      },
+    )
+
+    return filteredPolicies.map((policy) => {
+      let types =
+        policy.verifiableCredentialSettings?.credentialTypes
+          .map((ct) => ct.credentialType)
+          .filter((type) => credentialTypes.includes(type)) ?? []
+      // Remove duplicates and sort alphabetically
+      types = Array.from(new Set(types)).sort()
+      return {
+        id: policy.accessPackage.id,
+        displayName: policy.accessPackage.displayName || '',
+        description: policy.accessPackage.description || '',
+        credentialTypes: types,
+        identityStoreName: this.config.tenantName,
+        identityStoreId: this.config.identityStoreId,
+        policyDisplayName: policy.displayName,
+        policyDisplayDescription: policy.description,
+      }
+    })
+  }
 }
+
+const accessPackagePoliciesCache = Lazy(() =>
+  newCacheSection<AccessPackageAssignmentPolicy[]>('accessPackagePolicies', FIFTEEN_MINUTES_TTL),
+)
 
 class GraphServiceManager {
   private services: Record<string, GraphService> = {}
@@ -160,6 +265,16 @@ class GraphServiceManager {
 
   get all(): GraphService[] {
     return Object.values(this.services)
+  }
+
+  /**
+   * Finds all access packages across all configured Entra identity stores
+   * that match the specified credential types exactly.
+   */
+  async findAllAccessPackages(credentialTypes: string[]): Promise<AccessPackageResult[]> {
+    await this.init()
+    const results = await Promise.all(this.all.map((service) => service.findAccessPackages(credentialTypes)))
+    return results.flat()
   }
 }
 

@@ -35,6 +35,53 @@ type Query {
   Returns a contract by ID
   """
   contract(id: ID!): Contract!
+
+  """
+  Returns access packages that can be assigned upon presentation of a credential with the specified contract's credential types.
+  Queries all configured Entra identity stores for access package assignment policies with matching verifiable credential settings.
+  Returns an empty array if no matching packages are found or if the required permissions are not granted.
+  """
+  accessPackages(contractId: ID!): [AccessPackage!]!
+}
+
+"""
+An access package that can be assigned upon presentation of a verifiable credential.
+"""
+type AccessPackage {
+  """
+  The unique identifier for the access package.
+  """
+  id: ID!
+  """
+  The display name of the access package assignment policy.
+  """
+  displayName: String!
+  """
+  The description of the access package assignment policy.
+  """
+  description: String!
+  """
+  The credential types required to be presented for this access package.
+  """
+  credentialTypes: [String!]!
+  """
+  The name of the identity store that contains this access package.
+  """
+  identityStoreName: String!
+  """
+  The ID of the identity store that contains this access package.
+  """
+  identityStoreId: ID!
+
+  """
+  The display name of the access package assignment policy (policy).
+  """
+  policyDisplayName: String!
+
+  """
+  The description of the access package assignment policy (policy).
+  """
+  policyDisplayDescription: String
 }
 
 # eslint-disable-next-line @graphql-eslint/require-description

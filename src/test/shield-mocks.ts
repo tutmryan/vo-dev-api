@@ -122,7 +122,10 @@ jest.mock('../services/verified-id', () => ({
     createContract: jest.fn(),
     updateContract: jest.fn(),
     contracts: jest.fn(),
-    contract: jest.fn(),
+    contract: jest.fn().mockResolvedValue({
+      id: 'test-contract-id',
+      credentialTypes: ['TestCredential'],
+    }),
     findNetworkIssuers: jest.fn().mockResolvedValue([
       {
         id: 'test-issuer-1',
@@ -141,4 +144,32 @@ jest.mock('../services/verified-id', () => ({
     findIssuances: jest.fn(),
   })),
   VerifiedIdRequestService: jest.fn(),
+}))
+
+// Mock GraphServiceManager
+jest.mock('../services/graph-service', () => ({
+  graphServiceManager: {
+    findAllAccessPackages: jest.fn().mockResolvedValue([
+      {
+        id: 'test-access-package-id',
+        displayName: 'Test Access Package',
+        description: 'Test Description',
+        credentialTypes: ['TestCredential'],
+        identityStoreName: 'Test Store',
+        identityStoreId: 'test-store-id',
+        policyDisplayName: 'Test Policy',
+        policyDisplayDescription: 'Test Policy Description',
+      },
+    ]),
+  },
+}))
+
+// Mock Contract Loader
+jest.mock('../features/contracts/loaders', () => ({
+  contractLoader: jest.fn().mockReturnValue({
+    load: jest.fn().mockResolvedValue({
+      id: 'test-contract-id',
+      credentialTypes: ['TestCredential'],
+    }),
+  }),
 }))

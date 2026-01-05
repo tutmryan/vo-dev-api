@@ -16,6 +16,13 @@ exports[`shield rules are setup correctly 1`] = `
         "VerifiableCredential.InstanceAdmin"
       ]
     },
+    "accessPackages": {
+      "name": "hasRole-VerifiableCredential.CredentialAdmin",
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.CredentialAdmin"
+      ]
+    },
     "actionedApprovalData": {
       "rulesOr": [
         {
