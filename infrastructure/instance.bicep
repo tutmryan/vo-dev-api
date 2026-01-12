@@ -635,8 +635,6 @@ resource limitedOidcSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022
   parent: keyVault
 }
 
-
-
 @description('The ID of the VID authority')
 @secure()
 param vidAuthorityId string
@@ -765,7 +763,7 @@ resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
       name: redisCacheSKU
     }
     redisConfiguration: {
-      'maxmemory-policy': 'noeviction'
+      'maxmemory-policy': 'allkeys-lru'
     }
   }
 }
@@ -1553,8 +1551,6 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
 }
 
 param sharedResourceGroupName string
-
-
 
 var rawWorkBookData = string(loadJsonContent('./workbook.json'))
 var serialisedWorkBookData = replace(

@@ -147,7 +147,7 @@ jobs:
           app-service-zone-redundant: true
           redis-cache-sku: ${{ startsWith(inputs.instance, 'sandbox.') && 'Basic' || 'Standard' }}
           redis-cache-family: C
-          redis-cache-capacity: 0
+          redis-cache-capacity: ${{ startsWith(inputs.instance, 'sandbox.') && 0 || 1 }}
 
           cors-origin: "${{ vars.CORS_ORIGIN }}"
 
