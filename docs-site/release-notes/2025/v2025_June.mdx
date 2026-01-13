@@ -1,17 +1,21 @@
 ---
-title: v2025.6.0
+title: June 2025
 date: 2025-06-30T00:00
 description: Adding support for authenticated OIDC clients and introduce retention of wallet details and their association with credentials for presentation and revocation.
-slug: v2025_6_0
-tags: [2025, v2025.6]
+slug: v2025_June
+tags: [2025, v2025.6.0]
 ---
 
 Adding support for authenticated OIDC clients and introduce retention of wallet details and their association with credentials for presentation and revocation.
 
 <!-- truncate -->
 
-## 🚀 What’s new
-### New features
+## v2025.6.0
+
+### 🚀 What's new
+
+#### New features
+
 - Introduce OIDC claim mapping from credential to OIDC scopes and claims
 - Introduce support for OIDC client secrets
 - Display presentation constraints in presentation details screen
@@ -21,12 +25,14 @@ Adding support for authenticated OIDC clients and introduce retention of wallet 
   - View wallet presentations
   - Revoke all associated credentials from a Wallet
 
-### Enhancements
+#### Enhancements
+
 - Ported background job handling code infrastructure from the Management API to the VO API
 - When verbose logging is enabled, ODIC requests with `response_type` of `id_token` are now logged for diagnostic purposes
 - Relaxed validation on credential types
 
-## 🛠️ Notable fixes
+### 🛠️ Notable fixes
+
 - Add missing limited access token role `VerifiableCredential.AcquireLimitedAccessToken.Present` to documentation
 - Claim type supporting images/photos may not display correctly on an Android device
 - Escape single quotes in MS Graph user query input

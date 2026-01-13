@@ -1,17 +1,34 @@
 ---
-title: v2025.0.0
+title: January 2025
 date: 2025-01-06T00:00
-description: Our first release for the year provides some Composer improvements to support managing contracts and remote issuance processes. We’ve also released more capability in our OIDC Provider, allowing the user interface at authentication time to be customised.
-slug: v2025_0_0
-tags: [2025, v2025.0]
+description: Our first release for the year provides some Composer improvements to support managing contracts and remote issuance processes. We've also released more capability in our OIDC Provider, allowing the user interface at authentication time to be customised.
+slug: v2025_January
+tags: [2025, v2025.0.0, v2025.1.0]
 ---
 
-Our first release for the year provides some Composer improvements to support managing contracts and remote issuance processes. We’ve also released more capability in our OIDC Provider, allowing the user interface at authentication time to be customised.
+Our first releases for the year provide Composer improvements to support managing contracts and remote issuance processes, enhanced OIDC Provider capabilities with custom authentication UI, and improvements to credential authentication configuration.
 
 <!-- truncate -->
 
-## 🚀 What’s new
-### Enhancements
+## v2025.1.0
+
+### 🚀 What's new
+
+#### Enhancements
+
+- Support top level OpenID email scope+claim in OIDC provider via presented credential claim
+- Switch off OIDC provider browser session (SSO across apps with varied credential auth requirements does not make sense)
+- Add copy button for OIDC well-known endpoint and auth client ID
+- Improve async issuance OTP throttling within 2 minute window
+
+---
+
+## v2025.0.0
+
+### 🚀 What's new
+
+#### Enhancements
+
 - Add application role 'Contract admin' for automating contract creation from client applications
 - Add support for filtering contracts via:
   - 'isPublic' flag
@@ -25,7 +42,8 @@ Our first release for the year provides some Composer improvements to support ma
 - Add monitoring for Verified ID service and MS Graph service integrations
 - Enable app insights client telemetry from Concierge UI
 
-## 🛠️ Bug fixes
+### 🛠️ Notable fixes
+
 - Composer menu toggle icon was sometimes misaligned
 - OIDC clients: Resetting client form showed validation errors on optional fields
 - OIDC provider: Access token claims were lost after token refresh

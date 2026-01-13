@@ -1,17 +1,21 @@
 ---
-title: v2025.5.0
+title: May 2025
 date: 2025-05-27T00:00
 description: Introducing the capability to import and export Credential definitions along with refinements that empower customers to control more instance configuration.
-slug: v2025_5_0
-tags: [2025, v2025.5]
+slug: v2025_May
+tags: [2025, v2025.5.0]
 ---
 
 Introducing the capability to import and export Credential definitions along with refinements that empower customers to control more instance configuration.
 
 <!-- truncate -->
 
-## 🚀 What’s new
-### New features
+## v2025.5.0
+
+### 🚀 What's new
+
+#### New features
+
 - Composer now allows the exporting and importing of Credentials and Templates
 - Composer now allows administrators to make changes to the instance configuration
   - Add or remove additional Entra tenants
@@ -20,11 +24,12 @@ Introducing the capability to import and export Credential definitions along wit
   - Adjust CORS Origin headers
 - OIDC control parameter `vc_constraint_value` can now be set to dynamically resolve to the `login_hint`
 
-### Enhancements
+#### Enhancements
+
 - Support setting a custom log level in the API service
 - The API generates an error when trying to create a template that is nested more than four levels deep
 - Composer disables templates from being selected as a parent if they cannot be nested further
 
+### 🛠️ Notable fixes
 
-## 🛠️ Notable fixes
 - Fix OIDC error rendering would output text

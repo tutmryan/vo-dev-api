@@ -1,24 +1,29 @@
 ---
-title: v2025.2.0
+title: February 2025
 date: 2025-02-19T00:00
 description: An update that introduces MFA support in Entra ID and the ability for a credential holder to manage their credential operations using the Concierge.
-slug: v2025_2_0
-tags: [2025, v2025.2]
+slug: v2025_February
+tags: [2025, v2025.2.0]
 ---
 
 An update that introduces MFA support in Entra ID and the ability for a credential holder to manage their credential operations using the Concierge.
 
 <!-- truncate -->
 
-## 🚀 What’s new
-### New features
+## v2025.2.0
+
+### 🚀 What's new
+
+#### New features
+
 - Support Entra EAM (External Authentication Method) for MFA in Entra ID
 - Support issuee sign-in to concierge (and API access)
 - Issuees can sign in to the concierge, view issuances and presentations, accept pending issuances
 - Remote issuances can be accepted via concierge sign-in
 - Support claim constraints in presentation builder
 
-### Enhancements
+#### Enhancements
+
 - Remote issuances can be made:
   - without generating standard Email or SMS notifications (BYO notifications)
   - without OTP verification (acceptance via concierge sign-in)
@@ -40,7 +45,8 @@ An update that introduces MFA support in Entra ID and the ability for a credenti
   - Document the special VerifiableCredential type
   - Link to identity mapping guide from async issuance CSV identity column doc
 
-## 🛠️ Notable fixes
+### 🛠️ Notable fixes
+
 - Library vulnerability patching
 - Handle transient MS Graph and VID service monitoring failures
 - Prevent a template being set as it's own parent

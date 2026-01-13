@@ -1,0 +1,45 @@
+---
+title: November 2025
+date: 2025-11-28T00:00
+description: November 2025 release includes new credential management capabilities, Concierge branding support, enhanced email configuration, Support Agent role, security fixes, and numerous UX improvements across the platform.
+slug: v2025_November
+tags: [2025, v2025.11.0]
+---
+
+November 2025 release includes new credential management capabilities, Concierge branding support, enhanced email configuration, Support Agent role, security fixes, and numerous UX improvements across the platform.
+
+<!-- truncate -->
+
+## v2025.11.0
+
+### 🚀 What's new
+
+#### New features
+
+- Updated User and App Roles:
+  - Credential Revoker: Added credential revoker functionality in Composer for managing credential lifecycle
+  - Support Agent Role: Introduced new Support Agent role with appropriate permissions for customer support workflows
+- Introduced client-level branding support in Concierge for customized user experiences
+- Added instance-level email sender configuration with fallback to default settings
+- Added to Credential defintion page
+
+#### Enhancements
+
+- Improved SMS delivery and added "Reply STOP to unsubscribe" text to comply with carrier requirements
+- Optimized OIDC screen load speed, responsiveness, and overall user experience
+- Reorganized and restructured navigation menu in Composer for improved usability
+- Enhanced handling of SendGrid and Twilio status updates for better tracking of email and SMS delivery
+- Reinstated external identity store lookup with multi-store support
+- Added total counts to credential detail views
+- Improved user experience for remote issuance workflows
+- Added CORS origin list testing capability
+
+### 🛠️ Notable fixes
+
+- Fixed critical security vulnerability in GraphQL mutation for authentication presentation request in OIDC flow
+- Fixed card color value normalization issue when comparing overrides
+- Resolved background errors for Support Agent users
+- Fixed navigation collapse button visibility issue when side navigation has overflow scroll
+- Corrected permissions for remote resend and cancel operations
+- Fixed missing claim validation types
+- Fixed identifier field behavior to disable when store type is not manual
