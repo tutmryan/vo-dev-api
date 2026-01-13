@@ -832,83 +832,88 @@ resource redisCacheDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01
   }
 }
 
-resource redisMetricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = if (!empty(actionGroupAlertName)) {
-  name: '${resourcePrefix}-redis-metric-alert'
-  location: 'global'
-  properties: {
-    description: 'Triggers when the redis cache reaches critical levels'
+@description('Redis metric alert configurations with independent alert rules')
+var redisAlerts = [
+  {
+    nameSuffix: 'memory'
+    description: 'Redis used memory percentage is high'
+    metricName: 'usedmemorypercentage'
+    aggregation: 'Maximum'
+    threshold: 80
     severity: 0
-    enabled: true
-    scopes: [
-      redisCache.id
-    ]
-    evaluationFrequency: 'PT1M'
-    windowSize: 'PT5M'
-    criteria: {
-      'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
-      allOf: [
+  }
+  {
+    nameSuffix: 'server-load'
+    description: 'Redis server load is high'
+    metricName: 'serverLoad'
+    aggregation: 'Average'
+    threshold: 80
+    severity: 1
+  }
+  {
+    nameSuffix: 'cpu'
+    description: 'Redis CPU usage is high'
+    metricName: 'percentProcessorTime'
+    aggregation: 'Maximum'
+    threshold: 80
+    severity: 1
+  }
+  {
+    nameSuffix: 'clients'
+    description: 'Redis connected clients is high'
+    metricName: 'connectedclients'
+    aggregation: 'Maximum'
+    threshold: 5625
+    severity: 1
+  }
+  {
+    nameSuffix: 'cache-read'
+    description: 'Redis cache read throughput is high'
+    metricName: 'cacheRead'
+    aggregation: 'Maximum'
+    threshold: 100000
+    severity: 1
+  }
+]
+resource redisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
+  for alert in redisAlerts: if (!empty(actionGroupAlertName)) {
+    name: '${resourcePrefix}-redis-${alert.nameSuffix}-alert'
+    location: 'global'
+    properties: {
+      description: alert.description
+      severity: alert.severity
+      enabled: true
+      scopes: [
+        redisCache.id
+      ]
+      evaluationFrequency: 'PT1M'
+      windowSize: 'PT5M'
+      criteria: {
+        allOf: [
+          {
+            name: alert.metricName
+            criterionType: 'StaticThresholdCriterion'
+            metricNamespace: 'Microsoft.Cache/Redis'
+            metricName: alert.metricName
+            operator: 'GreaterThan'
+            threshold: alert.threshold
+            timeAggregation: alert.aggregation
+            skipMetricValidation: false
+          }
+        ]
+        'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
+      }
+      autoMitigate: true
+      targetResourceType: 'Microsoft.Cache/Redis'
+      targetResourceRegion: location
+      actions: [
         {
-          threshold: 80
-          name: 'Server Load'
-          metricNamespace: 'Microsoft.Cache/Redis'
-          metricName: 'serverLoad'
-          operator: 'GreaterThan'
-          timeAggregation: 'Average'
-          skipMetricValidation: false
-          criterionType: 'StaticThresholdCriterion'
-        }
-        {
-          threshold: 80
-          name: 'Used Memory Percentage'
-          metricNamespace: 'Microsoft.Cache/Redis'
-          metricName: 'usedmemorypercentage'
-          operator: 'GreaterThan'
-          timeAggregation: 'Average'
-          skipMetricValidation: false
-          criterionType: 'StaticThresholdCriterion'
-        }
-        {
-          threshold: 5625
-          name: 'Connected Clients'
-          metricNamespace: 'Microsoft.Cache/Redis'
-          metricName: 'connectedclients'
-          operator: 'GreaterThan'
-          timeAggregation: 'Maximum'
-          skipMetricValidation: false
-          criterionType: 'StaticThresholdCriterion'
-        }
-        {
-          threshold: 100000
-          name: 'Cache Read'
-          metricNamespace: 'Microsoft.Cache/Redis'
-          metricName: 'cacheRead'
-          operator: 'GreaterThan'
-          timeAggregation: 'Maximum'
-          skipMetricValidation: false
-          criterionType: 'StaticThresholdCriterion'
-        }
-        {
-          threshold: 80
-          name: 'CPU Percentage'
-          metricNamespace: 'Microsoft.Cache/Redis'
-          metricName: 'percentProcessorTime'
-          operator: 'GreaterThan'
-          timeAggregation: 'Maximum'
-          skipMetricValidation: false
-          criterionType: 'StaticThresholdCriterion'
+          actionGroupId: actionGroupAlertId
         }
       ]
     }
-    autoMitigate: true
-    targetResourceType: 'Microsoft.Cache/Redis'
-    targetResourceRegion: location
-    actions: [
-      {
-        actionGroupId: actionGroupAlertId
-      }
-    ]
   }
-}
+]
 
 output databaseHost string = '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
 
