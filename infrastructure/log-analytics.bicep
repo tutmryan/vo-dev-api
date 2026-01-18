@@ -9,7 +9,7 @@ param location string = resourceGroup().location
 @maxValue(365)
 param retentionInDays int = 180
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
   name: '${resourcePrefix}-la'
   location: location
   properties: {
@@ -25,7 +25,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
 
 output logAnalyticsId string = logAnalytics.id
 
-resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2023-03-11' = {
+resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2024-03-11' = {
   // DCE: Provides the HTTPS ingestion endpoint that clients post audit log data to.
   // The DCR (below) references this via dataCollectionEndpointId to authorize + shape data.
   name: '${resourcePrefix}-dce-audit-traces'
@@ -40,7 +40,7 @@ resource dataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2023
 
 // Custom table that physically stores the ingested records in the workspace.
 // Name MUST end with _CL and the stream name in the DCR will be: Custom-<TableName>
-resource auditTracesTable 'Microsoft.OperationalInsights/workspaces/tables@2022-10-01' = {
+resource auditTracesTable 'Microsoft.OperationalInsights/workspaces/tables@2025-07-01' = {
   // Must be the actual table name (must end with _CL) not a prefixed variant
   name: 'AuditTraces_CL'
   parent: logAnalytics
@@ -89,7 +89,7 @@ resource auditTracesTable 'Microsoft.OperationalInsights/workspaces/tables@2022-
 
 // DCR: Binds the DCE to the Log Analytics workspace and maps a declared stream to the destination table.
 // Flow: Client -> DCE ingestion endpoint -> DCR stream ("Custom-AuditTraces_CL") -> AuditTraces_CL table.
-resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' = {
+resource dataCollectionRule 'Microsoft.Insights/dataCollectionRules@2024-03-11' = {
   name: '${resourcePrefix}-dcr-audit-traces'
   location: location
   dependsOn: [

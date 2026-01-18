@@ -1,2 +1,6 @@
 {
+  "1112148": {
+    "notes": "Waiting for upstream fix. The vuln is low severity",
+    "expiry": "2026/02/15"
+  }
 }

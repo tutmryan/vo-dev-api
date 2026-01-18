@@ -8,7 +8,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' exis
   name: '${resourcePrefix}-la'
 }
 
-resource eventHubNamespace 'Microsoft.EventHub/namespaces@2022-10-01-preview' = {
+resource eventHubNamespace 'Microsoft.EventHub/namespaces@2024-01-01' = {
   name: '${resourcePrefix}-eventhub-namespace'
   location: location
   sku: {
@@ -23,7 +23,7 @@ resource eventHubNamespace 'Microsoft.EventHub/namespaces@2022-10-01-preview' = 
   }
 }
 
-resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2023-01-01-preview' = {
+resource auditTracesEventHub 'Microsoft.EventHub/namespaces/eventhubs@2024-01-01' = {
   name: '${resourcePrefix}-eh-audit-traces'
   parent: eventHubNamespace
   properties: {
@@ -44,7 +44,7 @@ resource auditTracesEventHubConsumerGroups 'Microsoft.EventHub/namespaces/eventh
   parent: auditTracesEventHub
 }
 
-resource auditTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExports@2020-08-01' = {
+resource auditTracesDataExport 'Microsoft.OperationalInsights/workspaces/dataExports@2025-07-01' = {
   name: '${resourcePrefix}-ehr-export-audit-traces'
   parent: logAnalytics
   properties: {

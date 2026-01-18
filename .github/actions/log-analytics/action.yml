@@ -26,7 +26,7 @@ runs:
 
     - name: Deploy log analytics workspace
       id: deploy-log-analytics
-      uses: azure/arm-deploy@v1
+      uses: azure/arm-deploy@v2
       with:
         deploymentName: ${{env.NOW}}-log-analytics-${{inputs.resource-prefix}}
         resourceGroupName: ${{ inputs.resource-group-name }}

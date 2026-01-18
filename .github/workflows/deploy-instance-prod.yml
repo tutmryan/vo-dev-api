@@ -58,26 +58,65 @@ jobs:
           path: ./.github/actions
           if-no-files-found: error
 
-  deploy:
-    name: Deploy to prod
+  deploy-log-analytics:
+    name: Deploy log analytics
     runs-on: vo-saas-vnet-runner-prod
     permissions:
       id-token: write
     needs:
-      - build-api
-      - build-migrations-package
       - upload-other-artifacts
-    environment:
-      name: ${{ inputs.instance }}
-      url: https://${{ inputs.instance }}.api.verifiedorchestration.com
+    outputs:
+      log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
+      resource-group-name: ${{ steps.set-vars.outputs.resource-group-name }}
+      resource-prefix: ${{ steps.set-vars.outputs.resource-prefix }}
+      resource-group-unique-string: ${{ steps.instance-resource-group.outputs.resource-group-unique-string }}
     steps:
       - name: Set variables
         id: set-vars
         shell: bash
         run: |
           instance=${{ inputs.instance }}
-          echo "resource-group-name=vo-${instance/./-}-instance" >> $GITHUB_ENV
-          echo "resource-prefix=vo-${instance/./-}" >> $GITHUB_ENV
+          resource_group_name=vo-${instance/./-}-instance
+          resource_prefix=vo-${instance/./-}
+          echo "resource-group-name=${resource_group_name}" >> $GITHUB_OUTPUT
+          echo "resource-prefix=${resource_prefix}" >> $GITHUB_OUTPUT
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
+      - name: Instance resource group
+        id: instance-resource-group
+        uses: ./github-actions/resource-group
+        with:
+          resource-group-name: ${{ steps.set-vars.outputs.resource-group-name }}
+          resource-group-location: australiaeast
+      - name: Instance log analytics
+        id: instance-log-analytics
+        uses: ./github-actions/log-analytics
+        with:
+          resource-group-name: ${{ steps.set-vars.outputs.resource-group-name }}
+          resource-prefix: ${{ steps.set-vars.outputs.resource-prefix }}
+          retention-in-days: ${{ startsWith(inputs.instance, 'sandbox.') && 30 || 180 }}
+
+  deploy-infrastructure:
+    name: Deploy infrastructure
+    runs-on: vo-saas-vnet-runner-prod
+    permissions:
+      id-token: write
+    needs:
+      - build-api
+      - build-migrations-package
+      - deploy-log-analytics
+    environment:
+      name: ${{ inputs.instance }}
+      url: https://${{ inputs.instance }}.api.verifiedorchestration.com
+    outputs:
+      api-app-service-name: ${{ steps.deploy-instance.outputs.api-app-service-name }}
+    steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
       - name: Log in to Azure
@@ -87,24 +126,11 @@ jobs:
           tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
           subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
           enable-AzPSSession: true
-      - name: Instance resource group
-        id: instance-resource-group
-        uses: ./github-actions/resource-group
-        with:
-          resource-group-name: ${{ env.resource-group-name }}
-          resource-group-location: australiaeast
-      - name: Instance log analytics
-        id: instance-log-analytics
-        uses: ./github-actions/log-analytics
-        with:
-          resource-group-name: ${{ env.resource-group-name }}
-          resource-prefix: ${{ env.resource-prefix }}
-          retention-in-days: ${{ startsWith(inputs.instance, 'sandbox.') && 30 || 180 }}
       - name: Instance SQL database
         id: instance-sql-db
         uses: ./github-actions/sql-db
         with:
-          resource-prefix: ${{ env.resource-prefix }}
+          resource-prefix: ${{ needs.deploy-log-analytics.outputs.resource-prefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
           elastic-pool-name: ${{ vars.SQL_ELASTIC_POOL_NAME }}
       - name: Deploy instance
@@ -125,9 +151,9 @@ jobs:
           azure-client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
           azure-tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
           azure-subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
-          resource-group-name: ${{ env.resource-group-name }}
-          resource-group-unique-string: ${{ steps.instance-resource-group.outputs.resource-group-unique-string }}
-          resource-prefix: ${{ env.resource-prefix }}
+          resource-group-name: ${{ needs.deploy-log-analytics.outputs.resource-group-name }}
+          resource-group-unique-string: ${{ needs.deploy-log-analytics.outputs.resource-group-unique-string }}
+          resource-prefix: ${{ needs.deploy-log-analytics.outputs.resource-prefix }}
           deployment-service-principal-object-id: ${{ vars.PROD_AZURE_SERVICE_PRINCIPAL_OBJECT_ID }}
           vnet-name: ${{ vars.PROD_VNET_NAME }}
           platform-management-service-principal-object-id: ${{ vars.PROD_PLATFORM_MANAGEMENT_SERVICE_PRINCIPAL_OBJECT_ID }}
@@ -186,6 +212,32 @@ jobs:
         uses: ./github-actions/sql-db-audit
         with:
           resource-group-name: vo-platform-shared-infra
-          resource-prefix: ${{ env.resource-prefix }}
+          resource-prefix: ${{ needs.deploy-log-analytics.outputs.resource-prefix }}
           sql-server-name: ${{ vars.SQL_SERVER_NAME }}
-          log-analytics-id: ${{ steps.instance-log-analytics.outputs.log-analytics-id }}
+          log-analytics-id: ${{ needs.deploy-log-analytics.outputs.log-analytics-id }}
+
+  deploy-custom-domain:
+    name: Deploy custom domain
+    runs-on: vo-saas-vnet-runner-prod
+    permissions:
+      id-token: write
+    needs:
+      - deploy-infrastructure
+      - deploy-log-analytics
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.PROD_AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.PROD_AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.PROD_AZURE_SUBSCRIPTION_ID }}
+      - name: Deploy API custom domain
+        id: deploy-api-custom-domain
+        uses: ./github-actions/api-custom-domain
+        with:
+          resource-group-name: ${{ needs.deploy-log-analytics.outputs.resource-group-name }}
+          instance: ${{ inputs.instance }}
+          domain: verifiedorchestration.com
+          app-service-name: ${{ needs.deploy-infrastructure.outputs.api-app-service-name }}

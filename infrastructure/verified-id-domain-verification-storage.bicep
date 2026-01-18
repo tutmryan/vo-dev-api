@@ -20,7 +20,7 @@ resource verifiedIdDomainVerificationStorage 'Microsoft.Storage/storageAccounts@
   }
 }
 
-resource verifiedIdDomainVerificationStorageBlobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
+resource verifiedIdDomainVerificationStorageBlobService 'Microsoft.Storage/storageAccounts/blobServices@2025-06-01' = {
   name: 'default'
   parent: verifiedIdDomainVerificationStorage
   properties: {

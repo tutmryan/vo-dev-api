@@ -24,7 +24,7 @@ runs:
 
     - name: Deploy SQL DB instance
       id: deploy-sql-db
-      uses: azure/arm-deploy@v1
+      uses: azure/arm-deploy@v2
       with:
         deploymentName: ${{env.NOW}}-sql-db-${{inputs.resource-prefix}}
         resourceGroupName: ${{ inputs.resource-group-name }}

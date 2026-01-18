@@ -1,0 +1,34 @@
+name: API Custom Domain
+description: Sets up custom domain SSL binding for the API app service
+
+inputs:
+  resource-group-name:
+    description: Name of the resource group
+    required: true
+  instance:
+    description: The name of the instance
+    required: true
+  domain:
+    description: The domain of the instance
+    default: 'verifiedorchestration.com'
+  app-service-name:
+    description: Name of the API app service
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Set current date as environment variable
+      run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Set up API custom domain
+      id: set-up-api-domain
+      uses: azure/arm-deploy@v2
+      with:
+        deploymentName: ${{env.NOW}}-api-domain-${{inputs.instance}}
+        resourceGroupName: ${{ inputs.resource-group-name }}
+        template: ./infrastructure/app-service-custom-domain.bicep
+        parameters: >-
+          appServiceName=${{ inputs.app-service-name }}
+          domain=${{ inputs.instance }}.api.${{ inputs.domain }}

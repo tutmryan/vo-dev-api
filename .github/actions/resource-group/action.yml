@@ -22,7 +22,7 @@ runs:
 
     - name: Deploy resource group
       id: deploy-resource-group
-      uses: azure/arm-deploy@v1
+      uses: azure/arm-deploy@v2
       with:
         deploymentName: ${{env.NOW}}-rg-${{inputs.resource-group-name}}
         scope: subscription

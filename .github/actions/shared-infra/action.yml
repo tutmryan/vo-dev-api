@@ -41,7 +41,7 @@ runs:
 
     - name: Shared infrastructure
       id: deploy-shared-infrastructure
-      uses: azure/arm-deploy@v1
+      uses: azure/arm-deploy@v2
       with:
         deploymentName: ${{env.NOW}}-shared-infra
         resourceGroupName: ${{ inputs.resource-group-name }}

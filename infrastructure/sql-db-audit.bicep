@@ -17,7 +17,7 @@ resource sqlDatabase 'Microsoft.Sql/servers/databases@2022-05-01-preview' existi
   parent: sqlServer
 }
 
-resource sqlServerAuditingSettings 'Microsoft.Sql/servers/databases/auditingSettings@2023-05-01-preview' = {
+resource sqlServerAuditingSettings 'Microsoft.Sql/servers/databases/auditingSettings@2024-11-01-preview' = {
   name: 'default'
   parent: sqlDatabase
   properties: {

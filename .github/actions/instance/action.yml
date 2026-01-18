@@ -199,6 +199,15 @@ outputs:
   api-app-service-name:
     description: Name of the API app service
     value: ${{ steps.instance-infra.outputs.apiAppServiceName }}
+  api-app-service-default-hostname:
+    description: Default hostname of the API app service
+    value: ${{ steps.instance-infra.outputs.apiAppServiceDefaultHostname }}
+  api-app-service-custom-domain-verification-id:
+    description: Custom domain verification ID of the API app service
+    value: ${{ steps.instance-infra.outputs.apiAppServiceCustomDomainVerificationId }}
+  instance-app-id:
+    description: App ID of the instance app registration
+    value: ${{ steps.add-instance-app-registration.outputs.instanceAppId }}
   database-host:
     description: Hostname of the deployed SQL database
     value: ${{ steps.instance-infra.outputs.databaseHost }}
@@ -243,7 +252,7 @@ runs:
 
     - name: Deploy storage account to host DID documents
       id: deploy-did-storage-account
-      uses: azure/arm-deploy@v1
+      uses: azure/arm-deploy@v2
       if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       with:
         deploymentName: ${{env.NOW}}-did-storage-${{inputs.instance}}
@@ -260,7 +269,7 @@ runs:
 
     - name: Set up CDN with a custom domain and azure managed certificate for DID static website
       id: deploy-did-cdn
-      uses: azure/arm-deploy@v1
+      uses: azure/arm-deploy@v2
       if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       with:
         deploymentName: ${{env.NOW}}-did-cdn-${{inputs.instance}}
@@ -358,7 +367,7 @@ runs:
 
     - name: Instance infrastructure
       id: instance-infra
-      uses: azure/arm-deploy@v1
+      uses: azure/arm-deploy@v2
       with:
         deploymentName: ${{env.NOW}}-api-${{inputs.instance}}
         resourceGroupName: ${{ inputs.resource-group-name }}
@@ -468,19 +477,6 @@ runs:
         ./infrastructure/scripts/verify-dns-records.ps1
         -DnsRecords ${{ inputs.instance }}.api.${{ inputs.domain }}, ausid.${{ inputs.instance }}.api.${{ inputs.domain }}
         -TimeoutMinutes 3 -PollingIntervalSeconds 10
-
-    - name: Set up API domain
-      id: set-up-api-domain
-      uses: azure/arm-deploy@v1
-      with:
-        deploymentName: ${{env.NOW}}-api-domain-${{inputs.instance}}
-        resourceGroupName: ${{ inputs.resource-group-name }}
-        template: ./infrastructure/app-service-custom-domain.bicep
-        parameters: >-
-          appServiceName=${{ steps.instance-infra.outputs.apiAppServiceName }}
-          domain=${{ inputs.instance }}.api.${{ inputs.domain }}
-
-
 
     - name: Add API auth redirect URIs
       id: add-api-redirect-uris
@@ -636,7 +632,7 @@ runs:
 
     - name: Set up audit log streaming
       id: audit-log-streaming
-      uses: azure/arm-deploy@v1
+      uses: azure/arm-deploy@v2
       if: inputs.audit-log-streaming-enabled == 'true'
       with:
         deploymentName: ${{env.NOW}}-audit-${{inputs.instance}}

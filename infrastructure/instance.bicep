@@ -15,15 +15,15 @@ param appInsightsRetentionInDays int = 180
 
 param location string = resourceGroup().location
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' existing = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-07-01' existing = {
   name: '${resourcePrefix}-la'
 }
 
-resource auditTracesDataCollectionRule 'Microsoft.Insights/dataCollectionRules@2023-03-11' existing = {
+resource auditTracesDataCollectionRule 'Microsoft.Insights/dataCollectionRules@2024-03-11' existing = {
   name: '${resourcePrefix}-dcr-audit-traces'
 }
 
-resource auditTracesDataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2023-03-11' existing = {
+resource auditTracesDataCollectionEndpoint 'Microsoft.Insights/dataCollectionEndpoints@2024-03-11' existing = {
   name: '${resourcePrefix}-dce-audit-traces'
 }
 
@@ -57,7 +57,7 @@ var appServiceSubnetId = resourceId(
   'app-service-subnet'
 )
 
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
+resource keyVault 'Microsoft.KeyVault/vaults@2025-05-01' = {
   name: 'vo-kv-inst-${uniqueSuffix}'
   location: location
   properties: {
@@ -114,7 +114,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   }
 }
 
-resource oidcKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
+resource oidcKeyVault 'Microsoft.KeyVault/vaults@2025-05-01' = {
   name: 'vo-kv-oidc-${uniqueSuffix}'
   location: location
   properties: {
@@ -143,7 +143,7 @@ resource oidcKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   }
 }
 
-resource identityStoreKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
+resource identityStoreKeyVault 'Microsoft.KeyVault/vaults@2025-05-01' = {
   name: 'vo-kv-idst-${uniqueSuffix}'
   location: location
   properties: {
@@ -172,7 +172,7 @@ resource identityStoreKeyVault 'Microsoft.KeyVault/vaults@2022-07-01' = {
   }
 }
 
-resource homeTenantGraphClientSecretPreconfigured 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(homeTenantGraphClientId) && !empty(homeTenantGraphClientSecret)) {
+resource homeTenantGraphClientSecretPreconfigured 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(homeTenantGraphClientId) && !empty(homeTenantGraphClientSecret)) {
   name: 'identity-store-client-secret-${homeTenantGraphClientId}'
   parent: identityStoreKeyVault
   properties: {
@@ -180,7 +180,7 @@ resource homeTenantGraphClientSecretPreconfigured 'Microsoft.KeyVault/vaults/sec
   }
 }
 
-resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = {
   name: '${resourcePrefix}-kv-pe'
   location: location
   properties: {
@@ -199,7 +199,7 @@ resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01'
   }
 }
 
-resource oidcKeyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+resource oidcKeyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = {
   name: '${resourcePrefix}-oidc-kv-pe'
   location: location
   properties: {
@@ -218,7 +218,7 @@ resource oidcKeyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05
   }
 }
 
-resource identityStoreKvPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+resource identityStoreKvPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = {
   name: '${resourcePrefix}-identity-store-kv-pe'
   location: location
   properties: {
@@ -237,7 +237,7 @@ resource identityStoreKvPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023
   }
 }
 
-resource keyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
+resource keyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2025-01-01' = {
   parent: keyVaultPrivateEndpoint
   name: 'default'
   properties: {
@@ -256,7 +256,7 @@ resource keyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/private
   }
 }
 
-resource oidcKeyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
+resource oidcKeyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2025-01-01' = {
   parent: oidcKeyVaultPrivateEndpoint
   name: 'default'
   properties: {
@@ -275,7 +275,7 @@ resource oidcKeyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/pri
   }
 }
 
-resource identityStoreKeyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
+resource identityStoreKeyVaultPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2025-01-01' = {
   parent: identityStoreKvPrivateEndpoint
   name: 'default'
   properties: {
@@ -319,7 +319,7 @@ resource keyVaultDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-p
 @secure()
 param apiCookieSecret string
 
-resource apiCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(apiCookieSecret)) {
+resource apiCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(apiCookieSecret)) {
   name: 'API-COOKIE-SECRET'
   parent: keyVault
   properties: {
@@ -330,7 +330,7 @@ resource apiCookieSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
   }
 }
 
-resource apiCookieSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(apiCookieSecret)) {
+resource apiCookieSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2025-05-01' existing = if (empty(apiCookieSecret)) {
   name: 'API-COOKIE-SECRET'
   parent: keyVault
 }
@@ -339,7 +339,7 @@ resource apiCookieSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-0
 @secure()
 param smsSecret string
 
-resource smsSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource smsSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'SMS-SECRET'
   parent: keyVault
   properties: {
@@ -354,7 +354,7 @@ resource smsSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
 @secure()
 param smsPrimaryToken string
 
-resource smsPrimaryTokenSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource smsPrimaryTokenSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'SMS-PRIMARY-TOKEN'
   parent: keyVault
   properties: {
@@ -369,7 +369,7 @@ resource smsPrimaryTokenSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
 @secure()
 param emailApiKey string
 
-resource emailApiKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource emailApiKeySecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'EMAIL-API-KEY'
   parent: keyVault
   properties: {
@@ -384,7 +384,7 @@ resource emailApiKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
 @secure()
 param emailWebhookForwarderSecret string
 
-resource emailWebhookForwarderSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource emailWebhookForwarderSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'EMAIL-WEBHOOK-FORWARDER-SECRET'
   parent: keyVault
   properties: {
@@ -399,7 +399,7 @@ resource emailWebhookForwarderSecretSecret 'Microsoft.KeyVault/vaults/secrets@20
 @secure()
 param apiClientSecret string
 
-resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(apiClientSecret)) {
+resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(apiClientSecret)) {
   name: 'API-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -410,7 +410,7 @@ resource apiClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = 
   }
 }
 
-resource apiClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(apiClientSecret)) {
+resource apiClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2025-05-01' existing = if (empty(apiClientSecret)) {
   name: 'API-CLIENT-SECRET'
   parent: keyVault
 }
@@ -419,7 +419,7 @@ resource apiClientSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-0
 @secure()
 param internalClientSecret string
 
-resource internalClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource internalClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'INTERNAL-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -434,7 +434,7 @@ resource internalClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-0
 @secure()
 param vidCallbackClientSecret string
 
-resource vidCallbackClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource vidCallbackClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'VID-CALLBACK-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -449,7 +449,7 @@ resource vidCallbackClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-0
 @secure()
 param limitedAccessClientSecret string
 
-resource limitedAccessClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource limitedAccessClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'LIMITED-ACCESS-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -464,7 +464,7 @@ resource limitedAccessClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022
 @secure()
 param limitedAccessSecret string
 
-resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(limitedAccessSecret)) {
+resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(limitedAccessSecret)) {
   name: 'LIMITED-ACCESS-SECRET'
   parent: keyVault
   properties: {
@@ -475,7 +475,7 @@ resource limitedAccessSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01
   }
 }
 
-resource limitedAccessSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(limitedAccessSecret)) {
+resource limitedAccessSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2025-05-01' existing = if (empty(limitedAccessSecret)) {
   name: 'LIMITED-ACCESS-SECRET'
   parent: keyVault
 }
@@ -484,7 +484,7 @@ resource limitedAccessSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@20
 @secure()
 param limitedApprovalClientSecret string
 
-resource limitedApprovalClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource limitedApprovalClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'LIMITED-APPROVAL-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -499,7 +499,7 @@ resource limitedApprovalClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@20
 @secure()
 param limitedApprovalSecret string
 
-resource limitedApprovalSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(limitedApprovalSecret)) {
+resource limitedApprovalSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(limitedApprovalSecret)) {
   name: 'LIMITED-APPROVAL-SECRET'
   parent: keyVault
   properties: {
@@ -510,7 +510,7 @@ resource limitedApprovalSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-
   }
 }
 
-resource limitedApprovalSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(limitedApprovalSecret)) {
+resource limitedApprovalSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2025-05-01' existing = if (empty(limitedApprovalSecret)) {
   name: 'LIMITED-APPROVAL-SECRET'
   parent: keyVault
 }
@@ -519,7 +519,7 @@ resource limitedApprovalSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@
 @secure()
 param limitedPhotoCaptureClientSecret string
 
-resource limitedPhotoCaptureClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource limitedPhotoCaptureClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'LIMITED-PHOTO-CAPTURE-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -534,7 +534,7 @@ resource limitedPhotoCaptureClientSecretSecret 'Microsoft.KeyVault/vaults/secret
 @secure()
 param limitedPhotoCaptureSecret string
 
-resource limitedPhotoCaptureSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(limitedPhotoCaptureSecret)) {
+resource limitedPhotoCaptureSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(limitedPhotoCaptureSecret)) {
   name: 'LIMITED-PHOTO-CAPTURE-SECRET'
   parent: keyVault
   properties: {
@@ -545,7 +545,7 @@ resource limitedPhotoCaptureSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022
   }
 }
 
-resource limitedPhotoCaptureSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(limitedPhotoCaptureSecret)) {
+resource limitedPhotoCaptureSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2025-05-01' existing = if (empty(limitedPhotoCaptureSecret)) {
   name: 'LIMITED-PHOTO-CAPTURE-SECRET'
   parent: keyVault
 }
@@ -554,7 +554,7 @@ resource limitedPhotoCaptureSecretSecretExisting 'Microsoft.KeyVault/vaults/secr
 @secure()
 param limitedAsyncIssuanceClientSecret string
 
-resource limitedAsyncIssuanceClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource limitedAsyncIssuanceClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'LIMITED-ASYNC-ISSUANCE-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -569,7 +569,7 @@ resource limitedAsyncIssuanceClientSecretSecret 'Microsoft.KeyVault/vaults/secre
 @secure()
 param limitedAsyncIssuanceSecret string
 
-resource limitedAsyncIssuanceSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(limitedAsyncIssuanceSecret)) {
+resource limitedAsyncIssuanceSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(limitedAsyncIssuanceSecret)) {
   name: 'LIMITED-ASYNC-ISSUANCE-SECRET'
   parent: keyVault
   properties: {
@@ -580,7 +580,7 @@ resource limitedAsyncIssuanceSecretSecret 'Microsoft.KeyVault/vaults/secrets@202
   }
 }
 
-resource limitedAsyncIssuanceSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(limitedAsyncIssuanceSecret)) {
+resource limitedAsyncIssuanceSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2025-05-01' existing = if (empty(limitedAsyncIssuanceSecret)) {
   name: 'LIMITED-ASYNC-ISSUANCE-SECRET'
   parent: keyVault
 }
@@ -589,7 +589,7 @@ resource limitedAsyncIssuanceSecretSecretExisting 'Microsoft.KeyVault/vaults/sec
 @secure()
 param limitedDemoClientSecret string
 
-resource limitedDemoClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource limitedDemoClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'LIMITED-DEMO-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -604,7 +604,7 @@ resource limitedDemoClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-0
 @secure()
 param limitedOidcClientSecret string
 
-resource limitedOidcClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource limitedOidcClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'LIMITED-OIDC-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -619,7 +619,7 @@ resource limitedOidcClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-0
 @secure()
 param limitedOidcSecret string
 
-resource limitedOidcSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(limitedOidcSecret)) {
+resource limitedOidcSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(limitedOidcSecret)) {
   name: 'LIMITED-OIDC-SECRET'
   parent: keyVault
   properties: {
@@ -630,7 +630,7 @@ resource limitedOidcSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' 
   }
 }
 
-resource limitedOidcSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(limitedOidcSecret)) {
+resource limitedOidcSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2025-05-01' existing = if (empty(limitedOidcSecret)) {
   name: 'LIMITED-OIDC-SECRET'
   parent: keyVault
 }
@@ -638,7 +638,8 @@ resource limitedOidcSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2022
 @description('The ID of the VID authority')
 @secure()
 param vidAuthorityId string
-resource vidAuthorityIdSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+
+resource vidAuthorityIdSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'VID-AUTHORITY-ID'
   parent: keyVault
   properties: {
@@ -651,52 +652,73 @@ resource vidAuthorityIdSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
 
 @description('The instance, used to construct known URLs by convention')
 param instance string
+
 @description('The release version of the instance')
 param releaseVersion string
+
 @description('The domain, used to construct known URLs by convention')
 param domain string
+
 @description('The value to use for API cors.origin setting (RegExp string[] of additional origins)')
 param corsOrigin string
+
 @description('Mapping of identity issuer identifiers to labels (JSON Record<string, string>)')
 param identityIssuers string
+
 @description('Mapping of app user OIDs to labels (JSON Record<string, string>)')
 param platformConsumerApps string
+
 @description('The name of the home tenant')
 param homeTenantName string
+
 @description('The ID of the home tenant')
 param homeTenantId string
+
 @description('The client ID of the home tenant graph client (optional)')
 param homeTenantGraphClientId string
+
 @description('The client secret of the home tenant graph client (optional)')
 @secure()
 param homeTenantGraphClientSecret string
+
 @description('The client ID of the home tenant VID service client (optional)')
 param homeTenantVidServiceClientId string
+
 @description('The client secret of the home tenant VID service client (optional)')
 @secure()
 param homeTenantVidServiceClientSecret string
+
 @description('The flag indicating whether the dev tools (i.e. Apollo Studio, .etc) are deployed')
 param devToolsEnabled string
+
 @description('The flag indicating whether the face check features (i.e. issuing credentials with face check photo, .etc) are available')
 param faceCheckEnabled string
+
 @description('The flag indicating whether the demo features (i.e limited presentation token, presentation demo page, .etc) are deployed')
 param demoEnabled string
+
 @description('The flag indicating whether the mdoc features are available')
 param mdocEnabled string
+
 @description('JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant')
 param additionalAuthTenantIds string
+
 @description('Limit the number of aliases in a GraphQL document.')
 param graphqlMaxAliases string
+
 @description('Limit the depth of a GraphQL document.')
 param graphqlMaxDepth string
+
 @description('Limit the number of directives in a GraphQL document.')
 param graphqlMaxDirectives string
+
 @description('Limit the number of tokens in a GraphQL document.')
 param graphqlMaxTokens string
+
 @description('The log level of the API app')
 param logLevel string
 
-resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'HOME-TENANT-GRAPH-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -706,7 +728,8 @@ resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@20
     value: homeTenantGraphClientSecret
   }
 }
-resource homeTenantVidServiceClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+
+resource homeTenantVidServiceClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'HOME-TENANT-VID-SERVICE-CLIENT-SECRET'
   parent: keyVault
   properties: {
@@ -748,6 +771,7 @@ var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
 
 @description('The shared action group for alerts, if action group for alerts has not been set up yet this param value will be empty')
 param actionGroupAlertName string
+
 var actionGroupAlertId = resourceId(sharedResourceGroupName, 'Microsoft.Insights/actionGroups', actionGroupAlertName)
 
 resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
@@ -768,7 +792,7 @@ resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   }
 }
 
-resource redisCachePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+resource redisCachePrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = {
   name: '${resourcePrefix}-redis-pe'
   location: location
   properties: {
@@ -787,7 +811,7 @@ resource redisCachePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-0
   }
 }
 
-resource redisCachePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
+resource redisCachePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2025-01-01' = {
   parent: redisCachePrivateEndpoint
   name: 'default'
   properties: {
@@ -806,7 +830,7 @@ resource redisCachePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/priva
   }
 }
 
-resource redisKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = {
+resource redisKeySecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'REDIS-KEY'
   parent: keyVault
   properties: {
@@ -875,6 +899,7 @@ var redisAlerts = [
     severity: 1
   }
 ]
+
 resource redisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
   for alert in redisAlerts: if (!empty(actionGroupAlertName)) {
     name: '${resourcePrefix}-redis-${alert.nameSuffix}-alert'
@@ -944,7 +969,7 @@ resource verifiedOrchestrationStorageLock 'Microsoft.Authorization/locks@2020-05
   }
 }
 
-resource verifiedOrchestrationStorageBlobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
+resource verifiedOrchestrationStorageBlobService 'Microsoft.Storage/storageAccounts/blobServices@2025-06-01' = {
   name: 'default'
   parent: verifiedOrchestrationStorage
   properties: {
@@ -1082,7 +1107,7 @@ resource privateStorageEncryptionKey 'Microsoft.KeyVault/vaults/keys@2021-10-01'
 @secure()
 param privateStorageClientEncryptionKey string
 
-resource privateStorageClientEncryptionKeySecret 'Microsoft.KeyVault/vaults/secrets@2022-07-01' = if (!empty(privateStorageClientEncryptionKey)) {
+resource privateStorageClientEncryptionKeySecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(privateStorageClientEncryptionKey)) {
   name: 'PRIVATE-STORAGE-ENCRYPTION-KEY'
   parent: keyVault
   properties: {
@@ -1093,12 +1118,12 @@ resource privateStorageClientEncryptionKeySecret 'Microsoft.KeyVault/vaults/secr
   }
 }
 
-resource privateStorageClientEncryptionKeySecretExisting 'Microsoft.KeyVault/vaults/secrets@2022-07-01' existing = if (empty(privateStorageClientEncryptionKey)) {
+resource privateStorageClientEncryptionKeySecretExisting 'Microsoft.KeyVault/vaults/secrets@2025-05-01' existing = if (empty(privateStorageClientEncryptionKey)) {
   name: 'PRIVATE-STORAGE-ENCRYPTION-KEY'
   parent: keyVault
 }
 
-resource verifiedOrchestrationPrivateStorageBlobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
+resource verifiedOrchestrationPrivateStorageBlobService 'Microsoft.Storage/storageAccounts/blobServices@2025-06-01' = {
   name: 'default'
   parent: privateStorageAccount
   properties: {
@@ -1125,7 +1150,7 @@ resource verifiedOrchestrationPrivateStorageBlobService 'Microsoft.Storage/stora
   }
 }
 
-resource storagePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+resource storagePrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = {
   name: '${resourcePrefix}-storage-pe'
   location: location
   properties: {
@@ -1144,7 +1169,7 @@ resource storagePrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' 
   }
 }
 
-resource storagePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
+resource storagePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2025-01-01' = {
   parent: storagePrivateEndpoint
   name: 'default'
   properties: {

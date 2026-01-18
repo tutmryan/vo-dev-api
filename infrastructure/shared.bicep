@@ -4,7 +4,7 @@ param resourcePrefix string
 
 param location string = resourceGroup().location
 
-resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
   name: '${resourcePrefix}-la'
   location: location
   properties: {
@@ -18,7 +18,7 @@ resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
   }
 }
 
-resource sqlServerUserAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+resource sqlServerUserAssignedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
   name: '${resourcePrefix}-sql-server-identity'
   location: location
 }
@@ -29,7 +29,7 @@ param sqlServerAadAdministratorName string
 @description('Object ID of the Azure SQL AAD administrator')
 param sqlServerAadAdministratorObjectId string
 
-resource sqlServer1 'Microsoft.Sql/servers@2022-05-01-preview' = {
+resource sqlServer1 'Microsoft.Sql/servers@2024-11-01-preview' = {
   name: '${resourcePrefix}-sql-server-1'
   location: location
   identity: {
@@ -51,7 +51,7 @@ resource sqlServer1 'Microsoft.Sql/servers@2022-05-01-preview' = {
   }
 }
 
-resource sqlServer1AuditingSettings 'Microsoft.Sql/servers/auditingSettings@2023-05-01-preview' = {
+resource sqlServer1AuditingSettings 'Microsoft.Sql/servers/auditingSettings@2024-11-01-preview' = {
   name: 'default'
   parent: sqlServer1
   properties: {
@@ -135,7 +135,7 @@ var editionToSkuMap = {
   }
 }
 
-resource sqlServerElasticPool 'Microsoft.Sql/servers/elasticPools@2022-05-01-preview' = {
+resource sqlServerElasticPool 'Microsoft.Sql/servers/elasticPools@2024-11-01-preview' = {
   name: '${resourcePrefix}-sql-elastic-pool'
   location: location
   sku: {
@@ -153,7 +153,7 @@ resource sqlServerElasticPool 'Microsoft.Sql/servers/elasticPools@2022-05-01-pre
   }
 }
 
-resource sqlServerPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01' = {
+resource sqlServerPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = {
   name: '${resourcePrefix}-sql-pe'
   location: location
   properties: {
@@ -174,7 +174,7 @@ resource sqlServerPrivateEndpoint 'Microsoft.Network/privateEndpoints@2023-05-01
   }
 }
 
-resource sqlServerPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2023-05-01' = {
+resource sqlServerPrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2025-01-01' = {
   parent: sqlServerPrivateEndpoint
   name: 'default'
   properties: {
@@ -239,7 +239,7 @@ param appServiceZoneRedundant bool = false
 @description('Enable autoscale for the App Service Plan')
 param appServiceAutoscale bool = true
 
-resource appServicePlan1 'Microsoft.Web/serverfarms@2022-03-01' = {
+resource appServicePlan1 'Microsoft.Web/serverfarms@2025-03-01' = {
   name: '${resourcePrefix}-app-service-plan-1'
   location: location
   sku: {
@@ -474,7 +474,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2023-05-01' = {
   }
 }
 
-resource gitHubActionsNetworkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2023-05-01' = {
+resource gitHubActionsNetworkSecurityGroup 'Microsoft.Network/networkSecurityGroups@2025-03-01' = {
   name: '${resourcePrefix}-github-actions-nsg'
   location: location
   properties: {
@@ -673,12 +673,12 @@ resource gitHubActionsNetworkSecurityGroup 'Microsoft.Network/networkSecurityGro
   }
 }
 
-resource sqlServerPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+resource sqlServerPrivateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
   name: 'privatelink${environment().suffixes.sqlServerHostname}'
   location: 'global'
 }
 
-resource sqlServerPrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+resource sqlServerPrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
   parent: sqlServerPrivateDnsZone
   name: '${resourcePrefix}-sql-dns-link'
   location: 'global'
@@ -690,12 +690,12 @@ resource sqlServerPrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualN
   }
 }
 
-resource keyVaultPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+resource keyVaultPrivateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
   name: 'privatelink.vaultcore.azure.net'
   location: 'global'
 }
 
-resource keyVaultPrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+resource keyVaultPrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
   parent: keyVaultPrivateDnsZone
   name: '${resourcePrefix}-kv-dns-link'
   location: 'global'
@@ -707,12 +707,12 @@ resource keyVaultPrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNe
   }
 }
 
-resource redisCachePrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+resource redisCachePrivateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
   name: 'privatelink.redis.cache.windows.net'
   location: 'global'
 }
 
-resource redisCachePrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+resource redisCachePrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
   parent: redisCachePrivateDnsZone
   name: '${resourcePrefix}-redis-dns-link'
   location: 'global'
@@ -724,12 +724,12 @@ resource redisCachePrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtual
   }
 }
 
-resource storagePrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+resource storagePrivateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
   name: 'privatelink.blob.${environment().suffixes.storage}'
   location: 'global'
 }
 
-resource storagePrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+resource storagePrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
   parent: storagePrivateDnsZone
   name: '${resourcePrefix}-storage-dns-link'
   location: 'global'
