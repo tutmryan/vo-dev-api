@@ -1515,6 +1515,15 @@ export type CredentialTypesWhere = {
   includeTemplateTypes?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** Represents a count of items on a specific date. */
+export type DateCount = {
+  __typename?: 'DateCount';
+  /** The number of items on that date. */
+  count: Scalars['NonNegativeInt']['output'];
+  /** The date for which the count is provided (ISO date string). */
+  date: Scalars['String']['output'];
+};
+
 /** Status of the DID docs */
 export enum DidDocumentStatus {
   Published = 'published',
@@ -4108,6 +4117,8 @@ export type Query = {
   issuanceCount: Scalars['NonNegativeInt']['output'];
   /** Returns the issuance count, grouped by Contract, optionally matching the specified criteria. */
   issuanceCountByContract: Array<ContractCount>;
+  /** Returns the issuance count, grouped by Date, optionally matching the specified criteria. */
+  issuanceCountByDate: Array<DateCount>;
   /** Returns the issuance count, grouped by User, optionally matching the specified criteria. */
   issuanceCountByUser: Array<UserCount>;
   /** Returns the authenticated caller, either a `User` (app or person) or the `Identity` of a credential issuee. */
@@ -4138,6 +4149,8 @@ export type Query = {
   presentationCount: Scalars['NonNegativeInt']['output'];
   /** Returns the successful presentation count, grouped by Contract, optionally matching the specified criteria. */
   presentationCountByContract: Array<ContractCount>;
+  /** Returns the successful presentation count, grouped by date, optionally matching the specified criteria. */
+  presentationCountByDate: Array<DateCount>;
   /** Returns the successful presentation count, grouped by requesting User, optionally matching the specified criteria. */
   presentationCountByUser: Array<UserCount>;
   /** Returns a template by ID */
@@ -4396,6 +4409,11 @@ export type QueryIssuanceCountByContractArgs = {
 };
 
 
+export type QueryIssuanceCountByDateArgs = {
+  where?: InputMaybe<IssuanceWhere>;
+};
+
+
 export type QueryIssuanceCountByUserArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
@@ -4452,6 +4470,11 @@ export type QueryPresentationCountArgs = {
 export type QueryPresentationCountByContractArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  where?: InputMaybe<PresentationWhere>;
+};
+
+
+export type QueryPresentationCountByDateArgs = {
   where?: InputMaybe<PresentationWhere>;
 };
 
@@ -6144,6 +6167,7 @@ export type ResolversTypes = {
   CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
   CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
   CredentialTypesWhere: CredentialTypesWhere;
+  DateCount: ResolverTypeWrapper<DateCount>;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   DidDocumentStatus: DidDocumentStatus;
   Discovery: ResolverTypeWrapper<Discovery>;
@@ -6403,6 +6427,7 @@ export type ResolversParentTypes = {
   CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
   CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
   CredentialTypesWhere: CredentialTypesWhere;
+  DateCount: DateCount;
   DateTime: Scalars['DateTime']['output'];
   Discovery: Discovery;
   EmailAddress: Scalars['EmailAddress']['output'];
@@ -6862,6 +6887,11 @@ export type ContractDisplayModelResolvers<ContextType = GraphQLContext, ParentTy
 export type CorsOriginConfigResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['CorsOriginConfig'] = ResolversParentTypes['CorsOriginConfig']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   origin?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type DateCountResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['DateCount'] = ResolversParentTypes['DateCount']> = {
+  count?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
+  date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DateTime'], any> {
@@ -7434,6 +7464,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   issuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<QueryIssuanceArgs, 'id'>>;
   issuanceCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryIssuanceCountArgs>>;
   issuanceCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByContractArgs>>;
+  issuanceCountByDate?: Resolver<Array<ResolversTypes['DateCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByDateArgs>>;
   issuanceCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByUserArgs>>;
   me?: Resolver<Maybe<ResolversTypes['Me']>, ParentType, ContextType>;
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
@@ -7446,6 +7477,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   presentation?: Resolver<ResolversTypes['Presentation'], ParentType, ContextType, RequireFields<QueryPresentationArgs, 'id'>>;
   presentationCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryPresentationCountArgs>>;
   presentationCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryPresentationCountByContractArgs>>;
+  presentationCountByDate?: Resolver<Array<ResolversTypes['DateCount']>, ParentType, ContextType, Partial<QueryPresentationCountByDateArgs>>;
   presentationCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryPresentationCountByUserArgs>>;
   template?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<QueryTemplateArgs, 'id'>>;
   templateCombinedData?: Resolver<ResolversTypes['TemplateParentData'], ParentType, ContextType, RequireFields<QueryTemplateCombinedDataArgs, 'templateId'>>;
@@ -7694,6 +7726,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   ContractDisplayCredentialLogo?: ContractDisplayCredentialLogoResolvers<ContextType>;
   ContractDisplayModel?: ContractDisplayModelResolvers<ContextType>;
   CorsOriginConfig?: CorsOriginConfigResolvers<ContextType>;
+  DateCount?: DateCountResolvers<ContextType>;
   DateTime?: GraphQLScalarType;
   Discovery?: DiscoveryResolvers<ContextType>;
   EmailAddress?: GraphQLScalarType;

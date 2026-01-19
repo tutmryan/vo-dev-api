@@ -702,6 +702,10 @@ extend type Query {
   Returns the issuance count, grouped by User, optionally matching the specified criteria.
   """
   issuanceCountByUser(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]!
+  """
+  Returns the issuance count, grouped by Date, optionally matching the specified criteria.
+  """
+  issuanceCountByDate(where: IssuanceWhere): [DateCount!]!
 }
 
 """

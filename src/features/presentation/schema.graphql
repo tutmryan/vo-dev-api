@@ -964,10 +964,10 @@ extend type Query {
   """
   findPresentations(
     where: PresentationWhere
-    offset: PositiveInt
-    limit: PositiveInt = 100
     orderBy: PresentationOrderBy
     orderDirection: OrderDirection
+    offset: PositiveInt
+    limit: PositiveInt = 100
   ): [Presentation!]!
   """
   Returns the successful presentation count, optionally matching the specified criteria.
@@ -977,15 +977,32 @@ extend type Query {
   Returns the successful presentation count, grouped by Contract, optionally matching the specified criteria.
   """
   presentationCountByContract(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [ContractCount!]!
-
   """
   Returns the successful presentation count, grouped by requesting User, optionally matching the specified criteria.
   """
   presentationCountByUser(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]!
   """
+  Returns the successful presentation count, grouped by date, optionally matching the specified criteria.
+  """
+  presentationCountByDate(where: PresentationWhere): [DateCount!]!
+  """
   Verifies the tokens in a presentation's receipt and returns the validity of each.
   """
   verifyPresentation(receipt: PresentationReceiptInput!, presentedAt: String!): VerifyPresentationResult!
+}
+
+"""
+Represents a count of items on a specific date.
+"""
+type DateCount {
+  """
+  The date for which the count is provided (ISO date string).
+  """
+  date: String!
+  """
+  The number of items on that date.
+  """
+  count: NonNegativeInt!
 }
 
 """

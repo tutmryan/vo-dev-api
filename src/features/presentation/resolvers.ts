@@ -1,11 +1,12 @@
 import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { resolvePresentationEventData, subscribeToPresentationEventsWithFilter } from './callback/pubsub'
-import { CreatePresentationRequestCommand } from './commands/create-presentation-request-command'
 import { CreateMDocPresentationRequestCommand } from './commands/create-mdoc-presentation-request-command'
+import { CreatePresentationRequestCommand } from './commands/create-presentation-request-command'
 import { ProcessMDocPresentationResponseCommand } from './commands/process-mdoc-presentation-response-command'
 import { resolvePresentedCredentials } from './presented-credentials-resolver'
 import { CountPresentationsByContractQuery } from './queries/count-presentations-by-contract-query'
+import { CountPresentationsByDateQuery } from './queries/count-presentations-by-date-query'
 import { CountPresentationsByUserQuery } from './queries/count-presentations-by-user-query'
 import { CountPresentationsQuery } from './queries/count-presentations-query'
 import { FindPresentationsQuery } from './queries/find-presentations-query'
@@ -23,6 +24,7 @@ export const resolvers: Resolvers = {
       query(context, CountPresentationsByUserQuery, where, offset, limit),
     presentationCountByContract: (_parent, { where, offset, limit }, context) =>
       query(context, CountPresentationsByContractQuery, where, offset, limit),
+    presentationCountByDate: (_parent, { where }, context) => query(context, CountPresentationsByDateQuery, where),
     verifyPresentation: (_parent, { receipt, presentedAt }, context) => query(context, VerifyPresentationQuery, receipt, presentedAt),
   },
   Mutation: {

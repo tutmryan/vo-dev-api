@@ -10,6 +10,7 @@ import { RevokeIssuancesCommand } from './commands/revoke-issuances-command'
 import { RevokeUserIssuancesCommand } from './commands/revoke-user-issuances-command'
 import { RevokeWalletIssuancesCommand } from './commands/revoke-wallet-issuances-command'
 import { CountIssuancesByContractQuery } from './queries/count-issuances-by-contract'
+import { CountIssuancesByDateQuery } from './queries/count-issuances-by-date-query'
 import { CountIssuancesByUserQuery } from './queries/count-issuances-by-user-query'
 import { CountIssuancesQuery } from './queries/count-issuances-query'
 import { FindIssuancesQuery } from './queries/find-issuances-query'
@@ -23,6 +24,7 @@ export const resolvers: Resolvers = {
     issuanceCount: (_, { where }, context) => query(context, CountIssuancesQuery, where),
     issuanceCountByUser: (_, { where, offset, limit }, context) => query(context, CountIssuancesByUserQuery, where, offset, limit),
     issuanceCountByContract: (_, { where, offset, limit }, context) => query(context, CountIssuancesByContractQuery, where, offset, limit),
+    issuanceCountByDate: (_, { where }, context) => query(context, CountIssuancesByDateQuery, where),
   },
   Mutation: {
     createIssuanceRequest: (_, { request }, context) => dispatch(context, CreateIssuanceRequestCommand, request),
