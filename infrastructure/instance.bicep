@@ -865,6 +865,7 @@ var redisAlerts = [
     aggregation: 'Maximum'
     threshold: 80
     severity: 0
+    evaluationFrequency: 'PT1M'
   }
   {
     nameSuffix: 'server-load'
@@ -873,6 +874,7 @@ var redisAlerts = [
     aggregation: 'Average'
     threshold: 80
     severity: 1
+    evaluationFrequency: 'PT5M'
   }
   {
     nameSuffix: 'cpu'
@@ -881,6 +883,7 @@ var redisAlerts = [
     aggregation: 'Maximum'
     threshold: 80
     severity: 1
+    evaluationFrequency: 'PT5M'
   }
   {
     nameSuffix: 'clients'
@@ -889,14 +892,16 @@ var redisAlerts = [
     aggregation: 'Maximum'
     threshold: 5625
     severity: 1
+    evaluationFrequency: 'PT5M'
   }
   {
     nameSuffix: 'cache-read'
     description: 'Redis cache read throughput is high'
     metricName: 'cacheRead'
-    aggregation: 'Maximum'
+    aggregation: 'Average'
     threshold: 100000
     severity: 1
+    evaluationFrequency: 'PT5M'
   }
 ]
 
@@ -911,7 +916,7 @@ resource redisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
       scopes: [
         redisCache.id
       ]
-      evaluationFrequency: 'PT1M'
+      evaluationFrequency: alert.evaluationFrequency
       windowSize: 'PT5M'
       criteria: {
         allOf: [
