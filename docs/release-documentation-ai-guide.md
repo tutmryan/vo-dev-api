@@ -89,6 +89,39 @@ tags: [{YYYY}, v{YYYY}.{M}.{iteration}, v{YYYY}.{M}.{iteration+1}]
 ❌ Infrastructure changes that don't affect customers
 ❌ Work-in-progress (WIP) features not ready for customers
 ❌ Deployment configuration changes
+❌ Release documentation tasks (e.g., "Create release notes for v2026.1.0")
+
+### Security Vulnerability Disclosure
+
+**IMPORTANT:** Do NOT disclose specific CVE numbers or vulnerability details in customer-facing release notes.
+
+**Why:**
+
+- Provides attackers a roadmap to exploit systems that haven't upgraded yet
+- Not all customers upgrade immediately, creating a window of vulnerability
+- Broadcasting the specific CVE tells attackers exactly which vulnerability to target
+
+**Best Practice:**
+
+Use generic security language instead:
+
+✅ "Security updates"
+✅ "Security improvements and dependency updates"
+✅ "Addressed security vulnerabilities in third-party dependencies"
+
+❌ "Fixed CVE-2026-12345"
+❌ "Patched vulnerability in package X version Y"
+❌ "Addressed security issue [specific technical details]"
+
+**Examples:**
+
+- Input: "FIX Audit for CVE-2026-22029"
+- Output: "Important security updates in Concierge"
+
+- Input: "Update package-name to fix CVE-2025-1234"
+- Output: "Security improvements and dependency updates"
+
+For customers requiring specific CVE details, maintain separate security bulletins or provide through private channels.
 
 ### Consolidation Rules
 
