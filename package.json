@@ -107,8 +107,8 @@
   "dependencies": {
     "@apollo/server": "^5.2.0",
     "@apollo/utils.keyvaluecache": "^4.0.0",
-    "@auth0/cose": "^1.0.2",
     "@as-integrations/express5": "^1.1.2",
+    "@auth0/cose": "^1.0.2",
     "@azure/identity": "^4.13.0",
     "@azure/keyvault-secrets": "^4.10.0",
     "@azure/monitor-ingestion": "^1.2.0",
@@ -205,6 +205,9 @@
     },
     "typeorm": {
       "mssql": "^12"
+    },
+    "ts-node": {
+      "diff": ">=4.0.4"
     }
   }
 }
