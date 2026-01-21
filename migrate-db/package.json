@@ -33,6 +33,9 @@
   "overrides": {
     "@azure/identity": "^4.3.0",
     "glob": "^12.0.0",
-    "sha.js": "^2.4.12"
+    "sha.js": "^2.4.12",
+    "ts-node": {
+      "diff": ">=4.0.4"
+    }
   }
 }
