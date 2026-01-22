@@ -26,7 +26,6 @@ The environment should have deployment protection rules applied (required review
 - SQL_ELASTIC_POOL_NAME
 - HOME_TENANT_NAME
 - HOME_TENANT_ID
-- HOME_TENANT_GRAPH_CLIENT_ID (optional, only required for MS Graph integration)
 - HOME_TENANT_AUTHORITY_ID (optional, only required for customer hosted authorities)
 - HOME_TENANT_VID_SERVICE_CLIENT_ID (optional, only required for customer hosted authorities)
 - VID_AUTHORITY_NAME (optional, only required for VO hosted authorities)
@@ -65,7 +64,6 @@ Note: for production instances, make sure you set `DEV_TOOLS_ENABLED` to false (
 
 ### Secrets
 
-- HOME_TENANT_GRAPH_CLIENT_SECRET (optional, only required for MS Graph integration)
 - HOME_TENANT_VID_SERVICE_CLIENT_SECRET (optional, only required for customer hosted authorities)
 
 ## Add to the deployment matrix

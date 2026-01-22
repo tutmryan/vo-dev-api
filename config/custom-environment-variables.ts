@@ -88,10 +88,6 @@ const config: EnvVarSubstitution<Config> = {
   homeTenant: {
     name: 'HOME_TENANT_NAME',
     tenantId: 'HOME_TENANT_ID',
-    graphCredentials: {
-      clientId: 'HOME_TENANT_GRAPH_CLIENT_ID',
-      clientSecret: 'HOME_TENANT_GRAPH_CLIENT_SECRET',
-    },
     vidServiceCredentials: {
       clientId: 'HOME_TENANT_VID_SERVICE_CLIENT_ID',
       clientSecret: 'HOME_TENANT_VID_SERVICE_CLIENT_SECRET',

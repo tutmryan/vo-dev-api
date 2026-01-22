@@ -34,7 +34,6 @@ const config: DeepPartial<Config> = {
   homeTenant: {
     name: 'TEST_HOME_TENANT_NAME',
     tenantId: 'TEST_HOME_TENANT_ID',
-    graphCredentials: {},
     vidServiceCredentials: {},
   },
   platformTenant: {

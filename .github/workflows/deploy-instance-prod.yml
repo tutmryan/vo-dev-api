@@ -194,8 +194,6 @@ jobs:
 
           home-tenant-id: ${{ vars.HOME_TENANT_ID }}
           home-tenant-name: ${{ vars.HOME_TENANT_NAME }}
-          home-tenant-graph-client-id: ${{ vars.HOME_TENANT_GRAPH_CLIENT_ID }}
-          home-tenant-graph-client-secret: ${{ secrets.HOME_TENANT_GRAPH_CLIENT_SECRET }}
           home-tenant-authority-id: ${{ vars.HOME_TENANT_AUTHORITY_ID }}
           home-tenant-vid-service-client-id: ${{ vars.HOME_TENANT_VID_SERVICE_CLIENT_ID }}
           home-tenant-vid-service-client-secret: ${{ secrets.HOME_TENANT_VID_SERVICE_CLIENT_SECRET }}

@@ -172,14 +172,6 @@ resource identityStoreKeyVault 'Microsoft.KeyVault/vaults@2025-05-01' = {
   }
 }
 
-resource homeTenantGraphClientSecretPreconfigured 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(homeTenantGraphClientId) && !empty(homeTenantGraphClientSecret)) {
-  name: 'identity-store-client-secret-${homeTenantGraphClientId}'
-  parent: identityStoreKeyVault
-  properties: {
-    value: homeTenantGraphClientSecret
-  }
-}
-
 resource keyVaultPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = {
   name: '${resourcePrefix}-kv-pe'
   location: location
@@ -674,13 +666,6 @@ param homeTenantName string
 @description('The ID of the home tenant')
 param homeTenantId string
 
-@description('The client ID of the home tenant graph client (optional)')
-param homeTenantGraphClientId string
-
-@description('The client secret of the home tenant graph client (optional)')
-@secure()
-param homeTenantGraphClientSecret string
-
 @description('The client ID of the home tenant VID service client (optional)')
 param homeTenantVidServiceClientId string
 
@@ -717,17 +702,6 @@ param graphqlMaxTokens string
 
 @description('The log level of the API app')
 param logLevel string
-
-resource homeTenantGraphClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
-  name: 'HOME-TENANT-GRAPH-CLIENT-SECRET'
-  parent: keyVault
-  properties: {
-    attributes: {
-      enabled: true
-    }
-    value: homeTenantGraphClientSecret
-  }
-}
 
 resource homeTenantVidServiceClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
   name: 'HOME-TENANT-VID-SERVICE-CLIENT-SECRET'
@@ -1557,8 +1531,6 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     LIMITED_OIDC_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedOidcSecret) ? limitedOidcSecretSecretExisting : limitedOidcSecretSecret).properties.secretUri})'
     HOME_TENANT_NAME: homeTenantName
     HOME_TENANT_ID: homeTenantId
-    HOME_TENANT_GRAPH_CLIENT_ID: homeTenantGraphClientId
-    HOME_TENANT_GRAPH_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantGraphClientSecretSecret.properties.secretUri})'
     HOME_TENANT_VID_SERVICE_CLIENT_ID: homeTenantVidServiceClientId
     HOME_TENANT_VID_SERVICE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantVidServiceClientSecretSecret.properties.secretUri})'
     VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'

@@ -117,7 +117,6 @@ export type Config = {
   homeTenant: {
     name: string
     tenantId: string
-    graphCredentials?: ClientCredentials
     vidServiceCredentials: ClientCredentials
   }
   platformTenant: {
