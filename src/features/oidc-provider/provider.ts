@@ -116,6 +116,24 @@ async function createProvider() {
     },
     renderError: errorHandler,
     enableHttpPostMethods: true,
+    enabledJWA: {
+      requestObjectSigningAlgValues: [
+        'HS256',
+        'HS384',
+        'HS512',
+        'RS256',
+        'RS384',
+        'RS512',
+        'PS256',
+        'PS384',
+        'PS512',
+        'ES256',
+        'ES384',
+        'ES512',
+        'Ed25519',
+        'EdDSA',
+      ],
+    },
   } satisfies Configuration)
 
   // allow http + localhost for redirect URIs

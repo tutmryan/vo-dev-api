@@ -1,0 +1,185 @@
+---
+sidebar_position: 20
+---
+
+# Keeping authorization requests trustworthy
+
+When an application redirects a user to an OpenID Connect (OIDC) provider, a lot of security-critical information is carried in the authorization request (for example, which client is asking, where the user should be redirected back to, and what is being requested).
+
+If an attacker can tamper with an authorization request in transit, or trick a client into sending a request with the wrong parameters, the result can be anything from a broken login flow through to redirect-based attacks and unintended elevation of access.
+
+This article covers options you can adopt in your client configuration and integration to increase confidence that an authorization request is the one you intended.
+
+## Prefer short, fixed redirects
+
+Redirect-based protocols work best when the redirect endpoints are predictable and tightly controlled.
+
+When you configure a VO OIDC client, keep the set of redirect URIs as small as possible:
+
+- Use exact redirect URIs.
+- Avoid wildcards.
+- Separate environments (local development, test, production) into distinct redirect URIs.
+- Remove legacy redirect URIs when you no longer need them.
+
+## Use Authorization Code + PKCE everywhere
+
+The VO OIDC provider is designed for the Authorization Code flow with Proof Key for Code Exchange (PKCE).
+
+PKCE helps ensure that even if an authorization code is observed by an attacker, it cannot be redeemed without the matching code verifier.
+
+## Keep request parameters out of the browser URL where possible
+
+It is common to build the authorization request in a front-end application and send it via a browser redirect.
+
+That works, but it also means the full set of authorization request parameters can:
+
+- Appear in browser history.
+- Be copied to referrer headers (depending on referrer policy and browser behavior).
+- Be captured by logging, monitoring, proxies, or debugging tooling.
+
+Two complementary mechanisms help reduce this exposure:
+
+- JSON Authorization Requests (JAR) (signed request objects)
+- Pushed Authorization Requests (PAR)
+
+## JSON Authorization Requests (JAR)
+
+With JAR, the authorization request is packaged as a signed object (a "request object") rather than a loose collection of URL parameters.
+
+This has a few advantages:
+
+- The request can be integrity-protected (the provider can verify it has not been changed).
+- The request can be authenticated (the provider can verify it was created by the expected party).
+- Sensitive parameters can be kept out of the URL when combined with PAR.
+
+### Where this helps most
+
+JAR is most valuable when a client has an ability to sign requests with a private key that is not exposed to the browser.
+
+That typically means:
+
+- A confidential client running on a backend server.
+- A frontend that delegates request construction/signing to a backend.
+
+### Signing algorithms for JAR
+
+If you use JAR, treat the signing algorithm choice as part of your client security posture. In practice, the goal is to use a modern public-key algorithm that is widely implemented, avoids known "gotchas", and matches what your provider supports.
+
+Ranked from least problematic to most problematic:
+
+1. `EdDSA` (Ed25519)
+1. `ES256`, `ES384`, `ES512`
+1. `PS256`, `PS384`, `PS512`
+1. `RS256`, `RS384`, `RS512`
+1. `HS256`, `HS384`, `HS512`
+
+Notes on the ranking:
+
+- `EdDSA` is typically a great option where available: strong security properties and compact keys/signatures.
+- `ES*` is widely supported and avoids some of the operational baggage of RSA keys.
+- `PS*` (RSA-PSS) is a solid RSA choice, but support can be less consistent across stacks than `RS*`.
+- `RS*` is widely supported, but relies on older RSA signing padding. It is still commonly deployed and is usually fine when key management is strong.
+- `HS*` makes the verifier and signer share the same secret. That’s often a poor fit for multi-service or third-party integrations, and it increases the blast radius if the secret leaks.
+
+If you have to choose between “more modern but not supported” and “widely supported”, pick what the provider supports and focus on keeping signing keys off the browser, protecting them well, and rotating them.
+
+### Key length and whether it matters
+
+Longer keys can improve security margins, but it rarely fixes the most common real-world failures.
+
+- For RSA-based algorithms (`PS256`, `PS384`, `PS512`, `RS256`, `RS384`, `RS512`), a 2048-bit key is a common baseline. Moving to 3072-bit or 4096-bit keys increases cost (CPU, signature size) and is typically only worthwhile if you have a specific policy or threat model driving it.
+- For EC and EdDSA algorithms (`ES256`, `ES384`, `ES512`, `EdDSA`), “key length” doesn’t work the same way as RSA. You choose a curve/algorithm, and you mainly focus on safe key storage and lifecycle.
+
+In most deployments, you get more practical value from:
+
+- Keeping private keys server-side only
+- Rotating keys and retiring old keys
+- Using PAR so the request content is sent over a back-channel
+- Reducing logging/telemetry exposure of authorization request material
+
+### Current availability
+
+In VO today, JAR support is currently used as part of federated flows.
+
+If you are integrating an application directly against the VO OIDC provider and your client library supports request objects, you can still design your integration so that you are ready to adopt JAR as soon as it is available for your client type.
+
+## Pushed Authorization Requests (PAR)
+
+With PAR, the authorization request parameters are sent directly from a trusted component to the OIDC provider over a direct back-channel call.
+
+The provider returns a reference (commonly an authorization request URI or an identifier). The browser redirect then includes only that reference.
+
+This reduces the amount of request material exposed in the front-channel redirect.
+
+### The flow to aim for
+
+A robust pattern is:
+
+1. Your backend constructs the authorization request.
+1. Your backend sends it to the provider using PAR (back-channel).
+1. The provider returns a request reference (for example, a `request_uri` or request ID).
+1. Your frontend initiates the browser redirect using only:
+   - the request reference returned by the provider
+   - standard redirect flow parameters required by your OIDC library
+
+This separation helps keep security-sensitive request construction and any signing keys on the server.
+
+### Why push from the backend
+
+Using PAR from a backend is particularly helpful because it can:
+
+- Keep client authentication material (for example, private keys used for JAR) off the device.
+- Avoid exposing large or sensitive request payloads in URLs.
+- Make it easier to enforce consistent request construction (scopes, resources, ACR/AMR requests, and other constraints).
+
+## Putting JAR + PAR together
+
+JAR and PAR are commonly used together:
+
+- JAR provides integrity and (optionally) client authentication for the request content.
+- PAR moves the request content off the front-channel and into a back-channel call.
+
+Even when you only adopt one of them initially, designing your integration so the backend owns request construction gives you a clean path to adopt the other later.
+
+## Implementation guidance
+
+### Keep request construction server-side
+
+If your application has both a frontend and a backend, have the backend own:
+
+- Building the authorization request (scopes, resource indicators, any VO-specific parameters)
+- Creating and storing PKCE material if your architecture allows it
+- Pushing the request using PAR when supported
+- Returning only what the frontend needs to initiate the redirect
+
+### Avoid mixing dynamic input into redirect targets
+
+Do not allow user-controlled input to influence:
+
+- Which redirect URI is used
+- Where post-login navigation goes (unless you strictly validate it)
+
+If you need "return to" behavior, use an allow-list of application paths rather than allowing arbitrary URLs.
+
+### Validate client library behavior
+
+Different OIDC libraries handle authorization request construction differently. In particular:
+
+- Confirm how the library handles `state` and `nonce` generation and validation.
+- Confirm whether the library supports request objects (JAR) and PAR.
+- Confirm whether the library logs or exposes authorization request URLs in debug output.
+
+## What to check in the provider metadata
+
+The provider’s discovery document is the authoritative place to check what is supported.
+
+Use the VO discovery endpoint is `{yourInstanceUrl}/oidc/.well-known/openid-configuration`.
+
+## Summary
+
+You can improve the security of OIDC client authentication by reducing the ways an authorization request can be modified or unintentionally exposed.
+
+- Keep redirect URIs tight and predictable.
+- Use Authorization Code + PKCE.
+- Prefer server-side request construction.
+- Adopt PAR and JAR where available, and design your integration so you can move to "backend pushes, frontend redirects with a request reference".
