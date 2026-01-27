@@ -9,7 +9,13 @@ import type { Adapter, AdapterPayload } from 'oidc-provider'
 
 const grantable = new Set(['AccessToken', 'AuthorizationCode', 'RefreshToken', 'DeviceCode', 'BackchannelAuthenticationRequest'])
 
-const consumable = new Set(['AuthorizationCode', 'RefreshToken', 'DeviceCode', 'BackchannelAuthenticationRequest'])
+const consumable = new Set([
+  'AuthorizationCode',
+  'RefreshToken',
+  'DeviceCode',
+  'BackchannelAuthenticationRequest',
+  'PushedAuthorizationRequest',
+])
 
 function grantKeyFor(id: string) {
   return `grant:${id}`
