@@ -1,9 +1,6 @@
----
-sidebar_position: 1
----
+# Application integration
 
 import { ApiLink } from '@site/src/components/ApiLink'
-import { AdminLink } from '@site/src/components/AdminLink'
 
 The VO platform is based on a GraphQL API, facilitating seamless integration with custom applications.
 
@@ -20,35 +17,8 @@ If you're using a different development stack, our guides and examples can still
 
 All data and operations are accessible through the API, which presents a strongly typed, documented and discoverable schema.
 
-### Apollo Sandbox UI
+### Apollo Studio
 
-Apollo Studio is a GraphQL IDE that enables you to explore the VO API. It's an ideal tool for delving into the schema, building and running queries, as well as referencing the documentation.
+[Apollo Studio](/docs/guides/integration/apollo-studio) is a GraphQL IDE that enables you to explore the VO API. It's an ideal tool for delving into the schema, building and running queries, as well as referencing the documentation.
 
-You will need to be [onboarded as a platform user](../onboarding-users.mdx) to access Apollo Studio and the API.
-
-<ApiLink>Access Apollo Sandbox</ApiLink>
-
-#### Basic Apollo Studio usage
-
-- Navigate the schema and select operations, types, and fields using the Documentation tab in the Explorer view.
-- Define operation variables through the Variables tab.
-- Utilize the Traces view to gauge the performance of your query.
-- Generate a link to an operation definition using the Share button.
-- Export data in JSON or CSV format.
-
-![Apollo Studio Basic](../../../static/img/apollo-sandbox-basic.png)
-
-![Apollo Studio Traces](../../../static/img/apollo-sandbox-traces.png)
-
-#### Subscriptions in Apollo Studio
-
-Query and Mutation operations work _out of the box_ through cookie authentication (see the _Include cookies_ setting in _Connection settings_).
-
-To use subscription connections, which do not include cookies, you need to provide an Authorization header for the subscription operation.
-
-1. Copy an Authorization header value from the <AdminLink>Composer</AdminLink> using your browser dev tools
-1. Insert the Authorization header into the **Headers** section in Apollo Studio
-
-You can now subscribe to events and see event data. Typically, an access token is valid for approximately 50 minutes, subject to your tenant configuration.
-
-![Apollo Sandbox Subscriptions](../../../static/img/apollo-sandbox-subscriptions.png)
+<ApiLink>Access Apollo Studio</ApiLink>

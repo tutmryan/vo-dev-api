@@ -1,0 +1,98 @@
+---
+sidebar_label: Apollo Studio
+title: Getting Started with Apollo Studio
+---
+
+import { AdminLink } from '@site/src/components/AdminLink'
+import { ApiLink } from '@site/src/components/ApiLink'
+
+Apollo Studio is a GraphQL IDE that enables you to explore the VO API. It's an ideal tool for delving into the schema, building and running queries, as well as referencing the documentation.
+
+## Prerequisites
+
+Before using Apollo Studio, you need to be [onboarded as a platform user](/docs/guides/onboarding-users).
+
+## Accessing Apollo Studio
+
+To access Apollo Studio:
+
+1. Sign in to <AdminLink>Composer</AdminLink>
+2. Open the navigation menu and expand **Resources**
+3. Select **Apollo Studio**
+
+:::note
+The Apollo Studio menu item is only visible if the user has the required permissions to access it.
+:::
+
+## Authentication
+
+Query and Mutation operations work out of the box through cookie authentication.
+
+To ensure your requests are authenticated:
+
+1. Make sure you are signed in to the platform
+2. In Apollo Studio, open **Connection settings**
+3. Enable **Include cookies**
+
+This allows Apollo Studio to use your browser session for authentication when executing operations.
+
+## Basic usage
+
+- Navigate the schema and select operations, types, and fields using the **Documentation** tab in the Explorer view.
+- Define operation variables through the **Variables** tab.
+- Utilize the **Traces** view to gauge the performance of your query.
+- Generate a link to an operation definition using the **Share** button.
+- Export data in JSON or CSV format.
+
+![Apollo Studio Basic](../../../static/img/apollo-sandbox-basic.png)
+
+## Building and executing operations
+
+### Queries and mutations
+
+1. Type your query or mutation in the editor panel
+2. Add any required variables in the **Variables** panel (JSON format)
+3. Click the **Run** button or press `Ctrl+Enter` (Mac: `Cmd+Enter`)
+4. View the response in the right panel
+
+Example query to find presentations:
+
+```graphql
+query FindPresentations {
+  findPresentations {
+    id
+    receipt
+    presentedAt
+  }
+}
+```
+
+### Subscriptions
+
+Subscriptions require an additional authorization header since they use WebSocket connections which do not include cookies.
+
+To set up subscriptions:
+
+1. Copy an Authorization header value from <AdminLink>Composer</AdminLink> using your browser dev tools
+2. In Apollo Studio, open **Connection settings**
+3. Insert the Authorization header into the **Headers** section
+
+You can now subscribe to events and see event data.
+
+![Apollo Studio Subscriptions](../../../static/img/apollo-sandbox-subscriptions.png)
+
+## Request tracing
+
+Apollo Studio displays detailed timing information for each request. Utilize the Traces view to gauge the performance of your query.
+
+![Apollo Studio Traces](../../../static/img/apollo-sandbox-traces.png)
+
+## Session duration
+
+Typically, an access token is valid for approximately **50 minutes**, subject to your tenant configuration. After this time, you'll need to refresh the page and sign in again to continue making authenticated requests.
+
+## Next steps
+
+- [Integration Overview](/docs/guides/integration) - Learn about different integration options
+- [JavaScript Client](/docs/guides/integration/javascript-client) - Set up a JavaScript client for your application
+- [React with Apollo](/docs/guides/integration/react-apollo) - Integrate with a React application
