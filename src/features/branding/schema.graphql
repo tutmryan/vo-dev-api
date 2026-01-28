@@ -37,25 +37,47 @@ Defines the input to create or update a concierge branding configuration.
 """
 input ConciergeBrandingInput {
   """
-  The branding configuration data.
+  The Concierge branding configuration data.
+  """
+  data: JSONObject!
+}
+
+"""
+Defines the input to create or update a composer branding configuration.
+"""
+input ComposerBrandingInput {
+  """
+  The Composer branding configuration data.
   """
   data: JSONObject!
 }
 
 extend type Query {
   """
-  Returns a branding config for the Concierge or null if no branding has been saved yet.
+  Returns the Concierge branding config or null if no branding has been saved yet.
   """
   conciergeBranding: Branding
+  """
+  Returns the Composer branding config or null if no branding has been saved yet.
+  """
+  composerBranding: Branding
 }
 
 extend type Mutation {
   """
-  Create or update a concierge branding config.
+  Create or update a Concierge branding config.
   """
   saveConciergeBranding(input: ConciergeBrandingInput!): Branding!
   """
-  Deletes an existing concierge branding.
+  Deletes an existing Concierge branding.
   """
   deleteConciergeBranding: Void
+  """
+  Create or update Composer branding config.
+  """
+  saveComposerBranding(input: ComposerBrandingInput!): Branding!
+  """
+  Deletes existing Composer branding.
+  """
+  deleteComposerBranding: Void
 }
