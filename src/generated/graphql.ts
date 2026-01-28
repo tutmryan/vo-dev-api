@@ -890,9 +890,15 @@ export type CommunicationWhere = {
   status?: InputMaybe<CommunicationStatus>;
 };
 
+/** Defines the input to create or update a composer branding configuration. */
+export type ComposerBrandingInput = {
+  /** The Composer branding configuration data. */
+  data: Scalars['JSONObject']['input'];
+};
+
 /** Defines the input to create or update a concierge branding configuration. */
 export type ConciergeBrandingInput = {
-  /** The branding configuration data. */
+  /** The Concierge branding configuration data. */
   data: Scalars['JSONObject']['input'];
 };
 
@@ -2676,7 +2682,9 @@ export type Mutation = {
   createPresentationRequestForAuthn: PresentationRequestResponse;
   /** Creates a new template */
   createTemplate: Template;
-  /** Deletes an existing concierge branding. */
+  /** Deletes existing Composer branding. */
+  deleteComposerBranding?: Maybe<Scalars['Void']['output']>;
+  /** Deletes an existing Concierge branding. */
   deleteConciergeBranding?: Maybe<Scalars['Void']['output']>;
   /** Deletes an existing contract. Only possible when the contract has not yet been provisioned. */
   deleteContract?: Maybe<Scalars['Void']['output']>;
@@ -2739,7 +2747,9 @@ export type Mutation = {
   revokeUserIssuances: Scalars['ID']['output'];
   /** Revokes existing credentials presented by a wallet. */
   revokeWalletIssuances: Scalars['ID']['output'];
-  /** Create or update a concierge branding config. */
+  /** Create or update Composer branding config. */
+  saveComposerBranding: Branding;
+  /** Create or update a Concierge branding config. */
   saveConciergeBranding: Branding;
   /** Creates or updates an identity based on its issuer and identifier */
   saveIdentity: Identity;
@@ -3050,6 +3060,11 @@ export type MutationRevokeUserIssuancesArgs = {
 
 export type MutationRevokeWalletIssuancesArgs = {
   walletId: Scalars['ID']['input'];
+};
+
+
+export type MutationSaveComposerBrandingArgs = {
+  input: ComposerBrandingInput;
 };
 
 
@@ -4041,7 +4056,9 @@ export type Query = {
   asyncIssuanceRequest: AsyncIssuanceRequest;
   /** Returns the details of the configured instance authority */
   authority: Authority;
-  /** Returns a branding config for the Concierge or null if no branding has been saved yet. */
+  /** Returns the Composer branding config or null if no branding has been saved yet. */
+  composerBranding?: Maybe<Branding>;
+  /** Returns the Concierge branding config or null if no branding has been saved yet. */
   conciergeBranding?: Maybe<Branding>;
   /** Returns a contract by ID */
   contract: Contract;
@@ -6129,6 +6146,7 @@ export type ResolversTypes = {
   CommunicationPurpose: CommunicationPurpose;
   CommunicationStatus: CommunicationStatus;
   CommunicationWhere: CommunicationWhere;
+  ComposerBrandingInput: ComposerBrandingInput;
   ConciergeBrandingInput: ConciergeBrandingInput;
   ConciergeClientBrandingInput: ConciergeClientBrandingInput;
   ConfigurationValidation: ConfigurationValidation;
@@ -6392,6 +6410,7 @@ export type ResolversParentTypes = {
   ClientCredentialsInput: ClientCredentialsInput;
   Communication: CommunicationEntity;
   CommunicationWhere: CommunicationWhere;
+  ComposerBrandingInput: ComposerBrandingInput;
   ConciergeBrandingInput: ConciergeBrandingInput;
   ConciergeClientBrandingInput: ConciergeClientBrandingInput;
   ConfigurationValidation: ConfigurationValidation;
@@ -7188,6 +7207,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createPresentationRequestForApproval?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestForApprovalArgs, 'approvalRequestId'>>;
   createPresentationRequestForAuthn?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
+  deleteComposerBranding?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   deleteConciergeBranding?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
   deleteIdentities?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteIdentitiesArgs, 'ids'>>;
@@ -7212,6 +7232,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   revokeIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeIssuancesArgs, 'ids'>>;
   revokeUserIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeUserIssuancesArgs, 'userId'>>;
   revokeWalletIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeWalletIssuancesArgs, 'walletId'>>;
+  saveComposerBranding?: Resolver<ResolversTypes['Branding'], ParentType, ContextType, RequireFields<MutationSaveComposerBrandingArgs, 'input'>>;
   saveConciergeBranding?: Resolver<ResolversTypes['Branding'], ParentType, ContextType, RequireFields<MutationSaveConciergeBrandingArgs, 'input'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
   saveInstanceMsGraphClient?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationSaveInstanceMsGraphClientArgs, 'graphClient' | 'identifier'>>;
@@ -7430,6 +7451,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   asyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<QueryAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   asyncIssuanceRequest?: Resolver<ResolversTypes['AsyncIssuanceRequest'], ParentType, ContextType, RequireFields<QueryAsyncIssuanceRequestArgs, 'id'>>;
   authority?: Resolver<ResolversTypes['Authority'], ParentType, ContextType>;
+  composerBranding?: Resolver<Maybe<ResolversTypes['Branding']>, ParentType, ContextType>;
   conciergeBranding?: Resolver<Maybe<ResolversTypes['Branding']>, ParentType, ContextType>;
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
   corsOriginConfigs?: Resolver<Array<ResolversTypes['CorsOriginConfig']>, ParentType, ContextType>;
