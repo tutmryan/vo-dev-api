@@ -43,7 +43,7 @@ class RedisAdapter implements Adapter {
     // @ts-ignore
     multi[consumable.has(this.name) ? 'hmset' : 'set'](key, store)
 
-    if (expiresIn) {
+    if (expiresIn > 0) {
       multi.expire(key, expiresIn)
     }
 

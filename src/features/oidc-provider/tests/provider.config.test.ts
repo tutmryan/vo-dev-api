@@ -2,6 +2,8 @@ import type { Express } from 'express'
 import type { JWK } from 'jose'
 import type { AccessToken, Configuration, KoaContextWithOIDC } from 'oidc-provider'
 
+import { OIDC_TTL } from '../ttl'
+
 const TEST_COOKIE_SECRET = 'test-secret'
 const TEST_SUPPORTED_ACRS = ['loa1', 'loa2'] as const
 const TEST_EXTRA_PARAMS = { extra_param: true } as const
@@ -174,7 +176,13 @@ describe('createProvider configuration', () => {
     expect(config.jwks?.keys).toEqual(TEST_JWKS_KEYS)
 
     expect(config.expiresWithSession?.(undefined as unknown as KoaContextWithOIDC, undefined as unknown as AccessToken)).toBe(false)
-    expect(config.ttl?.Session).toBe(1)
+    expect(config.ttl?.Session).toBe(OIDC_TTL.Session)
+    expect(config.ttl?.Interaction).toBe(OIDC_TTL.Interaction)
+    expect(config.ttl?.AuthorizationCode).toBe(OIDC_TTL.AuthorizationCode)
+    expect(config.ttl?.Grant).toBe(OIDC_TTL.Grant)
+    expect(config.ttl?.AccessToken).toBe(OIDC_TTL.AccessToken)
+    expect(config.ttl?.IdToken).toBe(OIDC_TTL.IdToken)
+    expect(config.ttl?.RefreshToken).toBe(OIDC_TTL.RefreshToken)
 
     expect(config.enableHttpPostMethods).toBe(true)
 

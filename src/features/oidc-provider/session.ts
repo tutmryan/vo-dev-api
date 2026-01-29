@@ -7,7 +7,7 @@ import { faceCheckEnabled, limitedOidcAuthnAuth, limitedOidcClient } from '../..
 import { dataSource } from '../../data'
 import type { ClaimConstraint, Identity, RequestConfiguration, RequestCredential } from '../../generated/graphql'
 import type { Logger } from '../../logger'
-import { newCacheSection, ONE_HOUR_TTL } from '../../redis/cache'
+import { newCacheSection } from '../../redis/cache'
 import { getPlatformIssuerDid } from '../../services'
 import { invariant } from '../../util/invariant'
 import { Lazy } from '../../util/lazy'
@@ -23,9 +23,10 @@ import type { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entit
 import type { OidcClientEntity } from './entities/oidc-client-entity'
 import { ExtraParams } from './extra-params'
 import { addEamPresentationConstraints, getEamAccountId } from './integrations/entra-eam'
+import { OIDC_TTL } from './ttl'
 
-const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', ONE_HOUR_TTL))
-const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', ONE_HOUR_TTL))
+const loginInteractionCache = Lazy(() => newCacheSection('oidcAuthInteraction', OIDC_TTL.Interaction * 1000))
+const sessionInteractionCache = Lazy(() => newCacheSection('oidcAuthSession', OIDC_TTL.Interaction * 1000))
 
 const claimConstraintOperators = ['values', 'contains', 'startsWith'] as const
 

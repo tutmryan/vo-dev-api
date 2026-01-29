@@ -150,7 +150,7 @@ export const jobs: Jobs = {
     handler: monitorServicesJobHandler,
     jobResultHandler: monitorServicesResultHandler,
     schedule: { every: 5 * 60 * 1000 }, // every 5 minutes
-    resultCacheTtl: 0, // no caching of results, as we want to always run the job when queued
+    resultCacheTtl: 0, // don't cache results - job results won't be cached in redis
   },
   applyOidcSigningKeysRotation: {
     handler: applyOidcSigningKeysRotationJobHandler,

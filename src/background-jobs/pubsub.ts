@@ -33,8 +33,10 @@ export const publishBackgroundJobEvent = async (data: BackgroundJobTopicData): P
   // keep a copy of the job finished event in cache so that
   // we can immediately return the event to any subscriber
   // subscribing after the event has happened
-  const ttl = getJobConfig(data.jobName)?.resultCacheTtl // use the job's result cache ttl to override the default, if specified
-  if (eventIsFinal(data)) await finishedBackgroundJobEvents().set(data.jobId, JSON.stringify(data), ttl)
+  const jobConfig = getJobConfig(data.jobName)
+  const ttl = jobConfig?.resultCacheTtl ?? BACKGROUND_JOB_EVENTS_TTL
+  // only cache if ttl is greater than 0
+  if (eventIsFinal(data) && ttl > 0) await finishedBackgroundJobEvents().set(data.jobId, JSON.stringify(data), ttl)
   return pubsub().publish(`${BACKGROUND_JOB_TOPIC}.${data.jobId}`, data)
 }
 

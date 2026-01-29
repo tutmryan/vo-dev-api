@@ -30,6 +30,7 @@ import { getResourceServerInfo } from './resource-indicators'
 import { routes } from './routes'
 import { logoutSource } from './source'
 import { extraTokenClaims, issueRefreshToken } from './tokens'
+import { OIDC_TTL } from './ttl'
 
 export const oidcProviderModule = Lazy(async () => {
   const module = await dynamicImport<{ default: Constructor<Provider>; errors: Errors; interactionPolicy: interactionPolicy }>(
@@ -112,7 +113,13 @@ async function createProvider() {
     // Expire browser sessions immediately, since each credential provides a distinct account / subject identifier / session
     expiresWithSession: () => false,
     ttl: {
-      Session: 1,
+      Session: OIDC_TTL.Session,
+      Interaction: OIDC_TTL.Interaction,
+      AuthorizationCode: OIDC_TTL.AuthorizationCode,
+      Grant: OIDC_TTL.Grant,
+      AccessToken: OIDC_TTL.AccessToken,
+      IdToken: OIDC_TTL.IdToken,
+      RefreshToken: OIDC_TTL.RefreshToken,
     },
     renderError: errorHandler,
     enableHttpPostMethods: true,

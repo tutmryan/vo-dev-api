@@ -13,7 +13,10 @@ import { logger } from '../../logger'
 import { openidClaims } from './claims'
 
 /**
- * Always issue a refresh token
+ * Refresh token policy for credential-centric authentication model.
+ *
+ * Refresh tokens are still issued for compatibility with existing client flows.
+ * Their lifetime is intentionally kept very short via oidc-provider `ttl` configuration.
  * https://github.com/panva/node-oidc-provider/blob/main/docs/README.md#issuerefreshtoken
  */
 export async function issueRefreshToken(
