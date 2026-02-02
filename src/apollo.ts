@@ -92,7 +92,7 @@ const plugins = (
     ...protection.plugins,
     operationTypePlugin,
     graphqlOperationLoggingPlugin<GraphQLContext, Logger>({
-      logLevel: 'audit',
+      logLevel: 'info',
       contextCreationFailureLogger: logger,
       includeMutationResponseData: true,
       augmentLogEntry(ctx) {
@@ -141,7 +141,7 @@ export const startApolloServer = async (app: Express, httpServer: http.Server, .
   logger.info('Initialising subscriptions websocket server')
   const wsServerCleanup = useSubscriptionsServer({
     logger,
-    operationLogLevel: 'audit',
+    operationLogLevel: 'info',
     schema,
     httpServer,
     createSubscriptionContext,

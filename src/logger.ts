@@ -73,10 +73,12 @@ export const logger: Logger = Object.create(baseLogger, {
       const transform = baseLogger as unknown as Transform // A winston logger extends Transform stream
       const redactedValues = redactValues(rest, ...logging.redactPaths)
 
+      const isAuditLog = level === 'audit' || redactedValues.eventTypeId !== undefined
+
       // For audit logs with a known eventTypeId, derive the message from the event type
       // This ensures consistent messages in both console and Azure Log Analytics
       let resolvedMessage = message
-      if (level === 'audit' && redactedValues.eventTypeId) {
+      if (isAuditLog) {
         const eventMetadata = AuditEventById[redactedValues.eventTypeId as AuditEventTypeId] as { eventType: AuditEventType } | undefined
         if (eventMetadata) {
           resolvedMessage = formatEventTypeAsMessage(eventMetadata.eventType)
@@ -86,10 +88,18 @@ export const logger: Logger = Object.create(baseLogger, {
       }
 
       transform.write(
-        Object.assign({}, { logLevel: level, level: level === 'audit' ? 'info' : level, message: resolvedMessage }, redactedValues),
+        Object.assign(
+          {},
+          {
+            logLevel: isAuditLog ? 'audit' : level,
+            level: level === 'audit' ? 'info' : level,
+            message: resolvedMessage,
+          },
+          redactedValues,
+        ),
       )
 
-      if (level === 'audit') {
+      if (isAuditLog) {
         auditService.log(resolvedMessage, redactedValues)
       }
     },
@@ -97,7 +107,8 @@ export const logger: Logger = Object.create(baseLogger, {
   auditEvent: {
     value: function (event: AuditEvent, properties?: Record<string, unknown>) {
       const message = formatEventTypeAsMessage(event.eventType)
-      this.audit(message, { eventTypeId: event.id, ...properties })
+      // always write audit messages
+      this.write({ level: 'info', message, eventTypeId: event.id, ...properties })
     },
   },
   child: {
@@ -115,7 +126,8 @@ export const logger: Logger = Object.create(baseLogger, {
         auditEvent: {
           value: function (event: AuditEvent, properties?: Record<string, unknown>) {
             const message = formatEventTypeAsMessage(event.eventType)
-            this.audit(message, { eventTypeId: event.id, ...properties })
+            // always write audit messages
+            this.write({ level: 'info', message, eventTypeId: event.id, ...properties })
           },
         },
         write: {

@@ -694,7 +694,7 @@
             "type": 3,
             "content": {
               "version": "KqlItem/1.0",
-              "query": "traces\n| where message == 'GraphQL operation'\n| extend query = extract('(query|mutation) (\\\\w*)', 2, tostring(customDimensions.query), typeof(string))\n| extend duration = toint(customDimensions.duration)\n| where query != ''\n| summarize count(), round(avg(duration)), percentiles(duration, 50, 95, 99) by query\n| order by percentile_duration_99 desc\n\n",
+              "query": "traces\n| where message has 'API GraphQL'\n| extend query = extract('(query|mutation) (\\\\w*)', 2, tostring(customDimensions.query), typeof(string))\n| extend duration = toint(customDimensions.duration)\n| where query != ''\n| summarize count(), round(avg(duration)), percentiles(duration, 50, 95, 99) by query\n| order by percentile_duration_99 desc\n\n",
               "size": 1,
               "showAnalytics": true,
               "title": "GraphQL operation duration",
