@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       instance:
-        description: 'The instance to deploy'
+        description: "The instance to deploy"
         required: true
 
 permissions:
@@ -19,7 +19,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
   build-api:
     name: Build API
     uses: makerxstudio/shared-config/.github/workflows/node-build-zip.yml@main
@@ -34,8 +33,6 @@ jobs:
       node-version: 22.x
       working-directory: ./migrate-db
       artifact-name: migrations-package
-
-
 
   upload-other-artifacts:
     name: Upload other artifacts
@@ -144,7 +141,8 @@ jobs:
           dev-tools-enabled: ${{ vars.DEV_TOOLS_ENABLED }}
           face-check-enabled: ${{ vars.FACE_CHECK_ENABLED }}
           demo-enabled: ${{ vars.DEMO_ENABLED  }}
-          mdoc-enabled: ${{ vars.MDOC_ENABLED }}
+          mdoc-presentations-enabled: ${{ vars.MDOC_PRESENTATIONS_ENABLED }}
+          mdoc-multipaz-test-certificates-enabled: ${{ vars.MDOC_MULTIPAZ_TEST_CERTIFICATES_ENABLED }}
           identity-issuers: "${{ vars.IDENTITY_ISSUERS }}"
           platform-consumer-apps: "${{ vars.PLATFORM_CONSUMER_APPS }}"
 

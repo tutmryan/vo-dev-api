@@ -73,8 +73,14 @@ inputs:
     description: The flag indicating whether the face check features (i.e. issuing credentials with face check photo, .etc) are available
   demo-enabled:
     description: The flag indicating whether the demo features (i.e. limited presentation token, presentation demo page, .etc) are available
-  mdoc-enabled:
-    description: The flag indicating whether the mdoc features are available
+  mdoc-presentations-enabled:
+    description: The flag indicating whether the mDoc presentation features are available
+    required: false
+    default: 'false'
+  mdoc-multipaz-test-certificates-enabled:
+    description: The flag indicating whether multipaz test certificates are enabled for mDoc
+    required: false
+    default: 'false'
   identity-issuers:
     description: Mapping of identity issuer identifiers to labels (JSON Record<string, string>)
   platform-consumer-apps:
@@ -249,6 +255,7 @@ runs:
       uses: azure/arm-deploy@v2
       if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       with:
+        scope: resourcegroup
         deploymentName: ${{env.NOW}}-did-storage-${{inputs.instance}}
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/verified-id-domain-verification-storage.bicep
@@ -266,6 +273,7 @@ runs:
       uses: azure/arm-deploy@v2
       if: steps.check-vid-authority.outputs.linkedDomainsVerified != 'True'
       with:
+        scope: resourcegroup
         deploymentName: ${{env.NOW}}-did-cdn-${{inputs.instance}}
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/verified-id-domain-verification-cdn.bicep
@@ -363,6 +371,7 @@ runs:
       id: instance-infra
       uses: azure/arm-deploy@v2
       with:
+        scope: resourcegroup
         deploymentName: ${{env.NOW}}-api-${{inputs.instance}}
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/instance.bicep
@@ -412,7 +421,8 @@ runs:
           devToolsEnabled=${{ inputs.dev-tools-enabled }}
           faceCheckEnabled=${{ inputs.face-check-enabled }}
           demoEnabled=${{ inputs.demo-enabled }}
-          mdocEnabled=${{ inputs.mdoc-enabled }}
+          mdocPresentationsEnabled=${{ inputs.mdoc-presentations-enabled }}
+          mdocMultipazTestCertificatesEnabled=${{ inputs.mdoc-multipaz-test-certificates-enabled }}
           identityIssuers="${{ inputs.identity-issuers }}"
           platformConsumerApps="${{ inputs.platform-consumer-apps }}"
           additionalAuthTenantIds="${{ inputs.additional-auth-tenant-ids }}"
@@ -626,6 +636,7 @@ runs:
       uses: azure/arm-deploy@v2
       if: inputs.audit-log-streaming-enabled == 'true'
       with:
+        scope: resourcegroup
         deploymentName: ${{env.NOW}}-audit-${{inputs.instance}}
         resourceGroupName: ${{ inputs.resource-group-name }}
         template: ./infrastructure/audit-log-streaming.bicep

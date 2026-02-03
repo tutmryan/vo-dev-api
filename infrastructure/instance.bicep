@@ -682,8 +682,11 @@ param faceCheckEnabled string
 @description('The flag indicating whether the demo features (i.e limited presentation token, presentation demo page, .etc) are deployed')
 param demoEnabled string
 
-@description('The flag indicating whether the mdoc features are available')
-param mdocEnabled string
+@description('The flag indicating whether the mDoc presentation features are available')
+param mdocPresentationsEnabled string
+
+@description('The flag indicating whether multipaz test certificates are enabled for mDoc')
+param mdocMultipazTestCertificatesEnabled string
 
 @description('JWT tokens issued by these tenant IDs are accepted by API in addition to the home tenant and platform tenant')
 param additionalAuthTenantIds string
@@ -1537,7 +1540,8 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     DEV_TOOLS_ENABLED: devToolsEnabled
     FACE_CHECK_ENABLED: faceCheckEnabled
     DEMO_ENABLED: demoEnabled
-    MDOC_ENABLED: mdocEnabled
+    MDOC_PRESENTATIONS_ENABLED: mdocPresentationsEnabled
+    MDOC_MULTIPAZ_TEST_CERTIFICATES_ENABLED: mdocMultipazTestCertificatesEnabled
     IDENTITY_ISSUERS: identityIssuers
     PLATFORM_CONSUMER_APPS: platformConsumerApps
     ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds
