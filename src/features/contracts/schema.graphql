@@ -25,7 +25,7 @@ type Query {
   """
   findContracts(
     where: ContractWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt
     orderBy: ContractOrderBy
     orderDirection: OrderDirection

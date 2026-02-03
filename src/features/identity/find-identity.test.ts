@@ -4,7 +4,7 @@ import { beforeAfterAll, executeOperationAnonymous, executeOperationAsCredential
 import { createIdentityInput, saveIdentityMutation } from './tests/create-identity'
 
 export const findIdentitiesQuery = graphql(`
-  query FindIdentities($where: IdentityWhere, $limit: PositiveInt, $offset: PositiveInt) {
+  query FindIdentities($where: IdentityWhere, $limit: PositiveInt, $offset: NonNegativeInt) {
     findIdentities(where: $where, limit: $limit, offset: $offset) {
       id
       issuer

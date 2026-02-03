@@ -82,7 +82,7 @@ export const deleteOidcClientMutation = graphql(`
 export const findOidcClientsQuery = graphql(`
   query FindOidcClients(
     $where: OidcClientWhere
-    $offset: PositiveInt
+    $offset: NonNegativeInt
     $limit: PositiveInt
     $orderBy: OidcClientOrderBy
     $orderDirection: OrderDirection
@@ -148,7 +148,7 @@ export const deleteOidcResourceMutation = graphql(`
 export const findOidcResourcesQuery = graphql(`
   query FindOidcResources(
     $where: OidcResourceWhere
-    $offset: PositiveInt
+    $offset: NonNegativeInt
     $limit: PositiveInt
     $orderBy: OidcResourceOrderBy
     $orderDirection: OrderDirection
@@ -277,7 +277,7 @@ export const oidcClaimMappingQuery = graphql(`
 export const findOidcClaimMappingsQuery = graphql(`
   query FindOidcClaimMappings(
     $where: OidcClaimMappingWhere
-    $offset: PositiveInt
+    $offset: NonNegativeInt
     $limit: PositiveInt
     $orderBy: OidcClaimMappingOrderBy
     $orderDirection: OrderDirection

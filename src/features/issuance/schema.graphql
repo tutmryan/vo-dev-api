@@ -620,7 +620,7 @@ extend type Contract {
   """
   Returns the successful credential issuances for this contract.
   """
-  issuances(where: ContractIssuanceWhere, offset: PositiveInt, limit: PositiveInt = 100): [Issuance!]!
+  issuances(where: ContractIssuanceWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Issuance!]!
   """
   Returns the total number of credential issuances for this contract.
   """
@@ -635,7 +635,7 @@ extend type Identity {
   """
   Returns the successful credential issuances for this identity.
   """
-  issuances(where: IdentityIssuanceWhere, offset: PositiveInt, limit: PositiveInt = 100): [Issuance!]!
+  issuances(where: IdentityIssuanceWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Issuance!]!
   """
   Returns the total number of credential issuances for this identity.
   """
@@ -646,7 +646,7 @@ extend type User {
   """
   Returns the successful credential issuances this user has made (issuance.issuedBy => user).
   """
-  issuances(where: UserIssuanceWhere, offset: PositiveInt, limit: PositiveInt = 100): [Issuance!]!
+  issuances(where: UserIssuanceWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Issuance!]!
 }
 
 """
@@ -685,7 +685,7 @@ extend type Query {
   """
   findIssuances(
     where: IssuanceWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt = 100
     orderBy: IssuanceOrderBy
     orderDirection: OrderDirection
@@ -697,11 +697,11 @@ extend type Query {
   """
   Returns the issuance count, grouped by Contract, optionally matching the specified criteria.
   """
-  issuanceCountByContract(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [ContractCount!]!
+  issuanceCountByContract(where: IssuanceWhere, offset: NonNegativeInt, limit: PositiveInt): [ContractCount!]!
   """
   Returns the issuance count, grouped by User, optionally matching the specified criteria.
   """
-  issuanceCountByUser(where: IssuanceWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]!
+  issuanceCountByUser(where: IssuanceWhere, offset: NonNegativeInt, limit: PositiveInt): [UserCount!]!
   """
   Returns the issuance count, grouped by Date, optionally matching the specified criteria.
   """

@@ -219,7 +219,7 @@ type Query {
   """
   findIdentities(
     where: IdentityWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt = 100
     orderBy: IdentityOrderBy
     orderDirection: OrderDirection

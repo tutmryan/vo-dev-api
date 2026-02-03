@@ -114,7 +114,7 @@ extend type Query {
   """
   findCommunications(
     where: CommunicationWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt
     orderBy: CommunicationOrderBy
     orderDirection: OrderDirection

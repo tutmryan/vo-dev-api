@@ -177,7 +177,7 @@ extend type Query {
   """
   findIdentityStores(
     where: IdentityStoreWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt
     orderBy: IdentityStoreOrderBy
     orderDirection: OrderDirection

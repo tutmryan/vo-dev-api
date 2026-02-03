@@ -28,7 +28,7 @@ extend type Query {
   """
   Returns wallets, optionally matching the specified criteria
   """
-  findWallets(where: WalletWhere, offset: PositiveInt, limit: PositiveInt = 100): [Wallet!]!
+  findWallets(where: WalletWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Wallet!]!
 }
 
 """

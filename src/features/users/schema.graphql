@@ -83,5 +83,11 @@ type Query {
   """
   Returns users, optionally matching the specified criteria
   """
-  findUsers(where: UserWhere, offset: PositiveInt, limit: PositiveInt = 100, orderBy: UserOrderBy, orderDirection: OrderDirection): [User!]!
+  findUsers(
+    where: UserWhere
+    offset: NonNegativeInt
+    limit: PositiveInt = 100
+    orderBy: UserOrderBy
+    orderDirection: OrderDirection
+  ): [User!]!
 }

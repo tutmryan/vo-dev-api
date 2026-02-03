@@ -442,7 +442,7 @@ type AsyncIssuanceRequest {
   """
   communications(
     where: CommunicationWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt
     orderBy: CommunicationOrderBy
     orderDirection: OrderDirection
@@ -543,7 +543,7 @@ extend type Query {
   """
   findAsyncIssuanceRequests(
     where: AsyncIssuanceRequestsWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt = 100
     orderBy: AsyncIssuanceRequestsOrderBy
     orderDirection: OrderDirection
@@ -569,12 +569,20 @@ extend type Identity {
   """
   Returns the async issuance requests for this identity, optionally matching the specified criteria.
   """
-  asyncIssuanceRequests(where: IdentityAsyncIssuanceRequestsWhere, offset: PositiveInt, limit: PositiveInt = 100): [AsyncIssuanceRequest!]!
+  asyncIssuanceRequests(
+    where: IdentityAsyncIssuanceRequestsWhere
+    offset: NonNegativeInt
+    limit: PositiveInt = 100
+  ): [AsyncIssuanceRequest!]!
 }
 
 extend type Contract {
   """
   Returns the async issuance requests for this contract, optionally matching the specified criteria.
   """
-  asyncIssuanceRequests(where: ContractAsyncIssuanceRequestsWhere, offset: PositiveInt, limit: PositiveInt = 100): [AsyncIssuanceRequest!]!
+  asyncIssuanceRequests(
+    where: ContractAsyncIssuanceRequestsWhere
+    offset: NonNegativeInt
+    limit: PositiveInt = 100
+  ): [AsyncIssuanceRequest!]!
 }

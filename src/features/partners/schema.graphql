@@ -159,7 +159,7 @@ type Query {
   """
   findPartners(
     where: PartnerWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt = 100
     orderBy: PartnerOrderBy
     orderDirection: OrderDirection

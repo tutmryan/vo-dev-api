@@ -886,7 +886,7 @@ extend type Contract {
   """
   Returns the successful credential presentations for this contract.
   """
-  presentations(where: ContractPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
+  presentations(where: ContractPresentationWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Presentation!]!
   """
   Returns the weekly average of credential presentations for this contract.
   """
@@ -897,42 +897,42 @@ extend type Identity {
   """
   Returns the successful credential presentations for this identity.
   """
-  presentations(where: IdentityPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
+  presentations(where: IdentityPresentationWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
 extend type User {
   """
   Returns the successful credential presentations this user has requested (presentation.requestedBy => user).
   """
-  presentations(where: UserPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
+  presentations(where: UserPresentationWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
 extend type Issuance {
   """
   Returns the successful credential presentations for this issuance.
   """
-  presentations(where: IssuancePresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
+  presentations(where: IssuancePresentationWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
 extend type Partner {
   """
   Returns the successful credential presentations of credentials issued by this partner.
   """
-  presentations(where: PartnerPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
+  presentations(where: PartnerPresentationWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
 extend type OidcClient {
   """
   Returns the successful credential presentations that were requested for authorization .
   """
-  presentations(where: OidcClientPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
+  presentations(where: OidcClientPresentationWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
 extend type Wallet {
   """
   Returns the successful credential presentations for this wallet.
   """
-  presentations(where: WalletPresentationWhere, offset: PositiveInt, limit: PositiveInt = 100): [Presentation!]!
+  presentations(where: WalletPresentationWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Presentation!]!
 }
 
 """
@@ -966,7 +966,7 @@ extend type Query {
     where: PresentationWhere
     orderBy: PresentationOrderBy
     orderDirection: OrderDirection
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt = 100
   ): [Presentation!]!
   """
@@ -976,11 +976,11 @@ extend type Query {
   """
   Returns the successful presentation count, grouped by Contract, optionally matching the specified criteria.
   """
-  presentationCountByContract(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [ContractCount!]!
+  presentationCountByContract(where: PresentationWhere, offset: NonNegativeInt, limit: PositiveInt): [ContractCount!]!
   """
   Returns the successful presentation count, grouped by requesting User, optionally matching the specified criteria.
   """
-  presentationCountByUser(where: PresentationWhere, offset: PositiveInt, limit: PositiveInt): [UserCount!]!
+  presentationCountByUser(where: PresentationWhere, offset: NonNegativeInt, limit: PositiveInt): [UserCount!]!
   """
   Returns the successful presentation count, grouped by date, optionally matching the specified criteria.
   """

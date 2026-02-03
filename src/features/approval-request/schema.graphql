@@ -317,7 +317,7 @@ extend type Query {
   """
   findApprovalRequests(
     where: ApprovalRequestsWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt = 100
     orderBy: ApprovalRequestsOrderBy
     orderDirection: OrderDirection

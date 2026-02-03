@@ -54,7 +54,7 @@ export async function getAsyncIssuance(id: string) {
 const listAsyncIssuanceRequestsQuery = graphql(`
   query ListAsyncIssuanceRequests(
     $where: AsyncIssuanceRequestsWhere
-    $offset: PositiveInt
+    $offset: NonNegativeInt
     $limit: PositiveInt
     $orderBy: AsyncIssuanceRequestsOrderBy
     $orderDirection: OrderDirection

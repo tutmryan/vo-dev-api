@@ -111,7 +111,7 @@ extend type Query {
   """
   findOidcClients(
     where: OidcClientWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt = 100
     orderBy: OidcClientOrderBy
     orderDirection: OrderDirection
@@ -126,7 +126,7 @@ extend type Query {
   """
   findOidcResources(
     where: OidcResourceWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt = 100
     orderBy: OidcResourceOrderBy
     orderDirection: OrderDirection
@@ -141,7 +141,7 @@ extend type Query {
   """
   findOidcClaimMappings(
     where: OidcClaimMappingWhere
-    offset: PositiveInt
+    offset: NonNegativeInt
     limit: PositiveInt = 100
     orderBy: OidcClaimMappingOrderBy
     orderDirection: OrderDirection

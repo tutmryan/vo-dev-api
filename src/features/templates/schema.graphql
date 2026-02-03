@@ -3,7 +3,7 @@ type Query {
   """
   Returns templates, optionally matching the specified criteria
   """
-  findTemplates(where: TemplateWhere, offset: PositiveInt, limit: PositiveInt = 100): [Template!]!
+  findTemplates(where: TemplateWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [Template!]!
 
   """
   Returns a template by ID
