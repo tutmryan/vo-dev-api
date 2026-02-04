@@ -59,6 +59,10 @@ on:
       pre-run-script:
         required: false
         type: string
+      noop:
+        required: false
+        type: boolean
+        default: false
     secrets:
       npm-auth-token:
         description: NPM auth token (don't pass in on a PR build on a public repository)
@@ -66,6 +70,7 @@ on:
 
 jobs:
   node-ci:
+    if: ${{ inputs.noop != true }}
     runs-on: ubuntu-latest
 
     defaults:

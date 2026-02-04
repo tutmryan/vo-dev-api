@@ -15,8 +15,9 @@ jobs:
     name: CI API
     uses: ./.github/workflows/node-ci.yml
     with:
+      noop: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
       node-version: 22.x
-      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "Skipped audit for dependabot PR"' || 'npm run audit' }}
+      audit-script: npm run audit
       pre-test-script: npm run test:ci:start-db
       test-script: npm run test:ci
       output-test-results: true
@@ -25,16 +26,20 @@ jobs:
     name: CI Migrations Package
     uses: ./.github/workflows/node-ci.yml
     with:
+      noop: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
       node-version: 22.x
-      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "Skipped audit for dependabot PR"' || 'npm run audit' }}
+      audit-script: npm run audit
       working-directory: ./migrate-db
 
   ci-docs-site:
     name: CI Docs Site
     uses: ./.github/workflows/node-ci.yml
     with:
+      noop: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
       node-version: 22.x
-      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "Skipoed audit for dependabot PR"' || 'npm run audit' }}
+      audit-script: npm run audit
       working-directory: ./docs-site
       run-build: true
       build-script: npm run build:pr
+
+  
