@@ -178,7 +178,7 @@
     "opentelemetry-instrumentation-ws": "^0.5.0",
     "pkijs": "^3.3.3",
     "qrcode": "^1.5.4",
-    "rate-limiter-flexible": "^8.3.0",
+    "rate-limiter-flexible": "^9.1.0",
     "twilio": "^5.10.6",
     "typeorm": "^0.3.27",
     "uuid": "^11.1.0",
