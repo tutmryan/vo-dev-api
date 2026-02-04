@@ -115,7 +115,7 @@
     "@azure/monitor-opentelemetry": "^1.14.2",
     "@azure/msal-node": "^3.8.3",
     "@azure/storage-blob": "^12.29.1",
-    "@escape.tech/graphql-armor": "^3.1.7",
+    "@escape.tech/graphql-armor": "^3.2.0",
     "@graphql-codegen/client-preset": "^5.2.0",
     "@graphql-tools/executor-http": "^3.0.7",
     "@graphql-tools/load-files": "^7.0.1",
