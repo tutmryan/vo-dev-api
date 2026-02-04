@@ -4,17 +4,17 @@ on:
   pull_request:
     branches:
       - main
-      - 'feature/**'
+      - "feature/**"
 
 permissions:
   contents: read
   checks: write
 
 jobs:
-
   ci-api:
     name: CI API
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
+    if: github.actor != 'dependabot[bot]'
     with:
       node-version: 22.x
       audit-script: npm run audit
@@ -25,6 +25,7 @@ jobs:
   ci-migrations-package:
     name: CI Migrations Package
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
+    if: github.actor != 'dependabot[bot]'
     with:
       node-version: 22.x
       audit-script: npm run audit
@@ -33,6 +34,7 @@ jobs:
   ci-docs-site:
     name: CI Docs Site
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
+    if: github.actor != 'dependabot[bot]'
     with:
       node-version: 22.x
       audit-script: npm run audit
