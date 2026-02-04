@@ -12,32 +12,29 @@ permissions:
 
 jobs:
   ci-api:
-    if: github.event.pull_request.user.login != 'dependabot[bot]'
     name: CI API
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
       node-version: 22.x
-      audit-script: npm run audit
+      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "skip audit"' || 'npm run audit' }}
       pre-test-script: npm run test:ci:start-db
       test-script: npm run test:ci
       output-test-results: true
 
   ci-migrations-package:
-    if: github.event.pull_request.user.login != 'dependabot[bot]'
     name: CI Migrations Package
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
       node-version: 22.x
-      audit-script: npm run audit
+      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "skip audit"' || 'npm run audit' }}
       working-directory: ./migrate-db
 
   ci-docs-site:
-    if: github.event.pull_request.user.login != 'dependabot[bot]'
     name: CI Docs Site
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
       node-version: 22.x
-      audit-script: npm run audit
+      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "skip audit"' || 'npm run audit' }}
       working-directory: ./docs-site
       run-build: true
       build-script: npm run build:pr
