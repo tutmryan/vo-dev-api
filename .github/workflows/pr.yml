@@ -16,7 +16,7 @@ jobs:
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
       node-version: 22.x
-      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "skip audit"' || 'npm run audit' }}
+      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "Skipped audit for dependabot PR"' || 'npm run audit' }}
       pre-test-script: npm run test:ci:start-db
       test-script: npm run test:ci
       output-test-results: true
@@ -26,7 +26,7 @@ jobs:
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
       node-version: 22.x
-      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "skip audit"' || 'npm run audit' }}
+      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "Skipped audit for dependabot PR"' || 'npm run audit' }}
       working-directory: ./migrate-db
 
   ci-docs-site:
@@ -34,7 +34,7 @@ jobs:
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
       node-version: 22.x
-      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "skip audit"' || 'npm run audit' }}
+      audit-script: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && 'echo "Skipoed audit for dependabot PR"' || 'npm run audit' }}
       working-directory: ./docs-site
       run-build: true
       build-script: npm run build:pr
