@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   ci-api:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     name: CI API
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
@@ -23,7 +23,7 @@ jobs:
       output-test-results: true
 
   ci-migrations-package:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     name: CI Migrations Package
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
@@ -32,7 +32,7 @@ jobs:
       working-directory: ./migrate-db
 
   ci-docs-site:
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     name: CI Docs Site
     uses: makerxstudio/shared-config/.github/workflows/node-ci.yml@main
     with:
