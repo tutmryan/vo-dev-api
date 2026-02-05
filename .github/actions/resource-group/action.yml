@@ -11,7 +11,7 @@ inputs:
 outputs:
   resource-group-unique-string:
     description: The unique string for this resource group ID (lower-case)
-    value: ${{ steps.deploy-resource-group.outputs.resourceGroupUniqueString }}
+    value: ${{ steps.deploy-resource-group.outputs.resource-group-unique-string }}
 
 runs:
   using: composite
@@ -22,13 +22,63 @@ runs:
 
     - name: Deploy resource group
       id: deploy-resource-group
-      uses: azure/arm-deploy@v2
-      with:
-        deploymentName: ${{env.NOW}}-rg-${{inputs.resource-group-name}}
-        scope: subscription
-        region: ${{ inputs.resource-group-location }}
-        template: ./infrastructure/resource-group.bicep
-        parameters: >-
-          resourceGroupName=${{ inputs.resource-group-name }}
-          resourceGroupLocation=${{ inputs.resource-group-location }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        location='${{ inputs.resource-group-location }}'
+        rg_name='${{ inputs.resource-group-name }}'
+
+        base_name="${NOW}-rg-${rg_name}"
+        attempt_id='${{ github.run_id }}-${{ github.run_attempt }}'
+        hash="$(echo -n "${attempt_id}" | sha256sum | cut -c1-8)"
+        deployment_name="${base_name}-${hash}"
+        max_len=64
+        if [ ${#deployment_name} -gt ${max_len} ]; then
+          trim_len=$((max_len - 1 - 8))
+          deployment_name="$(echo -n "${base_name}" | cut -c1-${trim_len})-${hash}"
+        fi
+
+        max_attempts=5
+        sleep_seconds=10
+
+        echo "Deployment name: ${deployment_name}"
+
+        for attempt in $(seq 1 "${max_attempts}"); do
+          echo "Starting subscription deployment (attempt ${attempt}/${max_attempts}) name='${deployment_name}' location='${location}'"
+
+          set +e
+          output="$(az deployment sub create \
+            --name "${deployment_name}" \
+            --location "${location}" \
+            --template-file "./infrastructure/resource-group.bicep" \
+            --parameters resourceGroupName="${rg_name}" resourceGroupLocation="${location}" \
+            --query "properties.outputs.resourceGroupUniqueString.value" \
+            -o tsv 2>&1)"
+          exit_code=$?
+          set -e
+
+          if [ "${exit_code}" -eq 0 ] && [ -n "${output}" ]; then
+            echo "resource-group-unique-string=${output}" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
+
+          echo "Deployment attempt failed. az output:"
+          echo "${output}"
+
+          if echo "${output}" | grep -qiE 'DeploymentNotFound|AnotherOperationInProgress|Conflict|TooManyRequests|429'; then
+            if [ "${attempt}" -lt "${max_attempts}" ]; then
+              echo "Transient error detected. Sleeping ${sleep_seconds}s before retry..."
+              sleep "${sleep_seconds}"
+              sleep_seconds=$((sleep_seconds * 2))
+              continue
+            fi
+          fi
+
+          echo "ERROR: Non-transient deployment failure detected"
+          exit 1
+        done
+
+        echo "ERROR: All ${max_attempts} deployment attempts failed"
+        exit 1
 
