@@ -86,7 +86,7 @@ export const rules: ShieldSchema<Resolvers> = {
     findAsyncIssuanceRequests: isAllowedToViewIssuances,
     findCommunications: anyUserRule,
     findContracts: or(anyUserRule, isIssuanceApp, isPresentationApp, isContractAdminApp, isLimitedListContractsApp),
-    findIdentities: anyUserRule,
+    findIdentities: or(anyUserRule, isIssuanceApp),
     findIdentityStores: or(isInstanceAdminUser, isAllowedToCreateAndDeleteIdentities),
     findIssuances: isAllowedToViewIssuances,
     findNetworkIssuers: isPartnerAdminUser,

@@ -1,9 +1,8 @@
-import { IsNull, Raw, type FindOptionsOrder, type FindOptionsRelations, type FindOptionsWhere } from 'typeorm'
 import type { QueryContext } from '../../../cqs'
-import { IssuanceOrderBy, IssuanceStatus, OrderDirection, type IssuanceWhere, type Maybe } from '../../../generated/graphql'
-import { LessThanOrEqualTimestamp, MoreThanOrEqualTimestamp, OptionalRange } from '../../../util/typeorm'
-import type { PresentationEntity } from '../../presentation/entities/presentation-entity'
+import { IssuanceOrderBy, OrderDirection, type IssuanceWhere, type Maybe } from '../../../generated/graphql'
 import { IssuanceEntity } from '../entities/issuance-entity'
+import { validateFilter } from '../validation/filter-validation'
+import { applyWhereClause } from './where-builder'
 
 export async function FindIssuancesQuery(
   this: QueryContext,
@@ -13,76 +12,60 @@ export async function FindIssuancesQuery(
   orderBy?: Maybe<IssuanceOrderBy>,
   orderDirection?: Maybe<OrderDirection>,
 ) {
-  const where: FindOptionsWhere<IssuanceEntity> = {}
-  const relations: FindOptionsRelations<IssuanceEntity> = {}
-  const order: FindOptionsOrder<IssuanceEntity> = {}
+  // Validate filter depth and condition count
+  validateFilter(criteria)
 
-  if (criteria?.requestId) where.requestId = criteria.requestId
-  if (criteria?.identityId) where.identityId = criteria.identityId
+  // Create query builder
+  const qb = this.entityManager.getRepository(IssuanceEntity).createQueryBuilder('issuance').comment('FindIssuancesQuery')
+
+  // Set up joins if needed (must be done before applying where clause)
   if (criteria?.identityStoreId) {
-    relations.identity = true
-    where.identity = { identityStoreId: criteria.identityStoreId }
-  }
-  if (criteria?.contractId) where.contractId = criteria.contractId
-  if (criteria?.issuedById) where.issuedById = criteria.issuedById
-  if (criteria?.revokedById) where.revokedById = criteria.revokedById
-  if (criteria?.hasFaceCheckPhoto !== null && criteria?.hasFaceCheckPhoto !== undefined) {
-    where.hasFaceCheckPhoto = Raw((alias) => `ISNULL(${alias}, 0) = :hasFaceCheckPhoto`, { hasFaceCheckPhoto: criteria.hasFaceCheckPhoto })
+    qb.leftJoin('issuance.identity', 'identity')
   }
   if (criteria?.presentationId) {
-    relations.presentations = true
-    const presentationWhere: FindOptionsWhere<PresentationEntity> = {
-      id: criteria.presentationId,
-    }
-    where.presentations = presentationWhere
+    qb.leftJoin('issuance.presentations', 'presentation')
   }
 
-  where.issuedAt = OptionalRange(criteria?.from, criteria?.to)
-  where.expiresAt = OptionalRange(criteria?.expiresFrom, criteria?.expiresTo)
-  where.revokedAt = OptionalRange(criteria?.revokedFrom, criteria?.revokedTo)
-
-  if (criteria?.status === IssuanceStatus.Active) {
-    where.revokedAt = IsNull()
-    where.expiresAt = MoreThanOrEqualTimestamp(new Date())
-  } else if (criteria?.status === IssuanceStatus.Expired) {
-    where.expiresAt = LessThanOrEqualTimestamp(new Date())
-  } else if (criteria?.status === IssuanceStatus.Revoked) {
-    where.isRevoked = true
+  // Apply WHERE clause recursively
+  if (criteria) {
+    applyWhereClause(qb, criteria)
   }
 
+  // Apply ordering
   const direction = orderDirection ?? OrderDirection.Asc
   switch (orderBy) {
     case IssuanceOrderBy.ContractName:
-      relations.contract = true
-      order.contract = { name: direction }
+      qb.leftJoinAndSelect('issuance.contract', 'contract')
+      qb.orderBy('contract.name', direction)
       break
     case IssuanceOrderBy.ExpiresAt:
-      order.expiresAt = direction
+      qb.orderBy('issuance.expiresAt', direction)
       break
     case IssuanceOrderBy.IdentityName:
-      relations.identity = true
-      order.identity = { name: direction }
+      qb.leftJoinAndSelect('issuance.identity', 'identity')
+      qb.orderBy('identity.name', direction)
       break
     case IssuanceOrderBy.IssuedAt:
-      order.issuedAt = orderDirection ?? OrderDirection.Desc
+      qb.orderBy('issuance.issuedAt', orderDirection ?? OrderDirection.Desc)
       break
     case IssuanceOrderBy.IssuedByName:
-      relations.issuedBy = true
-      order.issuedBy = { name: direction }
+      qb.leftJoinAndSelect('issuance.issuedBy', 'issuedBy')
+      qb.orderBy('issuedBy.name', direction)
       break
     default:
-      order.issuedAt = orderDirection ?? OrderDirection.Desc
+      qb.orderBy('issuance.issuedAt', orderDirection ?? OrderDirection.Desc)
       break
   }
 
-  const issuances = await this.entityManager.getRepository(IssuanceEntity).find({
-    comment: 'FindIssuancesQuery',
-    where,
-    relations,
-    skip: offset ?? undefined,
-    take: limit ?? undefined,
-    order,
-  })
+  // Apply pagination
+  if (offset !== null && offset !== undefined) {
+    qb.skip(offset)
+  }
+  if (limit !== null && limit !== undefined) {
+    qb.take(limit)
+  }
+
+  const issuances = await qb.getMany()
 
   return issuances
 }

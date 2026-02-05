@@ -442,23 +442,34 @@ exports[`shield rules are setup correctly 1`] = `
     "findIdentities": {
       "rulesOr": [
         {
-          "name": "isUserWithReadPermissions",
-          "cache": "contextual",
-          "__roles": [
-            "VerifiableCredential.Reader",
-            "VerifiableCredential.Issuer",
-            "VerifiableCredential.CredentialAdmin",
-            "VerifiableCredential.PartnerAdmin",
-            "VerifiableCredential.ApprovalRequestAdmin",
-            "VerifiableCredential.OidcAdmin",
-            "VerifiableCredential.InstanceAdmin"
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.ApprovalRequestAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "hasRole-VerifiableCredential.SupportAgent",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.SupportAgent"
+              ]
+            }
           ]
         },
         {
-          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "name": "isIssuanceApp",
           "cache": "contextual",
           "__roles": [
-            "VerifiableCredential.SupportAgent"
+            "VerifiableCredential.Issue"
           ]
         }
       ]

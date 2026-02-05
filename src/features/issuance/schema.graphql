@@ -552,6 +552,33 @@ input UserIssuanceWhere {
 
 """
 Criteria for filtering issuances.
+
+Supports complex filtering with AND/OR operators (max depth: 3, max 20 conditions total).
+
+Example - Filter for recent activity (replacement for recentActivityFrom/To):
+```json
+{
+  "OR": [
+    { "from": "2026-01-12T00:00:00Z" },
+    { "revokedFrom": "2026-01-12T00:00:00Z" }
+  ]
+}
+```
+
+Example - Complex nested query:
+```json
+{
+  "AND": [
+    {
+      "OR": [
+        { "contractId": "contract-123" },
+        { "identityId": "identity-456" }
+      ]
+    },
+    { "status": "Active" }
+  ]
+}
+```
 """
 input IssuanceWhere {
   """
@@ -614,6 +641,14 @@ input IssuanceWhere {
   The presentation which included the issuance
   """
   presentationId: ID
+  """
+  Logical AND - all conditions must match. Maximum depth: 3 levels.
+  """
+  AND: [IssuanceWhere!]
+  """
+  Logical OR - at least one condition must match. Maximum depth: 3 levels.
+  """
+  OR: [IssuanceWhere!]
 }
 
 extend type Contract {

@@ -1,6 +1,7 @@
 import type { CommandContext, QueryContext, TransactionalCommandContext } from '.'
 import { type GraphQLContext } from '../context'
 import { entityManager, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../data'
+import { wrapEntityManagerWithSafeLimits } from '../data/entity-manager'
 import { addUserToManager } from '../data/user-context-helper'
 import { userIsUserEntity } from '../util/user-invariant'
 import { performFeatureCheck } from './feature-map'
@@ -23,7 +24,7 @@ export const dispatch = async <T extends CommandLike>(
 
     const ctx: CommandContext = {
       user,
-      entityManager,
+      entityManager: wrapEntityManagerWithSafeLimits(entityManager),
       logger,
       services,
       dataLoaders,
@@ -53,7 +54,7 @@ export const dispatchTransactional = async <T extends TransactionalCommandLike>(
       return await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
         if (userManagerUserId) addUserToManager(entityManager, userManagerUserId)
         else if (userIsUserEntity(user)) addUserToManager(entityManager, user.entity.id)
-        return await fn(entityManager)
+        return await fn(wrapEntityManagerWithSafeLimits(entityManager))
       })
     },
   }
@@ -69,7 +70,7 @@ export const query = async <T extends QueryLike>(
   const { user, logger, services, dataLoaders } = context
   const queryContext: QueryContext = {
     user,
-    entityManager,
+    entityManager: wrapEntityManagerWithSafeLimits(entityManager),
     logger,
     services,
     dataLoaders,

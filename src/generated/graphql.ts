@@ -2242,8 +2242,41 @@ export enum IssuanceStatus {
   Revoked = 'revoked'
 }
 
-/** Criteria for filtering issuances. */
+/**
+ * Criteria for filtering issuances.
+ *
+ * Supports complex filtering with AND/OR operators (max depth: 3, max 20 conditions total).
+ *
+ * Example - Filter for recent activity (replacement for recentActivityFrom/To):
+ * ```json
+ * {
+ *   "OR": [
+ *     { "from": "2026-01-12T00:00:00Z" },
+ *     { "revokedFrom": "2026-01-12T00:00:00Z" }
+ *   ]
+ * }
+ * ```
+ *
+ * Example - Complex nested query:
+ * ```json
+ * {
+ *   "AND": [
+ *     {
+ *       "OR": [
+ *         { "contractId": "contract-123" },
+ *         { "identityId": "identity-456" }
+ *       ]
+ *     },
+ *     { "status": "Active" }
+ *   ]
+ * }
+ * ```
+ */
 export type IssuanceWhere = {
+  /** Logical AND - all conditions must match. Maximum depth: 3 levels. */
+  AND?: InputMaybe<Array<IssuanceWhere>>;
+  /** Logical OR - at least one condition must match. Maximum depth: 3 levels. */
+  OR?: InputMaybe<Array<IssuanceWhere>>;
   /** The ID of the contract that was issued. */
   contractId?: InputMaybe<Scalars['ID']['input']>;
   /** The start of the expiresAt period to include. */

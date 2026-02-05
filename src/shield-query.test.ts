@@ -149,6 +149,7 @@ findIssuances(where: $where, limit: 10) {
         UserRoles.oidcAdmin,
         UserRoles.instanceAdmin,
         UserRoles.supportAgent,
+        AppRoles.issue,
       ],
       false,
       `

@@ -12,3 +12,62 @@ This section provides comprehensive documentation for the VO GraphQL API schema.
 ## Getting started with the API
 
 The VO API follows GraphQL conventions, providing a flexible and powerful way to query and manipulate data. If you're new to GraphQL, we recommend reviewing the [official GraphQL documentation](https://graphql.org/learn/) before diving into our API.
+
+## Pagination and query limits
+
+To ensure optimal performance and protect against database overload, all list queries (`find*` queries) enforce pagination limits:
+
+- **Default limit**: When no limit is specified, queries default to **100 records**
+- **Maximum limit**: You cannot request more than **1000 records** in a single query - requests exceeding this limit will fail with a `LIMIT_EXCEEDED` error
+- **Best practice**: Use `offset` and `limit` together to paginate through large result sets
+
+### Pagination example
+
+```graphql
+# First page: get the first 50 issuances
+query {
+  findIssuances(limit: 50, offset: 1) {
+    id
+    issuedAt
+  }
+}
+
+# Second page: get the next 50 issuances
+query {
+  findIssuances(limit: 50, offset: 51) {
+    id
+    issuedAt
+  }
+}
+```
+
+### Limit exceeded error
+
+If you request more than 1000 records, the API will return an error:
+
+```json
+{
+  "errors": [
+    {
+      "message": "Limit exceeded",
+      "extensions": {
+        "code": "LIMIT_EXCEEDED",
+        "requestedLimit": 5000,
+        "maxLimit": 1000
+      }
+    }
+  ]
+}
+```
+
+### Working with large datasets
+
+For queries that return large result sets:
+
+1. **Use filtering** - Apply `where` conditions to narrow results before pagination
+2. **Paginate efficiently** - Request reasonable page sizes (e.g., 50-200 records) and iterate through pages
+3. **Stay within limits** - Keep requests under 1000 records to avoid errors
+
+:::tip
+If you need to process more than 1000 records, implement pagination to request data in smaller batches. Use filtering to narrow results when possible.
+:::
