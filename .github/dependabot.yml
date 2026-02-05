@@ -7,11 +7,19 @@ updates:
     directory: /
     schedule:
       interval: daily
+    cooldown:
+      default-days: 7
+
   - package-ecosystem: npm
     directory: /docs-site
     schedule:
       interval: daily
+    cooldown:
+      default-days: 7
+
   - package-ecosystem: npm
     directory: /migrate-db
     schedule:
       interval: daily
+    cooldown:
+      default-days: 7
