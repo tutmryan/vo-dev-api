@@ -1,7 +1,7 @@
 import { isLocalDev } from '@makerx/node-common'
 import { createDatabase, tryConnect } from '../src/util/local-database-init'
 
-if (!isLocalDev) {
+if (!isLocalDev && process.env.TEST_DATA_MIGRATION_DRIFT !== 'true') {
   console.error('Database setup is only for localdev ❌')
   process.exit(1)
 }

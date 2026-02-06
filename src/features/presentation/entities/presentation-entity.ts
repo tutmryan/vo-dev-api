@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, RelationId } from 'typeorm'
+import { Column, CreateDateColumn, Entity, Index, JoinTable, ManyToMany, ManyToOne, RelationId } from 'typeorm'
 import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import type { PresentedCredential, RequestCredential } from '../../../generated/graphql'
@@ -13,6 +13,7 @@ import { WalletEntity } from '../../wallet/entities/wallet-entity'
 export type PresentedData = Omit<PresentedCredential, 'claims'>
 
 @Entity('presentation')
+@Index('ix_presentation_identity_id_wallet_id', ['identityId', 'walletId'])
 export class PresentationEntity extends VerifiedOrchestrationEntity {
   constructor(
     args?: Pick<
