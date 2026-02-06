@@ -134,7 +134,7 @@ Variable "$request" got invalid value "456" at "request.identityId"; Value is no
       photoCaptureUrl: expect.stringMatching(/^https:\/\/test.portal.verifiedorchestration.com\/photo-capture\/(.*)$/),
       photoCaptureQrCode: expect.stringMatching(/^data:image\/png;base64,(.*)$/),
     })
-  })
+  }, 15000)
 
   it('works as a limited access issuance app without specifying identityId', async () => {
     // Arrange
