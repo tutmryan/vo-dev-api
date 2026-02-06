@@ -19,7 +19,7 @@
     "db:reset": "cross-env DATABASE_USERNAME=sa npm run typeorm -- schema:drop --dataSource src/data && npm run db:migrate",
     "db:migration:generate": "cross-env DATABASE_USERNAME=sa ts-node scripts/add-migration.ts generate",
     "db:migration:create": "ts-node scripts/add-migration.ts create",
-    "db:migration:check": "npm run typeorm -- migration:generate --dryrun --dataSource src/data --check some/path",
+    "db:migration:check": "cross-env DATABASE_USERNAME=sa npm run typeorm -- migration:generate --dryrun --dataSource src/data --check migrate-db/migrations/drift-check",
     "db:migrate": "cross-env DATABASE_USERNAME=sa npm run typeorm -- migration:run --dataSource src/data",
     "db:migrate:revert": "cross-env DATABASE_USERNAME=sa npm run typeorm -- migration:revert --dataSource src/data",
     "gql:generate": "graphql-codegen",

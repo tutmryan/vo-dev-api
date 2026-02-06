@@ -28,8 +28,11 @@ jobs:
     with:
       node-version: 22.x
       audit-script: npm run audit
+      pre-run-script: npm ci --prefix ..
+      pre-test-script: npm run test:ci:start-db --prefix ..
       run-audit: ${{ github.event.pull_request.user.login != 'dependabot[bot]' }}
       working-directory: ./migrate-db
+      test-script: npm run verify-migrations
 
   ci-docs-site:
     name: CI Docs Site

@@ -12,6 +12,7 @@
     "dev": "cross-env HOST=localhost DATABASE=VerifiedOrchestration USER=api_user PASSWORD=7o}R~=XA1jmz!-aHQ^pA ts-node --transpile-only -r dotenv/config index",
     "check-types": "tsc --noEmit",
     "audit": "npx --yes better-npm-audit audit",
+    "verify-migrations": "ts-node scripts/verify-migrations.ts",
     "build": "npm run clean && tsc && npm run build:copy-files && npm run build:install && npm run build:post-build",
     "clean": "shx rm -rf build",
     "build:copy-files": "shx cp package*.json build",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.6",
+    "@types/cross-spawn": "^6.0.6",
     "@types/node": "^25.1.0",
     "cross-env": "^10.0.0",
     "shx": "^0.4.0",

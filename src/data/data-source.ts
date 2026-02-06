@@ -13,7 +13,7 @@ import { SnakeNamingStrategy } from './utils/snake-naming-strategy'
 const { logging, host, port } = databaseConfig
 let { database } = databaseConfig
 
-if (process.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV === 'test' && process.env.TEST_DATA_MIGRATION_DRIFT !== 'true') {
   database = `${database}_${randomDigits(6)}`
 }
 
