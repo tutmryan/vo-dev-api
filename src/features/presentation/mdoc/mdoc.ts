@@ -132,13 +132,14 @@ async function validateDocument(document: MDocDocument, requestedDocType: string
   const digestValidations = await validateIssuerSignedItemDigests(issuerSigned, mso)
 
   // Step 5: Validate ValidityInfo timestamps
+  // When x5chain is empty (e.g. Apple Wallet), skip certificate-based validation
   const { isWithinValidityPeriod, msoValidityInfo } = validateValidityInfo(mso.validityInfo, validatedCert)
 
   return {
     isValid: true,
     docType: document.docType,
-    certificate: certValidation,
-    signatureVerified: true,
+    certificate: certValidation ?? undefined,
+    signatureVerified: validatedCert !== null,
     digestAlgorithm: mso.digestAlgorithm,
     digestValidations,
     docTypeMatches: true,
@@ -161,29 +162,42 @@ async function validateDocument(document: MDocDocument, requestedDocType: string
 async function validateIssuerAuth(
   issuerSigned: MDocIssuerSigned,
   requestedDocType: string,
-): Promise<[MobileSecurityObject, Certificate, MDocCertificateValidation]> {
+): Promise<[MobileSecurityObject, Certificate | null, MDocCertificateValidation | null]> {
   const { issuerAuth } = issuerSigned
   invariant(issuerAuth.payload, 'IssuerAuth payload is null')
 
-  const sign1 = new Sign1(issuerAuth.protectedHeaders, issuerAuth.unprotectedHeaders, issuerAuth.payload, issuerAuth.signature)
-
-  // Extract X.509 certificate chain from unprotected headers
+  // Extract X.509 certificate chain from headers
   // According to RFC 8152 and the COSE X.509 headers spec:
   // - x5chain parameter label is 33
-  // - The unprotectedHeaders is a Map with numeric keys (COSE header parameter labels)
+  // - Can be in unprotected or protected headers
+  // - cbor2 may decode CBOR maps as plain objects with string keys or as Map instances
   // - The value can be a single certificate (bstr) or an array of certificates
-  const x5chainRaw = issuerAuth.unprotectedHeaders.get(33)
-  invariant(x5chainRaw, 'Missing x5chain (parameter 33) in issuerAuth unprotected headers')
-  const x5chain = Array.isArray(x5chainRaw) ? x5chainRaw : [x5chainRaw]
-  invariant(x5chain.length > 0, 'x5chain is empty')
-  invariant(
-    x5chain.every((cert) => cert instanceof Uint8Array || Buffer.isBuffer(cert)),
-    'x5chain contains non-binary certificate data',
-  )
+  // - Apple Wallet sends unprotected[33]=[] (empty array) — no certs included
+  const getHeaderValue = (headers: unknown, key: number): unknown => {
+    if (headers instanceof Map) return headers.get(key)
+    if (typeof headers === 'object' && headers !== null) return (headers as Record<string, unknown>)[String(key)]
+    return undefined
+  }
 
-  const x5chainBytes: Uint8Array[] = x5chain.map((cert) =>
-    Buffer.isBuffer(cert) ? new Uint8Array(cert.buffer, cert.byteOffset, cert.byteLength) : (cert as Uint8Array),
-  )
+  const unprotVal = getHeaderValue(issuerAuth.unprotectedHeaders, 33)
+  const protVal = getHeaderValue(issuerAuth.protectedHeadersDecoded, 33)
+
+  // Pick the first non-empty value: skip empty arrays (Apple Wallet sends unprotected[33]=[])
+  const isNonEmpty = (v: unknown) => v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0)
+  const x5chainRaw = isNonEmpty(unprotVal) ? unprotVal : isNonEmpty(protVal) ? protVal : undefined
+
+  let x5chainBytes: Uint8Array[] | null = null
+  if (x5chainRaw) {
+    const x5chain = Array.isArray(x5chainRaw) ? x5chainRaw : [x5chainRaw]
+    invariant(x5chain.length > 0, 'x5chain is empty')
+    invariant(
+      x5chain.every((cert) => cert instanceof Uint8Array || Buffer.isBuffer(cert)),
+      'x5chain contains non-binary certificate data',
+    )
+    x5chainBytes = x5chain.map((cert) =>
+      Buffer.isBuffer(cert) ? new Uint8Array(cert.buffer, cert.byteOffset, cert.byteLength) : (cert as Uint8Array),
+    )
+  }
 
   // Step 1: Perform full X.509 certificate validation according to ISO 18013-5 § 9.3.3
   // This includes:
@@ -205,27 +219,35 @@ async function validateIssuerAuth(
   // - We explicitly check the 'signed' date is within cert validity in step 3
   // - We check the current time is within the mDoc validity window (validFrom/validUntil)
 
-  // Load trusted IACA root certificates
-  const trustedRootCerts = await fetchIacaCertificates({ filterByDocType: [requestedDocType] })
+  let validatedCert: Certificate | null = null
+  let certValidation: MDocCertificateValidation | null = null
 
-  // Perform full X.509 validation
-  // Using current time for now - the MSO 'signed' date will be validated separately
-  const validationResult = await validateX509CertificateChain(x5chainBytes, trustedRootCerts, {
-    validationTime: new Date(),
-  })
-  const validatedCert = validationResult.certificate
+  if (x5chainBytes) {
+    // Load trusted IACA root certificates
+    const trustedRootCerts = await fetchIacaCertificates({ filterByDocType: [requestedDocType] })
 
-  // Step 2: Verify the COSE_Sign1 digital signature using the validated certificate
-  // The @auth0/cose library's verifyX509() method:
-  // 1. Extracts the x5chain from the COSE unprotected headers (parameter 33)
-  // 2. Validates the chain against the trusted root CAs provided
-  // 3. Extracts the public key from the leaf certificate
-  // 4. Verifies the signature using that public key
-  //
-  // We pass the trusted root certificates (in PEM format) so the library can validate
-  // the x5chain that's already embedded in the COSE message
-  const trustedRootCertsPem = trustedRootCerts.map((cert) => derToPem(cert))
-  await sign1.verifyX509(trustedRootCertsPem)
+    // Perform full X.509 validation
+    const validationResult = await validateX509CertificateChain(x5chainBytes, trustedRootCerts, {
+      validationTime: new Date(),
+    })
+    validatedCert = validationResult.certificate
+
+    // Step 2: Verify the COSE_Sign1 digital signature using the validated certificate
+    const sign1 = new Sign1(issuerAuth.protectedHeaders, issuerAuth.unprotectedHeaders, issuerAuth.payload, issuerAuth.signature)
+    const trustedRootCertsPem = trustedRootCerts.map((cert) => derToPem(cert))
+    await sign1.verifyX509(trustedRootCertsPem)
+
+    certValidation = {
+      isValid: validationResult.isValid,
+      subject: validationResult.details.subject,
+      issuer: validationResult.details.issuer,
+      validity: {
+        notBefore: validationResult.details.validity.notBefore,
+        notAfter: validationResult.details.validity.notAfter,
+      },
+      serialNumber: validationResult.details.serialNumber,
+    }
+  }
 
   // Decode the payload to get the MobileSecurityObject
   // The payload is MobileSecurityObjectBytes = #6.24(bstr .cbor MobileSecurityObject)
@@ -242,16 +264,6 @@ async function validateIssuerAuth(
   invariant(mso.docType, 'MSO missing docType')
   invariant(mso.validityInfo, 'MSO missing validityInfo')
 
-  const certValidation: MDocCertificateValidation = {
-    isValid: validationResult.isValid,
-    subject: validationResult.details.subject,
-    issuer: validationResult.details.issuer,
-    validity: {
-      notBefore: validationResult.details.validity.notBefore,
-      notAfter: validationResult.details.validity.notAfter,
-    },
-    serialNumber: validationResult.details.serialNumber,
-  }
   return [mso, validatedCert, certValidation]
 }
 
@@ -317,14 +329,17 @@ async function validateIssuerSignedItemDigests(issuerSigned: MDocIssuerSigned, m
  */
 function validateValidityInfo(
   validityInfo: MobileSecurityObject['validityInfo'],
-  certificate: Certificate,
+  certificate: Certificate | null,
 ): { isWithinValidityPeriod: boolean; msoValidityInfo: MDocMsoValidityInfo } {
   // Convert to Date objects if they aren't already
   const { signed, validFrom, validUntil } = validityInfo
 
   // Check that the MSO 'signed' date is within the certificate validity period
   // This is a critical requirement from ISO 18013-5 § 9.3.1 step 5
-  validateCertificateValidityForDate(certificate, signed)
+  // Skip when no certificate is available (e.g. Apple Wallet sends empty x5chain)
+  if (certificate) {
+    validateCertificateValidityForDate(certificate, signed)
+  }
 
   const now = new Date()
   invariant(now >= validFrom, `mDoc not yet valid: validFrom is ${validFrom.toISOString()}, current time is ${now.toISOString()}`)

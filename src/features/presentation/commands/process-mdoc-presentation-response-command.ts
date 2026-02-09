@@ -11,15 +11,14 @@ import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { createOrUpdateIdentity } from '../../identity'
 import { createIdentityIdentifierFromClaims } from '../mdoc/identifier-from-claims'
-import { decodeAndValidateISO18013_7Response } from '../mdoc/iso18013-7'
-import { decodeAndValidateOpenId4VpResponse } from '../mdoc/openid4vp'
+import { decodeAndValidateISO18013_7Response } from '../mdoc/protocols/orgIsoMdoc'
 import { mdocRequestDetailsCache } from '../mdoc/shared-config'
 
 registerFeatureCheck(ProcessMDocPresentationResponseCommand, async (...[,]) => isMDocPresentationsEnabled())
 
 export async function ProcessMDocPresentationResponseCommand(
   this: CommandContext,
-  { requestId, response, platform }: MDocPresentationResponseInput,
+  { requestId, response }: MDocPresentationResponseInput,
 ): Promise<MDocProcessedResponse> {
   const { user, entityManager } = this
   userInvariant(user)
@@ -30,10 +29,7 @@ export async function ProcessMDocPresentationResponseCommand(
   // Verify the requesting user matches (security check)
   invariant(requestDetails.requestedById === user.entity.id, 'Request was created by a different user')
 
-  const decodedResponse =
-    platform === 'android'
-      ? await decodeAndValidateOpenId4VpResponse(requestDetails, response)
-      : await decodeAndValidateISO18013_7Response(requestDetails, response)
+  const decodedResponse = await decodeAndValidateISO18013_7Response(requestDetails, response)
   invariant(
     decodedResponse.mDocDeviceResponse.status === 0,
     `Device response indicates failure with status ${decodedResponse.mDocDeviceResponse.status}`,
@@ -88,7 +84,6 @@ export async function ProcessMDocPresentationResponseCommand(
   return {
     requestId,
     documents,
-    platform,
     identityId,
     diagnostics: decodedResponse.diagnostics,
   }

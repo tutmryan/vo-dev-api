@@ -79,27 +79,10 @@ export type MDocRequestDetails = {
   requestId: string
   requestedById: string
   identityId?: string
-  clientName: string
   docType: string
   requestedClaims: MDocRequestClaimPath[]
-  platform?: 'android' | 'apple'
   createdAt: number
   callback?: Callback
-}
-
-/**
- * Apple ISO18013-7 device request structure
- */
-export type AppleDeviceRequest = {
-  version: string
-  docRequests: unknown[]
-}
-
-/**
- * Apple encryption info structure
- */
-export type AppleEncryptionInfo = {
-  publicKey: unknown
 }
 
 export type ProcessedMDocRequestResponse = {
@@ -114,6 +97,8 @@ export type ProcessedMDocRequestResponse = {
 export type EphemeralKeyData = {
   encryptionPrivateKey: string // base64-encoded PKCS8 encryption private key
   signingPrivateKey?: string // base64-encoded PKCS8 signing private key (for signed requests)
+  encryptionInfoBase64?: string // base64url-encoded encryptionInfo CBOR (for org-iso-mdoc session transcript)
+  origin?: string // origin used in session transcript (for org-iso-mdoc)
   created: number
   requestId: string
 }

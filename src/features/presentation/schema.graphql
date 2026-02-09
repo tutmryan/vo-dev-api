@@ -278,7 +278,6 @@ type Mutation {
   createPresentationRequest(request: PresentationRequestInput!): PresentationRequestResponse!
   """
   Creates an mDoc presentation request for use with the Digital Credential API.
-  Returns platform-specific request formats for both Android (OpenID4VP) and Apple (ISO18013-7).
   """
   createMDocPresentationRequest(request: MDocPresentationRequestInput!): MDocPresentationRequestResponse!
   """
@@ -1104,10 +1103,6 @@ input MDocPresentationRequestInput {
   """
   identity: IdentityInput
   """
-  A display name of the verifier. This name will be presented to the user.
-  """
-  clientName: String!
-  """
   The mDoc document type to request (e.g., "org.iso.18013.5.1.mDL" for mobile driver's license).
   """
   docType: String!
@@ -1166,29 +1161,15 @@ input MDocClaimPathInput {
 }
 
 """
-Android-specific presentation request using OpenID4VP protocol.
+ISO 18013-7 Annex C (org-iso-mdoc) presentation request data.
 """
-type AndroidPresentationRequest {
+type MDocOrgIsoMDocRequest {
   """
-  The OpenID4VP request as a JSON string, ready for use with the Digital Credential API.
-  """
-  openId4VpRequest: String!
-  """
-  The protocol identifier for OpenID4VP.
-  """
-  openId4VpProtocol: String!
-}
-
-"""
-Apple-specific presentation request using ISO18013-7 protocol.
-"""
-type ApplePresentationRequest {
-  """
-  The device request as a base64-encoded string.
+  The CBOR-encoded device request as a base64url string.
   """
   deviceRequest: String!
   """
-  Encryption information for the response as a base64-encoded string.
+  The CBOR-encoded encryption info as a base64url string.
   """
   encryptionInfo: String!
 }
@@ -1202,13 +1183,9 @@ type MDocPresentationResponse {
   """
   requestId: ID!
   """
-  The Android/Google-specific request data.
+  The org-iso-mdoc presentation request data for the Digital Credential API.
   """
-  androidRequest: AndroidPresentationRequest!
-  """
-  The Apple-specific request data.
-  """
-  appleRequest: ApplePresentationRequest!
+  request: MDocOrgIsoMDocRequest!
   """
   Indicates when the response will expire.
   """
@@ -1227,27 +1204,9 @@ input MDocPresentationResponseInput {
   """
   requestId: ID!
   """
-  The encrypted presentation response from the wallet (as a JWE string for Android/OpenID4VP).
+  The encrypted presentation response from the wallet.
   """
   response: String!
-  """
-  The platform that generated the response (android or apple).
-  """
-  platform: MDocPlatform!
-}
-
-"""
-The platform that generated the mDoc presentation response.
-"""
-enum MDocPlatform {
-  """
-  Android using OpenID4VP protocol
-  """
-  android
-  """
-  Apple using ISO18013-7 protocol
-  """
-  apple
 }
 
 """
@@ -1353,7 +1312,7 @@ type MDocDocumentValidation {
   """
   X.509 certificate chain validation details (ISO 18013-5 section 9.3.3).
   """
-  certificate: MDocCertificateValidation!
+  certificate: MDocCertificateValidation
   """
   COSE_Sign1 signature verification status (ISO 18013-5 section 9.3.1 step 2).
   """
@@ -1488,10 +1447,6 @@ type MDocProcessedResponse {
   Typically contains one document, but may contain multiple in some cases.
   """
   documents: [MDocDocument!]!
-  """
-  The platform that generated the response.
-  """
-  platform: MDocPlatform!
   """
   The identity ID associated with this presentation (if available).
   """

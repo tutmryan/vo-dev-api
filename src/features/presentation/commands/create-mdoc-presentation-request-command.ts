@@ -7,7 +7,7 @@ import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { createOrUpdateIdentity } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
-import { buildOpenId4VpRequest } from '../mdoc/openid4vp'
+import { buildISO18013_7DeviceRequest } from '../mdoc/protocols/orgIsoMdoc'
 import { MDOC_TTL, mdocRequestDetailsCache } from '../mdoc/shared-config'
 import type { MDocRequestClaimPath, MDocRequestDetails } from '../mdoc/types'
 
@@ -45,24 +45,15 @@ export async function CreateMDocPresentationRequestCommand(
     return mapped
   })
 
-  // Build Android/Google OpenID4VP request (signed or unsigned based on input)
-  const { request: openId4VpRequest, protocol } = await buildOpenId4VpRequest(requestId, request.docType, requestedClaims, {
-    clientName: request.clientName,
-    expectedOrigins: request.signing?.expectedOrigins,
-  })
-
-  // Build Apple ISO18013-7 request (skeleton implementation)
-  // TODO  (mdoc): Implement full Apple request generation
-  // const appleRequest = await buildAppleDeviceRequest(requestId, request.docType, request.requestedClaims)
-  const appleDeviceRequest = ''
-  const appleEncryptionInfo = ''
+  // Build ISO18013-7 DeviceRequest (CBOR-encoded) with ephemeral encryption key
+  const origin = request.signing?.expectedOrigins[0] ?? ''
+  const orgIsoMdoc = await buildISO18013_7DeviceRequest(requestId, request.docType, requestedClaims, origin)
 
   // Store request details in cache for later validation
   const requestDetails: MDocRequestDetails = {
     requestId,
     requestedById: user.entity.id,
     identityId: identity?.id,
-    clientName: request.clientName,
     docType: request.docType,
     requestedClaims: requestedClaims,
     createdAt: Date.now(),
@@ -70,18 +61,14 @@ export async function CreateMDocPresentationRequestCommand(
     callback: request.callback ?? undefined,
   }
 
-  const cache = await mdocRequestDetailsCache()
+  const cache = mdocRequestDetailsCache()
   await cache.set(requestId, requestDetails, MDOC_TTL)
 
   return {
     requestId,
-    androidRequest: {
-      openId4VpRequest: openId4VpRequest,
-      openId4VpProtocol: protocol,
-    },
-    appleRequest: {
-      deviceRequest: appleDeviceRequest,
-      encryptionInfo: appleEncryptionInfo,
+    request: {
+      deviceRequest: orgIsoMdoc.deviceRequest,
+      encryptionInfo: orgIsoMdoc.encryptionInfo,
     },
     expiry: addMilliseconds(new Date(), MDOC_TTL).getTime() / 1000,
   }
