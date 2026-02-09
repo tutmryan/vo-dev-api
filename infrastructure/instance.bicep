@@ -841,6 +841,9 @@ var redisAlerts = [
     metricName: 'usedmemorypercentage'
     aggregation: 'Maximum'
     threshold: 80
+    useDynamicThreshold: false
+    alertSensitivity: null
+    failingPeriods: null
     severity: 0
     evaluationFrequency: 'PT1M'
   }
@@ -850,6 +853,9 @@ var redisAlerts = [
     metricName: 'serverLoad'
     aggregation: 'Average'
     threshold: 80
+    useDynamicThreshold: false
+    alertSensitivity: null
+    failingPeriods: null
     severity: 1
     evaluationFrequency: 'PT5M'
   }
@@ -859,6 +865,9 @@ var redisAlerts = [
     metricName: 'percentProcessorTime'
     aggregation: 'Maximum'
     threshold: 80
+    useDynamicThreshold: false
+    alertSensitivity: null
+    failingPeriods: null
     severity: 1
     evaluationFrequency: 'PT5M'
   }
@@ -868,6 +877,9 @@ var redisAlerts = [
     metricName: 'connectedclients'
     aggregation: 'Maximum'
     threshold: 5625
+    useDynamicThreshold: false
+    alertSensitivity: null
+    failingPeriods: null
     severity: 1
     evaluationFrequency: 'PT5M'
   }
@@ -876,7 +888,13 @@ var redisAlerts = [
     description: 'Redis cache read throughput is high'
     metricName: 'cacheRead'
     aggregation: 'Average'
-    threshold: 100000
+    threshold: null
+    useDynamicThreshold: true
+    alertSensitivity: 'Medium'
+    failingPeriods: {
+      numberOfEvaluationPeriods: 4
+      minFailingPeriodsToAlert: 4
+    }
     severity: 1
     evaluationFrequency: 'PT5M'
   }
@@ -895,21 +913,38 @@ resource redisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
       ]
       evaluationFrequency: alert.evaluationFrequency
       windowSize: 'PT5M'
-      criteria: {
-        allOf: [
-          {
-            name: alert.metricName
-            criterionType: 'StaticThresholdCriterion'
-            metricNamespace: 'Microsoft.Cache/Redis'
-            metricName: alert.metricName
-            operator: 'GreaterThan'
-            threshold: alert.threshold
-            timeAggregation: alert.aggregation
-            skipMetricValidation: false
+      criteria: alert.useDynamicThreshold
+        ? {
+            allOf: [
+              {
+                name: alert.metricName
+                criterionType: 'DynamicThresholdCriterion'
+                metricNamespace: 'Microsoft.Cache/Redis'
+                metricName: alert.metricName
+                operator: 'GreaterThan'
+                alertSensitivity: alert.alertSensitivity!
+                failingPeriods: alert.failingPeriods!
+                timeAggregation: alert.aggregation
+                skipMetricValidation: false
+              }
+            ]
+            'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
           }
-        ]
-        'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
-      }
+        : {
+            allOf: [
+              {
+                name: alert.metricName
+                criterionType: 'StaticThresholdCriterion'
+                metricNamespace: 'Microsoft.Cache/Redis'
+                metricName: alert.metricName
+                operator: 'GreaterThan'
+                threshold: alert.threshold!
+                timeAggregation: alert.aggregation
+                skipMetricValidation: false
+              }
+            ]
+            'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
+          }
       autoMitigate: true
       targetResourceType: 'Microsoft.Cache/Redis'
       targetResourceRegion: location
