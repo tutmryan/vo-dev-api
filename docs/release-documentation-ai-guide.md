@@ -177,9 +177,46 @@ Organize filtered changes into:
 
 1. **New features** - Major new capabilities
 2. **Enhancements** - Improvements to existing features
-3. **Notable fixes** - Bug fixes that impact customers
+3. **Breaking changes** - Changes that may require customer action (GraphQL schema changes, API changes, deprecated features)
+4. **Notable fixes** - Bug fixes that impact customers
 
 Consolidate duplicate or related items across repositories.
+
+#### Documenting Breaking Changes
+
+Breaking changes should be documented with a positive, benefit-focused tone while clearly indicating the change nature.
+
+**Guidelines:**
+
+- Use a dedicated `### ⚠️ Breaking Changes` section when breaking changes exist
+- Frame changes positively, emphasizing the improvement or new capability
+- Clearly indicate what changed (e.g., "GraphQL Schema", "API")
+- Explain the benefit first, then note the constraint
+- Use friendly, approachable language
+
+**Example - GraphQL Schema Change:**
+
+✅ Good:
+
+```markdown
+### ⚠️ Breaking Changes
+
+- **GraphQL Schema:** Offset parameter validation updated to support zero values, enabling more consistent pagination starting from the first record (now accepts 0 and positive integers only)
+```
+
+❌ Avoid:
+
+```markdown
+### Breaking Changes
+
+- Fixed offset parameter validation to reject negative values
+```
+
+**Template:**
+
+```markdown
+- **[Component]:** [Benefit/improvement description], [new behavior/constraint]
+```
 
 ### Step 5: Write Customer-Friendly Descriptions
 
@@ -251,6 +288,10 @@ This release includes significant improvements to audit logging, new instance in
 
 - Added reader access to remote issuances
 - Database performance improvements
+
+### ⚠️ Breaking Changes
+
+- **GraphQL Schema:** Updated validation for improved data consistency (now enforces stricter type checking)
 
 ### 🛠️ Notable fixes
 
@@ -328,6 +369,8 @@ Before finalizing, verify:
 - [ ] No WIP features
 - [ ] All changes are customer-relevant
 - [ ] Descriptions are clear and benefit-focused
+- [ ] Breaking changes (if any) are documented in a dedicated section with positive framing
+- [ ] Breaking changes clearly indicate the component/area affected (e.g., "GraphQL Schema:", "API:")
 
 ## Additional Notes
 
@@ -353,6 +396,16 @@ Always use full month names:
 - **UI/UX:** Navigation changes, new screens, improved workflows
 - **Documentation:** Customer-facing docs, help text, tooltips
 - **Integration:** API changes, SDK updates, webhook improvements
+- **Breaking Changes:** GraphQL schema changes, API parameter validation changes, deprecated features removal, behavior changes requiring customer action
+
+### Common Breaking Change Scenarios
+
+Document these as breaking changes when they occur:
+
+- **GraphQL Schema Changes:** Type changes, new required fields, validation rule changes
+- **API Parameter Validation:** Changes to accepted values, type enforcement, range restrictions
+- **Deprecated Feature Removal:** Removal of previously deprecated endpoints, features, or properties
+- **Behavior Changes:** Changes to default values, response formats, or processing logic that may affect existing integrations
 
 ### When in Doubt
 
