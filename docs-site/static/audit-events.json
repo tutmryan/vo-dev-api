@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "name": "Verified Orchestration Audit Events",
   "version": "1.0.0",
-  "generatedAt": "2025-12-17T03:40:49.844Z",
+  "generatedAt": "2026-02-11T10:23:50.056Z",
   "events": [
     {
       "eventTypeId": "VO0000",
@@ -14,25 +14,25 @@
       "eventTypeId": "VO0010",
       "eventType": "api.graphql.operation",
       "category": "API",
-      "description": "API GRAPHQL Operation"
+      "description": "API GraphQL Operation"
     },
     {
       "eventTypeId": "VO0011",
       "eventType": "api.graphql.query",
       "category": "API",
-      "description": "API GRAPHQL Query"
+      "description": "API GraphQL Query"
     },
     {
       "eventTypeId": "VO0012",
       "eventType": "api.graphql.mutation",
       "category": "API",
-      "description": "API GRAPHQL Mutation"
+      "description": "API GraphQL Mutation"
     },
     {
       "eventTypeId": "VO0013",
       "eventType": "api.graphql.subscription",
       "category": "API",
-      "description": "API GRAPHQL Subscription"
+      "description": "API GraphQL Subscription"
     },
     {
       "eventTypeId": "VO0030",

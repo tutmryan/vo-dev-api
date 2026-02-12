@@ -125,7 +125,7 @@ const template = fs.readFileSync(templatePath, 'utf8')
 const auditEventsTable = generateMarkdown()
 const markdown = template.replace('{{AUDIT_EVENTS_TABLE}}', auditEventsTable)
 
-const outputPath = path.resolve(__dirname, '../docs/guides/audit-events.md')
+const outputPath = path.resolve(__dirname, '../docs/guides/audit/event-types.md')
 fs.writeFileSync(outputPath, markdown)
 
 console.log('Audit event docs generated:', outputPath)
