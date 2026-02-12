@@ -42,6 +42,10 @@ const config = {
       ({
         docs: {
           sidebarPath: require.resolve('./sidebarsDocumentation.js'),
+          admonitions: {
+            keywords: ['vo-tip'],
+            extendDefaults: true,
+          },
         },
         blog: false,
         theme: {

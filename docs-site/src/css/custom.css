@@ -103,3 +103,25 @@ footer.row { margin-top: 0.5rem; }
 .breadcrumbs {
   display: flex;
 }
+.hash-link { font-weight: 300; }
+
+.featureSvg, .featureSvg_GfXr {
+  color: black !important;
+}
+
+/* Custom color and border for the new vo-tip admonition type - light and dark */
+html[data-theme='light'] .theme-admonition.admonition-vo-tip {
+  background-color: #F1F2FF;
+  border-color: #406BF7;
+}
+html[data-theme='dark'] .theme-admonition.admonition-vo-tip  {
+  background-color: #2f2f2f;
+  border-color: #406BF7;
+}
+/* Set font styling for vo-tip Admonition */
+.admonition-heading-vo-tip {
+  font: var(--ifm-heading-font-weight) var(--ifm-h5-font-size) /
+    var(--ifm-heading-line-height) var(--ifm-heading-font-family);
+  text-transform: uppercase;
+}
+

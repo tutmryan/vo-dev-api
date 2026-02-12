@@ -1,0 +1,36 @@
+.admonition {
+  margin: var(--ifm-spacing-vertical) 0;
+  border-left: var(--ifm-alert-border-left-width) solid var(--ifm-color-primary);
+  padding: var(--ifm-alert-padding-vertical) var(--ifm-alert-padding-horizontal);
+  background-color: var(--ifm-alert-background-color);
+  border-radius: var(--ifm-alert-border-radius);
+}
+
+.admonitionHeading {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5em;
+}
+
+.admonitionIcon {
+  margin-right: 0.5em;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ifm-alert-icon-size);
+  height: var(--ifm-alert-icon-size);
+}
+
+.admonitionTitle {
+  font-weight: var(--ifm-font-weight-semibold);
+  margin: 0;
+}
+
+.admonitionContent > *:first-child {
+  margin-top: 0;
+}
+
+.admonitionContent > *:last-child {
+  margin-bottom: 0;
+}
