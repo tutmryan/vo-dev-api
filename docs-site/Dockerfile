@@ -6,12 +6,11 @@ WORKDIR /app
 ENV NODE_ENV="production"
 
 FROM base AS build
-RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
-COPY package-lock.json package.json ./
-RUN npm ci --include=dev
+RUN apt-get update -qq && apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 COPY . .
 WORKDIR /app/docs-site
+COPY docs-site/package-lock.json docs-site/package.json ./
+RUN npm ci --include=dev
 RUN npm run generate-graphql-docs
 RUN npm run generate-permissions-docs
 RUN npm run build
