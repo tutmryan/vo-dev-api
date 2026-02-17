@@ -9,8 +9,26 @@ on:
 permissions:
   contents: read
   checks: write
+  pull-requests: read
 
 jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    outputs:
+      docs_site: ${{ steps.filter.outputs.docs_site }}
+      migrate_db: ${{ steps.filter.outputs.migrate_db }}
+    steps:
+      - name: Filter paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            docs_site:
+              - 'docs-site/**'
+            migrate_db:
+              - 'migrate-db/**'
+
   ci-api:
     name: CI API
     uses: ./.github/workflows/node-ci.yml
@@ -24,6 +42,8 @@ jobs:
 
   ci-migrations-package:
     name: CI Migrations Package
+    needs: changes
+    if: needs.changes.outputs.migrate_db == 'true'
     uses: ./.github/workflows/node-ci.yml
     with:
       node-version: 22.x
@@ -36,6 +56,8 @@ jobs:
 
   ci-docs-site:
     name: CI Docs Site
+    needs: changes
+    if: needs.changes.outputs.docs_site == 'true'
     uses: ./.github/workflows/node-ci.yml
     with:
       node-version: 22.x
