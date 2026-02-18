@@ -40,8 +40,8 @@ jobs:
       test-script: npm run test:ci
       output-test-results: true
 
-  ci-migrations-package:
-    name: CI Migrations Package
+  ci-migrations-package-run:
+    name: CI Migrations Package - Run
     needs: changes
     if: needs.changes.outputs.migrate_db == 'true'
     uses: ./.github/workflows/node-ci.yml
@@ -54,8 +54,26 @@ jobs:
       working-directory: ./migrate-db
       test-script: npm run verify-migrations
 
-  ci-docs-site:
-    name: CI Docs Site
+  ci-migrations-package:
+    name: CI Migrations Package
+    needs: [changes, ci-migrations-package-run]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check result
+        run: |
+          if [[ "${{ needs.changes.outputs.migrate_db }}" != "true" ]]; then
+            echo "Skipped — no migrate-db changes"
+            exit 0
+          fi
+          if [[ "${{ needs.ci-migrations-package-run.result }}" == "success" ]]; then
+            exit 0
+          fi
+          echo "CI Migrations Package failed"
+          exit 1
+
+  ci-docs-site-run:
+    name: CI Docs Site - Run
     needs: changes
     if: needs.changes.outputs.docs_site == 'true'
     uses: ./.github/workflows/node-ci.yml
@@ -66,3 +84,21 @@ jobs:
       working-directory: ./docs-site
       run-build: true
       build-script: npm run build:pr
+
+  ci-docs-site:
+    name: CI Docs Site
+    needs: [changes, ci-docs-site-run]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check result
+        run: |
+          if [[ "${{ needs.changes.outputs.docs_site }}" != "true" ]]; then
+            echo "Skipped — no docs-site changes"
+            exit 0
+          fi
+          if [[ "${{ needs.ci-docs-site-run.result }}" == "success" ]]; then
+            exit 0
+          fi
+          echo "CI Docs Site failed"
+          exit 1
