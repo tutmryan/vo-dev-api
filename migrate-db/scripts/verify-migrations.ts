@@ -36,7 +36,6 @@ const main = async () => {
     // We need to disable the random database suffix for this check so we can predict the DB name
     // We also force the DB setup to run even though we are technically in 'test' mode (not localdev)
     process.env.TEST_DATA_MIGRATION_DRIFT = 'true'
-    process.env.DATABASE_NAME ||= 'VerifiedOrchestration_DriftTest'
 
     // Migration 1755489140150 requiring HOME_TENANT_ID
     // We try to use what's in .env (loaded above), otherwise fall back to strict test defaults for CI

@@ -2,7 +2,7 @@ import type { ValueTransformer } from 'typeorm/decorator/options/ValueTransforme
 
 export const uuidLowerCaseTransformer: ValueTransformer = {
   from: (dbValue) => {
-    return dbValue == null ? null : (dbValue as string).toLowerCase()
+    return (dbValue as string | null)?.toLowerCase()
   },
   to: (entityValue) => entityValue,
 }

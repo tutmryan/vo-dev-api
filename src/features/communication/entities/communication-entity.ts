@@ -1,8 +1,7 @@
 import { Column, CreateDateColumn, Entity, Index, ManyToOne } from 'typeorm'
-import { dateTimeOffsetTransformer, dateTimeOffsetType, nvarcharType } from '../../../data/utils/crossDbColumnTypes'
-import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
-import { CommunicationPurpose, CommunicationStatus, ContactMethod } from '../../../generated/graphql'
+import { CommunicationPurpose, ContactMethod, CommunicationStatus } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AsyncIssuanceEntity } from '../../async-issuance/entities/async-issuance-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
@@ -24,7 +23,7 @@ export class CommunicationEntity extends VerifiedOrchestrationEntity {
     typeSafeAssign(this, { ...rest, asyncIssuanceId: asyncIssuanceId ?? null })
   }
 
-  @CreateDateColumn({ type: dateTimeOffsetType, transformer: dateTimeOffsetTransformer })
+  @CreateDateColumn({ type: 'datetimeoffset' })
   sentAt!: Date
 
   @ManyToOne(() => UserEntity)
@@ -39,10 +38,10 @@ export class CommunicationEntity extends VerifiedOrchestrationEntity {
   @Column({ transformer: uuidLowerCaseTransformer })
   recipientId!: string
 
-  @Column({ type: nvarcharType, length: 255 })
+  @Column({ type: 'nvarchar', length: 255 })
   contactMethod!: ContactMethod
 
-  @Column({ type: nvarcharType, length: 255 })
+  @Column({ type: 'nvarchar', length: 255 })
   purpose!: CommunicationPurpose
 
   @ManyToOne(() => AsyncIssuanceEntity)
@@ -51,9 +50,9 @@ export class CommunicationEntity extends VerifiedOrchestrationEntity {
   @Column({ nullable: true, transformer: uuidLowerCaseTransformer })
   asyncIssuanceId!: string | null
 
-  @Column({ type: nvarcharType, length: 255 })
+  @Column({ type: 'nvarchar', length: 255 })
   status!: CommunicationStatus
 
-  @Column({ type: nvarcharType, nullable: true })
+  @Column({ type: 'nvarchar', nullable: true })
   details?: string
 }

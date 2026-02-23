@@ -1,5 +1,4 @@
 import { Column, Entity, PrimaryColumn } from 'typeorm'
-import { nvarcharMaxType, nvarcharType, varcharMaxLength } from '../../../data/utils/crossDbColumnTypes'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 
 export type InstanceSetting = { key: 'email-sender'; value: { senderName?: string | null; senderEmail?: string | null } }
@@ -10,10 +9,10 @@ export type InstanceSettingValue<K extends InstanceSettingKey> = Extract<Instanc
 
 @Entity('instance_settings')
 export class InstanceSettingEntity extends VerifiedOrchestrationEntity {
-  @PrimaryColumn({ name: 'setting_key', type: nvarcharType, length: 100 })
+  @PrimaryColumn({ name: 'setting_key', type: 'nvarchar', length: 100 })
   settingKey!: InstanceSettingKey
 
-  @Column({ name: 'setting_value', type: nvarcharMaxType, length: varcharMaxLength })
+  @Column({ name: 'setting_value', type: 'nvarchar', length: 'max' })
   settingValue!: string
 
   getValue<K extends InstanceSettingKey>(): InstanceSettingValue<K> {

@@ -11,24 +11,17 @@ const handleError = (error: Error) => {
   process.exit(1)
 }
 
-const databaseName = process.env.DATABASE_NAME?.trim()
-
-if (!databaseName) {
-  console.error('DATABASE_NAME is required ❌')
-  process.exit(1)
-}
-
 tryConnect(20_000)
   .then(async (pool) => {
-    const database = await pool.query`SELECT * FROM sys.databases WHERE name = ${databaseName}`
+    const database = await pool.query`SELECT * FROM sys.databases WHERE name = N'VerifiedOrchestration'`
     await pool.close()
 
     if (database.recordset.length) {
-      console.log(`Database ${databaseName} already exists ✅`)
+      console.log('Database already exists ✅')
       process.exit()
     }
 
     await createDatabase({ runMigrations: false })
-    console.log(`Database ${databaseName} initialised ✅`)
+    console.log('Database initialised ✅')
   })
   .catch(handleError)

@@ -1,6 +1,5 @@
 import { Column, Entity, Index } from 'typeorm'
-import { booleanType, nvarcharType } from '../../../data/utils/crossDbColumnTypes'
-import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 
@@ -14,19 +13,19 @@ export class UserEntity extends VerifiedOrchestrationEntity {
     if (args) typeSafeAssign(this, args)
   }
 
-  @Column({ type: 'uuid', transformer: uuidLowerCaseTransformer })
+  @Column({ type: 'uniqueidentifier', transformer: uuidLowerCaseTransformer })
   oid!: string
 
-  @Column({ type: 'uuid', transformer: uuidLowerCaseTransformer })
+  @Column({ type: 'uniqueidentifier', transformer: uuidLowerCaseTransformer })
   tenantId!: string
 
-  @Column({ type: nvarcharType, nullable: true })
+  @Column({ type: 'nvarchar', nullable: true })
   email!: string | null
 
-  @Column({ type: nvarcharType })
+  @Column({ type: 'nvarchar' })
   name!: string
 
-  @Column({ type: booleanType })
+  @Column({ type: 'bit' })
   isApp!: boolean
 
   update(input: UpdateIdentityInput): boolean {

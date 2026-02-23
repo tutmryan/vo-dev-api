@@ -1,6 +1,5 @@
 import { compact, flatten, isEqual, merge, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, OneToMany, RelationId } from 'typeorm'
-import { booleanType, nvarcharMaxType, nvarcharType, varcharMaxLength } from '../../../data/utils/crossDbColumnTypes'
 import type {
   FaceCheckPhotoSupport,
   Maybe,
@@ -38,7 +37,7 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
     typeSafeAssign(this, { ...rest, parent: Promise.resolve(parent) })
   }
 
-  @Column({ type: nvarcharType })
+  @Column({ type: 'nvarchar' })
   name!: string
 
   @ManyToOne(() => TemplateEntity, { nullable: true })
@@ -53,13 +52,13 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
   @OneToMany(() => ContractEntity, (contract) => contract.template)
   contracts!: Promise<ContractEntity[]>
 
-  @Column({ type: booleanType, nullable: true })
+  @Column({ type: 'bit', nullable: true })
   isPublic!: boolean | null
 
   @Column({ type: 'int', nullable: true })
   validityIntervalInSeconds!: number | null
 
-  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
   private displayJson?: string | null
 
   get display(): PersistedTemplateDisplayModel | null {
@@ -69,7 +68,7 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
     this.displayJson = display ? JSON.stringify(display) : null
   }
 
-  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
   private credentialTypesJson!: string | null
 
   get credentialTypes(): string[] | null {
@@ -83,7 +82,7 @@ export class TemplateEntity extends AuditedAndTrackedEntity {
     } else this.credentialTypesJson = null
   }
 
-  @Column({ type: nvarcharType, nullable: true })
+  @Column({ type: 'nvarchar', nullable: true })
   faceCheckSupport!: FaceCheckPhotoSupport | null
 
   private getAncestors: () => Promise<TemplateEntity[]> = Lazy(async () => {

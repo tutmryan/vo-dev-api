@@ -1,6 +1,5 @@
 import { Column, CreateDateColumn, Entity, Index, JoinTable, ManyToMany, ManyToOne, RelationId } from 'typeorm'
-import { booleanType, dateTimeOffsetTransformer, dateTimeOffsetType, nvarcharType } from '../../../data/utils/crossDbColumnTypes'
-import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { IssuanceStatus } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
@@ -20,7 +19,7 @@ export class IssuanceEntity extends AuditedAndTrackedEntity {
     typeSafeAssign(this, args)
   }
 
-  @Column({ type: nvarcharType, nullable: true })
+  @Column({ type: 'nvarchar', nullable: true })
   requestId!: string | null
 
   @ManyToOne(() => ContractEntity)
@@ -41,13 +40,13 @@ export class IssuanceEntity extends AuditedAndTrackedEntity {
   @Column({ transformer: uuidLowerCaseTransformer })
   issuedById!: string
 
-  @CreateDateColumn({ type: dateTimeOffsetType, transformer: dateTimeOffsetTransformer })
+  @CreateDateColumn({ type: 'datetimeoffset' })
   issuedAt!: Date
 
-  @Column({ type: dateTimeOffsetType, transformer: dateTimeOffsetTransformer })
+  @Column({ type: 'datetimeoffset' })
   expiresAt!: Date
 
-  @Column({ type: booleanType, nullable: true })
+  @Column({ type: 'bit', nullable: true })
   isRevoked!: boolean | null
 
   @ManyToOne(() => UserEntity, { nullable: true })
@@ -56,10 +55,10 @@ export class IssuanceEntity extends AuditedAndTrackedEntity {
   @RelationId((issuance: IssuanceEntity) => issuance.revokedBy)
   revokedById!: string | null
 
-  @Column({ type: dateTimeOffsetType, nullable: true, transformer: dateTimeOffsetTransformer })
+  @Column({ type: 'datetimeoffset', nullable: true })
   revokedAt!: Date | null
 
-  @Column({ type: booleanType, nullable: true })
+  @Column({ type: 'bit', nullable: true })
   hasFaceCheckPhoto!: boolean | null
 
   @ManyToMany(() => PresentationEntity)

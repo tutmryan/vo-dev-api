@@ -1,6 +1,6 @@
 import casual from 'casual'
 import { randomUUID } from 'crypto'
-import { transactionOrReuse } from '../../../data'
+import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
 import { graphql } from '../../../generated'
 import type { AcquireLimitedAccessTokenInput } from '../../../generated/graphql'
@@ -90,7 +90,7 @@ const credentialTypesQuery = graphql(`
 async function createContractWithIssuance() {
   const identity = await createIdentity()
   const contract = await createContract(getDefaultContractInput())
-  const { issuedBy, issuance } = await transactionOrReuse(async (entityManager) => {
+  const { issuedBy, issuance } = await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
     const issuedBy = await entityManager
       .getRepository(UserEntity)
       .save(new UserEntity({ email: casual.email, isApp: true, name: 'Test', oid: randomUUID(), tenantId: randomUUID() }))
