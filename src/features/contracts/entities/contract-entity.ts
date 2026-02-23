@@ -1,7 +1,15 @@
 import { differenceInSeconds } from 'date-fns'
 import { isEqual, uniq } from 'lodash'
 import { Column, Entity, ManyToOne, RelationId } from 'typeorm'
-import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
+import {
+  booleanType,
+  dateTimeOffsetTransformer,
+  dateTimeOffsetType,
+  nvarcharMaxLength,
+  nvarcharMaxType,
+  nvarcharType,
+} from '../../../data/utils/crossDbColumnTypes'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
 import type { ContractDisplayCredential, ContractDisplayCredentialLogo, ContractDisplayModel } from '../../../generated/graphql'
 import { FaceCheckPhotoSupport } from '../../../generated/graphql'
 import { domainInvariant } from '../../../util/domain-invariant'
@@ -31,7 +39,7 @@ export class ContractEntity extends AuditedAndTrackedEntity {
     typeSafeAssign(this, { ...rest, template: Promise.resolve(template) })
   }
 
-  @Column({ type: 'nvarchar' })
+  @Column({ type: nvarcharType })
   name!: string
 
   @ManyToOne(() => TemplateEntity, { nullable: true })
@@ -40,13 +48,13 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   @Column({ nullable: true, transformer: uuidLowerCaseTransformer })
   templateId!: string | null
 
-  @Column({ type: 'bit', nullable: false })
+  @Column({ type: booleanType, nullable: false })
   isPublic!: boolean
 
   @Column({ type: 'int', nullable: false })
   validityIntervalInSeconds!: number
 
-  @Column({ type: 'uniqueidentifier', nullable: true, transformer: uuidLowerCaseTransformer })
+  @Column({ type: 'uuid', nullable: true, transformer: uuidLowerCaseTransformer })
   externalId!: string | null
 
   @ManyToOne(() => UserEntity, { nullable: true })
@@ -55,7 +63,7 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   @RelationId((contract: ContractEntity) => contract.provisionedBy)
   provisionedById!: string | null
 
-  @Column({ type: 'datetimeoffset', nullable: true })
+  @Column({ type: dateTimeOffsetType, nullable: true, transformer: dateTimeOffsetTransformer })
   provisionedAt!: Date | null
 
   @ManyToOne(() => UserEntity, { nullable: true })
@@ -64,10 +72,10 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   @RelationId((contract: ContractEntity) => contract.lastProvisionedBy)
   lastProvisionedById!: string | null
 
-  @Column({ type: 'datetimeoffset', nullable: true })
+  @Column({ type: dateTimeOffsetType, nullable: true, transformer: dateTimeOffsetTransformer })
   lastProvisionedAt!: Date | null
 
-  @Column({ type: 'bit', nullable: true })
+  @Column({ type: booleanType, nullable: true })
   isDeprecated!: boolean | null
 
   @ManyToOne(() => UserEntity, { nullable: true })
@@ -76,10 +84,10 @@ export class ContractEntity extends AuditedAndTrackedEntity {
   @RelationId((contract: ContractEntity) => contract.deprecatedBy)
   deprecatedById!: string | null
 
-  @Column({ type: 'datetimeoffset', nullable: true })
+  @Column({ type: dateTimeOffsetType, nullable: true, transformer: dateTimeOffsetTransformer })
   deprecatedAt!: Date | null
 
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength })
   private displayJson!: string
 
   get display(): PersistedContractDisplayModel {
@@ -90,7 +98,7 @@ export class ContractEntity extends AuditedAndTrackedEntity {
     this.displayJson = JSON.stringify(display)
   }
 
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength })
   private credentialTypesJson!: string
 
   get credentialTypes(): string[] {
@@ -104,7 +112,7 @@ export class ContractEntity extends AuditedAndTrackedEntity {
     this.credentialTypesJson = JSON.stringify(credentialTypes)
   }
 
-  @Column({ type: 'nvarchar', default: FaceCheckPhotoSupport.None })
+  @Column({ type: nvarcharType, default: FaceCheckPhotoSupport.None })
   faceCheckSupport!: FaceCheckPhotoSupport
 
   async update(

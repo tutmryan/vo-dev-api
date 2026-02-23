@@ -1,17 +1,17 @@
 import { Column, JoinColumn, ManyToOne, RelationId } from 'typeorm'
-import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
-import { AuditAction } from './audit-action'
-import { UserEntity } from '../../users/entities/user-entity'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
+import { UserEntity } from '../../users/entities/user-entity'
+import { AuditAction } from './audit-action'
 
 export abstract class AuditBase extends VerifiedOrchestrationEntity {
-  @Column({ type: 'uniqueidentifier', transformer: uuidLowerCaseTransformer })
+  @Column({ type: 'uuid', transformer: uuidLowerCaseTransformer })
   entityId!: string
 
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({ type: 'text' })
   auditData!: string
 
-  @Column({ type: 'nvarchar' })
+  @Column({ type: 'varchar' })
   action!: AuditAction
 
   @ManyToOne(() => UserEntity)
@@ -21,7 +21,7 @@ export abstract class AuditBase extends VerifiedOrchestrationEntity {
   @RelationId((audit: AuditBase) => audit.user)
   userId!: string
 
-  @Column({ type: 'datetimeoffset' })
+  @Column({ type: 'datetime' })
   auditDateTime!: Date
 
   get auditDataObject() {

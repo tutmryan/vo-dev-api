@@ -11,7 +11,6 @@ if (process.env.SMS_SECRET) {
 }
 
 const config: Config.InitialOptions = {
-  preset: 'ts-jest',
   rootDir: 'src',
   globalSetup: '<rootDir>/../jest.setup.ts',
   globalTeardown: '<rootDir>/../jest.teardown.ts',
@@ -24,8 +23,26 @@ const config: Config.InitialOptions = {
   transformIgnorePatterns: ['node_modules/(?!(cbor2|@cto\\.af|hpke)/)'],
   // Include transform for JS files from ESM packages
   transform: {
-    '^.+\\.tsx?$': 'ts-jest',
-    '^.+\\.jsx?$': 'ts-jest',
+    '^.+\\.[tj]sx?$': [
+      '@swc/jest',
+      {
+        jsc: {
+          parser: {
+            syntax: 'typescript',
+            decorators: true,
+          },
+          transform: {
+            legacyDecorator: true,
+            decoratorMetadata: true,
+            useDefineForClassFields: false,
+          },
+          target: 'es2022',
+        },
+        module: {
+          type: 'commonjs',
+        },
+      },
+    ],
   },
   // GH runners currently have 2 cores. However by default, Jest will use core count - 1,
   // so setting it to 2 will help with performance and memory usage

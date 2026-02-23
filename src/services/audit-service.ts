@@ -5,17 +5,21 @@ import { AuditEventById, UNKNOWN_EVENT_TYPE, UNKNOWN_EVENT_TYPE_ID, type AuditEv
 import { auditLogStreaming, platformTenant } from '../config'
 import { logger } from '../logger'
 
-const ruleId = auditLogStreaming.dataCollectionRuleId
 const streamName = 'Custom-AuditTraces_CL'
-const credential = auditLogStreaming.dataCollectionClientSecret
-  ? new ClientSecretCredential(
-      platformTenant.tenantId,
-      auditLogStreaming.dataCollectionClientId,
-      auditLogStreaming.dataCollectionClientSecret,
-    ) // Use for local dev and potentially non-Azure hosting
-  : new DefaultAzureCredential() // Use Managed Identity when hosted in Azure
-
-const logsIngestionClient = new LogsIngestionClient(auditLogStreaming.dataCollectionEndpoint, credential)
+let _logsIngestionClient: LogsIngestionClient | undefined
+function getLogsIngestionClient() {
+  if (!_logsIngestionClient) {
+    const credential = auditLogStreaming.dataCollectionClientSecret
+      ? new ClientSecretCredential(
+          platformTenant.tenantId,
+          auditLogStreaming.dataCollectionClientId,
+          auditLogStreaming.dataCollectionClientSecret,
+        ) // Use for local dev and potentially non-Azure hosting
+      : new DefaultAzureCredential() // Use Managed Identity when hosted in Azure
+    _logsIngestionClient = new LogsIngestionClient(auditLogStreaming.dataCollectionEndpoint, credential)
+  }
+  return _logsIngestionClient
+}
 
 // Changes to this type must be reflected in the Log Analytics workspace custom log definition
 // See the log-analytics.bicep file for the custom log definition
@@ -50,7 +54,7 @@ const createAuditService = () => {
       }
 
       try {
-        await logsIngestionClient.upload(ruleId, streamName, [logEntry])
+        await getLogsIngestionClient().upload(auditLogStreaming.dataCollectionRuleId, streamName, [logEntry])
       } catch (error) {
         if (isAggregateLogsUploadError(error)) {
           for (const innerError of error.errors) {

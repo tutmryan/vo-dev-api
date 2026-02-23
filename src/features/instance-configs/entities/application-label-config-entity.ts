@@ -1,5 +1,6 @@
 import { Column, Entity, ManyToOne } from 'typeorm'
-import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
+import { nvarcharType } from '../../../data/utils/crossDbColumnTypes'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { IdentityStoreEntity } from '../../identity-store/entities/identity-store-entity'
@@ -17,7 +18,7 @@ export class ApplicationLabelConfigEntity extends VerifiedOrchestrationEntity {
   @Column({ name: 'identifier', type: 'varchar', unique: true, length: 255 })
   identifier!: string
 
-  @Column({ name: 'name', type: 'nvarchar', length: 255 })
+  @Column({ name: 'name', type: nvarcharType, length: 255 })
   name!: string
 
   @ManyToOne(() => IdentityStoreEntity)

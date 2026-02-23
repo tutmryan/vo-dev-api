@@ -1,4 +1,5 @@
 import { Column, Entity } from 'typeorm'
+import { nvarcharMaxLength, nvarcharMaxType, nvarcharType } from '../../../data/utils/crossDbColumnTypes'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 
@@ -9,10 +10,10 @@ export class BrandingEntity extends AuditedAndTrackedEntity {
     if (args) typeSafeAssign(this, args)
   }
 
-  @Column({ type: 'nvarchar' })
+  @Column({ type: nvarcharType })
   name!: string
 
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength, nullable: true })
   private dataJson!: string | null
 
   get data(): any | null {

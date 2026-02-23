@@ -1,6 +1,14 @@
 import { randomUUID } from 'crypto'
 import { isIP } from 'net'
 import { BeforeInsert, BeforeUpdate, Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, OneToMany, RelationId } from 'typeorm'
+import {
+  booleanType,
+  dateTimeOffsetTransformer,
+  dateTimeOffsetType,
+  nvarcharMaxLength,
+  nvarcharMaxType,
+  nvarcharType,
+} from '../../../data/utils/crossDbColumnTypes'
 import { OidcApplicationType, OidcClientType } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { assertExhaustive } from '../../../util/type-helpers'
@@ -39,13 +47,13 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
     }
   }
 
-  @DeleteDateColumn({ type: 'datetimeoffset', nullable: true })
+  @DeleteDateColumn({ type: dateTimeOffsetType, nullable: true, transformer: dateTimeOffsetTransformer })
   deletedAt!: Date | null
 
-  @Column({ type: 'nvarchar' })
+  @Column({ type: nvarcharType })
   name!: string
 
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true, name: 'logo' })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength, nullable: true, name: 'logo' })
   logo!: string | null
   @BeforeInsert()
   @BeforeUpdate()
@@ -53,10 +61,10 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
     this.logo = this.logo?.toString() ?? null
   }
 
-  @Column({ type: 'nvarchar', nullable: true })
+  @Column({ type: nvarcharType, nullable: true })
   backgroundColor!: string | null
 
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true, name: 'background_image' })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength, nullable: true, name: 'background_image' })
   backgroundImage!: string | null
   @BeforeInsert()
   @BeforeUpdate()
@@ -64,7 +72,7 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
     this.backgroundImage = this.backgroundImage?.toString() ?? null
   }
 
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true, name: 'policy_url' })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength, nullable: true, name: 'policy_url' })
   policyUrl!: string | null
   @BeforeInsert()
   @BeforeUpdate()
@@ -72,7 +80,7 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
     this.policyUrl = this.policyUrl?.toString() ?? null
   }
 
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true, name: 'terms_of_service_url' })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength, nullable: true, name: 'terms_of_service_url' })
   termsOfServiceUrl!: string | null
   @BeforeInsert()
   @BeforeUpdate()
@@ -80,13 +88,13 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
     this.termsOfServiceUrl = this.termsOfServiceUrl?.toString() ?? null
   }
 
-  @Column({ type: 'nvarchar', default: OidcApplicationType.Web })
+  @Column({ type: nvarcharType, default: OidcApplicationType.Web })
   applicationType!: OidcApplicationType
 
-  @Column({ type: 'nvarchar', default: OidcClientType.Public })
+  @Column({ type: nvarcharType, default: OidcClientType.Public })
   clientType!: OidcClientType
 
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength })
   private redirectUrisJson!: string
 
   get redirectUris(): string[] {
@@ -96,7 +104,7 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
     this.redirectUrisJson = JSON.stringify(value)
   }
 
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength })
   private postLogoutUrisJson!: string
 
   get postLogoutUris(): string[] {
@@ -109,31 +117,31 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
   /**
    * Require the client to use face check for all auth presentations.
    */
-  @Column({ type: 'bit', default: false })
+  @Column({ type: booleanType, default: false })
   requireFaceCheck!: boolean
 
   /**
    * Indicates whether JWT-secured authorisation requests (JAR) are enabled for this client.
    */
-  @Column({ type: 'bit', default: false, name: 'authorization_request_type_jar_enabled' })
+  @Column({ type: booleanType, default: false, name: 'authorization_request_type_jar_enabled' })
   authorizationRequestsTypeJarEnabled!: boolean
 
   /**
    * Indicates whether standard authorisation requests (query params) are enabled for this client.
    */
-  @Column({ type: 'bit', default: true, name: 'authorization_request_type_standard_enabled' })
+  @Column({ type: booleanType, default: true, name: 'authorization_request_type_standard_enabled' })
   authorizationRequestsTypeStandardEnabled!: boolean
 
   /**
    * The relying party's JWKS URI to use when JAR is enabled.
    */
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true, name: 'relying_party_jwks_uri' })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength, nullable: true, name: 'relying_party_jwks_uri' })
   relyingPartyJwksUri!: string | null
 
   /**
    * Allow the client to auth using presentations from any partner.
    */
-  @Column({ type: 'bit' })
+  @Column({ type: booleanType })
   allowAnyPartner!: boolean
 
   /**
@@ -155,7 +163,7 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
    * - The authentication client also can specify the claim to use via the `vc_unique_claim_for_sub` auth request parameter.
    * - If values are defined here and the `vc_unique_claim_for_sub` auth request parameter is provided, it is validated to be from this list.
    */
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength, nullable: true })
   private uniqueClaimsForSubjectIdJSON!: string | null
 
   get uniqueClaimsForSubjectId(): string[] | null {
@@ -168,7 +176,7 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
   /**
    * Optionally limit the client to auth using presentations of the specified types.
    */
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
+  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength, nullable: true })
   private credentialTypesJson!: string | null
 
   get credentialTypes(): string[] | null {
