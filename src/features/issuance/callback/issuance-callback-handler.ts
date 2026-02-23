@@ -1,7 +1,7 @@
 import { addSeconds } from 'date-fns'
 import { omit } from 'lodash'
 import { AuditEvents } from '../../../audit-types'
-import { ISOLATION_LEVEL, dataSource } from '../../../data'
+import { transactionOrReuse } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
 import { IssuanceRequestStatus } from '../../../generated/graphql'
 import { logger as globalLogger } from '../../../logger'
@@ -39,7 +39,7 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
     })
 
   if (event.requestStatus === IssuanceRequestStatus.IssuanceSuccessful) {
-    await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
+    await transactionOrReuse(async (entityManager) => {
       // look up the contract to get the validity interval
       const contract = await entityManager.getRepository(ContractEntity).findOneByOrFail({ id: issuanceRequestDetails.contractId })
       let validityIntervalInSeconds = contract.validityIntervalInSeconds

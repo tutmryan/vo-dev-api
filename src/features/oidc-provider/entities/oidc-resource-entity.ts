@@ -1,5 +1,12 @@
 import { randomUUID } from 'crypto'
 import { BeforeInsert, BeforeUpdate, Column, DeleteDateColumn, Entity } from 'typeorm'
+import {
+  dateTimeOffsetTransformer,
+  dateTimeOffsetType,
+  nvarcharMaxType,
+  nvarcharType,
+  varcharMaxLength,
+} from '../../../data/utils/crossDbColumnTypes'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 
@@ -12,13 +19,13 @@ export class OidcResourceEntity extends AuditedAndTrackedEntity {
     if (args) typeSafeAssign(this, { ...args, id: args.id ?? randomUUID() })
   }
 
-  @DeleteDateColumn({ type: 'datetimeoffset', nullable: true })
+  @DeleteDateColumn({ type: dateTimeOffsetType, nullable: true, transformer: dateTimeOffsetTransformer })
   deletedAt!: Date | null
 
-  @Column({ type: 'nvarchar' })
+  @Column({ type: nvarcharType })
   name!: string
 
-  @Column({ type: 'nvarchar', name: 'resource_indicator' })
+  @Column({ type: nvarcharType, name: 'resource_indicator' })
   resourceIndicator!: string
   @BeforeInsert()
   @BeforeUpdate()
@@ -26,7 +33,7 @@ export class OidcResourceEntity extends AuditedAndTrackedEntity {
     this.resourceIndicator = this.resourceIndicator.toString()
   }
 
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength })
   private scopesJson!: string
 
   get scopes(): string[] {

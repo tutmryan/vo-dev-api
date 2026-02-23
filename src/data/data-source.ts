@@ -1,20 +1,21 @@
 import { environment, isLocalDev } from '@makerx/node-common'
 import 'reflect-metadata'
-import { DataSource } from 'typeorm'
+import { DataSource, type DataSourceOptions, type MixedList } from 'typeorm'
 import type { SqlServerConnectionOptions } from 'typeorm/driver/sqlserver/SqlServerConnectionOptions'
 import { database as databaseConfig } from '../config'
 import { AuditingEventSubscriber } from '../features/auditing/auditing-event-subscribers'
 import { TrackingEventSubscriber } from '../features/auditing/tracking-event-subscriber'
 import { LoggerForTypeOrm, logger } from '../logger'
-import { randomDigits } from '../util/random-digits'
 import type { VerifiedOrchestrationEntityManager } from './entity-manager'
 import { SnakeNamingStrategy } from './utils/snake-naming-strategy'
 
 const { logging, host, port } = databaseConfig
 let { database } = databaseConfig
 
-if (process.env.NODE_ENV === 'test' && process.env.TEST_DATA_MIGRATION_DRIFT !== 'true') {
-  database = `${database}_${randomDigits(6)}`
+const isTest = process.env.NODE_ENV === 'test' && process.env.TEST_DATA_MIGRATION_DRIFT !== 'true'
+
+if (isTest) {
+  database = `:memory:`
 }
 
 const baseConfig: Pick<
@@ -44,6 +45,19 @@ const baseConfig: Pick<
   subscribers: [TrackingEventSubscriber, AuditingEventSubscriber],
 }
 
+const sqliteConfig: DataSourceOptions = {
+  type: 'sqlite',
+  database: ':memory:',
+  synchronize: true,
+  dropSchema: true,
+  logger: new LoggerForTypeOrm(logging, logger),
+  entities: ['src/**/entities/*{.ts,.js}'] as MixedList<string>,
+  migrations: [],
+  migrationsTransactionMode: 'each',
+  namingStrategy: new SnakeNamingStrategy(),
+  subscribers: [TrackingEventSubscriber, AuditingEventSubscriber],
+}
+
 const usernamePasswordAuthConfig: () => SqlServerConnectionOptions = () => {
   const { username, password } = databaseConfig
   return {
@@ -68,7 +82,11 @@ const aadAuthConfig: () => SqlServerConnectionOptions = () => {
   }
 }
 
-export const dataSourceConfig: SqlServerConnectionOptions =
-  isLocalDev || environment === 'test' ? usernamePasswordAuthConfig() : aadAuthConfig()
+export const dataSourceConfig: DataSourceOptions = isTest
+  ? sqliteConfig
+  : isLocalDev || environment === 'test'
+    ? usernamePasswordAuthConfig()
+    : aadAuthConfig()
+export const isSqlite = dataSourceConfig.type === 'sqlite'
 export const dataSource = new DataSource(dataSourceConfig)
 export const entityManager = dataSource.manager as VerifiedOrchestrationEntityManager

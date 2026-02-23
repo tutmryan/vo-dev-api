@@ -1,6 +1,14 @@
 import { pick } from 'lodash'
 import { Column, Entity, ManyToOne } from 'typeorm'
-import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
+import {
+  booleanType,
+  dateTimeOffsetTransformer,
+  dateTimeOffsetType,
+  nvarcharMaxType,
+  nvarcharType,
+  varcharMaxLength,
+} from '../../../data/utils/crossDbColumnTypes'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
 import type { Callback, PresentationRequestInput } from '../../../generated/graphql'
 import { ApprovalRequestStatus } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
@@ -28,29 +36,29 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
     if (args) typeSafeAssign(this, args)
   }
 
-  @Column({ type: 'datetimeoffset' })
+  @Column({ type: dateTimeOffsetType, transformer: dateTimeOffsetTransformer })
   expiresAt!: Date
 
-  @Column({ type: 'nvarchar' })
+  @Column({ type: nvarcharType })
   requestType!: string
 
-  @Column({ type: 'nvarchar', nullable: true })
+  @Column({ type: nvarcharType, nullable: true })
   correlationId!: string | null
 
-  @Column({ type: 'nvarchar', nullable: true })
+  @Column({ type: nvarcharType, nullable: true })
   referenceUrl!: string | null
 
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
   purpose!: string | null
 
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
   requestDataJson!: string | null
 
   get requestData(): any | null {
     return this.requestDataJson ? JSON.parse(this.requestDataJson) : null
   }
 
-  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
   callbackJson!: string | null
 
   get callback(): any | null {
@@ -61,10 +69,10 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
     return this.callbackJson ? JSON.parse(this.callbackJson) : null
   }
 
-  @Column({ type: 'uniqueidentifier', transformer: uuidLowerCaseTransformer })
+  @Column({ type: 'uuid', transformer: uuidLowerCaseTransformer })
   callbackSecret!: string
 
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength })
   presentationRequestJson!: string
 
   get presentationRequest(): any {
@@ -78,16 +86,16 @@ export class ApprovalRequestEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => PresentationEntity)
   presentation!: Promise<PresentationEntity | null>
 
-  @Column({ type: 'uniqueidentifier', nullable: true, transformer: uuidLowerCaseTransformer })
+  @Column({ type: 'uuid', nullable: true, transformer: uuidLowerCaseTransformer })
   presentationId!: string | null
 
-  @Column({ type: 'bit', nullable: true })
+  @Column({ type: booleanType, nullable: true })
   isApproved!: boolean | null
 
-  @Column({ type: 'bit', nullable: true })
+  @Column({ type: booleanType, nullable: true })
   isCancelled!: boolean | null
 
-  @Column({ type: 'nvarchar', nullable: true })
+  @Column({ type: nvarcharType, nullable: true })
   actionedComment!: string | null
 
   get status(): ApprovalRequestStatus {
