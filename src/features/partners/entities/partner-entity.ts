@@ -1,12 +1,5 @@
 import { Column, DeleteDateColumn, Entity, JoinTable, ManyToMany, RelationId } from 'typeorm'
-import {
-  dateTimeOffsetTransformer,
-  dateTimeOffsetType,
-  nvarcharMaxLength,
-  nvarcharMaxType,
-  nvarcharType,
-} from '../../../data/utils/crossDbColumnTypes'
-import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { createSha256Hash } from '../../../util/crypto-hash'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
@@ -27,16 +20,16 @@ export class PartnerEntity extends AuditedAndTrackedEntity {
       })
   }
 
-  @Column({ type: nvarcharType })
+  @Column({ type: 'nvarchar' })
   name!: string
 
-  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength })
+  @Column({ type: 'nvarchar', length: 'MAX' })
   did!: string
 
   @Column({ type: 'varchar', unique: true, length: 255 })
   didHash!: string
 
-  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength })
+  @Column({ type: 'nvarchar', length: 'MAX' })
   credentialTypesJson!: string
 
   get credentialTypes(): string[] {
@@ -46,13 +39,13 @@ export class PartnerEntity extends AuditedAndTrackedEntity {
     this.credentialTypesJson = JSON.stringify(types)
   }
 
-  @Column({ type: 'uuid', nullable: true, transformer: uuidLowerCaseTransformer })
+  @Column({ type: 'uniqueidentifier', nullable: true, transformer: uuidLowerCaseTransformer })
   tenantId!: string | null
 
-  @Column({ type: 'uuid', nullable: true, transformer: uuidLowerCaseTransformer })
+  @Column({ type: 'uniqueidentifier', nullable: true, transformer: uuidLowerCaseTransformer })
   issuerId!: string | null
 
-  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength, nullable: true })
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
   linkedDomainUrlsJson!: string | null
 
   get linkedDomainUrls(): string[] | null {
@@ -62,7 +55,7 @@ export class PartnerEntity extends AuditedAndTrackedEntity {
     this.linkedDomainUrlsJson = urls ? JSON.stringify(urls) : null
   }
 
-  @DeleteDateColumn({ type: dateTimeOffsetType, nullable: true, transformer: dateTimeOffsetTransformer })
+  @DeleteDateColumn({ type: 'datetimeoffset', nullable: true })
   deletedAt!: Date | null
 
   @ManyToMany(() => PresentationEntity)

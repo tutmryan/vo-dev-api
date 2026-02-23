@@ -1,5 +1,4 @@
 import { Column, Entity, OneToMany, RelationId } from 'typeorm'
-import { nvarcharMaxLength, nvarcharMaxType } from '../../../data/utils/crossDbColumnTypes'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import { createSha256Hash } from '../../../util/crypto-hash'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
@@ -20,7 +19,7 @@ export class WalletEntity extends VerifiedOrchestrationEntity {
     })
   }
 
-  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength })
+  @Column({ type: 'varchar', length: 'MAX' })
   subject!: string
 
   @Column({ type: 'varchar', unique: true, length: 255 })

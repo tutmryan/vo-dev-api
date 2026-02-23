@@ -2,7 +2,7 @@ import type { JwtPayload } from '@makerx/graphql-core'
 import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { addDays, startOfToday } from 'date-fns'
-import { transactionOrReuse } from '../../../data'
+import { ISOLATION_LEVEL, dataSource } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
 import { graphql } from '../../../generated'
 import type { ApprovalRequestInput } from '../../../generated/graphql'
@@ -94,7 +94,7 @@ export async function createApprovalRequest(input: ApprovalRequestInput, jwt?: J
 async function createPresentationForApprovalRequest(approvalRequestId: string) {
   const identity = await createIdentity()
   const contract = await createContract(getDefaultContractInput())
-  const { presentation } = await transactionOrReuse(async (entityManager) => {
+  const { presentation } = await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
     const requestedBy = await entityManager
       .getRepository(UserEntity)
       .save(new UserEntity({ email: casual.email, isApp: true, name: 'Test', oid: randomUUID(), tenantId: randomUUID() }))

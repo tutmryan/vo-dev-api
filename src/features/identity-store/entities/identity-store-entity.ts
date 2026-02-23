@@ -1,6 +1,5 @@
 import { Column, DeleteDateColumn, Entity } from 'typeorm'
 
-import { booleanType, dateTimeOffsetTransformer, dateTimeOffsetType, nvarcharType } from '../../../data/utils/crossDbColumnTypes'
 import { IdentityStoreType } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
@@ -16,19 +15,19 @@ export class IdentityStoreEntity extends AuditedAndTrackedEntity {
     typeSafeAssign(this, args)
   }
 
-  @DeleteDateColumn({ type: dateTimeOffsetType, nullable: true, transformer: dateTimeOffsetTransformer })
+  @DeleteDateColumn({ type: 'datetimeoffset', nullable: true })
   deletedAt!: Date | null
 
   @Column({ name: 'identifier', type: 'varchar', unique: true, length: 255 })
   identifier!: string
 
-  @Column({ name: 'name', type: nvarcharType, length: 255 })
+  @Column({ name: 'name', type: 'nvarchar', length: 255 })
   name!: string
 
-  @Column({ name: 'type', type: nvarcharType, length: 50 })
+  @Column({ name: 'type', type: 'nvarchar', length: 50 })
   type!: IdentityStoreType
 
-  @Column({ name: 'is_authentication_enabled', type: booleanType })
+  @Column({ name: 'is_authentication_enabled', type: 'bit' })
   isAuthenticationEnabled!: boolean
 
   @Column({ name: 'client_id', type: 'varchar', length: 255, nullable: true })

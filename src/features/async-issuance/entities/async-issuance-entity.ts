@@ -1,7 +1,6 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm'
 import { calculateExpiryFromNow, convertAsyncIssuanceExpiryDaysToRequestExpiry, ExpiryPeriodsInDays } from '..'
-import { dateTimeOffsetTransformer, dateTimeOffsetType, nvarcharType } from '../../../data/utils/crossDbColumnTypes'
-import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { AsyncIssuanceRequestExpiry, AsyncIssuanceRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
 import { invariant } from '../../../util/invariant'
@@ -40,7 +39,7 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
     })
   }
 
-  @Column({ type: dateTimeOffsetType, transformer: dateTimeOffsetTransformer })
+  @Column({ type: 'datetimeoffset' })
   expiresOn!: Date
 
   @Column({ type: 'smallint' })
@@ -64,13 +63,13 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
   @Column({ nullable: true, transformer: uuidLowerCaseTransformer })
   issuanceId!: string | null
 
-  @Column({ type: nvarcharType, default: 'pending' })
+  @Column({ type: 'nvarchar', default: 'pending' })
   state!: 'pending' | 'contacted' | 'contact-failed' | 'issued' | 'issuance-verification-failed' | 'issuance-failed' | 'cancelled'
 
   @OneToMany(() => CommunicationEntity, (communication) => communication.asyncIssuance)
   communications!: Promise<CommunicationEntity[]>
 
-  @Column({ type: nvarcharType, nullable: true, name: 'post_issuance_redirect_url' })
+  @Column({ type: 'nvarchar', nullable: true, name: 'post_issuance_redirect_url' })
   postIssuanceRedirectUrl!: string | null
   @BeforeInsert()
   @BeforeUpdate()

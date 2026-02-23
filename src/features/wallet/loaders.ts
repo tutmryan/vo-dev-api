@@ -36,7 +36,7 @@ export const walletUsedDateLoader = (aggregation: AggregationType) => {
       const walletId = row.walletId
       const dateString = row[alias]
       if (walletId && dateString) {
-        resultMap.set(walletId, new Date(dateString.endsWith('Z') ? dateString : `${dateString}Z`))
+        resultMap.set(walletId, new Date(dateString))
       }
     }
 

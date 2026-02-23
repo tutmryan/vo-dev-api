@@ -12,7 +12,7 @@ const manyToOneRelations = () => {
       typeName: isFunction(r.type) ? r.type().name : r.type,
     }))
 }
-const uniqueidentifierColumns = () => typeormMetadata.columns.filter((c) => c.options.type === 'uuid')
+const uniqueidentifierColumns = () => typeormMetadata.columns.filter((c) => c.options.type === 'uniqueidentifier')
 
 describe('Entity Conventions', () => {
   beforeAfterAll()

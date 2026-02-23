@@ -2,7 +2,7 @@ import type { ClientMetadata } from 'oidc-provider'
 import { oidcSecretService } from '.'
 import { runDeduplicatedJob } from '../../background-jobs'
 import { apiUrl, portalUrl } from '../../config'
-import { transactionOrReuse } from '../../data'
+import { dataSource, ISOLATION_LEVEL as TXN_ISOLATION_LEVEL } from '../../data'
 import { addUserToManager } from '../../data/user-context-helper'
 import { OidcApplicationType, OidcClientType } from '../../generated/graphql'
 import { logger } from '../../logger'
@@ -109,7 +109,7 @@ async function loadOrInitialise(): Promise<SourceOidcData> {
 }
 
 export function loadExistingData(): Promise<SourceOidcData> {
-  return transactionOrReuse(async (entityManager) => {
+  return dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
     const clientRepo = entityManager.getRepository(OidcClientEntity)
     const resourceRepo = entityManager.getRepository(OidcResourceEntity)
     const partnerRepo = entityManager.getRepository(PartnerEntity)
@@ -171,7 +171,7 @@ function dataIsInitialised([clients, resources]: SourceOidcData) {
 export async function initialiseDataFromDeduplicatedBackgroundJob() {
   logger.info('Initialising OIDC data')
 
-  await transactionOrReuse(async (entityManager) => {
+  await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
     const clientRepo = entityManager.getRepository(OidcClientEntity)
     const resourceRepo = entityManager.getRepository(OidcResourceEntity)
     const clientResourceRepo = entityManager.getRepository(OidcClientResourceEntity)
@@ -239,7 +239,7 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
 }
 
 export async function checkIssuanceIsNotRevoked(issuanceId: string) {
-  const isRevoked = await transactionOrReuse(async (entityManager) => {
+  const isRevoked = await dataSource.manager.transaction(TXN_ISOLATION_LEVEL, async (entityManager) => {
     return await entityManager.getRepository(IssuanceEntity).existsBy({ id: issuanceId, isRevoked: true })
   })
   if (isRevoked) {

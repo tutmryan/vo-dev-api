@@ -205,3 +205,4 @@ export type Config = {
 
 const typedConfig = createTypedConfig<Config>(config)
 export default typedConfig
+export * from './expanded'

@@ -1,12 +1,5 @@
 import { sortBy } from 'lodash'
 import { Column, DeleteDateColumn, Entity } from 'typeorm'
-import {
-  dateTimeOffsetTransformer,
-  dateTimeOffsetType,
-  nvarcharMaxLength,
-  nvarcharMaxType,
-  nvarcharType,
-} from '../../../data/utils/crossDbColumnTypes'
 import { ScopedClaimMapping } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
@@ -22,13 +15,13 @@ export class OidcClaimMappingEntity extends AuditedAndTrackedEntity {
     if (args) typeSafeAssign(this, args)
   }
 
-  @DeleteDateColumn({ type: dateTimeOffsetType, nullable: true, transformer: dateTimeOffsetTransformer })
+  @DeleteDateColumn({ type: 'datetimeoffset', nullable: true })
   deletedAt!: Date | null
 
-  @Column({ type: nvarcharType })
+  @Column({ type: 'nvarchar' })
   name!: string
 
-  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength })
+  @Column({ type: 'nvarchar', length: 'MAX' })
   private mappingJson!: string
 
   get mapping(): ClaimMapping {
@@ -38,7 +31,7 @@ export class OidcClaimMappingEntity extends AuditedAndTrackedEntity {
     this.mappingJson = JSON.stringify(value)
   }
 
-  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength, nullable: true })
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
   credentialTypesJson!: string | null
 
   get credentialTypes(): string[] | null {

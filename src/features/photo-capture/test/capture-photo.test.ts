@@ -17,18 +17,6 @@ import { acquireLimitedPhotoCaptureTokenMutation } from '../../limited-photo-cap
 describe('capturePhoto mutation', () => {
   jest.setTimeout(15000)
   beforeAfterAll()
-
-  let contractId: string
-  let identityId: string
-  beforeAll(async () => {
-    mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
-      mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
-    )
-    const { contract, identity } = await setupPhotoCaptureData()
-    contractId = contract.id
-    identityId = identity.id
-  }, 15000)
-
   beforeEach(() => {
     mockedServices.clearAllMocks()
     mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
@@ -88,7 +76,11 @@ describe('capturePhoto mutation', () => {
 
   it('works with valid input', async () => {
     // Arrange
-    const photoCaptureRequest = await createPhotoCaptureRequest({ contractId, identityId })
+    const {
+      contract: { id: contractId },
+      identity: { id: identityId },
+    } = await setupPhotoCaptureData()
+    const photoCaptureRequest = await createPhotoCaptureRequest()
     expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
     const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
@@ -115,7 +107,11 @@ describe('capturePhoto mutation', () => {
 
   it('prevents capturing a photo more than once', async () => {
     // Arrange
-    const photoCaptureRequest = await createPhotoCaptureRequest({ contractId, identityId })
+    const {
+      contract: { id: contractId },
+      identity: { id: identityId },
+    } = await setupPhotoCaptureData()
+    const photoCaptureRequest = await createPhotoCaptureRequest()
     expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
     const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
@@ -143,7 +139,11 @@ describe('capturePhoto mutation', () => {
 
   it('prevents acquiring a token for a photo request that has already been captured', async () => {
     // Arrange
-    const photoCaptureRequest = await createPhotoCaptureRequest({ contractId, identityId })
+    const {
+      contract: { id: contractId },
+      identity: { id: identityId },
+    } = await setupPhotoCaptureData()
+    const photoCaptureRequest = await createPhotoCaptureRequest()
     expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
     const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
@@ -174,7 +174,11 @@ describe('capturePhoto mutation', () => {
 
   it('returns an error for invalid photo format', async () => {
     // Arrange
-    const photoCaptureRequest = await createPhotoCaptureRequest({ contractId, identityId })
+    const {
+      contract: { id: contractId },
+      identity: { id: identityId },
+    } = await setupPhotoCaptureData()
+    const photoCaptureRequest = await createPhotoCaptureRequest()
     expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
     const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
@@ -199,7 +203,11 @@ describe('capturePhoto mutation', () => {
 
   it('returns an error for invalid photo data url', async () => {
     // Arrange
-    const photoCaptureRequest = await createPhotoCaptureRequest({ contractId, identityId })
+    const {
+      contract: { id: contractId },
+      identity: { id: identityId },
+    } = await setupPhotoCaptureData()
+    const photoCaptureRequest = await createPhotoCaptureRequest()
     expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
     const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest
 
@@ -224,10 +232,13 @@ describe('capturePhoto mutation', () => {
 
   it('returns an auth error attempting to upload for a different photo request', async () => {
     // Arrange
-    const [photoCaptureRequest, photoCaptureRequest2] = await Promise.all([
-      createPhotoCaptureRequest({ contractId, identityId }),
-      createPhotoCaptureRequest({ contractId, identityId }),
-    ])
+    const {
+      contract: { id: contractId },
+      identity: { id: identityId },
+    } = await setupPhotoCaptureData()
+
+    const photoCaptureRequest = await createPhotoCaptureRequest({ contractId, identityId })
+    const photoCaptureRequest2 = await createPhotoCaptureRequest()
 
     expectToBeDefined(photoCaptureRequest.data?.createPhotoCaptureRequest)
     const { id: photoCaptureRequestId } = photoCaptureRequest.data.createPhotoCaptureRequest

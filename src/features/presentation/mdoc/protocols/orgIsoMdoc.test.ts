@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, jest } from '@jest/globals'
 import { decode, encode, Tag } from 'cbor2'
 import { createHash } from 'crypto'
 import * as HPKE from 'hpke'
@@ -5,9 +6,9 @@ import { InvariantError } from '../../../../util/invariant'
 import type { MDocRequestClaimPath } from '../types'
 
 // Mocks
-const mockCacheGet = jest.fn()
-const mockCacheSet = jest.fn()
-const mockCacheDelete = jest.fn()
+const mockCacheGet = jest.fn<(...args: unknown[]) => Promise<unknown>>()
+const mockCacheSet = jest.fn<(...args: unknown[]) => Promise<void>>()
+const mockCacheDelete = jest.fn<(...args: unknown[]) => Promise<void>>()
 
 jest.mock('../shared-config', () => ({
   mdocEphemeralKeys: () => ({
@@ -17,7 +18,7 @@ jest.mock('../shared-config', () => ({
   }),
 }))
 
-const mockValidateMDocResponse = jest.fn()
+const mockValidateMDocResponse = jest.fn<(...args: unknown[]) => Promise<unknown>>()
 jest.mock('../mdoc', () => ({
   validateMDocResponse: (...args: unknown[]) => mockValidateMDocResponse(...args),
 }))

@@ -1,12 +1,5 @@
 import { Column, CreateDateColumn, Entity, Index, JoinTable, ManyToMany, ManyToOne, RelationId } from 'typeorm'
-import {
-  dateTimeOffsetTransformer,
-  dateTimeOffsetType,
-  nvarcharMaxLength,
-  nvarcharMaxType,
-  nvarcharType,
-} from '../../../data/utils/crossDbColumnTypes'
-import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
 import { VerifiedOrchestrationEntity } from '../../../data/verified-orchestration-entity'
 import type { PresentedCredential, RequestCredential } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
@@ -42,7 +35,7 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
     })
   }
 
-  @Column({ type: nvarcharType, nullable: true })
+  @Column({ type: 'nvarchar', nullable: true })
   requestId!: string | null
 
   @ManyToOne(() => IdentityEntity)
@@ -71,10 +64,10 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
   @RelationId((presentation: PresentationEntity) => presentation.partners)
   partnerIds!: string[]
 
-  @CreateDateColumn({ type: dateTimeOffsetType, transformer: dateTimeOffsetTransformer })
+  @CreateDateColumn({ type: 'datetimeoffset' })
   presentedAt!: Date
 
-  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength })
+  @Column({ type: 'nvarchar', length: 'MAX' })
   requestedCredentialsJson!: string
 
   get requestedCredentials(): RequestCredential[] {
@@ -85,7 +78,7 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
     this.requestedCredentialsJson = JSON.stringify(requestedCredentials)
   }
 
-  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength })
+  @Column({ type: 'nvarchar', length: 'MAX' })
   presentedCredentialsJson!: string
 
   get presentedCredentials(): PresentedData[] {
@@ -96,7 +89,7 @@ export class PresentationEntity extends VerifiedOrchestrationEntity {
     this.presentedCredentialsJson = JSON.stringify(presentedCredentials)
   }
 
-  @Column({ type: nvarcharMaxType, length: nvarcharMaxLength, nullable: true })
+  @Column({ type: 'nvarchar', length: 'MAX', nullable: true })
   receiptJson!: string | null
 
   get receipt(): Record<string, unknown> | null {
