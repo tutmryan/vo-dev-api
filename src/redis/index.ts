@@ -7,9 +7,11 @@ import { logger } from '../logger'
 
 export const isRedisEnabled = !!redisConfig.host
 
-if (!isRedisEnabled && !isLocalDev && environment !== 'test') {
-  logger.warn(`Redis is not configured - this configuration is unexpected for environment: ${environment}`)
-} else {
+if (!isLocalDev && environment !== 'test') {
+  if (!isRedisEnabled) {
+    logger.warn(`Redis is not configured - this configuration is unexpected for environment: ${environment}`)
+  }
+
   logger.info(`Caching and pubsub configured using ${isRedisEnabled ? 'Redis' : 'in-memory fallback'} `)
 }
 
