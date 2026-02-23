@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       docs_site: ${{ steps.filter.outputs.docs_site }}
-      migrate_db: ${{ steps.filter.outputs.migrate_db }}
     steps:
       - name: Filter paths
         id: filter
@@ -26,8 +25,6 @@ jobs:
           filters: |
             docs_site:
               - 'docs-site/**'
-            migrate_db:
-              - 'migrate-db/**'
 
   ci-api:
     name: CI API
@@ -40,10 +37,8 @@ jobs:
       test-script: npm run test:ci
       output-test-results: true
 
-  ci-migrations-package-run:
-    name: CI Migrations Package - Run
-    needs: changes
-    if: needs.changes.outputs.migrate_db == 'true'
+  ci-migrations-package:
+    name: CI Migrations Package
     uses: ./.github/workflows/node-ci.yml
     with:
       node-version: 22.x
@@ -53,24 +48,6 @@ jobs:
       run-audit: ${{ github.event.pull_request.user.login != 'dependabot[bot]' }}
       working-directory: ./migrate-db
       test-script: npm run verify-migrations
-
-  ci-migrations-package:
-    name: CI Migrations Package
-    needs: [changes, ci-migrations-package-run]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check result
-        run: |
-          if [[ "${{ needs.changes.outputs.migrate_db }}" != "true" ]]; then
-            echo "Skipped — no migrate-db changes"
-            exit 0
-          fi
-          if [[ "${{ needs.ci-migrations-package-run.result }}" == "success" ]]; then
-            exit 0
-          fi
-          echo "CI Migrations Package failed"
-          exit 1
 
   ci-docs-site-run:
     name: CI Docs Site - Run
