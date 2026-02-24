@@ -39,6 +39,7 @@ import {
 import { isOidcAuthnClient, isValidOidcAuthnPresentationRequest } from './features/oidc-provider/shield-rules'
 import { isValidCapturePhoto, isValidLimitedIssuancePhotoCaptureRequest } from './features/photo-capture/shield-rules'
 import type { Resolvers } from './generated/graphql'
+import { logger } from './logger'
 import {
   anyUserRule,
   fallbackRule,
@@ -422,12 +423,22 @@ export const rules: ShieldSchema<Resolvers> = {
 export const permissions = wrappedShield(rules)
 
 function wrappedShield(x: ShieldSchema<Resolvers>) {
+  const debug = isLocalDev || isDev
+
   return shield(x as IRules, {
     fallbackRule,
-    debug: isLocalDev || isDev, // [doc](https://the-guild.dev/graphql/shield/docs/shield) says: _Toggle debug mode._ (???)
+    debug,
     allowExternalErrors: true, // we don't want shield to catch and convert all errors to: Not Authorised!
-    fallbackError: new GraphQLError('Not Authorized!', {
-      extensions: { code: 'FORBIDDEN', http: { status: 403 } },
-    }),
+    fallbackError: (thrownThing, _parent, _args, _context, info) => {
+      const location = `${info.parentType.name}.${info.fieldName}`
+
+      if (debug) {
+        logger.warn(`GraphQL Shield rejected operation`, { name: info.operation.name?.value, location, path: info.path, thrownThing })
+      }
+
+      return new GraphQLError('Not Authorized!', {
+        extensions: { code: 'FORBIDDEN', http: { status: 403 } },
+      })
+    },
   })
 }
