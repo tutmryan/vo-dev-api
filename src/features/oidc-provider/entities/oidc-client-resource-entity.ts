@@ -1,5 +1,6 @@
 import { Column, Entity, Index, ManyToOne } from 'typeorm'
-import { uuidLowerCaseTransformer } from '../../../data/utils/uuid-lower-case-transformer'
+import { nvarcharMaxType, varcharMaxLength } from '../../../data/utils/crossDbColumnTypes'
+import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { OidcClientEntity } from './oidc-client-entity'
@@ -31,7 +32,7 @@ export class OidcClientResourceEntity extends AuditedAndTrackedEntity {
   /**
    * Defines the scopes that the client may request for the resource.
    */
-  @Column({ type: 'nvarchar', length: 'MAX' })
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength })
   private resourceScopesJson!: string
 
   get resourceScopes(): string[] {

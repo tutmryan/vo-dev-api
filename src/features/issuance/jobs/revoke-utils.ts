@@ -2,7 +2,7 @@ import { omit } from 'lodash'
 import { In, type FindOptionsWhere } from 'typeorm'
 import { AuditEvents } from '../../../audit-types'
 import type { HandlerContext } from '../../../background-jobs/jobs'
-import { ISOLATION_LEVEL, dataSource } from '../../../data'
+import { dataSource, transactionOrReuse } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
 import { IssuanceStatus } from '../../../generated/graphql'
 import type { logger } from '../../../logger'
@@ -69,7 +69,7 @@ const revokeIssuanceBatch = async (context: HandlerContext, issuances: IssuanceE
       // if the issuance has been previously revoked, we don't need to proceed further
       if (!issuance.isRevoked) {
         // start a new transaction for each issuance revocation
-        await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
+        await transactionOrReuse(async (entityManager) => {
           logger.info(`revoking issuance ${issuance.id}`)
 
           const result = await revokeIssuance(issuance, verifiedIdAdmin, user, logger, contract)

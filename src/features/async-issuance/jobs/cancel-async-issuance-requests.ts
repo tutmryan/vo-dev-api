@@ -1,7 +1,7 @@
 import { type FindOptionsWhere, In } from 'typeorm'
 import { AuditEvents } from '../../../audit-types'
 import type { HandlerContext, JobHandler } from '../../../background-jobs/jobs'
-import { dataSource, ISOLATION_LEVEL } from '../../../data'
+import { dataSource, transactionOrReuse } from '../../../data'
 import { addUserToManager } from '../../../data/user-context-helper'
 import { invariant } from '../../../util/invariant'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
@@ -36,7 +36,7 @@ const cancelAsyncIssuanceRequests = async (context: HandlerContext, where: FindO
         continue
       }
 
-      await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
+      await transactionOrReuse(async (entityManager) => {
         addUserToManager(entityManager, user.id)
         await asyncIssuances.deleteAsyncIssuanceIfExists(
           request.id,
