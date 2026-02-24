@@ -54,15 +54,6 @@
     "value": "VerifiableCredential.AcquireLimitedAccessToken.Present"
   },
   {
-    "id": "e0bc5748-b9fc-4859-ac78-3e506d37ae14",
-    "allowedMemberTypes": ["Application"],
-    "isEnabled": true,
-    "origin": "Application",
-    "description": "Provides access to create approval requests and read approval data",
-    "displayName": "Approval request integration",
-    "value": "VerifiableCredential.RequestApproval"
-  },
-  {
     "id": "137a06ee-22db-486f-be90-4edd4871cb51",
     "allowedMemberTypes": ["Application"],
     "isEnabled": true,
@@ -108,15 +99,6 @@
     "value": "VerifiableCredential.PartnerAdmin"
   },
   {
-    "id": "41d281b4-0328-4741-88fa-8aae49e1550e",
-    "allowedMemberTypes": ["User"],
-    "isEnabled": true,
-    "origin": "Application",
-    "description": "Provides access to administer approval requests",
-    "displayName": "Approval request admin",
-    "value": "VerifiableCredential.ApprovalRequestAdmin"
-  },
-  {
     "id": "5219f907-82b7-4bef-9cc4-6a9625324bcc",
     "allowedMemberTypes": ["User"],
     "isEnabled": true,
@@ -151,5 +133,68 @@
     "description": "Can revoke credentials",
     "displayName": "Credentials - Revoke",
     "value": "credentials.revoke"
+  },
+  {
+    "id": "f71bc363-7743-4929-96ae-ffcd58e250c6",
+    "allowedMemberTypes": ["User", "Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to create presentation flows",
+    "displayName": "Presentation flow - Create",
+    "value": "presentationFlow.create"
+  },
+  {
+    "id": "4de9e848-cceb-49f0-bfcd-a4386b6c9502",
+    "allowedMemberTypes": ["User", "Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to read presentation flows and their data",
+    "displayName": "Presentation flow - Read",
+    "value": "presentationFlow.read"
+  },
+  {
+    "id": "b1a495b8-46d6-46c7-bb38-912974c3022e",
+    "allowedMemberTypes": ["User", "Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to cancel presentation flows",
+    "displayName": "Presentation flow - Cancel",
+    "value": "presentationFlow.cancel"
+  },
+  {
+    "id": "cd9386c5-91e0-402c-b5e4-5910ba3a805c",
+    "allowedMemberTypes": ["User", "Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to create presentation flow templates",
+    "displayName": "Presentation flow - Template - Create",
+    "value": "presentationFlow.template.create"
+  },
+  {
+    "id": "67906a5b-6718-419b-a47e-c42fa311ba1e",
+    "allowedMemberTypes": ["User", "Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to read presentation flow templates",
+    "displayName": "Presentation flow - Template - Read",
+    "value": "presentationFlow.template.read"
+  },
+  {
+    "id": "10dcedc3-a464-444a-9031-b44bb96482a5",
+    "allowedMemberTypes": ["User", "Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to update presentation flow templates",
+    "displayName": "Presentation flow - Template - Update",
+    "value": "presentationFlow.template.update"
+  },
+  {
+    "id": "298afbf9-6639-4664-93fc-9257d13ebd03",
+    "allowedMemberTypes": ["User", "Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to delete presentation flow templates",
+    "displayName": "Presentation flow - Template - Delete",
+    "value": "presentationFlow.template.delete"
   }
 ]
