@@ -54,6 +54,15 @@
     "value": "VerifiableCredential.AcquireLimitedAccessToken.Present"
   },
   {
+    "id": "e0bc5748-b9fc-4859-ac78-3e506d37ae14",
+    "allowedMemberTypes": ["Application"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to create approval requests and read approval data",
+    "displayName": "Approval request integration",
+    "value": "VerifiableCredential.RequestApproval"
+  },
+  {
     "id": "137a06ee-22db-486f-be90-4edd4871cb51",
     "allowedMemberTypes": ["Application"],
     "isEnabled": true,
@@ -97,6 +106,15 @@
     "description": "Provide access to administer partners; includes Reader access",
     "displayName": "Partner admin",
     "value": "VerifiableCredential.PartnerAdmin"
+  },
+  {
+    "id": "41d281b4-0328-4741-88fa-8aae49e1550e",
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Provides access to administer approval requests",
+    "displayName": "Approval request admin",
+    "value": "VerifiableCredential.ApprovalRequestAdmin"
   },
   {
     "id": "5219f907-82b7-4bef-9cc4-6a9625324bcc",
