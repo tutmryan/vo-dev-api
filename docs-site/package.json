@@ -31,7 +31,7 @@
     "@docusaurus/preset-classic": "^3.9.2",
     "@easyops-cn/docusaurus-search-local": "^0.52.3",
     "@graphql-markdown/docusaurus": "^1.30.3",
-    "@graphql-tools/json-file-loader": "^8.0.25",
+    "@graphql-tools/json-file-loader": "^8.0.26",
     "@mdx-js/react": "^3.1.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.2.3",
