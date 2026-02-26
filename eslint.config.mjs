@@ -2,6 +2,8 @@ import js from '@eslint/js'
 import graphqlPlugin from '@graphql-eslint/eslint-plugin'
 import prettierPlugin from 'eslint-plugin-prettier'
 import * as tseslint from 'typescript-eslint'
+import noHardcodedColumnTypes from './.eslint/no-hardcoded-column-types.mjs'
+import uuidRequiresTransformer from './.eslint/uuid-requires-transformer.mjs'
 
 export default [
   // Ignore build artifacts
@@ -45,6 +47,22 @@ export default [
           caughtErrorsIgnorePattern: '.*',
         },
       ],
+    },
+  },
+
+  {
+    files: ['src/**/entities/**/*.ts'],
+    plugins: {
+      vo: {
+        rules: {
+          'no-hardcoded-column-types': noHardcodedColumnTypes,
+          'uuid-requires-transformer': uuidRequiresTransformer,
+        },
+      },
+    },
+    rules: {
+      'vo/no-hardcoded-column-types': 'error',
+      'vo/uuid-requires-transformer': 'error',
     },
   },
 
