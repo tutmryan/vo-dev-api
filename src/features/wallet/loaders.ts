@@ -29,14 +29,23 @@ export const walletUsedDateLoader = (aggregation: AggregationType) => {
       .where('LOWER(presentation.walletId) IN (:...walletIds)', { walletIds })
       .groupBy('LOWER(presentation.walletId)')
       .comment(`FindWallet${alias}ByWalletId`)
-      .getRawMany<Record<string, string>>()
+      .getRawMany<Record<string, any>>()
 
     const resultMap = new Map<string, Date>()
     for (const row of results) {
       const walletId = row.walletId
-      const dateString = row[alias]
-      if (walletId && dateString) {
-        resultMap.set(walletId, new Date(dateString.endsWith('Z') ? dateString : `${dateString}Z`))
+      const dateRaw = row[alias]
+
+      if (walletId && dateRaw) {
+        let date: Date
+
+        if (dateRaw instanceof Date) {
+          date = dateRaw
+        } else {
+          date = new Date(dateRaw.endsWith('Z') ? dateRaw : `${dateRaw}Z`)
+        }
+
+        resultMap.set(walletId, date)
       }
     }
 
