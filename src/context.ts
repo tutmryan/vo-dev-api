@@ -12,8 +12,8 @@ import { getAsyncIssuanceDataForSession } from './features/async-issuance/sessio
 import { IdentityEntity } from './features/identity/entities/identity-entity'
 import { getPlatformConsumerApps } from './features/instance-configs'
 import { getLimitedAccessData } from './features/limited-access-tokens'
-import { getLimitedApprovalData } from './features/limited-approval-tokens'
 import { getLimitedPhotoCaptureSession } from './features/limited-photo-capture-tokens'
+import { getLimitedPresentationFlowTokenData } from './features/limited-presentation-flow-tokens'
 import { VoIdentityClaim } from './features/oidc-provider/claims'
 import { getOidcSessionContext, type OidcSessionContext } from './features/oidc-provider/session'
 import type { PhotoCaptureData } from './features/photo-capture'
@@ -79,14 +79,14 @@ export const findUpdateOrCreateUser = async (
     return new User(claims, token, userEntity, limitedAccessData)
   }
 
-  // Special case: when called with a limited approval token:
-  // - load the limited approval data associated with the token
-  // - load the user that created the approval request
-  const isApprovalRequestClient = Array.isArray(claims.roles) && claims.roles.includes(InternalRoles.limitedApproval)
-  if (isApprovalRequestClient) {
-    const limitedApprovalData = await getLimitedApprovalData(token)
-    const userEntity = await dataSource.getRepository(UserEntity).findOneOrFail({ where: { id: limitedApprovalData.userId } })
-    return new User(claims, token, userEntity, undefined, limitedApprovalData)
+  // Special case: when called with a limited presentation flow token:
+  // - load the limited presentation flow data associated with the token
+  // - load the user that created the presentation flow request
+  const isPresentationFlowClient = Array.isArray(claims.roles) && claims.roles.includes(InternalRoles.limitedPresentationFlow)
+  if (isPresentationFlowClient) {
+    const limitedPresentationFlowData = await getLimitedPresentationFlowTokenData(token)
+    const userEntity = await dataSource.getRepository(UserEntity).findOneOrFail({ where: { id: limitedPresentationFlowData.userId } })
+    return new User(claims, token, userEntity, undefined, limitedPresentationFlowData)
   }
 
   // Special case: when called with a limited photo capture token:

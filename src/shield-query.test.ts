@@ -50,7 +50,6 @@ describe('Shield Rules - Query Permissions', () => {
         UserRoles.issuer,
         UserRoles.credentialAdmin,
         UserRoles.partnerAdmin,
-        UserRoles.approvalRequestAdmin,
         UserRoles.oidcAdmin,
         UserRoles.instanceAdmin,
         UserRoles.supportAgent,
@@ -75,7 +74,6 @@ describe('Shield Rules - Query Permissions', () => {
         UserRoles.issuer,
         UserRoles.credentialAdmin,
         UserRoles.partnerAdmin,
-        UserRoles.approvalRequestAdmin,
         UserRoles.oidcAdmin,
         UserRoles.instanceAdmin,
         UserRoles.supportAgent,
@@ -98,7 +96,6 @@ describe('Shield Rules - Query Permissions', () => {
         UserRoles.issuer,
         UserRoles.credentialAdmin,
         UserRoles.partnerAdmin,
-        UserRoles.approvalRequestAdmin,
         UserRoles.oidcAdmin,
         UserRoles.instanceAdmin,
         UserRoles.supportAgent,
@@ -119,7 +116,6 @@ findIssuances(where: $where, limit: 10) {
       [
         UserRoles.issuer,
         UserRoles.supportAgent,
-        UserRoles.approvalRequestAdmin,
         UserRoles.credentialAdmin,
         UserRoles.reader,
         UserRoles.partnerAdmin,
@@ -145,7 +141,6 @@ findIssuances(where: $where, limit: 10) {
         UserRoles.issuer,
         UserRoles.credentialAdmin,
         UserRoles.partnerAdmin,
-        UserRoles.approvalRequestAdmin,
         UserRoles.oidcAdmin,
         UserRoles.instanceAdmin,
         UserRoles.supportAgent,
@@ -164,15 +159,7 @@ findIssuances(where: $where, limit: 10) {
 
   describe('findUsers', () => {
     testQueryPermissions(
-      [
-        UserRoles.reader,
-        UserRoles.issuer,
-        UserRoles.credentialAdmin,
-        UserRoles.partnerAdmin,
-        UserRoles.approvalRequestAdmin,
-        UserRoles.oidcAdmin,
-        UserRoles.instanceAdmin,
-      ],
+      [UserRoles.reader, UserRoles.issuer, UserRoles.credentialAdmin, UserRoles.partnerAdmin, UserRoles.oidcAdmin, UserRoles.instanceAdmin],
       false,
       `
       query FindUsersShieldTest {
@@ -191,7 +178,6 @@ findIssuances(where: $where, limit: 10) {
         UserRoles.issuer,
         UserRoles.credentialAdmin,
         UserRoles.partnerAdmin,
-        UserRoles.approvalRequestAdmin,
         UserRoles.oidcAdmin,
         UserRoles.instanceAdmin,
         UserRoles.supportAgent,
@@ -215,7 +201,6 @@ findIssuances(where: $where, limit: 10) {
         UserRoles.issuer,
         UserRoles.credentialAdmin,
         UserRoles.partnerAdmin,
-        UserRoles.approvalRequestAdmin,
         UserRoles.oidcAdmin,
         UserRoles.instanceAdmin,
         AppRoles.contractAdmin,
@@ -231,13 +216,27 @@ findIssuances(where: $where, limit: 10) {
     )
   })
 
-  describe('findApprovalRequests', () => {
+  describe('findPresentationFlows', () => {
     testQueryPermissions(
-      [UserRoles.approvalRequestAdmin],
+      [UserRoles.presentationFlowRead, AppRoles.presentationFlowRead],
       false,
       `
-        query FindApprovalRequestsShieldTest {
-          findApprovalRequests(limit: 10) {
+        query FindPresentationFlowsShieldTest {
+          findPresentationFlows(limit: 10) {
+            id
+          }
+        }
+      `,
+    )
+  })
+
+  describe('findPresentationFlowTemplates', () => {
+    testQueryPermissions(
+      [UserRoles.presentationFlowReadTemplate, AppRoles.presentationFlowReadTemplate],
+      false,
+      `
+        query FindPresentationFlowTemplatesShieldTest {
+          findPresentationFlowTemplates {
             id
           }
         }

@@ -3,11 +3,17 @@ export enum UserRoles {
   issuer = 'VerifiableCredential.Issuer',
   credentialAdmin = 'VerifiableCredential.CredentialAdmin',
   partnerAdmin = 'VerifiableCredential.PartnerAdmin',
-  approvalRequestAdmin = 'VerifiableCredential.ApprovalRequestAdmin',
   oidcAdmin = 'VerifiableCredential.OidcAdmin',
   instanceAdmin = 'VerifiableCredential.InstanceAdmin',
   supportAgent = 'VerifiableCredential.SupportAgent',
   credentialRevoker = 'credentials.revoke',
+  presentationFlowCreate = 'presentationFlow.create',
+  presentationFlowRead = 'presentationFlow.read',
+  presentationFlowCancel = 'presentationFlow.cancel',
+  presentationFlowCreateTemplate = 'presentationFlow.template.create',
+  presentationFlowReadTemplate = 'presentationFlow.template.read',
+  presentationFlowUpdateTemplate = 'presentationFlow.template.update',
+  presentationFlowDeleteTemplate = 'presentationFlow.template.delete',
 }
 
 export enum OidcScopes {
@@ -17,9 +23,15 @@ export enum OidcScopes {
 export enum AppRoles {
   issue = 'VerifiableCredential.Issue',
   present = 'VerifiableCredential.Present',
-  requestApproval = 'VerifiableCredential.RequestApproval',
   contractAdmin = 'VerifiableCredential.ContractAdmin',
-  revoke = 'credentials.revoke',
+  credentialsRevoke = 'credentials.revoke',
+  presentationFlowCreate = 'presentationFlow.create',
+  presentationFlowRead = 'presentationFlow.read',
+  presentationFlowCancel = 'presentationFlow.cancel',
+  presentationFlowCreateTemplate = 'presentationFlow.template.create',
+  presentationFlowReadTemplate = 'presentationFlow.template.read',
+  presentationFlowUpdateTemplate = 'presentationFlow.template.update',
+  presentationFlowDeleteTemplate = 'presentationFlow.template.delete',
 }
 
 export enum LimitedAccessTokenAcquisitionRoles {
@@ -31,7 +43,7 @@ export enum LimitedAccessTokenAcquisitionRoles {
 
 export enum InternalRoles {
   limitedAccess = 'VerifiableCredential.LimitedAccess',
-  limitedApproval = 'VerifiableCredential.LimitedApproval',
+  limitedPresentationFlow = 'VerifiableCredential.LimitedPresentationFlow',
   limitedPhotoCapture = 'VerifiableCredential.LimitedPhotoCapture',
   limitedAsyncIssuance = 'VerifiableCredential.LimitedAsyncIssuance',
   callback = 'VerifiableCredential.Request.Callback',

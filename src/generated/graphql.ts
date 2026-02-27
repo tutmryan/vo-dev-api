@@ -5,10 +5,11 @@ import { ContractEntity } from '../features/contracts/entities/contract-entity';
 import { UserEntity } from '../features/users/entities/user-entity';
 import { IssuanceEntity } from '../features/issuance/entities/issuance-entity';
 import { PresentationEntity } from '../features/presentation/entities/presentation-entity';
+import { PresentationFlowEntity } from '../features/presentation-flow/entities/presentation-flow-entity';
+import { PresentationFlowTemplateEntity } from '../features/presentation-flow/entities/presentation-flow-template-entity';
 import { IdentityEntity } from '../features/identity/entities/identity-entity';
 import { IdentityStoreEntity } from '../features/identity-store/entities/identity-store-entity';
 import { PartnerEntity } from '../features/partners/entities/partner-entity';
-import { ApprovalRequestEntity } from '../features/approval-request/entities/approval-request-entity';
 import { AsyncIssuanceEntity } from '../features/async-issuance/entities/async-issuance-entity';
 import { CommunicationEntity } from '../features/communication/entities/communication-entity';
 import { OidcClientEntity } from '../features/oidc-provider/entities/oidc-client-entity';
@@ -49,6 +50,8 @@ export type Scalars = {
   JSONObject: { input: Record<string, unknown>; output: Record<string, unknown>; }
   /** The locale in the format of a BCP 47 (RFC 5646) standard string */
   Locale: { input: string; output: string; }
+  /** A field whose value is a Markdown string. */
+  Markdown: { input: string; output: string; }
   /** Integers that will have a value of 0 or more. */
   NonNegativeInt: { input: number; output: number; }
   /** Floats that will have a value greater than 0. */
@@ -135,56 +138,51 @@ export type AcquireLimitedAccessTokenInput = {
   requestableCredentials?: InputMaybe<Array<RequestedCredentialSpecificationInput>>;
 };
 
-/** Input for acquiring a limited token for approval. */
-export type AcquireLimitedApprovalTokenInput = {
-  /** The ID of the approval request to which access will be limited. */
-  approvalRequestId: Scalars['UUID']['input'];
-};
-
 /** Input for acquiring a limited token for photo capture. */
 export type AcquireLimitedPhotoCaptureTokenInput = {
   /** The ID of the photo capture request to which access will be limited. */
   photoCaptureRequestId: Scalars['UUID']['input'];
 };
 
-/** Input for actioning an approval request. */
-export type ActionApprovalRequestInput = {
-  /** Optional comment on approval or rejection of this request. */
-  actionedComment?: InputMaybe<Scalars['String']['input']>;
-  /** Indicates whether the approval has been granted. */
-  isApproved: Scalars['Boolean']['input'];
+/** Input for acquiring a limited token for presentation flow. */
+export type AcquireLimitedPresentationFlowTokenInput = {
+  /** The ID of the presentation flow to which access will be limited. */
+  presentationFlowId: Scalars['UUID']['input'];
 };
 
-/** Details of the action taken on the approval request. */
-export type ActionedApprovalData = {
-  __typename?: 'ActionedApprovalData';
-  /** When the approval request was actioned. */
-  actionedAt: Scalars['DateTime']['output'];
-  /** The person, if known, who approved/rejected the approval request or the app that cancelled the approval request. */
-  actionedBy?: Maybe<ActionedBy>;
-  /** Optional comment on approval or rejection of this request. */
-  actionedComment?: Maybe<Scalars['String']['output']>;
-  /** The ID of the approval request that was actioned. */
-  approvalRequestId: Scalars['ID']['output'];
-  /** A unique secret that can be used to verify the authenticity of the callback. */
-  callbackSecret: Scalars['String']['output'];
-  /** The optional originating source entity ID of the artifact requiring approval. */
-  correlationId?: Maybe<Scalars['ID']['output']>;
-  /** Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type. */
-  requestData?: Maybe<Scalars['JSONObject']['output']>;
-  /** Arbitrary state value which was optionally included in the approval request callback definition. */
-  state?: Maybe<Scalars['String']['output']>;
-  /** The current status of the approval request. */
-  status: ApprovalRequestStatus;
+export type Action = {
+  __typename?: 'Action';
+  key: Scalars['String']['output'];
+  label: Scalars['String']['output'];
 };
 
-/** The details of the person who actioned the approval request */
+export type ActionInput = {
+  key: Scalars['String']['input'];
+  label: Scalars['String']['input'];
+};
+
+/** The details of the person who submitted the presentation flow */
 export type ActionedBy = {
   __typename?: 'ActionedBy';
   /** The id of this identity */
   id: Scalars['ID']['output'];
   /** The name of the identity */
   name: Scalars['String']['output'];
+};
+
+export type ActionedPresentationFlowData = {
+  __typename?: 'ActionedPresentationFlowData';
+  actionKey?: Maybe<Scalars['String']['output']>;
+  callbackSecret: Scalars['String']['output'];
+  correlationId?: Maybe<Scalars['ID']['output']>;
+  dataResults?: Maybe<Scalars['JSONObject']['output']>;
+  presentationFlowId: Scalars['ID']['output'];
+  presentationId?: Maybe<Scalars['ID']['output']>;
+  requestData?: Maybe<Scalars['JSONObject']['output']>;
+  state?: Maybe<Scalars['String']['output']>;
+  status: PresentationFlowStatus;
+  submittedAt?: Maybe<Scalars['DateTime']['output']>;
+  submittedBy?: Maybe<ActionedBy>;
 };
 
 /** A human-friendly label for a specific application (by identifier) */
@@ -204,120 +202,6 @@ export type ApplicationLabelConfigInput = {
   identifier: Scalars['String']['input'];
   /** A human-friendly label for the application */
   name: Scalars['String']['input'];
-};
-
-/** An instance of an approval request. */
-export type ApprovalRequest = {
-  __typename?: 'ApprovalRequest';
-  /** Optional comment on approval or rejection of this request. */
-  actionedComment?: Maybe<Scalars['String']['output']>;
-  /** The optional originating source entity ID of the artifact requiring approval. */
-  correlationId?: Maybe<Scalars['ID']['output']>;
-  /** When the approval expires; presentations cannot be made for an expired approval. */
-  expiresAt: Scalars['DateTime']['output'];
-  id: Scalars['ID']['output'];
-  /** Indicates whether the approval has been granted. */
-  isApproved?: Maybe<Scalars['Boolean']['output']>;
-  /** The presentation that was provided to satisfy approval requirement */
-  presentation?: Maybe<Presentation>;
-  /** The presentation request definition for this approval. */
-  presentationRequest: Scalars['JSONObject']['output'];
-  /** Purpose for requesting approval. */
-  purpose: Scalars['String']['output'];
-  /** Optional URL to the artifact for approval. */
-  referenceUrl?: Maybe<Scalars['String']['output']>;
-  /** Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type. */
-  requestData?: Maybe<Scalars['JSONObject']['output']>;
-  /** The type of approval request, useful for partitioning and filtering different types of approval requests. */
-  requestType: Scalars['String']['output'];
-  /** When the approval request was created. */
-  requestedAt: Scalars['DateTime']['output'];
-  /** The platform user (application or person) that requested the approval. */
-  requestedBy: User;
-  /** The approval status. */
-  status: ApprovalRequestStatus;
-  /** When the approval request was last updated. */
-  updatedAt?: Maybe<Scalars['DateTime']['output']>;
-  /** The user who last updated the approval request. */
-  updatedBy?: Maybe<User>;
-};
-
-/** The input for creating a new approval request. */
-export type ApprovalRequestInput = {
-  /** Callback will be invoked when the approval request is actioned (i.e. approved, rejected, or cancelled). */
-  callback?: InputMaybe<Callback>;
-  /** The optional originating source entity ID of the artifact requiring approval. */
-  correlationId?: InputMaybe<Scalars['ID']['input']>;
-  /**
-   * When the approval expires; presentations cannot be made for an expired approval.
-   * Defaults to 7 days from the current date.
-   */
-  expiresAt?: InputMaybe<Scalars['DateTime']['input']>;
-  /** The presentation request definition for this approval. */
-  presentationRequestInput: ApprovalRequestPresentationInput;
-  /** Purpose for requesting approval. Markdown is supported. */
-  purpose: Scalars['String']['input'];
-  /** Optional URL to the artifact for approval. */
-  referenceUrl?: InputMaybe<Scalars['String']['input']>;
-  /** Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type. */
-  requestData?: InputMaybe<Scalars['JSONObject']['input']>;
-  /** The type of approval request, useful for partitioning and filtering different types of approval requests. */
-  requestType: Scalars['String']['input'];
-};
-
-/** Defines the approval request's verifiable credentials presentation request. */
-export type ApprovalRequestPresentationInput = {
-  /** A collection of RequestCredential objects representing the credentials the user needs to provide. */
-  requestedCredentials: Array<RequestCredential>;
-};
-
-/** A response for a newly created approval request. */
-export type ApprovalRequestResponse = {
-  __typename?: 'ApprovalRequestResponse';
-  /** A unique secret that can be used to verify the authenticity of the callback. */
-  callbackSecret: Scalars['String']['output'];
-  /** The ID of the newly created approval request. */
-  id: Scalars['ID']['output'];
-  /** The URL to the newly created approval request in the portal */
-  portalUrl: Scalars['String']['output'];
-};
-
-/** The status of the approval. */
-export enum ApprovalRequestStatus {
-  Approved = 'approved',
-  Cancelled = 'cancelled',
-  Expired = 'expired',
-  Pending = 'pending',
-  Rejected = 'rejected'
-}
-
-/** Fields that can be used for sorting approval requests by. */
-export enum ApprovalRequestsOrderBy {
-  /** The timestamp when the approval request was created. */
-  RequestedAt = 'requestedAt'
-}
-
-/** Represents the criteria for filtering approval requests. */
-export type ApprovalRequestsWhere = {
-  /** Returns approval requests with the specified type. */
-  requestType?: InputMaybe<Scalars['String']['input']>;
-  /** Returns approval requests requested by the specified user (application or person). */
-  requestedById?: InputMaybe<Scalars['ID']['input']>;
-  /** Returns approval requests with the requested credential type. */
-  requestedCredentialType?: InputMaybe<Scalars['String']['input']>;
-  /** Returns approval requests requested after this point. */
-  requestedFrom?: InputMaybe<Scalars['DateTime']['input']>;
-  /** Returns approval requests requested before this point. */
-  requestedTo?: InputMaybe<Scalars['DateTime']['input']>;
-  /** Returns approval requests with the specified status. */
-  status?: InputMaybe<ApprovalRequestStatus>;
-};
-
-/** A limited approval token response. */
-export type ApprovalTokenResponse = {
-  __typename?: 'ApprovalTokenResponse';
-  expires: Scalars['DateTime']['output'];
-  token: Scalars['String']['output'];
 };
 
 /** An async issuance issuee contact information. */
@@ -1406,15 +1290,8 @@ export type CreatePartnerInput = {
   tenantId?: InputMaybe<Scalars['ID']['input']>;
 };
 
-/** Input for creating approval presentation requests */
-export type CreatePresentationRequestForApprovalInput = {
-  /**
-   * Determines whether a QR code is included in the response of this request
-   * Present the QR code and ask the user to scan it.
-   * Scanning the QR code launches the authenticator app with this issuance request.
-   * Possible values are true (default) or false.
-   * When you set the value to false, use the return url property to render a deep link.
-   */
+/** Input for creating presentation flow presentation requests. */
+export type CreatePresentationRequestForPresentationFlowInput = {
   includeQRCode?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -1502,6 +1379,61 @@ export type CredentialTypesWhere = {
    */
   includeTemplateTypes?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
+export type DataConstraints = {
+  __typename?: 'DataConstraints';
+  max?: Maybe<Scalars['Float']['output']>;
+  maxLength?: Maybe<Scalars['Int']['output']>;
+  min?: Maybe<Scalars['Float']['output']>;
+  minLength?: Maybe<Scalars['Int']['output']>;
+  pattern?: Maybe<Scalars['String']['output']>;
+};
+
+export type DataConstraintsInput = {
+  max?: InputMaybe<Scalars['Float']['input']>;
+  maxLength?: InputMaybe<Scalars['Int']['input']>;
+  min?: InputMaybe<Scalars['Float']['input']>;
+  minLength?: InputMaybe<Scalars['Int']['input']>;
+  pattern?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type DataDefinition = {
+  __typename?: 'DataDefinition';
+  allowMultiple?: Maybe<Scalars['Boolean']['output']>;
+  constraints?: Maybe<DataConstraints>;
+  id: Scalars['String']['output'];
+  label: Scalars['String']['output'];
+  options?: Maybe<Array<DataOption>>;
+  required: Scalars['Boolean']['output'];
+  type: DataType;
+};
+
+export type DataDefinitionInput = {
+  allowMultiple?: InputMaybe<Scalars['Boolean']['input']>;
+  constraints?: InputMaybe<DataConstraintsInput>;
+  label: Scalars['String']['input'];
+  options?: InputMaybe<Array<DataOptionInput>>;
+  required: Scalars['Boolean']['input'];
+  type: DataType;
+};
+
+export type DataOption = {
+  __typename?: 'DataOption';
+  id: Scalars['String']['output'];
+  label: Scalars['String']['output'];
+};
+
+export type DataOptionInput = {
+  label: Scalars['String']['input'];
+};
+
+/** The supported data entry field types. */
+export enum DataType {
+  Boolean = 'boolean',
+  Number = 'number',
+  Select = 'select',
+  Text = 'text'
+}
 
 /** Represents a count of items on a specific date. */
 export type DateCount = {
@@ -1648,6 +1580,7 @@ export type Identity = {
   issuerLabel?: Maybe<Scalars['String']['output']>;
   /** The name of the identity */
   name: Scalars['String']['output'];
+  presentationFlows: Array<PresentationFlow>;
   /** Returns the successful credential presentations for this identity. */
   presentations: Array<Presentation>;
   /** When the identity was last updated. */
@@ -1670,6 +1603,14 @@ export type IdentityIssuancesArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   where?: InputMaybe<IdentityIssuanceWhere>;
+};
+
+
+/** Represents an identity that is issued credentials */
+export type IdentityPresentationFlowsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  where?: InputMaybe<IdentityPresentationFlowsWhere>;
 };
 
 
@@ -1760,6 +1701,13 @@ export enum IdentityOrderBy {
   /** The name of the identity. */
   Name = 'name'
 }
+
+export type IdentityPresentationFlowsWhere = {
+  createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  createdTo?: InputMaybe<Scalars['DateTime']['input']>;
+  incomplete?: InputMaybe<Scalars['Boolean']['input']>;
+  status?: InputMaybe<PresentationFlowStatus>;
+};
 
 /** Criteria for filtering identity presentations. */
 export type IdentityPresentationWhere = {
@@ -2601,19 +2549,10 @@ export type Mutation = {
    * - Issuance and presentation data can be queried, but only for the specified identity.
    */
   acquireLimitedAccessToken: AccessTokenResponse;
-  /**
-   * Acquire a limited approval token that can be used to:
-   * - create presentation request anonymously
-   * - fetch details of the approval request
-   * - approve or reject the approval request
-   */
-  acquireLimitedApprovalToken: ApprovalTokenResponse;
   /** Acquire a limited photo capture token that can be used to upload a photo for the photo capture request. */
   acquireLimitedPhotoCaptureToken: PhotoCaptureTokenResponse;
-  /** Actions an approval request. */
-  actionApprovalRequest: ApprovalRequest;
-  /** Cancels an existing pending approval request. */
-  cancelApprovalRequest?: Maybe<Scalars['Void']['output']>;
+  /** Acquire a limited presentation flow token. */
+  acquireLimitedPresentationFlowToken: PresentationFlowTokenResponse;
   /**
    * Cancel an issuance request.
    *
@@ -2631,13 +2570,12 @@ export type Mutation = {
    * - Starts a background job for all cancellations and returns that job id.
    */
   cancelAsyncIssuanceRequests: Scalars['ID']['output'];
+  cancelPresentationFlow?: Maybe<Scalars['Void']['output']>;
   /**
    * Captures a photo for the specified photo capture request, ready to be used in a subsequent issuance request.
    * The photo must be a [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) using base64 encoding.
    */
   capturePhoto?: Maybe<Scalars['Void']['output']>;
-  /** Creates a new approval request. */
-  createApprovalRequest: ApprovalRequestResponse;
   /**
    * Creates one or more async issuance requests.
    *
@@ -2674,10 +2612,10 @@ export type Mutation = {
   createPartner: Partner;
   /** Creates a request to support capturing a photo to be used in a subsequent issuance. */
   createPhotoCaptureRequest: PhotoCaptureRequestResponse;
+  createPresentationFlow: PresentationFlowResponse;
+  createPresentationFlowTemplate: PresentationFlowTemplate;
   /** The result of this request returns a URL and optional QR code to start the presentation process or an error. */
   createPresentationRequest: PresentationRequestResponse;
-  /** The result of this request returns a QR code with a link to start the presentation process, or an error */
-  createPresentationRequestForApproval: PresentationRequestResponse;
   /**
    * Creates a new presentation request for authorization.
    *
@@ -2685,6 +2623,7 @@ export type Mutation = {
    * - This operation is only for use by the OIDC provider login UI.
    */
   createPresentationRequestForAuthn: PresentationRequestResponse;
+  createPresentationRequestForPresentationFlow: PresentationRequestResponse;
   /** Creates a new template */
   createTemplate: Template;
   /** Deletes existing Composer branding. */
@@ -2705,6 +2644,7 @@ export type Mutation = {
   deleteOidcClientResource: OidcClient;
   /** Deletes an OIDC resource */
   deleteOidcResource: OidcResource;
+  deletePresentationFlowTemplate?: Maybe<Scalars['Void']['output']>;
   /** Deletes an existing template */
   deleteTemplate?: Maybe<Scalars['Void']['output']>;
   /** Deprecates an existing contract. */
@@ -2775,6 +2715,7 @@ export type Mutation = {
    * Passing null or omitting fields will unset the override and revert to defaults.
    */
   setEmailSenderConfig: EmailSenderConfig;
+  submitPresentationFlowActions: PresentationFlow;
   /** Suspends an identity store. Use resumeIdentityStore to reactivate. */
   suspendIdentityStore: IdentityStore;
   /** Suspends a partner */
@@ -2784,8 +2725,6 @@ export type Mutation = {
    * This is useful for verification after correcting service integration configuration.
    */
   testServices: Discovery;
-  /** Updates an existing pending approval request. */
-  updateApprovalRequest?: Maybe<Scalars['Void']['output']>;
   /**
    * Updates the async issuance issuee's contact information.
    *
@@ -2821,6 +2760,7 @@ export type Mutation = {
   updateOidcResource: OidcResource;
   /** Updates the name and credential types of a partner */
   updatePartner: Partner;
+  updatePresentationFlowTemplate: PresentationFlowTemplate;
   /** Updates an existing template */
   updateTemplate: Template;
 };
@@ -2837,24 +2777,13 @@ export type MutationAcquireLimitedAccessTokenArgs = {
 };
 
 
-export type MutationAcquireLimitedApprovalTokenArgs = {
-  input: AcquireLimitedApprovalTokenInput;
-};
-
-
 export type MutationAcquireLimitedPhotoCaptureTokenArgs = {
   input: AcquireLimitedPhotoCaptureTokenInput;
 };
 
 
-export type MutationActionApprovalRequestArgs = {
-  id: Scalars['ID']['input'];
-  input: ActionApprovalRequestInput;
-};
-
-
-export type MutationCancelApprovalRequestArgs = {
-  id: Scalars['ID']['input'];
+export type MutationAcquireLimitedPresentationFlowTokenArgs = {
+  input: AcquireLimitedPresentationFlowTokenInput;
 };
 
 
@@ -2868,14 +2797,14 @@ export type MutationCancelAsyncIssuanceRequestsArgs = {
 };
 
 
-export type MutationCapturePhotoArgs = {
-  photo: Scalars['String']['input'];
-  photoCaptureRequestId: Scalars['UUID']['input'];
+export type MutationCancelPresentationFlowArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
-export type MutationCreateApprovalRequestArgs = {
-  request: ApprovalRequestInput;
+export type MutationCapturePhotoArgs = {
+  photo: Scalars['String']['input'];
+  photoCaptureRequestId: Scalars['UUID']['input'];
 };
 
 
@@ -2941,14 +2870,24 @@ export type MutationCreatePhotoCaptureRequestArgs = {
 };
 
 
+export type MutationCreatePresentationFlowArgs = {
+  request: PresentationFlowInput;
+};
+
+
+export type MutationCreatePresentationFlowTemplateArgs = {
+  input: PresentationFlowTemplateInput;
+};
+
+
 export type MutationCreatePresentationRequestArgs = {
   request: PresentationRequestInput;
 };
 
 
-export type MutationCreatePresentationRequestForApprovalArgs = {
-  approvalRequestId: Scalars['ID']['input'];
-  input?: InputMaybe<CreatePresentationRequestForApprovalInput>;
+export type MutationCreatePresentationRequestForPresentationFlowArgs = {
+  input?: InputMaybe<CreatePresentationRequestForPresentationFlowInput>;
+  presentationFlowId: Scalars['ID']['input'];
 };
 
 
@@ -2989,6 +2928,11 @@ export type MutationDeleteOidcClientResourceArgs = {
 
 
 export type MutationDeleteOidcResourceArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type MutationDeletePresentationFlowTemplateArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -3110,6 +3054,12 @@ export type MutationSetEmailSenderConfigArgs = {
 };
 
 
+export type MutationSubmitPresentationFlowActionsArgs = {
+  id: Scalars['ID']['input'];
+  input: SubmitActionsInput;
+};
+
+
 export type MutationSuspendIdentityStoreArgs = {
   id: Scalars['ID']['input'];
 };
@@ -3117,12 +3067,6 @@ export type MutationSuspendIdentityStoreArgs = {
 
 export type MutationSuspendPartnerArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type MutationUpdateApprovalRequestArgs = {
-  id: Scalars['ID']['input'];
-  input: UpdateApprovalRequestInput;
 };
 
 
@@ -3194,6 +3138,12 @@ export type MutationUpdateOidcResourceArgs = {
 export type MutationUpdatePartnerArgs = {
   id: Scalars['ID']['input'];
   input: UpdatePartnerInput;
+};
+
+
+export type MutationUpdatePresentationFlowTemplateArgs = {
+  id: Scalars['ID']['input'];
+  input: PresentationFlowTemplateInput;
 };
 
 
@@ -3886,6 +3836,152 @@ export type PresentationEventWhere = {
   type?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A presentation flow. */
+export type PresentationFlow = {
+  __typename?: 'PresentationFlow';
+  action?: Maybe<Action>;
+  actions?: Maybe<Array<Action>>;
+  autoSubmit?: Maybe<Scalars['Boolean']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  createdBy: User;
+  dataResults?: Maybe<Scalars['JSONObject']['output']>;
+  dataSchema?: Maybe<Array<DataDefinition>>;
+  expiresAt: Scalars['DateTime']['output'];
+  id: Scalars['ID']['output'];
+  identity?: Maybe<Identity>;
+  isCancelled?: Maybe<Scalars['Boolean']['output']>;
+  isSubmitted?: Maybe<Scalars['Boolean']['output']>;
+  portalUrl: Scalars['String']['output'];
+  postPresentationText?: Maybe<Scalars['Markdown']['output']>;
+  prePresentationText?: Maybe<Scalars['Markdown']['output']>;
+  presentation?: Maybe<Presentation>;
+  presentationRequest: Scalars['JSONObject']['output'];
+  requestData?: Maybe<Scalars['JSONObject']['output']>;
+  status: PresentationFlowStatus;
+  template?: Maybe<PresentationFlowTemplate>;
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedBy?: Maybe<User>;
+};
+
+export type PresentationFlowInput = {
+  actions?: InputMaybe<Array<ActionInput>>;
+  autoSubmit?: InputMaybe<Scalars['Boolean']['input']>;
+  callback?: InputMaybe<Callback>;
+  correlationId?: InputMaybe<Scalars['ID']['input']>;
+  dataSchema?: InputMaybe<Array<DataDefinitionInput>>;
+  expiresAt?: InputMaybe<Scalars['DateTime']['input']>;
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  postPresentationText?: InputMaybe<Scalars['Markdown']['input']>;
+  prePresentationText?: InputMaybe<Scalars['Markdown']['input']>;
+  presentationRequest: PresentationRequestInput;
+  requestData?: InputMaybe<Scalars['JSONObject']['input']>;
+  templateId?: InputMaybe<Scalars['ID']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type PresentationFlowResponse = {
+  __typename?: 'PresentationFlowResponse';
+  callbackSecret: Scalars['String']['output'];
+  request: PresentationFlow;
+};
+
+/** The status of the presentation flow. */
+export enum PresentationFlowStatus {
+  Cancelled = 'CANCELLED',
+  Expired = 'EXPIRED',
+  Pending = 'PENDING',
+  PresentationVerified = 'PRESENTATION_VERIFIED',
+  RequestCreated = 'REQUEST_CREATED',
+  RequestRetrieved = 'REQUEST_RETRIEVED',
+  Submitted = 'SUBMITTED'
+}
+
+/** A template for creating presentation flows. */
+export type PresentationFlowTemplate = {
+  __typename?: 'PresentationFlowTemplate';
+  actions?: Maybe<Array<Action>>;
+  autoSubmit?: Maybe<Scalars['Boolean']['output']>;
+  createdAt: Scalars['DateTime']['output'];
+  createdBy: User;
+  dataSchema?: Maybe<Array<DataDefinition>>;
+  expiresAfterDays?: Maybe<Scalars['Int']['output']>;
+  fieldVisibility: PresentationFlowTemplateFieldVisibility;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  postPresentationText?: Maybe<Scalars['Markdown']['output']>;
+  prePresentationText?: Maybe<Scalars['Markdown']['output']>;
+  presentationRequest: Scalars['JSONObject']['output'];
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedBy?: Maybe<User>;
+};
+
+/** Controls which fields are visible when creating a presentation flow from a template. */
+export type PresentationFlowTemplateFieldVisibility = {
+  __typename?: 'PresentationFlowTemplateFieldVisibility';
+  actions?: Maybe<Scalars['Boolean']['output']>;
+  allowRevoked?: Maybe<Scalars['Boolean']['output']>;
+  autoSubmit?: Maybe<Scalars['Boolean']['output']>;
+  clientName?: Maybe<Scalars['Boolean']['output']>;
+  constraints?: Maybe<Scalars['Boolean']['output']>;
+  credentialTypes?: Maybe<Scalars['Boolean']['output']>;
+  dataSchema?: Maybe<Scalars['Boolean']['output']>;
+  expiresAt?: Maybe<Scalars['Boolean']['output']>;
+  faceCheck?: Maybe<Scalars['Boolean']['output']>;
+  postPresentationText?: Maybe<Scalars['Boolean']['output']>;
+  prePresentationText?: Maybe<Scalars['Boolean']['output']>;
+  title?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type PresentationFlowTemplateFieldVisibilityInput = {
+  actions?: InputMaybe<Scalars['Boolean']['input']>;
+  allowRevoked?: InputMaybe<Scalars['Boolean']['input']>;
+  autoSubmit?: InputMaybe<Scalars['Boolean']['input']>;
+  clientName?: InputMaybe<Scalars['Boolean']['input']>;
+  constraints?: InputMaybe<Scalars['Boolean']['input']>;
+  credentialTypes?: InputMaybe<Scalars['Boolean']['input']>;
+  dataSchema?: InputMaybe<Scalars['Boolean']['input']>;
+  expiresAt?: InputMaybe<Scalars['Boolean']['input']>;
+  faceCheck?: InputMaybe<Scalars['Boolean']['input']>;
+  postPresentationText?: InputMaybe<Scalars['Boolean']['input']>;
+  prePresentationText?: InputMaybe<Scalars['Boolean']['input']>;
+  title?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type PresentationFlowTemplateInput = {
+  actions?: InputMaybe<Array<ActionInput>>;
+  autoSubmit?: InputMaybe<Scalars['Boolean']['input']>;
+  dataSchema?: InputMaybe<Array<DataDefinitionInput>>;
+  expiresAfterDays?: InputMaybe<Scalars['Int']['input']>;
+  fieldVisibility: PresentationFlowTemplateFieldVisibilityInput;
+  name: Scalars['String']['input'];
+  postPresentationText?: InputMaybe<Scalars['Markdown']['input']>;
+  prePresentationText?: InputMaybe<Scalars['Markdown']['input']>;
+  presentationRequest: PresentationRequestInput;
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** A limited presentation flow token response. */
+export type PresentationFlowTokenResponse = {
+  __typename?: 'PresentationFlowTokenResponse';
+  expires: Scalars['DateTime']['output'];
+  token: Scalars['String']['output'];
+};
+
+export enum PresentationFlowsOrderBy {
+  CreatedAt = 'createdAt'
+}
+
+export type PresentationFlowsWhere = {
+  createdById?: InputMaybe<Scalars['ID']['input']>;
+  createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  createdTo?: InputMaybe<Scalars['DateTime']['input']>;
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  incomplete?: InputMaybe<Scalars['Boolean']['input']>;
+  status?: InputMaybe<PresentationFlowStatus>;
+};
+
 /** Fields that can be used for sorting presentations. */
 export enum PresentationOrderBy {
   /** The name of the identity who presented the credential. */
@@ -4040,14 +4136,9 @@ export type Query = {
    * Returns an empty array if no matching packages are found or if the required permissions are not granted.
    */
   accessPackages: Array<AccessPackage>;
-  /** Returns details of the action taken on the approval request. */
-  actionedApprovalData?: Maybe<ActionedApprovalData>;
+  actionedPresentationFlowData?: Maybe<ActionedPresentationFlowData>;
   /** List all application label configs for a given identity store */
   applicationLabelConfigs: Array<ApplicationLabelConfig>;
-  /** Returns an approval request by ID. */
-  approvalRequest: ApprovalRequest;
-  /** Returns the distinct approval request types that have been used. */
-  approvalRequestTypes: Array<Scalars['String']['output']>;
   /**
    * Returns the async issuance issuee contact information.
    *
@@ -4080,8 +4171,6 @@ export type Query = {
    * Returns null if no override is set.
    */
   emailSenderConfig: EmailSenderConfig;
-  /** Returns approval requests, optionally matching the specified criteria. */
-  findApprovalRequests: Array<ApprovalRequest>;
   /** Returns async issuance requests, optionally matching the specified criteria. */
   findAsyncIssuanceRequests: Array<AsyncIssuanceRequest>;
   /** Returns communications, optionally matching the specified criteria */
@@ -4107,6 +4196,8 @@ export type Query = {
   findOidcResources: Array<OidcResource>;
   /** Returns partners, optionally matching the specified criteria */
   findPartners: Array<Partner>;
+  findPresentationFlowTemplates: Array<PresentationFlowTemplate>;
+  findPresentationFlows: Array<PresentationFlow>;
   /** Returns successful credential presentations, optionally matching the specified criteria. */
   findPresentations: Array<Presentation>;
   /** Returns templates, optionally matching the specified criteria */
@@ -4175,6 +4266,8 @@ export type Query = {
   presentationCountByDate: Array<DateCount>;
   /** Returns the successful presentation count, grouped by requesting User, optionally matching the specified criteria. */
   presentationCountByUser: Array<UserCount>;
+  presentationFlow: PresentationFlow;
+  presentationFlowTemplate: PresentationFlowTemplate;
   /** Returns a template by ID */
   template: Template;
   /** Returns the combined data of a template and its ancestors */
@@ -4207,18 +4300,13 @@ export type QueryAccessPackagesArgs = {
 };
 
 
-export type QueryActionedApprovalDataArgs = {
+export type QueryActionedPresentationFlowDataArgs = {
   id: Scalars['ID']['input'];
 };
 
 
 export type QueryApplicationLabelConfigsArgs = {
   identityStoreId: Scalars['ID']['input'];
-};
-
-
-export type QueryApprovalRequestArgs = {
-  id: Scalars['ID']['input'];
 };
 
 
@@ -4239,15 +4327,6 @@ export type QueryContractArgs = {
 
 export type QueryCredentialTypesArgs = {
   where?: InputMaybe<CredentialTypesWhere>;
-};
-
-
-export type QueryFindApprovalRequestsArgs = {
-  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
-  offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
-  orderBy?: InputMaybe<ApprovalRequestsOrderBy>;
-  orderDirection?: InputMaybe<OrderDirection>;
-  where?: InputMaybe<ApprovalRequestsWhere>;
 };
 
 
@@ -4343,6 +4422,15 @@ export type QueryFindPartnersArgs = {
   orderBy?: InputMaybe<PartnerOrderBy>;
   orderDirection?: InputMaybe<OrderDirection>;
   where?: InputMaybe<PartnerWhere>;
+};
+
+
+export type QueryFindPresentationFlowsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  orderBy?: InputMaybe<PresentationFlowsOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<PresentationFlowsWhere>;
 };
 
 
@@ -4505,6 +4593,16 @@ export type QueryPresentationCountByUserArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   where?: InputMaybe<PresentationWhere>;
+};
+
+
+export type QueryPresentationFlowArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryPresentationFlowTemplateArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -4737,6 +4835,11 @@ export type ServiceFailures = {
   verifiedId?: Maybe<Scalars['String']['output']>;
 };
 
+export type SubmitActionsInput = {
+  actionKey?: InputMaybe<Scalars['String']['input']>;
+  dataResults?: InputMaybe<Scalars['JSONObject']['input']>;
+};
+
 export type Subscription = {
   __typename?: 'Subscription';
   /** Returns event data when the background job progresses from being queued to completed or failed */
@@ -4747,6 +4850,8 @@ export type Subscription = {
   photoCaptureEvent: PhotoCaptureEventData;
   /** Returns event data when an presentation callback is received */
   presentationEvent: PresentationEventData;
+  /** Returns the updated presentation flow when its status changes. */
+  presentationFlowEvent: PresentationFlow;
 };
 
 
@@ -4767,6 +4872,11 @@ export type SubscriptionPhotoCaptureEventArgs = {
 
 export type SubscriptionPresentationEventArgs = {
   where?: InputMaybe<PresentationEventWhere>;
+};
+
+
+export type SubscriptionPresentationFlowEventArgs = {
+  id: Scalars['ID']['input'];
 };
 
 /** Defines a template that can be used as a base for a contract */
@@ -4967,14 +5077,6 @@ export type TextValidation = {
 export type TextValidationInput = {
   maxLength?: InputMaybe<Scalars['PositiveInt']['input']>;
   minLength?: InputMaybe<Scalars['PositiveInt']['input']>;
-};
-
-/** The input for updating an existing approval request. */
-export type UpdateApprovalRequestInput = {
-  /** Purpose for requesting approval. Markdown is supported. */
-  purpose: Scalars['String']['input'];
-  /** Optional additional data that is useful for / relevant to the approval; the schema of which would vary by type. */
-  requestData?: InputMaybe<Scalars['JSONObject']['input']>;
 };
 
 /** Update payload for updating an identity store */
@@ -5220,50 +5322,6 @@ export type WebDidModel = {
   didDocumentStatus: DidDocumentStatus;
   linkedDomainUrls: Array<Scalars['URL']['output']>;
 };
-
-export type CancelApprovalRequestMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type CancelApprovalRequestMutation = { __typename?: 'Mutation', cancelApprovalRequest?: null | undefined | void | null };
-
-export type ApprovalRequestQueryVariables = Exact<{
-  approvalRequestId: Scalars['ID']['input'];
-}>;
-
-
-export type ApprovalRequestQuery = { __typename?: 'Query', approvalRequest: { __typename?: 'ApprovalRequest', id: string, requestedAt: Date, expiresAt: Date, requestType: string, correlationId?: string | null, referenceUrl?: string | null, purpose: string, requestData?: Record<string, unknown> | null, actionedComment?: string | null, status: ApprovalRequestStatus } };
-
-export type CreateApprovalRequestMutationVariables = Exact<{
-  input: ApprovalRequestInput;
-}>;
-
-
-export type CreateApprovalRequestMutation = { __typename?: 'Mutation', createApprovalRequest: { __typename?: 'ApprovalRequestResponse', id: string, portalUrl: string, callbackSecret: string } };
-
-export type ActionApprovalRequestMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  input: ActionApprovalRequestInput;
-}>;
-
-
-export type ActionApprovalRequestMutation = { __typename?: 'Mutation', actionApprovalRequest: { __typename?: 'ApprovalRequest', id: string, status: ApprovalRequestStatus, isApproved?: boolean | null, actionedComment?: string | null } };
-
-export type FindActionedApprovalDataQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type FindActionedApprovalDataQuery = { __typename?: 'Query', actionedApprovalData?: { __typename?: 'ActionedApprovalData', approvalRequestId: string, correlationId?: string | null, requestData?: Record<string, unknown> | null, state?: string | null, status: ApprovalRequestStatus, actionedComment?: string | null, actionedAt: Date, callbackSecret: string, actionedBy?: { __typename?: 'ActionedBy', id: string, name: string } | null } | null };
-
-export type UpdateApprovalRequestMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-  input: UpdateApprovalRequestInput;
-}>;
-
-
-export type UpdateApprovalRequestMutation = { __typename?: 'Mutation', updateApprovalRequest?: null | undefined | void | null };
 
 export type CancelAsyncIssuanceRequestMutationVariables = Exact<{
   asyncIssuanceRequestId: Scalars['UUID']['input'];
@@ -5568,19 +5626,26 @@ export type CreatePresentationRequestMutation = { __typename?: 'Mutation', creat
     | { __typename?: 'RequestErrorResponse', error: { __typename?: 'RequestErrorWithInner', code: string, message: string, innererror: { __typename?: 'RequestInnerError', code: string, message: string, target?: string | null } } }
    };
 
-export type AcquireLimitedApprovalTokenMutationVariables = Exact<{
-  input: AcquireLimitedApprovalTokenInput;
-}>;
-
-
-export type AcquireLimitedApprovalTokenMutation = { __typename?: 'Mutation', acquireLimitedApprovalToken: { __typename?: 'ApprovalTokenResponse', token: string, expires: Date } };
-
 export type AcquireLimitedPhotoCaptureTokenMutationVariables = Exact<{
   input: AcquireLimitedPhotoCaptureTokenInput;
 }>;
 
 
 export type AcquireLimitedPhotoCaptureTokenMutation = { __typename?: 'Mutation', acquireLimitedPhotoCaptureToken: { __typename?: 'PhotoCaptureTokenResponse', token: string, expires: Date } };
+
+export type AcquireLimitedPresentationFlowTokenMutationVariables = Exact<{
+  input: AcquireLimitedPresentationFlowTokenInput;
+}>;
+
+
+export type AcquireLimitedPresentationFlowTokenMutation = { __typename?: 'Mutation', acquireLimitedPresentationFlowToken: { __typename?: 'PresentationFlowTokenResponse', token: string, expires: Date } };
+
+export type CreatePresentationFlowMutationVariables = Exact<{
+  request: PresentationFlowInput;
+}>;
+
+
+export type CreatePresentationFlowMutation = { __typename?: 'Mutation', createPresentationFlow: { __typename?: 'PresentationFlowResponse', request: { __typename?: 'PresentationFlow', id: string } } };
 
 export type OidcClientFragmentFragment = { __typename?: 'OidcClient', id: string, name: string, applicationType: OidcApplicationType, clientType: OidcClientType, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, redirectUris: Array<string>, postLogoutUris: Array<string>, requireFaceCheck: boolean, allowAnyPartner: boolean, authorizationRequestsTypeJarEnabled: boolean, relyingPartyJwksUri?: string | null, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null };
 
@@ -5839,6 +5904,49 @@ export type PhotoCaptureStatusQueryVariables = Exact<{
 
 export type PhotoCaptureStatusQuery = { __typename?: 'Query', photoCaptureStatus: { __typename?: 'PhotoCaptureEventData', status: PhotoCaptureStatus } };
 
+export type CancelPresentationFlowTestMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CancelPresentationFlowTestMutation = { __typename?: 'Mutation', cancelPresentationFlow?: null | undefined | void | null };
+
+export type PresentationFlowTestQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type PresentationFlowTestQuery = { __typename?: 'Query', presentationFlow: { __typename?: 'PresentationFlow', id: string, title?: string | null, expiresAt: Date, prePresentationText?: string | null, postPresentationText?: string | null, requestData?: Record<string, unknown> | null, status: PresentationFlowStatus } };
+
+export type FindActionedPresentationFlowDataTestQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type FindActionedPresentationFlowDataTestQuery = { __typename?: 'Query', actionedPresentationFlowData?: { __typename?: 'ActionedPresentationFlowData', presentationFlowId: string, requestData?: Record<string, unknown> | null, state?: string | null, status: PresentationFlowStatus, presentationId?: string | null, dataResults?: Record<string, unknown> | null, submittedAt?: Date | null, callbackSecret: string, submittedBy?: { __typename?: 'ActionedBy', id: string, name: string } | null } | null };
+
+export type CreatePresentationFlowTestMutationVariables = Exact<{
+  request: PresentationFlowInput;
+}>;
+
+
+export type CreatePresentationFlowTestMutation = { __typename?: 'Mutation', createPresentationFlow: { __typename?: 'PresentationFlowResponse', callbackSecret: string, request: { __typename?: 'PresentationFlow', id: string, portalUrl: string } } };
+
+export type SubmitPresentationFlowActionsTestMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: SubmitActionsInput;
+}>;
+
+
+export type SubmitPresentationFlowActionsTestMutation = { __typename?: 'Mutation', submitPresentationFlowActions: { __typename?: 'PresentationFlow', id: string, status: PresentationFlowStatus, isSubmitted?: boolean | null, dataResults?: Record<string, unknown> | null } };
+
+export type PresentationFlowQueryTestQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type PresentationFlowQueryTestQuery = { __typename?: 'Query', presentationFlow: { __typename?: 'PresentationFlow', id: string, title?: string | null, expiresAt: Date, prePresentationText?: string | null, postPresentationText?: string | null, requestData?: Record<string, unknown> | null, status: PresentationFlowStatus } };
+
 export type TemplateParentDataFragmentFragment = { __typename?: 'Template', parentData?: { __typename?: 'TemplateParentData', isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> | null } | null } | null };
 
 export type GetTemplateParentDataQueryQueryVariables = Exact<{
@@ -5895,12 +6003,6 @@ export const OidcClaimMappingFragmentFragmentDoc = {"kind":"Document","definitio
 export const PartnerFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PartnerFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Partner"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}},{"kind":"Field","name":{"kind":"Name","value":"issuerId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}},{"kind":"Field","name":{"kind":"Name","value":"suspendedAt"}}]}}]} as unknown as DocumentNode<PartnerFieldsFragment, unknown>;
 export const TemplateParentDataFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateParentDataFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"parentData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]}}]} as unknown as DocumentNode<TemplateParentDataFragmentFragment, unknown>;
 export const TemplateFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]} as unknown as DocumentNode<TemplateFragmentFragment, unknown>;
-export const CancelApprovalRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CancelApprovalRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cancelApprovalRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<CancelApprovalRequestMutation, CancelApprovalRequestMutationVariables>;
-export const ApprovalRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"ApprovalRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"approvalRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"approvalRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"approvalRequestId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"requestedAt"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"requestType"}},{"kind":"Field","name":{"kind":"Name","value":"correlationId"}},{"kind":"Field","name":{"kind":"Name","value":"referenceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"purpose"}},{"kind":"Field","name":{"kind":"Name","value":"requestData"}},{"kind":"Field","name":{"kind":"Name","value":"actionedComment"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<ApprovalRequestQuery, ApprovalRequestQueryVariables>;
-export const CreateApprovalRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateApprovalRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ApprovalRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createApprovalRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"portalUrl"}},{"kind":"Field","name":{"kind":"Name","value":"callbackSecret"}}]}}]}}]} as unknown as DocumentNode<CreateApprovalRequestMutation, CreateApprovalRequestMutationVariables>;
-export const ActionApprovalRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"ActionApprovalRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ActionApprovalRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionApprovalRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"isApproved"}},{"kind":"Field","name":{"kind":"Name","value":"actionedComment"}}]}}]}}]} as unknown as DocumentNode<ActionApprovalRequestMutation, ActionApprovalRequestMutationVariables>;
-export const FindActionedApprovalDataDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindActionedApprovalData"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionedApprovalData"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"approvalRequestId"}},{"kind":"Field","name":{"kind":"Name","value":"correlationId"}},{"kind":"Field","name":{"kind":"Name","value":"requestData"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"actionedComment"}},{"kind":"Field","name":{"kind":"Name","value":"actionedAt"}},{"kind":"Field","name":{"kind":"Name","value":"actionedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"callbackSecret"}}]}}]}}]} as unknown as DocumentNode<FindActionedApprovalDataQuery, FindActionedApprovalDataQueryVariables>;
-export const UpdateApprovalRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateApprovalRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UpdateApprovalRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateApprovalRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}]}]}}]} as unknown as DocumentNode<UpdateApprovalRequestMutation, UpdateApprovalRequestMutationVariables>;
 export const CancelAsyncIssuanceRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CancelAsyncIssuanceRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"asyncIssuanceRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cancelAsyncIssuanceRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"asyncIssuanceRequestId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"asyncIssuanceRequestId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"AsyncIssuanceRequestFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"AsyncIssuanceRequestFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AsyncIssuanceRequest"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"isStatusFinal"}},{"kind":"Field","name":{"kind":"Name","value":"failureReason"}},{"kind":"Field","name":{"kind":"Name","value":"expiry"}},{"kind":"Field","name":{"kind":"Name","value":"expiresOn"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"identity"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"issuance"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<CancelAsyncIssuanceRequestMutation, CancelAsyncIssuanceRequestMutationVariables>;
 export const CreateAsyncIssuanceRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateAsyncIssuanceRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AsyncIssuanceRequestInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createAsyncIssuanceRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AsyncIssuanceResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"asyncIssuanceRequestIds"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"AsyncIssuanceErrorResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"errors"}}]}}]}}]}}]} as unknown as DocumentNode<CreateAsyncIssuanceRequestMutation, CreateAsyncIssuanceRequestMutationVariables>;
 export const CreateIssuanceRequestForAsyncIssuanceDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateIssuanceRequestForAsyncIssuance"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"asyncIssuanceRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createIssuanceRequestForAsyncIssuance"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"asyncIssuanceRequestId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"asyncIssuanceRequestId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"IssuanceResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"requestId"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"qrCode"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RequestErrorResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"__typename"}},{"kind":"Field","name":{"kind":"Name","value":"requestId"}},{"kind":"Field","name":{"kind":"Name","value":"date"}},{"kind":"Field","name":{"kind":"Name","value":"mscv"}},{"kind":"Field","name":{"kind":"Name","value":"error"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"innererror"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"target"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateIssuanceRequestForAsyncIssuanceMutation, CreateIssuanceRequestForAsyncIssuanceMutationVariables>;
@@ -5942,8 +6044,9 @@ export const ContractDocument = {"kind":"Document","definitions":[{"kind":"Opera
 export const FindIssuancesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindIssuances"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"IssuanceWhere"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findIssuances"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"issuedAt"}}]}}]}}]} as unknown as DocumentNode<FindIssuancesQuery, FindIssuancesQueryVariables>;
 export const CredentialTypesDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"CredentialTypes"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]} as unknown as DocumentNode<CredentialTypesQuery, CredentialTypesQueryVariables>;
 export const CreatePresentationRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePresentationRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPresentationRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"requestId"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"qrCode"}},{"kind":"Field","name":{"kind":"Name","value":"expiry"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RequestErrorResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"error"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"innererror"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"message"}},{"kind":"Field","name":{"kind":"Name","value":"target"}}]}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreatePresentationRequestMutation, CreatePresentationRequestMutationVariables>;
-export const AcquireLimitedApprovalTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AcquireLimitedApprovalToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AcquireLimitedApprovalTokenInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"acquireLimitedApprovalToken"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"expires"}}]}}]}}]} as unknown as DocumentNode<AcquireLimitedApprovalTokenMutation, AcquireLimitedApprovalTokenMutationVariables>;
 export const AcquireLimitedPhotoCaptureTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AcquireLimitedPhotoCaptureToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AcquireLimitedPhotoCaptureTokenInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"acquireLimitedPhotoCaptureToken"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"expires"}}]}}]}}]} as unknown as DocumentNode<AcquireLimitedPhotoCaptureTokenMutation, AcquireLimitedPhotoCaptureTokenMutationVariables>;
+export const AcquireLimitedPresentationFlowTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AcquireLimitedPresentationFlowToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AcquireLimitedPresentationFlowTokenInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"acquireLimitedPresentationFlowToken"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"token"}},{"kind":"Field","name":{"kind":"Name","value":"expires"}}]}}]}}]} as unknown as DocumentNode<AcquireLimitedPresentationFlowTokenMutation, AcquireLimitedPresentationFlowTokenMutationVariables>;
+export const CreatePresentationFlowDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePresentationFlow"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationFlowInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPresentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"request"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]} as unknown as DocumentNode<CreatePresentationFlowMutation, CreatePresentationFlowMutationVariables>;
 export const CreateOidcClientDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateOidcClient"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClientInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createOidcClient"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"clientType"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"requireFaceCheck"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"authorizationRequestsTypeJarEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"relyingPartyJwksUri"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<CreateOidcClientMutation, CreateOidcClientMutationVariables>;
 export const UpdateOidcClientDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateOidcClient"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClientInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateOidcClient"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"clientType"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"requireFaceCheck"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"authorizationRequestsTypeJarEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"relyingPartyJwksUri"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<UpdateOidcClientMutation, UpdateOidcClientMutationVariables>;
 export const DeleteOidcClientDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteOidcClient"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteOidcClient"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"clientType"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"requireFaceCheck"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"authorizationRequestsTypeJarEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"relyingPartyJwksUri"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<DeleteOidcClientMutation, DeleteOidcClientMutationVariables>;
@@ -5977,6 +6080,12 @@ export const PartnerByDidDocument = {"kind":"Document","definitions":[{"kind":"O
 export const CreatePhotoCaptureRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePhotoCaptureRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PhotoCaptureRequest"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPhotoCaptureRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"photoCaptureUrl"}},{"kind":"Field","name":{"kind":"Name","value":"photoCaptureQrCode"}}]}}]}}]} as unknown as DocumentNode<CreatePhotoCaptureRequestMutation, CreatePhotoCaptureRequestMutationVariables>;
 export const CapturePhotoDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CapturePhoto"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"photo"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"String"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"capturePhoto"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"photoCaptureRequestId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}}},{"kind":"Argument","name":{"kind":"Name","value":"photo"},"value":{"kind":"Variable","name":{"kind":"Name","value":"photo"}}}]}]}}]} as unknown as DocumentNode<CapturePhotoMutation, CapturePhotoMutationVariables>;
 export const PhotoCaptureStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PhotoCaptureStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"photoCaptureStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"photoCaptureRequestId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<PhotoCaptureStatusQuery, PhotoCaptureStatusQueryVariables>;
+export const CancelPresentationFlowTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CancelPresentationFlowTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cancelPresentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<CancelPresentationFlowTestMutation, CancelPresentationFlowTestMutationVariables>;
+export const PresentationFlowTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PresentationFlowTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"presentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"prePresentationText"}},{"kind":"Field","name":{"kind":"Name","value":"postPresentationText"}},{"kind":"Field","name":{"kind":"Name","value":"requestData"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<PresentationFlowTestQuery, PresentationFlowTestQueryVariables>;
+export const FindActionedPresentationFlowDataTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindActionedPresentationFlowDataTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionedPresentationFlowData"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"presentationFlowId"}},{"kind":"Field","name":{"kind":"Name","value":"requestData"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"presentationId"}},{"kind":"Field","name":{"kind":"Name","value":"dataResults"}},{"kind":"Field","name":{"kind":"Name","value":"submittedAt"}},{"kind":"Field","name":{"kind":"Name","value":"submittedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"callbackSecret"}}]}}]}}]} as unknown as DocumentNode<FindActionedPresentationFlowDataTestQuery, FindActionedPresentationFlowDataTestQueryVariables>;
+export const CreatePresentationFlowTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePresentationFlowTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationFlowInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPresentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"callbackSecret"}},{"kind":"Field","name":{"kind":"Name","value":"request"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"portalUrl"}}]}}]}}]}}]} as unknown as DocumentNode<CreatePresentationFlowTestMutation, CreatePresentationFlowTestMutationVariables>;
+export const SubmitPresentationFlowActionsTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SubmitPresentationFlowActionsTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SubmitActionsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"submitPresentationFlowActions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"isSubmitted"}},{"kind":"Field","name":{"kind":"Name","value":"dataResults"}}]}}]}}]} as unknown as DocumentNode<SubmitPresentationFlowActionsTestMutation, SubmitPresentationFlowActionsTestMutationVariables>;
+export const PresentationFlowQueryTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PresentationFlowQueryTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"presentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"prePresentationText"}},{"kind":"Field","name":{"kind":"Name","value":"postPresentationText"}},{"kind":"Field","name":{"kind":"Name","value":"requestData"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<PresentationFlowQueryTestQuery, PresentationFlowQueryTestQueryVariables>;
 export const GetTemplateParentDataQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTemplateParentDataQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"template"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateParentDataFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateParentDataFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"parentData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]}}]} as unknown as DocumentNode<GetTemplateParentDataQueryQuery, GetTemplateParentDataQueryQueryVariables>;
 export const CreateTemplateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateTemplate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TemplateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]} as unknown as DocumentNode<CreateTemplateMutation, CreateTemplateMutationVariables>;
 export const GetTemplateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTemplate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"template"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]} as unknown as DocumentNode<GetTemplateQuery, GetTemplateQueryVariables>;
@@ -6099,21 +6208,14 @@ export type ResolversTypes = {
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   AccessTokenResponse: ResolverTypeWrapper<AccessTokenResponse>;
   AcquireLimitedAccessTokenInput: AcquireLimitedAccessTokenInput;
-  AcquireLimitedApprovalTokenInput: AcquireLimitedApprovalTokenInput;
   AcquireLimitedPhotoCaptureTokenInput: AcquireLimitedPhotoCaptureTokenInput;
-  ActionApprovalRequestInput: ActionApprovalRequestInput;
-  ActionedApprovalData: ResolverTypeWrapper<ActionedApprovalData>;
+  AcquireLimitedPresentationFlowTokenInput: AcquireLimitedPresentationFlowTokenInput;
+  Action: ResolverTypeWrapper<Action>;
+  ActionInput: ActionInput;
   ActionedBy: ResolverTypeWrapper<ActionedBy>;
+  ActionedPresentationFlowData: ResolverTypeWrapper<ActionedPresentationFlowData>;
   ApplicationLabelConfig: ResolverTypeWrapper<ApplicationLabelConfigEntity>;
   ApplicationLabelConfigInput: ApplicationLabelConfigInput;
-  ApprovalRequest: ResolverTypeWrapper<ApprovalRequestEntity>;
-  ApprovalRequestInput: ApprovalRequestInput;
-  ApprovalRequestPresentationInput: ApprovalRequestPresentationInput;
-  ApprovalRequestResponse: ResolverTypeWrapper<ApprovalRequestResponse>;
-  ApprovalRequestStatus: ApprovalRequestStatus;
-  ApprovalRequestsOrderBy: ApprovalRequestsOrderBy;
-  ApprovalRequestsWhere: ApprovalRequestsWhere;
-  ApprovalTokenResponse: ResolverTypeWrapper<ApprovalTokenResponse>;
   AsyncIssuanceContact: ResolverTypeWrapper<AsyncIssuanceContact>;
   AsyncIssuanceContactInput: AsyncIssuanceContactInput;
   AsyncIssuanceErrorResponse: ResolverTypeWrapper<AsyncIssuanceErrorResponse>;
@@ -6181,13 +6283,20 @@ export type ResolversTypes = {
   CorsOriginConfig: ResolverTypeWrapper<CorsOriginConfigEntity>;
   CorsOriginConfigInput: CorsOriginConfigInput;
   CreatePartnerInput: CreatePartnerInput;
-  CreatePresentationRequestForApprovalInput: CreatePresentationRequestForApprovalInput;
+  CreatePresentationRequestForPresentationFlowInput: CreatePresentationRequestForPresentationFlowInput;
   CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
   CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
   CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
   CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
   CredentialTypesWhere: CredentialTypesWhere;
+  DataConstraints: ResolverTypeWrapper<DataConstraints>;
+  DataConstraintsInput: DataConstraintsInput;
+  DataDefinition: ResolverTypeWrapper<DataDefinition>;
+  DataDefinitionInput: DataDefinitionInput;
+  DataOption: ResolverTypeWrapper<DataOption>;
+  DataOptionInput: DataOptionInput;
+  DataType: DataType;
   DateCount: ResolverTypeWrapper<DateCount>;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   DidDocumentStatus: DidDocumentStatus;
@@ -6210,6 +6319,7 @@ export type ResolversTypes = {
   IdentityIssuanceWhere: IdentityIssuanceWhere;
   IdentityIssuer: ResolverTypeWrapper<IdentityIssuer>;
   IdentityOrderBy: IdentityOrderBy;
+  IdentityPresentationFlowsWhere: IdentityPresentationFlowsWhere;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityStore: ResolverTypeWrapper<IdentityStoreEntity>;
   IdentityStoreInput: IdentityStoreInput;
@@ -6258,6 +6368,7 @@ export type ResolversTypes = {
   MDocProcessedResponseResult: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['MDocProcessedResponseResult']>;
   MDocRequestSigningInput: MDocRequestSigningInput;
   MDocValidationResults: ResolverTypeWrapper<MDocValidationResults>;
+  Markdown: ResolverTypeWrapper<Scalars['Markdown']['output']>;
   Me: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['Me']>;
   MsGraphFailure: ResolverTypeWrapper<MsGraphFailure>;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
@@ -6302,6 +6413,17 @@ export type ResolversTypes = {
   PresentationEvent: ResolverTypeWrapper<PresentationEvent>;
   PresentationEventData: ResolverTypeWrapper<Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversTypes['Presentation']> }>;
   PresentationEventWhere: PresentationEventWhere;
+  PresentationFlow: ResolverTypeWrapper<PresentationFlowEntity>;
+  PresentationFlowInput: PresentationFlowInput;
+  PresentationFlowResponse: ResolverTypeWrapper<Omit<PresentationFlowResponse, 'request'> & { request: ResolversTypes['PresentationFlow'] }>;
+  PresentationFlowStatus: PresentationFlowStatus;
+  PresentationFlowTemplate: ResolverTypeWrapper<PresentationFlowTemplateEntity>;
+  PresentationFlowTemplateFieldVisibility: ResolverTypeWrapper<PresentationFlowTemplateFieldVisibility>;
+  PresentationFlowTemplateFieldVisibilityInput: PresentationFlowTemplateFieldVisibilityInput;
+  PresentationFlowTemplateInput: PresentationFlowTemplateInput;
+  PresentationFlowTokenResponse: ResolverTypeWrapper<PresentationFlowTokenResponse>;
+  PresentationFlowsOrderBy: PresentationFlowsOrderBy;
+  PresentationFlowsWhere: PresentationFlowsWhere;
   PresentationOrderBy: PresentationOrderBy;
   PresentationReceiptInput: PresentationReceiptInput;
   PresentationRequestInput: PresentationRequestInput;
@@ -6329,6 +6451,7 @@ export type ResolversTypes = {
   ScopedClaimMappingInput: ScopedClaimMappingInput;
   SendAsyncIssuanceVerificationResponse: ResolverTypeWrapper<SendAsyncIssuanceVerificationResponse>;
   ServiceFailures: ResolverTypeWrapper<ServiceFailures>;
+  SubmitActionsInput: SubmitActionsInput;
   Subscription: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Template: ResolverTypeWrapper<TemplateEntity>;
   TemplateDisplayClaim: ResolverTypeWrapper<Omit<TemplateDisplayClaim, 'validation'> & { validation?: Maybe<ResolversTypes['ClaimValidation']> }>;
@@ -6346,7 +6469,6 @@ export type ResolversTypes = {
   TextValidationInput: TextValidationInput;
   URL: ResolverTypeWrapper<Scalars['URL']['output']>;
   UUID: ResolverTypeWrapper<Scalars['UUID']['output']>;
-  UpdateApprovalRequestInput: UpdateApprovalRequestInput;
   UpdateIdentityStoreInput: UpdateIdentityStoreInput;
   UpdatePartnerInput: UpdatePartnerInput;
   User: ResolverTypeWrapper<UserEntity>;
@@ -6373,19 +6495,14 @@ export type ResolversParentTypes = {
   ID: Scalars['ID']['output'];
   AccessTokenResponse: AccessTokenResponse;
   AcquireLimitedAccessTokenInput: AcquireLimitedAccessTokenInput;
-  AcquireLimitedApprovalTokenInput: AcquireLimitedApprovalTokenInput;
   AcquireLimitedPhotoCaptureTokenInput: AcquireLimitedPhotoCaptureTokenInput;
-  ActionApprovalRequestInput: ActionApprovalRequestInput;
-  ActionedApprovalData: ActionedApprovalData;
+  AcquireLimitedPresentationFlowTokenInput: AcquireLimitedPresentationFlowTokenInput;
+  Action: Action;
+  ActionInput: ActionInput;
   ActionedBy: ActionedBy;
+  ActionedPresentationFlowData: ActionedPresentationFlowData;
   ApplicationLabelConfig: ApplicationLabelConfigEntity;
   ApplicationLabelConfigInput: ApplicationLabelConfigInput;
-  ApprovalRequest: ApprovalRequestEntity;
-  ApprovalRequestInput: ApprovalRequestInput;
-  ApprovalRequestPresentationInput: ApprovalRequestPresentationInput;
-  ApprovalRequestResponse: ApprovalRequestResponse;
-  ApprovalRequestsWhere: ApprovalRequestsWhere;
-  ApprovalTokenResponse: ApprovalTokenResponse;
   AsyncIssuanceContact: AsyncIssuanceContact;
   AsyncIssuanceContactInput: AsyncIssuanceContactInput;
   AsyncIssuanceErrorResponse: AsyncIssuanceErrorResponse;
@@ -6440,13 +6557,19 @@ export type ResolversParentTypes = {
   CorsOriginConfig: CorsOriginConfigEntity;
   CorsOriginConfigInput: CorsOriginConfigInput;
   CreatePartnerInput: CreatePartnerInput;
-  CreatePresentationRequestForApprovalInput: CreatePresentationRequestForApprovalInput;
+  CreatePresentationRequestForPresentationFlowInput: CreatePresentationRequestForPresentationFlowInput;
   CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
   CreateUpdateTemplateDisplayConsentInput: CreateUpdateTemplateDisplayConsentInput;
   CreateUpdateTemplateDisplayCredentialInput: CreateUpdateTemplateDisplayCredentialInput;
   CreateUpdateTemplateDisplayCredentialLogoInput: CreateUpdateTemplateDisplayCredentialLogoInput;
   CreateUpdateTemplateDisplayModelInput: CreateUpdateTemplateDisplayModelInput;
   CredentialTypesWhere: CredentialTypesWhere;
+  DataConstraints: DataConstraints;
+  DataConstraintsInput: DataConstraintsInput;
+  DataDefinition: DataDefinition;
+  DataDefinitionInput: DataDefinitionInput;
+  DataOption: DataOption;
+  DataOptionInput: DataOptionInput;
   DateCount: DateCount;
   DateTime: Scalars['DateTime']['output'];
   Discovery: Discovery;
@@ -6466,6 +6589,7 @@ export type ResolversParentTypes = {
   IdentityInput: IdentityInput;
   IdentityIssuanceWhere: IdentityIssuanceWhere;
   IdentityIssuer: IdentityIssuer;
+  IdentityPresentationFlowsWhere: IdentityPresentationFlowsWhere;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityStore: IdentityStoreEntity;
   IdentityStoreInput: IdentityStoreInput;
@@ -6509,6 +6633,7 @@ export type ResolversParentTypes = {
   MDocProcessedResponseResult: ResolversUnionTypes<ResolversParentTypes>['MDocProcessedResponseResult'];
   MDocRequestSigningInput: MDocRequestSigningInput;
   MDocValidationResults: MDocValidationResults;
+  Markdown: Scalars['Markdown']['output'];
   Me: ResolversUnionTypes<ResolversParentTypes>['Me'];
   MsGraphFailure: MsGraphFailure;
   Mutation: Record<PropertyKey, never>;
@@ -6545,6 +6670,15 @@ export type ResolversParentTypes = {
   PresentationEvent: PresentationEvent;
   PresentationEventData: Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversParentTypes['Presentation']> };
   PresentationEventWhere: PresentationEventWhere;
+  PresentationFlow: PresentationFlowEntity;
+  PresentationFlowInput: PresentationFlowInput;
+  PresentationFlowResponse: Omit<PresentationFlowResponse, 'request'> & { request: ResolversParentTypes['PresentationFlow'] };
+  PresentationFlowTemplate: PresentationFlowTemplateEntity;
+  PresentationFlowTemplateFieldVisibility: PresentationFlowTemplateFieldVisibility;
+  PresentationFlowTemplateFieldVisibilityInput: PresentationFlowTemplateFieldVisibilityInput;
+  PresentationFlowTemplateInput: PresentationFlowTemplateInput;
+  PresentationFlowTokenResponse: PresentationFlowTokenResponse;
+  PresentationFlowsWhere: PresentationFlowsWhere;
   PresentationReceiptInput: PresentationReceiptInput;
   PresentationRequestInput: PresentationRequestInput;
   PresentationRequestRegistration: PresentationRequestRegistration;
@@ -6570,6 +6704,7 @@ export type ResolversParentTypes = {
   ScopedClaimMappingInput: ScopedClaimMappingInput;
   SendAsyncIssuanceVerificationResponse: SendAsyncIssuanceVerificationResponse;
   ServiceFailures: ServiceFailures;
+  SubmitActionsInput: SubmitActionsInput;
   Subscription: Record<PropertyKey, never>;
   Template: TemplateEntity;
   TemplateDisplayClaim: Omit<TemplateDisplayClaim, 'validation'> & { validation?: Maybe<ResolversParentTypes['ClaimValidation']> };
@@ -6587,7 +6722,6 @@ export type ResolversParentTypes = {
   TextValidationInput: TextValidationInput;
   URL: Scalars['URL']['output'];
   UUID: Scalars['UUID']['output'];
-  UpdateApprovalRequestInput: UpdateApprovalRequestInput;
   UpdateIdentityStoreInput: UpdateIdentityStoreInput;
   UpdatePartnerInput: UpdatePartnerInput;
   User: UserEntity;
@@ -6650,16 +6784,9 @@ export type AccessTokenResponseResolvers<ContextType = GraphQLContext, ParentTyp
   token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type ActionedApprovalDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ActionedApprovalData'] = ResolversParentTypes['ActionedApprovalData']> = {
-  actionedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  actionedBy?: Resolver<Maybe<ResolversTypes['ActionedBy']>, ParentType, ContextType>;
-  actionedComment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  approvalRequestId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  callbackSecret?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  correlationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
-  requestData?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
-  state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  status?: Resolver<ResolversTypes['ApprovalRequestStatus'], ParentType, ContextType>;
+export type ActionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Action'] = ResolversParentTypes['Action']> = {
+  key?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export type ActionedByResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ActionedBy'] = ResolversParentTypes['ActionedBy']> = {
@@ -6667,40 +6794,24 @@ export type ActionedByResolvers<ContextType = GraphQLContext, ParentType extends
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
+export type ActionedPresentationFlowDataResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ActionedPresentationFlowData'] = ResolversParentTypes['ActionedPresentationFlowData']> = {
+  actionKey?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  callbackSecret?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  correlationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  dataResults?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  presentationFlowId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  presentationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  requestData?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  state?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['PresentationFlowStatus'], ParentType, ContextType>;
+  submittedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  submittedBy?: Resolver<Maybe<ResolversTypes['ActionedBy']>, ParentType, ContextType>;
+};
+
 export type ApplicationLabelConfigResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApplicationLabelConfig'] = ResolversParentTypes['ApplicationLabelConfig']> = {
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-};
-
-export type ApprovalRequestResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApprovalRequest'] = ResolversParentTypes['ApprovalRequest']> = {
-  actionedComment?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  correlationId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
-  expiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  isApproved?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  presentation?: Resolver<Maybe<ResolversTypes['Presentation']>, ParentType, ContextType>;
-  presentationRequest?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
-  purpose?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  referenceUrl?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  requestData?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
-  requestType?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  requestedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  requestedBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  status?: Resolver<ResolversTypes['ApprovalRequestStatus'], ParentType, ContextType>;
-  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
-  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
-};
-
-export type ApprovalRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApprovalRequestResponse'] = ResolversParentTypes['ApprovalRequestResponse']> = {
-  callbackSecret?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
-  portalUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-};
-
-export type ApprovalTokenResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ApprovalTokenResponse'] = ResolversParentTypes['ApprovalTokenResponse']> = {
-  expires?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
-  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
 export type AsyncIssuanceContactResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AsyncIssuanceContact'] = ResolversParentTypes['AsyncIssuanceContact']> = {
@@ -6900,6 +7011,29 @@ export type CorsOriginConfigResolvers<ContextType = GraphQLContext, ParentType e
   origin?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
+export type DataConstraintsResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['DataConstraints'] = ResolversParentTypes['DataConstraints']> = {
+  max?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  maxLength?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  min?: Resolver<Maybe<ResolversTypes['Float']>, ParentType, ContextType>;
+  minLength?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  pattern?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+};
+
+export type DataDefinitionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['DataDefinition'] = ResolversParentTypes['DataDefinition']> = {
+  allowMultiple?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  constraints?: Resolver<Maybe<ResolversTypes['DataConstraints']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  options?: Resolver<Maybe<Array<ResolversTypes['DataOption']>>, ParentType, ContextType>;
+  required?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['DataType'], ParentType, ContextType>;
+};
+
+export type DataOptionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['DataOption'] = ResolversParentTypes['DataOption']> = {
+  id?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type DateCountResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['DateCount'] = ResolversParentTypes['DateCount']> = {
   count?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -6972,6 +7106,7 @@ export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends R
   issuer?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   issuerLabel?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  presentationFlows?: Resolver<Array<ResolversTypes['PresentationFlow']>, ParentType, ContextType, RequireFields<IdentityPresentationFlowsArgs, 'limit'>>;
   presentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<IdentityPresentationsArgs, 'limit'>>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
@@ -7166,6 +7301,10 @@ export type MDocValidationResultsResolvers<ContextType = GraphQLContext, ParentT
   validatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
 };
 
+export interface MarkdownScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['Markdown'], any> {
+  name: 'Markdown';
+}
+
 export type MeResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Me'] = ResolversParentTypes['Me']> = {
   __resolveType: TypeResolveFn<'Identity' | 'User', ParentType, ContextType>;
 };
@@ -7178,14 +7317,12 @@ export type MsGraphFailureResolvers<ContextType = GraphQLContext, ParentType ext
 export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   acquireAsyncIssuanceToken?: Resolver<ResolversTypes['AsyncIssuanceTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireAsyncIssuanceTokenArgs, 'asyncIssuanceRequestId' | 'verificationCode'>>;
   acquireLimitedAccessToken?: Resolver<ResolversTypes['AccessTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireLimitedAccessTokenArgs, 'input'>>;
-  acquireLimitedApprovalToken?: Resolver<ResolversTypes['ApprovalTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireLimitedApprovalTokenArgs, 'input'>>;
   acquireLimitedPhotoCaptureToken?: Resolver<ResolversTypes['PhotoCaptureTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireLimitedPhotoCaptureTokenArgs, 'input'>>;
-  actionApprovalRequest?: Resolver<ResolversTypes['ApprovalRequest'], ParentType, ContextType, RequireFields<MutationActionApprovalRequestArgs, 'id' | 'input'>>;
-  cancelApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationCancelApprovalRequestArgs, 'id'>>;
+  acquireLimitedPresentationFlowToken?: Resolver<ResolversTypes['PresentationFlowTokenResponse'], ParentType, ContextType, RequireFields<MutationAcquireLimitedPresentationFlowTokenArgs, 'input'>>;
   cancelAsyncIssuanceRequest?: Resolver<Maybe<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<MutationCancelAsyncIssuanceRequestArgs, 'asyncIssuanceRequestId'>>;
   cancelAsyncIssuanceRequests?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationCancelAsyncIssuanceRequestsArgs, 'asyncIssuanceRequestIds'>>;
+  cancelPresentationFlow?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationCancelPresentationFlowArgs, 'id'>>;
   capturePhoto?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationCapturePhotoArgs, 'photo' | 'photoCaptureRequestId'>>;
-  createApprovalRequest?: Resolver<ResolversTypes['ApprovalRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateApprovalRequestArgs, 'request'>>;
   createAsyncIssuanceRequest?: Resolver<ResolversTypes['AsyncIssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateAsyncIssuanceRequestArgs, 'request'>>;
   createContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationCreateContractArgs, 'input'>>;
   createIdentityStore?: Resolver<ResolversTypes['IdentityStore'], ParentType, ContextType, RequireFields<MutationCreateIdentityStoreArgs, 'input'>>;
@@ -7198,9 +7335,11 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationCreateOidcResourceArgs, 'input'>>;
   createPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationCreatePartnerArgs, 'input'>>;
   createPhotoCaptureRequest?: Resolver<ResolversTypes['PhotoCaptureRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePhotoCaptureRequestArgs, 'request'>>;
+  createPresentationFlow?: Resolver<ResolversTypes['PresentationFlowResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationFlowArgs, 'request'>>;
+  createPresentationFlowTemplate?: Resolver<ResolversTypes['PresentationFlowTemplate'], ParentType, ContextType, RequireFields<MutationCreatePresentationFlowTemplateArgs, 'input'>>;
   createPresentationRequest?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestArgs, 'request'>>;
-  createPresentationRequestForApproval?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestForApprovalArgs, 'approvalRequestId'>>;
   createPresentationRequestForAuthn?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType>;
+  createPresentationRequestForPresentationFlow?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestForPresentationFlowArgs, 'presentationFlowId'>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
   deleteComposerBranding?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   deleteConciergeBranding?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
@@ -7211,6 +7350,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   deleteOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientArgs, 'id'>>;
   deleteOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientResourceArgs, 'clientId' | 'resourceId'>>;
   deleteOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationDeleteOidcResourceArgs, 'id'>>;
+  deletePresentationFlowTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeletePresentationFlowTemplateArgs, 'id'>>;
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;
   deprecateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationDeprecateContractArgs, 'id'>>;
   generateOidcClientSecret?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -7235,10 +7375,10 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   setApplicationLabelConfigs?: Resolver<Array<ResolversTypes['ApplicationLabelConfig']>, ParentType, ContextType, RequireFields<MutationSetApplicationLabelConfigsArgs, 'identityStoreId' | 'input'>>;
   setCorsOriginConfigs?: Resolver<Array<ResolversTypes['CorsOriginConfig']>, ParentType, ContextType, RequireFields<MutationSetCorsOriginConfigsArgs, 'input'>>;
   setEmailSenderConfig?: Resolver<ResolversTypes['EmailSenderConfig'], ParentType, ContextType, RequireFields<MutationSetEmailSenderConfigArgs, 'input'>>;
+  submitPresentationFlowActions?: Resolver<ResolversTypes['PresentationFlow'], ParentType, ContextType, RequireFields<MutationSubmitPresentationFlowActionsArgs, 'id' | 'input'>>;
   suspendIdentityStore?: Resolver<ResolversTypes['IdentityStore'], ParentType, ContextType, RequireFields<MutationSuspendIdentityStoreArgs, 'id'>>;
   suspendPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationSuspendPartnerArgs, 'id'>>;
   testServices?: Resolver<ResolversTypes['Discovery'], ParentType, ContextType>;
-  updateApprovalRequest?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationUpdateApprovalRequestArgs, 'id' | 'input'>>;
   updateAsyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<MutationUpdateAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   updateConciergeClientBranding?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateConciergeClientBrandingArgs, 'input'>>;
   updateContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationUpdateContractArgs, 'id' | 'input'>>;
@@ -7251,6 +7391,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   updateOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientResourceArgs, 'clientId' | 'input'>>;
   updateOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationUpdateOidcResourceArgs, 'id' | 'input'>>;
   updatePartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationUpdatePartnerArgs, 'id' | 'input'>>;
+  updatePresentationFlowTemplate?: Resolver<ResolversTypes['PresentationFlowTemplate'], ParentType, ContextType, RequireFields<MutationUpdatePresentationFlowTemplateArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;
 };
 
@@ -7416,6 +7557,75 @@ export type PresentationEventDataResolvers<ContextType = GraphQLContext, ParentT
   presentation?: Resolver<Maybe<ResolversTypes['Presentation']>, ParentType, ContextType>;
 };
 
+export type PresentationFlowResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlow'] = ResolversParentTypes['PresentationFlow']> = {
+  action?: Resolver<Maybe<ResolversTypes['Action']>, ParentType, ContextType>;
+  actions?: Resolver<Maybe<Array<ResolversTypes['Action']>>, ParentType, ContextType>;
+  autoSubmit?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  dataResults?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  dataSchema?: Resolver<Maybe<Array<ResolversTypes['DataDefinition']>>, ParentType, ContextType>;
+  expiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  identity?: Resolver<Maybe<ResolversTypes['Identity']>, ParentType, ContextType>;
+  isCancelled?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  isSubmitted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  portalUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  postPresentationText?: Resolver<Maybe<ResolversTypes['Markdown']>, ParentType, ContextType>;
+  prePresentationText?: Resolver<Maybe<ResolversTypes['Markdown']>, ParentType, ContextType>;
+  presentation?: Resolver<Maybe<ResolversTypes['Presentation']>, ParentType, ContextType>;
+  presentationRequest?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
+  requestData?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
+  status?: Resolver<ResolversTypes['PresentationFlowStatus'], ParentType, ContextType>;
+  template?: Resolver<Maybe<ResolversTypes['PresentationFlowTemplate']>, ParentType, ContextType>;
+  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+};
+
+export type PresentationFlowResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlowResponse'] = ResolversParentTypes['PresentationFlowResponse']> = {
+  callbackSecret?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  request?: Resolver<ResolversTypes['PresentationFlow'], ParentType, ContextType>;
+};
+
+export type PresentationFlowTemplateResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlowTemplate'] = ResolversParentTypes['PresentationFlowTemplate']> = {
+  actions?: Resolver<Maybe<Array<ResolversTypes['Action']>>, ParentType, ContextType>;
+  autoSubmit?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  dataSchema?: Resolver<Maybe<Array<ResolversTypes['DataDefinition']>>, ParentType, ContextType>;
+  expiresAfterDays?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  fieldVisibility?: Resolver<ResolversTypes['PresentationFlowTemplateFieldVisibility'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  postPresentationText?: Resolver<Maybe<ResolversTypes['Markdown']>, ParentType, ContextType>;
+  prePresentationText?: Resolver<Maybe<ResolversTypes['Markdown']>, ParentType, ContextType>;
+  presentationRequest?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
+  title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+};
+
+export type PresentationFlowTemplateFieldVisibilityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlowTemplateFieldVisibility'] = ResolversParentTypes['PresentationFlowTemplateFieldVisibility']> = {
+  actions?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  allowRevoked?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  autoSubmit?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  clientName?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  constraints?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  credentialTypes?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  dataSchema?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  expiresAt?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  faceCheck?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  postPresentationText?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  prePresentationText?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  title?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+};
+
+export type PresentationFlowTokenResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlowTokenResponse'] = ResolversParentTypes['PresentationFlowTokenResponse']> = {
+  expires?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type PresentationRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationRequestResponse'] = ResolversParentTypes['PresentationRequestResponse']> = {
   __resolveType: TypeResolveFn<'PresentationResponse' | 'RequestErrorResponse', ParentType, ContextType>;
 };
@@ -7439,10 +7649,8 @@ export type PresentedCredentialResolvers<ContextType = GraphQLContext, ParentTyp
 
 export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   accessPackages?: Resolver<Array<ResolversTypes['AccessPackage']>, ParentType, ContextType, RequireFields<QueryAccessPackagesArgs, 'contractId'>>;
-  actionedApprovalData?: Resolver<Maybe<ResolversTypes['ActionedApprovalData']>, ParentType, ContextType, RequireFields<QueryActionedApprovalDataArgs, 'id'>>;
+  actionedPresentationFlowData?: Resolver<Maybe<ResolversTypes['ActionedPresentationFlowData']>, ParentType, ContextType, RequireFields<QueryActionedPresentationFlowDataArgs, 'id'>>;
   applicationLabelConfigs?: Resolver<Array<ResolversTypes['ApplicationLabelConfig']>, ParentType, ContextType, RequireFields<QueryApplicationLabelConfigsArgs, 'identityStoreId'>>;
-  approvalRequest?: Resolver<ResolversTypes['ApprovalRequest'], ParentType, ContextType, RequireFields<QueryApprovalRequestArgs, 'id'>>;
-  approvalRequestTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
   asyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<QueryAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   asyncIssuanceRequest?: Resolver<ResolversTypes['AsyncIssuanceRequest'], ParentType, ContextType, RequireFields<QueryAsyncIssuanceRequestArgs, 'id'>>;
   authority?: Resolver<ResolversTypes['Authority'], ParentType, ContextType>;
@@ -7453,7 +7661,6 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   credentialTypes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType, Partial<QueryCredentialTypesArgs>>;
   discovery?: Resolver<ResolversTypes['Discovery'], ParentType, ContextType>;
   emailSenderConfig?: Resolver<ResolversTypes['EmailSenderConfig'], ParentType, ContextType>;
-  findApprovalRequests?: Resolver<Array<ResolversTypes['ApprovalRequest']>, ParentType, ContextType, RequireFields<QueryFindApprovalRequestsArgs, 'limit'>>;
   findAsyncIssuanceRequests?: Resolver<Array<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<QueryFindAsyncIssuanceRequestsArgs, 'limit'>>;
   findCommunications?: Resolver<Array<ResolversTypes['Communication']>, ParentType, ContextType, Partial<QueryFindCommunicationsArgs>>;
   findContracts?: Resolver<Array<ResolversTypes['Contract']>, ParentType, ContextType, Partial<QueryFindContractsArgs>>;
@@ -7465,6 +7672,8 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findOidcClients?: Resolver<Array<ResolversTypes['OidcClient']>, ParentType, ContextType, RequireFields<QueryFindOidcClientsArgs, 'limit'>>;
   findOidcResources?: Resolver<Array<ResolversTypes['OidcResource']>, ParentType, ContextType, RequireFields<QueryFindOidcResourcesArgs, 'limit'>>;
   findPartners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType, RequireFields<QueryFindPartnersArgs, 'limit'>>;
+  findPresentationFlowTemplates?: Resolver<Array<ResolversTypes['PresentationFlowTemplate']>, ParentType, ContextType>;
+  findPresentationFlows?: Resolver<Array<ResolversTypes['PresentationFlow']>, ParentType, ContextType, RequireFields<QueryFindPresentationFlowsArgs, 'limit'>>;
   findPresentations?: Resolver<Array<ResolversTypes['Presentation']>, ParentType, ContextType, RequireFields<QueryFindPresentationsArgs, 'limit'>>;
   findTemplates?: Resolver<Array<ResolversTypes['Template']>, ParentType, ContextType, RequireFields<QueryFindTemplatesArgs, 'limit'>>;
   findTenantIdentities?: Resolver<Array<ResolversTypes['TenantIdentity']>, ParentType, ContextType, RequireFields<QueryFindTenantIdentitiesArgs, 'limit' | 'where'>>;
@@ -7496,6 +7705,8 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   presentationCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryPresentationCountByContractArgs>>;
   presentationCountByDate?: Resolver<Array<ResolversTypes['DateCount']>, ParentType, ContextType, Partial<QueryPresentationCountByDateArgs>>;
   presentationCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryPresentationCountByUserArgs>>;
+  presentationFlow?: Resolver<ResolversTypes['PresentationFlow'], ParentType, ContextType, RequireFields<QueryPresentationFlowArgs, 'id'>>;
+  presentationFlowTemplate?: Resolver<ResolversTypes['PresentationFlowTemplate'], ParentType, ContextType, RequireFields<QueryPresentationFlowTemplateArgs, 'id'>>;
   template?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<QueryTemplateArgs, 'id'>>;
   templateCombinedData?: Resolver<ResolversTypes['TemplateParentData'], ParentType, ContextType, RequireFields<QueryTemplateCombinedDataArgs, 'templateId'>>;
   testAuthorityClient?: Resolver<ResolversTypes['Authority'], ParentType, ContextType, RequireFields<QueryTestAuthorityClientArgs, 'authorityClient' | 'identifier'>>;
@@ -7580,6 +7791,7 @@ export type SubscriptionResolvers<ContextType = GraphQLContext, ParentType exten
   issuanceEvent?: SubscriptionResolver<ResolversTypes['IssuanceEventData'], "issuanceEvent", ParentType, ContextType, Partial<SubscriptionIssuanceEventArgs>>;
   photoCaptureEvent?: SubscriptionResolver<ResolversTypes['PhotoCaptureEventData'], "photoCaptureEvent", ParentType, ContextType, RequireFields<SubscriptionPhotoCaptureEventArgs, 'photoCaptureRequestId'>>;
   presentationEvent?: SubscriptionResolver<ResolversTypes['PresentationEventData'], "presentationEvent", ParentType, ContextType, Partial<SubscriptionPresentationEventArgs>>;
+  presentationFlowEvent?: SubscriptionResolver<ResolversTypes['PresentationFlow'], "presentationFlowEvent", ParentType, ContextType, RequireFields<SubscriptionPresentationFlowEventArgs, 'id'>>;
 };
 
 export type TemplateResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Template'] = ResolversParentTypes['Template']> = {
@@ -7710,12 +7922,10 @@ export type WebDidModelResolvers<ContextType = GraphQLContext, ParentType extend
 export type Resolvers<ContextType = GraphQLContext> = {
   AccessPackage?: AccessPackageResolvers<ContextType>;
   AccessTokenResponse?: AccessTokenResponseResolvers<ContextType>;
-  ActionedApprovalData?: ActionedApprovalDataResolvers<ContextType>;
+  Action?: ActionResolvers<ContextType>;
   ActionedBy?: ActionedByResolvers<ContextType>;
+  ActionedPresentationFlowData?: ActionedPresentationFlowDataResolvers<ContextType>;
   ApplicationLabelConfig?: ApplicationLabelConfigResolvers<ContextType>;
-  ApprovalRequest?: ApprovalRequestResolvers<ContextType>;
-  ApprovalRequestResponse?: ApprovalRequestResponseResolvers<ContextType>;
-  ApprovalTokenResponse?: ApprovalTokenResponseResolvers<ContextType>;
   AsyncIssuanceContact?: AsyncIssuanceContactResolvers<ContextType>;
   AsyncIssuanceErrorResponse?: AsyncIssuanceErrorResponseResolvers<ContextType>;
   AsyncIssuanceRequest?: AsyncIssuanceRequestResolvers<ContextType>;
@@ -7741,6 +7951,9 @@ export type Resolvers<ContextType = GraphQLContext> = {
   ContractDisplayCredentialLogo?: ContractDisplayCredentialLogoResolvers<ContextType>;
   ContractDisplayModel?: ContractDisplayModelResolvers<ContextType>;
   CorsOriginConfig?: CorsOriginConfigResolvers<ContextType>;
+  DataConstraints?: DataConstraintsResolvers<ContextType>;
+  DataDefinition?: DataDefinitionResolvers<ContextType>;
+  DataOption?: DataOptionResolvers<ContextType>;
   DateCount?: DateCountResolvers<ContextType>;
   DateTime?: GraphQLScalarType;
   Discovery?: DiscoveryResolvers<ContextType>;
@@ -7781,6 +7994,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   MDocProcessedResponse?: MDocProcessedResponseResolvers<ContextType>;
   MDocProcessedResponseResult?: MDocProcessedResponseResultResolvers<ContextType>;
   MDocValidationResults?: MDocValidationResultsResolvers<ContextType>;
+  Markdown?: GraphQLScalarType;
   Me?: MeResolvers<ContextType>;
   MsGraphFailure?: MsGraphFailureResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
@@ -7802,6 +8016,11 @@ export type Resolvers<ContextType = GraphQLContext> = {
   PresentationCallbackEvent?: PresentationCallbackEventResolvers<ContextType>;
   PresentationEvent?: PresentationEventResolvers<ContextType>;
   PresentationEventData?: PresentationEventDataResolvers<ContextType>;
+  PresentationFlow?: PresentationFlowResolvers<ContextType>;
+  PresentationFlowResponse?: PresentationFlowResponseResolvers<ContextType>;
+  PresentationFlowTemplate?: PresentationFlowTemplateResolvers<ContextType>;
+  PresentationFlowTemplateFieldVisibility?: PresentationFlowTemplateFieldVisibilityResolvers<ContextType>;
+  PresentationFlowTokenResponse?: PresentationFlowTokenResponseResolvers<ContextType>;
   PresentationRequestResponse?: PresentationRequestResponseResolvers<ContextType>;
   PresentationResponse?: PresentationResponseResolvers<ContextType>;
   PresentedCredential?: PresentedCredentialResolvers<ContextType>;

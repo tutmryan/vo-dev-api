@@ -2,6 +2,7 @@ import { rule } from 'graphql-shield'
 import type { GraphQLContext } from '../../context'
 import { userIsIdentityEntity } from '../../util/user-invariant'
 import { AsyncIssuanceEntity } from '../async-issuance/entities/async-issuance-entity'
+import { PresentationFlowEntity } from '../presentation-flow/entities/presentation-flow-entity'
 import { IssuanceEntity } from '../issuance/entities/issuance-entity'
 import { PresentationEntity } from '../presentation/entities/presentation-entity'
 import { IdentityEntity } from './entities/identity-entity'
@@ -28,6 +29,14 @@ export const issuanceIsToAuthenticatedUser = rule('issuanceIsToAuthenticatedUser
   { user }: GraphQLContext,
 ) => {
   return parent instanceof IssuanceEntity && userIsIdentityEntity(user) && parent.identityId === user.entity.id
+})
+
+export const presentationFlowIsToAuthenticatedUser = rule('presentationFlowIsToAuthenticatedUser', { cache: 'strict' })((
+  parent,
+  _,
+  { user }: GraphQLContext,
+) => {
+  return parent instanceof PresentationFlowEntity && userIsIdentityEntity(user) && parent.identityId === user.entity.id
 })
 
 export const presentationIsByAuthenticatedUser = rule('presentationIsByAuthenticatedUser', { cache: 'strict' })((

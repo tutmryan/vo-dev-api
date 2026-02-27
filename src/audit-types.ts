@@ -74,6 +74,13 @@ export const AuditEvents = {
   PRESENTATION_REQUEST_RETRIEVED: { id: 'VO0061', eventType: 'presentation.request.retrieved' },
   PRESENTATION_REQUEST_COMPLETED: { id: 'VO0062', eventType: 'presentation.request.completed' },
   PRESENTATION_REQUEST_FAILED: { id: 'VO0063', eventType: 'presentation.request.failed' },
+  PRESENTATION_FLOW_CREATED: { id: 'VO0064', eventType: 'presentation.flow.created' },
+  PRESENTATION_FLOW_CANCELLED: { id: 'VO0065', eventType: 'presentation.flow.cancelled' },
+  PRESENTATION_FLOW_SUBMITTED: { id: 'VO0066', eventType: 'presentation.flow.submitted' },
+  PRESENTATION_FLOW_REQUEST_CREATED: { id: 'VO0070', eventType: 'presentation.flow.request.created' },
+  PRESENTATION_FLOW_TEMPLATE_CREATED: { id: 'VO0067', eventType: 'presentation.flow.template.created' },
+  PRESENTATION_FLOW_TEMPLATE_UPDATED: { id: 'VO0068', eventType: 'presentation.flow.template.updated' },
+  PRESENTATION_FLOW_TEMPLATE_DELETED: { id: 'VO0069', eventType: 'presentation.flow.template.deleted' },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Issuance Events (VO0080-VO0099)

@@ -20,10 +20,11 @@ extensions:
                 User: ../features/users/entities/user-entity#UserEntity
                 Issuance: ../features/issuance/entities/issuance-entity#IssuanceEntity
                 Presentation: ../features/presentation/entities/presentation-entity#PresentationEntity
+                PresentationFlow: ../features/presentation-flow/entities/presentation-flow-entity#PresentationFlowEntity
+                PresentationFlowTemplate: ../features/presentation-flow/entities/presentation-flow-template-entity#PresentationFlowTemplateEntity
                 Identity: ../features/identity/entities/identity-entity#IdentityEntity
                 IdentityStore: ../features/identity-store/entities/identity-store-entity#IdentityStoreEntity
                 Partner: ../features/partners/entities/partner-entity#PartnerEntity
-                ApprovalRequest: ../features/approval-request/entities/approval-request-entity#ApprovalRequestEntity
                 AsyncIssuanceRequest: ../features/async-issuance/entities/async-issuance-entity#AsyncIssuanceEntity
                 Communication: ../features/communication/entities/communication-entity#CommunicationEntity
                 OidcClient: ../features/oidc-provider/entities/oidc-client-entity#OidcClientEntity
@@ -50,6 +51,7 @@ extensions:
             JSONObject: Record<string, unknown>
             EmailAddress: string
             UUID: string
+            Markdown: string
       ./src/generated/schema.json:
         sort: true
         plugins:

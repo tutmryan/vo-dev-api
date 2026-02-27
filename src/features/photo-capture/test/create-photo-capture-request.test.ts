@@ -49,7 +49,7 @@ describe('createPhotoCaptureRequest mutation', () => {
         },
       },
       AppRoles.present,
-      AppRoles.requestApproval,
+      AppRoles.presentationFlowCreate,
     )
 
     // Assert
@@ -69,7 +69,6 @@ describe('createPhotoCaptureRequest mutation', () => {
           },
         },
       },
-      UserRoles.approvalRequestAdmin,
       UserRoles.credentialAdmin,
       UserRoles.partnerAdmin,
       UserRoles.reader,

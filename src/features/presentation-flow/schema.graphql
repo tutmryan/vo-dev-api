@@ -1,0 +1,295 @@
+# eslint-disable @graphql-eslint/strict-id-in-types
+# eslint-disable @graphql-eslint/naming-convention
+# eslint-disable @graphql-eslint/require-description
+
+"""
+The status of the presentation flow.
+"""
+enum PresentationFlowStatus {
+  PENDING
+  REQUEST_CREATED
+  REQUEST_RETRIEVED
+  PRESENTATION_VERIFIED
+  SUBMITTED
+  EXPIRED
+  CANCELLED
+}
+
+"""
+The supported data entry field types.
+"""
+enum DataType {
+  boolean
+  select
+  text
+  number
+}
+
+type DataOption {
+  id: String!
+  label: String!
+}
+
+input DataOptionInput {
+  label: String!
+}
+
+type DataConstraints {
+  min: Float
+  max: Float
+  minLength: Int
+  maxLength: Int
+  pattern: String
+}
+
+input DataConstraintsInput {
+  min: Float
+  max: Float
+  minLength: Int
+  maxLength: Int
+  pattern: String
+}
+
+type DataDefinition {
+  id: String!
+  type: DataType!
+  label: String!
+  required: Boolean!
+  allowMultiple: Boolean
+  options: [DataOption!]
+  constraints: DataConstraints
+}
+
+input DataDefinitionInput {
+  type: DataType!
+  label: String!
+  required: Boolean!
+  allowMultiple: Boolean
+  options: [DataOptionInput!]
+  constraints: DataConstraintsInput
+}
+
+type Action {
+  key: String!
+  label: String!
+}
+
+input ActionInput {
+  key: String!
+  label: String!
+}
+
+input PresentationFlowInput {
+  identityId: ID
+  correlationId: ID
+  templateId: ID
+  title: String
+  expiresAt: DateTime
+  prePresentationText: Markdown
+  postPresentationText: Markdown
+  requestData: JSONObject
+  presentationRequest: PresentationRequestInput!
+  dataSchema: [DataDefinitionInput!]
+  actions: [ActionInput!]
+  autoSubmit: Boolean
+  callback: Callback
+}
+
+type PresentationFlowResponse {
+  callbackSecret: String!
+  request: PresentationFlow!
+}
+
+"""
+A presentation flow.
+"""
+type PresentationFlow {
+  id: ID!
+  title: String
+  portalUrl: String!
+  identity: Identity
+  expiresAt: DateTime!
+  prePresentationText: Markdown
+  postPresentationText: Markdown
+  requestData: JSONObject
+  presentationRequest: JSONObject!
+  dataSchema: [DataDefinition!]
+  dataResults: JSONObject
+  actions: [Action!]
+  autoSubmit: Boolean
+  action: Action
+  presentation: Presentation
+  isCancelled: Boolean
+  isSubmitted: Boolean
+  template: PresentationFlowTemplate
+  status: PresentationFlowStatus!
+  createdBy: User!
+  createdAt: DateTime!
+  updatedBy: User
+  updatedAt: DateTime
+}
+
+input SubmitActionsInput {
+  dataResults: JSONObject
+  actionKey: String
+}
+
+"""
+Input for creating presentation flow presentation requests.
+"""
+input CreatePresentationRequestForPresentationFlowInput {
+  includeQRCode: Boolean
+}
+
+input PresentationFlowsWhere {
+  createdById: ID
+  identityId: ID
+  status: PresentationFlowStatus
+  incomplete: Boolean
+  createdFrom: DateTime
+  createdTo: DateTime
+}
+
+input IdentityPresentationFlowsWhere {
+  status: PresentationFlowStatus
+  incomplete: Boolean
+  createdFrom: DateTime
+  createdTo: DateTime
+}
+
+enum PresentationFlowsOrderBy {
+  createdAt
+}
+
+"""
+The details of the person who submitted the presentation flow
+"""
+type ActionedBy {
+  """
+  The id of this identity
+  """
+  id: ID!
+  """
+  The name of the identity
+  """
+  name: String!
+}
+
+type ActionedPresentationFlowData {
+  presentationFlowId: ID!
+  correlationId: ID
+  requestData: JSONObject
+  state: String
+  status: PresentationFlowStatus!
+  presentationId: ID
+  dataResults: JSONObject
+  actionKey: String
+  submittedAt: DateTime
+  submittedBy: ActionedBy
+  callbackSecret: String!
+}
+
+extend type Mutation {
+  createPresentationFlow(request: PresentationFlowInput!): PresentationFlowResponse!
+  createPresentationRequestForPresentationFlow(
+    presentationFlowId: ID!
+    input: CreatePresentationRequestForPresentationFlowInput
+  ): PresentationRequestResponse!
+  submitPresentationFlowActions(id: ID!, input: SubmitActionsInput!): PresentationFlow!
+  cancelPresentationFlow(id: ID!): Void
+  createPresentationFlowTemplate(input: PresentationFlowTemplateInput!): PresentationFlowTemplate!
+  updatePresentationFlowTemplate(id: ID!, input: PresentationFlowTemplateInput!): PresentationFlowTemplate!
+  deletePresentationFlowTemplate(id: ID!): Void
+}
+
+extend type Query {
+  presentationFlow(id: ID!): PresentationFlow!
+  findPresentationFlows(
+    where: PresentationFlowsWhere
+    offset: NonNegativeInt
+    limit: PositiveInt = 100
+    orderBy: PresentationFlowsOrderBy
+    orderDirection: OrderDirection
+  ): [PresentationFlow!]!
+  actionedPresentationFlowData(id: ID!): ActionedPresentationFlowData
+  presentationFlowTemplate(id: ID!): PresentationFlowTemplate!
+  findPresentationFlowTemplates: [PresentationFlowTemplate!]!
+}
+
+extend type Subscription {
+  """
+  Returns the updated presentation flow when its status changes.
+  """
+  presentationFlowEvent(id: ID!): PresentationFlow!
+}
+
+"""
+Controls which fields are visible when creating a presentation flow from a template.
+"""
+type PresentationFlowTemplateFieldVisibility {
+  title: Boolean
+  prePresentationText: Boolean
+  postPresentationText: Boolean
+  credentialTypes: Boolean
+  allowRevoked: Boolean
+  faceCheck: Boolean
+  expiresAt: Boolean
+  dataSchema: Boolean
+  actions: Boolean
+  autoSubmit: Boolean
+  constraints: Boolean
+  clientName: Boolean
+}
+
+input PresentationFlowTemplateFieldVisibilityInput {
+  title: Boolean
+  prePresentationText: Boolean
+  postPresentationText: Boolean
+  credentialTypes: Boolean
+  allowRevoked: Boolean
+  faceCheck: Boolean
+  expiresAt: Boolean
+  dataSchema: Boolean
+  actions: Boolean
+  autoSubmit: Boolean
+  constraints: Boolean
+  clientName: Boolean
+}
+
+"""
+A template for creating presentation flows.
+"""
+type PresentationFlowTemplate {
+  id: ID!
+  name: String!
+  title: String
+  prePresentationText: Markdown
+  postPresentationText: Markdown
+  presentationRequest: JSONObject!
+  dataSchema: [DataDefinition!]
+  actions: [Action!]
+  autoSubmit: Boolean
+  expiresAfterDays: Int
+  fieldVisibility: PresentationFlowTemplateFieldVisibility!
+  createdBy: User!
+  createdAt: DateTime!
+  updatedBy: User
+  updatedAt: DateTime
+}
+
+input PresentationFlowTemplateInput {
+  name: String!
+  title: String
+  prePresentationText: Markdown
+  postPresentationText: Markdown
+  presentationRequest: PresentationRequestInput!
+  dataSchema: [DataDefinitionInput!]
+  actions: [ActionInput!]
+  autoSubmit: Boolean
+  expiresAfterDays: Int
+  fieldVisibility: PresentationFlowTemplateFieldVisibilityInput!
+}
+
+extend type Identity {
+  presentationFlows(where: IdentityPresentationFlowsWhere, offset: NonNegativeInt, limit: PositiveInt = 100): [PresentationFlow!]!
+}

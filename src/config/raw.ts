@@ -134,7 +134,7 @@ export type Config = {
     credentials: ClientCredentials
     secret?: string
   }
-  limitedApproval: {
+  limitedPresentationFlow: {
     credentials: ClientCredentials
     secret?: string
   }

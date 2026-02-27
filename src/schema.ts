@@ -3,7 +3,7 @@ import { mergeResolvers } from '@graphql-tools/merge'
 import { makeExecutableSchema } from '@graphql-tools/schema'
 import { stitchSchemas } from '@graphql-tools/stitch'
 import type { GraphQLSchema } from 'graphql'
-import { GraphQLScalarType } from 'graphql'
+import { GraphQLError, GraphQLScalarType, Kind } from 'graphql'
 import { constraintDirectiveDocumentation, constraintDirectiveTypeDefs } from 'graphql-constraint-directive'
 import { applyMiddleware } from 'graphql-middleware'
 import { resolvers as scalarResolvers } from 'graphql-scalars'
@@ -30,6 +30,26 @@ const usedScalars = pick(
   'UUID',
 )
 
+const markdownScalar = {
+  Markdown: new GraphQLScalarType({
+    name: 'Markdown',
+    serialize: (value) => String(value),
+    parseValue: (value) => {
+      if (value === null || value === undefined) return null
+      if (typeof value !== 'string') {
+        throw new GraphQLError('Markdown must be a string')
+      }
+      return value
+    },
+    parseLiteral: (ast) => {
+      if (ast.kind !== Kind.STRING) {
+        throw new GraphQLError('Markdown must be a string')
+      }
+      return ast.value
+    },
+  }),
+}
+
 function buildLocalSchema() {
   const resolvers = loadFilesSync(
     [path.join(__dirname, './features/**/resolvers.*'), path.join(__dirname, './background-jobs/**/resolvers.*')],
@@ -43,7 +63,7 @@ function buildLocalSchema() {
 
   let schema = makeExecutableSchema({
     typeDefs: [constraintDirectiveTypeDefs, typeDefs],
-    resolvers: mergeResolvers([usedScalars, ...resolvers]),
+    resolvers: mergeResolvers([usedScalars, markdownScalar, ...resolvers]),
   })
   schema = constraintDirectiveDocumentation({})(schema)
   requireExplicitResolversForScalars(schema)

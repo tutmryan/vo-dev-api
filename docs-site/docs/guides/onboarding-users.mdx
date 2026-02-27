@@ -19,7 +19,7 @@ We recommend creating Microsoft Entra ID groups mapped to each VO user role. Use
 - [Issuer](#issuer)
 - [Credential admin](#credential-admin)
 - [Partner admin](#partner-admin)
-- [Approval request admin](#approval-request-admin)
+- [Presentation flow admin](#presentation-flow-admin)
 - [OIDC admin](#oidc-admin)
 - [Instance admin](#instance-admin)
 - [Support agent](#support-agent)
@@ -89,16 +89,20 @@ Permissions:
 - add partner
 - edit partner
 
-## Approval request admin
+## Presentation flow admin
 
-User role: `VerifiableCredential.ApprovalRequestAdmin`
+User roles: `presentationFlow.create`, `presentationFlow.read`, `presentationFlow.cancel`
 
 Permissions:
 
-- all the permissions of [Reader](#reader) role, and
-- view and filter the list of approval requests
-- view approval request details including actioned approval data
-- cancel pending approval requests
+- create presentation flows
+- view and filter the list of presentation flows
+- view presentation flow details including actioned data
+- cancel pending presentation flows
+
+Additional template management roles are available: `presentationFlow.template.create`, `presentationFlow.template.read`, `presentationFlow.template.update`, `presentationFlow.template.delete`.
+
+Refer to the [Presentation flows](/docs/guides/presentation-flows) guide for more information.
 
 ## OIDC admin
 

@@ -22,7 +22,7 @@ const config: DeepPartial<Config> = {
       clientId: '137d81ce-2067-4670-9c61-70bb7fc726e8',
     },
   },
-  limitedApproval: {
+  limitedPresentationFlow: {
     credentials: {
       clientId: '20b94470-7f92-46fd-b332-e5e9d06a04df',
     },

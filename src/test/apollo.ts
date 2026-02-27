@@ -9,7 +9,7 @@ import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
 import type { AppRoles } from '../roles'
 import { InternalRoles, UserRoles } from '../roles'
 import schema from '../schema'
-import type { LimitedApprovalOperationInput, LimitedPhotoCaptureOperationInput } from './context'
+import type { LimitedPhotoCaptureOperationInput, LimitedPresentationFlowOperationInput } from './context'
 import { buildIssueeJwt, buildJwt, createContext } from './context'
 
 const server = new ApolloServer<GraphQLContext>({
@@ -24,7 +24,7 @@ export const executeOperation = async <TData = Record<string, unknown>, TVariabl
   },
   jwtPayload?: JwtPayload,
   limitedAccessData?: AcquireLimitedAccessTokenInput,
-  limitedApprovalData?: LimitedApprovalOperationInput,
+  limitedPresentationFlowData?: LimitedPresentationFlowOperationInput,
   limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
   limitedAsyncIssuanceData?: AsyncIssuanceSessionData,
   serverInstance = server,
@@ -33,7 +33,7 @@ export const executeOperation = async <TData = Record<string, unknown>, TVariabl
     contextValue: await createContext(
       jwtPayload,
       limitedAccessData,
-      limitedApprovalData,
+      limitedPresentationFlowData,
       limitedPhotoCaptureData,
       limitedAsyncIssuanceData,
     ),
@@ -48,8 +48,8 @@ export const executeOperationAs = async <TData = Record<string, unknown>, TVaria
   },
   jwtPayload: JwtPayload,
   limitedAccessData?: AcquireLimitedAccessTokenInput,
-  limitedApprovalData?: LimitedApprovalOperationInput,
-): Promise<FormattedExecutionResult<TData>> => executeOperation(request, jwtPayload, limitedAccessData, limitedApprovalData)
+  limitedPresentationFlowData?: LimitedPresentationFlowOperationInput,
+): Promise<FormattedExecutionResult<TData>> => executeOperation(request, jwtPayload, limitedAccessData, limitedPresentationFlowData)
 
 export const executeOperationAnonymous = async <TData = Record<string, unknown>, TVariables extends VariableValues = VariableValues>(
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
@@ -85,15 +85,6 @@ export const executeOperationAsPartnerAdmin = async <TData = Record<string, unkn
   },
 ): Promise<FormattedExecutionResult<TData>> => executeOperationAsUser(request, UserRoles.partnerAdmin)
 
-export const executeOperationAsApprovalRequestAdmin = async <
-  TData = Record<string, unknown>,
-  TVariables extends VariableValues = VariableValues,
->(
-  request: Omit<GraphQLRequest<TVariables>, 'query'> & {
-    query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
-  },
-): Promise<FormattedExecutionResult<TData>> => executeOperationAsUser(request, UserRoles.approvalRequestAdmin)
-
 export const executeOperationAsLimitedAccessClient = async <
   TData = Record<string, unknown>,
   TVariables extends VariableValues = VariableValues,
@@ -105,16 +96,16 @@ export const executeOperationAsLimitedAccessClient = async <
 ): Promise<FormattedExecutionResult<TData>> =>
   executeOperation(request, buildJwt({ roles: [InternalRoles.limitedAccess] }), limitedAccessData)
 
-export const executeOperationAsLimitedApprovalClient = async <
+export const executeOperationAsLimitedPresentationFlowClient = async <
   TData = Record<string, unknown>,
   TVariables extends VariableValues = VariableValues,
 >(
   request: Omit<GraphQLRequest<TVariables>, 'query'> & {
     query?: string | DocumentNode | TypedDocumentNode<TData, TVariables>
   },
-  limitedApprovalData?: LimitedApprovalOperationInput,
+  limitedPresentationFlowData?: LimitedPresentationFlowOperationInput,
 ): Promise<FormattedExecutionResult<TData>> =>
-  executeOperation(request, buildJwt({ roles: [InternalRoles.limitedApproval] }), undefined, limitedApprovalData)
+  executeOperation(request, buildJwt({ roles: [InternalRoles.limitedPresentationFlow] }), undefined, limitedPresentationFlowData)
 
 export const executeOperationAsLimitedPhotoCaptureClient = async <
   TData = Record<string, unknown>,

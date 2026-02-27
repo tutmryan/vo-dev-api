@@ -33,10 +33,10 @@ export const limitedAccessAuth: ClientCredentialsConfig = {
   tokenUrl: platformTokenUrl,
   ...config.get('limitedAccess.credentials'),
 }
-export const limitedApprovalAuth: ClientCredentialsConfig = {
+export const limitedPresentationFlowAuth: ClientCredentialsConfig = {
   scope: internalScope,
   tokenUrl: platformTokenUrl,
-  ...config.get('limitedApproval.credentials'),
+  ...config.get('limitedPresentationFlow.credentials'),
 }
 export const limitedPhotoCaptureAuth: ClientCredentialsConfig = {
   scope: internalScope,
@@ -125,7 +125,7 @@ export const oidcAuthorityUrl = `${apiUrl}/oidc`
 // This config is used to validate API access via JWTs that we issue, example:
 // - VID service callback tokens
 // - Limited access tokens
-// - Limited approval tokens
+// - Limited presentation flow tokens
 // - Limited photo capture tokens
 // - Limited async issuance tokens
 // - Limited demo tokens

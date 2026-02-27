@@ -6,8 +6,11 @@ import {
   isValidLimitedAccessIssuanceFilter,
   isValidLimitedAccessPresentationFilter,
 } from './features/limited-access-tokens'
-import { isLimitedApprovalApp, isValidLimitedApprovalPresentationFilter } from './features/limited-approval-tokens/shield-rules'
 import { isLimitedAsyncIssuanceApp, isValidLimitedAsyncIssuanceIssuanceFilter } from './features/limited-async-issuance-tokens/shield-rules'
+import {
+  isLimitedPresentationFlowApp,
+  isValidLimitedPresentationFlowPresentationFilter,
+} from './features/limited-presentation-flow-tokens/shield-rules'
 import { isOidcAuthnClient, isValidOidcAuthnPresentationFilter } from './features/oidc-provider/shield-rules'
 import { AppRoles, OidcScopes, UserRoles } from './roles'
 import { hasAnyRoleRuleWithName, hasApiResourceScopeRule, hasRoleRule } from './util/shield-utils'
@@ -19,7 +22,6 @@ export const isUserWithReadPermissions = hasAnyRoleRuleWithName(
   UserRoles.issuer,
   UserRoles.credentialAdmin,
   UserRoles.partnerAdmin,
-  UserRoles.approvalRequestAdmin,
   UserRoles.oidcAdmin,
   UserRoles.instanceAdmin,
 )
@@ -28,7 +30,6 @@ export const isUserWithReadPermissions = hasAnyRoleRuleWithName(
 export const isIssuerUser = hasRoleRule(UserRoles.issuer)
 export const isCredentialAdminUser = hasRoleRule(UserRoles.credentialAdmin)
 export const isPartnerAdminUser = hasRoleRule(UserRoles.partnerAdmin)
-export const isApprovalRequestAdminUser = hasRoleRule(UserRoles.approvalRequestAdmin)
 export const isOidcAdminUser = hasRoleRule(UserRoles.oidcAdmin)
 export const isInstanceAdminUser = hasRoleRule(UserRoles.instanceAdmin)
 export const isSupportAgentUser = hasRoleRule(UserRoles.supportAgent)
@@ -53,7 +54,7 @@ export const fallbackRule = or(
   isPresentationApp,
   isContractAdminApp,
   isLimitedAccessApp,
-  isLimitedApprovalApp,
+  isLimitedPresentationFlowApp,
   isLimitedAsyncIssuanceApp,
   isOidcAuthnClient,
   isIssuee,
@@ -74,7 +75,7 @@ export const isAllowedToViewPresentations = or(
   isUserWithReadPermissions,
   isPresentationApp,
   isValidLimitedAccessPresentationFilter,
-  isValidLimitedApprovalPresentationFilter,
+  isValidLimitedPresentationFlowPresentationFilter,
   isValidOidcAuthnPresentationFilter,
   isSupportAgentUser,
 )

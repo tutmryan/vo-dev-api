@@ -51,7 +51,7 @@ const config: DeepPartial<Config> = {
   limitedAccess: {
     credentials: {},
   },
-  limitedApproval: {
+  limitedPresentationFlow: {
     credentials: {},
   },
   limitedPhotoCapture: {

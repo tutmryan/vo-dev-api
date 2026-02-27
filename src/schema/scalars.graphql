@@ -347,3 +347,8 @@ scalar Locale
 # A field whose value is an IPC Class Symbol within the International Patent Classification System: https://www.wipo.int/classifications/ipc/en/
 # """
 # scalar IPCPatent
+
+"""
+A field whose value is a Markdown string.
+"""
+scalar Markdown

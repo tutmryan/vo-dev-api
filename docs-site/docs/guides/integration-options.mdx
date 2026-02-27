@@ -96,15 +96,16 @@ Considerations:
 - Applications have a high level of control over the authentication process, e.g. presentation constraints and requiring biometric face check.
 - The OpenID Connect provider establishes a session, so authentication has an extended lifetime and is shared across multiple applications without re-presentation (effectively SSO).
 
-### Presentation for approving workflows
+### Presentation flows
 
-Use the [approvals](./approvals.mdx) feature to facilitate workflows that require approval from a human via the presentation of credentials.
+Use [presentation flows](./presentation-flows.mdx) to facilitate asynchronous, link-based credential presentations for use cases such as caller verification, approvals, and data entry with verification.
 
 Considerations:
 
 - Easy to implement from server-side applications with no user interface.
-- Only suitable for workflows that require human approval.
+- Suitable for workflows that require human verification, approval, or data collection.
 - Supports a strong level of control over the presentation process, e.g. presentation constraints and requiring biometric face check.
+- Supports optional data entry fields and custom actions (e.g. approve/reject).
 
 ### Presentation via the Composer
 
@@ -117,7 +118,7 @@ Applications that do not have a user interface can integrate with the VO platfor
 Functions might include:
 
 - Remote issuance of credentials to recipients.
-- Orchestrating approval workflows.
+- Orchestrating presentation flows (e.g. approvals, caller verification).
 - Automating credential and template management.
 - Automating revocation of credentials e.g. identity off-boarding.
 

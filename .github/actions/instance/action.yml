@@ -136,8 +136,8 @@ inputs:
   limited-access-client-secret:
     description: The client secret of the limited access client in Azure AD
     required: true
-  limited-approval-client-secret:
-    description: The client secret of the limited approval client in Azure AD
+  limited-presentation-flow-client-secret:
+    description: The client secret of the limited presentation flow client in Azure AD
     required: true
   limited-photo-capture-client-secret:
     description: The client secret of the limited photo capture client in Azure AD
@@ -343,7 +343,7 @@ runs:
         ${{ inputs.deployment-service-principal-object-id }}
         API-COOKIE-SECRET:hex:16
         LIMITED-ACCESS-SECRET:hex:16
-        LIMITED-APPROVAL-SECRET:hex:16
+        LIMITED-PRESENTATION-FLOW-SECRET:hex:16
         LIMITED-PHOTO-CAPTURE-SECRET:hex:16
         LIMITED-ASYNC-ISSUANCE-SECRET:hex:16
         LIMITED-OIDC-SECRET:hex:16
@@ -404,8 +404,8 @@ runs:
           vidCallbackClientSecret=${{ inputs.vid-callback-client-secret }}
           limitedAccessClientSecret=${{ inputs.limited-access-client-secret }}
           limitedAccessSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-ACCESS-SECRET }}
-          limitedApprovalClientSecret=${{ inputs.limited-approval-client-secret }}
-          limitedApprovalSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-APPROVAL-SECRET }}
+          limitedPresentationFlowClientSecret=${{ inputs.limited-presentation-flow-client-secret }}
+          limitedPresentationFlowSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-PRESENTATION-FLOW-SECRET }}
           limitedPhotoCaptureClientSecret=${{ inputs.limited-photo-capture-client-secret }}
           limitedPhotoCaptureSecret=${{ steps.prepare-new-secrets.outputs.LIMITED-PHOTO-CAPTURE-SECRET }}
           limitedAsyncIssuanceClientSecret=${{ inputs.limited-async-issuance-client-secret }}

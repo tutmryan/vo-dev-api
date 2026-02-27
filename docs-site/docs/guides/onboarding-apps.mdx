@@ -26,7 +26,7 @@ This model is suitable for apps which can securely store a secret, such as APIs,
 - [Contract admin](#contract-admin)
 - [Credential issuance](#credential-issuance)
 - [Credential presentation](#credential-presentation)
-- [Approval request integration](#approval-request-integration)
+- [Presentation flow integration](#presentation-flow-integration)
 - [Credentials - Revoke](#credentials---revoke)
 
 ### Contract admin
@@ -62,14 +62,19 @@ Permissions:
 - Read identity data
 - Read contract data
 
-### Approval request integration
+### Presentation flow integration
 
-Application role: `VerifiableCredential.RequestApproval`
+Application roles: `presentationFlow.create`, `presentationFlow.read`, `presentationFlow.cancel`
 
 Permissions:
 
-- Create approval requests
-- Manage approval requests (update, cancel) that were created by the app
+- Create presentation flows
+- Read presentation flows and actioned data
+- Cancel presentation flows
+
+Additional template management roles are available: `presentationFlow.template.create`, `presentationFlow.template.read`, `presentationFlow.template.update`, `presentationFlow.template.delete`.
+
+Refer to the [Presentation flows](/docs/guides/presentation-flows) guide for more information.
 
 ### Credentials - Revoke
 

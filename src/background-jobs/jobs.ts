@@ -2,12 +2,12 @@ import type { BaseRequestInfo } from '@makerx/graphql-core'
 import { isLocalDev } from '@makerx/node-common'
 import type { JobsOptions } from 'bullmq'
 import type { VerifiedOrchestrationEntityManager } from '../data/entity-manager'
-import type { InvokeApprovalCallbackJobPayload } from '../features/approval-request/jobs/invoke-approval-callback'
-import { invokeApprovalCallbackJobHandler } from '../features/approval-request/jobs/invoke-approval-callback'
 import type { CancelAsyncIssuanceRequestsJobPayload } from '../features/async-issuance/jobs/cancel-async-issuance-requests'
 import { cancelAsyncIssuanceRequestsHandler } from '../features/async-issuance/jobs/cancel-async-issuance-requests'
 import type { SendAsyncIssuanceNotificationsJobPayload } from '../features/async-issuance/jobs/send-async-issuance-notifications'
 import { sendAsyncIssuanceNotificationsJobHandler } from '../features/async-issuance/jobs/send-async-issuance-notifications'
+import type { InvokePresentationFlowCallbackJobPayload } from '../features/presentation-flow/jobs/invoke-presentation-flow-callback'
+import { invokePresentationFlowCallbackJobHandler } from '../features/presentation-flow/jobs/invoke-presentation-flow-callback'
 import type { RevokeContractIssuancesJobPayload } from '../features/issuance/jobs/revoke-contract-issuances'
 import { revokeContractIssuancesJobHandler } from '../features/issuance/jobs/revoke-contract-issuances'
 import {
@@ -81,7 +81,7 @@ export type Jobs = {
   revokeIdentityIssuances: JobConfig<RevokeIdentityIssuancesJobPayload>
   revokeUserIssuances: JobConfig<RevokeUserIssuancesJobPayload>
   revokeWalletIssuances: JobConfig<RevokeWalletIssuancesJobPayload>
-  invokeApprovalCallback: JobConfig<InvokeApprovalCallbackJobPayload>
+  invokePresentationFlowCallback: JobConfig<InvokePresentationFlowCallbackJobPayload>
   sendAsyncIssuanceNotifications: JobConfig<SendAsyncIssuanceNotificationsJobPayload>
   cancelAsyncIssuanceRequests: JobConfig<CancelAsyncIssuanceRequestsJobPayload>
   initialiseOidcKeys: JobConfig
@@ -111,8 +111,8 @@ export const jobs: Jobs = {
     handler: revokeWalletIssuancesJobHandler,
     disableImplicitTransaction: true,
   },
-  invokeApprovalCallback: {
-    handler: invokeApprovalCallbackJobHandler,
+  invokePresentationFlowCallback: {
+    handler: invokePresentationFlowCallbackJobHandler,
     options: {
       attempts: 18, // exponential backoff means final retry (2 ** 18 = 262144s) = 3 days
     },

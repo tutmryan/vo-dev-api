@@ -38,9 +38,9 @@ The following app registrations are created for the internal operations of the V
 
   ```JSON
   {
-    description: "Provides limited access to approval features of the Verified Orchestration platform - access tokens with this role are created by the API and given to limited approval client. DO NOT GRANT TO OTHER APPLICATIONS.",
-    displayName: "Limited approval [INTERNAL API USE ONLY]",
-    value: "VerifiableCredential.LimitedApproval"
+    description: "Provides limited access to presentation flow features of the Verified Orchestration platform - access tokens with this role are created by the API and given to presentation flow client. DO NOT GRANT TO OTHER APPLICATIONS.",
+    displayName: "Limited presentation flow [INTERNAL API USE ONLY]",
+    value: "VerifiableCredential.LimitedPresentationFlow"
   }
   ```
 
@@ -89,17 +89,17 @@ The following app registrations are created for the internal operations of the V
   - VerifiableCredential.LimitedAccess
 - grant admin consent for the added permissions
 
-## Create an app registration for acquiring limited approval tokens
+## Create an app registration for acquiring limited presentation flow tokens
 
-- create app registration named `Verified Orchestration Limited Approval Client` (with `(non prod)` suffix for the non prod environment)
+- create app registration named `Verified Orchestration Limited Presentation Flow Client` (with `(non prod)` suffix for the non prod environment)
 - choose `Single tenant` option for `Supported account types`
 - click "Register" to create the app registration
 - create a client secret for the Verified Orchestration API to generate a token
   - set it to expires in 24 months
-  - store it in Bitwarden, `NonProd - Verified Orchestration -> Limited approval client secret` for the non prod environment
-  - set `[NON_PROD | PROD]_LIMITED_APPROVAL_CLIENT_SECRET` secret in the GitHub organisation
+  - store it in Bitwarden, `NonProd - Verified Orchestration -> Limited presentation flow client secret` for the non prod environment
+  - set `[NON_PROD | PROD]_LIMITED_PRESENTATION_FLOW_CLIENT_SECRET` secret in the GitHub organisation
 - add the following application permissions from `Verified Orchestration Internal` API
-  - VerifiableCredential.LimitedApproval
+  - VerifiableCredential.LimitedPresentationFlow
 - grant admin consent for the added permissions
 
 ## Create an app registration for acquiring limited photo capture tokens

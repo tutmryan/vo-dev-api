@@ -126,11 +126,11 @@ const config: EnvVarSubstitution<Config> = {
     },
     secret: 'LIMITED_ACCESS_SECRET',
   },
-  limitedApproval: {
+  limitedPresentationFlow: {
     credentials: {
-      clientSecret: 'LIMITED_APPROVAL_CLIENT_SECRET',
+      clientSecret: 'LIMITED_PRESENTATION_FLOW_CLIENT_SECRET',
     },
-    secret: 'LIMITED_APPROVAL_SECRET',
+    secret: 'LIMITED_PRESENTATION_FLOW_SECRET',
   },
   limitedPhotoCapture: {
     credentials: {

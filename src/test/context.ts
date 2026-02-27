@@ -8,9 +8,8 @@ import { dataSource } from '../data'
 import type { AsyncIssuanceSessionData } from '../features/async-issuance/session'
 import { setAsyncIssuanceSessionData } from '../features/async-issuance/session'
 import { setLimitedAccessData } from '../features/limited-access-tokens'
-import type { LimitedApprovalData } from '../features/limited-approval-tokens'
-import { setLimitedApprovalData } from '../features/limited-approval-tokens'
 import { createLimitedPhotoCaptureSession } from '../features/limited-photo-capture-tokens'
+import { setLimitedPresentationFlowTokenData, type LimitedPresentationFlowTokenData } from '../features/limited-presentation-flow-tokens'
 import { VoIdentityClaim } from '../features/oidc-provider/claims'
 import { setPhotoCaptureData, type PhotoCaptureData } from '../features/photo-capture'
 import type { AcquireLimitedAccessTokenInput } from '../generated/graphql'
@@ -63,24 +62,25 @@ export function buildIssueeJwt(identityId: string) {
   }
 }
 
-export type LimitedApprovalOperationInput = PartialBy<LimitedApprovalData, 'userId'>
+export type LimitedPresentationFlowOperationInput = PartialBy<LimitedPresentationFlowTokenData, 'userId'>
 export type LimitedPhotoCaptureOperationInput = PartialBy<PhotoCaptureData, 'userId'> & { disableSession?: boolean }
 
 export const createContext = async (
   jwtPayload?: JwtPayload,
   limitedAccessInput?: AcquireLimitedAccessTokenInput,
-  limitedApprovalInput?: LimitedApprovalOperationInput,
+  limitedPresentationFlowInput?: LimitedPresentationFlowOperationInput,
   limitedPhotoCaptureData?: LimitedPhotoCaptureOperationInput,
   limitedAsyncIssuanceData?: AsyncIssuanceSessionData,
 ): Promise<GraphQLContext> => {
   // create a user
   const token = randomUUID()
 
-  // limited access and limited approval data injection
-  if (limitedAccessInput || limitedApprovalInput || limitedPhotoCaptureData || limitedAsyncIssuanceData) {
+  // limited access and limited presentation flow data injection
+  if (limitedAccessInput || limitedPresentationFlowInput || limitedPhotoCaptureData || limitedAsyncIssuanceData) {
     const userEntity = await findUpdateOrCreateUserEntity(jwtPayload!)
     if (limitedAccessInput) await setLimitedAccessData(token, Object.assign({ userId: userEntity.id }, limitedAccessInput))
-    if (limitedApprovalInput) await setLimitedApprovalData(token, Object.assign({ userId: userEntity.id }, limitedApprovalInput))
+    if (limitedPresentationFlowInput)
+      await setLimitedPresentationFlowTokenData(token, Object.assign({ userId: userEntity.id }, limitedPresentationFlowInput))
     if (limitedPhotoCaptureData) {
       await setPhotoCaptureData(
         limitedPhotoCaptureData.photoCaptureRequestId,

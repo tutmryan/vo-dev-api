@@ -1,0 +1,24 @@
+"""
+Input for acquiring a limited token for presentation flow.
+"""
+input AcquireLimitedPresentationFlowTokenInput {
+  """
+  The ID of the presentation flow to which access will be limited.
+  """
+  presentationFlowId: UUID!
+}
+
+"""
+A limited presentation flow token response.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type PresentationFlowTokenResponse {
+  token: String!
+  expires: DateTime!
+}
+
+extend type Mutation {
+  """
+  Acquire a limited presentation flow token.
+  """
+  acquireLimitedPresentationFlowToken(input: AcquireLimitedPresentationFlowTokenInput!): PresentationFlowTokenResponse!
+}

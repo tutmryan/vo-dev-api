@@ -135,10 +135,7 @@ function stripOuterParens(str: string): string {
 }
 
 function abbreviateRuleTerm(term: string): string {
-  return term
-    .replace('hasApprovalRequestPresentationAndMatchesApprovalRequestId', 'hasApprovalReqPresMatchId')
-    .replace('issuanceIsToAuthenticatedUser', 'issuanceIsToAuthUser')
-    .replace('hasApiResourceScope-', '')
+  return term.replace('issuanceIsToAuthenticatedUser', 'issuanceIsToAuthUser').replace('hasApiResourceScope-', '')
 }
 
 function stripRulePrefix(rule: string) {
@@ -263,7 +260,6 @@ const note = `
   > - All role names are shown without the \`VerifiableCredential.\` or \`AcquireLimitedAccessToken.\` prefix.
   > - Some columns (such as internal roles) are hidden to keep the table readable and focused on the most relevant permissions for typical users.
   > - Long rule names are abbreviated, e.g.:
-  >   - \`hasApprovalRequestPresentationAndMatchesApprovalRequestId\` → \`hasApprovalReqPresMatchId\`
   >   - \`issuanceIsToAuthenticatedUser\` → \`issuanceIsToAuthUser\`
   > - The \`Rule\` column shows the full access rule for each field, including all required roles and logical conditions.
   `

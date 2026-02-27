@@ -186,7 +186,7 @@ jobs:
           vid-callback-client-secret: ${{ secrets.NON_PROD_VID_CALLBACK_CLIENT_SECRET }}
 
           limited-access-client-secret: ${{ secrets.NON_PROD_LIMITED_ACCESS_CLIENT_SECRET }}
-          limited-approval-client-secret: ${{ secrets.NON_PROD_LIMITED_APPROVAL_CLIENT_SECRET }}
+          limited-presentation-flow-client-secret: ${{ secrets.NON_PROD_LIMITED_PRESENTATION_FLOW_CLIENT_SECRET }}
           limited-photo-capture-client-secret: ${{ secrets.NON_PROD_LIMITED_PHOTO_CAPTURE_CLIENT_SECRET }}
           limited-async-issuance-client-secret: ${{ secrets.NON_PROD_LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET }}
           limited-demo-client-secret: ${{ secrets.NON_PROD_LIMITED_DEMO_CLIENT_SECRET }}

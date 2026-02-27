@@ -16,7 +16,7 @@ import type { PresentationEntity } from '../entities/presentation-entity'
 
 export type PresentationRequestDetails = Pick<PresentationEntity, 'requestedById' | 'identityId' | 'requestedCredentials'> &
   PresentationContext & { includeReceipt: boolean }
-type PresentationContext = { limitedApprovalKey?: string; authnSessionKey?: string }
+type PresentationContext = { limitedPresentationFlowKey?: string; authnSessionKey?: string; presentationFlowId?: string }
 
 registerFeatureCheck(CreatePresentationRequestCommand, async (...[, input]) => isFaceCheckPresentationEnabled(input))
 

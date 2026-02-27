@@ -1,0 +1,457 @@
+---
+sidebar_position: 12
+---
+
+import ThemedImage from '@theme/ThemedImage'
+import { AdminLink } from '@site/src/components/AdminLink'
+
+# Presentation flows
+
+The VO platform supports **presentation flows** — asynchronous, link-based credential presentation requests that can be sent to a person and actioned at their convenience. A presentation flow combines credential verification with optional data entry and custom actions, making it suitable for a wide range of use cases.
+
+Common use cases include:
+
+- **Caller verification** — a helpdesk agent sends a link to a caller, who presents a credential to verify their identity before the agent proceeds.
+- **Approvals** — an automated system requests credential-backed approval from a human (e.g. change management sign-off for a deployment).
+- **Data entry with verification** — a form is presented alongside a credential request, allowing the responder to supply additional information (e.g. incident details, comments) after verifying their identity.
+
+## How it works
+
+1. An application or user creates a **presentation flow** via the API (or the Composer).
+2. The responder receives a link to the **Concierge** portal.
+3. In the Concierge, the responder presents the requested credential(s) from their wallet.
+4. Optionally, the responder fills in data fields and/or selects an action (e.g. "Approve" / "Reject").
+5. The responder submits the flow.
+6. The requesting application is notified of the outcome via **callback**, **polling**, or **subscription**.
+
+## Creating a presentation flow
+
+Use the `createPresentationFlow` mutation to create a presentation flow. The mutation returns the request details including a portal URL to send to the responder, and a callback secret for verifying callbacks.
+
+```graphql title="createPresentationFlow mutation"
+mutation CreatePresentationFlow($request: PresentationFlowInput!) {
+  createPresentationFlow(request: $request) {
+    callbackSecret
+    request {
+      id
+      portalUrl
+      status
+    }
+  }
+}
+```
+
+The `PresentationFlowInput` specifies:
+
+- **`identityId`** — the identity of the person who should respond (optional).
+- **`correlationId`** — optional identifier to correlate the presentation flow with an external system record.
+- **`presentationRequest`** — the credential presentation request (same [PresentationRequestInput](/api-reference/types/inputs/presentation-request-input) used for standard presentations).
+- **`title`** — an optional title displayed to the responder.
+- **`prePresentationText`** — optional markdown text displayed before the credential presentation step.
+- **`postPresentationText`** — optional markdown text displayed after the credential is presented.
+- **`dataSchema`** — optional data entry fields for the responder to fill in.
+- **`actions`** — optional action buttons (e.g. "Approve" / "Reject").
+- **`autoSubmit`** — when `true`, the flow is automatically submitted after the credential is presented (useful when no data entry or action selection is needed).
+- **`callback`** — optional callback configuration for receiving the outcome.
+- **`requestData`** — optional arbitrary JSON data to correlate the request with your application's context.
+- **`templateId`** — optional reference to a saved template.
+- **`expiresAt`** — optional expiry timestamp (defaults to 7 days).
+
+### Example: caller verification for helpdesk
+
+A helpdesk agent needs to verify a caller's identity before proceeding. The flow auto-submits after the credential is presented — no additional data entry or actions are needed.
+
+```json title="Example variables for caller verification"
+{
+  "request": {
+    "identityId": "b3a7f625-20d9-4fe7-9c23-5ddcb836a9b9",
+    "title": "Verify your identity",
+    "prePresentationText": "Please present your **Employee** credential to verify your identity.",
+    "autoSubmit": true,
+    "presentationRequest": {
+      "requestedCredentials": [
+        {
+          "type": "VerifiedEmployee"
+        }
+      ],
+      "registration": {
+        "clientName": "Acme Helpdesk"
+      }
+    },
+    "callback": {
+      "url": "https://helpdesk.acmesoftware.net/verification-callback"
+    }
+  }
+}
+```
+
+### Example: approval workflow
+
+An automated system requests credential-backed approval from a change manager. The responder can approve or reject, with an optional comment.
+
+```json title="Example variables for approval workflow"
+{
+  "request": {
+    "identityId": "b3a7f625-20d9-4fe7-9c23-5ddcb836a9b9",
+    "title": "Deployment approval required",
+    "prePresentationText": "Please present your **ChangeManager** credential to approve this deployment.",
+    "postPresentationText": "Review the deployment details at [GitHub Actions run](https://github.com/AcmeSoftware/api/actions/runs/8595211647).",
+    "presentationRequest": {
+      "requestedCredentials": [
+        {
+          "type": "ChangeManager"
+        }
+      ],
+      "registration": {
+        "clientName": "Acme Deployment System"
+      }
+    },
+    "actions": [
+      { "key": "approve", "label": "Approve" },
+      { "key": "reject", "label": "Reject" }
+    ],
+    "dataSchema": [
+      {
+        "type": "text",
+        "label": "Comment",
+        "required": false
+      }
+    ],
+    "callback": {
+      "url": "https://github.acmesoftware.net/deployment-approval-callback"
+    },
+    "requestData": {
+      "runId": "8595211647",
+      "repository": "AcmeSoftware/api"
+    }
+  }
+}
+```
+
+### Example: data entry with verification
+
+A compliance team needs a verified employee to submit an incident report. The flow includes structured data entry fields.
+
+```json title="Example variables for data entry with verification"
+{
+  "request": {
+    "identityId": "b3a7f625-20d9-4fe7-9c23-5ddcb836a9b9",
+    "title": "Incident report",
+    "prePresentationText": "Present your **Employee** credential to verify your identity before submitting the report.",
+    "postPresentationText": "Please complete the incident details below.",
+    "presentationRequest": {
+      "requestedCredentials": [
+        {
+          "type": "VerifiedEmployee"
+        }
+      ],
+      "registration": {
+        "clientName": "Acme Compliance"
+      }
+    },
+    "dataSchema": [
+      {
+        "type": "text",
+        "label": "Incident summary",
+        "required": true,
+        "constraints": { "maxLength": 500 }
+      },
+      {
+        "type": "select",
+        "label": "Severity",
+        "required": true,
+        "options": [{ "label": "Low" }, { "label": "Medium" }, { "label": "High" }, { "label": "Critical" }]
+      },
+      {
+        "type": "boolean",
+        "label": "Requires immediate escalation",
+        "required": true
+      }
+    ],
+    "callback": {
+      "url": "https://compliance.acmesoftware.net/incident-callback"
+    }
+  }
+}
+```
+
+### Example response
+
+```json title="Response from createPresentationFlow"
+{
+  "data": {
+    "createPresentationFlow": {
+      "callbackSecret": "9456443c-4b74-4233-b8df-24670548e140",
+      "request": {
+        "id": "a4207da5-3009-4e64-bdd4-cb046f5ffb46",
+        "portalUrl": "https://instance.portal.verifiedorchestration.com/async-presentation-request/a4207da5-3009-4e64-bdd4-cb046f5ffb46",
+        "status": "PENDING"
+      }
+    }
+  }
+}
+```
+
+:::tip
+The `prePresentationText` and `postPresentationText` fields support markdown formatting.
+:::
+
+## Actioning a presentation flow
+
+The responder receives the portal URL (e.g. via email, chat, or in-app notification) and opens it in their browser.
+
+1. The Concierge portal displays the pre-presentation text and prompts the responder to present the requested credential(s).
+2. After successful credential presentation, the post-presentation text, data entry fields, and action buttons are displayed (if configured).
+3. The responder completes any data entry, selects an action, and submits.
+
+If `autoSubmit` is set to `true`, the flow is automatically submitted after the credential is presented, skipping steps 2 and 3.
+
+## Receiving the outcome
+
+When a presentation flow reaches a terminal state (`SUBMITTED` or `CANCELLED`), the requesting application can receive the outcome in three ways.
+
+### Callback
+
+If a `callback` URL was provided when creating the request, the platform will POST the `ActionedAsyncPresentationData` to that URL as JSON.
+
+```json title="Example callback payload"
+{
+  "presentationFlowId": "a4207da5-3009-4e64-bdd4-cb046f5ffb46",
+  "status": "SUBMITTED",
+  "requestData": {
+    "runId": "8595211647",
+    "repository": "AcmeSoftware/api"
+  },
+  "presentationId": "e7c3f1a2-9b4d-4e8f-a1c2-3d4e5f6a7b8c",
+  "dataResults": {
+    "Comment": "LGTM 👍"
+  },
+  "actionKey": "approve",
+  "submittedAt": "2024-04-04T02:20:15.856Z",
+  "submittedById": "f1e2d3c4-5678-90ab-cdef-1234567890ab",
+  "submittedBy": {
+    "id": "b3a7f625-20d9-4fe7-9c23-5ddcb836a9b9",
+    "name": "Jane Citizen"
+  },
+  "callbackSecret": "9456443c-4b74-4233-b8df-24670548e140"
+}
+```
+
+:::tip
+The `callbackSecret` is returned when creating the request and included in every callback payload. Use it to verify the authenticity of the callback.
+:::
+
+:::note
+Callbacks are retried on failure with exponential backoff, for up to 3 days.
+:::
+
+### Polling
+
+Applications can poll for the outcome using the `actionedAsyncPresentationData` query.
+
+```graphql title="actionedAsyncPresentationData query"
+query ActionedAsyncPresentationData($id: ID!) {
+  actionedAsyncPresentationData(id: $id) {
+    presentationFlowId
+    status
+    requestData
+    presentationId
+    dataResults
+    actionKey
+    submittedAt
+    submittedById
+    submittedBy {
+      id
+      name
+    }
+    callbackSecret
+  }
+}
+```
+
+:::note
+This query returns `null` until the request reaches a terminal state (`SUBMITTED` or `CANCELLED`).
+:::
+
+### Subscription
+
+For real-time updates, subscribe to the `presentationFlowEvent` subscription. This returns the updated request whenever its status changes (e.g. from `PENDING` to `PRESENTATION_VERIFIED` to `SUBMITTED`).
+
+```graphql title="presentationFlowEvent subscription"
+subscription PresentationFlowEvent($id: ID!) {
+  presentationFlowEvent(id: $id) {
+    id
+    status
+    presentation {
+      id
+      presentedAt
+    }
+    dataResults
+    action {
+      key
+      label
+    }
+  }
+}
+```
+
+## Presentation flow statuses
+
+| Status                  | Description                                                                                                     |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `PENDING`               | The request has been created and is awaiting a presentation request to be generated.                            |
+| `REQUEST_CREATED`       | A presentation request has been generated (e.g. QR code created) and is awaiting the responder.                 |
+| `REQUEST_RETRIEVED`     | The responder has retrieved the presentation request (e.g. scanned the QR code) and is presenting credentials.  |
+| `PRESENTATION_VERIFIED` | The credential has been successfully presented. The responder may still need to complete data entry and submit. |
+| `SUBMITTED`             | The responder has submitted the flow (terminal state).                                                          |
+| `CANCELLED`             | The request was cancelled (terminal state).                                                                     |
+| `EXPIRED`               | The request has passed its expiry time without being completed (terminal state).                                |
+
+## Cancelling a presentation flow
+
+Applications can cancel a pending presentation flow using the `cancelPresentationFlow` mutation.
+
+```graphql title="cancelPresentationFlow mutation"
+mutation CancelPresentationFlow($id: ID!) {
+  cancelPresentationFlow(id: $id)
+}
+```
+
+:::note
+Only the application or user that created the request can cancel it, unless the user has the cancel role.
+:::
+
+## Querying presentation flows
+
+Use the `findPresentationFlows` query to list and filter presentation flows.
+
+```graphql title="findPresentationFlows query"
+query FindPresentationFlows($where: PresentationFlowsWhere) {
+  findPresentationFlows(where: $where) {
+    id
+    title
+    status
+    createdAt
+    expiresAt
+    identity {
+      id
+      name
+    }
+    action {
+      key
+      label
+    }
+  }
+}
+```
+
+Filter options include:
+
+- **`status`** — filter by status (e.g. `PENDING`, `SUBMITTED`).
+- **`identityId`** — filter by the identity of the responder.
+- **`createdById`** — filter by the user or application that created the request.
+- **`createdFrom`** / **`createdTo`** — filter by creation date range.
+
+## Templates
+
+Templates allow you to pre-configure presentation flow settings that can be reused when creating requests. This is useful when the same type of flow is created frequently (e.g. a standard approval workflow).
+
+Templates can be managed via the API or the <AdminLink path="/presentation-flows/templates">Composer</AdminLink>.
+
+### Creating a template
+
+```graphql title="createPresentationFlowTemplate mutation"
+mutation CreatePresentationFlowTemplate($input: PresentationFlowTemplateInput!) {
+  createPresentationFlowTemplate(input: $input) {
+    id
+    name
+  }
+}
+```
+
+```json title="Example template input"
+{
+  "input": {
+    "name": "Deployment approval",
+    "title": "Deployment approval required",
+    "prePresentationText": "Present your **ChangeManager** credential.",
+    "presentationRequest": {
+      "requestedCredentials": [
+        {
+          "type": "ChangeManager"
+        }
+      ],
+      "registration": {
+        "clientName": "Acme Deployment System"
+      }
+    },
+    "actions": [
+      { "key": "approve", "label": "Approve" },
+      { "key": "reject", "label": "Reject" }
+    ],
+    "fieldVisibility": {
+      "title": true,
+      "prePresentationText": true,
+      "postPresentationText": true,
+      "actions": false,
+      "credentialTypes": false
+    }
+  }
+}
+```
+
+The `fieldVisibility` property controls which fields are visible (and editable) when a user creates a presentation flow from the template in the Composer.
+
+### Using a template
+
+When creating a presentation flow, reference the template by ID. The template's settings are used as defaults, and any fields provided in the request override the template values.
+
+```json title="Creating a request from a template"
+{
+  "request": {
+    "identityId": "b3a7f625-20d9-4fe7-9c23-5ddcb836a9b9",
+    "templateId": "c1d2e3f4-5678-90ab-cdef-1234567890ab",
+    "postPresentationText": "Deployment of **API v2.5.0** to production at **6am Friday**.",
+    "callback": {
+      "url": "https://github.acmesoftware.net/deployment-approval-callback"
+    }
+  }
+}
+```
+
+## Limited access tokens
+
+For client applications that cannot securely store a secret (e.g. SPAs, mobile apps), a secure backend can acquire a **limited presentation flow token** to grant scoped access to a specific presentation flow.
+
+```graphql title="acquireLimitedPresentationFlowToken mutation"
+mutation AcquireLimitedPresentationFlowToken($input: AcquireLimitedPresentationFlowTokenInput!) {
+  acquireLimitedPresentationFlowToken(input: $input) {
+    token
+    expires
+  }
+}
+```
+
+The token grants access to read, create a presentation request for, submit actions on, and cancel the specified presentation flow. Refer to the [limited access tokens guide](./limited-access-tokens/) for more information on the limited access token model.
+
+## Authorisation
+
+Access to presentation flows is controlled by granular application and user roles.
+
+### Application roles
+
+| Role                               | Permissions                               |
+| ---------------------------------- | ----------------------------------------- |
+| `presentationFlow.create`          | Create presentation flows                 |
+| `presentationFlow.read`            | Read presentation flows and actioned data |
+| `presentationFlow.cancel`          | Cancel presentation flows                 |
+| `presentationFlow.template.create` | Create templates                          |
+| `presentationFlow.template.read`   | Read templates                            |
+| `presentationFlow.template.update` | Update templates                          |
+| `presentationFlow.template.delete` | Delete templates                          |
+
+These roles can be assigned to both applications and users. Refer to [Onboarding an app](/docs/guides/onboarding-apps) and [Onboarding a user](/docs/guides/onboarding-users) for more information.
+
+### Composer
+
+The Composer provides a <AdminLink path="/presentation-flows">feature</AdminLink> for creating, viewing, filtering and cancelling presentation flows, as well as managing templates.

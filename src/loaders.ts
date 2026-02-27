@@ -1,5 +1,5 @@
-import { approvalRequestLoader } from './features/approval-request/loaders'
 import { asyncIssuanceContactLoader, asyncIssuanceLoader } from './features/async-issuance/loaders'
+import { presentationFlowLoader, presentationFlowTemplateLoader } from './features/presentation-flow/loaders'
 import { contractLoader } from './features/contracts/loaders'
 import { identityStoreLoader } from './features/identity-store/loaders'
 import { identityLoader, isIdentityDeletableLoader } from './features/identity/loaders'
@@ -28,7 +28,8 @@ export const createDataLoaders = (services: Services) => ({
   partnersByDid: partnerByDidLoader(),
   presentationPartnersLoader: presentationPartnersLoader(),
   presentations: presentationLoader(),
-  approvalRequests: approvalRequestLoader(),
+  presentationFlows: presentationFlowLoader(),
+  presentationFlowTemplates: presentationFlowTemplateLoader(),
   asyncIssuances: asyncIssuanceLoader(),
   asyncIssuanceContact: asyncIssuanceContactLoader(services.asyncIssuances),
   oidcClients: oidcClientLoader(),

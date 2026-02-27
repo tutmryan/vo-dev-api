@@ -7,6 +7,7 @@ import {
   asyncIssuanceIsToAuthenticatedUser,
   identityIsAuthenticatedUser,
   issuanceIsToAuthenticatedUser,
+  presentationFlowIsToAuthenticatedUser,
   presentationIsByAuthenticatedUser,
 } from './features/identity/shield-rules'
 import {
@@ -26,18 +27,28 @@ import {
   requestIdFilterDefined,
 } from './features/limited-access-tokens'
 import {
-  hasApprovalRequestPresentationAndMatchesApprovalRequestId,
-  isApprovalRequestApp,
-  isLimitedApprovalApp,
-  isValidLimitedPresentationRequestForApproval,
-} from './features/limited-approval-tokens/shield-rules'
-import {
   isLimitedAsyncIssuanceApp,
   isLimitedAsyncIssuancePhotoCaptureUser,
   isValidCreateIssuanceRequestForAsyncIssuanceRequest,
 } from './features/limited-async-issuance-tokens/shield-rules'
+import {
+  hasPresentationFlowPresentationAndMatchesId,
+  isLimitedPresentationFlowApp,
+  isValidLimitedCancelPresentationFlow,
+  isValidLimitedCreatePresentationRequestForPresentationFlow,
+  isValidLimitedPresentationFlow,
+} from './features/limited-presentation-flow-tokens/shield-rules'
 import { isOidcAuthnClient, isValidOidcAuthnPresentationRequest } from './features/oidc-provider/shield-rules'
 import { isValidCapturePhoto, isValidLimitedIssuancePhotoCaptureRequest } from './features/photo-capture/shield-rules'
+import {
+  canCancelPresentationFlow,
+  canCreatePresentationFlow,
+  canCreatePresentationFlowTemplate,
+  canDeletePresentationFlowTemplate,
+  canReadPresentationFlow,
+  canReadPresentationFlowTemplate,
+  canUpdatePresentationFlowTemplate,
+} from './features/presentation-flow/shield-rules'
 import type { Resolvers } from './generated/graphql'
 import { logger } from './logger'
 import {
@@ -49,7 +60,6 @@ import {
   isAllowedToViewAsyncIssuanceRequests,
   isAllowedToViewIssuances,
   isAllowedToViewPresentations,
-  isApprovalRequestAdminUser,
   isAsyncIssuer,
   isContractAdminApp,
   isCredentialAdminUser,
@@ -70,10 +80,9 @@ export const rules: ShieldSchema<Resolvers> = {
   Query: {
     '*': isUserWithReadPermissions,
     accessPackages: isCredentialAdminUser,
-    actionedApprovalData: or(isApprovalRequestAdminUser, isApprovalRequestApp),
+    actionedPresentationFlowData: or(canReadPresentationFlow, isValidLimitedPresentationFlow),
     applicationLabelConfigs: isInstanceAdminUser,
-    approvalRequest: or(isApprovalRequestAdminUser, and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId)),
-    approvalRequestTypes: isApprovalRequestAdminUser,
+    presentationFlow: or(canReadPresentationFlow, isValidLimitedPresentationFlow),
     asyncIssuanceContact: or(isIssuerUser, isSupportAgentUser),
     asyncIssuanceRequest: or(isAllowedToViewAsyncIssuanceRequests, isIssuee),
     authority: or(isUserWithReadPermissions, isIssuee),
@@ -83,7 +92,9 @@ export const rules: ShieldSchema<Resolvers> = {
     corsOriginConfigs: isInstanceAdminUser,
     discovery: or(anyUserRule, isIssuee),
     emailSenderConfig: isInstanceAdminUser,
-    findApprovalRequests: isApprovalRequestAdminUser,
+    findPresentationFlows: canReadPresentationFlow,
+    presentationFlowTemplate: canReadPresentationFlowTemplate,
+    findPresentationFlowTemplates: canReadPresentationFlowTemplate,
     findAsyncIssuanceRequests: isAllowedToViewIssuances,
     findCommunications: anyUserRule,
     findContracts: or(anyUserRule, isIssuanceApp, isPresentationApp, isContractAdminApp, isLimitedListContractsApp),
@@ -122,14 +133,12 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': isCredentialAdminUser,
     acquireAsyncIssuanceToken: allow,
     acquireLimitedAccessToken: and(hasTokenAcquisitionRole, isValidAcquireLimitedAccessTokenRequest),
-    acquireLimitedApprovalToken: allow,
+    acquireLimitedPresentationFlowToken: allow,
     acquireLimitedPhotoCaptureToken: allow,
-    actionApprovalRequest: and(isLimitedApprovalApp, hasApprovalRequestPresentationAndMatchesApprovalRequestId),
-    cancelApprovalRequest: or(isApprovalRequestAdminUser, isApprovalRequestApp),
     cancelAsyncIssuanceRequest: or(isAsyncIssuer, isSupportAgentUser),
     cancelAsyncIssuanceRequests: or(isAsyncIssuer, isSupportAgentUser),
     capturePhoto: isValidCapturePhoto,
-    createApprovalRequest: isApprovalRequestApp,
+    createPresentationFlow: canCreatePresentationFlow,
     createAsyncIssuanceRequest: isAsyncIssuer,
     createContract: or(isCredentialAdminUser, isContractAdminApp),
     createIdentityStore: isInstanceAdminUser,
@@ -142,7 +151,15 @@ export const rules: ShieldSchema<Resolvers> = {
     createPartner: isPartnerAdminUser,
     createPhotoCaptureRequest: or(isIssuerUser, isIssuanceApp, isValidLimitedIssuancePhotoCaptureRequest),
     createPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedPresentationRequest),
-    createPresentationRequestForApproval: isValidLimitedPresentationRequestForApproval,
+    createPresentationRequestForPresentationFlow: or(canCreatePresentationFlow, isValidLimitedCreatePresentationRequestForPresentationFlow),
+    submitPresentationFlowActions: or(
+      canReadPresentationFlow,
+      and(isLimitedPresentationFlowApp, hasPresentationFlowPresentationAndMatchesId),
+    ),
+    cancelPresentationFlow: or(canCancelPresentationFlow, isValidLimitedCancelPresentationFlow),
+    createPresentationFlowTemplate: canCreatePresentationFlowTemplate,
+    updatePresentationFlowTemplate: canUpdatePresentationFlowTemplate,
+    deletePresentationFlowTemplate: canDeletePresentationFlowTemplate,
     createPresentationRequestForAuthn: isValidOidcAuthnPresentationRequest,
     createMDocPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedMdocPresentationRequest),
     processMDocPresentationResponse: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedMdocPresentationRequest),
@@ -180,7 +197,6 @@ export const rules: ShieldSchema<Resolvers> = {
     suspendIdentityStore: isInstanceAdminUser,
     suspendPartner: isPartnerAdminUser,
     testServices: isInstanceAdminUser,
-    updateApprovalRequest: isApprovalRequestApp,
     updateAsyncIssuanceContact: or(isAsyncIssuer, isSupportAgentUser),
     updateContract: or(isCredentialAdminUser, isContractAdminApp),
     updateIdentityStore: isInstanceAdminUser,
@@ -204,6 +220,7 @@ export const rules: ShieldSchema<Resolvers> = {
       and(requestIdFilterDefined, or(isIssuanceApp, isLimitedIssuanceApp, isLimitedAsyncIssuanceApp, isIssuee)),
     ),
     photoCaptureEvent: or(isIssuer, isLimitedAsyncIssuancePhotoCaptureUser),
+    presentationFlowEvent: canReadPresentationFlow,
     presentationEvent: or(
       isCredentialAdminUser,
       and(
@@ -213,7 +230,7 @@ export const rules: ShieldSchema<Resolvers> = {
           isPresentationApp,
           isLimitedPresentationApp,
           isLimitedAnonymousPresentationApp,
-          isLimitedApprovalApp,
+          isLimitedPresentationFlowApp,
           isOidcAuthnClient,
         ),
       ),
@@ -222,19 +239,42 @@ export const rules: ShieldSchema<Resolvers> = {
   AccessTokenResponse: {
     '*': hasTokenAcquisitionRole,
   },
-  ActionedApprovalData: {
-    '*': or(isApprovalRequestAdminUser, isApprovalRequestApp),
+  ActionedPresentationFlowData: {
+    '*': or(canReadPresentationFlow, isValidLimitedPresentationFlow),
   },
   ActionedBy: {
-    '*': or(isApprovalRequestAdminUser, isApprovalRequestApp),
+    '*': or(canReadPresentationFlow, isValidLimitedPresentationFlow),
   },
-  ApprovalRequest: {
-    '*': or(isLimitedApprovalApp, isApprovalRequestAdminUser),
+  PresentationFlow: {
+    '*': or(
+      canReadPresentationFlow,
+      canCreatePresentationFlow,
+      canCancelPresentationFlow,
+      isLimitedPresentationFlowApp,
+      isValidLimitedPresentationFlow,
+      and(isIssuee, presentationFlowIsToAuthenticatedUser),
+    ),
   },
-  ApprovalRequestResponse: {
-    '*': isApprovalRequestApp,
+  PresentationFlowResponse: {
+    '*': canCreatePresentationFlow,
   },
-  ApprovalTokenResponse: {
+  PresentationFlowTemplate: {
+    '*': or(
+      canCreatePresentationFlowTemplate,
+      canReadPresentationFlowTemplate,
+      canUpdatePresentationFlowTemplate,
+      canDeletePresentationFlowTemplate,
+    ),
+  },
+  PresentationFlowTemplateFieldVisibility: {
+    '*': or(
+      canCreatePresentationFlowTemplate,
+      canReadPresentationFlowTemplate,
+      canUpdatePresentationFlowTemplate,
+      canDeletePresentationFlowTemplate,
+    ),
+  },
+  PresentationFlowTokenResponse: {
     '*': allow,
   },
   AsyncIssuanceContact: {
@@ -326,6 +366,7 @@ export const rules: ShieldSchema<Resolvers> = {
       isIssuee,
     ),
     asyncIssuanceRequests: or(isAllowedToViewAsyncIssuanceRequests, and(isIssuee, identityIsAuthenticatedUser)),
+    presentationFlows: or(canReadPresentationFlow, and(isIssuee, identityIsAuthenticatedUser)),
     issuances: or(isAllowedToViewIssuances, and(isIssuee, identityIsAuthenticatedUser)),
     presentations: or(isAllowedToViewPresentations, and(isIssuee, identityIsAuthenticatedUser)),
   },

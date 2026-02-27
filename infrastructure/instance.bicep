@@ -472,38 +472,38 @@ resource limitedAccessSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@20
   parent: keyVault
 }
 
-@description('The client secret of the limited approval client')
+@description('The client secret of the limited presentation flow client')
 @secure()
-param limitedApprovalClientSecret string
+param limitedPresentationFlowClientSecret string
 
-resource limitedApprovalClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
-  name: 'LIMITED-APPROVAL-CLIENT-SECRET'
+resource limitedPresentationFlowClientSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
+  name: 'LIMITED-PRESENTATION-FLOW-CLIENT-SECRET'
   parent: keyVault
   properties: {
     attributes: {
       enabled: true
     }
-    value: limitedApprovalClientSecret
+    value: limitedPresentationFlowClientSecret
   }
 }
 
-@description('The secret for limited approval data keys')
+@description('The secret for limited presentation flow data keys')
 @secure()
-param limitedApprovalSecret string
+param limitedPresentationFlowSecret string
 
-resource limitedApprovalSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(limitedApprovalSecret)) {
-  name: 'LIMITED-APPROVAL-SECRET'
+resource limitedPresentationFlowSecretSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (!empty(limitedPresentationFlowSecret)) {
+  name: 'LIMITED-PRESENTATION-FLOW-SECRET'
   parent: keyVault
   properties: {
     attributes: {
       enabled: true
     }
-    value: limitedApprovalSecret
+    value: limitedPresentationFlowSecret
   }
 }
 
-resource limitedApprovalSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2025-05-01' existing = if (empty(limitedApprovalSecret)) {
-  name: 'LIMITED-APPROVAL-SECRET'
+resource limitedPresentationFlowSecretSecretExisting 'Microsoft.KeyVault/vaults/secrets@2025-05-01' existing = if (empty(limitedPresentationFlowSecret)) {
+  name: 'LIMITED-PRESENTATION-FLOW-SECRET'
   parent: keyVault
 }
 
@@ -1558,8 +1558,8 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
     LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
     LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAccessSecret) ? limitedAccessSecretSecretExisting : limitedAccessSecretSecret).properties.secretUri})'
-    LIMITED_APPROVAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedApprovalClientSecretSecret.properties.secretUri})'
-    LIMITED_APPROVAL_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedApprovalSecret) ? limitedApprovalSecretSecretExisting : limitedApprovalSecretSecret).properties.secretUri})'
+    LIMITED_PRESENTATION_FLOW_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPresentationFlowClientSecretSecret.properties.secretUri})'
+    LIMITED_PRESENTATION_FLOW_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedPresentationFlowSecret) ? limitedPresentationFlowSecretSecretExisting : limitedPresentationFlowSecretSecret).properties.secretUri})'
     LIMITED_PHOTO_CAPTURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPhotoCaptureClientSecretSecret.properties.secretUri})'
     LIMITED_PHOTO_CAPTURE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedPhotoCaptureSecret) ? limitedPhotoCaptureSecretSecretExisting : limitedPhotoCaptureSecretSecret).properties.secretUri})'
     LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAsyncIssuanceClientSecretSecret.properties.secretUri})'

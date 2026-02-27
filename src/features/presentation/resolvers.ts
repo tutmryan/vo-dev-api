@@ -70,10 +70,6 @@ export const resolvers: Resolvers = {
     presentations: (oidcClient, { where, offset, limit }, context) =>
       query(context, FindPresentationsQuery, { oidcClientId: oidcClient.id, ...where }, offset, limit),
   },
-  ApprovalRequest: {
-    presentation: ({ presentationId }, _, { dataLoaders: { presentations } }) =>
-      presentationId ? presentations.load(presentationId) : null,
-  },
   PresentationRequestResponse: {
     __resolveType: (response) => ('error' in response ? 'RequestErrorResponse' : 'PresentationResponse'),
   },

@@ -3,7 +3,7 @@ import { User as BaseUser } from '@makerx/graphql-core'
 import type { AsyncIssuanceSessionData } from './features/async-issuance/session'
 import type { IdentityEntity } from './features/identity/entities/identity-entity'
 import type { LimitedAccessDemoToken } from './features/limited-access-tokens'
-import type { LimitedApprovalData } from './features/limited-approval-tokens'
+import type { LimitedPresentationFlowTokenData } from './features/limited-presentation-flow-tokens'
 import type { PhotoCaptureData } from './features/photo-capture'
 import type { UserEntity } from './features/users/entities/user-entity'
 import type { AcquireLimitedAccessTokenInput } from './generated/graphql'
@@ -15,7 +15,7 @@ import type { AcquireLimitedAccessTokenInput } from './generated/graphql'
 export class User<TEntity extends UserEntity | IdentityEntity> extends BaseUser {
   entity: TEntity
   limitedAccessData?: AcquireLimitedAccessTokenInput & LimitedAccessDemoToken
-  limitedApprovalData?: LimitedApprovalData
+  limitedPresentationFlowData?: LimitedPresentationFlowTokenData
   limitedPhotoCaptureData?: PhotoCaptureData
   limitedAsyncIssuanceData?: AsyncIssuanceSessionData
 
@@ -25,7 +25,7 @@ export class User<TEntity extends UserEntity | IdentityEntity> extends BaseUser 
 
     entity: TEntity,
     limitedAccessData?: AcquireLimitedAccessTokenInput,
-    limitedApprovalData?: LimitedApprovalData,
+    limitedPresentationFlowData?: LimitedPresentationFlowTokenData,
     limitedPhotoCaptureData?: PhotoCaptureData,
     limitedAsyncIssuanceData?: AsyncIssuanceSessionData,
   ) {
@@ -33,7 +33,7 @@ export class User<TEntity extends UserEntity | IdentityEntity> extends BaseUser 
 
     this.entity = entity
     this.limitedAccessData = limitedAccessData
-    this.limitedApprovalData = limitedApprovalData
+    this.limitedPresentationFlowData = limitedPresentationFlowData
     this.limitedPhotoCaptureData = limitedPhotoCaptureData
     this.limitedAsyncIssuanceData = limitedAsyncIssuanceData
   }

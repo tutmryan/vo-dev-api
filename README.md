@@ -180,15 +180,15 @@ To test EAM with a non-default `"possessionorinherence` ACR, follow these steps:
 4. Login (using a passkey registered in the Authenticator app) and go to https://mysignins.microsoft.com/security-info adding back the `EAM VO OIDC LocalDev (external provider)` method
 5. The claims parameter should request an ACR of `knowledgeorpossessionorinherence`
 
-## Approvals
+## Presentation flows
 
-Approvals allow integrating apps to create an approval request which can be actioned by someone presenting a credential.
+Presentation flows allow integrating apps to create a presentation flow which can be actioned by someone presenting a credential.
 
-To test the approval workflow you must create the approval request via an authorised client, with the application role `VerifiableCredential.RequestApproval`.
+To test the presentation flow workflow you must create the presentation flow via an authorised client, with the application role `presentationFlow.create`.
 
 ### Test client
 
-First, obtain the client secret from the [Github Approvals Demo client secret](https://vault.bitwarden.com/#/vault?organizationId=407a7ce4-93c3-4fb6-abdd-b1bd0185aa00&itemId=ce7341dc-fd43-4456-9873-b28400851ab4&action=view) item in Bitwarden.
+First, obtain the client secret from the [Github Presentation Flow Demo client secret](https://vault.bitwarden.com/#/vault?organizationId=407a7ce4-93c3-4fb6-abdd-b1bd0185aa00&itemId=ce7341dc-fd43-4456-9873-b28400851ab4&action=view) item in Bitwarden.
 
 ### Obtain access token
 
