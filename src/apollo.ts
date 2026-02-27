@@ -1,6 +1,5 @@
 import type { ApolloServerPlugin } from '@apollo/server'
 import { ApolloServer } from '@apollo/server'
-import { ApolloServerPluginLandingPageDisabled } from '@apollo/server/plugin/disabled'
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
 import { ApolloServerPluginInlineTrace } from '@apollo/server/plugin/inlineTrace'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
@@ -17,13 +16,14 @@ import { createApollo4QueryValidationPlugin } from 'graphql-constraint-directive
 import type http from 'http'
 import { authenticatedIntrospectionPlugin } from './apollo.authenticatedIntrospectionPlugin'
 import { AuditEvents } from './audit-types'
-import { devToolsEnabled, graphQL, logging } from './config'
+import { graphQL, logging } from './config'
 import type { GraphQLContext } from './context'
 import { createContext, createSubscriptionContext } from './context'
 import { getIssuerOptions } from './features/instance-configs'
 import type { Logger } from './logger'
 import { logger } from './logger'
 import { rateLimiterMiddleware } from './rate-limiter'
+import { UserRoles } from './roles'
 import createSchema from './schema'
 
 /**
@@ -124,11 +124,7 @@ const plugins = (
     plugins.push(ApolloServerPluginInlineTrace())
   }
 
-  plugins.push(
-    devToolsEnabled
-      ? ApolloServerPluginLandingPageLocalDefault({ embed: true, includeCookies: true })
-      : ApolloServerPluginLandingPageDisabled(),
-  )
+  plugins.push(ApolloServerPluginLandingPageLocalDefault({ embed: true, includeCookies: true }))
 
   plugins.push(createApollo4QueryValidationPlugin())
   return plugins
@@ -160,10 +156,10 @@ export const startApolloServer = async (app: Express, httpServer: http.Server, .
     plugins: plugins(httpServer, protection, async () => {
       await Promise.all([wsServerCleanup.dispose(), ...serverCleanup.map((cleanup) => cleanup())])
     }),
-    introspection: devToolsEnabled,
+    introspection: true,
     includeStacktraceInErrorResponses: isLocalDev,
     csrfPrevention: true,
-    hideSchemaDetailsFromClientErrors: !devToolsEnabled,
+    hideSchemaDetailsFromClientErrors: false,
   })
   await server.start()
 
@@ -171,6 +167,16 @@ export const startApolloServer = async (app: Express, httpServer: http.Server, .
     '/graphql',
     await rateLimiterMiddleware(),
     (req, res, next) => {
+      // Protect Apollo Studio landing page (browser requests) with role check
+      const isBrowserRequest = req.headers.accept?.split(',').includes('text/html')
+      if (isBrowserRequest) {
+        const userRoles = req.user?.roles ?? []
+        if (!userRoles.includes(UserRoles.toolsAPIExplorerAccess)) {
+          res.status(403).send('Access denied. You need the tools.apiExplorer.access role to access Apollo Studio.').end()
+          return
+        }
+      }
+
       const isAuthenticated = req.user !== undefined
       // Increase the body limit for authenticated users, because they can be trusted more to not DDOS the server
       const jsonHandler = json({ limit: isAuthenticated ? '10mb' : '1mb' })

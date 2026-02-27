@@ -14,6 +14,7 @@ export enum UserRoles {
   presentationFlowReadTemplate = 'presentationFlow.template.read',
   presentationFlowUpdateTemplate = 'presentationFlow.template.update',
   presentationFlowDeleteTemplate = 'presentationFlow.template.delete',
+  toolsAPIExplorerAccess = 'tools.apiExplorer.access',
 }
 
 export enum OidcScopes {

@@ -1526,7 +1526,7 @@ export type Features = {
   __typename?: 'Features';
   /** Indicates whether the demo features (presentation demo page, authn demo page, .etc) are available. */
   demoEnabled: Scalars['Boolean']['output'];
-  /** Indicates whether the API dev tools (Apollo Studio, introspection, PKCE) are available. */
+  /** Indicates whether additional API dev tools (PKCE, cookie session) are available. */
   devToolsEnabled: Scalars['Boolean']['output'];
   /** Indicates whether the face check features (i.e. issuing credentials with face check photo, .etc) are available */
   faceCheckEnabled: Scalars['Boolean']['output'];

@@ -8,7 +8,7 @@ type Features {
   findTenantIdentities: Boolean!
 
   """
-  Indicates whether the API dev tools (Apollo Studio, introspection, PKCE) are available.
+  Indicates whether additional API dev tools (PKCE, cookie session) are available.
   """
   devToolsEnabled: Boolean!
 

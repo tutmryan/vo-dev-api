@@ -214,5 +214,14 @@
     "description": "Provides access to delete presentation flow templates",
     "displayName": "Presentation flow - Template - Delete",
     "value": "presentationFlow.template.delete"
+  },
+  {
+    "id": "7a8e4f2c-9d1b-4e3a-8c5f-6b7d9e0a1f2c",
+    "allowedMemberTypes": ["User"],
+    "isEnabled": true,
+    "origin": "Application",
+    "description": "Allows a user to explore the VO APIs with Apollo Studio",
+    "displayName": "Tools - Apollo Studio",
+    "value": "tools.apiExplorer.access"
   }
 ]

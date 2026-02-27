@@ -20,7 +20,13 @@ export const resolvers: Resolvers = {
 function resolveDiscovery({ services: { graphServiceManager } }: { services: Services }) {
   const anyGraphServiceConfigured = graphServiceManager.all.some((gs) => gs.isConfigured)
   return {
-    features: { findTenantIdentities: anyGraphServiceConfigured, devToolsEnabled, faceCheckEnabled, demoEnabled, oidcEnabled },
+    features: {
+      findTenantIdentities: anyGraphServiceConfigured,
+      devToolsEnabled,
+      faceCheckEnabled,
+      demoEnabled,
+      oidcEnabled,
+    },
     urls: {
       docsUrl,
       portalUrl,
