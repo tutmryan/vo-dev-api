@@ -287,4 +287,4 @@ When logging via the `logger.audit` method, the logs are sent to both the normal
 
 To enable other destinations, you must add the `Verified Orchestration (dev)` Service Principal with the role `Monitoring Metrics Publisher` (ID: 3913510d-42f4-4e42-8a64-420c390055eb) to the Log Collection Rule (Note: it takes up to 1 hour for role assignments to propagate). It looks like this, sitting alongside the Managed Identity the API instance uses:
 
-![Log collection rule](./docs/assets/data-collection-rule-local-dev.png)
+![Log Collection Rule](./docs/assets/data-collection-rule-local-dev.png)
