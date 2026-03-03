@@ -1,9 +1,10 @@
-import { Column, DeleteDateColumn, Entity } from 'typeorm'
+import { Column, DeleteDateColumn, Entity, OneToOne } from 'typeorm'
 
 import { booleanType, dateTimeOffsetTransformer, dateTimeOffsetType, nvarcharType } from '../../../data/utils/crossDbColumnTypes'
 import { IdentityStoreType } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
+import { MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity } from '../../microsoft-entra-temporary-access-pass-issuance/entities/microsoft-entra-temporary-access-pass-issuance-configuration-entity'
 
 type CreateArgs = Pick<IdentityStoreEntity, 'identifier' | 'name' | 'type' | 'isAuthenticationEnabled'> &
   Partial<Pick<IdentityStoreEntity, 'clientId'>>
@@ -37,4 +38,7 @@ export class IdentityStoreEntity extends AuditedAndTrackedEntity {
   update(args: UpdateArgs) {
     typeSafeAssign(this, args)
   }
+
+  @OneToOne(() => MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity, (config) => config.identityStore)
+  microsoftEntraTemporaryAccessPassIssuanceConfiguration?: Promise<MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity>
 }

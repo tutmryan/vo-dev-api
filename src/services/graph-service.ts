@@ -42,6 +42,19 @@ export interface AccessPackageResult {
   policyDisplayDescription?: string
 }
 
+export interface AuthenticationMethodTarget {
+  targetType: 'group' | 'user'
+  id: string
+  isRegistrationRequired?: boolean
+}
+
+export interface AuthenticationMethodConfiguration {
+  id: string
+  state: 'enabled' | 'disabled'
+  includeTargets?: AuthenticationMethodTarget[]
+  excludeTargets?: AuthenticationMethodTarget[]
+}
+
 export interface GraphServiceConfig {
   identityStoreId: string
   auth: {
@@ -212,6 +225,47 @@ export class GraphService {
       }
     })
   }
+
+  async createTemporaryAccessPass({
+    userId,
+    lifetimeInMinutes = 60,
+    isUsableOnce = true,
+  }: {
+    userId: string
+    lifetimeInMinutes?: number
+    isUsableOnce?: boolean
+  }): Promise<TemporaryAccessPassAuthenticationMethod> {
+    return (await this.client().api(`/users/${userId}/authentication/temporaryAccessPassMethods`).post({
+      lifetimeInMinutes,
+      isUsableOnce,
+    })) as TemporaryAccessPassAuthenticationMethod
+  }
+
+  // This requires Microsoft Graph API permissions: Policy.Read.AuthenticationMethod
+  // Allows to check if the tenant has enabled the Temporary Access Pass authentication method
+  // https://learn.microsoft.com/en-us/graph/api/authenticationmethodspolicy-get?view=graph-rest-1.0&tabs=http
+  async getTemporaryAccessPassPolicy(): Promise<AuthenticationMethodConfiguration | undefined> {
+    try {
+      return (await this.client()
+        .api('/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/temporaryAccessPass')
+        .get()) as AuthenticationMethodConfiguration
+    } catch (error) {
+      if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
+        throw new Error('Missing policy permissions')
+      }
+      return undefined
+    }
+  }
+}
+
+export interface TemporaryAccessPassAuthenticationMethod {
+  id: string
+  temporaryAccessPass: string
+  createdDateTime: string
+  startDateTime: string
+  lifetimeInMinutes: number
+  isUsableOnce: boolean
+  methodUsabilityReason?: string
 }
 
 const accessPackagePoliciesCache = Lazy(() =>

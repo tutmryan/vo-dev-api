@@ -123,6 +123,8 @@ export const rules: ShieldSchema<Resolvers> = {
     presentation: anyUserRule,
     presentationCount: anyUserRule,
     presentationCountByUser: anyUserRule,
+    microsoftEntraTemporaryAccessPassIssuanceConfiguration: allow,
+    microsoftEntraTemporaryAccessPassIssuanceConfigurations: allow,
     template: or(isUserWithReadPermissions, isContractAdminApp),
     templateCombinedData: or(isUserWithReadPermissions, isContractAdminApp),
     testIdentityStoreGraphClient: isInstanceAdminUser,
@@ -163,6 +165,7 @@ export const rules: ShieldSchema<Resolvers> = {
     createPresentationRequestForAuthn: isValidOidcAuthnPresentationRequest,
     createMDocPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedMdocPresentationRequest),
     processMDocPresentationResponse: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedMdocPresentationRequest),
+    createMicrosoftEntraTemporaryAccessPassIssuanceConfiguration: isInstanceAdminUser,
     createTemplate: or(isCredentialAdminUser, isContractAdminApp),
     deleteConciergeBranding: isInstanceAdminUser,
     deleteComposerBranding: isInstanceAdminUser,
@@ -172,11 +175,13 @@ export const rules: ShieldSchema<Resolvers> = {
     deleteOidcClient: isOidcAdminUser,
     deleteOidcClientResource: isOidcAdminUser,
     deleteOidcResource: isOidcAdminUser,
+    deleteMicrosoftEntraTemporaryAccessPassIssuanceConfiguration: isInstanceAdminUser,
     deleteTemplate: or(isCredentialAdminUser, isContractAdminApp),
     deprecateContract: or(isCredentialAdminUser, isContractAdminApp),
     generateOidcClientSecret: isOidcAdminUser,
     import: or(isCredentialAdminUser, isContractAdminApp),
     provisionContract: or(isCredentialAdminUser, isContractAdminApp),
+    selfIssueMicrosoftEntraTemporaryAccessPass: or(anyUserRule, isIssuee),
     resendAsyncIssuanceNotification: or(isAsyncIssuer, isSupportAgentUser),
     resendAsyncIssuanceNotifications: or(isAsyncIssuer, isSupportAgentUser),
     resumeIdentityStore: isInstanceAdminUser,
@@ -207,6 +212,7 @@ export const rules: ShieldSchema<Resolvers> = {
     updateOidcResource: isOidcAdminUser,
     updateConciergeClientBranding: or(isOidcAdminUser, isInstanceAdminUser),
     updatePartner: isPartnerAdminUser,
+    updateMicrosoftEntraTemporaryAccessPassIssuanceConfiguration: isInstanceAdminUser,
     updateTemplate: or(isCredentialAdminUser, isContractAdminApp),
   },
   // Subscription subscribe rules currently depend on patched graphql-middleware
@@ -430,6 +436,12 @@ export const rules: ShieldSchema<Resolvers> = {
   SendAsyncIssuanceVerificationResponse: {
     '*': allow,
   },
+  SelfServiceAction: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  MicrosoftEntraTemporaryAccessPass: {
+    '*': fallbackWithSupportAgentRule,
+  },
   Template: {
     '*': fallbackWithSupportAgentRule,
   },
@@ -452,6 +464,9 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': fallbackWithSupportAgentRule,
   },
   User: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  MicrosoftEntraTemporaryAccessPassIssuanceConfiguration: {
     '*': fallbackWithSupportAgentRule,
   },
   UserCount: {

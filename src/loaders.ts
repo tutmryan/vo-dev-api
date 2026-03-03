@@ -1,12 +1,13 @@
 import { asyncIssuanceContactLoader, asyncIssuanceLoader } from './features/async-issuance/loaders'
-import { presentationFlowLoader, presentationFlowTemplateLoader } from './features/presentation-flow/loaders'
 import { contractLoader } from './features/contracts/loaders'
 import { identityStoreLoader } from './features/identity-store/loaders'
 import { identityLoader, isIdentityDeletableLoader } from './features/identity/loaders'
 import { applicationLabelConfigLoader, corsOriginConfigLoader } from './features/instance-configs/loaders'
 import { issuanceCountByContractLoader, issuanceCountByIdentityLoader, issuanceLoader } from './features/issuance/loaders'
+import { microsoftEntraTemporaryAccessPassIssuanceLoader } from './features/microsoft-entra-temporary-access-pass-issuance/loaders'
 import { oidcClaimMappingsLoader, oidcClientLoader, oidcResourceLoader } from './features/oidc-provider/loaders'
 import { partnerByDidLoader, partnerLoader, presentationPartnersLoader } from './features/partners/loaders'
+import { presentationFlowLoader, presentationFlowTemplateLoader } from './features/presentation-flow/loaders'
 import { presentationLoader } from './features/presentation/loaders'
 import { templateLoader } from './features/templates/loaders'
 import { userLoader } from './features/users/loaders'
@@ -41,4 +42,5 @@ export const createDataLoaders = (services: Services) => ({
   walletLastUsed: walletUsedDateLoader('MAX'),
   applicationLabelConfigs: applicationLabelConfigLoader(),
   corsOriginConfigs: corsOriginConfigLoader(),
+  microsoftEntraTemporaryAccessPassIssuances: microsoftEntraTemporaryAccessPassIssuanceLoader(),
 })

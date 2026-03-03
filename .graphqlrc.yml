@@ -35,6 +35,8 @@ extensions:
                 Wallet: ../features/wallet/entities/wallet-entity#WalletEntity
                 ApplicationLabelConfig: ../features/instance-configs/entities/application-label-config-entity#ApplicationLabelConfigEntity
                 CorsOriginConfig: ../features/instance-configs/entities/cors-origins-config-entity#CorsOriginConfigEntity
+                MicrosoftEntraTemporaryAccessPassIssuance: ../features/microsoft-entra-temporary-access-pass-issuance/entities/microsoft-entra-temporary-access-pass-issuance-entity#MicrosoftEntraTemporaryAccessPassIssuanceEntity
+                MicrosoftEntraTemporaryAccessPassIssuanceConfiguration: ../features/microsoft-entra-temporary-access-pass-issuance/entities/microsoft-entra-temporary-access-pass-issuance-configuration-entity#MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity
         config:
           strictScalars: true
           scalars:

@@ -111,6 +111,15 @@ export const AuditEvents = {
   ASYNC_ISSUANCE_REQUEST_CANCELLED_COMMAND: { id: 'VO0114', eventType: 'async-issuance.request.cancelled~command' },
   ASYNC_ISSUANCE_REQUEST_CANCELLED_JOB: { id: 'VO0115', eventType: 'async-issuance.request.cancelled~job' },
   ASYNC_ISSUANCE_CANCELLATION_FAILED: { id: 'VO0116', eventType: 'async-issuance.request.cancelled~failed' },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Microsoft Entra Temporary Access Pass events (VO0130-VO0139)
+  // ═══════════════════════════════════════════════════════════════════════════
+  MICROSOFT_ENTRA_TEMPORARY_ACCESS_PASS_SELF_ISSUED: { id: 'VO0130', eventType: 'microsoft-entra-temporary-access-pass.self-issued' },
+  MICROSOFT_ENTRA_TEMPORARY_ACCESS_PASS_SELF_ISSUANCE_FAILED: {
+    id: 'VO0131',
+    eventType: 'microsoft-entra-temporary-access-pass.issuance-failed',
+  },
 } as const
 
 /** Type for audit event keys (e.g., 'API_GRAPHQL_OPERATION') */

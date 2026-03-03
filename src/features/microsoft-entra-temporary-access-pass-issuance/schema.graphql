@@ -1,0 +1,297 @@
+"""
+Represents an available self-service action that a user or identity can perform.
+"""
+type SelfServiceAction {
+  """
+  The unique identifier of the self-service action.
+  """
+  id: ID!
+  """
+  The display title of the action.
+  """
+  title: String!
+  """
+  A detailed description of what the action does.
+  """
+  description: String
+  """
+  Indicates whether the action is currently enabled and available to the user.
+  """
+  enabled: Boolean!
+  """
+  If the action is not enabled, provides a reason why it is unavailable.
+  """
+  unavailableReason: String
+  """
+  The identity store associated with this action.
+  """
+  identityStore: IdentityStore
+}
+
+extend type Identity {
+  """
+  A list of self-service actions available to the identity.
+  """
+  availableSelfServiceActions: [SelfServiceAction!]!
+}
+
+"""
+Details of a Temporary Access Pass issued to a user.
+"""
+type MicrosoftEntraTemporaryAccessPass {
+  """
+  The unique identifier of the issued Temporary Access Pass.
+  """
+  id: ID!
+  """
+  The value of the Temporary Access Pass.
+  """
+  temporaryAccessPass: String!
+  """
+  The date and time when the Temporary Access Pass was created.
+  """
+  createdDateTime: DateTime!
+  """
+  The date and time when the Temporary Access Pass becomes valid.
+  """
+  startDateTime: DateTime!
+  """
+  The validity duration of the Temporary Access Pass in minutes.
+  """
+  lifetimeInMinutes: Int!
+  """
+  Indicates whether the Temporary Access Pass can only be used once.
+  """
+  isUsableOnce: Boolean!
+}
+
+extend type Mutation {
+  """
+  Self-issues a Microsoft Entra Temporary Access Pass to the currently authenticated identity.
+  """
+  selfIssueMicrosoftEntraTemporaryAccessPass: MicrosoftEntraTemporaryAccessPass!
+  """
+  Create a new Microsoft Entra Temporary Access Pass issuance configuration.
+  """
+  createMicrosoftEntraTemporaryAccessPassIssuanceConfiguration(
+    input: CreateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput!
+  ): MicrosoftEntraTemporaryAccessPassIssuanceConfiguration!
+  """
+  Update an existing Microsoft Entra Temporary Access Pass issuance configuration.
+  """
+  updateMicrosoftEntraTemporaryAccessPassIssuanceConfiguration(
+    id: ID!
+    input: UpdateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput!
+  ): MicrosoftEntraTemporaryAccessPassIssuanceConfiguration!
+  """
+  Delete a Microsoft Entra Temporary Access Pass issuance configuration.
+  """
+  deleteMicrosoftEntraTemporaryAccessPassIssuanceConfiguration(id: ID!): Boolean!
+}
+
+extend type Query {
+  """
+  List Microsoft Entra Temporary Access Pass issuance configurations.
+  """
+  microsoftEntraTemporaryAccessPassIssuanceConfigurations: [MicrosoftEntraTemporaryAccessPassIssuanceConfiguration!]!
+
+  """
+  Get a specific Microsoft Entra Temporary Access Pass issuance configuration by ID.
+  """
+  microsoftEntraTemporaryAccessPassIssuanceConfiguration(id: ID!): MicrosoftEntraTemporaryAccessPassIssuanceConfiguration
+
+  """
+  Find Microsoft Entra Temporary Access Pass issuances, optionally filtered by identity store or identity.
+  """
+  findMicrosoftEntraTemporaryAccessPassIssuances(
+    where: MicrosoftEntraTemporaryAccessPassIssuanceWhere
+    offset: NonNegativeInt
+    limit: PositiveInt
+    orderBy: MicrosoftEntraTemporaryAccessPassIssuanceOrderBy
+    orderDirection: OrderDirection
+  ): [MicrosoftEntraTemporaryAccessPassIssuance!]!
+
+  """
+  Get a single Microsoft Entra Temporary Access Pass issuance by ID.
+  """
+  microsoftEntraTemporaryAccessPassIssuance(id: ID!): MicrosoftEntraTemporaryAccessPassIssuance
+}
+
+"""
+A record of a Microsoft Entra Temporary Access Pass issuance.
+"""
+type MicrosoftEntraTemporaryAccessPassIssuance {
+  """
+  The unique identifier of the Microsoft Entra Temporary Access Pass issuance record.
+  """
+  id: ID!
+  """
+  The ID of the identity store where the Microsoft Entra Temporary Access Pass was issued.
+  """
+  identityStoreId: ID!
+  """
+  The identity store where the Microsoft Entra Temporary Access Pass was issued.
+  """
+  identityStore: IdentityStore
+  """
+  The OID or identifier of the identity the Microsoft Entra Temporary Access Pass was issued to.
+  """
+  identityId: String!
+  """
+  The identity the Microsoft Entra Temporary Access Pass was issued to.
+  """
+  identity: Identity
+  """
+  The ID of the Microsoft Entra Temporary Access Pass in the external system.
+  """
+  externalId: String!
+  """
+  The timestamp when the Microsoft Entra Temporary Access Pass was issued.
+  """
+  issuedAt: DateTime
+  """
+  The timestamp when the Microsoft Entra Temporary Access Pass expires.
+  """
+  expirationTime: DateTime
+  """
+  The date and time when the Microsoft Entra Temporary Access Pass was created.
+  """
+  createdDateTime: DateTime
+  """
+  The date and time when the Microsoft Entra Temporary Access Pass becomes valid.
+  """
+  startDateTime: DateTime
+  """
+  Indicates whether the Microsoft Entra Temporary Access Pass can only be used once.
+  """
+  isUsableOnce: Boolean
+}
+
+"""
+Criteria for filtering Microsoft Entra Temporary Access Pass issuances.
+"""
+input MicrosoftEntraTemporaryAccessPassIssuanceWhere {
+  """
+  Filter by the identity store that issued the Microsoft Entra Temporary Access Pass.
+  """
+  identityStoreId: ID
+  """
+  Filter by the id of the identity the Microsoft Entra Temporary Access Pass was issued to.
+  """
+  identityId: String
+}
+
+"""
+Fields available for ordering Microsoft Entra Temporary Access Pass issuances.
+"""
+enum MicrosoftEntraTemporaryAccessPassIssuanceOrderBy {
+  """
+  Order by the issuance timestamp.
+  """
+  ISSUED_AT
+  """
+  Order by the expiration timestamp.
+  """
+  EXPIRATION_TIME
+}
+
+"""
+Configuration settings for Microsoft Entra Temporary Access Pass issuance.
+"""
+type MicrosoftEntraTemporaryAccessPassIssuanceConfiguration {
+  """
+  The unique identifier of the config.
+  """
+  id: ID!
+  """
+  The display title of this Microsoft Entra Temporary Access Pass issuance configuration.
+  """
+  title: String!
+  """
+  An optional description for this configuration.
+  """
+  description: String
+  """
+  Whether this Microsoft Entra Temporary Access Pass issuance configuration is enabled.
+  """
+  enabled: Boolean!
+  """
+  The lifetime of the Microsoft Entra Temporary Access Pass in minutes.
+  """
+  lifetimeMinutes: Int
+  """
+  Indicates whether the issued Microsoft Entra Temporary Access Pass can only be used for a single login.
+  """
+  isUsableOnce: Boolean!
+  """
+  The ID of the identity store this configuration targets.
+  """
+  identityStoreId: ID
+}
+
+"""
+Input payload for creating a Microsoft Entra Temporary Access Pass issuance configuration.
+"""
+input CreateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput {
+  """
+  The display title of the Microsoft Entra Temporary Access Pass issuance configuration.
+  """
+  title: String!
+  """
+  An optional description for the configuration.
+  """
+  description: String
+  """
+  Whether the Microsoft Entra Temporary Access Pass issuance configuration is enabled.
+  """
+  enabled: Boolean!
+  """
+  The lifetime of the Microsoft Entra Temporary Access Pass in minutes. Must be between 10 and 43200 minutes (30 days).
+  """
+  lifetimeMinutes: Int @constraint(min: 10, max: 43200) # https://learn.microsoft.com/en-us/graph/api/authentication-post-temporaryaccesspassmethods?view=graph-rest-1.0&tabs=http#request-body
+  """
+  Indicates whether the issued Microsoft Entra Temporary Access Pass can only be used for a single login.
+  """
+  isUsableOnce: Boolean!
+  """
+  The ID of the identity store this configuration targets.
+  """
+  identityStoreId: ID
+}
+
+"""
+Input payload for updating an existing Microsoft Entra Temporary Access Pass issuance configuration.
+"""
+input UpdateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput {
+  """
+  The display title of the Microsoft Entra Temporary Access Pass issuance configuration.
+  """
+  title: String
+  """
+  An optional description for the configuration.
+  """
+  description: String
+  """
+  Whether the Microsoft Entra Temporary Access Pass issuance configuration is enabled.
+  """
+  enabled: Boolean
+  """
+  The lifetime of the Microsoft Entra Temporary Access Pass in minutes. Must be between 10 and 43200 minutes (30 days).
+  """
+  lifetimeMinutes: Int @constraint(min: 10, max: 43200) # https://learn.microsoft.com/en-us/graph/api/authentication-post-temporaryaccesspassmethods?view=graph-rest-1.0&tabs=http#request-body
+  """
+  Indicates whether the issued Microsoft Entra Temporary Access Pass can only be used for a single login.
+  """
+  isUsableOnce: Boolean
+  """
+  The ID of the identity store this configuration targets.
+  """
+  identityStoreId: ID
+}
+
+extend type IdentityStore {
+  """
+  The Microsoft Entra Temporary Access Pass issuance configuration for this identity store.
+  """
+  microsoftEntraTemporaryAccessPassIssuanceConfiguration: MicrosoftEntraTemporaryAccessPassIssuanceConfiguration
+}

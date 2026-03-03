@@ -20,6 +20,8 @@ import { BrandingEntity } from '../features/branding/entities/branding-entity';
 import { WalletEntity } from '../features/wallet/entities/wallet-entity';
 import { ApplicationLabelConfigEntity } from '../features/instance-configs/entities/application-label-config-entity';
 import { CorsOriginConfigEntity } from '../features/instance-configs/entities/cors-origins-config-entity';
+import { MicrosoftEntraTemporaryAccessPassIssuanceEntity } from '../features/microsoft-entra-temporary-access-pass-issuance/entities/microsoft-entra-temporary-access-pass-issuance-entity';
+import { MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity } from '../features/microsoft-entra-temporary-access-pass-issuance/entities/microsoft-entra-temporary-access-pass-issuance-configuration-entity';
 import { GraphQLContext } from '../context';
 import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/core';
 export type Maybe<T> = T | null;
@@ -1271,6 +1273,22 @@ export type CorsOriginConfigInput = {
   origin: Scalars['String']['input'];
 };
 
+/** Input payload for creating a Microsoft Entra Temporary Access Pass issuance configuration. */
+export type CreateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput = {
+  /** An optional description for the configuration. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** Whether the Microsoft Entra Temporary Access Pass issuance configuration is enabled. */
+  enabled: Scalars['Boolean']['input'];
+  /** The ID of the identity store this configuration targets. */
+  identityStoreId?: InputMaybe<Scalars['ID']['input']>;
+  /** Indicates whether the issued Microsoft Entra Temporary Access Pass can only be used for a single login. */
+  isUsableOnce: Scalars['Boolean']['input'];
+  /** The lifetime of the Microsoft Entra Temporary Access Pass in minutes. Must be between 10 and 43200 minutes (30 days). */
+  lifetimeMinutes?: InputMaybe<Scalars['Int']['input']>;
+  /** The display title of the Microsoft Entra Temporary Access Pass issuance configuration. */
+  title: Scalars['String']['input'];
+};
+
 /** Input type for creating a new partner */
 export type CreatePartnerInput = {
   /**
@@ -1558,6 +1576,8 @@ export type Identity = {
   __typename?: 'Identity';
   /** Returns the async issuance requests for this identity, optionally matching the specified criteria. */
   asyncIssuanceRequests: Array<AsyncIssuanceRequest>;
+  /** A list of self-service actions available to the identity. */
+  availableSelfServiceActions: Array<SelfServiceAction>;
   /** When the identity was created. */
   createdAt: Scalars['DateTime']['output'];
   /** The user who created the identity. */
@@ -1752,6 +1772,8 @@ export type IdentityStore = {
   identifier: Scalars['String']['output'];
   /** Whether this store represents an Entra tenant from which users or applications will authenticate to VO. */
   isAuthenticationEnabled: Scalars['Boolean']['output'];
+  /** The Microsoft Entra Temporary Access Pass issuance configuration for this identity store. */
+  microsoftEntraTemporaryAccessPassIssuanceConfiguration?: Maybe<MicrosoftEntraTemporaryAccessPassIssuanceConfiguration>;
   /** A human-friendly name for this store */
   name: Scalars['String']['output'];
   /** When the identity store was suspended. */
@@ -2523,6 +2545,85 @@ export type MDocValidationResults = {
 /** Me is a union type representing all possible authenticated callers. */
 export type Me = Identity | User;
 
+/** Details of a Temporary Access Pass issued to a user. */
+export type MicrosoftEntraTemporaryAccessPass = {
+  __typename?: 'MicrosoftEntraTemporaryAccessPass';
+  /** The date and time when the Temporary Access Pass was created. */
+  createdDateTime: Scalars['DateTime']['output'];
+  /** The unique identifier of the issued Temporary Access Pass. */
+  id: Scalars['ID']['output'];
+  /** Indicates whether the Temporary Access Pass can only be used once. */
+  isUsableOnce: Scalars['Boolean']['output'];
+  /** The validity duration of the Temporary Access Pass in minutes. */
+  lifetimeInMinutes: Scalars['Int']['output'];
+  /** The date and time when the Temporary Access Pass becomes valid. */
+  startDateTime: Scalars['DateTime']['output'];
+  /** The value of the Temporary Access Pass. */
+  temporaryAccessPass: Scalars['String']['output'];
+};
+
+/** A record of a Microsoft Entra Temporary Access Pass issuance. */
+export type MicrosoftEntraTemporaryAccessPassIssuance = {
+  __typename?: 'MicrosoftEntraTemporaryAccessPassIssuance';
+  /** The date and time when the Microsoft Entra Temporary Access Pass was created. */
+  createdDateTime?: Maybe<Scalars['DateTime']['output']>;
+  /** The timestamp when the Microsoft Entra Temporary Access Pass expires. */
+  expirationTime?: Maybe<Scalars['DateTime']['output']>;
+  /** The ID of the Microsoft Entra Temporary Access Pass in the external system. */
+  externalId: Scalars['String']['output'];
+  /** The unique identifier of the Microsoft Entra Temporary Access Pass issuance record. */
+  id: Scalars['ID']['output'];
+  /** The identity the Microsoft Entra Temporary Access Pass was issued to. */
+  identity?: Maybe<Identity>;
+  /** The OID or identifier of the identity the Microsoft Entra Temporary Access Pass was issued to. */
+  identityId: Scalars['String']['output'];
+  /** The identity store where the Microsoft Entra Temporary Access Pass was issued. */
+  identityStore?: Maybe<IdentityStore>;
+  /** The ID of the identity store where the Microsoft Entra Temporary Access Pass was issued. */
+  identityStoreId: Scalars['ID']['output'];
+  /** Indicates whether the Microsoft Entra Temporary Access Pass can only be used once. */
+  isUsableOnce?: Maybe<Scalars['Boolean']['output']>;
+  /** The timestamp when the Microsoft Entra Temporary Access Pass was issued. */
+  issuedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The date and time when the Microsoft Entra Temporary Access Pass becomes valid. */
+  startDateTime?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** Configuration settings for Microsoft Entra Temporary Access Pass issuance. */
+export type MicrosoftEntraTemporaryAccessPassIssuanceConfiguration = {
+  __typename?: 'MicrosoftEntraTemporaryAccessPassIssuanceConfiguration';
+  /** An optional description for this configuration. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** Whether this Microsoft Entra Temporary Access Pass issuance configuration is enabled. */
+  enabled: Scalars['Boolean']['output'];
+  /** The unique identifier of the config. */
+  id: Scalars['ID']['output'];
+  /** The ID of the identity store this configuration targets. */
+  identityStoreId?: Maybe<Scalars['ID']['output']>;
+  /** Indicates whether the issued Microsoft Entra Temporary Access Pass can only be used for a single login. */
+  isUsableOnce: Scalars['Boolean']['output'];
+  /** The lifetime of the Microsoft Entra Temporary Access Pass in minutes. */
+  lifetimeMinutes?: Maybe<Scalars['Int']['output']>;
+  /** The display title of this Microsoft Entra Temporary Access Pass issuance configuration. */
+  title: Scalars['String']['output'];
+};
+
+/** Fields available for ordering Microsoft Entra Temporary Access Pass issuances. */
+export enum MicrosoftEntraTemporaryAccessPassIssuanceOrderBy {
+  /** Order by the expiration timestamp. */
+  ExpirationTime = 'EXPIRATION_TIME',
+  /** Order by the issuance timestamp. */
+  IssuedAt = 'ISSUED_AT'
+}
+
+/** Criteria for filtering Microsoft Entra Temporary Access Pass issuances. */
+export type MicrosoftEntraTemporaryAccessPassIssuanceWhere = {
+  /** Filter by the id of the identity the Microsoft Entra Temporary Access Pass was issued to. */
+  identityId?: InputMaybe<Scalars['String']['input']>;
+  /** Filter by the identity store that issued the Microsoft Entra Temporary Access Pass. */
+  identityStoreId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 /** Returns information about a failure to connect to Microsoft Graph. */
 export type MsGraphFailure = {
   __typename?: 'MsGraphFailure';
@@ -2600,6 +2701,8 @@ export type Mutation = {
   createIssuanceRequestForAsyncIssuance: IssuanceRequestResponse;
   /** Creates an mDoc presentation request for use with the Digital Credential API. */
   createMDocPresentationRequest: MDocPresentationRequestResponse;
+  /** Create a new Microsoft Entra Temporary Access Pass issuance configuration. */
+  createMicrosoftEntraTemporaryAccessPassIssuanceConfiguration: MicrosoftEntraTemporaryAccessPassIssuanceConfiguration;
   /** Creates a new OIDC claim mapping */
   createOidcClaimMapping: OidcClaimMapping;
   /** Creates a new OIDC client */
@@ -2636,6 +2739,8 @@ export type Mutation = {
   deleteIdentities?: Maybe<Scalars['Void']['output']>;
   /** Deletes the MS Graph client of an instance. */
   deleteInstanceMsGraphClient: Instance;
+  /** Delete a Microsoft Entra Temporary Access Pass issuance configuration. */
+  deleteMicrosoftEntraTemporaryAccessPassIssuanceConfiguration: Scalars['Boolean']['output'];
   /** Deletes an OIDC claim mapping */
   deleteOidcClaimMapping: OidcClaimMapping;
   /** Deletes an OIDC client */
@@ -2700,6 +2805,8 @@ export type Mutation = {
   saveIdentity: Identity;
   /** Saves the MS Graph client configuration of an instance. */
   saveInstanceMsGraphClient: Instance;
+  /** Self-issues a Microsoft Entra Temporary Access Pass to the currently authenticated identity. */
+  selfIssueMicrosoftEntraTemporaryAccessPass: MicrosoftEntraTemporaryAccessPass;
   /**
    * Sends a verification code to the issuee.
    *
@@ -2743,6 +2850,8 @@ export type Mutation = {
   updateInstanceAuthorityClient: Instance;
   /** Updates the configuration of an instance. */
   updateInstanceConfiguration: Instance;
+  /** Update an existing Microsoft Entra Temporary Access Pass issuance configuration. */
+  updateMicrosoftEntraTemporaryAccessPassIssuanceConfiguration: MicrosoftEntraTemporaryAccessPassIssuanceConfiguration;
   /** Updates an existing OIDC claim mapping */
   updateOidcClaimMapping: OidcClaimMapping;
   /** Updates an existing OIDC client */
@@ -2839,6 +2948,11 @@ export type MutationCreateMDocPresentationRequestArgs = {
 };
 
 
+export type MutationCreateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationArgs = {
+  input: CreateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput;
+};
+
+
 export type MutationCreateOidcClaimMappingArgs = {
   input: OidcClaimMappingInput;
 };
@@ -2908,6 +3022,11 @@ export type MutationDeleteIdentitiesArgs = {
 
 export type MutationDeleteInstanceMsGraphClientArgs = {
   identifier: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteMicrosoftEntraTemporaryAccessPassIssuanceConfigurationArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3102,6 +3221,12 @@ export type MutationUpdateInstanceAuthorityClientArgs = {
 export type MutationUpdateInstanceConfigurationArgs = {
   configuration: InstanceConfigurationInput;
   identifier: Scalars['String']['input'];
+};
+
+
+export type MutationUpdateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationArgs = {
+  id: Scalars['ID']['input'];
+  input: UpdateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput;
 };
 
 
@@ -4183,6 +4308,8 @@ export type Query = {
   findIdentityStores: Array<IdentityStore>;
   /** Returns successful credential issuances, optionally matching the specified criteria. */
   findIssuances: Array<Issuance>;
+  /** Find Microsoft Entra Temporary Access Pass issuances, optionally filtered by identity store or identity. */
+  findMicrosoftEntraTemporaryAccessPassIssuances: Array<MicrosoftEntraTemporaryAccessPassIssuance>;
   /**
    * Finds issuers from the Entra Verified ID network
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-issuers
@@ -4236,6 +4363,12 @@ export type Query = {
   issuanceCountByUser: Array<UserCount>;
   /** Returns the authenticated caller, either a `User` (app or person) or the `Identity` of a credential issuee. */
   me?: Maybe<Me>;
+  /** Get a single Microsoft Entra Temporary Access Pass issuance by ID. */
+  microsoftEntraTemporaryAccessPassIssuance?: Maybe<MicrosoftEntraTemporaryAccessPassIssuance>;
+  /** Get a specific Microsoft Entra Temporary Access Pass issuance configuration by ID. */
+  microsoftEntraTemporaryAccessPassIssuanceConfiguration?: Maybe<MicrosoftEntraTemporaryAccessPassIssuanceConfiguration>;
+  /** List Microsoft Entra Temporary Access Pass issuance configurations. */
+  microsoftEntraTemporaryAccessPassIssuanceConfigurations: Array<MicrosoftEntraTemporaryAccessPassIssuanceConfiguration>;
   /**
    * Lists the credential contract types for the specified network issuer
    * See https://learn.microsoft.com/en-us/azure/active-directory/verifiable-credentials/vc-network-api#searching-for-published-credential-types-by-an-issuer
@@ -4384,6 +4517,15 @@ export type QueryFindIssuancesArgs = {
 };
 
 
+export type QueryFindMicrosoftEntraTemporaryAccessPassIssuancesArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  orderBy?: InputMaybe<MicrosoftEntraTemporaryAccessPassIssuanceOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<MicrosoftEntraTemporaryAccessPassIssuanceWhere>;
+};
+
+
 export type QueryFindNetworkIssuersArgs = {
   where: NetworkIssuersWhere;
 };
@@ -4528,6 +4670,16 @@ export type QueryIssuanceCountByUserArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
   where?: InputMaybe<IssuanceWhere>;
+};
+
+
+export type QueryMicrosoftEntraTemporaryAccessPassIssuanceArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryMicrosoftEntraTemporaryAccessPassIssuanceConfigurationArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -4817,6 +4969,23 @@ export type ScopedClaimMappingInput = {
   scope: Scalars['String']['input'];
 };
 
+/** Represents an available self-service action that a user or identity can perform. */
+export type SelfServiceAction = {
+  __typename?: 'SelfServiceAction';
+  /** A detailed description of what the action does. */
+  description?: Maybe<Scalars['String']['output']>;
+  /** Indicates whether the action is currently enabled and available to the user. */
+  enabled: Scalars['Boolean']['output'];
+  /** The unique identifier of the self-service action. */
+  id: Scalars['ID']['output'];
+  /** The identity store associated with this action. */
+  identityStore?: Maybe<IdentityStore>;
+  /** The display title of the action. */
+  title: Scalars['String']['output'];
+  /** If the action is not enabled, provides a reason why it is unavailable. */
+  unavailableReason?: Maybe<Scalars['String']['output']>;
+};
+
 /** The response for sending an async issuance verification code. */
 export type SendAsyncIssuanceVerificationResponse = {
   __typename?: 'SendAsyncIssuanceVerificationResponse';
@@ -5091,6 +5260,22 @@ export type UpdateIdentityStoreInput = {
   name: Scalars['String']['input'];
   /** What kind of store this is (e.g. 'entra') */
   type: IdentityStoreType;
+};
+
+/** Input payload for updating an existing Microsoft Entra Temporary Access Pass issuance configuration. */
+export type UpdateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput = {
+  /** An optional description for the configuration. */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** Whether the Microsoft Entra Temporary Access Pass issuance configuration is enabled. */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The ID of the identity store this configuration targets. */
+  identityStoreId?: InputMaybe<Scalars['ID']['input']>;
+  /** Indicates whether the issued Microsoft Entra Temporary Access Pass can only be used for a single login. */
+  isUsableOnce?: InputMaybe<Scalars['Boolean']['input']>;
+  /** The lifetime of the Microsoft Entra Temporary Access Pass in minutes. Must be between 10 and 43200 minutes (30 days). */
+  lifetimeMinutes?: InputMaybe<Scalars['Int']['input']>;
+  /** The display title of the Microsoft Entra Temporary Access Pass issuance configuration. */
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Input type for updating a new partner */
@@ -6282,6 +6467,7 @@ export type ResolversTypes = {
   ContractWhere: ContractWhere;
   CorsOriginConfig: ResolverTypeWrapper<CorsOriginConfigEntity>;
   CorsOriginConfigInput: CorsOriginConfigInput;
+  CreateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput: CreateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput;
   CreatePartnerInput: CreatePartnerInput;
   CreatePresentationRequestForPresentationFlowInput: CreatePresentationRequestForPresentationFlowInput;
   CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
@@ -6370,6 +6556,11 @@ export type ResolversTypes = {
   MDocValidationResults: ResolverTypeWrapper<MDocValidationResults>;
   Markdown: ResolverTypeWrapper<Scalars['Markdown']['output']>;
   Me: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['Me']>;
+  MicrosoftEntraTemporaryAccessPass: ResolverTypeWrapper<MicrosoftEntraTemporaryAccessPass>;
+  MicrosoftEntraTemporaryAccessPassIssuance: ResolverTypeWrapper<MicrosoftEntraTemporaryAccessPassIssuanceEntity>;
+  MicrosoftEntraTemporaryAccessPassIssuanceConfiguration: ResolverTypeWrapper<MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity>;
+  MicrosoftEntraTemporaryAccessPassIssuanceOrderBy: MicrosoftEntraTemporaryAccessPassIssuanceOrderBy;
+  MicrosoftEntraTemporaryAccessPassIssuanceWhere: MicrosoftEntraTemporaryAccessPassIssuanceWhere;
   MsGraphFailure: ResolverTypeWrapper<MsGraphFailure>;
   Mutation: ResolverTypeWrapper<Record<PropertyKey, never>>;
   NetworkContract: ResolverTypeWrapper<NetworkContract>;
@@ -6449,6 +6640,7 @@ export type ResolversTypes = {
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
   ScopedClaimMapping: ResolverTypeWrapper<ScopedClaimMapping>;
   ScopedClaimMappingInput: ScopedClaimMappingInput;
+  SelfServiceAction: ResolverTypeWrapper<Omit<SelfServiceAction, 'identityStore'> & { identityStore?: Maybe<ResolversTypes['IdentityStore']> }>;
   SendAsyncIssuanceVerificationResponse: ResolverTypeWrapper<SendAsyncIssuanceVerificationResponse>;
   ServiceFailures: ResolverTypeWrapper<ServiceFailures>;
   SubmitActionsInput: SubmitActionsInput;
@@ -6470,6 +6662,7 @@ export type ResolversTypes = {
   URL: ResolverTypeWrapper<Scalars['URL']['output']>;
   UUID: ResolverTypeWrapper<Scalars['UUID']['output']>;
   UpdateIdentityStoreInput: UpdateIdentityStoreInput;
+  UpdateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput: UpdateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput;
   UpdatePartnerInput: UpdatePartnerInput;
   User: ResolverTypeWrapper<UserEntity>;
   UserCount: ResolverTypeWrapper<Omit<UserCount, 'user'> & { user: ResolversTypes['User'] }>;
@@ -6556,6 +6749,7 @@ export type ResolversParentTypes = {
   ContractWhere: ContractWhere;
   CorsOriginConfig: CorsOriginConfigEntity;
   CorsOriginConfigInput: CorsOriginConfigInput;
+  CreateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput: CreateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput;
   CreatePartnerInput: CreatePartnerInput;
   CreatePresentationRequestForPresentationFlowInput: CreatePresentationRequestForPresentationFlowInput;
   CreateUpdateTemplateDisplayClaimInput: CreateUpdateTemplateDisplayClaimInput;
@@ -6635,6 +6829,10 @@ export type ResolversParentTypes = {
   MDocValidationResults: MDocValidationResults;
   Markdown: Scalars['Markdown']['output'];
   Me: ResolversUnionTypes<ResolversParentTypes>['Me'];
+  MicrosoftEntraTemporaryAccessPass: MicrosoftEntraTemporaryAccessPass;
+  MicrosoftEntraTemporaryAccessPassIssuance: MicrosoftEntraTemporaryAccessPassIssuanceEntity;
+  MicrosoftEntraTemporaryAccessPassIssuanceConfiguration: MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity;
+  MicrosoftEntraTemporaryAccessPassIssuanceWhere: MicrosoftEntraTemporaryAccessPassIssuanceWhere;
   MsGraphFailure: MsGraphFailure;
   Mutation: Record<PropertyKey, never>;
   NetworkContract: NetworkContract;
@@ -6702,6 +6900,7 @@ export type ResolversParentTypes = {
   RequestedCredentialSpecificationInput: RequestedCredentialSpecificationInput;
   ScopedClaimMapping: ScopedClaimMapping;
   ScopedClaimMappingInput: ScopedClaimMappingInput;
+  SelfServiceAction: Omit<SelfServiceAction, 'identityStore'> & { identityStore?: Maybe<ResolversParentTypes['IdentityStore']> };
   SendAsyncIssuanceVerificationResponse: SendAsyncIssuanceVerificationResponse;
   ServiceFailures: ServiceFailures;
   SubmitActionsInput: SubmitActionsInput;
@@ -6723,6 +6922,7 @@ export type ResolversParentTypes = {
   URL: Scalars['URL']['output'];
   UUID: Scalars['UUID']['output'];
   UpdateIdentityStoreInput: UpdateIdentityStoreInput;
+  UpdateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput: UpdateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationInput;
   UpdatePartnerInput: UpdatePartnerInput;
   User: UserEntity;
   UserCount: Omit<UserCount, 'user'> & { user: ResolversParentTypes['User'] };
@@ -7095,6 +7295,7 @@ export interface HexColorCodeScalarConfig extends GraphQLScalarTypeConfig<Resolv
 
 export type IdentityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Identity'] = ResolversParentTypes['Identity']> = {
   asyncIssuanceRequests?: Resolver<Array<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<IdentityAsyncIssuanceRequestsArgs, 'limit'>>;
+  availableSelfServiceActions?: Resolver<Array<ResolversTypes['SelfServiceAction']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -7125,6 +7326,7 @@ export type IdentityStoreResolvers<ContextType = GraphQLContext, ParentType exte
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identifier?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   isAuthenticationEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  microsoftEntraTemporaryAccessPassIssuanceConfiguration?: Resolver<Maybe<ResolversTypes['MicrosoftEntraTemporaryAccessPassIssuanceConfiguration']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   suspendedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   type?: Resolver<ResolversTypes['IdentityStoreType'], ParentType, ContextType>;
@@ -7309,6 +7511,39 @@ export type MeResolvers<ContextType = GraphQLContext, ParentType extends Resolve
   __resolveType: TypeResolveFn<'Identity' | 'User', ParentType, ContextType>;
 };
 
+export type MicrosoftEntraTemporaryAccessPassResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MicrosoftEntraTemporaryAccessPass'] = ResolversParentTypes['MicrosoftEntraTemporaryAccessPass']> = {
+  createdDateTime?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isUsableOnce?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  lifetimeInMinutes?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
+  startDateTime?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  temporaryAccessPass?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type MicrosoftEntraTemporaryAccessPassIssuanceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MicrosoftEntraTemporaryAccessPassIssuance'] = ResolversParentTypes['MicrosoftEntraTemporaryAccessPassIssuance']> = {
+  createdDateTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  expirationTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  externalId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  identity?: Resolver<Maybe<ResolversTypes['Identity']>, ParentType, ContextType>;
+  identityId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  identityStore?: Resolver<Maybe<ResolversTypes['IdentityStore']>, ParentType, ContextType>;
+  identityStoreId?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isUsableOnce?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  issuedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  startDateTime?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+};
+
+export type MicrosoftEntraTemporaryAccessPassIssuanceConfigurationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MicrosoftEntraTemporaryAccessPassIssuanceConfiguration'] = ResolversParentTypes['MicrosoftEntraTemporaryAccessPassIssuanceConfiguration']> = {
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  identityStoreId?: Resolver<Maybe<ResolversTypes['ID']>, ParentType, ContextType>;
+  isUsableOnce?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  lifetimeMinutes?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
 export type MsGraphFailureResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['MsGraphFailure'] = ResolversParentTypes['MsGraphFailure']> = {
   error?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   identityStoreId?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -7329,6 +7564,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
   createIssuanceRequestForAsyncIssuance?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestForAsyncIssuanceArgs, 'asyncIssuanceRequestId'>>;
   createMDocPresentationRequest?: Resolver<ResolversTypes['MDocPresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateMDocPresentationRequestArgs, 'request'>>;
+  createMicrosoftEntraTemporaryAccessPassIssuanceConfiguration?: Resolver<ResolversTypes['MicrosoftEntraTemporaryAccessPassIssuanceConfiguration'], ParentType, ContextType, RequireFields<MutationCreateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationArgs, 'input'>>;
   createOidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<MutationCreateOidcClaimMappingArgs, 'input'>>;
   createOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationCreateOidcClientArgs, 'input'>>;
   createOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationCreateOidcClientResourceArgs, 'clientId' | 'input'>>;
@@ -7346,6 +7582,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   deleteContract?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteContractArgs, 'id'>>;
   deleteIdentities?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteIdentitiesArgs, 'ids'>>;
   deleteInstanceMsGraphClient?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationDeleteInstanceMsGraphClientArgs, 'identifier'>>;
+  deleteMicrosoftEntraTemporaryAccessPassIssuanceConfiguration?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteMicrosoftEntraTemporaryAccessPassIssuanceConfigurationArgs, 'id'>>;
   deleteOidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<MutationDeleteOidcClaimMappingArgs, 'id'>>;
   deleteOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientArgs, 'id'>>;
   deleteOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientResourceArgs, 'clientId' | 'resourceId'>>;
@@ -7371,6 +7608,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   saveConciergeBranding?: Resolver<ResolversTypes['Branding'], ParentType, ContextType, RequireFields<MutationSaveConciergeBrandingArgs, 'input'>>;
   saveIdentity?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<MutationSaveIdentityArgs, 'input'>>;
   saveInstanceMsGraphClient?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationSaveInstanceMsGraphClientArgs, 'graphClient' | 'identifier'>>;
+  selfIssueMicrosoftEntraTemporaryAccessPass?: Resolver<ResolversTypes['MicrosoftEntraTemporaryAccessPass'], ParentType, ContextType>;
   sendAsyncIssuanceVerification?: Resolver<ResolversTypes['SendAsyncIssuanceVerificationResponse'], ParentType, ContextType, RequireFields<MutationSendAsyncIssuanceVerificationArgs, 'asyncIssuanceRequestId'>>;
   setApplicationLabelConfigs?: Resolver<Array<ResolversTypes['ApplicationLabelConfig']>, ParentType, ContextType, RequireFields<MutationSetApplicationLabelConfigsArgs, 'identityStoreId' | 'input'>>;
   setCorsOriginConfigs?: Resolver<Array<ResolversTypes['CorsOriginConfig']>, ParentType, ContextType, RequireFields<MutationSetCorsOriginConfigsArgs, 'input'>>;
@@ -7385,6 +7623,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   updateIdentityStore?: Resolver<ResolversTypes['IdentityStore'], ParentType, ContextType, RequireFields<MutationUpdateIdentityStoreArgs, 'id' | 'input'>>;
   updateInstanceAuthorityClient?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationUpdateInstanceAuthorityClientArgs, 'authorityClient' | 'identifier'>>;
   updateInstanceConfiguration?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<MutationUpdateInstanceConfigurationArgs, 'configuration' | 'identifier'>>;
+  updateMicrosoftEntraTemporaryAccessPassIssuanceConfiguration?: Resolver<ResolversTypes['MicrosoftEntraTemporaryAccessPassIssuanceConfiguration'], ParentType, ContextType, RequireFields<MutationUpdateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationArgs, 'id' | 'input'>>;
   updateOidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<MutationUpdateOidcClaimMappingArgs, 'id' | 'input'>>;
   updateOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientArgs, 'id' | 'input'>>;
   updateOidcClientClaimMappings?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientClaimMappingsArgs, 'claimMappingIds' | 'clientId'>>;
@@ -7667,6 +7906,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findIdentities?: Resolver<Array<ResolversTypes['Identity']>, ParentType, ContextType, RequireFields<QueryFindIdentitiesArgs, 'limit'>>;
   findIdentityStores?: Resolver<Array<ResolversTypes['IdentityStore']>, ParentType, ContextType, Partial<QueryFindIdentityStoresArgs>>;
   findIssuances?: Resolver<Array<ResolversTypes['Issuance']>, ParentType, ContextType, RequireFields<QueryFindIssuancesArgs, 'limit'>>;
+  findMicrosoftEntraTemporaryAccessPassIssuances?: Resolver<Array<ResolversTypes['MicrosoftEntraTemporaryAccessPassIssuance']>, ParentType, ContextType, Partial<QueryFindMicrosoftEntraTemporaryAccessPassIssuancesArgs>>;
   findNetworkIssuers?: Resolver<Array<ResolversTypes['NetworkIssuer']>, ParentType, ContextType, RequireFields<QueryFindNetworkIssuersArgs, 'where'>>;
   findOidcClaimMappings?: Resolver<Array<ResolversTypes['OidcClaimMapping']>, ParentType, ContextType, RequireFields<QueryFindOidcClaimMappingsArgs, 'limit'>>;
   findOidcClients?: Resolver<Array<ResolversTypes['OidcClient']>, ParentType, ContextType, RequireFields<QueryFindOidcClientsArgs, 'limit'>>;
@@ -7693,6 +7933,9 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   issuanceCountByDate?: Resolver<Array<ResolversTypes['DateCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByDateArgs>>;
   issuanceCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByUserArgs>>;
   me?: Resolver<Maybe<ResolversTypes['Me']>, ParentType, ContextType>;
+  microsoftEntraTemporaryAccessPassIssuance?: Resolver<Maybe<ResolversTypes['MicrosoftEntraTemporaryAccessPassIssuance']>, ParentType, ContextType, RequireFields<QueryMicrosoftEntraTemporaryAccessPassIssuanceArgs, 'id'>>;
+  microsoftEntraTemporaryAccessPassIssuanceConfiguration?: Resolver<Maybe<ResolversTypes['MicrosoftEntraTemporaryAccessPassIssuanceConfiguration']>, ParentType, ContextType, RequireFields<QueryMicrosoftEntraTemporaryAccessPassIssuanceConfigurationArgs, 'id'>>;
+  microsoftEntraTemporaryAccessPassIssuanceConfigurations?: Resolver<Array<ResolversTypes['MicrosoftEntraTemporaryAccessPassIssuanceConfiguration']>, ParentType, ContextType>;
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
   oidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<QueryOidcClaimMappingArgs, 'id'>>;
   oidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<QueryOidcClientArgs, 'id'>>;
@@ -7775,6 +8018,15 @@ export type ScopedClaimMappingResolvers<ContextType = GraphQLContext, ParentType
   claim?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   credentialClaim?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   scope?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+};
+
+export type SelfServiceActionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SelfServiceAction'] = ResolversParentTypes['SelfServiceAction']> = {
+  description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  identityStore?: Resolver<Maybe<ResolversTypes['IdentityStore']>, ParentType, ContextType>;
+  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  unavailableReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
 export type SendAsyncIssuanceVerificationResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SendAsyncIssuanceVerificationResponse'] = ResolversParentTypes['SendAsyncIssuanceVerificationResponse']> = {
@@ -7996,6 +8248,9 @@ export type Resolvers<ContextType = GraphQLContext> = {
   MDocValidationResults?: MDocValidationResultsResolvers<ContextType>;
   Markdown?: GraphQLScalarType;
   Me?: MeResolvers<ContextType>;
+  MicrosoftEntraTemporaryAccessPass?: MicrosoftEntraTemporaryAccessPassResolvers<ContextType>;
+  MicrosoftEntraTemporaryAccessPassIssuance?: MicrosoftEntraTemporaryAccessPassIssuanceResolvers<ContextType>;
+  MicrosoftEntraTemporaryAccessPassIssuanceConfiguration?: MicrosoftEntraTemporaryAccessPassIssuanceConfigurationResolvers<ContextType>;
   MsGraphFailure?: MsGraphFailureResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   NetworkContract?: NetworkContractResolvers<ContextType>;
@@ -8035,6 +8290,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   RequestedConfiguration?: RequestedConfigurationResolvers<ContextType>;
   RequestedCredential?: RequestedCredentialResolvers<ContextType>;
   ScopedClaimMapping?: ScopedClaimMappingResolvers<ContextType>;
+  SelfServiceAction?: SelfServiceActionResolvers<ContextType>;
   SendAsyncIssuanceVerificationResponse?: SendAsyncIssuanceVerificationResponseResolvers<ContextType>;
   ServiceFailures?: ServiceFailuresResolvers<ContextType>;
   Subscription?: SubscriptionResolvers<ContextType>;
