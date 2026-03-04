@@ -80,7 +80,7 @@ describe('submit presentation flow actions', () => {
 
     const { errors } = await submitAs(presentationFlow.request.id, limitedPresentationFlowInput, { dataResults: {} })
 
-    expect(errors?.[0]?.message).toContain('not in a valid state')
+    expect(errors?.[0]?.message).toContain('Presentation flow is expired')
   })
 
   describe('data schema validation', () => {

@@ -114,9 +114,9 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
 
   get status(): PresentationFlowStatus {
     if (this.isCancelled) return PresentationFlowStatusEnum.Cancelled
-    if (this.expiresAt.getTime() < Date.now()) return PresentationFlowStatusEnum.Expired
     if (this.isSubmitted) return PresentationFlowStatusEnum.Submitted
     if (this.presentationId) return PresentationFlowStatusEnum.PresentationVerified
+    if (this.expiresAt.getTime() < Date.now()) return PresentationFlowStatusEnum.Expired
     if (this.isRequestRetrieved) return PresentationFlowStatusEnum.RequestRetrieved
     if (this.isRequestCreated) return PresentationFlowStatusEnum.RequestCreated
     return PresentationFlowStatusEnum.Pending
