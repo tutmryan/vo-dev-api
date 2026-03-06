@@ -173,13 +173,33 @@ Refer to https://www.rfc-editor.org/rfc/rfc6749#section-2.1
 """
 enum OidcClientType {
   """
-  A client used where secrets can be securely stored, e.g. server-side authentication.
+  A client used where secrets cannot be securely stored, e.g. browser-based or mobile authentication.
   """
   public
   """
-  A client used where secrets cannot be securely stored, e.g. browser-based or mobile authentication.
+  A client used where secrets can be securely stored, e.g. server-side authentication.
   """
   confidential
+}
+
+"""
+The token endpoint authentication method for a confidential OIDC client.
+
+Refer to https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication
+"""
+enum OidcTokenEndpointAuthMethod {
+  """
+  No client authentication (public clients).
+  """
+  none
+  """
+  Client authenticates by including the client secret in the token request body.
+  """
+  client_secret_post
+  """
+  Client authenticates by sending a signed JWT assertion using a registered public key.
+  """
+  private_key_jwt
 }
 
 """
@@ -356,9 +376,37 @@ input OidcClientInput {
   """
   clientType: OidcClientType!
   """
-  The client secret, only applicable to confidential clients. Optional for update operations (existing secret will be retained when not provided).
+  The token endpoint authentication method. Defaults to `client_secret_post` for confidential clients and `none` for public clients.
+
+  Note:
+  - Confidential clients must use either `client_secret_post` or `private_key_jwt`, not both.
+  - When `client_secret_post` is used, `clientSecret` is required.
+  - When `private_key_jwt` is used, `clientJwks` or `clientJwksUri` is required.
+  """
+  tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod
+  """
+  The client secret, only applicable to confidential clients using `client_secret_post` authentication. Optional for update operations (existing secret will be retained when not provided).
   """
   clientSecret: String
+  """
+  The client's public key set (JWKS) as a JSON string, used for `private_key_jwt` client authentication.
+
+  Note:
+  - Accepts a single JWK object or a JWKS object containing a `keys` array.
+  - Only public keys (RSA or EC) are accepted.
+  - Multiple keys can be provided to support key rotation.
+  - Mutually exclusive with `clientJwksUri`.
+  """
+  clientJwks: JSONObject
+  """
+  A URI pointing to the client's public key set (JWKS), used for `private_key_jwt` client authentication.
+
+  Note:
+  - The URI must serve a valid JWKS document.
+  - Keys are fetched and cached by the OIDC provider.
+  - Mutually exclusive with `clientJwks`.
+  """
+  clientJwksUri: URL
   """
   The redirect URIs that the client is allowed to use.
   """
@@ -407,9 +455,20 @@ input OidcClientInput {
   """
   authorizationRequestsTypeStandardEnabled: Boolean
   """
-  The relying party's JWKS URI to use when JAR is enabled.
+  The relying party's public key set (JWKS) as a JSON string, used for verifying JWT-secured authorisation requests (JAR).
 
-  This should be the discovery URI without the `.well-known/openid-configuration` suffix.
+  Note:
+  - Accepts a single JWK object or a JWKS object containing a `keys` array.
+  - Only public keys (RSA or EC) are accepted.
+  - Mutually exclusive with `relyingPartyJwksUri`.
+  """
+  relyingPartyJwks: JSONObject
+  """
+  A URI pointing to the relying party's public key set (JWKS), used for verifying JWT-secured authorisation requests (JAR).
+
+  Note:
+  - The URI must serve a valid JWKS document.
+  - Mutually exclusive with `relyingPartyJwks`.
   """
   relyingPartyJwksUri: URL
 }
@@ -452,6 +511,18 @@ type OidcClient {
   """
   clientType: OidcClientType!
   """
+  The token endpoint authentication method used by this client.
+  """
+  tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod!
+  """
+  The client's public key set (JWKS) as a JSON string, used for `private_key_jwt` client authentication.
+  """
+  clientJwks: JSONObject
+  """
+  A URI pointing to the client's public key set (JWKS), used for `private_key_jwt` client authentication.
+  """
+  clientJwksUri: URL
+  """
   The redirect URIs that the client is allowed to use.
   """
   redirectUris: [URL!]!
@@ -468,9 +539,11 @@ type OidcClient {
   """
   authorizationRequestsTypeStandardEnabled: Boolean!
   """
-  The relying party's JWKS URI to use when JAR is enabled.
-
-  This should be the discovery URI without the `.well-known/openid-configuration` suffix.
+  The relying party's public key set (JWKS) as a JSON string, used for verifying JWT-secured authorisation requests (JAR).
+  """
+  relyingPartyJwks: JSONObject
+  """
+  A URI pointing to the relying party's public key set (JWKS), used for verifying JWT-secured authorisation requests (JAR).
   """
   relyingPartyJwksUri: URL
   """

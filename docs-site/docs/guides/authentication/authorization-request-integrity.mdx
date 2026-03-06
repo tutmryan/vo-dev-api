@@ -97,11 +97,28 @@ In most deployments, you get more practical value from:
 - Using PAR so the request content is sent over a back-channel
 - Reducing logging/telemetry exposure of authorization request material
 
-### Current availability
+### Configuring JAR keys
 
-In VO today, JAR support is currently used as part of federated flows.
+When JAR is enabled for a client, the OIDC provider needs public keys to verify the signed request objects. How you provide these keys depends on the client's token endpoint authentication method.
 
-If you are integrating an application directly against the VO OIDC provider and your client library supports request objects, you can still design your integration so that you are ready to adopt JAR as soon as it is available for your client type.
+#### Clients using `client_secret_post`
+
+If the client authenticates with a shared secret, request objects can be signed using an HMAC algorithm (`HS256`, `HS384`, `HS512`). The provider derives the verification key from the client secret automatically — no additional key configuration is needed.
+
+Alternatively, you can provide asymmetric keys (see below) if you prefer to sign request objects with a public-key algorithm.
+
+#### Clients using `private_key_jwt` or public clients
+
+You must provide the relying party's public keys for request object verification using one of (mutually exclusive):
+
+- **Relying party JWKS** — a JSON Web Key Set document pasted directly into the configuration.
+- **Relying party JWKS URI** — a URL pointing to a hosted JWKS document.
+
+You cannot provide both JWKS and JWKS URI at the same time.
+
+#### Matching authentication keys
+
+If the client uses `private_key_jwt` for token endpoint authentication, the same keys are often used for both client authentication and JAR signing. The admin UI provides a "Match authentication keys" option that copies the authentication key configuration into the JAR key fields for convenience. The values are stored independently in the database.
 
 ## Pushed Authorization Requests (PAR)
 

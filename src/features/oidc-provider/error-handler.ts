@@ -48,7 +48,11 @@ const minimalClientEntity = {
     | 'clientType'
     | 'authorizationRequestsTypeJarEnabled'
     | 'authorizationRequestsTypeStandardEnabled'
+    | 'relyingPartyJwks'
     | 'relyingPartyJwksUri'
+    | 'tokenEndpointAuthMethod'
+    | 'clientJwks'
+    | 'clientJwksUri'
   >
 >
 

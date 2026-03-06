@@ -70,7 +70,7 @@ async function createProvider() {
 
   const provider = new Provider(issuer, {
     clients: clientMetadata,
-    clientAuthMethods: ['none', 'client_secret_post'],
+    clientAuthMethods: ['none', 'client_secret_post', 'private_key_jwt'],
     ...(isRedisEnabled ? { adapter: (name) => new RedisAdapter(name, redisClient()) } : {}),
     cookies: {
       keys: [cookieSession.secret ?? throwError('cookieSession.secret is required')],
@@ -140,6 +140,7 @@ async function createProvider() {
         'Ed25519',
         'EdDSA',
       ],
+      clientAuthSigningAlgValues: ['RS256', 'RS384', 'RS512', 'PS256', 'PS384', 'PS512', 'ES256', 'ES384', 'ES512'],
     },
   } satisfies Configuration)
 

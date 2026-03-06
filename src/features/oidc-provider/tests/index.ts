@@ -11,6 +11,9 @@ graphql(`
     name
     applicationType
     clientType
+    tokenEndpointAuthMethod
+    clientJwks
+    clientJwksUri
     logo
     backgroundColor
     backgroundImage
@@ -22,6 +25,8 @@ graphql(`
     requireFaceCheck
     allowAnyPartner
     authorizationRequestsTypeJarEnabled
+    authorizationRequestsTypeStandardEnabled
+    relyingPartyJwks
     relyingPartyJwksUri
     partners {
       id

@@ -12,7 +12,7 @@ import {
   updateConciergeClientBrandingMutation,
   updateOidcClientMutation,
 } from '.'
-import { OidcApplicationType, OidcClientType } from '../../../generated/graphql'
+import { OidcApplicationType, OidcClientType, OidcTokenEndpointAuthMethod } from '../../../generated/graphql'
 import { UserRoles } from '../../../roles'
 import {
   beforeAfterAll,
@@ -154,6 +154,92 @@ describe('createOidcClient mutation', () => {
     expect(errors?.[0]?.message).toEqual('Confidential clients must have a secret')
   })
 
+  it('can create a confidential client with private_key_jwt and inline JWKS', async () => {
+    const jwks = {
+      keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1', use: 'sig', alg: 'RS256' }],
+    }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.tokenEndpointAuthMethod).toEqual(OidcTokenEndpointAuthMethod.PrivateKeyJwt)
+    expect(client.clientJwks).toEqual(jwks)
+    expect(client.clientJwksUri).toBeNull()
+    // No secret should be stored for private_key_jwt
+    expect(mockedServices.oidcSecretService.set.mock().mock.calls).toHaveLength(0)
+  })
+
+  it('can create a confidential client with private_key_jwt and JWKS URI', async () => {
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwksUri: 'https://example.com/.well-known/jwks.json',
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.tokenEndpointAuthMethod).toEqual(OidcTokenEndpointAuthMethod.PrivateKeyJwt)
+    expect(client.clientJwksUri).toEqual('https://example.com/.well-known/jwks.json')
+  })
+
+  it(`can't create a private_key_jwt client without JWKS or JWKS URI`, async () => {
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('private_key_jwt clients must have clientJwks or clientJwksUri')
+  })
+
+  it(`can't create a private_key_jwt client with a secret`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+      clientSecret: casual.uuid,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('private_key_jwt clients cannot have a secret, use client_secret_post instead')
+  })
+
+  it(`can't create a client_secret_post client with JWKS`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.ClientSecretPost,
+      clientSecret: casual.uuid,
+      clientJwks: jwks,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('client_secret_post clients cannot have JWKS, use private_key_jwt instead')
+  })
+
+  it(`can't create a public client with private_key_jwt`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Public,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('Public clients must use token endpoint auth method "none"')
+  })
+
   it('returns an unauthorized error when accessed anonymously', async () => {
     const { errors } = await executeOperationAnonymous({ query: createOidcClientMutation, variables: { input: createInput } })
     expect(errors).toBeDefined()
@@ -229,6 +315,294 @@ describe('updateOidcClient mutation', () => {
     const persistedPartnerIds = (await reloaded.partners).map((p) => p.id)
     expect(persistedPartnerIds).toEqual(expect.arrayContaining([partner1.id, partner2.id]))
   })
+
+  it('can switch a confidential client from client_secret_post to private_key_jwt', async () => {
+    const confidentialInput = createOidcClientInput({ clientType: OidcClientType.Confidential, clientSecret: casual.uuid })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: confidentialInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const updateInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+    })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    const updated = data.updateOidcClient
+    expect(updated.tokenEndpointAuthMethod).toEqual(OidcTokenEndpointAuthMethod.PrivateKeyJwt)
+    expect(updated.clientJwks).toEqual(jwks)
+    // Secret should be deleted when switching to private_key_jwt
+    expect(mockedServices.oidcSecretService.delete.lastCallArgs()).toEqual([client.id])
+  })
+
+  it('can switch a confidential client from private_key_jwt to client_secret_post', async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const pkjInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+    })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: pkjInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    const newSecret = casual.uuid
+    const updateInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.ClientSecretPost,
+      clientSecret: newSecret,
+    })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    const updated = data.updateOidcClient
+    expect(updated.tokenEndpointAuthMethod).toEqual(OidcTokenEndpointAuthMethod.ClientSecretPost)
+    expect(updated.clientJwks).toBeNull()
+    expect(updated.clientJwksUri).toBeNull()
+    expect(mockedServices.oidcSecretService.set.lastCallArgs()).toEqual([client.id, newSecret])
+  })
+
+  it(`can't switch from private_key_jwt to client_secret_post without a secret`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const pkjInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+    })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: pkjInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    const updateInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.ClientSecretPost,
+    })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(data?.updateOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('Confidential clients must have a secret')
+  })
+
+  it('retains existing secret when updating without providing a new secret', async () => {
+    const originalSecret = casual.uuid
+    const confidentialInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      clientSecret: originalSecret,
+    })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: confidentialInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    expect(mockedServices.oidcSecretService.set.lastCallArgs()).toEqual([client.id, originalSecret])
+
+    mockedServices.clearAllMocks()
+
+    const updateInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      name: 'Updated Name',
+    })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    expect(data.updateOidcClient.name).toEqual('Updated Name')
+
+    expect(mockedServices.oidcSecretService.set.mock().mock.calls).toHaveLength(0)
+    expect(mockedServices.oidcSecretService.delete.mock().mock.calls).toHaveLength(0)
+  })
+
+  it(`can't provide both clientJwks and clientJwksUri`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+      clientJwksUri: 'https://example.com/.well-known/jwks.json',
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('clientJwks and clientJwksUri are mutually exclusive')
+  })
+
+  it(`can't provide both relyingPartyJwks and relyingPartyJwksUri`, async () => {
+    const jarJwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'jar-key-1' }] }
+    const input = createOidcClientInput({
+      authorizationRequestsTypeJarEnabled: true,
+      relyingPartyJwks: jarJwks,
+      relyingPartyJwksUri: 'https://example.com/.well-known/jwks.json',
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('relyingPartyJwks and relyingPartyJwksUri are mutually exclusive')
+  })
+
+  it(`can't create a client with invalid JWK structure in clientJwks`, async () => {
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: { invalid: 'structure' },
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('clientJwks must be valid JSON containing a JWK or JWKS object')
+  })
+})
+
+describe('JAR key configuration', () => {
+  beforeAfterAll()
+  beforeEach(() => {
+    mockedServices.clearAllMocks()
+  })
+
+  it('can create a client with JAR enabled and relyingPartyJwksUri', async () => {
+    const input = createOidcClientInput({
+      authorizationRequestsTypeJarEnabled: true,
+      relyingPartyJwksUri: 'https://example.com/.well-known/jwks.json',
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.authorizationRequestsTypeJarEnabled).toBe(true)
+    expect(client.relyingPartyJwksUri).toEqual('https://example.com/.well-known/jwks.json')
+    expect(client.relyingPartyJwks).toBeNull()
+  })
+
+  it('can create a client with JAR enabled and inline relyingPartyJwks', async () => {
+    const jarJwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'jar-key-1', use: 'sig', alg: 'RS256' }] }
+    const input = createOidcClientInput({
+      authorizationRequestsTypeJarEnabled: true,
+      relyingPartyJwks: jarJwks,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.authorizationRequestsTypeJarEnabled).toBe(true)
+    expect(client.relyingPartyJwks).toEqual(jarJwks)
+    expect(client.relyingPartyJwksUri).toBeNull()
+  })
+
+  it('allows JAR without asymmetric keys when using client_secret_post (HS-signed)', async () => {
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      clientSecret: casual.uuid,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.ClientSecretPost,
+      authorizationRequestsTypeJarEnabled: true,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.authorizationRequestsTypeJarEnabled).toBe(true)
+    expect(client.relyingPartyJwks).toBeNull()
+    expect(client.relyingPartyJwksUri).toBeNull()
+  })
+
+  it(`requires JAR keys for private_key_jwt clients with JAR enabled`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'auth-key-1' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+      authorizationRequestsTypeJarEnabled: true,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual(
+      'JAR-enabled clients must have relyingPartyJwks or relyingPartyJwksUri (unless using client_secret_post)',
+    )
+  })
+
+  it('can create a private_key_jwt client with both auth and JAR keys (duplicated)', async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'shared-key-1', use: 'sig', alg: 'RS256' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+      authorizationRequestsTypeJarEnabled: true,
+      relyingPartyJwks: jwks,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.clientJwks).toEqual(jwks)
+    expect(client.relyingPartyJwks).toEqual(jwks)
+  })
+
+  it('clears JAR keys when JAR is disabled on update', async () => {
+    const jarJwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'jar-key-1' }] }
+    const createInput = createOidcClientInput({
+      authorizationRequestsTypeJarEnabled: true,
+      relyingPartyJwks: jarJwks,
+    })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: createInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+    expect(client.relyingPartyJwks).toEqual(jarJwks)
+
+    const updateInput = createOidcClientInput({
+      authorizationRequestsTypeJarEnabled: false,
+    })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    const updated = data.updateOidcClient
+    expect(updated.authorizationRequestsTypeJarEnabled).toBe(false)
+    expect(updated.relyingPartyJwks).toBeNull()
+    expect(updated.relyingPartyJwksUri).toBeNull()
+  })
+
+  it('requires JAR keys for public clients with JAR enabled', async () => {
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Public,
+      authorizationRequestsTypeJarEnabled: true,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual(
+      'JAR-enabled clients must have relyingPartyJwks or relyingPartyJwksUri (unless using client_secret_post)',
+    )
+  })
 })
 
 async function insertConciergeOidcClient(overrides: Partial<OidcClientEntity> = {}) {
@@ -249,6 +623,7 @@ async function insertConciergeOidcClient(overrides: Partial<OidcClientEntity> = 
     name: portalClientName,
     applicationType: OidcApplicationType.Web,
     clientType: OidcClientType.Public,
+    tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.None,
     redirectUris: ['https://example.com/cb'],
     postLogoutUris: ['https://example.com/logout'],
     ...overrides,

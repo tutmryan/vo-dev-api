@@ -9,7 +9,7 @@ import {
   nvarcharType,
   varcharMaxLength,
 } from '../../../data/utils/crossDbColumnTypes'
-import { OidcApplicationType, OidcClientType } from '../../../generated/graphql'
+import { OidcApplicationType, OidcClientType, OidcTokenEndpointAuthMethod } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { assertExhaustive } from '../../../util/type-helpers'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
@@ -33,7 +33,11 @@ type OptionalArgs = Pick<
   | 'requireFaceCheck'
   | 'authorizationRequestsTypeJarEnabled'
   | 'authorizationRequestsTypeStandardEnabled'
+  | 'relyingPartyJwks'
   | 'relyingPartyJwksUri'
+  | 'tokenEndpointAuthMethod'
+  | 'clientJwks'
+  | 'clientJwksUri'
 >
 type CreateOrUpdateArgs = RequiredArgs & Partial<OptionalArgs>
 
@@ -133,10 +137,48 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
   authorizationRequestsTypeStandardEnabled!: boolean
 
   /**
-   * The relying party's JWKS URI to use when JAR is enabled.
+   * The relying party's public key set (JWKS) as a JSON string, used for verifying JWT-secured authorisation requests (JAR).
+   */
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true, name: 'relying_party_jwks' })
+  private relyingPartyJwksJson!: string | null
+
+  get relyingPartyJwks(): object | null {
+    return this.relyingPartyJwksJson ? JSON.parse(this.relyingPartyJwksJson) : null
+  }
+  set relyingPartyJwks(value: object | null) {
+    this.relyingPartyJwksJson = value ? JSON.stringify(value) : null
+  }
+
+  /**
+   * A URI pointing to the relying party's public key set (JWKS), used for verifying JWT-secured authorisation requests (JAR).
    */
   @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true, name: 'relying_party_jwks_uri' })
   relyingPartyJwksUri!: string | null
+
+  /**
+   * The token endpoint authentication method for this client.
+   */
+  @Column({ type: nvarcharType, length: 50, nullable: true, name: 'token_endpoint_auth_method' })
+  tokenEndpointAuthMethod!: OidcTokenEndpointAuthMethod | null
+
+  /**
+   * The client's public key set (JWKS) as a JSON string, used for private_key_jwt client authentication.
+   */
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true, name: 'client_jwks' })
+  private clientJwksJson!: string | null
+
+  get clientJwks(): object | null {
+    return this.clientJwksJson ? JSON.parse(this.clientJwksJson) : null
+  }
+  set clientJwks(value: object | null) {
+    this.clientJwksJson = value ? JSON.stringify(value) : null
+  }
+
+  /**
+   * A URI pointing to the client's public key set (JWKS), used for private_key_jwt client authentication.
+   */
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true, name: 'client_jwks_uri' })
+  clientJwksUri!: string | null
 
   /**
    * Allow the client to auth using presentations from any partner.
@@ -223,7 +265,11 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
         args.authorizationRequestsTypeJarEnabled !== undefined ? args.authorizationRequestsTypeJarEnabled : false,
       authorizationRequestsTypeStandardEnabled:
         args.authorizationRequestsTypeStandardEnabled !== undefined ? args.authorizationRequestsTypeStandardEnabled : true,
+      relyingPartyJwks: args.relyingPartyJwks ?? null,
       relyingPartyJwksUri: args.relyingPartyJwksUri ?? null,
+      tokenEndpointAuthMethod: args.tokenEndpointAuthMethod ?? null,
+      clientJwks: args.clientJwks ?? null,
+      clientJwksUri: args.clientJwksUri ?? null,
       credentialTypes: args.credentialTypes ?? null,
       uniqueClaimsForSubjectId: args.uniqueClaimsForSubjectId ?? null,
       logo: args.logo ?? null,

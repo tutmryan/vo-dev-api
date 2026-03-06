@@ -1,26 +1,31 @@
 import { notifyOidcDataChanged, oidcSecretService } from '..'
 import type { CommandContext } from '../../../cqs'
-import { OidcApplicationType, OidcClientType, type OidcClientInput } from '../../../generated/graphql'
+import { OidcApplicationType, OidcTokenEndpointAuthMethod, type OidcClientInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import type { PartnerEntity } from '../../partners/entities/partner-entity'
 import { OidcClientEntity } from '../entities/oidc-client-entity'
-import { systemClientInvariant } from './utils'
+import { systemClientInvariant, validateClientAuthMethod, validateJarKeys, validateJwksJson } from './utils'
 
 export async function UpdateOidcClientCommand(this: CommandContext, clientId: string, input: OidcClientInput) {
   systemClientInvariant(clientId)
 
-  const { requireFaceCheck, allowAnyPartner, partnerIds, applicationType, relyingPartyJwksUri, ...rest } = input
+  const { requireFaceCheck, allowAnyPartner, partnerIds, applicationType, relyingPartyJwksUri, clientJwksUri, ...rest } = input
 
   const repo = this.entityManager.getRepository(OidcClientEntity)
   const client = await repo.findOneByOrFail({ id: clientId })
 
-  const clientChangedFromConfidentialToPublic =
-    client.clientType === OidcClientType.Confidential && input.clientType === OidcClientType.Public
-  const clientChangedFromPublicToConfidential =
-    client.clientType === OidcClientType.Public && input.clientType === OidcClientType.Confidential
+  const tokenEndpointAuthMethod = validateClientAuthMethod(input)
 
-  if (input.clientSecret) invariant(input.clientType === OidcClientType.Confidential, 'Only confidential clients can have a secret')
-  if (clientChangedFromPublicToConfidential) invariant(input.clientSecret, 'Confidential clients must have a secret')
+  const previousAuthMethod = client.tokenEndpointAuthMethod
+  const switchedToPrivateKeyJwt =
+    previousAuthMethod !== OidcTokenEndpointAuthMethod.PrivateKeyJwt &&
+    tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt
+
+  // When switching to client_secret_post from a method that didn't have a secret, a new secret is required
+  const previousUsedSecret = previousAuthMethod === OidcTokenEndpointAuthMethod.ClientSecretPost
+  if (tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.ClientSecretPost && !previousUsedSecret) {
+    invariant(input.clientSecret, 'Confidential clients must have a secret')
+  }
 
   const authorizationRequestsTypeJarEnabled = input.authorizationRequestsTypeJarEnabled ?? false
   const authorizationRequestsTypeStandardEnabled = input.authorizationRequestsTypeStandardEnabled ?? true
@@ -28,7 +33,11 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
     authorizationRequestsTypeJarEnabled || authorizationRequestsTypeStandardEnabled,
     'At least one authorization requests type must be enabled',
   )
-  if (authorizationRequestsTypeJarEnabled) invariant(input.relyingPartyJwksUri, 'Relying party JWKS URI is required when JAR is enabled')
+  validateJarKeys(input, tokenEndpointAuthMethod)
+
+  // Validate JWKS JSON format
+  validateJwksJson(input.clientJwks, 'clientJwks')
+  validateJwksJson(input.relyingPartyJwks, 'relyingPartyJwks')
 
   client.update({
     ...rest,
@@ -37,7 +46,11 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
     allowAnyPartner: allowAnyPartner ?? false,
     authorizationRequestsTypeJarEnabled,
     authorizationRequestsTypeStandardEnabled,
-    relyingPartyJwksUri: relyingPartyJwksUri?.toString(),
+    relyingPartyJwks: authorizationRequestsTypeJarEnabled ? (input.relyingPartyJwks ?? null) : null,
+    relyingPartyJwksUri: authorizationRequestsTypeJarEnabled ? (relyingPartyJwksUri?.toString() ?? null) : null,
+    tokenEndpointAuthMethod,
+    clientJwks: tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt ? (input.clientJwks ?? null) : null,
+    clientJwksUri: tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt ? (clientJwksUri?.toString() ?? null) : null,
   })
 
   if (partnerIds) {
@@ -46,8 +59,13 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
 
   const updated = await repo.save(client)
 
-  if (input.clientSecret) await oidcSecretService().set(client.id, input.clientSecret)
-  else if (clientChangedFromConfidentialToPublic) await oidcSecretService().delete(client.id)
+  // Handle secret storage based on auth method transitions
+  if (tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.ClientSecretPost && input.clientSecret) {
+    await oidcSecretService().set(client.id, input.clientSecret)
+  } else if (switchedToPrivateKeyJwt || tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.None) {
+    // Switching away from client_secret_post — delete the stored secret
+    await oidcSecretService().delete(client.id)
+  }
 
   notifyOidcDataChanged()
   return updated
