@@ -1,0 +1,45 @@
+---
+title: March 2026
+date: 2026-03-05T00:00
+description: This release introduces presentation flow management, self-serve tap issuance workflows, enhanced search functionality in Composer, and Apollo Studio integration with role-based access.
+slug: v2026_March
+tags: [2026, v2026.3.1, v2026.3.0]
+---
+
+This release introduces presentation flow management, self-serve tap issuance workflows, enhanced search functionality in Composer, and Apollo Studio integration with role-based access.
+
+<!-- truncate -->
+
+## v2026.3.1
+
+### 🛠️ Notable fixes
+
+- **Presentation flow status** - Fixed issue with incorrect presentation flow statuses
+
+## v2026.3.0
+
+### 🚀 What's new
+
+#### New features
+
+- **Presentation flow management** - Complete API and UI implementation for managing credential presentation workflows
+- **Self-serve tap issuance workflow in Concierge** - End users can now initiate tap-to-phone issuance workflows directly from Concierge
+
+#### Enhancements
+
+- **Advanced issuance search** - Composer now supports complex search queries with AND/OR operators and configurable query limits for more precise credential searches
+- **Apollo Studio integration** - Access Apollo Studio GraphQL explorer directly from activity screens in Composer with role-based access control
+- **Enhanced OIDC client details** - All authentication restrictions now displayed in OIDC client configuration screens for complete visibility
+- **Smart credential filtering** - Concierge now shows only active credentials by default with an easy toggle to view all credentials
+- **Streamlined credential type selection** - Tabs are automatically hidden when only one credential type is selected, reducing visual clutter
+- **Error boundary implementation** - Improved error handling in Concierge provides better user experience when unexpected errors occur
+- **Documentation improvements** - Added custom tip admonitions and updated audit examples with new event types
+- **Important security updates** - Multiple security improvements and dependency upgrades across all components
+
+### ⚠️ Breaking changes
+
+- **API:** The approval flow endpoints have been removed. Any integrations relying on approval flow operations should migrate to the new presentation flow endpoints.
+
+### 🛠️ Notable fixes
+
+- Fixed issue where file picker dialog would inadvertently open when clearing images in Concierge branding settings
