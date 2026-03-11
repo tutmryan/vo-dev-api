@@ -1929,6 +1929,27 @@ export type InstanceConfigurationInput = {
   identityIssuerLabels?: InputMaybe<Scalars['JSONObject']['input']>;
 };
 
+/** Instance setting result - value is JSON encoded based on the key type */
+export type InstanceSetting = {
+  __typename?: 'InstanceSetting';
+  /** The setting key */
+  key: InstanceSettingKey;
+  /**
+   * The setting value as JSON string. Parse based on key:
+   * - emailSender: { senderName?: string, senderEmail?: string }
+   * - useModernOidcUi: boolean
+   */
+  value: Scalars['JSON']['output'];
+};
+
+/** Available instance setting keys */
+export enum InstanceSettingKey {
+  /** Email sender configuration (senderName, senderEmail) */
+  EmailSender = 'emailSender',
+  /** Whether to use modern OIDC UI (true = modern, false = legacy EJS) */
+  UseModernOidcUi = 'useModernOidcUi'
+}
+
 /** An instance of a successful contract-to-credential issuance. */
 export type Issuance = {
   __typename?: 'Issuance';
@@ -2822,6 +2843,8 @@ export type Mutation = {
    * Passing null or omitting fields will unset the override and revert to defaults.
    */
   setEmailSenderConfig: EmailSenderConfig;
+  /** Set an instance setting. Value must be valid JSON matching the key's expected type. */
+  setInstanceSetting: InstanceSetting;
   submitPresentationFlowActions: PresentationFlow;
   /** Suspends an identity store. Use resumeIdentityStore to reactivate. */
   suspendIdentityStore: IdentityStore;
@@ -3170,6 +3193,11 @@ export type MutationSetCorsOriginConfigsArgs = {
 
 export type MutationSetEmailSenderConfigArgs = {
   input: EmailSenderConfigInput;
+};
+
+
+export type MutationSetInstanceSettingArgs = {
+  input: SetInstanceSettingInput;
 };
 
 
@@ -4408,6 +4436,8 @@ export type Query = {
   identityStore?: Maybe<IdentityStore>;
   /** Returns a single instance by identifier. */
   instanceByIdentifier: Instance;
+  /** Get an instance setting by key. Returns null if not set. */
+  instanceSetting?: Maybe<InstanceSetting>;
   /** Returns an issuance by ID */
   issuance: Issuance;
   /** Returns the issuance count, optionally matching the specified criteria. */
@@ -4698,6 +4728,11 @@ export type QueryIdentityStoreArgs = {
 
 export type QueryInstanceByIdentifierArgs = {
   identifier: Scalars['String']['input'];
+};
+
+
+export type QueryInstanceSettingArgs = {
+  key: InstanceSettingKey;
 };
 
 
@@ -5059,6 +5094,18 @@ export type ServiceFailures = {
   __typename?: 'ServiceFailures';
   msGraph?: Maybe<Array<MsGraphFailure>>;
   verifiedId?: Maybe<Scalars['String']['output']>;
+};
+
+/** Input for setting an instance setting. Value must be valid JSON matching the key's expected type. */
+export type SetInstanceSettingInput = {
+  /** The setting key */
+  key: InstanceSettingKey;
+  /**
+   * The setting value as JSON string. Must match the key's expected type:
+   * - emailSender: { senderName?: string, senderEmail?: string }
+   * - useModernOidcUi: boolean
+   */
+  value: Scalars['JSON']['input'];
 };
 
 export type SubmitActionsInput = {
@@ -5813,6 +5860,20 @@ export type SetEmailSenderConfigMutationVariables = Exact<{
 
 export type SetEmailSenderConfigMutation = { __typename?: 'Mutation', setEmailSenderConfig: { __typename?: 'EmailSenderConfig', senderName: string, senderEmail: string } };
 
+export type GetInstanceSettingQueryVariables = Exact<{
+  key: InstanceSettingKey;
+}>;
+
+
+export type GetInstanceSettingQuery = { __typename?: 'Query', instanceSetting?: { __typename?: 'InstanceSetting', key: InstanceSettingKey, value: unknown } | null };
+
+export type SetInstanceSettingMutationVariables = Exact<{
+  input: SetInstanceSettingInput;
+}>;
+
+
+export type SetInstanceSettingMutation = { __typename?: 'Mutation', setInstanceSetting: { __typename?: 'InstanceSetting', key: InstanceSettingKey, value: unknown } };
+
 export type CreateIssuanceRequestMutationVariables = Exact<{
   request: IssuanceRequestInput;
 }>;
@@ -6279,6 +6340,8 @@ export const GetCorsOriginConfigsDocument = {"kind":"Document","definitions":[{"
 export const SetCorsOriginConfigsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetCorsOriginConfigs"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"CorsOriginConfigInput"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setCorsOriginConfigs"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"origin"}}]}}]}}]} as unknown as DocumentNode<SetCorsOriginConfigsMutation, SetCorsOriginConfigsMutationVariables>;
 export const GetEmailSenderConfigDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetEmailSenderConfig"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"emailSenderConfig"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"senderName"}},{"kind":"Field","name":{"kind":"Name","value":"senderEmail"}}]}}]}}]} as unknown as DocumentNode<GetEmailSenderConfigQuery, GetEmailSenderConfigQueryVariables>;
 export const SetEmailSenderConfigDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetEmailSenderConfig"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"EmailSenderConfigInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setEmailSenderConfig"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"senderName"}},{"kind":"Field","name":{"kind":"Name","value":"senderEmail"}}]}}]}}]} as unknown as DocumentNode<SetEmailSenderConfigMutation, SetEmailSenderConfigMutationVariables>;
+export const GetInstanceSettingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetInstanceSetting"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"key"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"InstanceSettingKey"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"instanceSetting"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"key"},"value":{"kind":"Variable","name":{"kind":"Name","value":"key"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]} as unknown as DocumentNode<GetInstanceSettingQuery, GetInstanceSettingQueryVariables>;
+export const SetInstanceSettingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SetInstanceSetting"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SetInstanceSettingInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"setInstanceSetting"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"key"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}}]} as unknown as DocumentNode<SetInstanceSettingMutation, SetInstanceSettingMutationVariables>;
 export const CreateIssuanceRequestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateIssuanceRequest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"IssuanceRequestInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createIssuanceRequest"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"IssuanceResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"requestId"}},{"kind":"Field","name":{"kind":"Name","value":"url"}},{"kind":"Field","name":{"kind":"Name","value":"qrCode"}}]}},{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"RequestErrorResponse"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"error"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"code"}},{"kind":"Field","name":{"kind":"Name","value":"message"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateIssuanceRequestMutation, CreateIssuanceRequestMutationVariables>;
 export const AcquireLimitedAccessTokenDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"AcquireLimitedAccessToken"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"AcquireLimitedAccessTokenInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"acquireLimitedAccessToken"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"expires"}},{"kind":"Field","name":{"kind":"Name","value":"token"}}]}}]}}]} as unknown as DocumentNode<AcquireLimitedAccessTokenMutation, AcquireLimitedAccessTokenMutationVariables>;
 export const FindContractsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindContracts"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ContractWhere"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"forIdentityId"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findContracts"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"issuances"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"identityId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"forIdentityId"}}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"issuedAt"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}}]}},{"kind":"Field","name":{"kind":"Name","value":"presentations"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"ObjectValue","fields":[{"kind":"ObjectField","name":{"kind":"Name","value":"identityId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"forIdentityId"}}}]}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"IntValue","value":"1"}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"presentedAt"}}]}}]}}]}}]} as unknown as DocumentNode<FindContractsQuery, FindContractsQueryVariables>;
@@ -6574,6 +6637,8 @@ export type ResolversTypes = {
   Instance: ResolverTypeWrapper<Instance>;
   InstanceConfiguration: ResolverTypeWrapper<InstanceConfiguration>;
   InstanceConfigurationInput: InstanceConfigurationInput;
+  InstanceSetting: ResolverTypeWrapper<InstanceSetting>;
+  InstanceSettingKey: InstanceSettingKey;
   Issuance: ResolverTypeWrapper<IssuanceEntity>;
   IssuanceCallbackEvent: ResolverTypeWrapper<IssuanceCallbackEvent>;
   IssuanceEventData: ResolverTypeWrapper<Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversTypes['Issuance']> }>;
@@ -6701,6 +6766,7 @@ export type ResolversTypes = {
   SelfServiceAction: ResolverTypeWrapper<Omit<SelfServiceAction, 'identityStore'> & { identityStore?: Maybe<ResolversTypes['IdentityStore']> }>;
   SendAsyncIssuanceVerificationResponse: ResolverTypeWrapper<SendAsyncIssuanceVerificationResponse>;
   ServiceFailures: ResolverTypeWrapper<ServiceFailures>;
+  SetInstanceSettingInput: SetInstanceSettingInput;
   SubmitActionsInput: SubmitActionsInput;
   Subscription: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Template: ResolverTypeWrapper<TemplateEntity>;
@@ -6851,6 +6917,7 @@ export type ResolversParentTypes = {
   Instance: Instance;
   InstanceConfiguration: InstanceConfiguration;
   InstanceConfigurationInput: InstanceConfigurationInput;
+  InstanceSetting: InstanceSetting;
   Issuance: IssuanceEntity;
   IssuanceCallbackEvent: IssuanceCallbackEvent;
   IssuanceEventData: Omit<IssuanceEventData, 'issuance'> & { issuance?: Maybe<ResolversParentTypes['Issuance']> };
@@ -6961,6 +7028,7 @@ export type ResolversParentTypes = {
   SelfServiceAction: Omit<SelfServiceAction, 'identityStore'> & { identityStore?: Maybe<ResolversParentTypes['IdentityStore']> };
   SendAsyncIssuanceVerificationResponse: SendAsyncIssuanceVerificationResponse;
   ServiceFailures: ServiceFailures;
+  SetInstanceSettingInput: SetInstanceSettingInput;
   SubmitActionsInput: SubmitActionsInput;
   Subscription: Record<PropertyKey, never>;
   Template: TemplateEntity;
@@ -7406,6 +7474,11 @@ export type InstanceConfigurationResolvers<ContextType = GraphQLContext, ParentT
   identityIssuerLabels?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
 };
 
+export type InstanceSettingResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['InstanceSetting'] = ResolversParentTypes['InstanceSetting']> = {
+  key?: Resolver<ResolversTypes['InstanceSettingKey'], ParentType, ContextType>;
+  value?: Resolver<ResolversTypes['JSON'], ParentType, ContextType>;
+};
+
 export type IssuanceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Issuance'] = ResolversParentTypes['Issuance']> = {
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType>;
   credentialExpiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -7671,6 +7744,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   setApplicationLabelConfigs?: Resolver<Array<ResolversTypes['ApplicationLabelConfig']>, ParentType, ContextType, RequireFields<MutationSetApplicationLabelConfigsArgs, 'identityStoreId' | 'input'>>;
   setCorsOriginConfigs?: Resolver<Array<ResolversTypes['CorsOriginConfig']>, ParentType, ContextType, RequireFields<MutationSetCorsOriginConfigsArgs, 'input'>>;
   setEmailSenderConfig?: Resolver<ResolversTypes['EmailSenderConfig'], ParentType, ContextType, RequireFields<MutationSetEmailSenderConfigArgs, 'input'>>;
+  setInstanceSetting?: Resolver<ResolversTypes['InstanceSetting'], ParentType, ContextType, RequireFields<MutationSetInstanceSettingArgs, 'input'>>;
   submitPresentationFlowActions?: Resolver<ResolversTypes['PresentationFlow'], ParentType, ContextType, RequireFields<MutationSubmitPresentationFlowActionsArgs, 'id' | 'input'>>;
   suspendIdentityStore?: Resolver<ResolversTypes['IdentityStore'], ParentType, ContextType, RequireFields<MutationSuspendIdentityStoreArgs, 'id'>>;
   suspendPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationSuspendPartnerArgs, 'id'>>;
@@ -7989,6 +8063,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   identityIssuers?: Resolver<Array<ResolversTypes['IdentityIssuer']>, ParentType, ContextType>;
   identityStore?: Resolver<Maybe<ResolversTypes['IdentityStore']>, ParentType, ContextType, RequireFields<QueryIdentityStoreArgs, 'id'>>;
   instanceByIdentifier?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<QueryInstanceByIdentifierArgs, 'identifier'>>;
+  instanceSetting?: Resolver<Maybe<ResolversTypes['InstanceSetting']>, ParentType, ContextType, RequireFields<QueryInstanceSettingArgs, 'key'>>;
   issuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<QueryIssuanceArgs, 'id'>>;
   issuanceCount?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType, Partial<QueryIssuanceCountArgs>>;
   issuanceCountByContract?: Resolver<Array<ResolversTypes['ContractCount']>, ParentType, ContextType, Partial<QueryIssuanceCountByContractArgs>>;
@@ -8284,6 +8359,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   IdentityStore?: IdentityStoreResolvers<ContextType>;
   Instance?: InstanceResolvers<ContextType>;
   InstanceConfiguration?: InstanceConfigurationResolvers<ContextType>;
+  InstanceSetting?: InstanceSettingResolvers<ContextType>;
   Issuance?: IssuanceResolvers<ContextType>;
   IssuanceCallbackEvent?: IssuanceCallbackEventResolvers<ContextType>;
   IssuanceEventData?: IssuanceEventDataResolvers<ContextType>;

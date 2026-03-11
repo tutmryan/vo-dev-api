@@ -24,3 +24,6 @@ Thumbs.db
 # Claude related files
 .claude/*
 claude.md
+
+# Ignore OIDC UI build output
+/src/features/oidc-provider/oidc-ui/dist

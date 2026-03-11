@@ -8,7 +8,7 @@ import uuidRequiresTransformer from './.eslint/uuid-requires-transformer.mjs'
 export default [
   // Ignore build artifacts
   {
-    ignores: ['build/**', 'node_modules/**'],
+    ignores: ['build/**', '**/dist/**', 'node_modules/**', 'src/features/oidc-provider/oidc-ui/**'],
   },
 
   js.configs.recommended,

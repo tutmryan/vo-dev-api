@@ -266,6 +266,13 @@ exports[`shield rules are setup correctly 1`] = `
         }
       ]
     },
+    "instanceSetting": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
+    },
     "emailSenderConfig": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
       "cache": "contextual",
@@ -2701,6 +2708,13 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "setEmailSenderConfig": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
+    },
+    "setInstanceSetting": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
       "cache": "contextual",
       "__roles": [

@@ -15,10 +15,12 @@ import cors from 'cors'
 import { randomBytes } from 'crypto'
 import type { Express, Request } from 'express'
 import express from 'express'
+import { existsSync } from 'fs'
 import type { HelmetOptions } from 'helmet'
 import helmet from 'helmet'
 import type { ServerResponse } from 'http'
 import { clone, merge } from 'lodash'
+import path from 'path'
 import { combinedBearerTokenMiddleware } from './authentication'
 import {
   cookieSession as cookieSessionConfig,
@@ -111,6 +113,7 @@ export async function getExpressApp(): Promise<Express> {
               workerSrc: [`'self'`],
               formAction: oidcOnlyCsp.directives.formAction,
               requireTrustedTypesFor: oidcOnlyCsp.directives.requireTrustedTypesFor,
+              connectSrc: ["'self'", 'https://cdn.jsdelivr.net'],
             },
           }
         : oidcEnabled
@@ -214,6 +217,16 @@ export async function getExpressApp(): Promise<Express> {
     addOidcProvider(app)
       .then((oidcRoute) => logger.info(`OIDC provider ready on ${oidcRoute}`))
       .catch((error) => logger.error('Failed to start OIDC provider', { error }))
+
+    // OIDC UI files are copied to build/src during production build
+    const uiDistPath = path.join(process.cwd(), 'src', 'features', 'oidc-provider', 'oidc-ui', 'dist')
+
+    if (!existsSync(uiDistPath)) {
+      logger.warn('OIDC UI dist not found at', uiDistPath)
+    }
+
+    app.use('/oidc', express.static(uiDistPath))
+    logger.info('Added static route for OIDC provider UI at /oidc')
   }
 
   return app

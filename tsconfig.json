@@ -15,5 +15,6 @@
     }
   },
   "files": ["src/express.d.ts"],
-  "include": ["src", "config", "test", "scripts", "migrate-db", "jest.*.ts"]
+  "include": ["src", "config", "test", "scripts", "migrate-db", "jest.*.ts"],
+  "exclude": ["src/features/oidc-provider/oidc-ui/**"]
 }

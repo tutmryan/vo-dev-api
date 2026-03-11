@@ -51,6 +51,8 @@ type Documents = {
     "\n  mutation SetCorsOriginConfigs($input: [CorsOriginConfigInput!]!) {\n    setCorsOriginConfigs(input: $input) {\n      id\n      origin\n    }\n  }\n": typeof types.SetCorsOriginConfigsDocument,
     "\n  query GetEmailSenderConfig {\n    emailSenderConfig {\n      senderName\n      senderEmail\n    }\n  }\n": typeof types.GetEmailSenderConfigDocument,
     "\n  mutation SetEmailSenderConfig($input: EmailSenderConfigInput!) {\n    setEmailSenderConfig(input: $input) {\n      senderName\n      senderEmail\n    }\n  }\n": typeof types.SetEmailSenderConfigDocument,
+    "\n  query GetInstanceSetting($key: InstanceSettingKey!) {\n    instanceSetting(key: $key) {\n      key\n      value\n    }\n  }\n": typeof types.GetInstanceSettingDocument,
+    "\n  mutation SetInstanceSetting($input: SetInstanceSettingInput!) {\n    setInstanceSetting(input: $input) {\n      key\n      value\n    }\n  }\n": typeof types.SetInstanceSettingDocument,
     "\n  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {\n    createIssuanceRequest(request: $request) {\n      ... on IssuanceResponse {\n        requestId\n        url\n        qrCode\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n        }\n      }\n    }\n  }\n": typeof types.CreateIssuanceRequestDocument,
     "\n  mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {\n    acquireLimitedAccessToken(input: $input) {\n      expires\n      token\n    }\n  }\n": typeof types.AcquireLimitedAccessTokenDocument,
     "\n  query FindContracts($where: ContractWhere, $forIdentityId: ID) {\n    findContracts(where: $where) {\n      id\n      credentialTypes\n      display {\n        card {\n          title\n          issuedBy\n          backgroundColor\n          textColor\n          description\n          logo {\n            uri\n            description\n          }\n        }\n      }\n      issuances(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        issuedAt\n        expiresAt\n      }\n      presentations(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        presentedAt\n      }\n    }\n  }\n": typeof types.FindContractsDocument,
@@ -152,6 +154,8 @@ const documents: Documents = {
     "\n  mutation SetCorsOriginConfigs($input: [CorsOriginConfigInput!]!) {\n    setCorsOriginConfigs(input: $input) {\n      id\n      origin\n    }\n  }\n": types.SetCorsOriginConfigsDocument,
     "\n  query GetEmailSenderConfig {\n    emailSenderConfig {\n      senderName\n      senderEmail\n    }\n  }\n": types.GetEmailSenderConfigDocument,
     "\n  mutation SetEmailSenderConfig($input: EmailSenderConfigInput!) {\n    setEmailSenderConfig(input: $input) {\n      senderName\n      senderEmail\n    }\n  }\n": types.SetEmailSenderConfigDocument,
+    "\n  query GetInstanceSetting($key: InstanceSettingKey!) {\n    instanceSetting(key: $key) {\n      key\n      value\n    }\n  }\n": types.GetInstanceSettingDocument,
+    "\n  mutation SetInstanceSetting($input: SetInstanceSettingInput!) {\n    setInstanceSetting(input: $input) {\n      key\n      value\n    }\n  }\n": types.SetInstanceSettingDocument,
     "\n  mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {\n    createIssuanceRequest(request: $request) {\n      ... on IssuanceResponse {\n        requestId\n        url\n        qrCode\n      }\n      ... on RequestErrorResponse {\n        error {\n          code\n          message\n        }\n      }\n    }\n  }\n": types.CreateIssuanceRequestDocument,
     "\n  mutation AcquireLimitedAccessToken($input: AcquireLimitedAccessTokenInput!) {\n    acquireLimitedAccessToken(input: $input) {\n      expires\n      token\n    }\n  }\n": types.AcquireLimitedAccessTokenDocument,
     "\n  query FindContracts($where: ContractWhere, $forIdentityId: ID) {\n    findContracts(where: $where) {\n      id\n      credentialTypes\n      display {\n        card {\n          title\n          issuedBy\n          backgroundColor\n          textColor\n          description\n          logo {\n            uri\n            description\n          }\n        }\n      }\n      issuances(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        issuedAt\n        expiresAt\n      }\n      presentations(where: { identityId: $forIdentityId }, limit: 1) {\n        id\n        presentedAt\n      }\n    }\n  }\n": types.FindContractsDocument,
@@ -378,6 +382,14 @@ export function graphql(source: "\n  query GetEmailSenderConfig {\n    emailSend
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation SetEmailSenderConfig($input: EmailSenderConfigInput!) {\n    setEmailSenderConfig(input: $input) {\n      senderName\n      senderEmail\n    }\n  }\n"): (typeof documents)["\n  mutation SetEmailSenderConfig($input: EmailSenderConfigInput!) {\n    setEmailSenderConfig(input: $input) {\n      senderName\n      senderEmail\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query GetInstanceSetting($key: InstanceSettingKey!) {\n    instanceSetting(key: $key) {\n      key\n      value\n    }\n  }\n"): (typeof documents)["\n  query GetInstanceSetting($key: InstanceSettingKey!) {\n    instanceSetting(key: $key) {\n      key\n      value\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation SetInstanceSetting($input: SetInstanceSettingInput!) {\n    setInstanceSetting(input: $input) {\n      key\n      value\n    }\n  }\n"): (typeof documents)["\n  mutation SetInstanceSetting($input: SetInstanceSettingInput!) {\n    setInstanceSetting(input: $input) {\n      key\n      value\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
