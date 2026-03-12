@@ -28,7 +28,7 @@ jobs:
 
   ci-api:
     name: CI API
-    uses: ./.github/workflows/node-ci.yml
+    uses: VerifiedOrchestration/.github/.github/workflows/node-ci.yml@main
     with:
       node-version: 22.x
       audit-script: npm run audit
@@ -39,7 +39,7 @@ jobs:
 
   ci-migrations-package:
     name: CI Migrations Package
-    uses: ./.github/workflows/node-ci.yml
+    uses: VerifiedOrchestration/.github/.github/workflows/node-ci.yml@main
     with:
       node-version: 22.x
       audit-script: npm run audit
@@ -53,7 +53,7 @@ jobs:
     name: CI Docs Site - Run
     needs: changes
     if: needs.changes.outputs.docs_site == 'true'
-    uses: ./.github/workflows/node-ci.yml
+    uses: VerifiedOrchestration/.github/.github/workflows/node-ci.yml@main
     with:
       node-version: 22.x
       audit-script: npm run audit
