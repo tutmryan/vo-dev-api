@@ -12,7 +12,7 @@ on:
       lint-script:
         required: false
         type: string
-        default: npm run lint --if-present
+        default: npm run lint:nocache --if-present
       compile-script:
         required: false
         type: string

@@ -8,7 +8,7 @@ import uuidRequiresTransformer from './.eslint/uuid-requires-transformer.mjs'
 export default [
   // Ignore build artifacts
   {
-    ignores: ['build/**', '**/dist/**', 'node_modules/**', 'src/features/oidc-provider/oidc-ui/**'],
+    ignores: ['build/**', '**/dist/**', 'node_modules/**'],
   },
 
   js.configs.recommended,
@@ -75,5 +75,39 @@ export default [
       '@graphql-eslint': graphqlPlugin,
     },
     rules: graphqlPlugin.configs['flat/schema-recommended'].rules,
+  },
+
+  {
+    files: ['src/features/oidc-provider/oidc-ui/**/*.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: './src/features/oidc-provider/oidc-ui/tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    plugins: {
+      prettier: prettierPlugin,
+    },
+    rules: {
+      'prettier/prettier': 'warn',
+      'no-console': 'warn',
+      'prefer-template': 'error',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          ignoreRestSiblings: true,
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '.*',
+        },
+      ],
+    },
   },
 ]
