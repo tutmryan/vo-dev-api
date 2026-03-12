@@ -78,6 +78,40 @@ export default [
   },
 
   {
+    files: ['migrate-db/**/*.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: './migrate-db/tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    plugins: {
+      prettier: prettierPlugin,
+    },
+    rules: {
+      'prettier/prettier': 'warn',
+      'no-console': 'warn',
+      'prefer-template': 'error',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'error',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          ignoreRestSiblings: true,
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '.*',
+        },
+      ],
+    },
+  },
+
+  {
     files: ['src/features/oidc-provider/oidc-ui/**/*.ts'],
     languageOptions: {
       parser: tseslint.parser,
