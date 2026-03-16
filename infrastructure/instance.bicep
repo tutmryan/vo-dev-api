@@ -744,6 +744,27 @@ param redisCacheFamily string
 ])
 param redisCacheCapacity int
 
+@description('Specify the SKU for the Managed Redis (Redis Enterprise) instance.')
+@allowed([
+  'MemoryOptimized_M10'
+  'MemoryOptimized_M20'
+  'MemoryOptimized_M50'
+  'MemoryOptimized_M100'
+  'ComputeOptimized_X5'
+  'ComputeOptimized_X10'
+  'ComputeOptimized_X20'
+  'Balanced_B0'
+  'Balanced_B1'
+  'Balanced_B3'
+  'Balanced_B5'
+  'Balanced_B10'
+  'Balanced_B20'
+])
+param managedRedisSKU string = 'Balanced_B0'
+
+@description('Enable Managed Redis (Redis Enterprise) deployment. When true, app uses Managed Redis; when false, app uses legacy Azure Cache for Redis.')
+param useManagedRedis bool = true
+
 var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
 
 @description('The shared action group for alerts, if action group for alerts has not been set up yet this param value will be empty')
@@ -769,7 +790,7 @@ resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   }
 }
 
-resource redisCachePrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = {
+resource redisCachePrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = if (!useManagedRedis) {
   name: '${resourcePrefix}-redis-pe'
   location: location
   properties: {
@@ -788,7 +809,7 @@ resource redisCachePrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-0
   }
 }
 
-resource redisCachePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2025-01-01' = {
+resource redisCachePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2025-01-01' = if (!useManagedRedis) {
   parent: redisCachePrivateEndpoint
   name: 'default'
   properties: {
@@ -815,6 +836,79 @@ resource redisKeySecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
       enabled: true
     }
     value: redisCache.listKeys().primaryKey
+  }
+}
+
+// Managed Redis (Redis Enterprise) resources
+resource managedRedis 'Microsoft.Cache/redisEnterprise@2024-09-01-preview' = if (useManagedRedis) {
+  name: '${resourcePrefix}-managed-redis-${uniqueSuffix}'
+  location: location
+  sku: {
+    name: managedRedisSKU
+  }
+  properties: {
+    minimumTlsVersion: '1.2'
+  }
+}
+
+resource managedRedisDatabase 'Microsoft.Cache/redisEnterprise/databases@2024-09-01-preview' = if (useManagedRedis) {
+  parent: managedRedis
+  name: 'default'
+  properties: {
+    clientProtocol: 'Encrypted'
+    evictionPolicy: 'AllKeysLRU'
+    clusteringPolicy: 'EnterpriseCluster'
+    port: 10000
+  }
+}
+
+resource managedRedisPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = if (useManagedRedis) {
+  name: '${resourcePrefix}-managed-redis-pe'
+  location: location
+  properties: {
+    subnet: {
+      id: privateEndpointsSubnetId
+    }
+    privateLinkServiceConnections: [
+      {
+        name: '${resourcePrefix}-managed-redis-private-link'
+        properties: {
+          privateLinkServiceId: managedRedis.id
+          groupIds: ['redisEnterprise']
+        }
+      }
+    ]
+  }
+}
+
+resource managedRedisCachePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2025-01-01' = if (useManagedRedis) {
+  parent: managedRedisPrivateEndpoint
+  name: 'default'
+  properties: {
+    privateDnsZoneConfigs: [
+      {
+        name: 'config1'
+        properties: {
+          privateDnsZoneId: resourceId(
+            sharedResourceGroupName,
+            'Microsoft.Network/privateDnsZones',
+            'privatelink.redis.azure.net'
+          )
+        }
+      }
+    ]
+  }
+}
+
+resource managedRedisKeySecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = if (useManagedRedis) {
+  name: 'MANAGED-REDIS-KEY'
+  parent: keyVault
+  properties: {
+    attributes: {
+      enabled: true
+    }
+    #disable-next-line BCP422
+    value: managedRedisDatabase.listKeys().primaryKey
   }
 }
 
@@ -947,6 +1041,115 @@ resource redisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
           }
       autoMitigate: true
       targetResourceType: 'Microsoft.Cache/Redis'
+      targetResourceRegion: location
+      actions: [
+        {
+          actionGroupId: actionGroupAlertId
+        }
+      ]
+    }
+  }
+]
+
+// Managed Redis metric alerts
+var managedRedisAlerts = [
+  {
+    nameSuffix: 'memory'
+    description: 'Managed Redis used memory is high'
+    metricName: 'usedmemory'
+    aggregation: 'Maximum'
+    threshold: 80
+    useDynamicThreshold: false
+    alertSensitivity: null
+    failingPeriods: null
+    severity: 0
+    evaluationFrequency: 'PT1M'
+  }
+  {
+    nameSuffix: 'cpu'
+    description: 'Managed Redis CPU usage is high'
+    metricName: 'percentProcessorTime'
+    aggregation: 'Maximum'
+    threshold: 80
+    useDynamicThreshold: false
+    alertSensitivity: null
+    failingPeriods: null
+    severity: 1
+    evaluationFrequency: 'PT5M'
+  }
+  {
+    nameSuffix: 'server-load'
+    description: 'Managed Redis server load is high'
+    metricName: 'serverLoad'
+    aggregation: 'Average'
+    threshold: 80
+    useDynamicThreshold: false
+    alertSensitivity: null
+    failingPeriods: null
+    severity: 1
+    evaluationFrequency: 'PT5M'
+  }
+  {
+    nameSuffix: 'clients'
+    description: 'Managed Redis connected clients is high'
+    metricName: 'connectedclients'
+    aggregation: 'Maximum'
+    threshold: 5625
+    useDynamicThreshold: false
+    alertSensitivity: null
+    failingPeriods: null
+    severity: 1
+    evaluationFrequency: 'PT5M'
+  }
+]
+
+resource managedRedisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
+  for alert in managedRedisAlerts: if (useManagedRedis && !empty(actionGroupAlertName)) {
+    name: '${resourcePrefix}-managed-redis-${alert.nameSuffix}-alert'
+    location: 'global'
+    properties: {
+      description: alert.description
+      severity: alert.severity
+      enabled: true
+      scopes: [
+        managedRedis.id
+      ]
+      evaluationFrequency: alert.evaluationFrequency
+      windowSize: 'PT5M'
+      criteria: alert.useDynamicThreshold
+        ? {
+            allOf: [
+              {
+                name: alert.metricName
+                criterionType: 'DynamicThresholdCriterion'
+                metricNamespace: 'Microsoft.Cache/redisEnterprise'
+                metricName: alert.metricName
+                operator: 'GreaterThan'
+                alertSensitivity: alert.alertSensitivity!
+                failingPeriods: alert.failingPeriods!
+                timeAggregation: alert.aggregation
+                skipMetricValidation: false
+              }
+            ]
+            'odata.type': 'Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria'
+          }
+        : {
+            allOf: [
+              {
+                name: alert.metricName
+                criterionType: 'StaticThresholdCriterion'
+                metricNamespace: 'Microsoft.Cache/redisEnterprise'
+                metricName: alert.metricName
+                operator: 'GreaterThan'
+                threshold: alert.threshold!
+                timeAggregation: alert.aggregation
+                skipMetricValidation: false
+              }
+            ]
+            'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
+          }
+      autoMitigate: true
+      targetResourceType: 'Microsoft.Cache/redisEnterprise'
       targetResourceRegion: location
       actions: [
         {
@@ -1529,71 +1732,81 @@ param apiClientId string
 resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' = {
   name: 'appsettings'
   parent: apiAppServiceSlot
-  properties: {
-    NODE_ENV: nodeEnv
-    WEBSITE_RUN_FROM_PACKAGE: '1'
-    APPINSIGHTS_INSTRUMENTATION_KEY: apiAppInsights.properties.InstrumentationKey
-    APPLICATIONINSIGHTS_CONNECTION_STRING: apiAppInsights.properties.ConnectionString
-    INSTANCE: instance
-    VERSION: releaseVersion
-    CORS_ORIGIN: corsOrigin
-    COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiCookieSecret) ? apiCookieSecretSecretExisting : apiCookieSecretSecret).properties.secretUri})'
-    SMS_SECRET: '@Microsoft.KeyVault(SecretUri=${smsSecretSecret.properties.secretUri})'
-    SMS_PRIMARY_TOKEN: '@Microsoft.KeyVault(SecretUri=${smsPrimaryTokenSecret.properties.secretUri})'
-    EMAIL_API_KEY: '@Microsoft.KeyVault(SecretUri=${emailApiKeySecret.properties.secretUri})'
-    EMAIL_WEBHOOK_FORWARDER_SECRET: '@Microsoft.KeyVault(SecretUri=${emailWebhookForwarderSecretSecret.properties.secretUri})'
-    DATABASE_HOST: '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
-    DATABASE_NAME: '${resourcePrefix}-sql-db'
-    REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
-    REDIS_HOST: '${redisCache.name}.redis.cache.windows.net'
-    BLOB_STORAGE_URL: 'https://${verifiedOrchestrationStorage.name}.blob.${az.environment().suffixes.storage}'
-    PRIVATE_BLOB_STORAGE_URL: 'https://${privateStorageAccount.name}.blob.${az.environment().suffixes.storage}'
-    PRIVATE_STORAGE_ENCRYPTION_KEY: '@Microsoft.KeyVault(SecretUri=${(empty(privateStorageClientEncryptionKey) ? privateStorageClientEncryptionKeySecretExisting : privateStorageClientEncryptionKeySecret).properties.secretUri})'
-    OIDC_KEY_VAULT_URL: oidcKeyVault.properties.vaultUri
-    IDENTITY_STORE_KEY_VAULT_URL: identityStoreKeyVault.properties.vaultUri
-    API_CLIENT_ID: apiClientId
-    API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiClientSecret) ? apiClientSecretSecretExisting : apiClientSecretSecret).properties.secretUri})'
-    API_CLIENT_URI: apiClientId
-    INTERNAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${internalClientSecretSecret.properties.secretUri})'
-    VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
-    LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
-    LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAccessSecret) ? limitedAccessSecretSecretExisting : limitedAccessSecretSecret).properties.secretUri})'
-    LIMITED_PRESENTATION_FLOW_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPresentationFlowClientSecretSecret.properties.secretUri})'
-    LIMITED_PRESENTATION_FLOW_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedPresentationFlowSecret) ? limitedPresentationFlowSecretSecretExisting : limitedPresentationFlowSecretSecret).properties.secretUri})'
-    LIMITED_PHOTO_CAPTURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPhotoCaptureClientSecretSecret.properties.secretUri})'
-    LIMITED_PHOTO_CAPTURE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedPhotoCaptureSecret) ? limitedPhotoCaptureSecretSecretExisting : limitedPhotoCaptureSecretSecret).properties.secretUri})'
-    LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAsyncIssuanceClientSecretSecret.properties.secretUri})'
-    LIMITED_ASYNC_ISSUANCE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAsyncIssuanceSecret) ? limitedAsyncIssuanceSecretSecretExisting : limitedAsyncIssuanceSecretSecret).properties.secretUri})'
-    LIMITED_DEMO_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedDemoClientSecretSecret.properties.secretUri})'
-    LIMITED_OIDC_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedOidcClientSecretSecret.properties.secretUri})'
-    LIMITED_OIDC_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedOidcSecret) ? limitedOidcSecretSecretExisting : limitedOidcSecretSecret).properties.secretUri})'
-    HOME_TENANT_NAME: homeTenantName
-    HOME_TENANT_ID: homeTenantId
-    HOME_TENANT_VID_SERVICE_CLIENT_ID: homeTenantVidServiceClientId
-    HOME_TENANT_VID_SERVICE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantVidServiceClientSecretSecret.properties.secretUri})'
-    VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
-    DEV_TOOLS_ENABLED: devToolsEnabled
-    FACE_CHECK_ENABLED: faceCheckEnabled
-    DEMO_ENABLED: demoEnabled
-    MDOC_PRESENTATIONS_ENABLED: mdocPresentationsEnabled
-    MDOC_MULTIPAZ_TEST_CERTIFICATES_ENABLED: mdocMultipazTestCertificatesEnabled
-    IDENTITY_ISSUERS: identityIssuers
-    PLATFORM_CONSUMER_APPS: platformConsumerApps
-    ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds
-    GRAPHQL_MAX_ALIASES: graphqlMaxAliases
-    GRAPHQL_MAX_DEPTH: graphqlMaxDepth
-    GRAPHQL_MAX_DIRECTIVES: graphqlMaxDirectives
-    GRAPHQL_MAX_TOKENS: graphqlMaxTokens
-    LOG_LEVEL: logLevel
-    WEBSITE_WARMUP_PATH: '/azure-startup-probe-40nt0001ihrkbxdry635'
-    WEBSITE_SWAP_WARMUP_PING_PATH: '/azure-startup-probe-40nt0001ihrkbxdry635'
-    WEBSITE_WARMUP_STATUSES: '200'
-    WEBSITE_SWAP_WARMUP_PING_STATUSES: '200'
-    // The default is 230 (3:50), increase to 600 (10:00)
-    WEBSITES_CONTAINER_START_TIME_LIMIT: '600'
-    AUDIT_DATA_COLLECTION_ENDPOINT: auditTracesDataCollectionEndpoint.properties.logsIngestion.endpoint
-    AUDIT_DATA_COLLECTION_RULE_ID: auditTracesDataCollectionRule.properties.immutableId
-  }
+  properties: union(
+    {
+      NODE_ENV: nodeEnv
+      WEBSITE_RUN_FROM_PACKAGE: '1'
+      APPINSIGHTS_INSTRUMENTATION_KEY: apiAppInsights.properties.InstrumentationKey
+      APPLICATIONINSIGHTS_CONNECTION_STRING: apiAppInsights.properties.ConnectionString
+      INSTANCE: instance
+      VERSION: releaseVersion
+      CORS_ORIGIN: corsOrigin
+      COOKIE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiCookieSecret) ? apiCookieSecretSecretExisting : apiCookieSecretSecret).properties.secretUri})'
+      SMS_SECRET: '@Microsoft.KeyVault(SecretUri=${smsSecretSecret.properties.secretUri})'
+      SMS_PRIMARY_TOKEN: '@Microsoft.KeyVault(SecretUri=${smsPrimaryTokenSecret.properties.secretUri})'
+      EMAIL_API_KEY: '@Microsoft.KeyVault(SecretUri=${emailApiKeySecret.properties.secretUri})'
+      EMAIL_WEBHOOK_FORWARDER_SECRET: '@Microsoft.KeyVault(SecretUri=${emailWebhookForwarderSecretSecret.properties.secretUri})'
+      DATABASE_HOST: '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
+      DATABASE_NAME: '${resourcePrefix}-sql-db'
+      REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
+      REDIS_HOST: '${redisCache.name}.redis.cache.windows.net'
+      USE_MANAGED_REDIS: toLower(string(useManagedRedis))
+      BLOB_STORAGE_URL: 'https://${verifiedOrchestrationStorage.name}.blob.${az.environment().suffixes.storage}'
+      PRIVATE_BLOB_STORAGE_URL: 'https://${privateStorageAccount.name}.blob.${az.environment().suffixes.storage}'
+      PRIVATE_STORAGE_ENCRYPTION_KEY: '@Microsoft.KeyVault(SecretUri=${(empty(privateStorageClientEncryptionKey) ? privateStorageClientEncryptionKeySecretExisting : privateStorageClientEncryptionKeySecret).properties.secretUri})'
+      OIDC_KEY_VAULT_URL: oidcKeyVault.properties.vaultUri
+      IDENTITY_STORE_KEY_VAULT_URL: identityStoreKeyVault.properties.vaultUri
+      API_CLIENT_ID: apiClientId
+      API_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(apiClientSecret) ? apiClientSecretSecretExisting : apiClientSecretSecret).properties.secretUri})'
+      API_CLIENT_URI: apiClientId
+      INTERNAL_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${internalClientSecretSecret.properties.secretUri})'
+      VID_CALLBACK_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${vidCallbackClientSecretSecret.properties.secretUri})'
+      LIMITED_ACCESS_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAccessClientSecretSecret.properties.secretUri})'
+      LIMITED_ACCESS_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAccessSecret) ? limitedAccessSecretSecretExisting : limitedAccessSecretSecret).properties.secretUri})'
+      LIMITED_PRESENTATION_FLOW_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPresentationFlowClientSecretSecret.properties.secretUri})'
+      LIMITED_PRESENTATION_FLOW_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedPresentationFlowSecret) ? limitedPresentationFlowSecretSecretExisting : limitedPresentationFlowSecretSecret).properties.secretUri})'
+      LIMITED_PHOTO_CAPTURE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedPhotoCaptureClientSecretSecret.properties.secretUri})'
+      LIMITED_PHOTO_CAPTURE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedPhotoCaptureSecret) ? limitedPhotoCaptureSecretSecretExisting : limitedPhotoCaptureSecretSecret).properties.secretUri})'
+      LIMITED_ASYNC_ISSUANCE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedAsyncIssuanceClientSecretSecret.properties.secretUri})'
+      LIMITED_ASYNC_ISSUANCE_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedAsyncIssuanceSecret) ? limitedAsyncIssuanceSecretSecretExisting : limitedAsyncIssuanceSecretSecret).properties.secretUri})'
+      LIMITED_DEMO_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedDemoClientSecretSecret.properties.secretUri})'
+      LIMITED_OIDC_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${limitedOidcClientSecretSecret.properties.secretUri})'
+      LIMITED_OIDC_SECRET: '@Microsoft.KeyVault(SecretUri=${(empty(limitedOidcSecret) ? limitedOidcSecretSecretExisting : limitedOidcSecretSecret).properties.secretUri})'
+      HOME_TENANT_NAME: homeTenantName
+      HOME_TENANT_ID: homeTenantId
+      HOME_TENANT_VID_SERVICE_CLIENT_ID: homeTenantVidServiceClientId
+      HOME_TENANT_VID_SERVICE_CLIENT_SECRET: '@Microsoft.KeyVault(SecretUri=${homeTenantVidServiceClientSecretSecret.properties.secretUri})'
+      VID_AUTHORITY_ID: '@Microsoft.KeyVault(SecretUri=${vidAuthorityIdSecret.properties.secretUri})'
+      DEV_TOOLS_ENABLED: devToolsEnabled
+      FACE_CHECK_ENABLED: faceCheckEnabled
+      DEMO_ENABLED: demoEnabled
+      MDOC_PRESENTATIONS_ENABLED: mdocPresentationsEnabled
+      MDOC_MULTIPAZ_TEST_CERTIFICATES_ENABLED: mdocMultipazTestCertificatesEnabled
+      IDENTITY_ISSUERS: identityIssuers
+      PLATFORM_CONSUMER_APPS: platformConsumerApps
+      ADDITIONAL_AUTH_TENANT_IDS: additionalAuthTenantIds
+      GRAPHQL_MAX_ALIASES: graphqlMaxAliases
+      GRAPHQL_MAX_DEPTH: graphqlMaxDepth
+      GRAPHQL_MAX_DIRECTIVES: graphqlMaxDirectives
+      GRAPHQL_MAX_TOKENS: graphqlMaxTokens
+      LOG_LEVEL: logLevel
+      WEBSITE_WARMUP_PATH: '/azure-startup-probe-40nt0001ihrkbxdry635'
+      WEBSITE_SWAP_WARMUP_PING_PATH: '/azure-startup-probe-40nt0001ihrkbxdry635'
+      WEBSITE_WARMUP_STATUSES: '200'
+      WEBSITE_SWAP_WARMUP_PING_STATUSES: '200'
+      // The default is 230 (3:50), increase to 600 (10:00)
+      WEBSITES_CONTAINER_START_TIME_LIMIT: '600'
+      AUDIT_DATA_COLLECTION_ENDPOINT: auditTracesDataCollectionEndpoint.properties.logsIngestion.endpoint
+      AUDIT_DATA_COLLECTION_RULE_ID: auditTracesDataCollectionRule.properties.immutableId
+    },
+    useManagedRedis
+      ? {
+          MANAGED_REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${any(managedRedisKeySecret).properties.secretUri})'
+          MANAGED_REDIS_HOST: any(managedRedis).properties.hostName
+          MANAGED_REDIS_PORT: string(any(managedRedisDatabase).properties.port)
+        }
+      : {}
+  )
 }
 
 param sharedResourceGroupName string
@@ -1602,15 +1815,23 @@ var rawWorkBookData = string(loadJsonContent('./workbook.json'))
 var serialisedWorkBookData = replace(
   replace(
     replace(
-      replace(rawWorkBookData, '<appInsightsResourceId>', apiAppInsights.id),
-      '<appInsightsResourceName>',
-      apiAppInsights.name
+      replace(
+        replace(
+          replace(rawWorkBookData, '<appInsightsResourceId>', apiAppInsights.id),
+          '<appInsightsResourceName>',
+          apiAppInsights.name
+        ),
+        '<redisCacheResourceId>',
+        redisCache.id
+      ),
+      '<redisCacheResourceName>',
+      redisCache.name
     ),
-    '<redisCacheResourceId>',
-    redisCache.id
+    '<managedRedisResourceId>',
+    useManagedRedis ? managedRedis.id : ''
   ),
-  '<redisCacheResourceName>',
-  redisCache.name
+  '<managedRedisResourceName>',
+  useManagedRedis ? managedRedis.name : ''
 )
 
 resource workbook 'Microsoft.Insights/workbooks@2023-06-01' = {

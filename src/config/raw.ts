@@ -80,6 +80,12 @@ export type Config = {
     port: number
     key: string
   }
+  useManagedRedis?: boolean
+  managedRedis?: {
+    host?: string
+    port: number
+    key: string
+  }
   blobStorage: {
     url: string
     credentials?: BlobStorageCredentials

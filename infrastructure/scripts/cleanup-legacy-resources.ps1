@@ -6,10 +6,28 @@ param(
 
   [Parameter(Mandatory = $true)]
   [string]
-  $ResourcePrefix
+  $ResourcePrefix,
+
+  [Parameter(Mandatory = $true)]
+  [string]
+  $UseManagedRedis
 )
 
 $ErrorActionPreference = 'Stop'
+$useManagedRedisBool = $UseManagedRedis -eq 'true'
+
+$inactiveRedisPeName = $useManagedRedisBool ? "$ResourcePrefix-redis-pe" : "$ResourcePrefix-managed-redis-pe"
+$inactiveRedisPeId = az network private-endpoint show `
+  --resource-group $ResourceGroupName `
+  --name $inactiveRedisPeName `
+  --query "id" -o tsv 2>$null
+
+if ($inactiveRedisPeId) {
+  Write-Host "Deleting inactive Redis private endpoint: $inactiveRedisPeName"
+  az network private-endpoint delete `
+    --resource-group $ResourceGroupName `
+    --name $inactiveRedisPeName
+}
 
 $webTestsToDelete = @(
   "$ResourcePrefix-msgraphservice-health-test",
