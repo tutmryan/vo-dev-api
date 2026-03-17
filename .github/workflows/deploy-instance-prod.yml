@@ -172,8 +172,6 @@ jobs:
           redis-cache-sku: ${{ startsWith(inputs.instance, 'sandbox.') && 'Basic' || 'Standard' }}
           redis-cache-family: C
           redis-cache-capacity: ${{ startsWith(inputs.instance, 'sandbox.') && 0 || 1 }}
-          use-managed-redis: ${{ vars.USE_MANAGED_REDIS || 'true' }}
-          managed-redis-sku: ${{ vars.MANAGED_REDIS_SKU || 'Balanced_B0' }}
 
           cors-origin: "${{ vars.CORS_ORIGIN }}"
 

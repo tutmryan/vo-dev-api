@@ -65,12 +65,6 @@ const config: EnvVarSubstitution<Config> = {
     port: 'REDIS_PORT',
     key: 'REDIS_KEY',
   },
-  useManagedRedis: json('USE_MANAGED_REDIS'),
-  managedRedis: {
-    host: 'MANAGED_REDIS_HOST',
-    port: 'MANAGED_REDIS_PORT',
-    key: 'MANAGED_REDIS_KEY',
-  },
   blobStorage: {
     url: 'BLOB_STORAGE_URL',
   },

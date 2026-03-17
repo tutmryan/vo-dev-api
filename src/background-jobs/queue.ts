@@ -1,10 +1,10 @@
 import type { DefaultJobOptions } from 'bullmq'
 import { Queue, QueueEvents } from 'bullmq'
 import { logger } from '../logger'
-import { redisOptions, useManaged } from '../redis'
+import { redisOptions } from '../redis'
 import { Lazy } from '../util/lazy'
 
-export const JobQueueName = useManaged ? '{jobQueue}' : 'jobQueue'
+export const JobQueueName = 'jobQueue'
 
 export const defaultJobOptions: DefaultJobOptions = {
   removeOnComplete: true,

@@ -2,29 +2,24 @@ import { environment, isLocalDev } from '@makerx/node-common'
 import type { RedisOptions } from 'ioredis'
 import Redis from 'ioredis'
 import { camelCase } from 'lodash'
-import { managedRedis, redis, useManagedRedis } from '../config'
+import { redis as redisConfig } from '../config'
 import { logger } from '../logger'
 
-// Select Redis configuration based on feature flag
-export const useManaged = useManagedRedis ?? false
-const redisConfig = useManaged ? managedRedis : redis
-const redisType = useManaged ? 'Managed Redis' : 'Azure Cache for Redis'
-
-export const isRedisEnabled = !!redisConfig?.host
+export const isRedisEnabled = !!redisConfig.host
 
 if (!isLocalDev && environment !== 'test') {
   if (!isRedisEnabled) {
     logger.warn(`Redis is not configured - this configuration is unexpected for environment: ${environment}`)
   }
 
-  logger.info(`Caching and pubsub configured using ${isRedisEnabled ? redisType : 'in-memory fallback'} `)
+  logger.info(`Caching and pubsub configured using ${isRedisEnabled ? 'Redis' : 'in-memory fallback'} `)
 }
 
 export const redisOptions: RedisOptions = {
-  host: redisConfig?.host,
-  port: redisConfig?.port ?? 6380,
-  password: redisConfig?.key,
-  tls: redisConfig?.key ? {} : undefined,
+  host: redisConfig.host,
+  port: redisConfig.port,
+  password: redisConfig.key,
+  tls: redisConfig.key ? {} : undefined,
 }
 
 type ClientNames = 'cache' | 'publisher' | 'subscriber' | 'rate limit' | 'oidc'

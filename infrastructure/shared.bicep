@@ -724,23 +724,6 @@ resource redisCachePrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtual
   }
 }
 
-resource managedRedisCachePrivateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
-  name: 'privatelink.redis.azure.net'
-  location: 'global'
-}
-
-resource managedRedisCachePrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
-  parent: managedRedisCachePrivateDnsZone
-  name: '${resourcePrefix}-managed-redis-dns-link'
-  location: 'global'
-  properties: {
-    registrationEnabled: false
-    virtualNetwork: {
-      id: vnet.id
-    }
-  }
-}
-
 resource storagePrivateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
   name: 'privatelink.blob.${environment().suffixes.storage}'
   location: 'global'

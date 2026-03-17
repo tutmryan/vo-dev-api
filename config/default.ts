@@ -49,10 +49,6 @@ const config: DeepPartial<Config> = {
   redis: {
     port: 6380,
   },
-  useManagedRedis: true,
-  managedRedis: {
-    port: 10000,
-  },
   database: {
     port: 1433,
     logging: true,
