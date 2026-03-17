@@ -106,6 +106,7 @@ export const rules: ShieldSchema<Resolvers> = {
     findOidcClients: isUserWithReadPermissions,
     findOidcResources: isUserWithReadPermissions,
     findOidcClaimMappings: isUserWithReadPermissions,
+    findOidcIdentityResolvers: isUserWithReadPermissions,
     findPresentations: isAllowedToViewPresentations,
     findTemplates: or(isUserWithReadPermissions, isContractAdminApp),
     findWallets: isAllowedToViewPresentations,
@@ -150,6 +151,7 @@ export const rules: ShieldSchema<Resolvers> = {
     createOidcClaimMapping: isOidcAdminUser,
     createOidcClient: isOidcAdminUser,
     createOidcClientResource: isOidcAdminUser,
+    createOidcIdentityResolver: isOidcAdminUser,
     createOidcResource: isOidcAdminUser,
     createPartner: isPartnerAdminUser,
     createPhotoCaptureRequest: or(isIssuerUser, isIssuanceApp, isValidLimitedIssuancePhotoCaptureRequest),
@@ -175,6 +177,7 @@ export const rules: ShieldSchema<Resolvers> = {
     deleteOidcClaimMapping: isOidcAdminUser,
     deleteOidcClient: isOidcAdminUser,
     deleteOidcClientResource: isOidcAdminUser,
+    deleteOidcIdentityResolver: isOidcAdminUser,
     deleteOidcResource: isOidcAdminUser,
     deleteMicrosoftEntraTemporaryAccessPassIssuanceConfiguration: isInstanceAdminUser,
     deleteTemplate: or(isCredentialAdminUser, isContractAdminApp),
@@ -210,7 +213,9 @@ export const rules: ShieldSchema<Resolvers> = {
     updateOidcClaimMapping: isOidcAdminUser,
     updateOidcClient: isOidcAdminUser,
     updateOidcClientClaimMappings: isOidcAdminUser,
+    updateOidcClientIdentityResolvers: isOidcAdminUser,
     updateOidcClientResource: isOidcAdminUser,
+    updateOidcIdentityResolver: isOidcAdminUser,
     updateOidcResource: isOidcAdminUser,
     updateConciergeClientBranding: or(isOidcAdminUser, isInstanceAdminUser),
     updatePartner: isPartnerAdminUser,
@@ -403,6 +408,9 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': fallbackWithSupportAgentRule,
   },
   OidcClientResource: {
+    '*': fallbackRule,
+  },
+  OidcIdentityResolver: {
     '*': fallbackRule,
   },
   OidcResource: {

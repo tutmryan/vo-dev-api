@@ -25,6 +25,7 @@ const config = {
     hooks: {
       onBrokenMarkdownLinks: 'warn',
     },
+    mermaid: true,
   },
 
   // Even if you don't use internalization, you can use this field to set useful
@@ -112,6 +113,7 @@ const config = {
         hashed: true,
       },
     ],
+    '@docusaurus/theme-mermaid',
   ],
 
   themeConfig:

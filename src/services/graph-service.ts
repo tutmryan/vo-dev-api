@@ -144,6 +144,35 @@ export class GraphService {
     return result.value[0]
   }
 
+  async getUserById(id: string): Promise<PartialUser | undefined> {
+    const user = (await this.client()
+      .api(`/users/${encodeURIComponent(id)}`)
+      .select('displayName,id,identities,givenName,surname,userType')
+      .get()) as PartialUser
+
+    return user
+  }
+
+  async getUserByUserPrincipalName(upn: string): Promise<PartialUser | undefined> {
+    const user = (await this.client()
+      .api(`/users/${encodeURIComponent(upn)}`)
+      .select('displayName,id,identities,givenName,surname,userType')
+      .get()) as PartialUser
+
+    return user
+  }
+
+  async getUserByEmail(email: string): Promise<PartialUser | undefined> {
+    const encodedEmail = encodeURIComponent(email.replaceAll("'", "''"))
+    const result = (await this.client()
+      .api('/users')
+      .filter(`mail eq '${encodedEmail}'`)
+      .select('displayName,id,identities,givenName,surname,userType')
+      .get()) as { value: PartialUser[] }
+
+    return result.value[0]
+  }
+
   async findUsers({ nameStartsWith }: { nameStartsWith: string }, top: number): Promise<PartialUser[]> {
     const nameInput = encodeURIComponent(nameStartsWith.replaceAll("'", "''")) //https://learn.microsoft.com/en-us/graph/query-parameters?tabs=javascript#escaping-single-quotes
     const result = (await this.client()

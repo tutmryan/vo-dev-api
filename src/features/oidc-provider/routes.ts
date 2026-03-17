@@ -316,18 +316,18 @@ export function routes(app: Express, route: string): void {
       invariant(loginInteractionData, 'login interaction data not found')
 
       const client = getClient(clientId)
+      const identityResolvers = await client.identityResolvers
 
-      const loginResult = await completeLogin(
-        {
-          interactionId: uid,
-          requestId: req.body.requestId,
-          clientId,
-          uniqueClaimForSubParam: params.vc_unique_claim_for_sub as string | undefined,
-        },
-        client.uniqueClaimsForSubjectId ?? [],
-        await client.claimMappings,
+      const loginResult = await completeLogin({
+        interactionId: uid,
+        requestId: req.body.requestId,
+        clientId,
+        uniqueClaimForSubParam: params.vc_unique_claim_for_sub as string | undefined,
+        clientUniqueClaimsForSubjectId: client.uniqueClaimsForSubjectId ?? [],
+        clientClaimMappings: await client.claimMappings,
+        clientIdentityResolverClaims: identityResolvers.map(({ claimName }) => claimName),
         logger,
-      )
+      })
 
       logger.auditEvent(AuditEvents.OIDC_SESSION_STARTED, {
         presentationRequestId: req.body.requestId,

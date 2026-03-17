@@ -1,5 +1,12 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm'
-import { booleanType, dateTimeOffsetType, nvarcharMaxType, nvarcharType, varcharMaxLength } from '../../../data/utils/crossDbColumnTypes'
+import {
+  booleanType,
+  dateTimeOffsetTransformer,
+  dateTimeOffsetType,
+  nvarcharMaxType,
+  nvarcharType,
+  varcharMaxLength,
+} from '../../../data/utils/crossDbColumnTypes'
 import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
 import type { Action, Callback, DataDefinition, PresentationFlowStatus, PresentationRequestInput } from '../../../generated/graphql'
 import { PresentationFlowStatus as PresentationFlowStatusEnum } from '../../../generated/graphql'
@@ -21,7 +28,7 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
   @JoinColumn({ name: 'identity_id', foreignKeyConstraintName: 'fk_presentation_flow_identity_identity_id' })
   identity!: Promise<IdentityEntity | null>
 
-  @Column({ type: dateTimeOffsetType })
+  @Column({ type: dateTimeOffsetType, transformer: dateTimeOffsetTransformer })
   expiresAt!: Date
 
   @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })

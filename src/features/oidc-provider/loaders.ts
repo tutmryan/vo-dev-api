@@ -3,6 +3,7 @@ import { In } from 'typeorm'
 import { dataSource } from '../../data'
 import { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entity'
 import { OidcClientEntity } from './entities/oidc-client-entity'
+import { OidcIdentityResolverEntity } from './entities/oidc-identity-resolver-entity'
 import { OidcResourceEntity } from './entities/oidc-resource-entity'
 
 export const oidcClientLoader = () =>
@@ -27,4 +28,12 @@ export const oidcClaimMappingsLoader = () =>
       .getRepository(OidcClaimMappingEntity)
       .find({ comment: 'FindOidcClaimMappingsById', where: { id: In(ids) }, withDeleted: true })
     return ids.map((id) => results.find((r) => r.id === id) ?? new Error(`OIDC claim mapping not found: ${id}`))
+  })
+
+export const oidcIdentityResolversLoader = () =>
+  new DataLoader<string, OidcIdentityResolverEntity>(async (ids) => {
+    const results = await dataSource
+      .getRepository(OidcIdentityResolverEntity)
+      .find({ comment: 'FindOidcIdentityResolversById', where: { id: In(ids) }, withDeleted: true })
+    return ids.map((id) => results.find((r) => r.id === id) ?? new Error(`OIDC identity resolver not found: ${id}`))
   })

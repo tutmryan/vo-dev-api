@@ -31,6 +31,7 @@ extensions:
                 OidcResource: ../features/oidc-provider/entities/oidc-resource-entity#OidcResourceEntity
                 OidcClientResource: ../features/oidc-provider/entities/oidc-client-resource-entity#OidcClientResourceEntity
                 OidcClaimMapping: ../features/oidc-provider/entities/oidc-claim-mapping-entity#OidcClaimMappingEntity
+                OidcIdentityResolver: ../features/oidc-provider/entities/oidc-identity-resolver-entity#OidcIdentityResolverEntity
                 Branding: ../features/branding/entities/branding-entity#BrandingEntity
                 Wallet: ../features/wallet/entities/wallet-entity#WalletEntity
                 ApplicationLabelConfig: ../features/instance-configs/entities/application-label-config-entity#ApplicationLabelConfigEntity

@@ -86,6 +86,13 @@ type Documents = {
     "\n  mutation UpdateOidcClaimMapping($id: ID!, $input: OidcClaimMappingInput!) {\n    updateOidcClaimMapping(id: $id, input: $input) {\n      ...OidcClaimMappingFragment\n    }\n  }\n": typeof types.UpdateOidcClaimMappingDocument,
     "\n  mutation DeleteOidcClaimMapping($id: ID!) {\n    deleteOidcClaimMapping(id: $id) {\n      ...OidcClaimMappingFragment\n    }\n  }\n": typeof types.DeleteOidcClaimMappingDocument,
     "\n  mutation UpdateOidcClientClaimMappings($clientId: ID!, $claimMappingIds: [ID!]!) {\n    updateOidcClientClaimMappings(clientId: $clientId, claimMappingIds: $claimMappingIds) {\n      ...OidcClientFragment\n      claimMappings {\n        ...OidcClaimMappingFragment\n      }\n    }\n  }\n": typeof types.UpdateOidcClientClaimMappingsDocument,
+    "\n  fragment OidcIdentityResolverFragment on OidcIdentityResolver {\n    id\n    name\n    credentialTypes\n    claimName\n    identityStoreType\n    identityStore {\n      id\n      name\n    }\n    lookupType\n    createdAt\n    createdBy {\n      id\n      name\n    }\n    updatedAt\n    updatedBy {\n      id\n      name\n    }\n    deletedAt\n  }\n": typeof types.OidcIdentityResolverFragmentFragmentDoc,
+    "\n  query OidcIdentityResolver($id: ID!) {\n    oidcIdentityResolver(id: $id) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n": typeof types.OidcIdentityResolverDocument,
+    "\n  query FindOidcIdentityResolvers(\n    $where: OidcIdentityResolverWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcIdentityResolverOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcIdentityResolvers(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n": typeof types.FindOidcIdentityResolversDocument,
+    "\n  mutation CreateOidcIdentityResolver($input: OidcIdentityResolverInput!) {\n    createOidcIdentityResolver(input: $input) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n": typeof types.CreateOidcIdentityResolverDocument,
+    "\n  mutation UpdateOidcIdentityResolver($id: ID!, $input: OidcIdentityResolverInput!) {\n    updateOidcIdentityResolver(id: $id, input: $input) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n": typeof types.UpdateOidcIdentityResolverDocument,
+    "\n  mutation DeleteOidcIdentityResolver($id: ID!) {\n    deleteOidcIdentityResolver(id: $id) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n": typeof types.DeleteOidcIdentityResolverDocument,
+    "\n  mutation UpdateOidcClientIdentityResolvers($clientId: ID!, $identityResolverIds: [ID!]!) {\n    updateOidcClientIdentityResolvers(clientId: $clientId, identityResolverIds: $identityResolverIds) {\n      ...OidcClientFragment\n      identityResolvers {\n        ...OidcIdentityResolverFragment\n      }\n    }\n  }\n": typeof types.UpdateOidcClientIdentityResolversDocument,
     "\n  query Discovery{\n    discovery {\n      version\n    }\n  }\n": typeof types.DiscoveryDocument,
     "\n  query Authority {\n    authority {\n      id\n    }\n  }\n": typeof types.AuthorityDocument,
     "\nquery Me {\n  me {\n    ... on Identity {\n      presentations {\n        id\n      }\n      issuances {\n        id\n      }\n      asyncIssuanceRequests {\n        id\n      }\n    }\n  }\n}\n": typeof types.MeDocument,
@@ -189,6 +196,13 @@ const documents: Documents = {
     "\n  mutation UpdateOidcClaimMapping($id: ID!, $input: OidcClaimMappingInput!) {\n    updateOidcClaimMapping(id: $id, input: $input) {\n      ...OidcClaimMappingFragment\n    }\n  }\n": types.UpdateOidcClaimMappingDocument,
     "\n  mutation DeleteOidcClaimMapping($id: ID!) {\n    deleteOidcClaimMapping(id: $id) {\n      ...OidcClaimMappingFragment\n    }\n  }\n": types.DeleteOidcClaimMappingDocument,
     "\n  mutation UpdateOidcClientClaimMappings($clientId: ID!, $claimMappingIds: [ID!]!) {\n    updateOidcClientClaimMappings(clientId: $clientId, claimMappingIds: $claimMappingIds) {\n      ...OidcClientFragment\n      claimMappings {\n        ...OidcClaimMappingFragment\n      }\n    }\n  }\n": types.UpdateOidcClientClaimMappingsDocument,
+    "\n  fragment OidcIdentityResolverFragment on OidcIdentityResolver {\n    id\n    name\n    credentialTypes\n    claimName\n    identityStoreType\n    identityStore {\n      id\n      name\n    }\n    lookupType\n    createdAt\n    createdBy {\n      id\n      name\n    }\n    updatedAt\n    updatedBy {\n      id\n      name\n    }\n    deletedAt\n  }\n": types.OidcIdentityResolverFragmentFragmentDoc,
+    "\n  query OidcIdentityResolver($id: ID!) {\n    oidcIdentityResolver(id: $id) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n": types.OidcIdentityResolverDocument,
+    "\n  query FindOidcIdentityResolvers(\n    $where: OidcIdentityResolverWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcIdentityResolverOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcIdentityResolvers(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n": types.FindOidcIdentityResolversDocument,
+    "\n  mutation CreateOidcIdentityResolver($input: OidcIdentityResolverInput!) {\n    createOidcIdentityResolver(input: $input) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n": types.CreateOidcIdentityResolverDocument,
+    "\n  mutation UpdateOidcIdentityResolver($id: ID!, $input: OidcIdentityResolverInput!) {\n    updateOidcIdentityResolver(id: $id, input: $input) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n": types.UpdateOidcIdentityResolverDocument,
+    "\n  mutation DeleteOidcIdentityResolver($id: ID!) {\n    deleteOidcIdentityResolver(id: $id) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n": types.DeleteOidcIdentityResolverDocument,
+    "\n  mutation UpdateOidcClientIdentityResolvers($clientId: ID!, $identityResolverIds: [ID!]!) {\n    updateOidcClientIdentityResolvers(clientId: $clientId, identityResolverIds: $identityResolverIds) {\n      ...OidcClientFragment\n      identityResolvers {\n        ...OidcIdentityResolverFragment\n      }\n    }\n  }\n": types.UpdateOidcClientIdentityResolversDocument,
     "\n  query Discovery{\n    discovery {\n      version\n    }\n  }\n": types.DiscoveryDocument,
     "\n  query Authority {\n    authority {\n      id\n    }\n  }\n": types.AuthorityDocument,
     "\nquery Me {\n  me {\n    ... on Identity {\n      presentations {\n        id\n      }\n      issuances {\n        id\n      }\n      asyncIssuanceRequests {\n        id\n      }\n    }\n  }\n}\n": types.MeDocument,
@@ -522,6 +536,34 @@ export function graphql(source: "\n  mutation DeleteOidcClaimMapping($id: ID!) {
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(source: "\n  mutation UpdateOidcClientClaimMappings($clientId: ID!, $claimMappingIds: [ID!]!) {\n    updateOidcClientClaimMappings(clientId: $clientId, claimMappingIds: $claimMappingIds) {\n      ...OidcClientFragment\n      claimMappings {\n        ...OidcClaimMappingFragment\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateOidcClientClaimMappings($clientId: ID!, $claimMappingIds: [ID!]!) {\n    updateOidcClientClaimMappings(clientId: $clientId, claimMappingIds: $claimMappingIds) {\n      ...OidcClientFragment\n      claimMappings {\n        ...OidcClaimMappingFragment\n      }\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  fragment OidcIdentityResolverFragment on OidcIdentityResolver {\n    id\n    name\n    credentialTypes\n    claimName\n    identityStoreType\n    identityStore {\n      id\n      name\n    }\n    lookupType\n    createdAt\n    createdBy {\n      id\n      name\n    }\n    updatedAt\n    updatedBy {\n      id\n      name\n    }\n    deletedAt\n  }\n"): (typeof documents)["\n  fragment OidcIdentityResolverFragment on OidcIdentityResolver {\n    id\n    name\n    credentialTypes\n    claimName\n    identityStoreType\n    identityStore {\n      id\n      name\n    }\n    lookupType\n    createdAt\n    createdBy {\n      id\n      name\n    }\n    updatedAt\n    updatedBy {\n      id\n      name\n    }\n    deletedAt\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query OidcIdentityResolver($id: ID!) {\n    oidcIdentityResolver(id: $id) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n"): (typeof documents)["\n  query OidcIdentityResolver($id: ID!) {\n    oidcIdentityResolver(id: $id) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  query FindOidcIdentityResolvers(\n    $where: OidcIdentityResolverWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcIdentityResolverOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcIdentityResolvers(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n"): (typeof documents)["\n  query FindOidcIdentityResolvers(\n    $where: OidcIdentityResolverWhere\n    $offset: PositiveInt\n    $limit: PositiveInt\n    $orderBy: OidcIdentityResolverOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findOidcIdentityResolvers(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation CreateOidcIdentityResolver($input: OidcIdentityResolverInput!) {\n    createOidcIdentityResolver(input: $input) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n"): (typeof documents)["\n  mutation CreateOidcIdentityResolver($input: OidcIdentityResolverInput!) {\n    createOidcIdentityResolver(input: $input) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateOidcIdentityResolver($id: ID!, $input: OidcIdentityResolverInput!) {\n    updateOidcIdentityResolver(id: $id, input: $input) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateOidcIdentityResolver($id: ID!, $input: OidcIdentityResolverInput!) {\n    updateOidcIdentityResolver(id: $id, input: $input) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation DeleteOidcIdentityResolver($id: ID!) {\n    deleteOidcIdentityResolver(id: $id) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n"): (typeof documents)["\n  mutation DeleteOidcIdentityResolver($id: ID!) {\n    deleteOidcIdentityResolver(id: $id) {\n      ...OidcIdentityResolverFragment\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(source: "\n  mutation UpdateOidcClientIdentityResolvers($clientId: ID!, $identityResolverIds: [ID!]!) {\n    updateOidcClientIdentityResolvers(clientId: $clientId, identityResolverIds: $identityResolverIds) {\n      ...OidcClientFragment\n      identityResolvers {\n        ...OidcIdentityResolverFragment\n      }\n    }\n  }\n"): (typeof documents)["\n  mutation UpdateOidcClientIdentityResolvers($clientId: ID!, $identityResolverIds: [ID!]!) {\n    updateOidcClientIdentityResolvers(clientId: $clientId, identityResolverIds: $identityResolverIds) {\n      ...OidcClientFragment\n      identityResolvers {\n        ...OidcIdentityResolverFragment\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

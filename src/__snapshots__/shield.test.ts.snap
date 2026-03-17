@@ -663,6 +663,18 @@ exports[`shield rules are setup correctly 1`] = `
         "VerifiableCredential.InstanceAdmin"
       ]
     },
+    "findOidcIdentityResolvers": {
+      "name": "isUserWithReadPermissions",
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.Reader",
+        "VerifiableCredential.Issuer",
+        "VerifiableCredential.CredentialAdmin",
+        "VerifiableCredential.PartnerAdmin",
+        "VerifiableCredential.OidcAdmin",
+        "VerifiableCredential.InstanceAdmin"
+      ]
+    },
     "findPresentations": {
       "rulesOr": [
         {
@@ -1841,6 +1853,13 @@ exports[`shield rules are setup correctly 1`] = `
         "VerifiableCredential.OidcAdmin"
       ]
     },
+    "createOidcIdentityResolver": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
+    },
     "createOidcResource": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
       "cache": "contextual",
@@ -2275,6 +2294,13 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "deleteOidcClientResource": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
+    },
+    "deleteOidcIdentityResolver": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
       "cache": "contextual",
       "__roles": [
@@ -2817,7 +2843,21 @@ exports[`shield rules are setup correctly 1`] = `
         "VerifiableCredential.OidcAdmin"
       ]
     },
+    "updateOidcClientIdentityResolvers": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
+    },
     "updateOidcClientResource": {
+      "name": "hasRole-VerifiableCredential.OidcAdmin",
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.OidcAdmin"
+      ]
+    },
+    "updateOidcIdentityResolver": {
       "name": "hasRole-VerifiableCredential.OidcAdmin",
       "cache": "contextual",
       "__roles": [
@@ -6344,6 +6384,77 @@ exports[`shield rules are setup correctly 1`] = `
     }
   },
   "OidcClientResource": {
+    "*": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
+        },
+        {
+          "name": "isPresentationApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Present"
+          ]
+        },
+        {
+          "name": "isContractAdminApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.ContractAdmin"
+          ]
+        },
+        {
+          "name": "isLimitedAccessApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.LimitedAccess"
+          ]
+        },
+        {
+          "name": "isLimitedPresentationFlowApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.LimitedPresentationFlow"
+          ]
+        },
+        {
+          "name": "isLimitedAsyncIssuanceApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.LimitedAsyncIssuance"
+          ]
+        },
+        {
+          "name": "isOidcAuthnClient",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.LimitedOidcAuthn"
+          ]
+        },
+        {
+          "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+          "cache": "contextual"
+        }
+      ]
+    }
+  },
+  "OidcIdentityResolver": {
     "*": {
       "rulesOr": [
         {

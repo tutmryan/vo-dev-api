@@ -17,6 +17,7 @@ import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tra
 import { PartnerEntity } from '../../partners/entities/partner-entity'
 import { OidcClaimMappingEntity } from './oidc-claim-mapping-entity'
 import { OidcClientResourceEntity } from './oidc-client-resource-entity'
+import { OidcIdentityResolverEntity } from './oidc-identity-resolver-entity'
 
 type RequiredArgs = Pick<OidcClientEntity, 'name' | 'applicationType' | 'clientType' | 'redirectUris' | 'postLogoutUris'>
 type OptionalArgs = Pick<
@@ -243,6 +244,16 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
 
   @RelationId((client: OidcClientEntity) => client.claimMappings)
   claimMappingIds!: string[]
+
+  /**
+   * The identity resolvers applied to this client.
+   */
+  @ManyToMany(() => OidcIdentityResolverEntity)
+  @JoinTable({ name: 'oidc_client_identity_resolvers' })
+  identityResolvers!: Promise<OidcIdentityResolverEntity[]>
+
+  @RelationId((client: OidcClientEntity) => client.identityResolvers)
+  identityResolverIds!: string[]
 
   update(args: CreateOrUpdateArgs) {
     typeSafeAssign(this, OidcClientEntity.validateInflateArgs(args))

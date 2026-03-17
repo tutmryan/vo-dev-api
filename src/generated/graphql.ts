@@ -16,6 +16,7 @@ import { OidcClientEntity } from '../features/oidc-provider/entities/oidc-client
 import { OidcResourceEntity } from '../features/oidc-provider/entities/oidc-resource-entity';
 import { OidcClientResourceEntity } from '../features/oidc-provider/entities/oidc-client-resource-entity';
 import { OidcClaimMappingEntity } from '../features/oidc-provider/entities/oidc-claim-mapping-entity';
+import { OidcIdentityResolverEntity } from '../features/oidc-provider/entities/oidc-identity-resolver-entity';
 import { BrandingEntity } from '../features/branding/entities/branding-entity';
 import { WalletEntity } from '../features/wallet/entities/wallet-entity';
 import { ApplicationLabelConfigEntity } from '../features/instance-configs/entities/application-label-config-entity';
@@ -2730,6 +2731,8 @@ export type Mutation = {
   createOidcClient: OidcClient;
   /** Creates a new OIDC client resource */
   createOidcClientResource: OidcClient;
+  /** Creates a new OIDC identity resolver. */
+  createOidcIdentityResolver: OidcIdentityResolver;
   /** Creates a new OIDC resource */
   createOidcResource: OidcResource;
   /** Creates a partner whose credential types can be requested for presentation */
@@ -2768,6 +2771,8 @@ export type Mutation = {
   deleteOidcClient: OidcClient;
   /** Deletes an OIDC client resource */
   deleteOidcClientResource: OidcClient;
+  /** Deletes an OIDC identity resolver. */
+  deleteOidcIdentityResolver: OidcIdentityResolver;
   /** Deletes an OIDC resource */
   deleteOidcResource: OidcResource;
   deletePresentationFlowTemplate?: Maybe<Scalars['Void']['output']>;
@@ -2881,8 +2886,12 @@ export type Mutation = {
   updateOidcClient: OidcClient;
   /** Updates the claim mappings for an OIDC client. */
   updateOidcClientClaimMappings: OidcClient;
+  /** Updates the identity resolvers for an OIDC client. */
+  updateOidcClientIdentityResolvers: OidcClient;
   /** Updates an existing OIDC client resource */
   updateOidcClientResource: OidcClient;
+  /** Updates an existing OIDC identity resolver. */
+  updateOidcIdentityResolver: OidcIdentityResolver;
   /**
    * Updates an existing OIDC resource.
    *
@@ -2992,6 +3001,11 @@ export type MutationCreateOidcClientResourceArgs = {
 };
 
 
+export type MutationCreateOidcIdentityResolverArgs = {
+  input: OidcIdentityResolverInput;
+};
+
+
 export type MutationCreateOidcResourceArgs = {
   input: OidcResourceInput;
 };
@@ -3066,6 +3080,11 @@ export type MutationDeleteOidcClientArgs = {
 export type MutationDeleteOidcClientResourceArgs = {
   clientId: Scalars['ID']['input'];
   resourceId: Scalars['ID']['input'];
+};
+
+
+export type MutationDeleteOidcIdentityResolverArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -3276,9 +3295,21 @@ export type MutationUpdateOidcClientClaimMappingsArgs = {
 };
 
 
+export type MutationUpdateOidcClientIdentityResolversArgs = {
+  clientId: Scalars['ID']['input'];
+  identityResolverIds: Array<Scalars['ID']['input']>;
+};
+
+
 export type MutationUpdateOidcClientResourceArgs = {
   clientId: Scalars['ID']['input'];
   input: OidcClientResourceInput;
+};
+
+
+export type MutationUpdateOidcIdentityResolverArgs = {
+  id: Scalars['ID']['input'];
+  input: OidcIdentityResolverInput;
 };
 
 
@@ -3466,6 +3497,8 @@ export type OidcClient = {
   /** When the client was deleted. */
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   id: Scalars['ID']['output'];
+  /** The identity resolvers to be applied to this client. */
+  identityResolvers: Array<OidcIdentityResolver>;
   /** The URL of the client logo to be displayed during auth interactions, can be an image encoded as a data URL. */
   logo?: Maybe<Scalars['URL']['output']>;
   /** The name of the client. */
@@ -3703,6 +3736,86 @@ export type OidcClientWhere = {
   /** List only the clients which are, or are not, deleted. */
   isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
   /** List only clients matching this name. */
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** The strategy used to look up identities in an external identity store for OIDC identity resolvers. */
+export enum OidcIdentityLookupType {
+  /** Look up an identity in the external store by email. */
+  Email = 'EMAIL',
+  /** Look up an identity in the external store by object identifier. */
+  ObjectId = 'OBJECT_ID',
+  /** Look up an identity in the external store by user principal name. */
+  UserPrincipalName = 'USER_PRINCIPAL_NAME'
+}
+
+/** Represents an OIDC identity resolver, which maps credential claims to identities using an external identity store. */
+export type OidcIdentityResolver = {
+  __typename?: 'OidcIdentityResolver';
+  /** The credential claim name used when resolving identities. */
+  claimName: Scalars['String']['output'];
+  /** When the resolver was created. */
+  createdAt: Scalars['DateTime']['output'];
+  /** The user who created the resolver. */
+  createdBy: User;
+  /** The (optional) types of credentials that this identity resolver should be limited to. */
+  credentialTypes?: Maybe<Array<Scalars['String']['output']>>;
+  /** When the resolver was deleted. */
+  deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The unique identifier for the identity resolver. */
+  id: Scalars['ID']['output'];
+  /** The identity store used to resolve identities. */
+  identityStore: IdentityStore;
+  /** The type of identity store used by this resolver. */
+  identityStoreType: IdentityStoreType;
+  /** The lookup strategy that will be used in the identity store. */
+  lookupType: OidcIdentityLookupType;
+  /** The name of the identity resolver. */
+  name: Scalars['String']['output'];
+  /** When the resolver was last updated. */
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The user who last updated the resolver. */
+  updatedBy?: Maybe<User>;
+};
+
+/** Input type for creating or updating an OIDC identity resolver. */
+export type OidcIdentityResolverInput = {
+  /** The credential claim name used when resolving identities. Exactly one value will be present. */
+  claimName: Scalars['String']['input'];
+  /** The (optional) types of credentials that this identity resolver should be limited to. */
+  credentialTypes?: InputMaybe<Array<Scalars['String']['input']>>;
+  /** The identity store that will be used to resolve identities. */
+  identityStoreId: Scalars['ID']['input'];
+  /** The lookup strategy that will be used in the identity store. */
+  lookupType: OidcIdentityLookupType;
+  /** The name of the identity resolver. */
+  name: Scalars['String']['input'];
+};
+
+/** Fields that can be used for sorting OIDC identity resolvers by. */
+export enum OidcIdentityResolverOrderBy {
+  CreatedAt = 'createdAt',
+  Name = 'name',
+  UpdatedAt = 'updatedAt'
+}
+
+/** Criteria for finding OIDC identity resolvers. */
+export type OidcIdentityResolverWhere = {
+  /** The ID of the user (Person or Application) that created the identity resolver. */
+  createdById?: InputMaybe<Scalars['ID']['input']>;
+  /** The start of the createdAt period to include. */
+  createdFrom?: InputMaybe<Scalars['DateTime']['input']>;
+  /** The end of the createdAt period to include. */
+  createdTo?: InputMaybe<Scalars['DateTime']['input']>;
+  /** List only identity resolvers for this credential type. */
+  credentialType?: InputMaybe<Scalars['String']['input']>;
+  /** List only identity resolvers for this identity store. */
+  identityStoreId?: InputMaybe<Scalars['ID']['input']>;
+  /** List only identity resolvers for this identity store type. */
+  identityStoreType?: InputMaybe<IdentityStoreType>;
+  /** List only the identity resolvers which are, or are not, deleted. */
+  isDeleted?: InputMaybe<Scalars['Boolean']['input']>;
+  /** List only identity resolvers matching this name. */
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -4404,6 +4517,8 @@ export type Query = {
   findOidcClaimMappings: Array<OidcClaimMapping>;
   /** Returns OIDC clients, optionally matching the specified criteria */
   findOidcClients: Array<OidcClient>;
+  /** Returns OIDC identity resolvers, optionally matching the specified criteria. */
+  findOidcIdentityResolvers: Array<OidcIdentityResolver>;
   /** Returns OIDC resources, optionally matching the specified criteria */
   findOidcResources: Array<OidcResource>;
   /** Returns partners, optionally matching the specified criteria */
@@ -4465,6 +4580,8 @@ export type Query = {
   oidcClaimMapping: OidcClaimMapping;
   /** Returns a single OIDC client by ID */
   oidcClient: OidcClient;
+  /** Returns a single OIDC identity resolver by ID */
+  oidcIdentityResolver: OidcIdentityResolver;
   /** Returns a single OIDC resource by ID */
   oidcResource: OidcResource;
   /** Returns a partner by ID */
@@ -4636,6 +4753,15 @@ export type QueryFindOidcClientsArgs = {
 };
 
 
+export type QueryFindOidcIdentityResolversArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<OidcIdentityResolverOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<OidcIdentityResolverWhere>;
+};
+
+
 export type QueryFindOidcResourcesArgs = {
   limit?: InputMaybe<Scalars['PositiveInt']['input']>;
   offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
@@ -4787,6 +4913,11 @@ export type QueryOidcClaimMappingArgs = {
 
 
 export type QueryOidcClientArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryOidcIdentityResolverArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -6115,6 +6246,56 @@ export type UpdateOidcClientClaimMappingsMutationVariables = Exact<{
 
 export type UpdateOidcClientClaimMappingsMutation = { __typename?: 'Mutation', updateOidcClientClaimMappings: { __typename?: 'OidcClient', id: string, name: string, applicationType: OidcApplicationType, clientType: OidcClientType, tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod, clientJwks?: Record<string, unknown> | null, clientJwksUri?: string | null, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, redirectUris: Array<string>, postLogoutUris: Array<string>, requireFaceCheck: boolean, allowAnyPartner: boolean, authorizationRequestsTypeJarEnabled: boolean, authorizationRequestsTypeStandardEnabled: boolean, relyingPartyJwks?: Record<string, unknown> | null, relyingPartyJwksUri?: string | null, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, claimMappings: Array<{ __typename?: 'OidcClaimMapping', id: string, name: string, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, mappings: Array<{ __typename?: 'ScopedClaimMapping', scope: string, claim: string, credentialClaim: string }>, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null }>, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
 
+export type OidcIdentityResolverFragmentFragment = { __typename?: 'OidcIdentityResolver', id: string, name: string, credentialTypes?: Array<string> | null, claimName: string, identityStoreType: IdentityStoreType, lookupType: OidcIdentityLookupType, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, identityStore: { __typename?: 'IdentityStore', id: string, name: string }, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null };
+
+export type OidcIdentityResolverQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type OidcIdentityResolverQuery = { __typename?: 'Query', oidcIdentityResolver: { __typename?: 'OidcIdentityResolver', id: string, name: string, credentialTypes?: Array<string> | null, claimName: string, identityStoreType: IdentityStoreType, lookupType: OidcIdentityLookupType, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, identityStore: { __typename?: 'IdentityStore', id: string, name: string }, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type FindOidcIdentityResolversQueryVariables = Exact<{
+  where?: InputMaybe<OidcIdentityResolverWhere>;
+  offset?: InputMaybe<Scalars['PositiveInt']['input']>;
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  orderBy?: InputMaybe<OidcIdentityResolverOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+}>;
+
+
+export type FindOidcIdentityResolversQuery = { __typename?: 'Query', findOidcIdentityResolvers: Array<{ __typename?: 'OidcIdentityResolver', id: string, name: string, credentialTypes?: Array<string> | null, claimName: string, identityStoreType: IdentityStoreType, lookupType: OidcIdentityLookupType, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, identityStore: { __typename?: 'IdentityStore', id: string, name: string }, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null }> };
+
+export type CreateOidcIdentityResolverMutationVariables = Exact<{
+  input: OidcIdentityResolverInput;
+}>;
+
+
+export type CreateOidcIdentityResolverMutation = { __typename?: 'Mutation', createOidcIdentityResolver: { __typename?: 'OidcIdentityResolver', id: string, name: string, credentialTypes?: Array<string> | null, claimName: string, identityStoreType: IdentityStoreType, lookupType: OidcIdentityLookupType, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, identityStore: { __typename?: 'IdentityStore', id: string, name: string }, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type UpdateOidcIdentityResolverMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: OidcIdentityResolverInput;
+}>;
+
+
+export type UpdateOidcIdentityResolverMutation = { __typename?: 'Mutation', updateOidcIdentityResolver: { __typename?: 'OidcIdentityResolver', id: string, name: string, credentialTypes?: Array<string> | null, claimName: string, identityStoreType: IdentityStoreType, lookupType: OidcIdentityLookupType, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, identityStore: { __typename?: 'IdentityStore', id: string, name: string }, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type DeleteOidcIdentityResolverMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteOidcIdentityResolverMutation = { __typename?: 'Mutation', deleteOidcIdentityResolver: { __typename?: 'OidcIdentityResolver', id: string, name: string, credentialTypes?: Array<string> | null, claimName: string, identityStoreType: IdentityStoreType, lookupType: OidcIdentityLookupType, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, identityStore: { __typename?: 'IdentityStore', id: string, name: string }, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
+export type UpdateOidcClientIdentityResolversMutationVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+  identityResolverIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type UpdateOidcClientIdentityResolversMutation = { __typename?: 'Mutation', updateOidcClientIdentityResolvers: { __typename?: 'OidcClient', id: string, name: string, applicationType: OidcApplicationType, clientType: OidcClientType, tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod, clientJwks?: Record<string, unknown> | null, clientJwksUri?: string | null, logo?: string | null, backgroundColor?: string | null, backgroundImage?: string | null, policyUrl?: string | null, termsOfServiceUrl?: string | null, redirectUris: Array<string>, postLogoutUris: Array<string>, requireFaceCheck: boolean, allowAnyPartner: boolean, authorizationRequestsTypeJarEnabled: boolean, authorizationRequestsTypeStandardEnabled: boolean, relyingPartyJwks?: Record<string, unknown> | null, relyingPartyJwksUri?: string | null, uniqueClaimsForSubjectId?: Array<string> | null, credentialTypes?: Array<string> | null, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, identityResolvers: Array<{ __typename?: 'OidcIdentityResolver', id: string, name: string, credentialTypes?: Array<string> | null, claimName: string, identityStoreType: IdentityStoreType, lookupType: OidcIdentityLookupType, createdAt: Date, updatedAt?: Date | null, deletedAt?: Date | null, identityStore: { __typename?: 'IdentityStore', id: string, name: string }, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null }>, partners: Array<{ __typename?: 'Partner', id: string, name: string, did: string, credentialTypes: Array<string>, linkedDomainUrls?: Array<string> | null }>, resources?: Array<{ __typename?: 'OidcClientResource', resourceScopes: Array<string>, resource: { __typename?: 'OidcResource', id: string, name: string, resourceIndicator: string, scopes: Array<string> } }> | null, createdBy: { __typename?: 'User', id: string, name: string }, updatedBy?: { __typename?: 'User', id: string, name: string } | null } };
+
 export type DiscoveryQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -6303,6 +6484,7 @@ export const IdentityStoreFieldsFragmentDoc = {"kind":"Document","definitions":[
 export const OidcClientFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"clientType"}},{"kind":"Field","name":{"kind":"Name","value":"tokenEndpointAuthMethod"}},{"kind":"Field","name":{"kind":"Name","value":"clientJwks"}},{"kind":"Field","name":{"kind":"Name","value":"clientJwksUri"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"requireFaceCheck"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"authorizationRequestsTypeJarEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"authorizationRequestsTypeStandardEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"relyingPartyJwks"}},{"kind":"Field","name":{"kind":"Name","value":"relyingPartyJwksUri"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<OidcClientFragmentFragment, unknown>;
 export const OidcResourceFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcResourceFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcResource"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<OidcResourceFragmentFragment, unknown>;
 export const OidcClaimMappingFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClaimMappingFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClaimMapping"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"mappings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"scope"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"credentialClaim"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<OidcClaimMappingFragmentFragment, unknown>;
+export const OidcIdentityResolverFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcIdentityResolverFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcIdentityResolver"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"claimName"}},{"kind":"Field","name":{"kind":"Name","value":"identityStoreType"}},{"kind":"Field","name":{"kind":"Name","value":"identityStore"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lookupType"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<OidcIdentityResolverFragmentFragment, unknown>;
 export const PartnerFieldsFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"PartnerFields"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Partner"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"tenantId"}},{"kind":"Field","name":{"kind":"Name","value":"issuerId"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}},{"kind":"Field","name":{"kind":"Name","value":"suspendedAt"}}]}}]} as unknown as DocumentNode<PartnerFieldsFragment, unknown>;
 export const TemplateParentDataFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateParentDataFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"parentData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]}}]} as unknown as DocumentNode<TemplateParentDataFragmentFragment, unknown>;
 export const TemplateFragmentFragmentDoc = {"kind":"Document","definitions":[{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]} as unknown as DocumentNode<TemplateFragmentFragment, unknown>;
@@ -6372,6 +6554,12 @@ export const CreateOidcClaimMappingDocument = {"kind":"Document","definitions":[
 export const UpdateOidcClaimMappingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateOidcClaimMapping"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClaimMappingInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateOidcClaimMapping"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClaimMappingFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClaimMappingFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClaimMapping"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"mappings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"scope"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"credentialClaim"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<UpdateOidcClaimMappingMutation, UpdateOidcClaimMappingMutationVariables>;
 export const DeleteOidcClaimMappingDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteOidcClaimMapping"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteOidcClaimMapping"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClaimMappingFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClaimMappingFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClaimMapping"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"mappings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"scope"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"credentialClaim"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<DeleteOidcClaimMappingMutation, DeleteOidcClaimMappingMutationVariables>;
 export const UpdateOidcClientClaimMappingsDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateOidcClientClaimMappings"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"claimMappingIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateOidcClientClaimMappings"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"clientId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}},{"kind":"Argument","name":{"kind":"Name","value":"claimMappingIds"},"value":{"kind":"Variable","name":{"kind":"Name","value":"claimMappingIds"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}},{"kind":"Field","name":{"kind":"Name","value":"claimMappings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClaimMappingFragment"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"clientType"}},{"kind":"Field","name":{"kind":"Name","value":"tokenEndpointAuthMethod"}},{"kind":"Field","name":{"kind":"Name","value":"clientJwks"}},{"kind":"Field","name":{"kind":"Name","value":"clientJwksUri"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"requireFaceCheck"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"authorizationRequestsTypeJarEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"authorizationRequestsTypeStandardEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"relyingPartyJwks"}},{"kind":"Field","name":{"kind":"Name","value":"relyingPartyJwksUri"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClaimMappingFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClaimMapping"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"mappings"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"scope"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"credentialClaim"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<UpdateOidcClientClaimMappingsMutation, UpdateOidcClientClaimMappingsMutationVariables>;
+export const OidcIdentityResolverDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"OidcIdentityResolver"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"oidcIdentityResolver"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcIdentityResolverFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcIdentityResolverFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcIdentityResolver"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"claimName"}},{"kind":"Field","name":{"kind":"Name","value":"identityStoreType"}},{"kind":"Field","name":{"kind":"Name","value":"identityStore"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lookupType"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<OidcIdentityResolverQuery, OidcIdentityResolverQueryVariables>;
+export const FindOidcIdentityResolversDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindOidcIdentityResolvers"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"where"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcIdentityResolverWhere"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"offset"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PositiveInt"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"limit"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PositiveInt"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcIdentityResolverOrderBy"}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"orderDirection"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"OrderDirection"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"findOidcIdentityResolvers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"where"},"value":{"kind":"Variable","name":{"kind":"Name","value":"where"}}},{"kind":"Argument","name":{"kind":"Name","value":"offset"},"value":{"kind":"Variable","name":{"kind":"Name","value":"offset"}}},{"kind":"Argument","name":{"kind":"Name","value":"limit"},"value":{"kind":"Variable","name":{"kind":"Name","value":"limit"}}},{"kind":"Argument","name":{"kind":"Name","value":"orderBy"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderBy"}}},{"kind":"Argument","name":{"kind":"Name","value":"orderDirection"},"value":{"kind":"Variable","name":{"kind":"Name","value":"orderDirection"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcIdentityResolverFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcIdentityResolverFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcIdentityResolver"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"claimName"}},{"kind":"Field","name":{"kind":"Name","value":"identityStoreType"}},{"kind":"Field","name":{"kind":"Name","value":"identityStore"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lookupType"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<FindOidcIdentityResolversQuery, FindOidcIdentityResolversQueryVariables>;
+export const CreateOidcIdentityResolverDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateOidcIdentityResolver"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcIdentityResolverInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createOidcIdentityResolver"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcIdentityResolverFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcIdentityResolverFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcIdentityResolver"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"claimName"}},{"kind":"Field","name":{"kind":"Name","value":"identityStoreType"}},{"kind":"Field","name":{"kind":"Name","value":"identityStore"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lookupType"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<CreateOidcIdentityResolverMutation, CreateOidcIdentityResolverMutationVariables>;
+export const UpdateOidcIdentityResolverDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateOidcIdentityResolver"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"OidcIdentityResolverInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateOidcIdentityResolver"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcIdentityResolverFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcIdentityResolverFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcIdentityResolver"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"claimName"}},{"kind":"Field","name":{"kind":"Name","value":"identityStoreType"}},{"kind":"Field","name":{"kind":"Name","value":"identityStore"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lookupType"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<UpdateOidcIdentityResolverMutation, UpdateOidcIdentityResolverMutationVariables>;
+export const DeleteOidcIdentityResolverDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeleteOidcIdentityResolver"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deleteOidcIdentityResolver"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcIdentityResolverFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcIdentityResolverFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcIdentityResolver"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"claimName"}},{"kind":"Field","name":{"kind":"Name","value":"identityStoreType"}},{"kind":"Field","name":{"kind":"Name","value":"identityStore"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lookupType"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<DeleteOidcIdentityResolverMutation, DeleteOidcIdentityResolverMutationVariables>;
+export const UpdateOidcClientIdentityResolversDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdateOidcClientIdentityResolvers"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"identityResolverIds"}},"type":{"kind":"NonNullType","type":{"kind":"ListType","type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updateOidcClientIdentityResolvers"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"clientId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"clientId"}}},{"kind":"Argument","name":{"kind":"Name","value":"identityResolverIds"},"value":{"kind":"Variable","name":{"kind":"Name","value":"identityResolverIds"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcClientFragment"}},{"kind":"Field","name":{"kind":"Name","value":"identityResolvers"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"OidcIdentityResolverFragment"}}]}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcClientFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcClient"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"clientType"}},{"kind":"Field","name":{"kind":"Name","value":"tokenEndpointAuthMethod"}},{"kind":"Field","name":{"kind":"Name","value":"clientJwks"}},{"kind":"Field","name":{"kind":"Name","value":"clientJwksUri"}},{"kind":"Field","name":{"kind":"Name","value":"logo"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundImage"}},{"kind":"Field","name":{"kind":"Name","value":"policyUrl"}},{"kind":"Field","name":{"kind":"Name","value":"termsOfServiceUrl"}},{"kind":"Field","name":{"kind":"Name","value":"applicationType"}},{"kind":"Field","name":{"kind":"Name","value":"redirectUris"}},{"kind":"Field","name":{"kind":"Name","value":"postLogoutUris"}},{"kind":"Field","name":{"kind":"Name","value":"requireFaceCheck"}},{"kind":"Field","name":{"kind":"Name","value":"allowAnyPartner"}},{"kind":"Field","name":{"kind":"Name","value":"authorizationRequestsTypeJarEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"authorizationRequestsTypeStandardEnabled"}},{"kind":"Field","name":{"kind":"Name","value":"relyingPartyJwks"}},{"kind":"Field","name":{"kind":"Name","value":"relyingPartyJwksUri"}},{"kind":"Field","name":{"kind":"Name","value":"partners"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"did"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"linkedDomainUrls"}}]}},{"kind":"Field","name":{"kind":"Name","value":"uniqueClaimsForSubjectId"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"resources"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"resource"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"resourceIndicator"}},{"kind":"Field","name":{"kind":"Name","value":"scopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"resourceScopes"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"OidcIdentityResolverFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"OidcIdentityResolver"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}},{"kind":"Field","name":{"kind":"Name","value":"claimName"}},{"kind":"Field","name":{"kind":"Name","value":"identityStoreType"}},{"kind":"Field","name":{"kind":"Name","value":"identityStore"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"lookupType"}},{"kind":"Field","name":{"kind":"Name","value":"createdAt"}},{"kind":"Field","name":{"kind":"Name","value":"createdBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"updatedAt"}},{"kind":"Field","name":{"kind":"Name","value":"updatedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"deletedAt"}}]}}]} as unknown as DocumentNode<UpdateOidcClientIdentityResolversMutation, UpdateOidcClientIdentityResolversMutationVariables>;
 export const DiscoveryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Discovery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"discovery"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"version"}}]}}]}}]} as unknown as DocumentNode<DiscoveryQuery, DiscoveryQueryVariables>;
 export const AuthorityDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Authority"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"authority"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]} as unknown as DocumentNode<AuthorityQuery, AuthorityQueryVariables>;
 export const MeDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"Me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"me"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"InlineFragment","typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Identity"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"presentations"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"issuances"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}},{"kind":"Field","name":{"kind":"Name","value":"asyncIssuanceRequests"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}}]}}]}}]}}]}}]} as unknown as DocumentNode<MeQuery, MeQueryVariables>;
@@ -6704,6 +6892,11 @@ export type ResolversTypes = {
   OidcClientResourceInput: OidcClientResourceInput;
   OidcClientType: OidcClientType;
   OidcClientWhere: OidcClientWhere;
+  OidcIdentityLookupType: OidcIdentityLookupType;
+  OidcIdentityResolver: ResolverTypeWrapper<OidcIdentityResolverEntity>;
+  OidcIdentityResolverInput: OidcIdentityResolverInput;
+  OidcIdentityResolverOrderBy: OidcIdentityResolverOrderBy;
+  OidcIdentityResolverWhere: OidcIdentityResolverWhere;
   OidcResource: ResolverTypeWrapper<OidcResourceEntity>;
   OidcResourceInput: OidcResourceInput;
   OidcResourceOrderBy: OidcResourceOrderBy;
@@ -6975,6 +7168,9 @@ export type ResolversParentTypes = {
   OidcClientResource: OidcClientResourceEntity;
   OidcClientResourceInput: OidcClientResourceInput;
   OidcClientWhere: OidcClientWhere;
+  OidcIdentityResolver: OidcIdentityResolverEntity;
+  OidcIdentityResolverInput: OidcIdentityResolverInput;
+  OidcIdentityResolverWhere: OidcIdentityResolverWhere;
   OidcResource: OidcResourceEntity;
   OidcResourceInput: OidcResourceInput;
   OidcResourceWhere: OidcResourceWhere;
@@ -7699,6 +7895,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createOidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<MutationCreateOidcClaimMappingArgs, 'input'>>;
   createOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationCreateOidcClientArgs, 'input'>>;
   createOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationCreateOidcClientResourceArgs, 'clientId' | 'input'>>;
+  createOidcIdentityResolver?: Resolver<ResolversTypes['OidcIdentityResolver'], ParentType, ContextType, RequireFields<MutationCreateOidcIdentityResolverArgs, 'input'>>;
   createOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationCreateOidcResourceArgs, 'input'>>;
   createPartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationCreatePartnerArgs, 'input'>>;
   createPhotoCaptureRequest?: Resolver<ResolversTypes['PhotoCaptureRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePhotoCaptureRequestArgs, 'request'>>;
@@ -7717,6 +7914,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   deleteOidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<MutationDeleteOidcClaimMappingArgs, 'id'>>;
   deleteOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientArgs, 'id'>>;
   deleteOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationDeleteOidcClientResourceArgs, 'clientId' | 'resourceId'>>;
+  deleteOidcIdentityResolver?: Resolver<ResolversTypes['OidcIdentityResolver'], ParentType, ContextType, RequireFields<MutationDeleteOidcIdentityResolverArgs, 'id'>>;
   deleteOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationDeleteOidcResourceArgs, 'id'>>;
   deletePresentationFlowTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeletePresentationFlowTemplateArgs, 'id'>>;
   deleteTemplate?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType, RequireFields<MutationDeleteTemplateArgs, 'id'>>;
@@ -7759,7 +7957,9 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   updateOidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<MutationUpdateOidcClaimMappingArgs, 'id' | 'input'>>;
   updateOidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientArgs, 'id' | 'input'>>;
   updateOidcClientClaimMappings?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientClaimMappingsArgs, 'claimMappingIds' | 'clientId'>>;
+  updateOidcClientIdentityResolvers?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientIdentityResolversArgs, 'clientId' | 'identityResolverIds'>>;
   updateOidcClientResource?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<MutationUpdateOidcClientResourceArgs, 'clientId' | 'input'>>;
+  updateOidcIdentityResolver?: Resolver<ResolversTypes['OidcIdentityResolver'], ParentType, ContextType, RequireFields<MutationUpdateOidcIdentityResolverArgs, 'id' | 'input'>>;
   updateOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationUpdateOidcResourceArgs, 'id' | 'input'>>;
   updatePartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationUpdatePartnerArgs, 'id' | 'input'>>;
   updatePresentationFlowTemplate?: Resolver<ResolversTypes['PresentationFlowTemplate'], ParentType, ContextType, RequireFields<MutationUpdatePresentationFlowTemplateArgs, 'id' | 'input'>>;
@@ -7820,6 +8020,7 @@ export type OidcClientResolvers<ContextType = GraphQLContext, ParentType extends
   credentialTypes?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
   deletedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  identityResolvers?: Resolver<Array<ResolversTypes['OidcIdentityResolver']>, ParentType, ContextType>;
   logo?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   partners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType>;
@@ -7841,6 +8042,21 @@ export type OidcClientResolvers<ContextType = GraphQLContext, ParentType extends
 export type OidcClientResourceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['OidcClientResource'] = ResolversParentTypes['OidcClientResource']> = {
   resource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType>;
   resourceScopes?: Resolver<Array<ResolversTypes['String']>, ParentType, ContextType>;
+};
+
+export type OidcIdentityResolverResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['OidcIdentityResolver'] = ResolversParentTypes['OidcIdentityResolver']> = {
+  claimName?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+  credentialTypes?: Resolver<Maybe<Array<ResolversTypes['String']>>, ParentType, ContextType>;
+  deletedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  identityStore?: Resolver<ResolversTypes['IdentityStore'], ParentType, ContextType>;
+  identityStoreType?: Resolver<ResolversTypes['IdentityStoreType'], ParentType, ContextType>;
+  lookupType?: Resolver<ResolversTypes['OidcIdentityLookupType'], ParentType, ContextType>;
+  name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
+  updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
 };
 
 export type OidcResourceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['OidcResource'] = ResolversParentTypes['OidcResource']> = {
@@ -8046,6 +8262,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   findNetworkIssuers?: Resolver<Array<ResolversTypes['NetworkIssuer']>, ParentType, ContextType, RequireFields<QueryFindNetworkIssuersArgs, 'where'>>;
   findOidcClaimMappings?: Resolver<Array<ResolversTypes['OidcClaimMapping']>, ParentType, ContextType, RequireFields<QueryFindOidcClaimMappingsArgs, 'limit'>>;
   findOidcClients?: Resolver<Array<ResolversTypes['OidcClient']>, ParentType, ContextType, RequireFields<QueryFindOidcClientsArgs, 'limit'>>;
+  findOidcIdentityResolvers?: Resolver<Array<ResolversTypes['OidcIdentityResolver']>, ParentType, ContextType, RequireFields<QueryFindOidcIdentityResolversArgs, 'limit'>>;
   findOidcResources?: Resolver<Array<ResolversTypes['OidcResource']>, ParentType, ContextType, RequireFields<QueryFindOidcResourcesArgs, 'limit'>>;
   findPartners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType, RequireFields<QueryFindPartnersArgs, 'limit'>>;
   findPresentationFlowTemplates?: Resolver<Array<ResolversTypes['PresentationFlowTemplate']>, ParentType, ContextType>;
@@ -8076,6 +8293,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   networkContracts?: Resolver<Array<ResolversTypes['NetworkContract']>, ParentType, ContextType, RequireFields<QueryNetworkContractsArgs, 'issuerId' | 'tenantId'>>;
   oidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<QueryOidcClaimMappingArgs, 'id'>>;
   oidcClient?: Resolver<ResolversTypes['OidcClient'], ParentType, ContextType, RequireFields<QueryOidcClientArgs, 'id'>>;
+  oidcIdentityResolver?: Resolver<ResolversTypes['OidcIdentityResolver'], ParentType, ContextType, RequireFields<QueryOidcIdentityResolverArgs, 'id'>>;
   oidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<QueryOidcResourceArgs, 'id'>>;
   partner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<QueryPartnerArgs, 'id'>>;
   partnerByDid?: Resolver<Maybe<ResolversTypes['Partner']>, ParentType, ContextType, RequireFields<QueryPartnerByDidArgs, 'did'>>;
@@ -8398,6 +8616,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   OidcClaimMapping?: OidcClaimMappingResolvers<ContextType>;
   OidcClient?: OidcClientResolvers<ContextType>;
   OidcClientResource?: OidcClientResourceResolvers<ContextType>;
+  OidcIdentityResolver?: OidcIdentityResolverResolvers<ContextType>;
   OidcResource?: OidcResourceResolvers<ContextType>;
   Partner?: PartnerResolvers<ContextType>;
   PhotoCaptureEventData?: PhotoCaptureEventDataResolvers<ContextType>;

@@ -92,6 +92,24 @@ extend type Mutation {
   updateOidcClientClaimMappings(clientId: ID!, claimMappingIds: [ID!]!): OidcClient!
 
   """
+  Creates a new OIDC identity resolver.
+  """
+  createOidcIdentityResolver(input: OidcIdentityResolverInput!): OidcIdentityResolver!
+  """
+  Updates an existing OIDC identity resolver.
+  """
+  updateOidcIdentityResolver(id: ID!, input: OidcIdentityResolverInput!): OidcIdentityResolver!
+  """
+  Deletes an OIDC identity resolver.
+  """
+  deleteOidcIdentityResolver(id: ID!): OidcIdentityResolver!
+
+  """
+  Updates the identity resolvers for an OIDC client.
+  """
+  updateOidcClientIdentityResolvers(clientId: ID!, identityResolverIds: [ID!]!): OidcClient!
+
+  """
   Generates a secret suitable for an OIDC client.
   """
   generateOidcClientSecret: String!
@@ -146,6 +164,21 @@ extend type Query {
     orderBy: OidcClaimMappingOrderBy
     orderDirection: OrderDirection
   ): [OidcClaimMapping!]!
+
+  """
+  Returns a single OIDC identity resolver by ID
+  """
+  oidcIdentityResolver(id: ID!): OidcIdentityResolver!
+  """
+  Returns OIDC identity resolvers, optionally matching the specified criteria.
+  """
+  findOidcIdentityResolvers(
+    where: OidcIdentityResolverWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: OidcIdentityResolverOrderBy
+    orderDirection: OrderDirection
+  ): [OidcIdentityResolver!]!
 }
 
 """
@@ -334,6 +367,151 @@ input OidcClaimMappingWhere {
 Fields that can be used for sorting OIDC claim mappings by.
 """
 enum OidcClaimMappingOrderBy {
+  name
+  createdAt
+  updatedAt
+}
+
+"""
+The strategy used to look up identities in an external identity store for OIDC identity resolvers.
+"""
+enum OidcIdentityLookupType {
+  """
+  Look up an identity in the external store by object identifier.
+  """
+  OBJECT_ID
+  """
+  Look up an identity in the external store by user principal name.
+  """
+  USER_PRINCIPAL_NAME
+  """
+  Look up an identity in the external store by email.
+  """
+  EMAIL
+}
+
+"""
+Input type for creating or updating an OIDC identity resolver.
+"""
+input OidcIdentityResolverInput {
+  """
+  The name of the identity resolver.
+  """
+  name: String!
+  """
+  The (optional) types of credentials that this identity resolver should be limited to.
+  """
+  credentialTypes: [String!]
+  """
+  The credential claim name used when resolving identities. Exactly one value will be present.
+  """
+  claimName: String!
+  """
+  The identity store that will be used to resolve identities.
+  """
+  identityStoreId: ID!
+  """
+  The lookup strategy that will be used in the identity store.
+  """
+  lookupType: OidcIdentityLookupType!
+}
+
+"""
+Represents an OIDC identity resolver, which maps credential claims to identities using an external identity store.
+"""
+type OidcIdentityResolver {
+  """
+  The unique identifier for the identity resolver.
+  """
+  id: ID!
+  """
+  The name of the identity resolver.
+  """
+  name: String!
+  """
+  The (optional) types of credentials that this identity resolver should be limited to.
+  """
+  credentialTypes: [String!]
+  """
+  The credential claim name used when resolving identities.
+  """
+  claimName: String!
+  """
+  The type of identity store used by this resolver.
+  """
+  identityStoreType: IdentityStoreType!
+  """
+  The identity store used to resolve identities.
+  """
+  identityStore: IdentityStore!
+  """
+  The lookup strategy that will be used in the identity store.
+  """
+  lookupType: OidcIdentityLookupType!
+  """
+  The user who created the resolver.
+  """
+  createdBy: User!
+  """
+  When the resolver was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who last updated the resolver.
+  """
+  updatedBy: User
+  """
+  When the resolver was last updated.
+  """
+  updatedAt: DateTime
+  """
+  When the resolver was deleted.
+  """
+  deletedAt: DateTime
+}
+
+"""
+Criteria for finding OIDC identity resolvers.
+"""
+input OidcIdentityResolverWhere {
+  """
+  List only identity resolvers matching this name.
+  """
+  name: String
+  """
+  List only identity resolvers for this credential type.
+  """
+  credentialType: String
+  """
+  List only identity resolvers for this identity store type.
+  """
+  identityStoreType: IdentityStoreType
+  """
+  List only identity resolvers for this identity store.
+  """
+  identityStoreId: ID
+  """
+  The ID of the user (Person or Application) that created the identity resolver.
+  """
+  createdById: ID
+  """
+  The start of the createdAt period to include.
+  """
+  createdFrom: DateTime
+  """
+  The end of the createdAt period to include.
+  """
+  createdTo: DateTime
+  """
+  List only the identity resolvers which are, or are not, deleted.
+  """
+  isDeleted: Boolean
+}
+
+"""
+Fields that can be used for sorting OIDC identity resolvers by.
+"""
+enum OidcIdentityResolverOrderBy {
   name
   createdAt
   updatedAt
@@ -585,6 +763,10 @@ type OidcClient {
   The claim mappings to be applied to this client.
   """
   claimMappings: [OidcClaimMapping!]!
+  """
+  The identity resolvers to be applied to this client.
+  """
+  identityResolvers: [OidcIdentityResolver!]!
   """
   The user who created the client.
   """

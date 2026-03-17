@@ -81,6 +81,9 @@ export const AuditEvents = {
   PRESENTATION_FLOW_TEMPLATE_CREATED: { id: 'VO0067', eventType: 'presentation.flow.template.created' },
   PRESENTATION_FLOW_TEMPLATE_UPDATED: { id: 'VO0068', eventType: 'presentation.flow.template.updated' },
   PRESENTATION_FLOW_TEMPLATE_DELETED: { id: 'VO0069', eventType: 'presentation.flow.template.deleted' },
+  PRESENTATION_IDENTITY_RESOLVER_FAILED: { id: 'VO0071', eventType: 'presentation.identity-resolver.failed' },
+  PRESENTATION_IDENTITY_RESOLUTION_FAILED: { id: 'VO0072', eventType: 'presentation.identity-resolution.failed' },
+  PRESENTATION_IDENTITY_RESOLVED: { id: 'VO0073', eventType: 'presentation.identity.resolved' },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Issuance Events (VO0080-VO0099)

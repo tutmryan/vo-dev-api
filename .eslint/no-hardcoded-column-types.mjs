@@ -25,7 +25,20 @@ const bannedTypes = {
   },
 }
 
-const columnDecorators = new Set(['Column', 'CreateDateColumn', 'UpdateDateColumn', 'PrimaryColumn'])
+const columnDecorators = new Set(['Column', 'CreateDateColumn', 'UpdateDateColumn', 'DeleteDateColumn', 'PrimaryColumn'])
+
+const transformerRequiredTypes = {
+  dateTimeOffsetType: {
+    transformer: 'dateTimeOffsetTransformer',
+    message:
+      "Columns with 'dateTimeOffsetType' must include the 'dateTimeOffsetTransformer' to ensure consistent Date handling across MSSQL and SQLite.",
+  },
+  datetimeoffset: {
+    transformer: 'dateTimeOffsetTransformer',
+    message:
+      "Columns with 'datetimeoffset' must include the 'dateTimeOffsetTransformer' to ensure consistent Date handling across MSSQL and SQLite.",
+  },
+}
 
 /** @type {import('eslint').Rule.RuleModule} */
 const rule = {
@@ -37,6 +50,7 @@ const rule = {
     messages: {
       bannedColumnType: '{{ message }}',
       bannedMaxLength: "Use 'varcharMaxLength' from crossDbColumnTypes instead of hardcoded 'MAX'. SQLite does not support 'MAX' length.",
+      missingTransformer: '{{ message }}',
     },
     schema: [],
   },
@@ -66,6 +80,28 @@ const rule = {
               node: typeProp.value,
               messageId: 'bannedColumnType',
               data: { message: banned.message },
+            })
+          }
+        }
+
+        const transformerProp = optionsArg.properties.find(
+          (prop) => prop.type === 'Property' && prop.key.type === 'Identifier' && prop.key.name === 'transformer',
+        )
+
+        const typeIdentifier =
+          typeProp.value.type === 'Identifier'
+            ? typeProp.value.name
+            : typeProp.value.type === 'Literal' && typeof typeProp.value.value === 'string'
+              ? typeProp.value.value
+              : undefined
+
+        if (typeIdentifier) {
+          const transformerRule = transformerRequiredTypes[typeIdentifier]
+          if (transformerRule && !transformerProp) {
+            context.report({
+              node: typeProp.value,
+              messageId: 'missingTransformer',
+              data: { message: transformerRule.message },
             })
           }
         }

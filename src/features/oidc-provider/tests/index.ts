@@ -1,7 +1,13 @@
 import casual from 'casual'
 import { graphql } from '../../../generated'
-import type { OidcClaimMappingInput } from '../../../generated/graphql'
-import { OidcApplicationType, OidcClientType, type OidcClientInput, type OidcResourceInput } from '../../../generated/graphql'
+import type { OidcClaimMappingInput, OidcIdentityResolverInput } from '../../../generated/graphql'
+import {
+  OidcApplicationType,
+  OidcClientType,
+  OidcIdentityLookupType,
+  type OidcClientInput,
+  type OidcResourceInput,
+} from '../../../generated/graphql'
 import { UserRoles } from '../../../roles'
 import { executeOperationAsUser } from '../../../test'
 
@@ -349,3 +355,107 @@ export const updateOidcClientClaimMappingsMutation = graphql(`
     }
   }
 `)
+
+graphql(`
+  fragment OidcIdentityResolverFragment on OidcIdentityResolver {
+    id
+    name
+    credentialTypes
+    claimName
+    identityStoreType
+    identityStore {
+      id
+      name
+    }
+    lookupType
+    createdAt
+    createdBy {
+      id
+      name
+    }
+    updatedAt
+    updatedBy {
+      id
+      name
+    }
+    deletedAt
+  }
+`)
+
+export const oidcIdentityResolverQuery = graphql(`
+  query OidcIdentityResolver($id: ID!) {
+    oidcIdentityResolver(id: $id) {
+      ...OidcIdentityResolverFragment
+    }
+  }
+`)
+
+export const findOidcIdentityResolversQuery = graphql(`
+  query FindOidcIdentityResolvers(
+    $where: OidcIdentityResolverWhere
+    $offset: PositiveInt
+    $limit: PositiveInt
+    $orderBy: OidcIdentityResolverOrderBy
+    $orderDirection: OrderDirection
+  ) {
+    findOidcIdentityResolvers(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {
+      ...OidcIdentityResolverFragment
+    }
+  }
+`)
+
+export const createOidcIdentityResolverMutation = graphql(`
+  mutation CreateOidcIdentityResolver($input: OidcIdentityResolverInput!) {
+    createOidcIdentityResolver(input: $input) {
+      ...OidcIdentityResolverFragment
+    }
+  }
+`)
+
+export const updateOidcIdentityResolverMutation = graphql(`
+  mutation UpdateOidcIdentityResolver($id: ID!, $input: OidcIdentityResolverInput!) {
+    updateOidcIdentityResolver(id: $id, input: $input) {
+      ...OidcIdentityResolverFragment
+    }
+  }
+`)
+
+export const deleteOidcIdentityResolverMutation = graphql(`
+  mutation DeleteOidcIdentityResolver($id: ID!) {
+    deleteOidcIdentityResolver(id: $id) {
+      ...OidcIdentityResolverFragment
+    }
+  }
+`)
+
+export const updateOidcClientIdentityResolversMutation = graphql(`
+  mutation UpdateOidcClientIdentityResolvers($clientId: ID!, $identityResolverIds: [ID!]!) {
+    updateOidcClientIdentityResolvers(clientId: $clientId, identityResolverIds: $identityResolverIds) {
+      ...OidcClientFragment
+      identityResolvers {
+        ...OidcIdentityResolverFragment
+      }
+    }
+  }
+`)
+
+export function createOidcIdentityResolverInput(
+  identityStoreId: string,
+  input: Partial<Omit<OidcIdentityResolverInput, 'identityStoreId'>> = {},
+): OidcIdentityResolverInput {
+  return {
+    name: casual.name,
+    credentialTypes: [casual.word],
+    claimName: casual.word,
+    identityStoreId,
+    lookupType: OidcIdentityLookupType.Email,
+    ...input,
+  }
+}
+
+export async function createOidcIdentityResolver(identityStoreId: string, input: Partial<OidcIdentityResolverInput> = {}) {
+  return executeOperationAsUser(
+    { query: createOidcIdentityResolverMutation, variables: { input: createOidcIdentityResolverInput(identityStoreId, input) } },
+    UserRoles.oidcAdmin,
+  )
+}
