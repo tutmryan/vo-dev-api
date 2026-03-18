@@ -11,7 +11,7 @@ input ConciergeClientBrandingInput {
   """
   The logo displayed during concierge authentication.
   """
-  logo: URL
+  logo: DataURL
   """
   The background color for concierge authentication screens.
   """
@@ -19,7 +19,7 @@ input ConciergeClientBrandingInput {
   """
   The background image for concierge authentication screens.
   """
-  backgroundImage: URL
+  backgroundImage: DataURL
 }
 
 extend type Mutation {
@@ -528,7 +528,7 @@ input OidcClientInput {
   """
   The URL of the client logo to be displayed during auth interactions, can be an image encoded as a data URL.
   """
-  logo: URL
+  logo: DataURL
   """
   The background color, to be displayed during auth interactions, in hexadecimal format.
   """
@@ -536,7 +536,7 @@ input OidcClientInput {
   """
   The URL of the background image to be displayed during auth interactions, can be an image encoded as a data URL.
   """
-  backgroundImage: URL
+  backgroundImage: DataURL
   """
   The URL of a privacy policy for the client, displayed during auth interactions.
   """
@@ -663,7 +663,7 @@ type OidcClient {
   """
   The URL of the client logo to be displayed during auth interactions, can be an image encoded as a data URL.
   """
-  logo: URL
+  logo: DataURL
   """
   The background color, to be displayed during auth interactions, in hexadecimal format.
   """
@@ -671,7 +671,7 @@ type OidcClient {
   """
   The URL of the background image to be displayed during auth interactions, can be an image encoded as a data URL.
   """
-  backgroundImage: URL
+  backgroundImage: DataURL
   """
   The URL of a privacy policy for the client, displayed during auth interactions.
   """

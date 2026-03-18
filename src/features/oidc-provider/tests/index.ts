@@ -186,6 +186,8 @@ export const updateConciergeClientBrandingMutation = graphql(`
   }
 `)
 
+const validDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8J8AAAAASUVORK5CYII='
+
 export function createOidcClientInput(input: Partial<OidcClientInput> = {}): OidcClientInput {
   return {
     name: casual.name,
@@ -195,9 +197,9 @@ export function createOidcClientInput(input: Partial<OidcClientInput> = {}): Oid
     postLogoutUris: [casual.url.toLowerCase().replace('http', 'https')],
     requireFaceCheck: casual.boolean,
     allowAnyPartner: casual.boolean,
-    logo: casual.url.toLowerCase(),
+    logo: validDataUrl,
     backgroundColor: casual.rgb_hex,
-    backgroundImage: casual.url.toLowerCase(),
+    backgroundImage: validDataUrl,
     credentialTypes: [casual.word],
     policyUrl: casual.url.toLowerCase(),
     termsOfServiceUrl: casual.url.toLowerCase(),

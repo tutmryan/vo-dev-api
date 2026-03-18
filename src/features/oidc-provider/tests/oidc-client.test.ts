@@ -673,12 +673,14 @@ describe('updateConciergeClientBranding mutation', () => {
   beforeAfterAll()
 
   let initClient: OidcClientEntity
+  const validDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8J8AAAAASUVORK5CYII='
+  const invalidDataUrl = `${validDataUrl}"></div><div><p>INJECTED HTML</p></div><a`
 
   beforeAll(async () => {
     initClient = await insertConciergeOidcClient({
-      logo: 'http://www.somelogo.com/img.png',
+      logo: validDataUrl,
       backgroundColor: '#fff',
-      backgroundImage: 'http://www.bg.com/img.png',
+      backgroundImage: validDataUrl,
     })
   })
 
@@ -701,7 +703,7 @@ describe('updateConciergeClientBranding mutation', () => {
   })
 
   it('can update only the logo field', async () => {
-    const input = { logo: 'https://new.logo/image.png' }
+    const input = { logo: validDataUrl }
     const { data, errors } = await executeOperationAsUser(
       { query: updateConciergeClientBrandingMutation, variables: { input } },
       UserRoles.oidcAdmin,
@@ -720,7 +722,7 @@ describe('updateConciergeClientBranding mutation', () => {
     const input = {
       name: '`SomeBrand`',
       backgroundColor: '#123456',
-      backgroundImage: 'https://img.com/bg.png',
+      backgroundImage: validDataUrl,
     }
     const { data, errors } = await executeOperationAsUser(
       { query: updateConciergeClientBrandingMutation, variables: { input } },
@@ -733,7 +735,29 @@ describe('updateConciergeClientBranding mutation', () => {
     expect(updated.name).toEqual(input.name)
     expect(updated.backgroundColor).toEqual(input.backgroundColor)
     expect(updated.backgroundImage).toEqual(input.backgroundImage)
-    expect(updated.logo).toEqual('https://new.logo/image.png') // previously updated
+    expect(updated.logo).toEqual(validDataUrl) // previously updated
+  })
+
+  it('rejects logo values that are not valid data URLs', async () => {
+    const input = { logo: invalidDataUrl }
+    const { errors } = await executeOperationAsUser(
+      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('RFC 2397')
+  })
+
+  it('rejects backgroundImage values that are not valid data URLs', async () => {
+    const input = { backgroundImage: invalidDataUrl }
+    const { errors } = await executeOperationAsUser(
+      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('RFC 2397')
   })
 
   it('resets fields to null/default when null', async () => {

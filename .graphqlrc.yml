@@ -45,6 +45,7 @@ extensions:
             PositiveInt: number
             NonNegativeInt: number
             PositiveFloat: number
+            DataURL: string
             URL: string
             DateTime: Date
             Locale: string

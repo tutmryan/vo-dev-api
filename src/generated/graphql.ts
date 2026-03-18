@@ -41,6 +41,8 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  /** A field whose value conforms to the `data:` URL format as specified in RFC 2397. */
+  DataURL: { input: string; output: string; }
   /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
   DateTime: { input: Date; output: Date; }
   /** A field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address. */
@@ -776,9 +778,9 @@ export type ConciergeClientBrandingInput = {
   /** The background color for concierge authentication screens. */
   backgroundColor?: InputMaybe<Scalars['String']['input']>;
   /** The background image for concierge authentication screens. */
-  backgroundImage?: InputMaybe<Scalars['URL']['input']>;
+  backgroundImage?: InputMaybe<Scalars['DataURL']['input']>;
   /** The logo displayed during concierge authentication. */
-  logo?: InputMaybe<Scalars['URL']['input']>;
+  logo?: InputMaybe<Scalars['DataURL']['input']>;
   /** The display name shown in concierge flows. */
   name?: InputMaybe<Scalars['String']['input']>;
 };
@@ -3472,7 +3474,7 @@ export type OidcClient = {
   /** The background color, to be displayed during auth interactions, in hexadecimal format. */
   backgroundColor?: Maybe<Scalars['String']['output']>;
   /** The URL of the background image to be displayed during auth interactions, can be an image encoded as a data URL. */
-  backgroundImage?: Maybe<Scalars['URL']['output']>;
+  backgroundImage?: Maybe<Scalars['DataURL']['output']>;
   /** The claim mappings to be applied to this client. */
   claimMappings: Array<OidcClaimMapping>;
   /** The client's public key set (JWKS) as a JSON string, used for `private_key_jwt` client authentication. */
@@ -3500,7 +3502,7 @@ export type OidcClient = {
   /** The identity resolvers to be applied to this client. */
   identityResolvers: Array<OidcIdentityResolver>;
   /** The URL of the client logo to be displayed during auth interactions, can be an image encoded as a data URL. */
-  logo?: Maybe<Scalars['URL']['output']>;
+  logo?: Maybe<Scalars['DataURL']['output']>;
   /** The name of the client. */
   name: Scalars['String']['output'];
   /** The partners that the client allows presentations of credentials from. */
@@ -3562,7 +3564,7 @@ export type OidcClientInput = {
   /** The background color, to be displayed during auth interactions, in hexadecimal format. */
   backgroundColor?: InputMaybe<Scalars['String']['input']>;
   /** The URL of the background image to be displayed during auth interactions, can be an image encoded as a data URL. */
-  backgroundImage?: InputMaybe<Scalars['URL']['input']>;
+  backgroundImage?: InputMaybe<Scalars['DataURL']['input']>;
   /**
    * The client's public key set (JWKS) as a JSON string, used for `private_key_jwt` client authentication.
    *
@@ -3596,7 +3598,7 @@ export type OidcClientInput = {
    */
   credentialTypes?: InputMaybe<Array<Scalars['String']['input']>>;
   /** The URL of the client logo to be displayed during auth interactions, can be an image encoded as a data URL. */
-  logo?: InputMaybe<Scalars['URL']['input']>;
+  logo?: InputMaybe<Scalars['DataURL']['input']>;
   /** The name of the client. */
   name: Scalars['String']['input'];
   /** The IDs of the partners that the client allows presentations of credentials from. */
@@ -6791,6 +6793,7 @@ export type ResolversTypes = {
   DataOption: ResolverTypeWrapper<DataOption>;
   DataOptionInput: DataOptionInput;
   DataType: DataType;
+  DataURL: ResolverTypeWrapper<Scalars['DataURL']['output']>;
   DateCount: ResolverTypeWrapper<DateCount>;
   DateTime: ResolverTypeWrapper<Scalars['DateTime']['output']>;
   DidDocumentStatus: DidDocumentStatus;
@@ -7081,6 +7084,7 @@ export type ResolversParentTypes = {
   DataDefinitionInput: DataDefinitionInput;
   DataOption: DataOption;
   DataOptionInput: DataOptionInput;
+  DataURL: Scalars['DataURL']['output'];
   DateCount: DateCount;
   DateTime: Scalars['DateTime']['output'];
   Discovery: Discovery;
@@ -7556,6 +7560,10 @@ export type DataOptionResolvers<ContextType = GraphQLContext, ParentType extends
   label?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
+export interface DataUrlScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes['DataURL'], any> {
+  name: 'DataURL';
+}
+
 export type DateCountResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['DateCount'] = ResolversParentTypes['DateCount']> = {
   count?: Resolver<ResolversTypes['NonNegativeInt'], ParentType, ContextType>;
   date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
@@ -8010,7 +8018,7 @@ export type OidcClientResolvers<ContextType = GraphQLContext, ParentType extends
   authorizationRequestsTypeJarEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   authorizationRequestsTypeStandardEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   backgroundColor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  backgroundImage?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
+  backgroundImage?: Resolver<Maybe<ResolversTypes['DataURL']>, ParentType, ContextType>;
   claimMappings?: Resolver<Array<ResolversTypes['OidcClaimMapping']>, ParentType, ContextType>;
   clientJwks?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   clientJwksUri?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
@@ -8021,7 +8029,7 @@ export type OidcClientResolvers<ContextType = GraphQLContext, ParentType extends
   deletedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identityResolvers?: Resolver<Array<ResolversTypes['OidcIdentityResolver']>, ParentType, ContextType>;
-  logo?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
+  logo?: Resolver<Maybe<ResolversTypes['DataURL']>, ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   partners?: Resolver<Array<ResolversTypes['Partner']>, ParentType, ContextType>;
   policyUrl?: Resolver<Maybe<ResolversTypes['URL']>, ParentType, ContextType>;
@@ -8561,6 +8569,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   DataConstraints?: DataConstraintsResolvers<ContextType>;
   DataDefinition?: DataDefinitionResolvers<ContextType>;
   DataOption?: DataOptionResolvers<ContextType>;
+  DataURL?: GraphQLScalarType;
   DateCount?: DateCountResolvers<ContextType>;
   DateTime?: GraphQLScalarType;
   Discovery?: DiscoveryResolvers<ContextType>;
