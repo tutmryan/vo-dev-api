@@ -1,2 +1,14 @@
-node_modules
+**/node_modules
 build
+.git
+.gitignore
+**/.DS_Store
+*.log
+.env*
+**/*.swp
+**/*.swo
+**/.docusaurus
+**/Dockerfile*
+**/*.md
+fly.docs-site.toml
+!./docs-site/scripts/*.md

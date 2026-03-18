@@ -27,3 +27,16 @@ $ npm build<:env>
 ```
 
 This command generates static content into the `build` directory and can be served using any static contents hosting service.
+
+### Docker builds
+The current Dockerfile can take a while to build, to speed it up you can do the following
+```bash
+mkdir -p /tmp/docker-cache
+# From project root
+docker buildx build \
+  --cache-from type=local,src=/tmp/docker-cache \
+  --cache-to type=local,dest=/tmp/docker-cache,mode=max \
+  -t local-docs \
+  -f docs-site/Dockerfile \
+  .
+```
