@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class IncreaseApprovalRequestPurposeFieldSize1726558265962 implements MigrationInterface {
   name = 'IncreaseApprovalRequestPurposeFieldSize1726558265962'

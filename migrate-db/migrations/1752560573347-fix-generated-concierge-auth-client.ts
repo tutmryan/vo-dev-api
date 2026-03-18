@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class FixGeneratedConciergeAuthClient1752560573347 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {

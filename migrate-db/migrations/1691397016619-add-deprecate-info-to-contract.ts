@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddDeprecateInfoToContract1691397016619 implements MigrationInterface {
   name = 'AddDeprecateInfoToContract1691397016619'

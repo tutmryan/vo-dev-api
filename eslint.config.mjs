@@ -8,7 +8,7 @@ import uuidRequiresTransformer from './.eslint/uuid-requires-transformer.mjs'
 export default [
   // Ignore build artifacts
   {
-    ignores: ['build/**', '**/dist/**', 'node_modules/**'],
+    ignores: ['build/**', 'migrate-db/build/**', '**/dist/**', 'node_modules/**'],
   },
 
   js.configs.recommended,
@@ -102,7 +102,7 @@ export default [
         'error',
         {
           ignoreRestSiblings: true,
-          argsIgnorePattern: '^_',
+          argsIgnorePattern: '^(_|queryRunner$)',
           varsIgnorePattern: '^_',
           destructuredArrayIgnorePattern: '^_',
           caughtErrorsIgnorePattern: '.*',

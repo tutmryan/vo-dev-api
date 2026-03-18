@@ -1,10 +1,10 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddIdentityStoreTable1754410972843 implements MigrationInterface {
-    name = 'AddIdentityStoreTable1754410972843'
+  name = 'AddIdentityStoreTable1754410972843'
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             CREATE TABLE "identity_store" (
                 "id" uniqueidentifier NOT NULL,
                 "created_at" datetimeoffset NOT NULL CONSTRAINT "DF_1535742d68c32753178eb092a42" DEFAULT getdate(),
@@ -20,8 +20,8 @@ export class AddIdentityStoreTable1754410972843 implements MigrationInterface {
                 CONSTRAINT "uq_identity_store_identifier" UNIQUE ("identifier"),
                 CONSTRAINT "id_identity_store" PRIMARY KEY ("id")
             )
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             CREATE TABLE "identity_store_audit" (
                 "id" uniqueidentifier NOT NULL,
                 "entity_id" uniqueidentifier NOT NULL,
@@ -31,37 +31,36 @@ export class AddIdentityStoreTable1754410972843 implements MigrationInterface {
                 "user_id" uniqueidentifier,
                 CONSTRAINT "id_identity_store_audit" PRIMARY KEY ("id")
             )
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "identity_store"
             ADD CONSTRAINT "fk_identity_store_user_created_by_id" FOREIGN KEY ("created_by_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "identity_store"
             ADD CONSTRAINT "fk_identity_store_user_updated_by_id" FOREIGN KEY ("updated_by_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "identity_store_audit"
             ADD CONSTRAINT "fk_identity_store_audit_user_user_id" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-    }
+        `)
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             ALTER TABLE "identity_store_audit" DROP CONSTRAINT "fk_identity_store_audit_user_user_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "identity_store" DROP CONSTRAINT "fk_identity_store_user_updated_by_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "identity_store" DROP CONSTRAINT "fk_identity_store_user_created_by_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP TABLE "identity_store_audit"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP TABLE "identity_store"
-        `);
-    }
-
+        `)
+  }
 }

@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class MigrateApprovalRequestsToPresentationFlows1769078316171 implements MigrationInterface {
   name = 'MigrateApprovalRequestsToPresentationFlows1769078316171'

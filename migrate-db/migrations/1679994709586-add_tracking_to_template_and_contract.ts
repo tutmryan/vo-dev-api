@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class addTrackingToTemplateAndContract1679994709586 implements MigrationInterface {
   name = 'addTrackingToTemplateAndContract1679994709586'

@@ -1,4 +1,5 @@
-import spawn = require('cross-spawn')
+/* eslint-disable no-console */
+import spawn from 'cross-spawn'
 import * as dotenv from 'dotenv'
 import { resolve } from 'path'
 

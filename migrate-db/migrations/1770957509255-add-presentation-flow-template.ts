@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddPresentationFlowTemplate1770957509255 implements MigrationInterface {
   name = 'AddPresentationFlowTemplate1770957509255'

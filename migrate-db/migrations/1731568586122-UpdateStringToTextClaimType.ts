@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class UpdateStringToTextClaimType1731568586122 implements MigrationInterface {
   name = 'UpdateStringToTextClaimType1731568586122'

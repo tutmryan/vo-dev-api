@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddErrorToCommuncationsEntity1725407706575 implements MigrationInterface {
   name = 'AddErrorToCommuncationsEntity1725407706575'

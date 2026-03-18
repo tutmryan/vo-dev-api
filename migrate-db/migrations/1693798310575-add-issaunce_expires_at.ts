@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddIssaunceExpiresAt1693798310575 implements MigrationInterface {
   name = 'AddIssaunceExpiresAt1693798310575'
