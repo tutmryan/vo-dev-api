@@ -24,21 +24,35 @@ LABEL org.opencontainers.image.description="Verified Orchestration API Documenta
 
 COPY --from=build /app/docs-site/build /usr/share/nginx/html
 
+RUN cat > /docker-entrypoint.sh <<'EOF'
+#!/bin/sh
+set -e
+if [ -z "$DOCS_SITE_URL_OLD" ] || [ -z "$DOCS_SITE_URL" ]; then
+  echo "Error: DOCS_SITE_URL_OLD and DOCS_SITE_URL environment variables must be set"
+  exit 1
+fi
+sed -i "s/DOCS_SITE_URL_OLD/${DOCS_SITE_URL_OLD}/g" /etc/nginx/conf.d/default.conf
+sed -i "s/DOCS_SITE_URL/${DOCS_SITE_URL}/g" /etc/nginx/conf.d/default.conf
+exec nginx -g "daemon off;"
+EOF
+
+RUN chmod +x /docker-entrypoint.sh
 RUN cat > /etc/nginx/conf.d/default.conf <<'EOF'
 server {
   listen 3000;
   listen [::]:3000;
-  server_name docs.verifiedorchestration.com;
-  return 301 https://docs.idbyvo.com$request_uri;
+  server_name DOCS_SITE_URL_OLD;
+  return 301 https://DOCS_SITE_URL$request_uri;
 }
 
 server {
   listen 3000;
   listen [::]:3000;
-  server_name docs.idbyvo.com;
+  server_name DOCS_SITE_URL;
 
   root /usr/share/nginx/html;
   index index.html;
+  absolute_redirect off;
 
   location / {
     try_files $uri $uri/ /index.html;
@@ -51,4 +65,4 @@ server {
 }
 EOF
 EXPOSE 3000
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

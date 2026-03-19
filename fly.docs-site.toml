@@ -1,4 +1,5 @@
-app = "docs-site"
+
+app = "docs-vo"
 primary_region = "syd"
 
 [build]
