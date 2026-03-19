@@ -744,6 +744,24 @@ param redisCacheFamily string
 ])
 param redisCacheCapacity int
 
+@description('Specify the SKU for the Managed Redis (Redis Enterprise) instance.')
+@allowed([
+  'MemoryOptimized_M10'
+  'MemoryOptimized_M20'
+  'MemoryOptimized_M50'
+  'MemoryOptimized_M100'
+  'ComputeOptimized_X5'
+  'ComputeOptimized_X10'
+  'ComputeOptimized_X20'
+  'Balanced_B0'
+  'Balanced_B1'
+  'Balanced_B3'
+  'Balanced_B5'
+  'Balanced_B10'
+  'Balanced_B20'
+])
+param managedRedisSKU string = 'Balanced_B0'
+
 var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
 
 @description('The shared action group for alerts, if action group for alerts has not been set up yet this param value will be empty')
@@ -769,8 +787,31 @@ resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
   }
 }
 
-resource redisCachePrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = {
-  name: '${resourcePrefix}-redis-pe'
+// Managed Redis (Redis Enterprise) resources
+resource managedRedis 'Microsoft.Cache/redisEnterprise@2024-09-01-preview' = {
+  name: '${resourcePrefix}-managed-redis-${uniqueSuffix}'
+  location: location
+  sku: {
+    name: managedRedisSKU
+  }
+  properties: {
+    minimumTlsVersion: '1.2'
+  }
+}
+
+resource managedRedisDatabase 'Microsoft.Cache/redisEnterprise/databases@2024-09-01-preview' = {
+  parent: managedRedis
+  name: 'default'
+  properties: {
+    clientProtocol: 'Encrypted'
+    evictionPolicy: 'AllKeysLRU'
+    clusteringPolicy: 'EnterpriseCluster'
+    port: 10000
+  }
+}
+
+resource managedRedisPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = {
+  name: '${resourcePrefix}-managed-redis-pe'
   location: location
   properties: {
     subnet: {
@@ -778,18 +819,18 @@ resource redisCachePrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-0
     }
     privateLinkServiceConnections: [
       {
-        name: '${resourcePrefix}-redis-private-link'
+        name: '${resourcePrefix}-managed-redis-private-link'
         properties: {
-          privateLinkServiceId: redisCache.id
-          groupIds: ['redisCache']
+          privateLinkServiceId: managedRedis.id
+          groupIds: ['redisEnterprise']
         }
       }
     ]
   }
 }
 
-resource redisCachePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2025-01-01' = {
-  parent: redisCachePrivateEndpoint
+resource managedRedisCachePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneGroups@2025-01-01' = {
+  parent: managedRedisPrivateEndpoint
   name: 'default'
   properties: {
     privateDnsZoneConfigs: [
@@ -799,7 +840,7 @@ resource redisCachePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/priva
           privateDnsZoneId: resourceId(
             sharedResourceGroupName,
             'Microsoft.Network/privateDnsZones',
-            'privatelink.redis.cache.windows.net'
+            'privatelink.redis.azure.net'
           )
         }
       }
@@ -807,38 +848,24 @@ resource redisCachePrivateDnsZoneGroup 'Microsoft.Network/privateEndpoints/priva
   }
 }
 
-resource redisKeySecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
-  name: 'REDIS-KEY'
+resource managedRedisKeySecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' = {
+  name: 'MANAGED-REDIS-KEY'
   parent: keyVault
   properties: {
     attributes: {
       enabled: true
     }
-    value: redisCache.listKeys().primaryKey
+    #disable-next-line BCP422
+    value: managedRedisDatabase.listKeys().primaryKey
   }
 }
 
-resource redisCacheDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  scope: redisCache
-  name: 'diagnostics'
-  properties: {
-    workspaceId: logAnalytics.id
-    metrics: [
-      {
-        category: 'AllMetrics'
-        enabled: true
-        timeGrain: null
-      }
-    ]
-  }
-}
-
-@description('Redis metric alert configurations with independent alert rules')
-var redisAlerts = [
+// Managed Redis metric alerts
+var managedRedisAlerts = [
   {
     nameSuffix: 'memory'
-    description: 'Redis used memory percentage is high'
-    metricName: 'usedmemorypercentage'
+    description: 'Managed Redis used memory is high'
+    metricName: 'usedmemory'
     aggregation: 'Maximum'
     threshold: 80
     useDynamicThreshold: false
@@ -848,20 +875,8 @@ var redisAlerts = [
     evaluationFrequency: 'PT1M'
   }
   {
-    nameSuffix: 'server-load'
-    description: 'Redis server load is high'
-    metricName: 'serverLoad'
-    aggregation: 'Average'
-    threshold: 80
-    useDynamicThreshold: false
-    alertSensitivity: null
-    failingPeriods: null
-    severity: 1
-    evaluationFrequency: 'PT5M'
-  }
-  {
     nameSuffix: 'cpu'
-    description: 'Redis CPU usage is high'
+    description: 'Managed Redis CPU usage is high'
     metricName: 'percentProcessorTime'
     aggregation: 'Maximum'
     threshold: 80
@@ -872,8 +887,20 @@ var redisAlerts = [
     evaluationFrequency: 'PT5M'
   }
   {
+    nameSuffix: 'server-load'
+    description: 'Managed Redis server load is high'
+    metricName: 'serverLoad'
+    aggregation: 'Average'
+    threshold: 80
+    useDynamicThreshold: false
+    alertSensitivity: null
+    failingPeriods: null
+    severity: 1
+    evaluationFrequency: 'PT5M'
+  }
+  {
     nameSuffix: 'clients'
-    description: 'Redis connected clients is high'
+    description: 'Managed Redis connected clients is high'
     metricName: 'connectedclients'
     aggregation: 'Maximum'
     threshold: 5625
@@ -883,33 +910,18 @@ var redisAlerts = [
     severity: 1
     evaluationFrequency: 'PT5M'
   }
-  {
-    nameSuffix: 'cache-read'
-    description: 'Redis cache read throughput is high'
-    metricName: 'cacheRead'
-    aggregation: 'Average'
-    threshold: null
-    useDynamicThreshold: true
-    alertSensitivity: 'Medium'
-    failingPeriods: {
-      numberOfEvaluationPeriods: 4
-      minFailingPeriodsToAlert: 4
-    }
-    severity: 1
-    evaluationFrequency: 'PT5M'
-  }
 ]
 
-resource redisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
-  for alert in redisAlerts: if (!empty(actionGroupAlertName)) {
-    name: '${resourcePrefix}-redis-${alert.nameSuffix}-alert'
+resource managedRedisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
+  for alert in managedRedisAlerts: if (!empty(actionGroupAlertName)) {
+    name: '${resourcePrefix}-managed-redis-${alert.nameSuffix}-alert'
     location: 'global'
     properties: {
       description: alert.description
       severity: alert.severity
       enabled: true
       scopes: [
-        redisCache.id
+        managedRedis.id
       ]
       evaluationFrequency: alert.evaluationFrequency
       windowSize: 'PT5M'
@@ -919,7 +931,7 @@ resource redisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
               {
                 name: alert.metricName
                 criterionType: 'DynamicThresholdCriterion'
-                metricNamespace: 'Microsoft.Cache/Redis'
+                metricNamespace: 'Microsoft.Cache/redisEnterprise'
                 metricName: alert.metricName
                 operator: 'GreaterThan'
                 alertSensitivity: alert.alertSensitivity!
@@ -935,7 +947,7 @@ resource redisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
               {
                 name: alert.metricName
                 criterionType: 'StaticThresholdCriterion'
-                metricNamespace: 'Microsoft.Cache/Redis'
+                metricNamespace: 'Microsoft.Cache/redisEnterprise'
                 metricName: alert.metricName
                 operator: 'GreaterThan'
                 threshold: alert.threshold!
@@ -946,7 +958,7 @@ resource redisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
             'odata.type': 'Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria'
           }
       autoMitigate: true
-      targetResourceType: 'Microsoft.Cache/Redis'
+      targetResourceType: 'Microsoft.Cache/redisEnterprise'
       targetResourceRegion: location
       actions: [
         {
@@ -1544,8 +1556,9 @@ resource apiAppServiceSlotConfig 'Microsoft.Web/sites/slots/config@2022-03-01' =
     EMAIL_WEBHOOK_FORWARDER_SECRET: '@Microsoft.KeyVault(SecretUri=${emailWebhookForwarderSecretSecret.properties.secretUri})'
     DATABASE_HOST: '${sqlServerName}${az.environment().suffixes.sqlServerHostname}'
     DATABASE_NAME: '${resourcePrefix}-sql-db'
-    REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${redisKeySecret.properties.secretUri})'
-    REDIS_HOST: '${redisCache.name}.redis.cache.windows.net'
+    REDIS_KEY: '@Microsoft.KeyVault(SecretUri=${managedRedisKeySecret.properties.secretUri})'
+    REDIS_HOST: managedRedis.properties.hostName
+    REDIS_PORT: string(managedRedisDatabase.properties.port)
     BLOB_STORAGE_URL: 'https://${verifiedOrchestrationStorage.name}.blob.${az.environment().suffixes.storage}'
     PRIVATE_BLOB_STORAGE_URL: 'https://${privateStorageAccount.name}.blob.${az.environment().suffixes.storage}'
     PRIVATE_STORAGE_ENCRYPTION_KEY: '@Microsoft.KeyVault(SecretUri=${(empty(privateStorageClientEncryptionKey) ? privateStorageClientEncryptionKeySecretExisting : privateStorageClientEncryptionKeySecret).properties.secretUri})'
@@ -1606,11 +1619,11 @@ var serialisedWorkBookData = replace(
       '<appInsightsResourceName>',
       apiAppInsights.name
     ),
-    '<redisCacheResourceId>',
-    redisCache.id
+    '<managedRedisResourceId>',
+    managedRedis.id
   ),
-  '<redisCacheResourceName>',
-  redisCache.name
+  '<managedRedisResourceName>',
+  managedRedis.name
 )
 
 resource workbook 'Microsoft.Insights/workbooks@2023-06-01' = {

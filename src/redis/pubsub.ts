@@ -1,11 +1,10 @@
 import { RedisPubSub } from 'graphql-redis-subscriptions'
 import { PubSub } from 'graphql-subscriptions'
-import { createRedisClient, redisOptions } from '.'
-import { redis } from '../config'
+import { createRedisClient, isRedisEnabled, redisOptions } from '.'
 import { Lazy } from '../util/lazy'
 
-const publisherClient = Lazy(() => (redis.host ? createRedisClient('publisher', { ...redisOptions, lazyConnect: true }) : undefined))
-const subscriberClient = Lazy(() => (redis.host ? createRedisClient('subscriber', { ...redisOptions, lazyConnect: true }) : undefined))
+const publisherClient = Lazy(() => (isRedisEnabled ? createRedisClient('publisher', { ...redisOptions, lazyConnect: true }) : undefined))
+const subscriberClient = Lazy(() => (isRedisEnabled ? createRedisClient('subscriber', { ...redisOptions, lazyConnect: true }) : undefined))
 
 /**
  * Initialises pubsub clients, ensuring they are connected before use.
@@ -18,7 +17,7 @@ export async function initialisePubsub() {
 }
 
 export const pubsub = Lazy(() =>
-  redis.host ? new RedisPubSub({ publisher: publisherClient(), subscriber: subscriberClient() }) : new PubSub(),
+  isRedisEnabled ? new RedisPubSub({ publisher: publisherClient(), subscriber: subscriberClient() }) : new PubSub(),
 )
 
 /**

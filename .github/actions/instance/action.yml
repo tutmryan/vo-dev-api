@@ -100,6 +100,11 @@ inputs:
     description: Capacity of the Azure Redis Cache
     required: true
 
+  managed-redis-sku:
+    description: SKU of the Managed Redis (Redis Enterprise)
+    required: false
+    default: 'Balanced_B0'
+
   app-service-plan-id:
     description: ID of the App Service Plan to use as the serverFarmId for the app service(s)
     required: true
@@ -385,6 +390,7 @@ runs:
           redisCacheSKU=${{ inputs.redis-cache-sku }}
           redisCacheFamily=${{ inputs.redis-cache-family }}
           redisCacheCapacity=${{ inputs.redis-cache-capacity }}
+          managedRedisSKU=${{ inputs.managed-redis-sku }}
           appServicePlanId=${{ inputs.app-service-plan-id }}
           appServiceZoneRedundant=${{ inputs.app-service-zone-redundant }}
           nodeEnv=${{ inputs.node-env }}

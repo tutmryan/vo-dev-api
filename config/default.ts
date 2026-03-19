@@ -47,7 +47,7 @@ const config: DeepPartial<Config> = {
     httpOnly: true,
   },
   redis: {
-    port: 6380,
+    port: 10000,
   },
   database: {
     port: 1433,
