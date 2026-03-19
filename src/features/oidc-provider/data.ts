@@ -230,6 +230,12 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
       await clientRepo.save(portalClient)
       updatedConfig = true
     }
+    // backfill tokenEndpointAuthMethod for legacy portal clients that were created without it
+    if (portalClient && portalClient.tokenEndpointAuthMethod === null) {
+      portalClient.tokenEndpointAuthMethod = OidcTokenEndpointAuthMethod.None
+      await clientRepo.save(portalClient)
+      updatedConfig = true
+    }
     if (apiResource && !apiResourceHasCorrectScope(apiResource)) {
       apiResource.resourceIndicator = apiUrl
       await resourceRepo.save(apiResource)
@@ -260,6 +266,7 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
           name: portalClientName,
           applicationType: OidcApplicationType.Web,
           clientType: OidcClientType.Public,
+          tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.None,
           redirectUris: [portalRedirectUri, portalDemoRedirectUri],
           postLogoutUris: [portalRedirectUri, portalDemoRedirectUri],
           allowAnyPartner: true,

@@ -873,6 +873,47 @@ describe('oidcClient query', () => {
     expect(data?.oidcClient).toBeUndefined()
     expect(errors?.[0]?.message).toEqual(`OIDC client not found: ${id}`)
   })
+
+  it('returns the fallback tokenEndpointAuthMethod for a legacy public client stored with null', async () => {
+    // Arrange - directly insert a legacy client without tokenEndpointAuthMethod (null in DB)
+    const userId = faker.string.uuid()
+    let legacyClientId!: string
+
+    await inTransaction(async (em) => {
+      await em.getRepository(UserEntity).save({
+        id: userId,
+        oid: faker.string.uuid(),
+        tenantId: faker.string.uuid(),
+        email: 'legacy-test@example.com',
+        name: 'Legacy Test User',
+        isApp: false,
+      })
+    }, userId)
+
+    await inTransaction(async (em) => {
+      const client = new OidcClientEntity({
+        name: 'Legacy Public Client',
+        applicationType: OidcApplicationType.Web,
+        clientType: OidcClientType.Public,
+        redirectUris: ['https://example.com/cb'],
+        postLogoutUris: ['https://example.com/logout'],
+      })
+      // tokenEndpointAuthMethod is not set, resulting in null in the DB
+      await em.getRepository(OidcClientEntity).save(client)
+      legacyClientId = client.id
+    }, userId)
+
+    // Act
+    const { data, errors } = await executeOperationAsUser(
+      { query: oidcClientQuery, variables: { id: legacyClientId } },
+      UserRoles.oidcAdmin,
+    )
+
+    // Assert - the resolver must fall back to None for legacy public clients
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.oidcClient)
+    expect(data.oidcClient.tokenEndpointAuthMethod).toEqual(OidcTokenEndpointAuthMethod.None)
+  })
 })
 
 describe('findOidcClients query', () => {
