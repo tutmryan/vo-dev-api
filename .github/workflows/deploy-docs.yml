@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'docs-site/**'
+      - 'src/generated/schema.json'
+      - 'src/roles.ts'
+      - 'src/__snapshots__/shield.test.ts.snap'
+      - 'src/audit-types.ts'
+      - 'infrastructure/scripts/app-roles.json'
+      - '.github/workflows/deploy-docs.yml'
+      - 'fly.docs-site.toml'
   release:
     types: [created]
   workflow_dispatch:
