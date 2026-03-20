@@ -763,6 +763,7 @@ param redisCacheCapacity int
 param managedRedisSKU string = 'Balanced_B0'
 
 var uniqueSuffix = toLower(uniqueString(resourceGroup().id))
+var managedRedisUniqueSuffix = substring(uniqueSuffix, 0, 8)
 
 @description('The shared action group for alerts, if action group for alerts has not been set up yet this param value will be empty')
 param actionGroupAlertName string
@@ -789,7 +790,7 @@ resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
 
 // Managed Redis (Redis Enterprise) resources
 resource managedRedis 'Microsoft.Cache/redisEnterprise@2024-09-01-preview' = {
-  name: '${resourcePrefix}-managed-redis-${uniqueSuffix}'
+  name: '${resourcePrefix}-mgd-redis-${managedRedisUniqueSuffix}'
   location: location
   sku: {
     name: managedRedisSKU
@@ -811,7 +812,7 @@ resource managedRedisDatabase 'Microsoft.Cache/redisEnterprise/databases@2024-09
 }
 
 resource managedRedisPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10-01' = {
-  name: '${resourcePrefix}-managed-redis-pe'
+  name: '${resourcePrefix}-mgd-redis-pe'
   location: location
   properties: {
     subnet: {
@@ -819,7 +820,7 @@ resource managedRedisPrivateEndpoint 'Microsoft.Network/privateEndpoints@2024-10
     }
     privateLinkServiceConnections: [
       {
-        name: '${resourcePrefix}-managed-redis-private-link'
+        name: '${resourcePrefix}-mgd-redis-private-link'
         properties: {
           privateLinkServiceId: managedRedis.id
           groupIds: ['redisEnterprise']
@@ -914,7 +915,7 @@ var managedRedisAlerts = [
 
 resource managedRedisMetricAlerts 'Microsoft.Insights/metricAlerts@2018-03-01' = [
   for alert in managedRedisAlerts: if (!empty(actionGroupAlertName)) {
-    name: '${resourcePrefix}-managed-redis-${alert.nameSuffix}-alert'
+    name: '${resourcePrefix}-mgd-redis-${alert.nameSuffix}-alert'
     location: 'global'
     properties: {
       description: alert.description
