@@ -132,23 +132,6 @@
             "jsonData": "[\n {\n \"value\": \"<appInsightsResourceId>\",\n \"label\": \"<appInsightsResourceName>\",\n \"selected\": true\n }\n]"
           },
           {
-            "id": "6b2de158-e36c-46a6-bc94-d6ede02e732f",
-            "version": "KqlParameterItem/1.0",
-            "name": "RedisCacheResource",
-            "label": "Redis cache resource",
-            "type": 5,
-            "isRequired": true,
-            "multiSelect": true,
-            "quote": "'",
-            "delimiter": ",",
-            "isHiddenWhenLocked": true,
-            "typeSettings": {
-              "additionalResourceOptions": [],
-              "showDefault": false
-            },
-            "jsonData": "[\n {\n \"value\": \"<redisCacheResourceId>\",\n \"label\": \"<redisCacheResourceName>\",\n \"selected\": true\n }\n]"
-          },
-          {
             "id": "7c3ef269-f47d-57fa-cd05-e7fef03f623e",
             "version": "KqlParameterItem/1.0",
             "name": "ManagedRedisResource",
@@ -624,81 +607,6 @@
         ]
       },
       "name": "Application Insights"
-    },
-    {
-      "type": 12,
-      "content": {
-        "version": "NotebookGroup/1.0",
-        "groupType": "editable",
-        "title": "Azure Cache for Redis",
-        "expandable": true,
-        "expanded": true,
-        "items": [
-          {
-            "type": 10,
-            "content": {
-              "chartId": "a08ab8ac-676d-42d3-87e1-0653ee26468d",
-              "version": "MetricsItem/2.0",
-              "size": 0,
-              "chartType": 2,
-              "resourceType": "microsoft.cache/redis",
-              "metricScope": 0,
-              "resourceParameter": "RedisCacheResource",
-              "resourceIds": ["{RedisCacheResource}"],
-              "timeContextFromParameter": "Timerange",
-              "timeContext": {
-                "durationMs": 3600000
-              },
-              "metrics": [
-                {
-                  "namespace": "microsoft.cache/redis",
-                  "metric": "microsoft.cache/redis--usedmemory",
-                  "aggregation": 3
-                }
-              ],
-              "title": "Memory Usage",
-              "timeBrushParameterName": "Timerange",
-              "gridSettings": {
-                "rowLimit": 10000
-              }
-            },
-            "customWidth": "50",
-            "name": "metric - 1"
-          },
-          {
-            "type": 10,
-            "content": {
-              "chartId": "05825840-9812-4692-adc0-dc9da72fd4e5",
-              "version": "MetricsItem/2.0",
-              "size": 0,
-              "chartType": 2,
-              "resourceType": "microsoft.cache/redis",
-              "metricScope": 0,
-              "resourceParameter": "RedisCacheResource",
-              "resourceIds": ["{RedisCacheResource}"],
-              "timeContextFromParameter": "Timerange",
-              "timeContext": {
-                "durationMs": 3600000
-              },
-              "metrics": [
-                {
-                  "namespace": "microsoft.cache/redis",
-                  "metric": "microsoft.cache/redis--serverLoad",
-                  "aggregation": 3
-                }
-              ],
-              "title": "Redis Server Load",
-              "timeBrushParameterName": "Timerange",
-              "gridSettings": {
-                "rowLimit": 10000
-              }
-            },
-            "customWidth": "50",
-            "name": "metric - 2"
-          }
-        ]
-      },
-      "name": "Redis"
     },
     {
       "type": 12,

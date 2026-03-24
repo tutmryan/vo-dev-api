@@ -707,23 +707,6 @@ resource keyVaultPrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNe
   }
 }
 
-resource redisCachePrivateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
-  name: 'privatelink.redis.cache.windows.net'
-  location: 'global'
-}
-
-resource redisCachePrivateDnsZoneLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
-  parent: redisCachePrivateDnsZone
-  name: '${resourcePrefix}-redis-dns-link'
-  location: 'global'
-  properties: {
-    registrationEnabled: false
-    virtualNetwork: {
-      id: vnet.id
-    }
-  }
-}
-
 resource managedRedisCachePrivateDnsZone 'Microsoft.Network/privateDnsZones@2024-06-01' = {
   name: 'privatelink.redis.azure.net'
   location: 'global'

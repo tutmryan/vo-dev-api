@@ -90,16 +90,6 @@ inputs:
     description: Name of the SQL Server the instance will connect to
     required: true
 
-  redis-cache-sku:
-    description: SKU of the Azure Redis Cache
-    required: true
-  redis-cache-family:
-    description: Family of the Azure Redis Cache
-    required: true
-  redis-cache-capacity:
-    description: Capacity of the Azure Redis Cache
-    required: true
-
   managed-redis-sku:
     description: SKU of the Managed Redis (Redis Enterprise)
     required: false
@@ -387,9 +377,6 @@ runs:
           resourcePrefix=${{ inputs.resource-prefix }}
           sqlServerName=${{ inputs.sql-server-name }}
           sharedResourceGroupName=${{ inputs.shared-resource-group-name }}
-          redisCacheSKU=${{ inputs.redis-cache-sku }}
-          redisCacheFamily=${{ inputs.redis-cache-family }}
-          redisCacheCapacity=${{ inputs.redis-cache-capacity }}
           managedRedisSKU=${{ inputs.managed-redis-sku }}
           appServicePlanId=${{ inputs.app-service-plan-id }}
           appServiceZoneRedundant=${{ inputs.app-service-zone-redundant }}

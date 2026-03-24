@@ -717,33 +717,6 @@ resource homeTenantVidServiceClientSecretSecret 'Microsoft.KeyVault/vaults/secre
   }
 }
 
-@description('Specify the pricing tier of the new Azure Redis Cache.')
-@allowed([
-  'Basic'
-  'Standard'
-  'Premium'
-])
-param redisCacheSKU string
-
-@description('Specify the family for the sku. C = Basic/Standard, P = Premium.')
-@allowed([
-  'C'
-  'P'
-])
-param redisCacheFamily string
-
-@description('Specify the size of the new Azure Redis Cache instance. Valid values: for C (Basic/Standard) family (0, 1, 2, 3, 4, 5, 6), for P (Premium) family (1, 2, 3, 4)')
-@allowed([
-  0
-  1
-  2
-  3
-  4
-  5
-  6
-])
-param redisCacheCapacity int
-
 @description('Specify the SKU for the Managed Redis (Redis Enterprise) instance.')
 @allowed([
   'MemoryOptimized_M10'
@@ -769,24 +742,6 @@ var managedRedisUniqueSuffix = substring(uniqueSuffix, 0, 8)
 param actionGroupAlertName string
 
 var actionGroupAlertId = resourceId(sharedResourceGroupName, 'Microsoft.Insights/actionGroups', actionGroupAlertName)
-
-resource redisCache 'Microsoft.Cache/redis@2023-08-01' = {
-  name: '${resourcePrefix}-redis-${uniqueSuffix}'
-  location: location
-  properties: {
-    enableNonSslPort: false
-    minimumTlsVersion: '1.2'
-    publicNetworkAccess: 'Disabled'
-    sku: {
-      capacity: redisCacheCapacity
-      family: redisCacheFamily
-      name: redisCacheSKU
-    }
-    redisConfiguration: {
-      'maxmemory-policy': 'allkeys-lru'
-    }
-  }
-}
 
 // Managed Redis (Redis Enterprise) resources
 resource managedRedis 'Microsoft.Cache/redisEnterprise@2024-09-01-preview' = {
@@ -866,7 +821,7 @@ var managedRedisAlerts = [
   {
     nameSuffix: 'memory'
     description: 'Managed Redis used memory is high'
-    metricName: 'usedmemory'
+    metricName: 'usedmemorypercentage'
     aggregation: 'Maximum'
     threshold: 80
     useDynamicThreshold: false
@@ -879,7 +834,7 @@ var managedRedisAlerts = [
     nameSuffix: 'cpu'
     description: 'Managed Redis CPU usage is high'
     metricName: 'percentProcessorTime'
-    aggregation: 'Maximum'
+    aggregation: 'Average'
     threshold: 80
     useDynamicThreshold: false
     alertSensitivity: null
