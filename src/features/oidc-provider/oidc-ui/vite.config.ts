@@ -12,7 +12,7 @@ export default defineConfig({
       // - Old WebView on Chrome 70
       targets: ['defaults', 'ie >= 11', 'Chrome >= 70'],
       additionalLegacyPolyfills: ['whatwg-fetch'],
-      renderLegacyChunks: false,
+      renderLegacyChunks: true,
       modernPolyfills: true,
     }),
   ],

@@ -131,17 +131,19 @@ function loadSdk(sdkUrl: string, nonce: string): Promise<void> {
     document.head.appendChild(script)
   })
 }
-async function startLoginFlow(config: OidcConfig, nonce: string) {
-  // Load the SDK (replace with your actual logic for ES5/ES6 if needed)
-  await loadSdk(config.sdkUrl, nonce)
 
-  // @ts-expect-error - verifiedOrchestrationClientJs is loaded dynamically
-  const client = new window.verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
-    url: config.graphqlUrl,
-    accessToken: config.presentationAccessToken,
-  })
-
-  client.createPresentationRequestForAuthn(handlePresentationEvent).then(handlePresentation).catch(displayError)
+function startLoginFlow(config: OidcConfig, nonce: string) {
+  loadSdk(config.sdkUrl, nonce)
+    .then(function () {
+      // @ts-expect-error - verifiedOrchestrationClientJs is loaded dynamically
+      const client = new window.verifiedOrchestrationClientJs.VerifiedOrchestrationClient({
+        url: config.graphqlUrl,
+        accessToken: config.presentationAccessToken,
+      })
+      return client.createPresentationRequestForAuthn(handlePresentationEvent)
+    })
+    .then(handlePresentation)
+    .catch(displayError)
 }
 
 function hide(target: Element | NodeListOf<Element> | null) {
