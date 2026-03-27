@@ -4,7 +4,7 @@ import type { CommandContext } from '../../../cqs'
 import type { PresentationFlowTemplateInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
-import { PresentationFlowTemplateEntity } from '../entities/presentation-flow-template-entity'
+import { defaultTemplateNotification, PresentationFlowTemplateEntity } from '../entities/presentation-flow-template-entity'
 
 export async function UpdatePresentationFlowTemplateCommand(
   this: CommandContext,
@@ -40,6 +40,7 @@ export async function UpdatePresentationFlowTemplateCommand(
   entity.autoSubmit = input.autoSubmit ?? null
   entity.expiresAfterDays = input.expiresAfterDays ?? null
   entity.fieldVisibilityJson = JSON.stringify(input.fieldVisibility)
+  entity.notificationJson = JSON.stringify(input.notification ?? defaultTemplateNotification)
 
   const saved = await repo.save(entity)
 

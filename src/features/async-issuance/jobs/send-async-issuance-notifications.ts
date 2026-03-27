@@ -31,7 +31,7 @@ export const sendAsyncIssuanceNotificationsJobHandler: JobHandler<SendAsyncIssua
         await repository.save(asyncIssuance)
 
         if (err instanceof CommunicationError) {
-          await context.services.communications.recordCommunicationFailure(err, entityManager)
+          await context.services.communications.recordAsyncIssuanceCommunicationFailure(err, entityManager)
         }
         logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_NOTIFICATION_JOB_FAILED)
       })

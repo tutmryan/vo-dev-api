@@ -22,6 +22,8 @@ export const createPresentationFlowMutation = graphql(
         request {
           id
           portalUrl
+          hasContactNotificationSet
+          notificationStatus
         }
       }
     }

@@ -4,6 +4,7 @@ import { helper as communicationServiceHelper } from '../services/__mocks__/comm
 import { helper as identityStoreSecretServiceHelper } from '../services/__mocks__/identity-store-secret-service'
 import { helper as oidcSecretServiceHelper } from '../services/__mocks__/oidc-secret-service'
 import { helper as oidcStorageServiceHelper } from '../services/__mocks__/oidc-storage-service'
+import { helper as presentationFlowServiceHelper } from '../services/__mocks__/presentation-flow-service'
 import { helper as adminServiceMockHelper } from '../services/__mocks__/verified-id'
 import { helper as verifiedRequestServiceMockHelper } from '../services/__mocks__/verified-request'
 import { fakeDownloadToDataURL } from './data-url'
@@ -14,6 +15,7 @@ export const mockedServices = {
     adminServiceMockHelper.clearAllMocks()
     verifiedRequestServiceMockHelper.clearAllMocks()
     asyncIssuanceServiceHelper.clearAllMocks()
+    presentationFlowServiceHelper.clearAllMocks()
     communicationServiceHelper.clearAllMocks()
     oidcStorageServiceHelper.clearAllMocks()
     oidcSecretServiceHelper.clearAllMocks()
@@ -23,6 +25,7 @@ export const mockedServices = {
   requestService: verifiedRequestServiceMockHelper,
   blobStorageContainerService: blobStorageContainerServiceHelper,
   asyncIssuanceService: asyncIssuanceServiceHelper,
+  presentationFlowService: presentationFlowServiceHelper,
   communicationsService: communicationServiceHelper,
   oidcStorageService: oidcStorageServiceHelper,
   oidcSecretService: oidcSecretServiceHelper,

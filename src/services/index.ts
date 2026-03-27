@@ -18,6 +18,7 @@ import { AsyncIssuanceService } from './async-issuance-service'
 import { BlobStorageContainerService } from './blob-storage-container-service'
 import { CommunicationsService } from './communications-service'
 import { graphServiceManager, type IGraphServiceManager } from './graph-service'
+import { PresentationFlowService } from './presentation-flow-service'
 import { VerifiedIdAdminService, VerifiedIdRequestService } from './verified-id'
 
 export * from './graph-service'
@@ -28,6 +29,7 @@ export interface Services {
   verifiedIdRequest: VerifiedIdRequestService
   logoImages: BlobStorageContainerService
   asyncIssuances: AsyncIssuanceService
+  presentationFlows: PresentationFlowService
   communications: CommunicationsService
 }
 
@@ -45,6 +47,7 @@ export const createServices = (context: BaseContext): Services => {
     verifiedIdRequest: createVerifiedIdRequestService(context),
     logoImages: createLogoImagesService(),
     asyncIssuances: new AsyncIssuanceService(),
+    presentationFlows: new PresentationFlowService(),
     communications: new CommunicationsService(context.logger),
   }
 }

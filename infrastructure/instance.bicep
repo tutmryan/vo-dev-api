@@ -1189,6 +1189,14 @@ resource oidcBlobContainer 'Microsoft.Storage/storageAccounts/blobServices/conta
   }
 }
 
+resource presentationFlowBlobContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+  name: 'presentation-flow'
+  parent: verifiedOrchestrationPrivateStorageBlobService
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
 resource privateStorageDeletePolicy 'Microsoft.Storage/storageAccounts/managementPolicies@2023-01-01' = {
   name: 'default'
   parent: privateStorageAccount
@@ -1398,6 +1406,16 @@ resource asyncIssuanceBlobContainerRoleAssignment 'Microsoft.Authorization/roleA
 resource oidcBlobContainerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   scope: oidcBlobContainer
   name: guid(oidcBlobContainer.id, apiAppService.id, storageBlobContributorRoleDefinition.id)
+  properties: {
+    roleDefinitionId: storageBlobContributorRoleDefinition.id
+    principalId: apiAppService.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource presentationFlowBlobContainerRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  scope: presentationFlowBlobContainer
+  name: guid(presentationFlowBlobContainer.id, apiAppService.id, storageBlobContributorRoleDefinition.id)
   properties: {
     roleDefinitionId: storageBlobContributorRoleDefinition.id
     principalId: apiAppService.identity.principalId

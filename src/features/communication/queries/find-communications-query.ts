@@ -21,6 +21,7 @@ export async function FindCommunicationsQuery(
   if (criteria?.recipientId) where.recipientId = criteria.recipientId
   if (criteria?.createdById) where.createdById = criteria.createdById
   if (criteria?.asyncIssuanceRequestId) where.asyncIssuanceId = criteria.asyncIssuanceRequestId
+  if (criteria?.presentationFlowId) where.presentationFlowId = criteria.presentationFlowId
   if (criteria?.contactMethod) where.contactMethod = criteria.contactMethod
   if (criteria?.purpose) where.purpose = criteria.purpose
   if (criteria?.status) where.status = criteria.status

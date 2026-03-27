@@ -731,6 +731,7 @@ export enum CommunicationOrderBy {
 /** The possible communication purposes. */
 export enum CommunicationPurpose {
   Issuance = 'issuance',
+  PresentationFlow = 'presentationFlow',
   Verification = 'verification'
 }
 
@@ -749,6 +750,8 @@ export type CommunicationWhere = {
   contactMethod?: InputMaybe<ContactMethod>;
   /** The ID of the user (Person or Application) whose action resulted in the communication. */
   createdById?: InputMaybe<Scalars['ID']['input']>;
+  /** The ID of the presentation flow that the communication is related to. */
+  presentationFlowId?: InputMaybe<Scalars['ID']['input']>;
   /** The purpose of the communication. */
   purpose?: InputMaybe<CommunicationPurpose>;
   /** The ID of the recipient of the communication. */
@@ -2809,6 +2812,14 @@ export type Mutation = {
    * - Starts a background job for all notifications and returns that job id.
    */
   resendAsyncIssuanceNotifications: Scalars['ID']['output'];
+  /**
+   * Resend the presentation flow notification for the specified presentation flow ID.
+   *
+   * Items of note:
+   * - Synchronous operation that returns the updated presentation flow.
+   * - Only works for presentation flows that are in a pending state.
+   */
+  resendPresentationFlowNotification?: Maybe<PresentationFlow>;
   /** Resumes a previously suspended identity store. */
   resumeIdentityStore: IdentityStore;
   /** Resumes a partner */
@@ -2903,6 +2914,14 @@ export type Mutation = {
   updateOidcResource: OidcResource;
   /** Updates the name and credential types of a partner */
   updatePartner: Partner;
+  /**
+   * Update the presentation flow contact information.
+   *
+   * Items of note:
+   *
+   * - Contact information can only be updated when the presentation flow is in a pending state.
+   */
+  updatePresentationFlowContact?: Maybe<PresentationFlow>;
   updatePresentationFlowTemplate: PresentationFlowTemplate;
   /** Updates an existing template */
   updateTemplate: Template;
@@ -3135,6 +3154,11 @@ export type MutationResendAsyncIssuanceNotificationsArgs = {
 };
 
 
+export type MutationResendPresentationFlowNotificationArgs = {
+  presentationFlowId: Scalars['UUID']['input'];
+};
+
+
 export type MutationResumeIdentityStoreArgs = {
   id: Scalars['ID']['input'];
 };
@@ -3324,6 +3348,12 @@ export type MutationUpdateOidcResourceArgs = {
 export type MutationUpdatePartnerArgs = {
   id: Scalars['ID']['input'];
   input: UpdatePartnerInput;
+};
+
+
+export type MutationUpdatePresentationFlowContactArgs = {
+  contact?: InputMaybe<PresentationFlowContactInput>;
+  presentationFlowId: Scalars['UUID']['input'];
 };
 
 
@@ -4167,15 +4197,21 @@ export type PresentationFlow = {
   action?: Maybe<Action>;
   actions?: Maybe<Array<Action>>;
   autoSubmit?: Maybe<Scalars['Boolean']['output']>;
+  /** The communications that have been sent for this presentation flow. */
+  communications: Array<Communication>;
   createdAt: Scalars['DateTime']['output'];
   createdBy: User;
   dataResults?: Maybe<Scalars['JSONObject']['output']>;
   dataSchema?: Maybe<Array<DataDefinition>>;
   expiresAt: Scalars['DateTime']['output'];
+  /** Indicates whether this presentation flow has contact notification details set. */
+  hasContactNotificationSet: Scalars['Boolean']['output'];
   id: Scalars['ID']['output'];
   identity?: Maybe<Identity>;
   isCancelled?: Maybe<Scalars['Boolean']['output']>;
   isSubmitted?: Maybe<Scalars['Boolean']['output']>;
+  /** The status of the notification for this presentation flow. */
+  notificationStatus?: Maybe<PresentationFlowNotificationStatus>;
   portalUrl: Scalars['String']['output'];
   postPresentationText?: Maybe<Scalars['Markdown']['output']>;
   prePresentationText?: Maybe<Scalars['Markdown']['output']>;
@@ -4189,10 +4225,41 @@ export type PresentationFlow = {
   updatedBy?: Maybe<User>;
 };
 
+
+/** A presentation flow. */
+export type PresentationFlowCommunicationsArgs = {
+  limit?: InputMaybe<Scalars['PositiveInt']['input']>;
+  offset?: InputMaybe<Scalars['NonNegativeInt']['input']>;
+  orderBy?: InputMaybe<CommunicationOrderBy>;
+  orderDirection?: InputMaybe<OrderDirection>;
+  where?: InputMaybe<CommunicationWhere>;
+};
+
+/** Represents the presentation flow contact information. */
+export type PresentationFlowContact = {
+  __typename?: 'PresentationFlowContact';
+  /** The notification contact information. */
+  notification?: Maybe<Contact>;
+};
+
+/** Input defining the presentation flow contact information for notifications. */
+export type PresentationFlowContactInput = {
+  /**
+   * How the presentation flow notification should be sent.
+   * Set to null to remove the notification.
+   */
+  notification?: InputMaybe<ContactInput>;
+};
+
 export type PresentationFlowInput = {
   actions?: InputMaybe<Array<ActionInput>>;
   autoSubmit?: InputMaybe<Scalars['Boolean']['input']>;
   callback?: InputMaybe<Callback>;
+  /**
+   * The contact information for sending notifications about this presentation flow.
+   * When provided, a notification will be sent to the recipient.
+   */
+  contact?: InputMaybe<PresentationFlowContactInput>;
   correlationId?: InputMaybe<Scalars['ID']['input']>;
   dataSchema?: InputMaybe<Array<DataDefinitionInput>>;
   expiresAt?: InputMaybe<Scalars['DateTime']['input']>;
@@ -4204,6 +4271,18 @@ export type PresentationFlowInput = {
   templateId?: InputMaybe<Scalars['ID']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
+
+/** The notification status of the presentation flow. */
+export enum PresentationFlowNotificationStatus {
+  /** Notification failed to send. */
+  Failed = 'FAILED',
+  /** No notification configured for this presentation flow. */
+  None = 'NONE',
+  /** Notification job is queued but not yet sent. */
+  Pending = 'PENDING',
+  /** Notification was successfully sent. */
+  Sent = 'SENT'
+}
 
 export type PresentationFlowResponse = {
   __typename?: 'PresentationFlowResponse';
@@ -4234,6 +4313,7 @@ export type PresentationFlowTemplate = {
   fieldVisibility: PresentationFlowTemplateFieldVisibility;
   id: Scalars['ID']['output'];
   name: Scalars['String']['output'];
+  notification: PresentationFlowTemplateNotification;
   postPresentationText?: Maybe<Scalars['Markdown']['output']>;
   prePresentationText?: Maybe<Scalars['Markdown']['output']>;
   presentationRequest: Scalars['JSONObject']['output'];
@@ -4281,10 +4361,31 @@ export type PresentationFlowTemplateInput = {
   expiresAfterDays?: InputMaybe<Scalars['Int']['input']>;
   fieldVisibility: PresentationFlowTemplateFieldVisibilityInput;
   name: Scalars['String']['input'];
+  notification?: InputMaybe<PresentationFlowTemplateNotificationInput>;
   postPresentationText?: InputMaybe<Scalars['Markdown']['input']>;
   prePresentationText?: InputMaybe<Scalars['Markdown']['input']>;
   presentationRequest: PresentationRequestInput;
   title?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Controls notification behaviour when creating a presentation flow from a template. */
+export type PresentationFlowTemplateNotification = {
+  __typename?: 'PresentationFlowTemplateNotification';
+  /** Whether notifications are enabled by default for flows created from this template. */
+  enabled: Scalars['Boolean']['output'];
+  /** Whether the runner can change the send-notification toggle. When false the runner sees no notification section. */
+  enabledVisible: Scalars['Boolean']['output'];
+  /** The notification method locked by the template. Null means the runner may choose freely (when methodVisible is true). */
+  method?: Maybe<ContactMethod>;
+  /** Whether the runner can change the notification method. When false the method is fixed to the value above. */
+  methodVisible: Scalars['Boolean']['output'];
+};
+
+export type PresentationFlowTemplateNotificationInput = {
+  enabled: Scalars['Boolean']['input'];
+  enabledVisible: Scalars['Boolean']['input'];
+  method?: InputMaybe<ContactMethod>;
+  methodVisible: Scalars['Boolean']['input'];
 };
 
 /** A limited presentation flow token response. */
@@ -4606,6 +4707,15 @@ export type Query = {
   /** Returns the successful presentation count, grouped by requesting User, optionally matching the specified criteria. */
   presentationCountByUser: Array<UserCount>;
   presentationFlow: PresentationFlow;
+  /**
+   * Returns the presentation flow contact information.
+   *
+   * Items of note:
+   *
+   * - Returns PII information about the recipient. Use with caution. Intended for verification of presentation flows by admins only.
+   * - If the presentation flow has been submitted or expired, this information is no longer available.
+   */
+  presentationFlowContact?: Maybe<PresentationFlowContact>;
   presentationFlowTemplate: PresentationFlowTemplate;
   /** Returns a template by ID */
   template: Template;
@@ -4975,6 +5085,11 @@ export type QueryPresentationCountByUserArgs = {
 
 export type QueryPresentationFlowArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type QueryPresentationFlowContactArgs = {
+  presentationFlowId: Scalars['UUID']['input'];
 };
 
 
@@ -6416,7 +6531,7 @@ export type CreatePresentationFlowTestMutationVariables = Exact<{
 }>;
 
 
-export type CreatePresentationFlowTestMutation = { __typename?: 'Mutation', createPresentationFlow: { __typename?: 'PresentationFlowResponse', callbackSecret: string, request: { __typename?: 'PresentationFlow', id: string, portalUrl: string } } };
+export type CreatePresentationFlowTestMutation = { __typename?: 'Mutation', createPresentationFlow: { __typename?: 'PresentationFlowResponse', callbackSecret: string, request: { __typename?: 'PresentationFlow', id: string, portalUrl: string, hasContactNotificationSet: boolean, notificationStatus?: PresentationFlowNotificationStatus | null } } };
 
 export type SubmitPresentationFlowActionsTestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6426,12 +6541,42 @@ export type SubmitPresentationFlowActionsTestMutationVariables = Exact<{
 
 export type SubmitPresentationFlowActionsTestMutation = { __typename?: 'Mutation', submitPresentationFlowActions: { __typename?: 'PresentationFlow', id: string, status: PresentationFlowStatus, isSubmitted?: boolean | null, dataResults?: Record<string, unknown> | null } };
 
+export type CreatePresentationFlowTemplateNotificationTestMutationVariables = Exact<{
+  input: PresentationFlowTemplateInput;
+}>;
+
+
+export type CreatePresentationFlowTemplateNotificationTestMutation = { __typename?: 'Mutation', createPresentationFlowTemplate: { __typename?: 'PresentationFlowTemplate', id: string, notification: { __typename?: 'PresentationFlowTemplateNotification', enabled: boolean, enabledVisible: boolean, method?: ContactMethod | null, methodVisible: boolean } } };
+
+export type UpdatePresentationFlowTemplateNotificationTestMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: PresentationFlowTemplateInput;
+}>;
+
+
+export type UpdatePresentationFlowTemplateNotificationTestMutation = { __typename?: 'Mutation', updatePresentationFlowTemplate: { __typename?: 'PresentationFlowTemplate', id: string, notification: { __typename?: 'PresentationFlowTemplateNotification', enabled: boolean, enabledVisible: boolean, method?: ContactMethod | null, methodVisible: boolean } } };
+
+export type GetPresentationFlowTemplateNotificationTestQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetPresentationFlowTemplateNotificationTestQuery = { __typename?: 'Query', presentationFlowTemplate: { __typename?: 'PresentationFlowTemplate', id: string, notification: { __typename?: 'PresentationFlowTemplateNotification', enabled: boolean, enabledVisible: boolean, method?: ContactMethod | null, methodVisible: boolean } } };
+
 export type PresentationFlowQueryTestQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
 export type PresentationFlowQueryTestQuery = { __typename?: 'Query', presentationFlow: { __typename?: 'PresentationFlow', id: string, title?: string | null, expiresAt: Date, prePresentationText?: string | null, postPresentationText?: string | null, requestData?: Record<string, unknown> | null, status: PresentationFlowStatus } };
+
+export type UpdatePresentationFlowContactMutationVariables = Exact<{
+  presentationFlowId: Scalars['UUID']['input'];
+  contact?: InputMaybe<PresentationFlowContactInput>;
+}>;
+
+
+export type UpdatePresentationFlowContactMutation = { __typename?: 'Mutation', updatePresentationFlowContact?: { __typename?: 'PresentationFlow', id: string, hasContactNotificationSet: boolean, notificationStatus?: PresentationFlowNotificationStatus | null } | null };
 
 export type TemplateParentDataFragmentFragment = { __typename?: 'Template', parentData?: { __typename?: 'TemplateParentData', isPublic?: boolean | null, validityIntervalInSeconds?: number | null, credentialTypes?: Array<string> | null, display?: { __typename?: 'TemplateDisplayModel', locale?: string | null, card?: { __typename?: 'TemplateDisplayCredential', title?: string | null, issuedBy?: string | null, backgroundColor?: string | null, textColor?: string | null, description?: string | null, logo?: { __typename?: 'TemplateDisplayCredentialLogo', uri?: string | null, description?: string | null } | null } | null, consent?: { __typename?: 'TemplateDisplayConsent', title?: string | null, instructions?: string | null } | null, claims?: Array<{ __typename?: 'TemplateDisplayClaim', label: string, claim: string, type: ClaimType, description?: string | null, value?: string | null }> | null } | null } | null };
 
@@ -6578,9 +6723,13 @@ export const PhotoCaptureStatusDocument = {"kind":"Document","definitions":[{"ki
 export const CancelPresentationFlowTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CancelPresentationFlowTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cancelPresentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<CancelPresentationFlowTestMutation, CancelPresentationFlowTestMutationVariables>;
 export const PresentationFlowTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PresentationFlowTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"presentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"prePresentationText"}},{"kind":"Field","name":{"kind":"Name","value":"postPresentationText"}},{"kind":"Field","name":{"kind":"Name","value":"requestData"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<PresentationFlowTestQuery, PresentationFlowTestQueryVariables>;
 export const FindActionedPresentationFlowDataTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"FindActionedPresentationFlowDataTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"actionedPresentationFlowData"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"presentationFlowId"}},{"kind":"Field","name":{"kind":"Name","value":"requestData"}},{"kind":"Field","name":{"kind":"Name","value":"state"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"presentationId"}},{"kind":"Field","name":{"kind":"Name","value":"dataResults"}},{"kind":"Field","name":{"kind":"Name","value":"submittedAt"}},{"kind":"Field","name":{"kind":"Name","value":"submittedBy"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}}]}},{"kind":"Field","name":{"kind":"Name","value":"callbackSecret"}}]}}]}}]} as unknown as DocumentNode<FindActionedPresentationFlowDataTestQuery, FindActionedPresentationFlowDataTestQueryVariables>;
-export const CreatePresentationFlowTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePresentationFlowTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationFlowInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPresentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"callbackSecret"}},{"kind":"Field","name":{"kind":"Name","value":"request"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"portalUrl"}}]}}]}}]}}]} as unknown as DocumentNode<CreatePresentationFlowTestMutation, CreatePresentationFlowTestMutationVariables>;
+export const CreatePresentationFlowTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePresentationFlowTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationFlowInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPresentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"callbackSecret"}},{"kind":"Field","name":{"kind":"Name","value":"request"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"portalUrl"}},{"kind":"Field","name":{"kind":"Name","value":"hasContactNotificationSet"}},{"kind":"Field","name":{"kind":"Name","value":"notificationStatus"}}]}}]}}]}}]} as unknown as DocumentNode<CreatePresentationFlowTestMutation, CreatePresentationFlowTestMutationVariables>;
 export const SubmitPresentationFlowActionsTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"SubmitPresentationFlowActionsTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"SubmitActionsInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"submitPresentationFlowActions"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"status"}},{"kind":"Field","name":{"kind":"Name","value":"isSubmitted"}},{"kind":"Field","name":{"kind":"Name","value":"dataResults"}}]}}]}}]} as unknown as DocumentNode<SubmitPresentationFlowActionsTestMutation, SubmitPresentationFlowActionsTestMutationVariables>;
+export const CreatePresentationFlowTemplateNotificationTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePresentationFlowTemplateNotificationTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationFlowTemplateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPresentationFlowTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"notification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"enabledVisible"}},{"kind":"Field","name":{"kind":"Name","value":"method"}},{"kind":"Field","name":{"kind":"Name","value":"methodVisible"}}]}}]}}]}}]} as unknown as DocumentNode<CreatePresentationFlowTemplateNotificationTestMutation, CreatePresentationFlowTemplateNotificationTestMutationVariables>;
+export const UpdatePresentationFlowTemplateNotificationTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdatePresentationFlowTemplateNotificationTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationFlowTemplateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updatePresentationFlowTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}},{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"notification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"enabledVisible"}},{"kind":"Field","name":{"kind":"Name","value":"method"}},{"kind":"Field","name":{"kind":"Name","value":"methodVisible"}}]}}]}}]}}]} as unknown as DocumentNode<UpdatePresentationFlowTemplateNotificationTestMutation, UpdatePresentationFlowTemplateNotificationTestMutationVariables>;
+export const GetPresentationFlowTemplateNotificationTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetPresentationFlowTemplateNotificationTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"presentationFlowTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"notification"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"enabled"}},{"kind":"Field","name":{"kind":"Name","value":"enabledVisible"}},{"kind":"Field","name":{"kind":"Name","value":"method"}},{"kind":"Field","name":{"kind":"Name","value":"methodVisible"}}]}}]}}]}}]} as unknown as DocumentNode<GetPresentationFlowTemplateNotificationTestQuery, GetPresentationFlowTemplateNotificationTestQueryVariables>;
 export const PresentationFlowQueryTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PresentationFlowQueryTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"presentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"prePresentationText"}},{"kind":"Field","name":{"kind":"Name","value":"postPresentationText"}},{"kind":"Field","name":{"kind":"Name","value":"requestData"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<PresentationFlowQueryTestQuery, PresentationFlowQueryTestQueryVariables>;
+export const UpdatePresentationFlowContactDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"UpdatePresentationFlowContact"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"presentationFlowId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}},{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"contact"}},"type":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationFlowContactInput"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"updatePresentationFlowContact"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"presentationFlowId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"presentationFlowId"}}},{"kind":"Argument","name":{"kind":"Name","value":"contact"},"value":{"kind":"Variable","name":{"kind":"Name","value":"contact"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"hasContactNotificationSet"}},{"kind":"Field","name":{"kind":"Name","value":"notificationStatus"}}]}}]}}]} as unknown as DocumentNode<UpdatePresentationFlowContactMutation, UpdatePresentationFlowContactMutationVariables>;
 export const GetTemplateParentDataQueryDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTemplateParentDataQuery"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"template"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateParentDataFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateParentDataFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"parentData"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]}}]} as unknown as DocumentNode<GetTemplateParentDataQueryQuery, GetTemplateParentDataQueryQueryVariables>;
 export const CreateTemplateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateTemplate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"TemplateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]} as unknown as DocumentNode<CreateTemplateMutation, CreateTemplateMutationVariables>;
 export const GetTemplateDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetTemplate"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"template"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"FragmentSpread","name":{"kind":"Name","value":"TemplateFragment"}}]}}]}},{"kind":"FragmentDefinition","name":{"kind":"Name","value":"TemplateFragment"},"typeCondition":{"kind":"NamedType","name":{"kind":"Name","value":"Template"}},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"parent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"name"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}}]}},{"kind":"Field","name":{"kind":"Name","value":"display"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"locale"}},{"kind":"Field","name":{"kind":"Name","value":"card"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"issuedBy"}},{"kind":"Field","name":{"kind":"Name","value":"backgroundColor"}},{"kind":"Field","name":{"kind":"Name","value":"textColor"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"logo"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"uri"}},{"kind":"Field","name":{"kind":"Name","value":"image"}},{"kind":"Field","name":{"kind":"Name","value":"description"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"consent"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"instructions"}}]}},{"kind":"Field","name":{"kind":"Name","value":"claims"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"claim"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"description"}},{"kind":"Field","name":{"kind":"Name","value":"value"}}]}}]}},{"kind":"Field","name":{"kind":"Name","value":"isPublic"}},{"kind":"Field","name":{"kind":"Name","value":"validityIntervalInSeconds"}},{"kind":"Field","name":{"kind":"Name","value":"credentialTypes"}}]}}]} as unknown as DocumentNode<GetTemplateQuery, GetTemplateQueryVariables>;
@@ -6924,13 +7073,18 @@ export type ResolversTypes = {
   PresentationEventData: ResolverTypeWrapper<Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversTypes['Presentation']> }>;
   PresentationEventWhere: PresentationEventWhere;
   PresentationFlow: ResolverTypeWrapper<PresentationFlowEntity>;
+  PresentationFlowContact: ResolverTypeWrapper<PresentationFlowContact>;
+  PresentationFlowContactInput: PresentationFlowContactInput;
   PresentationFlowInput: PresentationFlowInput;
+  PresentationFlowNotificationStatus: PresentationFlowNotificationStatus;
   PresentationFlowResponse: ResolverTypeWrapper<Omit<PresentationFlowResponse, 'request'> & { request: ResolversTypes['PresentationFlow'] }>;
   PresentationFlowStatus: PresentationFlowStatus;
   PresentationFlowTemplate: ResolverTypeWrapper<PresentationFlowTemplateEntity>;
   PresentationFlowTemplateFieldVisibility: ResolverTypeWrapper<PresentationFlowTemplateFieldVisibility>;
   PresentationFlowTemplateFieldVisibilityInput: PresentationFlowTemplateFieldVisibilityInput;
   PresentationFlowTemplateInput: PresentationFlowTemplateInput;
+  PresentationFlowTemplateNotification: ResolverTypeWrapper<PresentationFlowTemplateNotification>;
+  PresentationFlowTemplateNotificationInput: PresentationFlowTemplateNotificationInput;
   PresentationFlowTokenResponse: ResolverTypeWrapper<PresentationFlowTokenResponse>;
   PresentationFlowsOrderBy: PresentationFlowsOrderBy;
   PresentationFlowsWhere: PresentationFlowsWhere;
@@ -7194,12 +7348,16 @@ export type ResolversParentTypes = {
   PresentationEventData: Omit<PresentationEventData, 'presentation'> & { presentation?: Maybe<ResolversParentTypes['Presentation']> };
   PresentationEventWhere: PresentationEventWhere;
   PresentationFlow: PresentationFlowEntity;
+  PresentationFlowContact: PresentationFlowContact;
+  PresentationFlowContactInput: PresentationFlowContactInput;
   PresentationFlowInput: PresentationFlowInput;
   PresentationFlowResponse: Omit<PresentationFlowResponse, 'request'> & { request: ResolversParentTypes['PresentationFlow'] };
   PresentationFlowTemplate: PresentationFlowTemplateEntity;
   PresentationFlowTemplateFieldVisibility: PresentationFlowTemplateFieldVisibility;
   PresentationFlowTemplateFieldVisibilityInput: PresentationFlowTemplateFieldVisibilityInput;
   PresentationFlowTemplateInput: PresentationFlowTemplateInput;
+  PresentationFlowTemplateNotification: PresentationFlowTemplateNotification;
+  PresentationFlowTemplateNotificationInput: PresentationFlowTemplateNotificationInput;
   PresentationFlowTokenResponse: PresentationFlowTokenResponse;
   PresentationFlowsWhere: PresentationFlowsWhere;
   PresentationReceiptInput: PresentationReceiptInput;
@@ -7933,6 +8091,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   provisionContract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<MutationProvisionContractArgs, 'id'>>;
   resendAsyncIssuanceNotification?: Resolver<Maybe<ResolversTypes['AsyncIssuanceRequest']>, ParentType, ContextType, RequireFields<MutationResendAsyncIssuanceNotificationArgs, 'asyncIssuanceRequestId'>>;
   resendAsyncIssuanceNotifications?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationResendAsyncIssuanceNotificationsArgs, 'asyncIssuanceRequestIds'>>;
+  resendPresentationFlowNotification?: Resolver<Maybe<ResolversTypes['PresentationFlow']>, ParentType, ContextType, RequireFields<MutationResendPresentationFlowNotificationArgs, 'presentationFlowId'>>;
   resumeIdentityStore?: Resolver<ResolversTypes['IdentityStore'], ParentType, ContextType, RequireFields<MutationResumeIdentityStoreArgs, 'id'>>;
   resumePartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationResumePartnerArgs, 'id'>>;
   revokeContractIssuances?: Resolver<ResolversTypes['ID'], ParentType, ContextType, RequireFields<MutationRevokeContractIssuancesArgs, 'contractId'>>;
@@ -7970,6 +8129,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   updateOidcIdentityResolver?: Resolver<ResolversTypes['OidcIdentityResolver'], ParentType, ContextType, RequireFields<MutationUpdateOidcIdentityResolverArgs, 'id' | 'input'>>;
   updateOidcResource?: Resolver<ResolversTypes['OidcResource'], ParentType, ContextType, RequireFields<MutationUpdateOidcResourceArgs, 'id' | 'input'>>;
   updatePartner?: Resolver<ResolversTypes['Partner'], ParentType, ContextType, RequireFields<MutationUpdatePartnerArgs, 'id' | 'input'>>;
+  updatePresentationFlowContact?: Resolver<Maybe<ResolversTypes['PresentationFlow']>, ParentType, ContextType, RequireFields<MutationUpdatePresentationFlowContactArgs, 'presentationFlowId'>>;
   updatePresentationFlowTemplate?: Resolver<ResolversTypes['PresentationFlowTemplate'], ParentType, ContextType, RequireFields<MutationUpdatePresentationFlowTemplateArgs, 'id' | 'input'>>;
   updateTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationUpdateTemplateArgs, 'id' | 'input'>>;
 };
@@ -8160,15 +8320,18 @@ export type PresentationFlowResolvers<ContextType = GraphQLContext, ParentType e
   action?: Resolver<Maybe<ResolversTypes['Action']>, ParentType, ContextType>;
   actions?: Resolver<Maybe<Array<ResolversTypes['Action']>>, ParentType, ContextType>;
   autoSubmit?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  communications?: Resolver<Array<ResolversTypes['Communication']>, ParentType, ContextType, Partial<PresentationFlowCommunicationsArgs>>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   dataResults?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   dataSchema?: Resolver<Maybe<Array<ResolversTypes['DataDefinition']>>, ParentType, ContextType>;
   expiresAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
+  hasContactNotificationSet?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identity?: Resolver<Maybe<ResolversTypes['Identity']>, ParentType, ContextType>;
   isCancelled?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   isSubmitted?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+  notificationStatus?: Resolver<Maybe<ResolversTypes['PresentationFlowNotificationStatus']>, ParentType, ContextType>;
   portalUrl?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   postPresentationText?: Resolver<Maybe<ResolversTypes['Markdown']>, ParentType, ContextType>;
   prePresentationText?: Resolver<Maybe<ResolversTypes['Markdown']>, ParentType, ContextType>;
@@ -8180,6 +8343,10 @@ export type PresentationFlowResolvers<ContextType = GraphQLContext, ParentType e
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+};
+
+export type PresentationFlowContactResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlowContact'] = ResolversParentTypes['PresentationFlowContact']> = {
+  notification?: Resolver<Maybe<ResolversTypes['Contact']>, ParentType, ContextType>;
 };
 
 export type PresentationFlowResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlowResponse'] = ResolversParentTypes['PresentationFlowResponse']> = {
@@ -8197,6 +8364,7 @@ export type PresentationFlowTemplateResolvers<ContextType = GraphQLContext, Pare
   fieldVisibility?: Resolver<ResolversTypes['PresentationFlowTemplateFieldVisibility'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  notification?: Resolver<ResolversTypes['PresentationFlowTemplateNotification'], ParentType, ContextType>;
   postPresentationText?: Resolver<Maybe<ResolversTypes['Markdown']>, ParentType, ContextType>;
   prePresentationText?: Resolver<Maybe<ResolversTypes['Markdown']>, ParentType, ContextType>;
   presentationRequest?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
@@ -8218,6 +8386,13 @@ export type PresentationFlowTemplateFieldVisibilityResolvers<ContextType = Graph
   postPresentationText?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   prePresentationText?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
+};
+
+export type PresentationFlowTemplateNotificationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlowTemplateNotification'] = ResolversParentTypes['PresentationFlowTemplateNotification']> = {
+  enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  enabledVisible?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  method?: Resolver<Maybe<ResolversTypes['ContactMethod']>, ParentType, ContextType>;
+  methodVisible?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
 };
 
 export type PresentationFlowTokenResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlowTokenResponse'] = ResolversParentTypes['PresentationFlowTokenResponse']> = {
@@ -8312,6 +8487,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   presentationCountByDate?: Resolver<Array<ResolversTypes['DateCount']>, ParentType, ContextType, Partial<QueryPresentationCountByDateArgs>>;
   presentationCountByUser?: Resolver<Array<ResolversTypes['UserCount']>, ParentType, ContextType, Partial<QueryPresentationCountByUserArgs>>;
   presentationFlow?: Resolver<ResolversTypes['PresentationFlow'], ParentType, ContextType, RequireFields<QueryPresentationFlowArgs, 'id'>>;
+  presentationFlowContact?: Resolver<Maybe<ResolversTypes['PresentationFlowContact']>, ParentType, ContextType, RequireFields<QueryPresentationFlowContactArgs, 'presentationFlowId'>>;
   presentationFlowTemplate?: Resolver<ResolversTypes['PresentationFlowTemplate'], ParentType, ContextType, RequireFields<QueryPresentationFlowTemplateArgs, 'id'>>;
   template?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<QueryTemplateArgs, 'id'>>;
   templateCombinedData?: Resolver<ResolversTypes['TemplateParentData'], ParentType, ContextType, RequireFields<QueryTemplateCombinedDataArgs, 'templateId'>>;
@@ -8638,9 +8814,11 @@ export type Resolvers<ContextType = GraphQLContext> = {
   PresentationEvent?: PresentationEventResolvers<ContextType>;
   PresentationEventData?: PresentationEventDataResolvers<ContextType>;
   PresentationFlow?: PresentationFlowResolvers<ContextType>;
+  PresentationFlowContact?: PresentationFlowContactResolvers<ContextType>;
   PresentationFlowResponse?: PresentationFlowResponseResolvers<ContextType>;
   PresentationFlowTemplate?: PresentationFlowTemplateResolvers<ContextType>;
   PresentationFlowTemplateFieldVisibility?: PresentationFlowTemplateFieldVisibilityResolvers<ContextType>;
+  PresentationFlowTemplateNotification?: PresentationFlowTemplateNotificationResolvers<ContextType>;
   PresentationFlowTokenResponse?: PresentationFlowTokenResponseResolvers<ContextType>;
   PresentationRequestResponse?: PresentationRequestResponseResolvers<ContextType>;
   PresentationResponse?: PresentationResponseResolvers<ContextType>;

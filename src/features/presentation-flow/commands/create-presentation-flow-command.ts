@@ -1,8 +1,9 @@
 import { randomUUID } from 'crypto'
 import { addDays } from 'date-fns'
 import { AuditEvents } from '../../../audit-types'
+import { addToJobQueue } from '../../../background-jobs'
 import type { CommandContext } from '../../../cqs'
-import type { PresentationFlowInput } from '../../../generated/graphql'
+import { PresentationFlowNotificationStatus, type PresentationFlowInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
 import { PresentationFlowEntity } from '../entities/presentation-flow-entity'
@@ -11,7 +12,7 @@ export async function CreatePresentationFlowCommand(
   this: CommandContext,
   input: PresentationFlowInput,
 ): Promise<{ callbackSecret: string; request: PresentationFlowEntity }> {
-  const { user, entityManager, logger } = this
+  const { user, entityManager, logger, services } = this
   userInvariant(user)
 
   const expiresAt = input.expiresAt ?? addDays(Date.now(), 7)
@@ -47,8 +48,18 @@ export async function CreatePresentationFlowCommand(
   entity.presentationId = null
   entity.isCancelled = null
   entity.isSubmitted = null
+  entity.hasContactNotification = input.contact?.notification ? true : null
+  entity.notificationStatus = input.contact?.notification ? PresentationFlowNotificationStatus.Pending : null
 
   const saved = await entityManager.getRepository(PresentationFlowEntity).save(entity)
+
+  if (input.contact?.notification) {
+    await services.presentationFlows.uploadContact(saved.id, input.contact)
+    await addToJobQueue('sendPresentationFlowNotifications', {
+      userId: user.entity.id,
+      presentationFlowId: saved.id,
+    })
+  }
 
   logger.auditEvent(AuditEvents.PRESENTATION_FLOW_CREATED, {
     presentationFlowId: saved.id,

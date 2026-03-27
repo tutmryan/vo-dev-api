@@ -101,6 +101,14 @@ exports[`shield rules are setup correctly 1`] = `
         }
       ]
     },
+    "presentationFlowContact": {
+      "name": "canCreatePresentationFlow",
+      "cache": "contextual",
+      "__roles": [
+        "presentationFlow.create",
+        "presentationFlow.create"
+      ]
+    },
     "asyncIssuanceRequest": {
       "rulesOr": [
         {
@@ -2489,6 +2497,22 @@ exports[`shield rules are setup correctly 1`] = `
         }
       ]
     },
+    "resendPresentationFlowNotification": {
+      "name": "canCreatePresentationFlow",
+      "cache": "contextual",
+      "__roles": [
+        "presentationFlow.create",
+        "presentationFlow.create"
+      ]
+    },
+    "updatePresentationFlowContact": {
+      "name": "canCreatePresentationFlow",
+      "cache": "contextual",
+      "__roles": [
+        "presentationFlow.create",
+        "presentationFlow.create"
+      ]
+    },
     "resumeIdentityStore": {
       "name": "hasRole-VerifiableCredential.InstanceAdmin",
       "cache": "contextual",
@@ -3440,6 +3464,44 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     }
   },
+  "PresentationFlowTemplateNotification": {
+    "*": {
+      "rulesOr": [
+        {
+          "name": "canCreatePresentationFlowTemplate",
+          "cache": "contextual",
+          "__roles": [
+            "presentationFlow.template.create",
+            "presentationFlow.template.create"
+          ]
+        },
+        {
+          "name": "canReadPresentationFlowTemplate",
+          "cache": "contextual",
+          "__roles": [
+            "presentationFlow.template.read",
+            "presentationFlow.template.read"
+          ]
+        },
+        {
+          "name": "canUpdatePresentationFlowTemplate",
+          "cache": "contextual",
+          "__roles": [
+            "presentationFlow.template.update",
+            "presentationFlow.template.update"
+          ]
+        },
+        {
+          "name": "canDeletePresentationFlowTemplate",
+          "cache": "contextual",
+          "__roles": [
+            "presentationFlow.template.delete",
+            "presentationFlow.template.delete"
+          ]
+        }
+      ]
+    }
+  },
   "PresentationFlowTokenResponse": {
     "*": {
       "rules": []
@@ -3462,6 +3524,16 @@ exports[`shield rules are setup correctly 1`] = `
             "VerifiableCredential.SupportAgent"
           ]
         }
+      ]
+    }
+  },
+  "PresentationFlowContact": {
+    "*": {
+      "name": "canCreatePresentationFlow",
+      "cache": "contextual",
+      "__roles": [
+        "presentationFlow.create",
+        "presentationFlow.create"
       ]
     }
   },

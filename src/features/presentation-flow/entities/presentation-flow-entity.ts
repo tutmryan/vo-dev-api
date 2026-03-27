@@ -8,8 +8,18 @@ import {
   varcharMaxLength,
 } from '../../../data/utils/crossDbColumnTypes'
 import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
-import type { Action, Callback, DataDefinition, PresentationFlowStatus, PresentationRequestInput } from '../../../generated/graphql'
-import { PresentationFlowStatus as PresentationFlowStatusEnum } from '../../../generated/graphql'
+import type {
+  Action,
+  Callback,
+  DataDefinition,
+  PresentationFlowNotificationStatus,
+  PresentationFlowStatus,
+  PresentationRequestInput,
+} from '../../../generated/graphql'
+import {
+  PresentationFlowNotificationStatus as PresentationFlowNotificationStatusEnum,
+  PresentationFlowStatus as PresentationFlowStatusEnum,
+} from '../../../generated/graphql'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { PresentationEntity } from '../../presentation/entities/presentation-entity'
@@ -73,6 +83,12 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'uuid', transformer: uuidLowerCaseTransformer })
   callbackSecret!: string
 
+  @Column({ type: booleanType, nullable: true })
+  hasContactNotification!: boolean | null
+
+  @Column({ type: nvarcharType, length: 255, nullable: true })
+  notificationStatus!: PresentationFlowNotificationStatus | null
+
   @ManyToOne(() => PresentationEntity)
   presentation!: Promise<PresentationEntity | null>
 
@@ -95,11 +111,7 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
     return this.requestDataJson ? (JSON.parse(this.requestDataJson) as Record<string, unknown>) : null
   }
 
-  get presentationRequest(): Record<string, unknown> {
-    return JSON.parse(this.presentationRequestJson) as Record<string, unknown>
-  }
-
-  get presentationRequestAsInput(): PresentationRequestInput {
+  get presentationRequest(): PresentationRequestInput {
     return JSON.parse(this.presentationRequestJson) as PresentationRequestInput
   }
 
@@ -127,5 +139,24 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
     if (this.isRequestRetrieved) return PresentationFlowStatusEnum.RequestRetrieved
     if (this.isRequestCreated) return PresentationFlowStatusEnum.RequestCreated
     return PresentationFlowStatusEnum.Pending
+  }
+
+  get isNotificationFinal(): boolean {
+    return (
+      this.notificationStatus === PresentationFlowNotificationStatusEnum.Sent ||
+      this.notificationStatus === PresentationFlowNotificationStatusEnum.Failed
+    )
+  }
+
+  public notificationQueued(): void {
+    this.notificationStatus = PresentationFlowNotificationStatusEnum.Pending
+  }
+
+  public notificationSent(): void {
+    this.notificationStatus = PresentationFlowNotificationStatusEnum.Sent
+  }
+
+  public notificationFailed(): void {
+    this.notificationStatus = PresentationFlowNotificationStatusEnum.Failed
   }
 }

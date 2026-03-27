@@ -59,6 +59,7 @@ const config: DeepPartial<Config> = {
   privateBlobStorage: {
     asyncIssuanceContainer: 'async-issuance',
     oidcContainer: 'oidc',
+    presentationFlowContainer: 'presentation-flow',
   },
   sms: {
     accountSid: 'AC860727ab860a86187f00a15bb05bd812',
@@ -72,6 +73,7 @@ const config: DeepPartial<Config> = {
     templates: {
       issuance: { id: 'd-8500cff9c1ba4bdc9326a46d85f93632', asm: { groupId: 26962, groupsToDisplay: [26962] } },
       verification: { id: 'd-a2af5a4bcad04f4392b51f7023106f2a', asm: { groupId: 27199, groupsToDisplay: [27199] } },
+      presentationFlow: { id: 'd-5f240dfb9bef46f698a9afe8ac309a38', asm: { groupId: 34451, groupsToDisplay: [34451] } },
     },
   },
   auth: {

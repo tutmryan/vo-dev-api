@@ -33,7 +33,7 @@ export async function CreatePresentationRequestForPresentationFlowCommand(
   }
 
   const presentationRequestInput: PresentationRequestInput = {
-    ...(request.presentationRequest as PresentationRequestInput),
+    ...request.presentationRequest,
     includeQRCode: input?.includeQRCode,
   }
 

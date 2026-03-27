@@ -16,4 +16,8 @@ export const resolvers: Resolvers = {
     communications: async ({ id }, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindCommunicationsQuery, { ...where, asyncIssuanceRequestId: id }, offset, limit, orderBy, orderDirection),
   },
+  PresentationFlow: {
+    communications: async ({ id }, { where, offset, limit, orderBy, orderDirection }, context) =>
+      query(context, FindCommunicationsQuery, { ...where, presentationFlowId: id }, offset, limit, orderBy, orderDirection),
+  },
 }

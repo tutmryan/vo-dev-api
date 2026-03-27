@@ -34,6 +34,8 @@ import {
 import { addAsyncIssuanceEmailStatusEndpoint } from './features/async-issuance/email-status-callback'
 import { addAsyncIssuanceSmsStatusEndpoint as addAsyncIssuanceSmsStatusCallbackEndpoint } from './features/async-issuance/sms-status-callback'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
+import { addPresentationFlowEmailStatusEndpoint } from './features/presentation-flow/email-status-callback'
+import { addPresentationFlowSmsStatusEndpoint } from './features/presentation-flow/sms-status-callback'
 import { demoPresentationTokenHandlers, demoPresentationTokenRoute } from './features/demo'
 import { corsConfig } from './features/instance-configs'
 import { vcLogoProxyHandler, vcLogoProxyTokenRoute } from './features/local-dev/vc-logo-proxy'
@@ -136,6 +138,8 @@ export async function getExpressApp(): Promise<Express> {
   addServiceHealthEndpoints(app)
   addAsyncIssuanceSmsStatusCallbackEndpoint(app)
   addAsyncIssuanceEmailStatusEndpoint(app)
+  addPresentationFlowSmsStatusEndpoint(app)
+  addPresentationFlowEmailStatusEndpoint(app)
 
   // Azure start-up probe (Don't use the known default and make the custom one unlikely to be discovered)
   app.get('/azure-startup-probe-40nt0001ihrkbxdry635', (_req, res) => {

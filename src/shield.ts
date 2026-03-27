@@ -84,6 +84,7 @@ export const rules: ShieldSchema<Resolvers> = {
     applicationLabelConfigs: isInstanceAdminUser,
     presentationFlow: or(canReadPresentationFlow, isValidLimitedPresentationFlow),
     asyncIssuanceContact: or(isIssuerUser, isSupportAgentUser),
+    presentationFlowContact: canCreatePresentationFlow,
     asyncIssuanceRequest: or(isAllowedToViewAsyncIssuanceRequests, isIssuee),
     authority: or(isUserWithReadPermissions, isIssuee),
     conciergeBranding: allow,
@@ -188,6 +189,8 @@ export const rules: ShieldSchema<Resolvers> = {
     selfIssueMicrosoftEntraTemporaryAccessPass: or(anyUserRule, isIssuee),
     resendAsyncIssuanceNotification: or(isAsyncIssuer, isSupportAgentUser),
     resendAsyncIssuanceNotifications: or(isAsyncIssuer, isSupportAgentUser),
+    resendPresentationFlowNotification: canCreatePresentationFlow,
+    updatePresentationFlowContact: canCreatePresentationFlow,
     resumeIdentityStore: isInstanceAdminUser,
     resumePartner: isPartnerAdminUser,
     revokeContractIssuances: isAllowedToRevokeCredentials,
@@ -287,11 +290,22 @@ export const rules: ShieldSchema<Resolvers> = {
       canDeletePresentationFlowTemplate,
     ),
   },
+  PresentationFlowTemplateNotification: {
+    '*': or(
+      canCreatePresentationFlowTemplate,
+      canReadPresentationFlowTemplate,
+      canUpdatePresentationFlowTemplate,
+      canDeletePresentationFlowTemplate,
+    ),
+  },
   PresentationFlowTokenResponse: {
     '*': allow,
   },
   AsyncIssuanceContact: {
     '*': or(isIssuerUser, isSupportAgentUser),
+  },
+  PresentationFlowContact: {
+    '*': canCreatePresentationFlow,
   },
   AsyncIssuanceErrorResponse: {
     '*': anyUserRule,
