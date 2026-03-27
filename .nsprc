@@ -1,2 +1,6 @@
 {
+  "1115432": {
+    "active": true,
+    "notes": "brace-expansion in minimatch@3.x (via eslint/@eslint/eslintrc) requires v1/v2 API incompatible with the patched v5; no upstream fix available without a breaking eslint upgrade."
+  }
 }
