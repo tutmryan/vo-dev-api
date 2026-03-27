@@ -20,6 +20,10 @@ export async function CreatePresentationRequestForPresentationFlowCommand(
   const { user, entityManager } = this
   userInvariant(user)
 
+  // Phase 1: short read — validate status and extract the request input, then release the entity.
+  // Keeping the entity in scope across the external call below would hold a DB connection open
+  // for the duration of the HTTP round-trip, causing deadlocks with the concurrent callback
+  // transaction that INSERTs into `presentation` and UPDATEs `presentation_flow`.
   const request = await entityManager.getRepository(PresentationFlowEntity).findOneOrFail({ where: { id: presentationFlowId } })
 
   const allowedStatuses: PresentationFlowStatus[] = [
@@ -37,13 +41,13 @@ export async function CreatePresentationRequestForPresentationFlowCommand(
     includeQRCode: input?.includeQRCode,
   }
 
+  // Phase 2: external call with no DB lock held, then a targeted write by PK.
   const result = await CreatePresentationRequestCommand.apply(this, [
     presentationRequestInput,
     { limitedPresentationFlowKey: getLimitedPresentationFlowKey(user.token), presentationFlowId },
   ])
 
-  request.isRequestCreated = true
-  await entityManager.getRepository(PresentationFlowEntity).save(request)
+  await entityManager.getRepository(PresentationFlowEntity).update(presentationFlowId, { isRequestCreated: true })
   await publishPresentationFlowEvent(presentationFlowId)
 
   // Log audit event for presentation request creation within flow context

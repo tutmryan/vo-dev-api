@@ -20,6 +20,7 @@ function createContext(overrides: Partial<CommandContext> = {}): CommandContext 
     getRepository: jest.fn().mockReturnValue({
       findOneOrFail: jest.fn(),
       save: jest.fn().mockResolvedValue(undefined),
+      update: jest.fn().mockResolvedValue(undefined),
     }),
   } as unknown as VerifiedOrchestrationEntityManager
 
@@ -110,5 +111,24 @@ describe('CreatePresentationRequestForPresentationFlowCommand', () => {
       expect.objectContaining({ includeQRCode: true }),
       expect.any(Object),
     ])
+  })
+
+  it('succeeds when presentation flow is in PresentationVerified status (retry path)', async () => {
+    const entity = createPresentationFlowEntity({ presentationId: 'existing-presentation-id' })
+    ;(context.entityManager.getRepository(PresentationFlowEntity).findOneOrFail as jest.Mock).mockResolvedValue(entity)
+
+    await expect(CreatePresentationRequestForPresentationFlowCommand.call(context, presentationFlowId)).resolves.not.toThrow()
+    expect(CreatePresentationRequestCommand.apply).toHaveBeenCalled()
+  })
+
+  it('writes isRequestCreated via update() by PK after the external call, not via save()', async () => {
+    const entity = createPresentationFlowEntity()
+    const repo = context.entityManager.getRepository(PresentationFlowEntity)
+    ;(repo.findOneOrFail as jest.Mock).mockResolvedValue(entity)
+
+    await CreatePresentationRequestForPresentationFlowCommand.call(context, presentationFlowId)
+
+    expect(repo.update).toHaveBeenCalledWith(presentationFlowId, { isRequestCreated: true })
+    expect(repo.save).not.toHaveBeenCalled()
   })
 })

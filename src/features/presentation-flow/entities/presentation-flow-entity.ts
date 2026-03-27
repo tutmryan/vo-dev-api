@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import {
   booleanType,
   dateTimeOffsetTransformer,
@@ -92,6 +92,7 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
   @ManyToOne(() => PresentationEntity)
   presentation!: Promise<PresentationEntity | null>
 
+  @Index('ix_presentation_flow_presentation_id')
   @Column({ type: 'uuid', nullable: true, transformer: uuidLowerCaseTransformer })
   presentationId!: string | null
 
