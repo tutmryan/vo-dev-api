@@ -396,6 +396,7 @@ type PresentationFlowTemplate {
   createdAt: DateTime!
   updatedBy: User
   updatedAt: DateTime
+  isDeleted: Boolean!
 }
 
 input PresentationFlowTemplateInput {

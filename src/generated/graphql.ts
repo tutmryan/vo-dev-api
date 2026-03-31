@@ -4312,6 +4312,7 @@ export type PresentationFlowTemplate = {
   expiresAfterDays?: Maybe<Scalars['Int']['output']>;
   fieldVisibility: PresentationFlowTemplateFieldVisibility;
   id: Scalars['ID']['output'];
+  isDeleted: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   notification: PresentationFlowTemplateNotification;
   postPresentationText?: Maybe<Scalars['Markdown']['output']>;
@@ -8363,6 +8364,7 @@ export type PresentationFlowTemplateResolvers<ContextType = GraphQLContext, Pare
   expiresAfterDays?: Resolver<Maybe<ResolversTypes['Int']>, ParentType, ContextType>;
   fieldVisibility?: Resolver<ResolversTypes['PresentationFlowTemplateFieldVisibility'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
+  isDeleted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   notification?: Resolver<ResolversTypes['PresentationFlowTemplateNotification'], ParentType, ContextType>;
   postPresentationText?: Resolver<Maybe<ResolversTypes['Markdown']>, ParentType, ContextType>;
