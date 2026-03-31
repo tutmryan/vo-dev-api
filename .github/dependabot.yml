@@ -6,20 +6,35 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule:
-      interval: daily
-    cooldown:
-      default-days: 7
+      interval: weekly
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+      development-dependencies:
+        dependency-type: "development"
+    # These packages have local patches applied via patch-package.
+    # Exclude them from automatic updates to avoid overwriting the patches.
+    ignore:
+      - dependency-name: "@azure/monitor-opentelemetry"
+      - dependency-name: "@opentelemetry/sdk-logs"
+      - dependency-name: "graphql-middleware"
 
   - package-ecosystem: npm
     directory: /docs-site
     schedule:
-      interval: daily
-    cooldown:
-      default-days: 7
+      interval: weekly
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+      development-dependencies:
+        dependency-type: "development"
 
   - package-ecosystem: npm
     directory: /migrate-db
     schedule:
-      interval: daily
-    cooldown:
-      default-days: 7
+      interval: weekly
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+      development-dependencies:
+        dependency-type: "development"
