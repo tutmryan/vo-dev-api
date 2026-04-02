@@ -1,102 +1,58 @@
+---
+sidebar_position: 1
+sidebar_label: Entra ID EAM
+---
+
 import { Help } from '@site/src/components/Help'
 import { ImgBorder } from '@site/src/components/ImgBorder'
 
-# Entra ID EAM
+# Entra ID External Authentication Method
 
-An external authentication method (EAM), lets users choose an external provider to meet multifactor authentication (MFA) requirements when they sign in to Microsoft Entra ID. An EAM can satisfy MFA requirements from Conditional Access policies, Microsoft Entra ID Protection risk-based Conditional Access policies, Privileged Identity Management (PIM) activation, and when the application itself requires MFA.
+The VO OIDC Provider supports being configured as an External Authentication Method (EAM) for identity verification and MFA in Entra ID.
 
-## Important Information
 
-### Release Status: Public Preview
-
-Entra ID EAM is in [public preview](https://learn.microsoft.com/en-us/entra/fundamentals/licensing-preview-info). Public preview features carry a higher risk of change and buggy behaviour than features that are generally available.
-
-:::danger[Caution]
-
-Authentications flows on Mobile devices which use Entra EAM with Verifiable Credentials (VC) are not supported.
+:::vo-tip[Caution]
+Entra ID authentications flows on mobile devices that use Entra EAM with Verifiable Credentials (VC) are not supported.
 
 VO is working with Microsoft to resolve this issue.
-
 :::
 
-### Tenants
+### Pre-requisites
 
-When using EAM with a tenant other than your home tenant, the VO platform must know about it. For more information, see [additional tenant IDs](/docs/guides/instance-configuration#additional-tenant-ids).
+- An Entra ID workforce tenant
+- The Entra tenant where EAM will be enabled must be configured as an identity store in the VO Composer
+- Credential holders must be linked to the Entra ID account they are entitled to access
 
-:::warning[Caution]
 
-If the tenant ID isn't known during, the following error will be displayed to the user by Microsoft.
+### Credential holder identity lookup
 
-```
-Cannot complete external authentication: provider returned 'invalid_request' error.
-```
-<details>
-  <summary>View</summary>
-  <ImgBorder>
-    ![Conditional Access Policy](../../../static/img/eam-auth-flow-unknown-tenant-id.png)
-  </ImgBorder>
-</details>
-:::
+When using EAM, the Entra ID user's identity must be resolved to a VO credential holder identity. The identity resolution happens by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the `id_token_hint` passed by Entra ID during the authentication process. See [Entra ID user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-id-user) for more information.
 
-### Identities
-
-When using EAM, the user's identity is unknown to the VO platform. Therefore, the user's identity must be resolved to an identity known by the platform. The identity resolution happens by searching for the identity using the `tid` (Tenant ID) and `oid` (Object ID) taken from the ID Token Hint passed by Entra ID during the authentication process. See [Entra ID user identity mapping](/docs/guides/identity-mapping#example-mapping-of-an-entra-id-user) for more information.
-
-:::warning[Caution]
-
-If the user's identity cannot be resolved during an EAM MFA authentication flow, the following error will be displayed to the user by Microsoft.
-
-```
-Cannot complete external authentication: provider returned 'access_denied' error.
-```
-<details>
-  <summary>View</summary>
-  <ImgBorder>
-    ![Conditional Access Policy](../../../static/img/eam-auth-flow-unmatched-identity-error.png)
-  </ImgBorder>
-</details>
-:::
-
+{/*
 ### Credentials
 
-To ensure the credential presented belongs to the user progressing through the EAM process, a presentation constraint is used to enforce the resolved identity ID matches to identity ID embedded in the credential. See [create presentation request](/docs/guides/presentation#create-presentation-request) for more information.
+To ensure the credential presented belongs to the user progressing through the EAM process, a presentation constraint is used to enforce the resolved credential holder identity ID matches to identity ID embedded in the credential. See [create presentation request](/docs/guides/presentation#create-presentation-request) for more information.
+*/}
 
-:::note
-Any credentials issued prior to **1st Jan 2025** will not contain the Identity ID claim. Additionally, contracts published prior to **1st Jan 2025** will continue to issue credentials without the Identity ID claim until republished in Composer. A credential cannot be used with EAM until it is issued with the Identity ID claim included.
-:::
-
-![Presentation Constraint](../../../static/img/eam-auth-cred-with-id.png)
-
-## Set up Guide
+## Set up guide
 
 The official documentation for setting up an EAM can be found [here](https://learn.microsoft.com/en-us/entra/identity/authentication/how-to-authentication-external-method-manage).
 
 The general flow is:
 
-1. Register an enterprise application/application in Entra ID.
-    1. The application will be used to store key OpenID Connect (OIDC) URIs as Single Page Applications (SPA) Redirect URIs.
-    2. The enterprise application will be used to enforce MFA by a Conditional Access Policy.
-2. Register an OIDC client in the VO platform.
-    1. The client ID will be used in the EAM OIDC configuration.
-    2. The redirect URI allows the VO platform to redirect back to the Microsoft.
-3. Register an authentication method in Entra ID.
-    1. An external authentication method is created with the OIDC configuration.
-    2. The client ID, discovery endpoint, and app ID are used to link the EAM to the OIDC client and enterprise application.
+1. Create an App Registration in Entra ID.
+2. Register an OIDC client in the VO Composer.
+3. Register an external authentication method in Entra ID.
+4. Enable the authentication method.
 
-Whilst the Microsoft documentation is comprehensive, it can be a little overwhelming. To help the following additional information below is provided.
+### 1. Create an App Registration in Entra ID
+In the Entra ID portal, create a new App Registration with the following settings:
+1. Supported account types should be 'Multiple Entra ID tenants'
+2. Set a Redirect URI, for a Web platform and set the Redirect URI to the VO OIDC Provider authorization endpoint (`{yourInstanceUrl}/oidc/auth`)
+3. From API permissions, grant delegated rights for Microsoft Graph `openid` and `profile` permissions
+4. Grant admin consent for the API permissions.
 
-### Entra ID - Application Registration
-
-SPA redirect URIs should be set to the following:
-
-1. `{yourInstanceUrl}/oidc/auth`
-2. `{yourInstanceUrl}/oidc/.well-known/openid-configuration`
-3. `{yourTenantUrl}` <Help>(which should resemble the format of `https://{tenantName}.onmicrosoft.com`)</Help>
-
-![SPAs Redirect URIs](../../../static/img/eam-app-redirects.png)
-
-The following token options should **not** be checked:
-
+Confirm the following Authentication settings for Web and SPA implicit grant and hybrid flows are **not** checked.
 1. Access tokens (used for implicit flows)
 2. ID tokens (used for implicit and hybrid flows)
 
@@ -104,15 +60,8 @@ The following token options should **not** be checked:
   ![SPAs Redirect URIs](../../../static/img/eam-app-token-options.png)
 </ImgBorder>
 
-### Entra ID - Enterprise Application Registration
 
-The associated Enterprise Application must have a conditional access policy set up to enforce MFA.
-
-<ImgBorder>
-  ![Conditional Access Policy](../../../static/img/eam-ca-policy-options.png)
-</ImgBorder>
-
-### VO Platform - OIDC Client Registration
+### 2. Register an OIDC Client in the VO Composer
 
 As Entra ID's EAM uses OIDC to provide the multifactor authentication, a OIDC client registration on the VO platform must be registered and with the following details:
 
@@ -122,21 +71,59 @@ One of the following URIs must be used as the `Redirect URI`, but depending on t
 - https://login.microsoftonline.us/common/federation/externalauthprovider (Azure US - Government)
 - https://login.partner.microsoftonline.cn/common/federation/externalauthprovider (Azure - China)
 
-### Entra ID - Authentication methods
+
+:::vo-tip[VO recommendation]
+Further identity proofing requirements can be configured in the OIDC client configuration.
+
+We recommend using a specific credential for MFA
+:::
+
+### 3. Register an external authentication method in Entra ID
 
 When setting up the authentication method, the following important details are required:
 
-1. Client ID
-    1. The client ID of the Authentication Client registered in Composer.
-2. Discovery Endpoint
-    1. The discovery endpoint of the VO platform instance. Which is, `{yourInstanceUrl}/oidc/.well-known/openid-configuration`.
-3. App ID
-    1. The ID of the Application registered in Entra ID.
+1. **Client ID**: the Client ID of the OIDC Client registered in the VO Composer.
+2. **Discovery Endpoint**: the Discovery URL of the VO instance OIDC Provider, which is `{yourInstanceUrl}/oidc/.well-known/openid-configuration`.
+3. **App ID**: The 'Application (client) ID' of the App Registration in Entra ID.
+
+If admin consent has been granted for Microsoft Graph `openid` and `profile` in the App Registration, the authentication method will work without requiring additional admin consent.
 
 <ImgBorder>
   ![External Authentication Method - OIDC Configuration](../../../static/img/eam-authentication-method-external-oidc-config.png)
 </ImgBorder>
 
-:::warning[Caution]
-Admin consent for the application is required in the tenant that uses the EAM. If consent isn't granted, the following error appears when an admin tries to use the EAM: AADSTS900491: Service principal `your App ID` not found.
-:::
+### 4. Enable the Authentication Method
+
+Entra ID must still be configured to allow (or enforce) the use of a VO credential for MFA.
+
+Where Entra Security Defaults are used, the authentication method must be enabled in one of two ways:
+1. A user can manage their authentication methods in their account Security Info page.
+2. An administrator can enable the authentication method for a user.
+
+Where Entra is using Conditional Access, policy can be configured to enforce the use of the VO credential for MFA.
+
+See https://learn.microsoft.com/en-us/entra/identity/authentication/how-to-authentication-external-method-manage#user-experience for more.
+
+## Troubleshooting
+
+**Error: 'AADSTS900491: Service principal `your App ID` not found'**.<br/>
+Admin consent for the application is required in the tenant that uses the EAM. If consent has not been granted for the `openid` and `profile` permissions, the user will receive this error during the MFA flow.
+
+
+**Error: 'Cannot complete external authentication: provider returned 'invalid_request' error.'**<br/>
+The Entra ID tenant is not correctly configured as an identity store in VO
+<details>
+  <summary>Expand screenshot</summary>
+  <ImgBorder>
+    ![Conditional Access Policy](../../../static/img/eam-auth-flow-unknown-tenant-id.png)
+  </ImgBorder>
+</details>
+
+**Error: 'Cannot complete external authentication: provider returned 'access_denied' error.'**<br/>
+The Entra ID user's identity cannot be resolved during an EAM MFA authentication flow. Ensure the Entra ID users object ID is correctly linked to the VO credential holder identity.
+<details>
+  <summary>Expand screenshot</summary>
+  <ImgBorder>
+    ![Conditional Access Policy](../../../static/img/eam-auth-flow-unmatched-identity-error.png)
+  </ImgBorder>
+</details>
