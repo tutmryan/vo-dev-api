@@ -107,12 +107,16 @@ const config = {
   ],
 
   themes: [
-    [
-      require.resolve('@easyops-cn/docusaurus-search-local'),
-      {
-        hashed: true,
-      },
-    ],
+    ...(process.env.ENABLE_SEARCH === 'false'
+      ? []
+      : [
+          [
+            require.resolve('@easyops-cn/docusaurus-search-local'),
+            {
+              hashed: true,
+            },
+          ],
+        ]),
     '@docusaurus/theme-mermaid',
   ],
 
