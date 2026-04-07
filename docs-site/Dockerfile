@@ -17,7 +17,12 @@ RUN npm run generate-graphql-docs &&\
   npm run build &&\
   npm prune --omit=dev
 
-FROM nginx:stable-alpine3.23
+# This stage allows for our build artifact to be exported for use in other contexts
+FROM scratch AS export
+COPY --from=build /app/docs-site/build /build
+
+# Leaving the final stage here for future, right now this image is only used to build the export stage
+FROM nginx:stable-alpine3.23 AS runtime
 
 LABEL org.opencontainers.image.source="https://github.com/verified-orchestration/verified-orchestration-api"
 LABEL org.opencontainers.image.description="Verified Orchestration API Documentation Site"
@@ -27,24 +32,16 @@ COPY --from=build /app/docs-site/build /usr/share/nginx/html
 RUN cat > /docker-entrypoint.sh <<'EOF'
 #!/bin/sh
 set -e
-if [ -z "$DOCS_SITE_URL_OLD" ] || [ -z "$DOCS_SITE_URL" ]; then
-  echo "Error: DOCS_SITE_URL_OLD and DOCS_SITE_URL environment variables must be set"
+if [ -z "$DOCS_SITE_URL" ]; then
+  echo "Error: DOCS_SITE_URL environment variable must be set"
   exit 1
 fi
-sed -i "s/DOCS_SITE_URL_OLD/${DOCS_SITE_URL_OLD}/g" /etc/nginx/conf.d/default.conf
 sed -i "s/DOCS_SITE_URL/${DOCS_SITE_URL}/g" /etc/nginx/conf.d/default.conf
 exec nginx -g "daemon off;"
 EOF
 
 RUN chmod +x /docker-entrypoint.sh
 RUN cat > /etc/nginx/conf.d/default.conf <<'EOF'
-server {
-  listen 3000;
-  listen [::]:3000;
-  server_name DOCS_SITE_URL_OLD;
-  return 301 https://DOCS_SITE_URL$request_uri;
-}
-
 server {
   listen 3000;
   listen [::]:3000;

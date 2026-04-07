@@ -12,3 +12,8 @@ build
 **/*.md
 fly.docs-site.toml
 !./docs-site/scripts/*.md
+.jira
+.idea
+.vscode
+.github
+local-dev
