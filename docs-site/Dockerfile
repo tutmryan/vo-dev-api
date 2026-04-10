@@ -1,7 +1,6 @@
 ARG NODE_VERSION=22
 
 FROM node:${NODE_VERSION}-slim AS base
-LABEL fly_launch_runtime="Node.js"
 WORKDIR /app
 ENV NODE_ENV="production"
 
