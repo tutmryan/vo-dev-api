@@ -1,9 +1,9 @@
 name: Deploy Docs
 run-name: |
   ${{ 
-    github.event_name == 'push' && 'Deploy docs to dev' ||
-    github.event_name == 'release' && 'Deploy docs to prod' ||
-    format('Deploy docs to {0}{1}', inputs.environment, inputs.purge_cache && ' and purge cache' || '')
+    github.event_name == 'push' && format('Deploy {0} to dev', github.ref_name) ||
+    github.event_name == 'release' && format('Deploy {0} to prod', github.ref_name) ||
+    format('Deploy {0} to {1}{2}', github.ref_name, inputs.environment, inputs.purge_cache && ' and purge cache' || '')
   }}
 
 on:
