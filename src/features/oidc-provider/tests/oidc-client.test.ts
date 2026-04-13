@@ -438,6 +438,32 @@ describe('updateOidcClient mutation', () => {
     expect(mockedServices.oidcSecretService.delete.mock().mock.calls).toHaveLength(0)
   })
 
+  it('does not attempt to delete a secret when updating a public client', async () => {
+    const publicInput = createOidcClientInput({ clientType: OidcClientType.Public })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: publicInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    mockedServices.clearAllMocks()
+
+    const updateInput = createOidcClientInput({ clientType: OidcClientType.Public, name: 'Updated Name' })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    expect(data.updateOidcClient.name).toEqual('Updated Name')
+
+    // No secret operations should occur — public clients never have a secret stored
+    expect(mockedServices.oidcSecretService.set.mock().mock.calls).toHaveLength(0)
+    expect(mockedServices.oidcSecretService.delete.mock().mock.calls).toHaveLength(0)
+  })
+
   it(`can't provide both clientJwks and clientJwksUri`, async () => {
     const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
     const input = createOidcClientInput({

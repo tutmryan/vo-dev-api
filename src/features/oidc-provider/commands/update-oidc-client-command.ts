@@ -17,9 +17,6 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
   const tokenEndpointAuthMethod = validateClientAuthMethod(input)
 
   const previousAuthMethod = client.tokenEndpointAuthMethod
-  const switchedToPrivateKeyJwt =
-    previousAuthMethod !== OidcTokenEndpointAuthMethod.PrivateKeyJwt &&
-    tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt
 
   // When switching to client_secret_post from a method that didn't have a secret, a new secret is required
   const previousUsedSecret = previousAuthMethod === OidcTokenEndpointAuthMethod.ClientSecretPost
@@ -62,8 +59,8 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
   // Handle secret storage based on auth method transitions
   if (tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.ClientSecretPost && input.clientSecret) {
     await oidcSecretService().set(client.id, input.clientSecret)
-  } else if (switchedToPrivateKeyJwt || tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.None) {
-    // Switching away from client_secret_post — delete the stored secret
+  } else if (previousUsedSecret && tokenEndpointAuthMethod !== OidcTokenEndpointAuthMethod.ClientSecretPost) {
+    // Only delete if there was previously a secret stored (client_secret_post) and we're leaving that method
     await oidcSecretService().delete(client.id)
   }
 
