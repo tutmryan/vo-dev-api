@@ -1,7 +1,6 @@
 import { generateOidcClientSecret } from '.'
 import { dispatch, query } from '../../cqs'
 import type { Resolvers } from '../../generated/graphql'
-import { OidcClientType, OidcTokenEndpointAuthMethod } from '../../generated/graphql'
 import { compactErrors } from '../../util/compact-errors'
 import { CreateOidcClaimMappingCommand } from './commands/create-oidc-claim-mapping'
 import { CreateOidcClientCommand } from './commands/create-oidc-client-command'
@@ -82,9 +81,6 @@ export const resolvers: Resolvers = {
       oidcClaimMappings.loadMany(parent.claimMappingIds).then(compactErrors),
     identityResolvers: async (parent, _args, { dataLoaders: { oidcIdentityResolvers } }) =>
       oidcIdentityResolvers.loadMany(parent.identityResolverIds).then(compactErrors),
-    tokenEndpointAuthMethod: (parent) =>
-      parent.tokenEndpointAuthMethod ??
-      (parent.clientType === OidcClientType.Confidential ? OidcTokenEndpointAuthMethod.ClientSecretPost : OidcTokenEndpointAuthMethod.None),
   },
   OidcClientResource: {
     resource: async (parent, _args, { dataLoaders: { oidcResources } }) => oidcResources.load(parent.resourceId),

@@ -63,7 +63,6 @@ const toOidcClientMetadata = async ({
   termsOfServiceUrl,
   policyUrl,
   applicationType,
-  clientType,
   authorizationRequestsTypeJarEnabled,
   relyingPartyJwks,
   relyingPartyJwksUri,
@@ -72,10 +71,7 @@ const toOidcClientMetadata = async ({
   clientJwksUri,
   responseTypes,
 }: OidcClientEntity): Promise<ClientMetadata> => {
-  // Resolve auth method: use stored value, or fall back to legacy logic for backward compat
-  const authMethod =
-    tokenEndpointAuthMethod ??
-    (clientType === OidcClientType.Confidential ? OidcTokenEndpointAuthMethod.ClientSecretPost : OidcTokenEndpointAuthMethod.None)
+  const authMethod = tokenEndpointAuthMethod
 
   let clientSecret: string | undefined
 
@@ -253,12 +249,6 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
     if (portalClient && !portalClientUrisAreCorrect(portalClient)) {
       portalClient.redirectUris = [portalRedirectUri, portalDemoRedirectUri]
       portalClient.postLogoutUris = [portalRedirectUri, portalDemoRedirectUri]
-      await clientRepo.save(portalClient)
-      updatedConfig = true
-    }
-    // backfill tokenEndpointAuthMethod for legacy portal clients that were created without it
-    if (portalClient && portalClient.tokenEndpointAuthMethod === null) {
-      portalClient.tokenEndpointAuthMethod = OidcTokenEndpointAuthMethod.None
       await clientRepo.save(portalClient)
       updatedConfig = true
     }

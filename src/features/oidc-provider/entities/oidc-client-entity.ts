@@ -22,7 +22,10 @@ import { OidcClientResourceEntity } from './oidc-client-resource-entity'
 import { OidcClientVcPolicy, OidcClientVcPolicyData } from './oidc-client-vc-policy'
 import { OidcIdentityResolverEntity } from './oidc-identity-resolver-entity'
 
-type RequiredArgs = Pick<OidcClientEntity, 'name' | 'applicationType' | 'clientType' | 'redirectUris' | 'postLogoutUris'>
+type RequiredArgs = Pick<
+  OidcClientEntity,
+  'name' | 'applicationType' | 'clientType' | 'redirectUris' | 'postLogoutUris' | 'tokenEndpointAuthMethod'
+>
 type OptionalArgs = Pick<
   OidcClientEntity,
   | 'credentialTypes'
@@ -40,7 +43,6 @@ type OptionalArgs = Pick<
   | 'authorizationRequestsTypeStandardEnabled'
   | 'relyingPartyJwks'
   | 'relyingPartyJwksUri'
-  | 'tokenEndpointAuthMethod'
   | 'clientJwks'
   | 'clientJwksUri'
   | 'vcPolicy'
@@ -175,8 +177,8 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
   /**
    * The token endpoint authentication method for this client.
    */
-  @Column({ type: nvarcharType, length: 50, nullable: true, name: 'token_endpoint_auth_method' })
-  tokenEndpointAuthMethod!: OidcTokenEndpointAuthMethod | null
+  @Column({ type: nvarcharType, length: 50, nullable: false, name: 'token_endpoint_auth_method' })
+  tokenEndpointAuthMethod!: OidcTokenEndpointAuthMethod
 
   /**
    * The client's public key set (JWKS) as a JSON string, used for private_key_jwt client authentication.
@@ -362,7 +364,7 @@ export class OidcClientEntity extends AuditedAndTrackedEntity {
         args.authorizationRequestsTypeStandardEnabled !== undefined ? args.authorizationRequestsTypeStandardEnabled : true,
       relyingPartyJwks: args.relyingPartyJwks ?? null,
       relyingPartyJwksUri: args.relyingPartyJwksUri ?? null,
-      tokenEndpointAuthMethod: args.tokenEndpointAuthMethod ?? null,
+      tokenEndpointAuthMethod: args.tokenEndpointAuthMethod,
       clientJwks: args.clientJwks ?? null,
       clientJwksUri: args.clientJwksUri ?? null,
       credentialTypes: args.credentialTypes ?? null,

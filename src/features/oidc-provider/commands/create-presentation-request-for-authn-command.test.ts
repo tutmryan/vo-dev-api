@@ -1,6 +1,6 @@
 import type { CommandContext } from '../../../cqs'
 import type { VerifiedOrchestrationEntityManager } from '../../../data/entity-manager'
-import { OidcApplicationType, OidcClientType } from '../../../generated/graphql'
+import { OidcApplicationType, OidcClientType, OidcTokenEndpointAuthMethod } from '../../../generated/graphql'
 import type { LoggerWithMetaControl } from '../../../logger'
 import { InvariantError } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
@@ -60,6 +60,7 @@ function createClient(overrides: Partial<OidcClientEntity> = {}): OidcClientEnti
     name: 'Test Client',
     applicationType: OidcApplicationType.Web,
     clientType: OidcClientType.Public,
+    tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.None,
     redirectUris: ['https://example.com/cb'],
     postLogoutUris: ['https://example.com/logout'],
     credentialTypes: ['TestCredential'],
