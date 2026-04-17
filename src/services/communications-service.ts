@@ -2,6 +2,7 @@ import type { MailDataRequired } from '@sendgrid/mail'
 import { email } from '../config'
 import type { VerifiedOrchestrationEntityManager } from '../data/entity-manager'
 import { getIssuanceEmailStatusCallbackUrl, getVerificationEmailStatusCallbackUrl } from '../features/async-issuance/email-status-callback'
+import { AsyncIssuanceEntity } from '../features/async-issuance/entities/async-issuance-entity'
 import { getIssuanceSmsStatusCallbackUrl, getVerificationSmsStatusCallbackUrl } from '../features/async-issuance/sms-status-callback'
 import { CommunicationEntity } from '../features/communication/entities/communication-entity'
 import { getEmailSenderConfig } from '../features/instance-configs'
@@ -365,6 +366,13 @@ export class CommunicationsService {
         details: error,
       }),
     )
+
+    // Update the denormalized flag on async_issuance for query optimization
+    if (purpose === CommunicationPurpose.Verification && !error) {
+      await entityManager.getRepository(AsyncIssuanceEntity).update(asyncIssuanceId, {
+        hasVerificationCommunication: true,
+      })
+    }
   }
 
   async recordAsyncIssuanceCommunicationFailure<TData extends AsyncIssuanceCommunicationData>(

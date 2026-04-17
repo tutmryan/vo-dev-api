@@ -2,20 +2,20 @@ import type { HttpClient } from '@makerx/node-common/http'
 import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { addYears } from 'date-fns'
+import type { IssuanceResponse } from '../../generated/graphql'
 import type { ServiceMock } from '../../util/jest'
 import { mockFunction } from '../../util/jest'
 import type { AwaitedReturnTypeOf } from '../../util/type-helpers'
-import type { IssuanceRequest } from '../verified-id'
-import type { VerifiedIdRequestService } from '../verified-id'
-import type { IssuanceResponse } from '../../generated/graphql'
+import type { IssuanceRequest, VerifiedIdRequestService } from '../verified-id'
 
 type ServiceReturn<Method extends keyof VerifiedIdRequestService> = AwaitedReturnTypeOf<VerifiedIdRequestService, Method>
 
-const buildCreateIssuanceRequestReturn = (mockedResult?: IssuanceResponse): ServiceReturn<'createIssuanceRequest'> => ({
+const buildCreateIssuanceRequestReturn = (mockedResult?: Partial<IssuanceResponse>): ServiceReturn<'createIssuanceRequest'> => ({
   requestId: randomUUID(),
   expiry: addYears(new Date(), 1).getTime(),
   qrCode: `data:image/png;base64${randomUUID()}`,
   url: casual.url,
+  credentialRecordId: randomUUID(),
   ...mockedResult,
 })
 

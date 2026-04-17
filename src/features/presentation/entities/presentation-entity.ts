@@ -21,10 +21,10 @@ export type PresentedData = Omit<PresentedCredential, 'claims'>
 
 @Entity('presentation')
 @Index('ix_presentation_identity_id_wallet_id', ['identityId', 'walletId'])
-// ix_presentation_wallet_id is a covering NONCLUSTERED index with INCLUDE columns (identity_id,
-// oidc_client_id, presented_at, requested_by_id, request_id) managed directly via migration.
-// TypeORM cannot represent SQL Server INCLUDE columns so all columns are listed as key columns here
-// to match what TypeORM reads from sys.index_columns during schema drift detection.
+// ix_presentation_wallet_id is a NONCLUSTERED covering index with INCLUDE columns managed via migration.
+// TypeORM reads sys.index_columns which includes INCLUDE columns without distinguishing them from
+// key columns, so all columns must be listed here to match what TypeORM sees in the database.
+// The actual migration creates: CREATE INDEX ... ON (wallet_id) INCLUDE (identity_id, ...)
 @Index('ix_presentation_wallet_id', ['walletId', 'identityId', 'oidcClientId', 'presentedAt', 'requestedById', 'requestId'])
 export class PresentationEntity extends VerifiedOrchestrationEntity {
   constructor(

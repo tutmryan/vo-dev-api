@@ -2,7 +2,8 @@ import { getClientCredentialsToken } from '@makerx/node-common'
 import { randomUUID } from 'crypto'
 import { acquireAsyncIssuanceTokenLimiter, redeemVerificationCode } from '..'
 import { limitedAsyncIssuanceAuth } from '../../../config'
-import type { CommandContext } from '../../../cqs'
+import type { TransactionalCommandContext } from '../../../cqs'
+import { addUserToManager } from '../../../data/user-context-helper'
 import type { AsyncIssuanceTokenResponse } from '../../../generated/graphql'
 import { IssuanceRequestStatus } from '../../../generated/graphql'
 import { consumeRateLimit } from '../../../rate-limiter'
@@ -18,11 +19,11 @@ import type { PhotoCaptureData } from '../../photo-capture'
 import { setPhotoCaptureData } from '../../photo-capture'
 
 export async function AcquireAsyncIssuanceTokenCommand(
-  this: CommandContext,
+  this: TransactionalCommandContext,
   asyncIssuanceRequestId: string,
   verificationCode: string,
 ): Promise<AsyncIssuanceTokenResponse> {
-  const { entityManager, requestInfo } = this
+  const { inTransaction, requestInfo } = this
 
   // rate limit by async issuance request id
   await consumeRateLimit(
@@ -36,9 +37,15 @@ export async function AcquireAsyncIssuanceTokenCommand(
   const isValid = await redeemVerificationCode(asyncIssuanceRequestId, verificationCode)
   invariant(isValid, 'Invalid verification code')
 
-  // validate async issuance entity state
-  const entity = await entityManager.getRepository(AsyncIssuanceEntity).findOneByOrFail({ id: asyncIssuanceRequestId })
-  invariant(!entity.isStatusFinal, 'Invalid async issuance state for issuance')
+  // validate async issuance entity state and mark it as verification-complete
+  const entity = await inTransaction(async (entityManager) => {
+    const entity = await entityManager.getRepository(AsyncIssuanceEntity).findOneByOrFail({ id: asyncIssuanceRequestId })
+    invariant(!entity.isStatusFinal, 'Invalid async issuance state for issuance')
+    entity.state = 'verification-complete'
+    addUserToManager(entityManager, entity.createdById)
+    await entityManager.getRepository(AsyncIssuanceEntity).save(entity)
+    return entity
+  })
 
   // download the async issuance request
   const asyncIssuanceRequest = await this.services.asyncIssuances.downloadAsyncIssuance(asyncIssuanceRequestId, entity.expiry)

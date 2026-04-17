@@ -1,0 +1,228 @@
+"""
+The method by which a credential was issued.
+"""
+enum CredentialIssuanceMethod {
+  """
+  Issued directly in person (no remote issuance request).
+  """
+  inPerson
+  """
+  Issued via a remote issuance request (async issuance).
+  """
+  remote
+}
+
+"""
+The unified lifecycle status of a credential record.
+
+States are grouped into four phases: Offer, Verification, Issuance, and Credential lifecycle.
+Transient states (offerAccepted, verificationCompleted) are used only in audit events and never returned by queries.
+"""
+enum CredentialRecordStatus {
+  # ── Offer phase (remote issuances only) ──────────────────────────────────
+
+  """
+  The credential offer has been sent to the issuee and is awaiting acceptance. Remote issuances only — in-person records begin at issuanceStarted.
+  """
+  offered
+  """
+  The issuee has accepted the offer and the verification flow has been opened. Transient — used in audit events only, never returned by queries; reaching verificationStarted implies offerAccepted.
+  """
+  offerAccepted
+  """
+  The offer window expired before the issuee accepted it. Remote issuances only.
+  """
+  offerExpired
+  """
+  The offer was cancelled by an operator before the credential was issued.
+  """
+  offerCancelled
+  """
+  A technical failure occurred while delivering the offer notification (e.g. the communication channel could not reach the issuee).
+  """
+  offerFailed
+
+  # ── Verification phase (remote issuances only) ───────────────────────────
+
+  """
+  Identity verification is underway. For remote issuances a verification communication (OTP/link) has been sent to the issuee. Reaching this state implies the offer was accepted.
+  """
+  verificationStarted
+  """
+  Identity verification succeeded. Transient — the system immediately advances to issuanceStarted. Used in audit events only, never returned by queries.
+  """
+  verificationCompleted
+  """
+  Identity verification failed because the subject's identity could not be confirmed (e.g. incorrect OTP, biometric mismatch). Operator action required.
+  """
+  identityNotVerified
+  """
+  A technical or system error occurred during the verification process (e.g. the IDV service was unavailable). Placeholder — reserved for future IDV integration.
+  """
+  verificationFailed
+
+  # ── Issuance phase (both in-person and remote) ───────────────────────────
+
+  """
+  The issuance process is actively underway: the offer has been accepted, the subject has been verified, and the QR code has been generated. In-person records begin here (offer acceptance and verification are handled in person by the operator and are not tracked as separate states).
+  """
+  issuanceStarted
+  """
+  A technical failure occurred during the issuance process (e.g. the Verified ID server rejected the credential issuance call).
+  """
+  issuanceFailed
+  """
+  The 5-minute QR code window closed without the credential being redeemed into the wallet. Applies to both in-person and remote issuances.
+  """
+  issuanceExpired
+
+  # ── Credential lifecycle ─────────────────────────────────────────────────
+
+  """
+  The credential has been successfully issued and is in the holder's wallet. This is the stable active state.
+  """
+  issuanceCompleted
+  """
+  The issued credential has expired (credential validity period passed). Operator action: reissue the credential.
+  """
+  expired
+  """
+  The issued credential was revoked by an operator.
+  """
+  revoked
+}
+
+"""
+A unified lifecycle view of a credential — either a completed issuance or a pending remote issuance request.
+"""
+type CredentialRecord {
+  """
+  The stable credential record ID. This is the primary identifier for the credential record lifecycle.
+  """
+  id: ID!
+  """
+  The identity of the person the credential was or will be issued to.
+  """
+  identity: Identity!
+  """
+  The contract defining the credential type.
+  """
+  contract: Contract!
+  """
+  The method by which the credential was or will be issued.
+  """
+  issuanceMethod: CredentialIssuanceMethod!
+  """
+  The unified lifecycle status of this credential record.
+  """ # eslint-disable-next-line @graphql-eslint/no-typename-prefix
+  credentialRecordStatus: CredentialRecordStatus!
+  """
+  When the credential record was created (issuedAt for direct issuances, createdAt for remote requests).
+  """
+  createdAt: DateTime!
+  """
+  The expiry of the offer or issuance session. Present for in-person and remote issuance requests.
+  """
+  expiresAt: DateTime
+  """
+  The user or application that created this credential record.
+  """
+  createdBy: User
+  """
+  The completed issuance. Present when credentialRecordStatus is issuanceCompleted, revoked, or expired.
+  """
+  issuance: Issuance
+  """
+  The remote issuance request. Present when the credential originated from a remote issuance request.
+  """
+  asyncIssuanceRequest: AsyncIssuanceRequest
+}
+
+"""
+Filter criteria for credential records.
+
+Supports complex filtering with AND/OR operators (max depth: 3, max 20 conditions total).
+
+Example - Filter by multiple statuses:
+```json
+{
+  "OR": [
+    { "credentialRecordStatus": "issuanceCompleted" },
+    { "credentialRecordStatus": "revoked" }
+  ]
+}
+```
+"""
+input CredentialRecordWhere {
+  """
+  Filter by credential record ID.
+  """
+  id: ID
+  """
+  Filter by contract ID.
+  """
+  contractId: ID
+  """
+  Filter by identity ID.
+  """
+  identityId: ID
+  """
+  Filter by identity store ID.
+  """
+  identityStoreId: ID
+  """
+  Filter by the user or application that created the record.
+  """
+  createdById: ID
+  """
+  Filter by issuance method.
+  """
+  issuanceMethod: CredentialIssuanceMethod
+  """
+  Filter by credential record status.
+  """
+  credentialRecordStatus: CredentialRecordStatus
+  """
+  Filter records created on or after this date.
+  """
+  createdFrom: DateTime
+  """
+  Filter records created on or before this date.
+  """
+  createdTo: DateTime
+  """
+  Logical AND - all conditions must match. Maximum depth: 3 levels.
+  """ # eslint-disable-next-line @graphql-eslint/naming-convention
+  AND: [CredentialRecordWhere!]
+  """
+  Logical OR - at least one condition must match. Maximum depth: 3 levels.
+  """ # eslint-disable-next-line @graphql-eslint/naming-convention
+  OR: [CredentialRecordWhere!]
+}
+
+"""
+Fields by which credential records can be ordered.
+"""
+enum CredentialRecordOrderBy {
+  createdAt
+  contractName
+  identityName
+}
+
+extend type Query {
+  """
+  Returns a unified view of credential records, combining issued credentials and pending remote issuance requests.
+  """
+  findCredentialRecords(
+    where: CredentialRecordWhere
+    offset: NonNegativeInt
+    limit: PositiveInt = 100
+    orderBy: CredentialRecordOrderBy
+    orderDirection: OrderDirection
+  ): [CredentialRecord!]!
+
+  """
+  Returns the total count of credential records matching the specified criteria.
+  """
+  credentialRecordCount(where: CredentialRecordWhere): NonNegativeInt!
+}

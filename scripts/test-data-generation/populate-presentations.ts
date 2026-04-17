@@ -29,6 +29,7 @@ import 'reflect-metadata'
 import { dataSource } from '../../src/data/data-source'
 import { addUserToManager } from '../../src/data/user-context-helper'
 import { ContractEntity } from '../../src/features/contracts/entities/contract-entity'
+import { CredentialRecordEntity } from '../../src/features/credential-record/entities/credential-record-entity'
 import { IdentityStoreEntity } from '../../src/features/identity-store/entities/identity-store-entity'
 import { IdentityEntity } from '../../src/features/identity/entities/identity-entity'
 import { IssuanceEntity } from '../../src/features/issuance/entities/issuance-entity'
@@ -222,6 +223,7 @@ async function main() {
 
   // Create additional issuances if needed
   const newIssuances: IssuanceEntity[] = []
+  const newCredentialRecords: CredentialRecordEntity[] = []
   if (additionalIssuancesNeeded > 0) {
     console.log(`Creating ${additionalIssuancesNeeded} new issuances...`)
     const issuancesPerContract = Math.ceil(additionalIssuancesNeeded / contracts.length)
@@ -231,14 +233,26 @@ async function main() {
         const expiresAt = new Date()
         expiresAt.setFullYear(expiresAt.getFullYear() + 1)
 
+        const identityId = identities[faker.number.int({ min: 0, max: identities.length - 1 })]!.id
+        const issuedById = users[faker.number.int({ min: 0, max: users.length - 1 })]!.id
+
+        const credentialRecord = new CredentialRecordEntity()
+        credentialRecord.createdById = scriptUserId
+        credentialRecord.contractId = contract.id
+        credentialRecord.identityId = identityId
+        credentialRecord.expiresAt = expiresAt
+        credentialRecord.failedAt = null
+        newCredentialRecords.push(credentialRecord)
+
         const issuance = new IssuanceEntity({
           id: randomUUID(),
           requestId: faker.string.alphanumeric(10),
           contractId: contract.id,
-          identityId: identities[faker.number.int({ min: 0, max: identities.length - 1 })]!.id,
-          issuedById: users[faker.number.int({ min: 0, max: users.length - 1 })]!.id,
+          identityId,
+          issuedById,
           expiresAt,
           hasFaceCheckPhoto: faker.datatype.boolean(),
+          credentialRecordId: credentialRecord.id,
         })
         newIssuances.push(issuance)
       }
@@ -247,15 +261,18 @@ async function main() {
     // Save new issuances in smaller batches to avoid parameter limits
     const issuanceBatchSize = 50
     for (let i = 0; i < newIssuances.length; i += issuanceBatchSize) {
-      const batch = newIssuances.slice(i, i + issuanceBatchSize)
+      const issuanceBatch = newIssuances.slice(i, i + issuanceBatchSize)
+      const credentialRecordBatch = newCredentialRecords.slice(i, i + issuanceBatchSize)
 
+      // Save credential records first (issuances have a FK to credential_record)
       // Use transaction and attach user context to the transaction manager
       await dataSource.transaction(async (transactionManager) => {
         addUserToManager(transactionManager, scriptUserId)
-        await transactionManager.save(batch)
+        await transactionManager.save(credentialRecordBatch)
+        await transactionManager.save(issuanceBatch)
       })
 
-      console.log(`Created issuances ${i + batch.length}/${newIssuances.length}`)
+      console.log(`Created issuances ${i + issuanceBatch.length}/${newIssuances.length}`)
     }
   }
 

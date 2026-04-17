@@ -2,14 +2,18 @@ import casual from 'casual'
 import { randomUUID } from 'crypto'
 import { addDays, addMinutes } from 'date-fns'
 import { AsyncIssuanceRequestExpiry, ClaimType, ContactMethod, FaceCheckPhotoSupport } from '../../../generated/graphql'
-import { beforeAfterAll, expectResponseUnionToBe } from '../../../test'
+import { beforeAfterAll, executeOperationAsIssuee, expectResponseUnionToBe, inTransaction } from '../../../test'
 import { executeJob } from '../../../test/background-job'
 import { mockedServices } from '../../../test/mocks'
 import { throwError } from '../../../util/throw-error'
 import { createIdentity } from '../../identity/tests/create-identity'
+import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 import { sendAsyncIssuanceNotificationsJobHandler } from '../jobs/send-async-issuance-notifications'
 import { createAsyncIssuanceRequest } from './create-async-issuance'
-import { createIssuanceRequestForAsyncIssuance } from './create-issuance-request-for-async-issuance'
+import {
+  createIssuanceRequestForAsyncIssuance,
+  createIssuanceRequestForAsyncIssuanceMutation,
+} from './create-issuance-request-for-async-issuance'
 import { getAsyncIssuance } from './get-async-issuance'
 import { additonalContractClaims, buildContact, faceCheckPhoto, givenContract, validAdditonalClaimsInput } from './index'
 
@@ -117,5 +121,80 @@ describe('createIssuanceRequestForAsyncIssuance mutation', () => {
         expect(createIssuanceResponse.url).toBeDefined()
       },
     )
+  })
+
+  describe('as authenticated identity (Concierge /issue/ path)', () => {
+    it('succeeds without "No user has been attached to this EntityManager" error', async () => {
+      // Arrange
+      const { contract } = await givenContract({})
+      const identity = await createIdentity()
+      const contact = buildContact()
+
+      const createResponse = await createAsyncIssuanceRequest([
+        {
+          contractId: contract.id,
+          identityId: identity.id,
+          expiry: AsyncIssuanceRequestExpiry.OneDay,
+          contact,
+        },
+      ])
+      expectResponseUnionToBe(createResponse, 'AsyncIssuanceResponse')
+      const requestId = createResponse.asyncIssuanceRequestIds[0] ?? throwError('Request not created')
+
+      // Act — execute as the identity user directly (no OTP session), matching the /issue/ path
+      const { data, errors } = await executeOperationAsIssuee(
+        {
+          query: createIssuanceRequestForAsyncIssuanceMutation,
+          variables: { asyncIssuanceRequestId: requestId },
+        },
+        identity.id,
+      )
+
+      // Assert
+      expect(errors).toBeUndefined()
+      expect(data?.createIssuanceRequestForAsyncIssuance.__typename).toBe('IssuanceResponse')
+    })
+  })
+
+  describe('credential record ID stability', () => {
+    it('returns the same credentialRecordId as the async issuance request so the Composer URL does not change after issuance', async () => {
+      // Arrange
+      const { contract } = await givenContract({})
+      const identity = await createIdentity()
+      const contact = buildContact()
+
+      const createResponse = await createAsyncIssuanceRequest([
+        {
+          contractId: contract.id,
+          identityId: identity.id,
+          expiry: AsyncIssuanceRequestExpiry.OneDay,
+          contact,
+        },
+      ])
+      expectResponseUnionToBe(createResponse, 'AsyncIssuanceResponse')
+      const requestId = createResponse.asyncIssuanceRequestIds[0] ?? throwError('Request not created')
+
+      // Record the credentialRecordId assigned at offer creation time
+      const asyncIssuanceEntity = await inTransaction((em) => em.getRepository(AsyncIssuanceEntity).findOneByOrFail({ id: requestId }))
+      const expectedCredentialRecordId = asyncIssuanceEntity.credentialRecordId
+
+      const asyncIssuance = (await getAsyncIssuance(requestId)) ?? throwError('Issuance not found')
+      await executeJob(sendAsyncIssuanceNotificationsJobHandler, {
+        userId: asyncIssuance.createdBy.id,
+        asyncIssuanceRequestIds: [requestId],
+      })
+
+      // Act — recipient accepts the offer
+      const issuanceResponse = await createIssuanceRequestForAsyncIssuance(requestId, {
+        contractId: contract.id,
+        identityId: identity.id,
+        asyncIssuanceRequestId: requestId,
+        userId: asyncIssuance.createdBy.id,
+      })
+
+      // Assert — the credentialRecordId in the response must equal the one created at offer time
+      expectResponseUnionToBe(issuanceResponse, 'IssuanceResponse')
+      expect(issuanceResponse.credentialRecordId).toBe(expectedCredentialRecordId)
+    })
   })
 })

@@ -13,6 +13,7 @@ const indexFor = (fields: [keyof CommunicationEntity]) => fields
 
 @Entity('communication')
 @Index(indexFor(['sentAt']))
+@Index('ix_communication_async_issuance_id_purpose', ['asyncIssuanceId', 'purpose'])
 export class CommunicationEntity extends VerifiedOrchestrationEntity {
   constructor(
     args?: Pick<CommunicationEntity, 'createdById' | 'recipientId' | 'contactMethod' | 'purpose' | 'status' | 'details'> & {

@@ -13,7 +13,7 @@
     "dev:oidc-ui:build": "cd src/features/oidc-provider/oidc-ui && npx vite build",
     "dev:oidc-ui:watch": "cd src/features/oidc-provider/oidc-ui && npx vite build --watch",
     "dev": "run-s dev:oidc-ui:build && run-p gql:generate:watch debug dev:oidc-ui:watch",
-    "typeorm": "dotenv -e .env -- ts-node ./node_modules/typeorm/cli.js",
+    "typeorm": "dotenv -e .env -- ts-node --swc ./node_modules/typeorm/cli.js",
     "db:init-localdev": "dotenv -e .env -- ts-node --transpile-only ./scripts/localdev-database-setup",
     "db:start": "dotenv -e .env -- docker compose up -d --wait && npm run db:init-localdev",
     "db:stop": "docker compose stop",

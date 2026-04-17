@@ -9,6 +9,7 @@ export const createIssuanceRequestMutation = graphql(`
         requestId
         url
         qrCode
+        credentialRecordId
       }
       ... on RequestErrorResponse {
         error {

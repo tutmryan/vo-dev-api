@@ -68,6 +68,7 @@ jest.mock('../data', () => {
     createQueryBuilder: jest.fn(() => createMockQueryBuilder()),
     count: jest.fn().mockResolvedValue(0),
     findAndCount: jest.fn().mockResolvedValue([[], 0]),
+    query: jest.fn().mockResolvedValue([]),
   }
 
   const mockManager = {

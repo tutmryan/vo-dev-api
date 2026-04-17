@@ -38,6 +38,7 @@ extensions:
                 CorsOriginConfig: ../features/instance-configs/entities/cors-origins-config-entity#CorsOriginConfigEntity
                 MicrosoftEntraTemporaryAccessPassIssuance: ../features/microsoft-entra-temporary-access-pass-issuance/entities/microsoft-entra-temporary-access-pass-issuance-entity#MicrosoftEntraTemporaryAccessPassIssuanceEntity
                 MicrosoftEntraTemporaryAccessPassIssuanceConfiguration: ../features/microsoft-entra-temporary-access-pass-issuance/entities/microsoft-entra-temporary-access-pass-issuance-configuration-entity#MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity
+                CredentialRecord: ../features/credential-record/queries/find-credential-records-query#CredentialRecordRow
         config:
           strictScalars: true
           scalars:

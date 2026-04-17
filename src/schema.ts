@@ -85,7 +85,9 @@ function buildLocalSchema() {
     { extensions: ['ts', 'js'] },
   )
   const typeDefs = loadFilesSync<string>([
+    path.join(__dirname, './background-jobs/**/*.schema.graphql'),
     path.join(__dirname, './background-jobs/**/schema.graphql'),
+    path.join(__dirname, './features/**/*.schema.graphql'),
     path.join(__dirname, './features/**/schema.graphql'),
     path.join(__dirname, './schema/**/*.graphql'),
   ])

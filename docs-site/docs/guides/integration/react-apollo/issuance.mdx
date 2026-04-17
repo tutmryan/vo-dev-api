@@ -44,6 +44,7 @@ const createIssuanceMutation = graphql(`
         url
         qrCode
         requestId
+        credentialRecordId
       }
       ... on RequestErrorResponse {
         error {

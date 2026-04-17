@@ -3,13 +3,24 @@ import { UserEntity } from '@/features/users/entities/user-entity'
 import { mockedServices } from '@/test/mocks'
 import { subDays } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
+import { graphql } from '../../../generated'
 import { AsyncIssuanceRequestExpiry, AsyncIssuanceRequestStatus } from '../../../generated/graphql'
-import { beforeAfterAll, expectToBeDefinedAndNotNull, expectToBeUndefined, inTransaction } from '../../../test'
+import { UserRoles } from '../../../roles'
+import { beforeAfterAll, executeOperationAsUser, expectToBeDefinedAndNotNull, expectToBeUndefined, inTransaction } from '../../../test'
 import { AsyncIssuanceEntity } from '../entities/async-issuance-entity'
 import { cancelAsyncIssuanceRequest } from './cancel-async-issuance'
 import { createAsyncIssuanceRequest } from './create-async-issuance'
 import { executeListAsyncIssuanceRequests } from './get-async-issuance'
 import { buildContact, givenContract } from './index'
+
+const listAsyncIssuanceRequestsWithCredentialRecordIdQuery = graphql(`
+  query ListAsyncIssuanceRequestsWithCredentialRecordId($where: AsyncIssuanceRequestsWhere) {
+    findAsyncIssuanceRequests(where: $where) {
+      id
+      credentialRecordId
+    }
+  }
+`)
 
 function withMockedServices() {
   mockedServices.adminService.contract.resolvedWith(mockedServices.adminService.contract.buildResolve())
@@ -80,6 +91,25 @@ describe('FindAsyncIssuancesQuery', () => {
   beforeEach(() => {
     mockedServices.clearAllMocks()
     withMockedServices()
+  })
+
+  it('returns credentialRecordId on each async issuance request', async () => {
+    const { contract } = await givenContract({})
+    const { asyncIssuanceId } = await createSingleAsyncIssuanceRequest(contract.id)
+
+    const { errors, data } = await executeOperationAsUser(
+      {
+        query: listAsyncIssuanceRequestsWithCredentialRecordIdQuery,
+        variables: { where: { contractId: contract.id } },
+      },
+      UserRoles.issuer,
+    )
+
+    expectToBeUndefined(errors)
+    expectToBeDefinedAndNotNull(data)
+    const match = data.findAsyncIssuanceRequests.find((r) => r.id === asyncIssuanceId)
+    expectToBeDefinedAndNotNull(match)
+    expect(match.credentialRecordId).toBeTruthy()
   })
 
   describe('Expired status excludes terminal states', () => {

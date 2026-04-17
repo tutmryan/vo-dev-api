@@ -1,4 +1,4 @@
-# eslint-disable @graphql-eslint/naming-convention
+ 
 
 """
 Input fields for editing the concierge OIDC client.

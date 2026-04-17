@@ -98,6 +98,7 @@ export const AuditEvents = {
   ISSUANCE_CREDENTIAL_ISSUED: { id: 'VO0082', eventType: 'issuance.credential.issued' },
   ISSUANCE_CREDENTIAL_REVOKED: { id: 'VO0083', eventType: 'issuance.credential.revoked' },
   ISSUANCE_CREDENTIAL_FAILED: { id: 'VO0084', eventType: 'issuance.credential.failed' },
+  ISSUANCE_REQUEST_CANCELLED: { id: 'VO0085', eventType: 'issuance.request.cancelled' },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Async issuance events
@@ -119,6 +120,7 @@ export const AuditEvents = {
   ASYNC_ISSUANCE_REQUEST_CANCELLED_COMMAND: { id: 'VO0114', eventType: 'async-issuance.request.cancelled~command' },
   ASYNC_ISSUANCE_REQUEST_CANCELLED_JOB: { id: 'VO0115', eventType: 'async-issuance.request.cancelled~job' },
   ASYNC_ISSUANCE_CANCELLATION_FAILED: { id: 'VO0116', eventType: 'async-issuance.request.cancelled~failed' },
+  ASYNC_ISSUANCE_ISSUANCE_REQUEST_CREATED: { id: 'VO0117', eventType: 'async-issuance.issuance-request.created' },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Microsoft Entra Temporary Access Pass events

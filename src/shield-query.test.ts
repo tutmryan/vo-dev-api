@@ -111,6 +111,48 @@ findIssuances(where: $where, limit: 10) {
     )
   })
 
+  describe('findCredentialRecords', () => {
+    testQueryPermissions(
+      [
+        UserRoles.reader,
+        UserRoles.issuer,
+        UserRoles.credentialAdmin,
+        UserRoles.partnerAdmin,
+        UserRoles.oidcAdmin,
+        UserRoles.instanceAdmin,
+        UserRoles.supportAgent,
+        AppRoles.issue,
+      ],
+      false,
+      `query FindCredentialRecordsShieldTest($where: CredentialRecordWhere) {
+findCredentialRecords(where: $where, limit: 10) {
+  id
+}
+}
+`,
+    )
+  })
+
+  describe('credentialRecordCount', () => {
+    testQueryPermissions(
+      [
+        UserRoles.reader,
+        UserRoles.issuer,
+        UserRoles.credentialAdmin,
+        UserRoles.partnerAdmin,
+        UserRoles.oidcAdmin,
+        UserRoles.instanceAdmin,
+        UserRoles.supportAgent,
+        AppRoles.issue,
+      ],
+      false,
+      `query CredentialRecordCountShieldTest($where: CredentialRecordWhere) {
+credentialRecordCount(where: $where)
+}
+`,
+    )
+  })
+
   describe('findAsyncIssuanceRequests', () => {
     testQueryPermissions(
       [

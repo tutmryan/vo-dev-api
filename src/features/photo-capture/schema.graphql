@@ -47,17 +47,17 @@ enum PhotoCaptureStatus {
   """
   The photo capture has not yet started
   """
-  # eslint-disable-next-line @graphql-eslint/naming-convention
+   
   not_started
   """
   The photo capture has been started
   """
-  # eslint-disable-next-line @graphql-eslint/naming-convention
+   
   started
   """
   The photo has been successfully captured
   """
-  # eslint-disable-next-line @graphql-eslint/naming-convention
+   
   complete
 }
 

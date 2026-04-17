@@ -1,5 +1,5 @@
 # eslint-disable @graphql-eslint/strict-id-in-types
-# eslint-disable @graphql-eslint/naming-convention
+ 
 """
 A human-friendly label for a specific application (by identifier)
 """

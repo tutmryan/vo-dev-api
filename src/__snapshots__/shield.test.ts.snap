@@ -560,6 +560,142 @@ exports[`shield rules are setup correctly 1`] = `
         }
       ]
     },
+    "findCredentialRecords": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
+            },
+            {
+              "rulesOr": [
+                {
+                  "name": "isRequestIdFilterDefined",
+                  "cache": "strict"
+                },
+                {
+                  "name": "isValidLimitedIdentitierFilter",
+                  "cache": "strict"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
+    },
+    "credentialRecordCount": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
+            },
+            {
+              "rulesOr": [
+                {
+                  "name": "isRequestIdFilterDefined",
+                  "cache": "strict"
+                },
+                {
+                  "name": "isValidLimitedIdentitierFilter",
+                  "cache": "strict"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
+    },
     "findIssuances": {
       "rulesOr": [
         {
@@ -1663,6 +1799,35 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "cancelAsyncIssuanceRequests": {
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "hasRole-VerifiableCredential.Issuer",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issuer"
+              ]
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
+    },
+    "cancelIssuanceRequest": {
       "rulesOr": [
         {
           "rulesOr": [

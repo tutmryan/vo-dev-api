@@ -1,4 +1,4 @@
-# eslint-disable @graphql-eslint/naming-convention
+ 
 
 """
 The possible contact methods.
@@ -437,6 +437,10 @@ type AsyncIssuanceRequest {
   When the async issuance request was last updated.
   """
   updatedAt: DateTime
+  """
+  The ID of the credential record associated with this async issuance request.
+  """
+  credentialRecordId: ID!
   """
   The communications that have been sent for this async issuance request.
   """

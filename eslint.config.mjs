@@ -74,7 +74,20 @@ export default [
     plugins: {
       '@graphql-eslint': graphqlPlugin,
     },
-    rules: graphqlPlugin.configs['flat/schema-recommended'].rules,
+    rules: {
+      ...graphqlPlugin.configs['flat/schema-recommended'].rules,
+      '@graphql-eslint/naming-convention': [
+        'error',
+        {
+          types: 'PascalCase',
+          FieldDefinition: 'camelCase',
+          InputValueDefinition: 'camelCase',
+          Argument: 'camelCase',
+          DirectiveDefinition: 'camelCase',
+          EnumValueDefinition: { ignorePattern: '.*' },
+        },
+      ],
+    },
   },
 
   {

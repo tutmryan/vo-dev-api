@@ -13,7 +13,7 @@ jest.mock('../../issuance/resolvers', () => {
       ...originalModule.resolvers,
       Mutation: {
         ...originalModule.resolvers.Mutation,
-        createIssuanceRequest: () => ({ requestId: randomUUID(), url: casual.url, qrCode: casual.word }),
+        createIssuanceRequest: () => ({ requestId: randomUUID(), url: casual.url, qrCode: casual.word, credentialRecordId: randomUUID() }),
       },
     },
   }
