@@ -1,15 +1,28 @@
 import { notifyOidcDataChanged, oidcSecretService } from '..'
 import type { CommandContext } from '../../../cqs'
-import { OidcApplicationType, OidcTokenEndpointAuthMethod, type OidcClientInput } from '../../../generated/graphql'
+import { OidcApplicationType, OidcResponseType, OidcTokenEndpointAuthMethod, type OidcClientInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import type { PartnerEntity } from '../../partners/entities/partner-entity'
+import { mapClaimConstraintInput } from '../claims'
 import { OidcClientEntity } from '../entities/oidc-client-entity'
-import { systemClientInvariant, validateClientAuthMethod, validateJarKeys, validateJwksJson } from './utils'
+import { OidcClientVcPolicy } from '../entities/oidc-client-vc-policy'
+import { systemClientInvariant, validateClientAuthMethod, validateJarKeys, validateJwksJson, validateResponseTypes } from './utils'
 
 export async function UpdateOidcClientCommand(this: CommandContext, clientId: string, input: OidcClientInput) {
   systemClientInvariant(clientId)
 
-  const { requireFaceCheck, allowAnyPartner, partnerIds, applicationType, relyingPartyJwksUri, clientJwksUri, ...rest } = input
+  const {
+    requireFaceCheck,
+    allowAnyPartner,
+    partnerIds,
+    applicationType,
+    relyingPartyJwksUri,
+    clientJwksUri,
+    vcPolicy,
+    claimConstraint,
+    responseTypes,
+    ...rest
+  } = input
 
   const repo = this.entityManager.getRepository(OidcClientEntity)
   const client = await repo.findOneByOrFail({ id: clientId })
@@ -36,6 +49,8 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
   validateJwksJson(input.clientJwks, 'clientJwks')
   validateJwksJson(input.relyingPartyJwks, 'relyingPartyJwks')
 
+  validateResponseTypes(responseTypes)
+
   client.update({
     ...rest,
     applicationType: applicationType ?? OidcApplicationType.Web,
@@ -48,6 +63,9 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
     tokenEndpointAuthMethod,
     clientJwks: tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt ? (input.clientJwks ?? null) : null,
     clientJwksUri: tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt ? (clientJwksUri?.toString() ?? null) : null,
+    vcPolicy: vcPolicy ? OidcClientVcPolicy.fromInput(vcPolicy) : OidcClientVcPolicy.default(),
+    claimConstraint: mapClaimConstraintInput(claimConstraint),
+    responseTypes: responseTypes ?? [OidcResponseType.Code],
   })
 
   if (partnerIds) {

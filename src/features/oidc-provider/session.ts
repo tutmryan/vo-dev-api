@@ -143,7 +143,7 @@ export async function extractRequestedCredentials(
   const requestedCredential = {
     type,
     acceptedIssuers: vcIssuerParam ? [vcIssuerParam] : undefined,
-    configuration: buildRequestConfiguration(params, client, loginInteractionData),
+    configuration: buildRequestConfiguration(client, loginInteractionData),
     constraints,
   }
 
@@ -154,27 +154,26 @@ export async function extractRequestedCredentials(
   return requestedCredential
 }
 
-const faceCheckMinConfidenceThreshold = 50
-const faceCheckMaxConfidenceThreshold = 70
-const faceCheckOn: RequestConfiguration = { validation: { faceCheck: {} } }
-
 function buildRequestConfiguration(
-  params: UnknownObject,
   client: OidcClientEntity,
   loginInteractionData?: LoginInteractionData,
 ): RequestConfiguration | undefined {
-  const faceCheckParam = params[ExtraParams.vc_facecheck] as string | undefined
-  const faceCheckClientDefault = client.requireFaceCheck ? faceCheckOn : undefined
-  if (faceCheckParam === 'true') return faceCheckOn
-  const asNumber = Number(faceCheckParam)
-  if (!Number.isNaN(asNumber) && asNumber >= faceCheckMinConfidenceThreshold && asNumber <= faceCheckMaxConfidenceThreshold)
-    return { validation: { faceCheck: { matchConfidenceThreshold: asNumber } } }
-  if (
-    !loginInteractionData?.integrations?.entraEam && // don't apply to EAM requests
-    simplifyClaimParameter(loginInteractionData?.requestedClaims?.id_token?.amr ?? undefined)?.values.includes('face')
-  )
-    return faceCheckOn
-  return faceCheckClientDefault
+  const threshold = client.faceCheckConfidenceThreshold ?? 70
+
+  const shouldApplyFaceCheck =
+    client.requireFaceCheck ||
+    (!loginInteractionData?.integrations?.entraEam &&
+      simplifyClaimParameter(loginInteractionData?.requestedClaims?.id_token?.amr ?? undefined)?.values.includes('face'))
+
+  if (!shouldApplyFaceCheck) return undefined
+
+  return {
+    validation: {
+      faceCheck: {
+        matchConfidenceThreshold: threshold,
+      },
+    },
+  }
 }
 
 export type PresentationLoginAccount = {

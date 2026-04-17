@@ -1,12 +1,13 @@
 import casual from 'casual'
 import { graphql } from '../../../generated'
-import type { OidcClaimMappingInput, OidcIdentityResolverInput } from '../../../generated/graphql'
+import type { ClaimConstraint, OidcClaimMappingInput, OidcIdentityResolverInput, OidcResourceInput } from '../../../generated/graphql'
 import {
   OidcApplicationType,
   OidcClientType,
   OidcIdentityLookupType,
+  OidcResponseType,
   type OidcClientInput,
-  type OidcResourceInput,
+  type OidcClientVcPolicyInput,
 } from '../../../generated/graphql'
 import { UserRoles } from '../../../roles'
 import { executeOperationAsUser } from '../../../test'
@@ -29,11 +30,13 @@ graphql(`
     redirectUris
     postLogoutUris
     requireFaceCheck
+    faceCheckConfidenceThreshold
     allowAnyPartner
     authorizationRequestsTypeJarEnabled
     authorizationRequestsTypeStandardEnabled
     relyingPartyJwks
     relyingPartyJwksUri
+    responseTypes
     partners {
       id
       name
@@ -52,6 +55,17 @@ graphql(`
       }
       resourceScopes
     }
+    vcPolicy {
+      vcType
+      vcConstraintValues
+    }
+    claimConstraint {
+      claimName
+      startsWith
+      contains
+      values
+    }
+    createdAt
     createdBy {
       id
       name
@@ -178,9 +192,9 @@ export const oidcResourceQuery = graphql(`
   }
 `)
 
-export const updateConciergeClientBrandingMutation = graphql(`
-  mutation UpdateConciergeClientBranding($input: ConciergeClientBrandingInput!) {
-    updateConciergeClientBranding(input: $input) {
+export const updateConciergeClientMutation = graphql(`
+  mutation UpdateConciergeClient($input: ConciergeClientInput!) {
+    updateConciergeClient(input: $input) {
       ...OidcClientFragment
     }
   }
@@ -188,9 +202,16 @@ export const updateConciergeClientBrandingMutation = graphql(`
 
 const validDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8J8AAAAASUVORK5CYII='
 
-export function createOidcClientInput(input: Partial<OidcClientInput> = {}): OidcClientInput {
+export function createOidcClientInput(
+  overrides: Partial<OidcClientInput> & {
+    vcPolicy?: OidcClientVcPolicyInput | null
+    claimConstraint?: ClaimConstraint | null
+  } = {},
+): OidcClientInput {
+  const { vcPolicy, claimConstraint, ...rest } = overrides
+
   return {
-    name: casual.name,
+    name: casual.company_name,
     applicationType: OidcApplicationType.Web,
     clientType: OidcClientType.Public,
     redirectUris: [casual.url.toLowerCase().replace('http', 'https')],
@@ -204,7 +225,11 @@ export function createOidcClientInput(input: Partial<OidcClientInput> = {}): Oid
     policyUrl: casual.url.toLowerCase(),
     termsOfServiceUrl: casual.url.toLowerCase(),
     uniqueClaimsForSubjectId: [casual.word],
-    ...input,
+    responseTypes: [OidcResponseType.Code],
+    ...rest,
+    // Only include vcPolicy/claimConstraint if explicitly provided in overrides
+    ...(vcPolicy !== undefined ? { vcPolicy } : {}),
+    ...(claimConstraint !== undefined ? { claimConstraint } : {}),
   }
 }
 

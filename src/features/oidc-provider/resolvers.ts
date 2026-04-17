@@ -14,12 +14,13 @@ import { DeleteOidcClientCommand } from './commands/delete-oidc-client-command'
 import { DeleteOidcClientResourceCommand } from './commands/delete-oidc-client-resource-command'
 import { DeleteOidcIdentityResolverCommand } from './commands/delete-oidc-identity-resolver-command'
 import { DeleteOidcResourceCommand } from './commands/delete-oidc-resource-command'
-import { UpdateConciergeClientBrandingCommand } from './commands/update-concierge-client-branding'
+import { UpdateConciergeClientCommand } from './commands/update-concierge-client-command'
 import { UpdateOidcClaimMappingCommand } from './commands/update-oidc-claim-mapping'
 import { UpdateOidcClientClaimMappingsCommand } from './commands/update-oidc-client-claim-mappings-command'
 import { UpdateOidcClientCommand } from './commands/update-oidc-client-command'
 import { UpdateOidcClientIdentityResolversCommand } from './commands/update-oidc-client-identity-resolvers-command'
 import { UpdateOidcClientResourceCommand } from './commands/update-oidc-client-resource-command'
+import { UpdateOidcClientVcPolicyCommand } from './commands/update-oidc-client-vc-policy-command'
 import { UpdateOidcIdentityResolverCommand } from './commands/update-oidc-identity-resolver-command'
 import { UpdateOidcResourceCommand } from './commands/update-oidc-resource-command'
 import { FindOidcClaimMappingsQuery } from './queries/find-oidc-claim-mappings-query'
@@ -56,7 +57,9 @@ export const resolvers: Resolvers = {
     deleteOidcIdentityResolver: async (_parent, { id }, context) => dispatch(context, DeleteOidcIdentityResolverCommand, id),
     updateOidcClientIdentityResolvers: async (_parent, { clientId, identityResolverIds }, context) =>
       dispatch(context, UpdateOidcClientIdentityResolversCommand, clientId, identityResolverIds),
-    updateConciergeClientBranding: async (_parent, { input }, context) => dispatch(context, UpdateConciergeClientBrandingCommand, input),
+    updateConciergeClient: async (_parent, { input }, context) => dispatch(context, UpdateConciergeClientCommand, input),
+    updateOidcClientVcPolicy: async (_parent, { clientId, input }, context) =>
+      dispatch(context, UpdateOidcClientVcPolicyCommand, clientId, input),
     generateOidcClientSecret,
   },
   Query: {

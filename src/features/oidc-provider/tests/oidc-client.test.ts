@@ -9,10 +9,10 @@ import {
   deleteOidcClientMutation,
   findOidcClientsQuery,
   oidcClientQuery,
-  updateConciergeClientBrandingMutation,
+  updateConciergeClientMutation,
   updateOidcClientMutation,
 } from '.'
-import { OidcApplicationType, OidcClientType, OidcTokenEndpointAuthMethod } from '../../../generated/graphql'
+import { OidcApplicationType, OidcClientType, OidcResponseType, OidcTokenEndpointAuthMethod, VcParamMode } from '../../../generated/graphql'
 import { UserRoles } from '../../../roles'
 import {
   beforeAfterAll,
@@ -631,6 +631,138 @@ describe('JAR key configuration', () => {
   })
 })
 
+describe('response type configuration', () => {
+  beforeAfterAll()
+
+  it('defaults to [CODE] when responseTypes not provided', async () => {
+    const input = createOidcClientInput()
+    delete (input as Record<string, unknown>).responseTypes
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expect(data?.createOidcClient.responseTypes).toEqual([OidcResponseType.Code])
+  })
+
+  it('can create a client with CODE response type', async () => {
+    const input = createOidcClientInput({ responseTypes: [OidcResponseType.Code] })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expect(data?.createOidcClient.responseTypes).toEqual([OidcResponseType.Code])
+  })
+
+  it('can create a client with ID_TOKEN response type', async () => {
+    const input = createOidcClientInput({ responseTypes: [OidcResponseType.IdToken] })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expect(data?.createOidcClient.responseTypes).toEqual([OidcResponseType.IdToken])
+  })
+
+  it('can create a client with CODE and ID_TOKEN response types (hybrid flow)', async () => {
+    const input = createOidcClientInput({
+      responseTypes: [OidcResponseType.Code, OidcResponseType.IdToken],
+    })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expect(data?.createOidcClient.responseTypes).toEqual(expect.arrayContaining([OidcResponseType.Code, OidcResponseType.IdToken]))
+    expect(data?.createOidcClient.responseTypes).toHaveLength(2)
+  })
+
+  it('cannot create a client with empty response types', async () => {
+    const input = createOidcClientInput({ responseTypes: [] })
+
+    const { errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('Response types must not be empty when specified')
+  })
+
+  it('cannot update a client with empty response types', async () => {
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: createOidcClientInput({ responseTypes: [OidcResponseType.Code] }) } },
+      UserRoles.oidcAdmin,
+    )
+    const clientId = createData!.createOidcClient.id
+
+    const input = createOidcClientInput({ responseTypes: [] })
+
+    const { errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: clientId, input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('Response types must not be empty when specified')
+  })
+
+  it('can update a client response types from CODE to hybrid', async () => {
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: createOidcClientInput({ responseTypes: [OidcResponseType.Code] }) } },
+      UserRoles.oidcAdmin,
+    )
+    const clientId = createData!.createOidcClient.id
+
+    const input = createOidcClientInput({
+      responseTypes: [OidcResponseType.Code, OidcResponseType.IdToken],
+    })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: clientId, input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expect(data?.updateOidcClient.responseTypes).toEqual(expect.arrayContaining([OidcResponseType.Code, OidcResponseType.IdToken]))
+  })
+
+  it('can update a client response types from CODE to ID_TOKEN', async () => {
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: createOidcClientInput({ responseTypes: [OidcResponseType.Code] }) } },
+      UserRoles.oidcAdmin,
+    )
+    const clientId = createData!.createOidcClient.id
+
+    const input = createOidcClientInput({ responseTypes: [OidcResponseType.IdToken] })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: clientId, input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expect(data?.updateOidcClient.responseTypes).toEqual([OidcResponseType.IdToken])
+  })
+
+  it('defaults to [CODE] when updating without responseTypes', async () => {
+    const { data: createData } = await executeOperationAsUser(
+      {
+        query: createOidcClientMutation,
+        variables: { input: createOidcClientInput({ responseTypes: [OidcResponseType.Code, OidcResponseType.IdToken] }) },
+      },
+      UserRoles.oidcAdmin,
+    )
+    const clientId = createData!.createOidcClient.id
+
+    const input = createOidcClientInput()
+    delete (input as Record<string, unknown>).responseTypes
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: clientId, input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    // PUT semantics: no responseTypes provided → defaults to [CODE]
+    expect(data?.updateOidcClient.responseTypes).toEqual([OidcResponseType.Code])
+  })
+})
+
 async function insertConciergeOidcClient(overrides: Partial<OidcClientEntity> = {}) {
   const userId = faker.string.uuid()
   await inTransaction(async (em) => {
@@ -695,7 +827,7 @@ async function createPartner(overrides: Partial<PartnerEntity> = {}) {
 
   return partner!
 }
-describe('updateConciergeClientBranding mutation', () => {
+describe('updateConciergeClient mutation', () => {
   beforeAfterAll()
 
   let initClient: OidcClientEntity
@@ -713,13 +845,13 @@ describe('updateConciergeClientBranding mutation', () => {
   it('can update only the name field', async () => {
     const input = { name: 'New Concierge Name' }
     const { data, errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      { query: updateConciergeClientMutation, variables: { input } },
       UserRoles.oidcAdmin,
     )
 
     expect(errors).toBeUndefined()
-    expectToBeDefined(data?.updateConciergeClientBranding)
-    const updated = data.updateConciergeClientBranding
+    expectToBeDefined(data?.updateConciergeClient)
+    const updated = data.updateConciergeClient
     expect(updated.name).toEqual('New Concierge Name')
     expect(updated.logo).toEqual(initClient.logo)
     expect(updated.backgroundColor).toEqual(initClient.backgroundColor)
@@ -731,33 +863,33 @@ describe('updateConciergeClientBranding mutation', () => {
   it('can update only the logo field', async () => {
     const input = { logo: validDataUrl }
     const { data, errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      { query: updateConciergeClientMutation, variables: { input } },
       UserRoles.oidcAdmin,
     )
 
     expect(errors).toBeUndefined()
-    expectToBeDefined(data?.updateConciergeClientBranding)
-    const updated = data.updateConciergeClientBranding
+    expectToBeDefined(data?.updateConciergeClient)
+    const updated = data.updateConciergeClient
     expect(updated.logo).toEqual(input.logo)
     expect(updated.name).toEqual('New Concierge Name') // previously updated
     expect(updated.backgroundColor).toEqual(initClient.backgroundColor)
     expect(updated.backgroundImage).toEqual(initClient.backgroundImage)
   })
 
-  it('can update multiple branding fields', async () => {
+  it('can update multiple fields', async () => {
     const input = {
       name: '`SomeBrand`',
       backgroundColor: '#123456',
       backgroundImage: validDataUrl,
     }
     const { data, errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      { query: updateConciergeClientMutation, variables: { input } },
       UserRoles.oidcAdmin,
     )
 
     expect(errors).toBeUndefined()
-    expectToBeDefined(data?.updateConciergeClientBranding)
-    const updated = data.updateConciergeClientBranding
+    expectToBeDefined(data?.updateConciergeClient)
+    const updated = data.updateConciergeClient
     expect(updated.name).toEqual(input.name)
     expect(updated.backgroundColor).toEqual(input.backgroundColor)
     expect(updated.backgroundImage).toEqual(input.backgroundImage)
@@ -766,10 +898,7 @@ describe('updateConciergeClientBranding mutation', () => {
 
   it('rejects logo values that are not valid data URLs', async () => {
     const input = { logo: invalidDataUrl }
-    const { errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
-      UserRoles.oidcAdmin,
-    )
+    const { errors } = await executeOperationAsUser({ query: updateConciergeClientMutation, variables: { input } }, UserRoles.oidcAdmin)
 
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toContain('RFC 2397')
@@ -777,10 +906,7 @@ describe('updateConciergeClientBranding mutation', () => {
 
   it('rejects backgroundImage values that are not valid data URLs', async () => {
     const input = { backgroundImage: invalidDataUrl }
-    const { errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
-      UserRoles.oidcAdmin,
-    )
+    const { errors } = await executeOperationAsUser({ query: updateConciergeClientMutation, variables: { input } }, UserRoles.oidcAdmin)
 
     expect(errors).toBeDefined()
     expect(errors?.[0]?.message).toContain('RFC 2397')
@@ -794,20 +920,20 @@ describe('updateConciergeClientBranding mutation', () => {
       backgroundImage: null,
     }
     const { data, errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      { query: updateConciergeClientMutation, variables: { input } },
       UserRoles.oidcAdmin,
     )
 
     expect(errors).toBeUndefined()
-    expectToBeDefined(data?.updateConciergeClientBranding)
-    const updated = data.updateConciergeClientBranding
+    expectToBeDefined(data?.updateConciergeClient)
+    const updated = data.updateConciergeClient
     expect(updated.name).toBeDefined()
     expect(updated.logo).toBeNull()
     expect(updated.backgroundColor).toBeNull()
     expect(updated.backgroundImage).toBeNull()
   })
 
-  it('does not change non-branding fields like redirectUris', async () => {
+  it('does not change other fields like redirectUris', async () => {
     const { data: queryData } = await executeOperationAsUser(
       { query: oidcClientQuery, variables: { id: portalClientId } },
       UserRoles.oidcAdmin,
@@ -817,26 +943,24 @@ describe('updateConciergeClientBranding mutation', () => {
 
     const input = { name: 'BrandOnly' }
     const { data, errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      { query: updateConciergeClientMutation, variables: { input } },
       UserRoles.oidcAdmin,
     )
     expect(errors).toBeUndefined()
-    expectToBeDefined(data?.updateConciergeClientBranding)
-    const updated = data.updateConciergeClientBranding
+    expectToBeDefined(data?.updateConciergeClient)
+    const updated = data.updateConciergeClient
 
     expect(updated.redirectUris).toEqual(originalRedirectUris)
   })
 
   it('returns unauthorized error for non-admin roles', async () => {
     const input = { name: 'ShouldNotWork' }
-    const { errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
-      UserRoles.reader,
-    )
+    const { errors } = await executeOperationAsUser({ query: updateConciergeClientMutation, variables: { input } }, UserRoles.reader)
     expect(errors).toBeDefined()
     expectUnauthorizedError(errors)
   })
 })
+
 describe('deleteOidcClient mutation', () => {
   beforeAfterAll()
 
@@ -993,5 +1117,426 @@ describe('findOidcClients query', () => {
     expect(defaultData?.findOidcClients?.length).toEqual(0)
     expect(withDeletedData?.findOidcClients?.length).toEqual(1)
     expect(withDeletedData?.findOidcClients?.[0]?.deletedAt).toBeTruthy()
+  })
+})
+
+describe('vcPolicy and claimConstraint', () => {
+  beforeAfterAll()
+  beforeEach(() => {
+    mockedServices.clearAllMocks()
+  })
+
+  describe('createOidcClient', () => {
+    it('creates a client with default vcPolicy when not provided', async () => {
+      const input = createOidcClientInput()
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.ClientSupplied,
+        vcConstraintValues: VcParamMode.ClientSupplied,
+      })
+    })
+
+    it('creates a client with a fully specified vcPolicy', async () => {
+      const input = createOidcClientInput({
+        vcPolicy: {
+          vcType: VcParamMode.Fixed,
+          vcConstraintValues: VcParamMode.Fixed,
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.Fixed,
+        vcConstraintValues: VcParamMode.Fixed,
+      })
+    })
+
+    it('creates a client with a partial vcPolicy, defaulting omitted fields', async () => {
+      const input = createOidcClientInput({
+        vcPolicy: {
+          vcType: VcParamMode.Fixed,
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.Fixed,
+        vcConstraintValues: VcParamMode.ClientSupplied,
+      })
+    })
+
+    it('creates a client with no claimConstraint when not provided', async () => {
+      const input = createOidcClientInput()
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.claimConstraint).toBeNull()
+    })
+
+    it('creates a client with a values claimConstraint', async () => {
+      const input = createOidcClientInput({
+        claimConstraint: {
+          claimName: 'country',
+          values: ['US', 'UK'],
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.claimConstraint).toEqual({
+        claimName: 'country',
+        values: ['US', 'UK'],
+        contains: null,
+        startsWith: null,
+      })
+    })
+
+    it('creates a client with a contains claimConstraint', async () => {
+      const input = createOidcClientInput({
+        claimConstraint: {
+          claimName: 'email',
+          contains: '@example.com',
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.claimConstraint).toEqual({
+        claimName: 'email',
+        values: null,
+        contains: '@example.com',
+        startsWith: null,
+      })
+    })
+
+    it('creates a client with a startsWith claimConstraint', async () => {
+      const input = createOidcClientInput({
+        claimConstraint: {
+          claimName: 'name',
+          startsWith: 'John',
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.claimConstraint).toEqual({
+        claimName: 'name',
+        values: null,
+        contains: null,
+        startsWith: 'John',
+      })
+    })
+  })
+
+  describe('updateOidcClient', () => {
+    it('can set vcPolicy on update', async () => {
+      const { data: createData } = await createOidcClient()
+      expectToBeDefined(createData?.createOidcClient)
+      const client = createData.createOidcClient
+
+      const input = createOidcClientInput({
+        vcPolicy: {
+          vcType: VcParamMode.Fixed,
+          vcConstraintValues: VcParamMode.Fixed,
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser(
+        { query: updateOidcClientMutation, variables: { id: client.id, input } },
+        UserRoles.oidcAdmin,
+      )
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.updateOidcClient)
+      expect(data.updateOidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.Fixed,
+        vcConstraintValues: VcParamMode.Fixed,
+      })
+    })
+
+    it('resets vcPolicy to defaults when not provided on update', async () => {
+      // Create with fixed policy
+      const createInput = createOidcClientInput({
+        vcPolicy: {
+          vcType: VcParamMode.Fixed,
+        },
+      })
+      const { data: createData } = await executeOperationAsUser(
+        { query: createOidcClientMutation, variables: { input: createInput } },
+        UserRoles.oidcAdmin,
+      )
+      expectToBeDefined(createData?.createOidcClient)
+      const client = createData.createOidcClient
+
+      // Update without vcPolicy
+      const updateInput = createOidcClientInput()
+      const { data, errors } = await executeOperationAsUser(
+        { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+        UserRoles.oidcAdmin,
+      )
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.updateOidcClient)
+      expect(data.updateOidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.ClientSupplied,
+        vcConstraintValues: VcParamMode.ClientSupplied,
+      })
+    })
+
+    it('can set a claimConstraint on update', async () => {
+      const { data: createData } = await createOidcClient()
+      expectToBeDefined(createData?.createOidcClient)
+      const client = createData.createOidcClient
+
+      const input = createOidcClientInput({
+        claimConstraint: {
+          claimName: 'country',
+          values: ['US', 'UK'],
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser(
+        { query: updateOidcClientMutation, variables: { id: client.id, input } },
+        UserRoles.oidcAdmin,
+      )
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.updateOidcClient)
+      expect(data.updateOidcClient.claimConstraint).toEqual({
+        claimName: 'country',
+        values: ['US', 'UK'],
+        contains: null,
+        startsWith: null,
+      })
+    })
+
+    it('can clear a claimConstraint by passing null on update', async () => {
+      // Create with constraint
+      const createInput = createOidcClientInput({
+        claimConstraint: {
+          claimName: 'country',
+          values: ['US'],
+        },
+      })
+      const { data: createData } = await executeOperationAsUser(
+        { query: createOidcClientMutation, variables: { input: createInput } },
+        UserRoles.oidcAdmin,
+      )
+      expectToBeDefined(createData?.createOidcClient)
+      const client = createData.createOidcClient
+      expect(client.claimConstraint).not.toBeNull()
+
+      // Update with null constraint
+      const updateInput = createOidcClientInput({
+        claimConstraint: null,
+      })
+
+      const { data, errors } = await executeOperationAsUser(
+        { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+        UserRoles.oidcAdmin,
+      )
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.updateOidcClient)
+      expect(data.updateOidcClient.claimConstraint).toBeNull()
+    })
+
+    it('can replace an existing claimConstraint with a different operator', async () => {
+      // Create with values constraint
+      const createInput = createOidcClientInput({
+        claimConstraint: {
+          claimName: 'country',
+          values: ['US'],
+        },
+      })
+      const { data: createData } = await executeOperationAsUser(
+        { query: createOidcClientMutation, variables: { input: createInput } },
+        UserRoles.oidcAdmin,
+      )
+      expectToBeDefined(createData?.createOidcClient)
+      const client = createData.createOidcClient
+
+      // Replace with contains constraint
+      const updateInput = createOidcClientInput({
+        claimConstraint: {
+          claimName: 'email',
+          contains: '@example.com',
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser(
+        { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+        UserRoles.oidcAdmin,
+      )
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.updateOidcClient)
+      expect(data.updateOidcClient.claimConstraint).toEqual({
+        claimName: 'email',
+        values: null,
+        contains: '@example.com',
+        startsWith: null,
+      })
+    })
+
+    it('persists vcPolicy and claimConstraint across queries', async () => {
+      const createInput = createOidcClientInput({
+        vcPolicy: {
+          vcType: VcParamMode.Fixed,
+          vcConstraintValues: VcParamMode.Fixed,
+        },
+        claimConstraint: {
+          claimName: 'country',
+          values: ['US', 'AU'],
+        },
+      })
+      const { data: createData } = await executeOperationAsUser(
+        { query: createOidcClientMutation, variables: { input: createInput } },
+        UserRoles.oidcAdmin,
+      )
+      expectToBeDefined(createData?.createOidcClient)
+      const clientId = createData.createOidcClient.id
+
+      // Query it back
+      const { data, errors } = await executeOperationAsUser({ query: oidcClientQuery, variables: { id: clientId } }, UserRoles.reader)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.oidcClient)
+      expect(data.oidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.Fixed,
+        vcConstraintValues: VcParamMode.Fixed,
+      })
+      expect(data.oidcClient.claimConstraint).toEqual({
+        claimName: 'country',
+        values: ['US', 'AU'],
+        contains: null,
+        startsWith: null,
+      })
+    })
+  })
+})
+
+describe('faceCheckConfidenceThreshold', () => {
+  beforeAfterAll()
+  beforeEach(() => {
+    mockedServices.clearAllMocks()
+  })
+
+  it('can create a client with faceCheckConfidenceThreshold', async () => {
+    const input = createOidcClientInput({
+      requireFaceCheck: true,
+      faceCheckConfidenceThreshold: 60,
+    })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    expect(data.createOidcClient.requireFaceCheck).toBe(true)
+    expect(data.createOidcClient.faceCheckConfidenceThreshold).toBe(60)
+  })
+
+  it('rejects faceCheckConfidenceThreshold below 50', async () => {
+    const input = createOidcClientInput({
+      faceCheckConfidenceThreshold: 49,
+    })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('faceCheckConfidenceThreshold must be between 50 and 100')
+  })
+
+  it('rejects faceCheckConfidenceThreshold above 100', async () => {
+    const input = createOidcClientInput({
+      faceCheckConfidenceThreshold: 101,
+    })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('faceCheckConfidenceThreshold must be between 50 and 100')
+  })
+
+  it('can update faceCheckConfidenceThreshold on a client', async () => {
+    const { data: createData } = await createOidcClient()
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    const input = createOidcClientInput({
+      requireFaceCheck: true,
+      faceCheckConfidenceThreshold: 55,
+    })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    expect(data.updateOidcClient.requireFaceCheck).toBe(true)
+    expect(data.updateOidcClient.faceCheckConfidenceThreshold).toBe(55)
+  })
+
+  it('persists faceCheckConfidenceThreshold across queries', async () => {
+    const input = createOidcClientInput({
+      requireFaceCheck: true,
+      faceCheckConfidenceThreshold: 60,
+    })
+
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const clientId = createData.createOidcClient.id
+
+    const { data, errors } = await executeOperationAsUser({ query: oidcClientQuery, variables: { id: clientId } }, UserRoles.reader)
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.oidcClient)
+    expect(data.oidcClient.requireFaceCheck).toBe(true)
+    expect(data.oidcClient.faceCheckConfidenceThreshold).toBe(60)
+  })
+
+  it('accepts boundary value 50', async () => {
+    const input = createOidcClientInput({ faceCheckConfidenceThreshold: 50 })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    expect(data.createOidcClient.faceCheckConfidenceThreshold).toBe(50)
+  })
+
+  it('accepts boundary value 100', async () => {
+    const input = createOidcClientInput({ faceCheckConfidenceThreshold: 100 })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    expect(data.createOidcClient.faceCheckConfidenceThreshold).toBe(100)
   })
 })

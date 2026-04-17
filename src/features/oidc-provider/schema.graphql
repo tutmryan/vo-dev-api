@@ -1,9 +1,9 @@
 # eslint-disable @graphql-eslint/naming-convention
 
 """
-Branding fields for the concierge OIDC client.
+Input fields for editing the concierge OIDC client.
 """
-input ConciergeClientBrandingInput {
+input ConciergeClientInput {
   """
   The display name shown in concierge flows.
   """
@@ -20,6 +20,38 @@ input ConciergeClientBrandingInput {
   The background image for concierge authentication screens.
   """
   backgroundImage: DataURL
+}
+
+"""
+The mode that controls how a vc_* authorisation parameter is resolved for an OIDC client.
+"""
+enum VcParamMode {
+  """
+  The client may supply a value at runtime. When missing, the entity's configured value is used as fallback.
+  """
+  client_supplied
+  """
+  The entity's configured value is always used, ignoring any client-supplied value.
+  """
+  fixed
+}
+
+"""
+Input defining the vc_* authorisation parameter policy for an OIDC client.
+Each field accepts a VcParamMode. Omitted fields default to client_supplied.
+"""
+input OidcClientVcPolicyInput {
+  vcType: VcParamMode
+  vcConstraintValues: VcParamMode
+}
+
+"""
+The vc_* authorisation parameter policy for an OIDC client.
+Controls whether entity-configured values are enforced (fixed) or may be overridden at runtime (client_supplied).
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type OidcClientVcPolicy {
+  vcType: VcParamMode!
+  vcConstraintValues: VcParamMode!
 }
 
 extend type Mutation {
@@ -114,9 +146,14 @@ extend type Mutation {
   """
   generateOidcClientSecret: String!
   """
-  Updates branding for the concierge OIDC client.
+  Updates for the concierge OIDC client.
   """
-  updateConciergeClientBranding(input: ConciergeClientBrandingInput!): OidcClient!
+  updateConciergeClient(input: ConciergeClientInput!): OidcClient!
+
+  """
+  Updates the vc_* authorisation parameter policy for an OIDC client.
+  """
+  updateOidcClientVcPolicy(clientId: ID!, input: OidcClientVcPolicyInput!): OidcClient!
 }
 
 extend type Query {
@@ -233,6 +270,20 @@ enum OidcTokenEndpointAuthMethod {
   Client authenticates by sending a signed JWT assertion using a registered public key.
   """
   private_key_jwt
+}
+
+"""
+The OAuth response types supported by an OIDC client.
+"""
+enum OidcResponseType {
+  """
+  Authorisation code response type, returns an authorisation code.
+  """
+  CODE
+  """
+  ID token response type, can be used alone or with CODE for hybrid flow (code id_token).
+  """
+  ID_TOKEN
 }
 
 """
@@ -598,6 +649,11 @@ input OidcClientInput {
   """
   requireFaceCheck: Boolean
   """
+  The face check match confidence threshold (50–100). Only applicable when requireFaceCheck is true.
+  When set, this value is sent as the matchConfidenceThreshold in the presentation request.
+  """
+  faceCheckConfidenceThreshold: Int
+  """
   Indicates whether the client allows presentations of credentials from any configured partner.
   """
   allowAnyPartner: Boolean
@@ -606,7 +662,7 @@ input OidcClientInput {
   """
   partnerIds: [ID!]
   """
-  The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
+  The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials.
 
   Note:
   - This is not needed for authentication using VO credentials, the issuanceId claim is used.
@@ -649,6 +705,27 @@ input OidcClientInput {
   - Mutually exclusive with `relyingPartyJwks`.
   """
   relyingPartyJwksUri: URL
+  """
+  The vc_* authorisation parameter policy for this client.
+  Controls how each vc_* parameter is resolved at runtime.
+  Omitted fields default to client_supplied.
+  """
+  vcPolicy: OidcClientVcPolicyInput
+  """
+  A claim constraint to configure on this client.
+  Exactly one operator (values, contains, startsWith) must be set.
+  Pass null to clear an existing constraint.
+  """
+  claimConstraint: ClaimConstraint
+  """
+  The OAuth response types supported by this client. Defaults to `[CODE]`.
+  Rules:
+  - At least one response type must be specified when provided.
+  - `CODE` and `ID_TOKEN` may be used individually or together.
+  - When both are specified, hybrid flow (code id_token) is enabled.
+  - Omit or pass null to use the default `[CODE]`.
+  """
+  responseTypes: [OidcResponseType!]
 }
 
 """
@@ -725,9 +802,19 @@ type OidcClient {
   """
   relyingPartyJwksUri: URL
   """
+  The OAuth response types supported by this client.
+  Contains one or both of CODE and ID_TOKEN.
+  """
+  responseTypes: [OidcResponseType!]!
+  """
   Indicates this client must use face check with every authentication presentation.
   """
   requireFaceCheck: Boolean!
+  """
+  The face check match confidence threshold (50–100). Only applicable when requireFaceCheck is true.
+  When set, this value is sent as the matchConfidenceThreshold in the presentation request.
+  """
+  faceCheckConfidenceThreshold: Int
   """
   Indicates whether the client allows presentations of credentials from any configured partner.
   """
@@ -737,7 +824,7 @@ type OidcClient {
   """
   partners: [Partner!]!
   """
-  The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
+  The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials.
 
   Note:
   - This is not needed for authentication using VO credentials, the issuanceId claim is used.
@@ -767,6 +854,14 @@ type OidcClient {
   The identity resolvers to be applied to this client.
   """
   identityResolvers: [OidcIdentityResolver!]!
+  """
+  The vc_* authorisation parameter policy for this client.
+  """
+  vcPolicy: OidcClientVcPolicy!
+  """
+  The configured claim constraint for this client.
+  """
+  claimConstraint: OidcClientClaimConstraint
   """
   The user who created the client.
   """
@@ -976,4 +1071,15 @@ enum OidcResourceOrderBy {
   resourceIndicator
   createdAt
   updatedAt
+}
+
+"""
+A claim constraint stored on an OIDC client.
+Exactly one operator field (values, contains, startsWith) will be set.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type OidcClientClaimConstraint {
+  claimName: String!
+  values: [String!]
+  contains: String
+  startsWith: String
 }

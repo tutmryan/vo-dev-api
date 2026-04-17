@@ -1,5 +1,7 @@
+import type { ClaimConstraint } from '@/generated/graphql'
 import type { Configuration } from 'oidc-provider'
 import type { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entity'
+import type { OidcClientClaimConstraint } from './entities/oidc-client-claim-constraint'
 import type { OidcResourceEntity } from './entities/oidc-resource-entity'
 
 export const presentationLoginStandardClaims = {
@@ -101,4 +103,33 @@ function normalizeBoolean(value: unknown): boolean | undefined {
     return Boolean(value)
   }
   return Boolean(value)
+}
+
+/**
+ * Maps a GraphQL ClaimConstraintInput to the entity's OidcClientClaimConstraint shape.
+ *
+ * - `undefined` (field not provided): returns null (no constraint)
+ * - `null` (explicitly cleared): returns null
+ * - object: maps to the entity shape, keeping only the active operator field
+ *
+ * Validation of exactly-one-operator is handled by the entity setter.
+ */
+export function mapClaimConstraintInput(input: ClaimConstraint | null | undefined): OidcClientClaimConstraint | null {
+  if (!input) return null
+
+  const constraint: OidcClientClaimConstraint = {
+    claimName: input.claimName,
+  }
+
+  if (input.values && input.values.length > 0) {
+    constraint.values = input.values
+  }
+  if (input.contains !== undefined && input.contains !== null) {
+    constraint.contains = input.contains
+  }
+  if (input.startsWith !== undefined && input.startsWith !== null) {
+    constraint.startsWith = input.startsWith
+  }
+
+  return constraint
 }

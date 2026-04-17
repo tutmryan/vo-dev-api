@@ -1,3 +1,4 @@
+import type { OidcResponseType } from '../../../generated/graphql'
 import { OidcClientType, OidcTokenEndpointAuthMethod, type OidcClientInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { apiResourceId, portalClientId } from '../data'
@@ -64,4 +65,25 @@ export function validateJwksJson(jwks: unknown | null | undefined, fieldName: st
   } else {
     invariant(false, `${fieldName} must be valid JSON containing a JWK or JWKS object`)
   }
+}
+
+/**
+ * Validates that the given response types conform to the supported OAuth response type rules:
+ * - null/undefined is allowed (caller defaults to [CODE])
+ * - At least one response type must be present when specified
+ * - CODE and ID_TOKEN may be used individually or together
+ * - Empty arrays are not permitted
+ */
+export function validateResponseTypes(responseTypes: OidcResponseType[] | null | undefined): void {
+  if (responseTypes == null) {
+    return
+  }
+
+  invariant(responseTypes.length > 0, 'Response types must not be empty when specified')
+
+  // Valid combinations: [CODE], [ID_TOKEN], or [CODE, ID_TOKEN]
+  invariant(responseTypes.length <= 2, 'At most two response types may be specified (CODE and ID_TOKEN)')
+
+  // Prevent duplicates
+  invariant(new Set(responseTypes).size === responseTypes.length, 'Duplicate response types are not permitted')
 }

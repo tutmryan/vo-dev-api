@@ -1,10 +1,10 @@
-import type { ClientMetadata } from 'oidc-provider'
+import type { ClientMetadata, ResponseType } from 'oidc-provider'
 import { oidcSecretService } from '.'
 import { runDeduplicatedJob } from '../../background-jobs'
 import { apiUrl, portalUrl } from '../../config'
 import { transactionOrReuse } from '../../data'
 import { addUserToManager } from '../../data/user-context-helper'
-import { OidcApplicationType, OidcClientType, OidcTokenEndpointAuthMethod } from '../../generated/graphql'
+import { OidcApplicationType, OidcClientType, OidcResponseType, OidcTokenEndpointAuthMethod } from '../../generated/graphql'
 import { logger } from '../../logger'
 import { OidcScopes } from '../../roles'
 import { IssuanceEntity } from '../issuance/entities/issuance-entity'
@@ -70,6 +70,7 @@ const toOidcClientMetadata = async ({
   tokenEndpointAuthMethod,
   clientJwks,
   clientJwksUri,
+  responseTypes,
 }: OidcClientEntity): Promise<ClientMetadata> => {
   // Resolve auth method: use stored value, or fall back to legacy logic for backward compat
   const authMethod =
@@ -120,6 +121,8 @@ const toOidcClientMetadata = async ({
   }
 
   const jwks = jwksKeys.length > 0 ? { keys: jwksKeys } : undefined
+  const oidcProviderResponseType = toOidcProviderResponseTypes(responseTypes)
+  const oidcProviderGrantTypes = toOidcProviderGrantTypes(responseTypes)
 
   return {
     client_id: id,
@@ -127,8 +130,8 @@ const toOidcClientMetadata = async ({
     client_secret: clientSecret,
     redirect_uris: redirectUris,
     post_logout_redirect_uris: postLogoutUris,
-    response_types: ['code', 'code id_token', 'id_token'],
-    grant_types: ['authorization_code', 'refresh_token', 'implicit'],
+    grant_types: oidcProviderGrantTypes,
+    response_types: oidcProviderResponseType,
     token_endpoint_auth_method: authMethod,
     tos_uri: termsOfServiceUrl ?? undefined,
     policy_uri: policyUrl ?? undefined,
@@ -137,6 +140,29 @@ const toOidcClientMetadata = async ({
     ...(jwksUri ? { jwks_uri: jwksUri } : {}),
   }
 }
+
+export const toOidcProviderResponseTypes = (responseTypes: OidcResponseType[]): ResponseType[] => {
+  const hasCode = responseTypes.includes(OidcResponseType.Code)
+  const hasIdToken = responseTypes.includes(OidcResponseType.IdToken)
+
+  if (!hasCode && hasIdToken) {
+    return ['id_token']
+  }
+
+  if (hasCode && hasIdToken) {
+    return ['code', 'id_token', 'code id_token']
+  }
+
+  // Authorization Code flow (default)
+  return ['code']
+}
+
+// Map schema response types from entity to OIDC provider's grant values
+const toOidcProviderGrantTypes = (responseTypes: OidcResponseType[]): string[] => [
+  'authorization_code',
+  'refresh_token',
+  ...(responseTypes.includes(OidcResponseType.IdToken) ? ['implicit'] : []),
+]
 
 type SourceOidcData = [OidcClientEntity[], OidcResourceEntity[], PartnerEntity[]]
 

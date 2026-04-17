@@ -15,6 +15,7 @@ import { requestOrigin } from '../../express'
 import { isIe11, isWebView3 } from '../../util/browser'
 import { invariant } from '../../util/invariant'
 import { getUseModernOidcUiSetting } from '../instance-configs'
+import { applyVcPolicy } from './apply-vc-policy'
 import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
 import { filterToRequestedClaimsAcr, filterToRequestedClaimsAmr } from './claims-parameter'
 import { eamLoginFailResult, getEamAcr, getEamAmr, isEamRequestAndLoginShouldFail } from './integrations/entra-eam'
@@ -129,9 +130,12 @@ export function routes(app: Express, route: string): void {
 
       switch (prompt.name) {
         case 'login': {
+          // Apply vc policy to resolve fixed/default params before consumption
+          const clientEntity = getClient(client.clientId)
+          applyVcPolicy(params, clientEntity)
+
           // If using modern UI, handle here and return early
           if (getUseModernOidcUiSetting()) {
-            const clientEntity = getClient(client.clientId)
             const { logo, backgroundColor, backgroundImage } = clientEntity
 
             // Check if we already have a valid session, if not set one up
@@ -208,7 +212,6 @@ export function routes(app: Express, route: string): void {
           const token = await acquireLoginPresentationToken()
           const sessionKey = getSessionKey(token.access_token)
           await setupLoginSession(uid, token)
-          const clientEntity = getClient(client.clientId)
           await setLoginInteractionData({
             ...(loginInteractionData ?? {}),
             interactionId: uid,

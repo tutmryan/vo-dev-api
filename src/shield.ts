@@ -220,7 +220,7 @@ export const rules: ShieldSchema<Resolvers> = {
     updateOidcClientResource: isOidcAdminUser,
     updateOidcIdentityResolver: isOidcAdminUser,
     updateOidcResource: isOidcAdminUser,
-    updateConciergeClientBranding: or(isOidcAdminUser, isInstanceAdminUser),
+    updateConciergeClient: or(isOidcAdminUser, isInstanceAdminUser),
     updatePartner: isPartnerAdminUser,
     updateMicrosoftEntraTemporaryAccessPassIssuanceConfiguration: isInstanceAdminUser,
     updateTemplate: or(isCredentialAdminUser, isContractAdminApp),
@@ -419,6 +419,12 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': fallbackRule,
   },
   OidcClient: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  OidcClientClaimConstraint: {
+    '*': fallbackWithSupportAgentRule,
+  },
+  OidcClientVcPolicy: {
     '*': fallbackWithSupportAgentRule,
   },
   OidcClientResource: {
