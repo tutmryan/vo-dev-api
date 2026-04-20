@@ -1509,10 +1509,241 @@ exports[`shield rules are setup correctly 1`] = `
       ]
     },
     "microsoftEntraTemporaryAccessPassIssuanceConfiguration": {
-      "rules": []
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "hasRole-VerifiableCredential.SupportAgent",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.SupportAgent"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+          "cache": "contextual"
+        }
+      ]
     },
     "microsoftEntraTemporaryAccessPassIssuanceConfigurations": {
-      "rules": []
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "hasRole-VerifiableCredential.SupportAgent",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.SupportAgent"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "findMicrosoftEntraTemporaryAccessPassIssuances": {
+      "rulesOr": [
+        {
+          "name": "isUserWithReadPermissions",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Reader",
+            "VerifiableCredential.Issuer",
+            "VerifiableCredential.CredentialAdmin",
+            "VerifiableCredential.PartnerAdmin",
+            "VerifiableCredential.OidcAdmin",
+            "VerifiableCredential.InstanceAdmin"
+          ]
+        },
+        {
+          "name": "isIssuanceApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.Issue"
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAccessApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAccess"
+              ]
+            },
+            {
+              "rulesOr": [
+                {
+                  "name": "isRequestIdFilterDefined",
+                  "cache": "strict"
+                },
+                {
+                  "name": "isValidLimitedIdentitierFilter",
+                  "cache": "strict"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedAsyncIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedAsyncIssuance"
+              ]
+            },
+            {
+              "name": "isRequestIdFilterDefined",
+              "cache": "strict"
+            }
+          ]
+        },
+        {
+          "name": "hasRole-VerifiableCredential.SupportAgent",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
+    },
+    "microsoftEntraTemporaryAccessPassIssuance": {
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "isIssuanceApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Issue"
+              ]
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
+                },
+                {
+                  "rulesOr": [
+                    {
+                      "name": "isRequestIdFilterDefined",
+                      "cache": "strict"
+                    },
+                    {
+                      "name": "isValidLimitedIdentitierFilter",
+                      "cache": "strict"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "rulesAnd": [
+                {
+                  "name": "isLimitedAsyncIssuanceApp",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAsyncIssuance"
+                  ]
+                },
+                {
+                  "name": "isRequestIdFilterDefined",
+                  "cache": "strict"
+                }
+              ]
+            },
+            {
+              "name": "hasRole-VerifiableCredential.SupportAgent",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.SupportAgent"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+          "cache": "contextual"
+        }
+      ]
+    },
+    "checkMyTapEligibility": {
+      "rulesOr": [
+        {
+          "rulesOr": [
+            {
+              "name": "isUserWithReadPermissions",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.Reader",
+                "VerifiableCredential.Issuer",
+                "VerifiableCredential.CredentialAdmin",
+                "VerifiableCredential.PartnerAdmin",
+                "VerifiableCredential.OidcAdmin",
+                "VerifiableCredential.InstanceAdmin"
+              ]
+            },
+            {
+              "name": "hasRole-VerifiableCredential.SupportAgent",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.SupportAgent"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+          "cache": "contextual"
+        }
+      ]
     },
     "template": {
       "rulesOr": [
@@ -8560,6 +8791,116 @@ exports[`shield rules are setup correctly 1`] = `
           "cache": "contextual",
           "__roles": [
             "VerifiableCredential.SupportAgent"
+          ]
+        }
+      ]
+    }
+  },
+  "MicrosoftEntraTemporaryAccessPassIssuance": {
+    "*": {
+      "rulesAnd": [
+        {
+          "rulesOr": [
+            {
+              "rulesOr": [
+                {
+                  "name": "isUserWithReadPermissions",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.Reader",
+                    "VerifiableCredential.Issuer",
+                    "VerifiableCredential.CredentialAdmin",
+                    "VerifiableCredential.PartnerAdmin",
+                    "VerifiableCredential.OidcAdmin",
+                    "VerifiableCredential.InstanceAdmin"
+                  ]
+                },
+                {
+                  "name": "isIssuanceApp",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.Issue"
+                  ]
+                },
+                {
+                  "name": "isPresentationApp",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.Present"
+                  ]
+                },
+                {
+                  "name": "isContractAdminApp",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.ContractAdmin"
+                  ]
+                },
+                {
+                  "name": "isLimitedAccessApp",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAccess"
+                  ]
+                },
+                {
+                  "name": "isLimitedPresentationFlowApp",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedPresentationFlow"
+                  ]
+                },
+                {
+                  "name": "isLimitedAsyncIssuanceApp",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedAsyncIssuance"
+                  ]
+                },
+                {
+                  "name": "isOidcAuthnClient",
+                  "cache": "contextual",
+                  "__roles": [
+                    "VerifiableCredential.LimitedOidcAuthn"
+                  ]
+                },
+                {
+                  "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+                  "cache": "contextual"
+                }
+              ]
+            },
+            {
+              "name": "hasRole-VerifiableCredential.SupportAgent",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.SupportAgent"
+              ]
+            }
+          ]
+        },
+        {
+          "rulesOr": [
+            {
+              "rulesAnd": [
+                {
+                  "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+                  "cache": "contextual"
+                },
+                {
+                  "name": "microsoftEntraTemporaryAccessPassIssuanceIsToAuthenticatedUser",
+                  "cache": "strict"
+                }
+              ]
+            },
+            {
+              "ruleNot": [
+                {
+                  "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+                  "cache": "contextual"
+                }
+              ]
+            }
           ]
         }
       ]

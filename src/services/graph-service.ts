@@ -184,6 +184,25 @@ export class GraphService {
     return result.value
   }
 
+  async checkMemberGroups(userId: string, groupIds: string[]): Promise<string[] | 'missing_permissions'> {
+    try {
+      const result = (await this.client()
+        .api(`/users/${encodeURIComponent(userId)}/checkMemberGroups`)
+        .post({
+          groupIds,
+        })) as { value: string[] }
+      return result.value
+    } catch (error) {
+      if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
+        logger.warn(
+          `Missing User.Read.All or Directory.Read.All permission to check member groups for identity store ${this.config.identityStoreId}`,
+        )
+        return 'missing_permissions'
+      }
+      throw error
+    }
+  }
+
   /**
    * Fetches access package assignment policies from Microsoft Graph Entitlement Management API.
    * Requires EntitlementManagement.Read.All permission.
@@ -207,7 +226,9 @@ export class GraphService {
     } catch (error) {
       // Silent failure is intentional - return empty array if EntitlementManagement.Read.All permission not granted
       if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
-        logger.info(`Access package policies not available for identity store ${this.config.identityStoreId} - permission not granted`)
+        logger.warn(
+          `Access package policies not available for identity store ${this.config.identityStoreId} - missing EntitlementManagement.Read.All permission`,
+        )
         return []
       }
       logger.error(`Failed to fetch access package assignment policies for identity store ${this.config.identityStoreId}`, { error })
@@ -264,23 +285,126 @@ export class GraphService {
     lifetimeInMinutes?: number
     isUsableOnce?: boolean
   }): Promise<TemporaryAccessPassAuthenticationMethod> {
-    return (await this.client().api(`/users/${userId}/authentication/temporaryAccessPassMethods`).post({
-      lifetimeInMinutes,
-      isUsableOnce,
-    })) as TemporaryAccessPassAuthenticationMethod
+    try {
+      return (await this.client()
+        .api(`/users/${encodeURIComponent(userId)}/authentication/temporaryAccessPassMethods`)
+        .post({
+          lifetimeInMinutes,
+          isUsableOnce,
+        })) as TemporaryAccessPassAuthenticationMethod
+    } catch (error) {
+      if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
+        logger.error(
+          `Failed to create Temporary Access Pass for identity store ${this.config.identityStoreId} - missing UserAuthMethod-TAP.ReadWrite.All or UserAuthenticationMethod.ReadWrite.All permission`,
+        )
+      }
+      throw error
+    }
+  }
+
+  async listTemporaryAccessPassMethods(userId: string): Promise<TemporaryAccessPassAuthenticationMethod[]> {
+    try {
+      const result = (await this.client().api(`/users/${userId}/authentication/temporaryAccessPassMethods`).get()) as {
+        value: TemporaryAccessPassAuthenticationMethod[]
+      }
+      return result.value
+    } catch (error) {
+      if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
+        logger.warn(
+          `Failed to list Temporary Access Pass methods for identity store ${this.config.identityStoreId} - missing UserAuthMethod-TAP.Read.All or UserAuthenticationMethod.Read.All permission`,
+        )
+      }
+      throw error
+    }
+  }
+
+  async getActiveUnusedTap(userId: string): Promise<TemporaryAccessPassAuthenticationMethod | null> {
+    const taps = await this.listTemporaryAccessPassMethods(userId)
+    // Find a TAP where isUsable === true and methodUsabilityReason === 'EnabledByPolicy'
+    return taps.find((tap) => tap.isUsable === true && tap.methodUsabilityReason === 'EnabledByPolicy') ?? null
+  }
+
+  async checkUserTapEligibility(userId: string): Promise<TapEligibilityResult> {
+    const policy = await this.getTemporaryAccessPassPolicy()
+
+    if (!policy) {
+      return { isEligible: false, reason: 'policy_not_found' }
+    }
+
+    if (policy === 'missing_permissions') {
+      return { isEligible: false, reason: 'missing_permissions' }
+    }
+
+    if (policy.state !== 'enabled') {
+      return { isEligible: false, reason: 'policy_disabled' }
+    }
+
+    // Evaluate excludeTargets
+    if (policy.excludeTargets && policy.excludeTargets.length > 0) {
+      const userTargets = policy.excludeTargets.filter((t) => t.targetType === 'user').map((t) => t.id)
+      if (userTargets.includes(userId)) {
+        return { isEligible: false, reason: 'user_excluded' }
+      }
+
+      const groupTargets = policy.excludeTargets.filter((t) => t.targetType === 'group').map((t) => t.id)
+      if (groupTargets.includes('all_users')) {
+        return { isEligible: false, reason: 'user_excluded' }
+      }
+
+      const guidGroupTargets = groupTargets.filter((id) => id !== 'all_users')
+      if (guidGroupTargets.length > 0) {
+        const memberGroups = await this.checkMemberGroups(userId, guidGroupTargets)
+        if (memberGroups === 'missing_permissions') {
+          return { isEligible: false, reason: 'missing_permissions' }
+        }
+        if (memberGroups.length > 0) {
+          return { isEligible: false, reason: 'user_excluded_via_group' }
+        }
+      }
+    }
+
+    // Evaluate includeTargets
+    if (policy.includeTargets && policy.includeTargets.length > 0) {
+      const userTargets = policy.includeTargets.filter((t) => t.targetType === 'user').map((t) => t.id)
+      if (userTargets.includes(userId)) {
+        return { isEligible: true }
+      }
+
+      const groupTargets = policy.includeTargets.filter((t) => t.targetType === 'group').map((t) => t.id)
+      if (groupTargets.includes('all_users')) {
+        return { isEligible: true }
+      }
+
+      const guidGroupTargets = groupTargets.filter((id) => id !== 'all_users')
+      if (guidGroupTargets.length > 0) {
+        const memberGroups = await this.checkMemberGroups(userId, guidGroupTargets)
+        if (memberGroups === 'missing_permissions') {
+          return { isEligible: false, reason: 'missing_permissions' }
+        }
+        if (memberGroups.length > 0) {
+          return { isEligible: true }
+        }
+      }
+
+      return { isEligible: false, reason: 'user_not_included' }
+    }
+
+    // If no include targets defined, default to false (best practice for security)
+    return { isEligible: false, reason: 'user_not_included' }
   }
 
   // This requires Microsoft Graph API permissions: Policy.Read.AuthenticationMethod
   // Allows to check if the tenant has enabled the Temporary Access Pass authentication method
   // https://learn.microsoft.com/en-us/graph/api/authenticationmethodspolicy-get?view=graph-rest-1.0&tabs=http
-  async getTemporaryAccessPassPolicy(): Promise<AuthenticationMethodConfiguration | undefined> {
+  async getTemporaryAccessPassPolicy(): Promise<AuthenticationMethodConfiguration | 'missing_permissions' | undefined> {
     try {
       return (await this.client()
         .api('/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/temporaryAccessPass')
         .get()) as AuthenticationMethodConfiguration
     } catch (error) {
       if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
-        throw new Error('Missing policy permissions')
+        logger.warn(`Missing Policy.Read.AuthenticationMethod permission for identity store ${this.config.identityStoreId}`)
+        return 'missing_permissions'
       }
       return undefined
     }
@@ -294,7 +418,19 @@ export interface TemporaryAccessPassAuthenticationMethod {
   startDateTime: string
   lifetimeInMinutes: number
   isUsableOnce: boolean
+  isUsable?: boolean
   methodUsabilityReason?: string
+}
+
+export interface TapEligibilityResult {
+  isEligible: boolean
+  reason?:
+    | 'policy_not_found'
+    | 'policy_disabled'
+    | 'user_excluded'
+    | 'user_excluded_via_group'
+    | 'user_not_included'
+    | 'missing_permissions'
 }
 
 const accessPackagePoliciesCache = Lazy(() =>
@@ -313,6 +449,7 @@ class GraphServiceManager {
 
   async init() {
     if (this.initialised) return
+    logger.info('GraphServiceManager initialising')
     const clientSecretService = createIdentityStoreSecretService()
     this.services = {}
     const stores = await dataSource.getRepository(IdentityStoreEntity).find({
@@ -320,11 +457,18 @@ class GraphServiceManager {
       comment: 'GraphServiceManagerInit',
     })
 
+    logger.info(`Found ${stores.length} Entra identity stores to initialise`)
+
     for (const store of stores) {
       if (store.clientId && store.identifier) {
         try {
           const clientSecret = await clientSecretService.get(store.clientId)
-          if (!clientSecret) continue
+          if (!clientSecret) {
+            logger.warn(
+              `Skipping GraphService creation for identity store ${store.id} - missing client secret for client ID ${store.clientId}`,
+            )
+            continue
+          }
           this.services[store.id] = new GraphService({
             tenantName: store.name,
             identityStoreId: store.id,
@@ -334,12 +478,16 @@ class GraphServiceManager {
               clientSecret,
             },
           })
+          logger.info(`Successfully created GraphService for identity store ${store.id} (${store.name})`)
         } catch (error) {
           logger.error(`Failed to create GraphService for identity store ${store.id}`, { error })
         }
+      } else {
+        logger.warn(`Skipping GraphService creation for identity store ${store.id} - missing clientId or identifier`)
       }
     }
     this.initialised = true
+    logger.info('GraphServiceManager initialisation complete')
   }
 
   get(identityStoreId: string): GraphService | undefined {

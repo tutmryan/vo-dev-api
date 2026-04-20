@@ -4807,6 +4807,8 @@ export type Query = {
   asyncIssuanceRequest: AsyncIssuanceRequest;
   /** Returns the details of the configured instance authority */
   authority: Authority;
+  /** Check if the current authenticated identity is eligible for self-service Temporary Access Pass. */
+  checkMyTapEligibility: Array<SelfServiceAction>;
   /** Returns the Composer branding config or null if no branding has been saved yet. */
   composerBranding?: Maybe<Branding>;
   /** Returns the Concierge branding config or null if no branding has been saved yet. */
@@ -5561,17 +5563,35 @@ export type SelfServiceAction = {
   __typename?: 'SelfServiceAction';
   /** A detailed description of what the action does. */
   description?: Maybe<Scalars['String']['output']>;
-  /** Indicates whether the action is currently enabled and available to the user. */
+  /** Indicates whether the action is administratively enabled. */
   enabled: Scalars['Boolean']['output'];
   /** The unique identifier of the self-service action. */
   id: Scalars['ID']['output'];
   /** The identity store associated with this action. */
   identityStore?: Maybe<IdentityStore>;
+  /** Indicates whether the current user meets the technical requirements to perform this action. */
+  isEligible: Scalars['Boolean']['output'];
   /** The display title of the action. */
   title: Scalars['String']['output'];
-  /** If the action is not enabled, provides a reason why it is unavailable. */
+  /** If the action is not enabled or not eligible, provides a reason why it is unavailable. */
   unavailableReason?: Maybe<Scalars['String']['output']>;
+  /** A machine-readable code for the reason why the action is unavailable. */
+  unavailableReasonCode?: Maybe<SelfServiceActionUnavailableReason>;
 };
+
+/** Represents the reason why a self-service action is unavailable. */
+export enum SelfServiceActionUnavailableReason {
+  AlreadyHasActiveTap = 'ALREADY_HAS_ACTIVE_TAP',
+  GuestUserNotEligible = 'GUEST_USER_NOT_ELIGIBLE',
+  MissingPermissions = 'MISSING_PERMISSIONS',
+  PolicyDisabled = 'POLICY_DISABLED',
+  PolicyNotFound = 'POLICY_NOT_FOUND',
+  SelfServiceDisabled = 'SELF_SERVICE_DISABLED',
+  ServiceNotConfigured = 'SERVICE_NOT_CONFIGURED',
+  UserExcluded = 'USER_EXCLUDED',
+  UserNotFound = 'USER_NOT_FOUND',
+  UserNotIncluded = 'USER_NOT_INCLUDED'
+}
 
 /** The response for sending an async issuance verification code. */
 export type SendAsyncIssuanceVerificationResponse = {
@@ -7447,6 +7467,7 @@ export type ResolversTypes = {
   ScopedClaimMapping: ResolverTypeWrapper<ScopedClaimMapping>;
   ScopedClaimMappingInput: ScopedClaimMappingInput;
   SelfServiceAction: ResolverTypeWrapper<Omit<SelfServiceAction, 'identityStore'> & { identityStore?: Maybe<ResolversTypes['IdentityStore']> }>;
+  SelfServiceActionUnavailableReason: SelfServiceActionUnavailableReason;
   SendAsyncIssuanceVerificationResponse: ResolverTypeWrapper<SendAsyncIssuanceVerificationResponse>;
   ServiceFailures: ResolverTypeWrapper<ServiceFailures>;
   SetInstanceSettingInput: SetInstanceSettingInput;
@@ -8802,6 +8823,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   asyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<QueryAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   asyncIssuanceRequest?: Resolver<ResolversTypes['AsyncIssuanceRequest'], ParentType, ContextType, RequireFields<QueryAsyncIssuanceRequestArgs, 'id'>>;
   authority?: Resolver<ResolversTypes['Authority'], ParentType, ContextType>;
+  checkMyTapEligibility?: Resolver<Array<ResolversTypes['SelfServiceAction']>, ParentType, ContextType>;
   composerBranding?: Resolver<Maybe<ResolversTypes['Branding']>, ParentType, ContextType>;
   conciergeBranding?: Resolver<Maybe<ResolversTypes['Branding']>, ParentType, ContextType>;
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
@@ -8940,8 +8962,10 @@ export type SelfServiceActionResolvers<ContextType = GraphQLContext, ParentType 
   enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identityStore?: Resolver<Maybe<ResolversTypes['IdentityStore']>, ParentType, ContextType>;
+  isEligible?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unavailableReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  unavailableReasonCode?: Resolver<Maybe<ResolversTypes['SelfServiceActionUnavailableReason']>, ParentType, ContextType>;
 };
 
 export type SendAsyncIssuanceVerificationResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SendAsyncIssuanceVerificationResponse'] = ResolversParentTypes['SendAsyncIssuanceVerificationResponse']> = {

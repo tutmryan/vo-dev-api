@@ -3,12 +3,14 @@ import { dataSource } from '../../data'
 import { logger } from '../../logger'
 import { consumeRateLimit } from '../../rate-limiter'
 import { rateLimiter } from '../../redis/rate-limiter'
+import type { GraphService } from '../../services/graph-service'
 import { graphServiceManager } from '../../services/graph-service'
 import { Lazy } from '../../util/lazy'
 import type { IdentityEntity } from '../identity/entities/identity-entity'
 
 import { MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity } from './entities/microsoft-entra-temporary-access-pass-issuance-configuration-entity'
 import { MicrosoftEntraTemporaryAccessPassIssuanceEntity } from './entities/microsoft-entra-temporary-access-pass-issuance-entity'
+import { SelfServiceActionUnavailableReason } from '../../generated/graphql'
 
 const microsoftEntraTemporaryAccessPassIssuanceLimiter = Lazy(() =>
   rateLimiter({
@@ -26,40 +28,110 @@ export class MicrosoftEntraTemporaryAccessPassService {
       .getRepository(MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity)
       .createQueryBuilder('config')
       .innerJoinAndSelect('config.identityStore', 'store')
-      .where('config.enabled = :enabled', { enabled: true })
-
-    qb.andWhere('store.id = :storeId', { storeId: identity.identityStoreId })
+      // Removed config.enabled = true filter to allow returning disabled actions with reasons
+      .where('store.id = :storeId', { storeId: identity.identityStoreId })
 
     return qb.getOne()
   }
 
   async getAvailableSelfServiceActions(identity: IdentityEntity) {
-    const config = await this.getAvailableMicrosoftEntraTemporaryAccessPassConfig(identity)
+    try {
+      await graphServiceManager.init()
+      const config = await this.getAvailableMicrosoftEntraTemporaryAccessPassConfig(identity)
 
-    if (!config || !config.identityStoreId) {
+      if (!config || !config.identityStoreId) {
+        return []
+      }
+
+      const service = graphServiceManager.get(config.identityStoreId)
+      let unavailableReason: string | undefined
+      let isEligible = true
+      let unavailableReasonCode: SelfServiceActionUnavailableReason | undefined
+
+      if (!service) {
+        isEligible = false
+        unavailableReason = `Service not configured for identity store ${config.identityStoreId}.`
+        unavailableReasonCode = SelfServiceActionUnavailableReason.ServiceNotConfigured
+      } else {
+        const eligibility = await this.checkEligibility(identity, service)
+
+        if (!eligibility.eligible) {
+          isEligible = false
+          unavailableReason = eligibility.reason
+          unavailableReasonCode = eligibility.reasonCode as SelfServiceActionUnavailableReason
+        }
+      }
+
+      const enabled = config.enabled
+      if (!enabled && isEligible) {
+        unavailableReason = 'Self-service Temporary Access Pass issuance is currently disabled.'
+        unavailableReasonCode = SelfServiceActionUnavailableReason.SelfServiceDisabled
+      }
+
+      return [
+        {
+          id: config.id,
+          title: config.title,
+          description: config.description ?? undefined,
+          enabled,
+          isEligible,
+          unavailableReason,
+          unavailableReasonCode,
+          identityStore: config.identityStore,
+        },
+      ]
+    } catch (error) {
+      logger.error('Failed to check TAP eligibility', { error })
       return []
     }
+  }
 
-    const service = graphServiceManager.get(config.identityStoreId)
+  private async checkEligibility(
+    identity: IdentityEntity,
+    service: GraphService,
+  ): Promise<{ eligible: boolean; reason?: string; reasonCode?: string }> {
+    const user = await service.getUserById(identity.identifier)
 
-    let unavailableReason: string | undefined
-    let enabled = true
-
-    if (!service) {
-      enabled = false
-      unavailableReason = 'Service not configured for this tenant.'
+    if (!user) {
+      return { eligible: false, reason: 'User not found in Entra ID.', reasonCode: 'USER_NOT_FOUND' }
     }
 
-    return [
-      {
-        id: config.id,
-        title: config.title,
-        description: config.description ?? undefined,
-        enabled,
-        unavailableReason,
-        identityStore: config.identityStore,
-      },
-    ]
+    if (user.userType && user.userType !== 'Member') {
+      return {
+        eligible: false,
+        reason: 'Guest users are not eligible for self-service Temporary Access Pass.',
+        reasonCode: 'GUEST_USER_NOT_ELIGIBLE',
+      }
+    }
+
+    const eligibility = await service.checkUserTapEligibility(identity.identifier)
+    if (!eligibility.isEligible) {
+      let reason = 'You are not eligible for self-service Temporary Access Pass.'
+      if (eligibility.reason === 'policy_disabled') {
+        reason = 'Temporary Access Pass is disabled for your organisation.'
+      } else if (eligibility.reason === 'user_excluded' || eligibility.reason === 'user_excluded_via_group') {
+        reason = 'You are explicitly excluded from using Temporary Access Pass by policy.'
+      } else if (eligibility.reason === 'user_not_included') {
+        reason = "You are not authorised to use Temporary Access Pass according to your organisation's policy."
+      } else if (eligibility.reason === 'missing_permissions') {
+        reason = 'Missing permissions to check TAP eligibility. Please contact your administrator.'
+      } else if (eligibility.reason === 'policy_not_found') {
+        reason = 'Temporary Access Pass policy not found in your organisation.'
+      }
+      return {
+        eligible: false,
+        reason,
+        reasonCode: eligibility.reason?.toUpperCase().replace(/_VIA_GROUP$/, '') as SelfServiceActionUnavailableReason,
+      }
+    }
+
+    const activeTap = await service.getActiveUnusedTap(identity.identifier)
+
+    if (activeTap) {
+      return { eligible: false, reason: 'You already have an active Temporary Access Pass.', reasonCode: 'ALREADY_HAS_ACTIVE_TAP' }
+    }
+
+    return { eligible: true }
   }
 
   async issueTemporaryAccessPass(identity: IdentityEntity) {
@@ -76,15 +148,25 @@ export class MicrosoftEntraTemporaryAccessPassService {
       throw new Error('No Temporary Access Pass configuration found for this identity.')
     }
 
+    if (!config.enabled) {
+      throw new Error('Self-service Temporary Access Pass issuance is currently disabled.')
+    }
+
     const targetOid = identity.identifier
     const identityId = identity.id
+    await graphServiceManager.init()
     const service = graphServiceManager.get(config.identityStoreId)
 
     if (!service) {
-      // It might be that the store is not Entra, or not configured with secrets
       throw new Error(
         `No Graph Service configured for Identity Store ${config.identityStoreId}. Ensure it is an Entra store and properly configured.`,
       )
+    }
+
+    const eligibility = await this.checkEligibility(identity, service)
+
+    if (!eligibility.eligible) {
+      throw new Error(eligibility.reason)
     }
 
     try {
@@ -114,9 +196,12 @@ export class MicrosoftEntraTemporaryAccessPassService {
 
       return tap
     } catch (error: any) {
-      logger.error(`Failed to issue Temporary Access Pass for identity ${identity.id}`, error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      logger.error(`Failed to issue Temporary Access Pass for identity ${identity.id}`, { error: errorMessage })
       logger.auditEvent(AuditEvents.MICROSOFT_ENTRA_TEMPORARY_ACCESS_PASS_SELF_ISSUANCE_FAILED, {
         targetIdentityId: identity.id,
+        identityStoreId: config.identityStoreId,
+        error: errorMessage,
       })
 
       if (error?.message?.includes('Temporary Access Pass cannot be added to an external guest user')) {

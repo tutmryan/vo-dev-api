@@ -40,6 +40,7 @@ import {
 } from './features/limited-presentation-flow-tokens/shield-rules'
 import { isOidcAuthnClient, isValidOidcAuthnPresentationRequest } from './features/oidc-provider/shield-rules'
 import { isValidCapturePhoto, isValidLimitedIssuancePhotoCaptureRequest } from './features/photo-capture/shield-rules'
+import { microsoftEntraTemporaryAccessPassIssuanceIsToAuthenticatedUser } from './features/microsoft-entra-temporary-access-pass-issuance/shield-rules'
 import {
   canCancelPresentationFlow,
   canCreatePresentationFlow,
@@ -128,8 +129,11 @@ export const rules: ShieldSchema<Resolvers> = {
     presentation: anyUserRule,
     presentationCount: anyUserRule,
     presentationCountByUser: anyUserRule,
-    microsoftEntraTemporaryAccessPassIssuanceConfiguration: allow,
-    microsoftEntraTemporaryAccessPassIssuanceConfigurations: allow,
+    microsoftEntraTemporaryAccessPassIssuanceConfiguration: or(anyUserRule, isIssuee),
+    microsoftEntraTemporaryAccessPassIssuanceConfigurations: or(anyUserRule, isIssuee),
+    findMicrosoftEntraTemporaryAccessPassIssuances: isAllowedToViewIssuances,
+    microsoftEntraTemporaryAccessPassIssuance: or(isAllowedToViewIssuances, isIssuee),
+    checkMyTapEligibility: or(anyUserRule, isIssuee),
     template: or(isUserWithReadPermissions, isContractAdminApp),
     templateCombinedData: or(isUserWithReadPermissions, isContractAdminApp),
     testIdentityStoreGraphClient: isInstanceAdminUser,
@@ -501,6 +505,12 @@ export const rules: ShieldSchema<Resolvers> = {
   },
   MicrosoftEntraTemporaryAccessPassIssuanceConfiguration: {
     '*': fallbackWithSupportAgentRule,
+  },
+  MicrosoftEntraTemporaryAccessPassIssuance: {
+    '*': and(
+      fallbackWithSupportAgentRule,
+      or(and(isIssuee, microsoftEntraTemporaryAccessPassIssuanceIsToAuthenticatedUser), not(isIssuee)),
+    ),
   },
   UserCount: {
     '*': fallbackWithSupportAgentRule,
