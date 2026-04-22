@@ -274,4 +274,65 @@ describe('Shield Rules - Mutation Permissions', () => {
       )
     })
   })
+
+  describe('Identity store mutations', () => {
+    const createIdentityStoreMutation = `
+      mutation CreateIdentityStoreShieldTest($input: IdentityStoreInput!) {
+        createIdentityStore(input: $input) {
+          id
+        }
+      }`
+
+    const updateIdentityStoreMutation = `
+      mutation UpdateIdentityStoreShieldTest($id: ID!, $input: UpdateIdentityStoreInput!) {
+        updateIdentityStore(id: $id, input: $input) {
+          id
+        }
+      }`
+
+    const suspendIdentityStoreMutation = `
+      mutation SuspendIdentityStoreShieldTest($id: ID!) {
+        suspendIdentityStore(id: $id) {
+          id
+        }
+      }`
+
+    const resumeIdentityStoreMutation = `
+      mutation ResumeIdentityStoreShieldTest($id: ID!) {
+        resumeIdentityStore(id: $id) {
+          id
+        }
+      }`
+
+    const createInput = {
+      identifier: 'test-store',
+      name: 'Test Store',
+      type: 'Manual',
+      isAuthenticationEnabled: false,
+      accessPackagesEnabled: false,
+    }
+
+    const updateInput = {
+      name: 'Test Store',
+      type: 'Manual',
+      isAuthenticationEnabled: false,
+      accessPackagesEnabled: false,
+    }
+
+    describe('createIdentityStore', () => {
+      testMutationPermissions([UserRoles.instanceAdmin], false, createIdentityStoreMutation, { input: createInput })
+    })
+
+    describe('updateIdentityStore', () => {
+      testMutationPermissions([UserRoles.instanceAdmin], false, updateIdentityStoreMutation, { id: 'abc', input: updateInput })
+    })
+
+    describe('suspendIdentityStore', () => {
+      testMutationPermissions([UserRoles.instanceAdmin], false, suspendIdentityStoreMutation, { id: 'abc' })
+    })
+
+    describe('resumeIdentityStore', () => {
+      testMutationPermissions([UserRoles.instanceAdmin], false, resumeIdentityStoreMutation, { id: 'abc' })
+    })
+  })
 })

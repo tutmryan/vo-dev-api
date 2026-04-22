@@ -26,6 +26,7 @@ function getRequiredRandomInput(): IdentityStoreInput {
     name: 'someName',
     type: IdentityStoreType.Entra,
     isAuthenticationEnabled: true,
+    accessPackagesEnabled: false,
   }
 }
 
@@ -34,6 +35,7 @@ function getRequiredUpdateRandomInput(): UpdateIdentityStoreInput {
     name: 'someUpdatedName',
     type: IdentityStoreType.Entra,
     isAuthenticationEnabled: true,
+    accessPackagesEnabled: false,
   }
 }
 

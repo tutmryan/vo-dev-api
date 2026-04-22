@@ -133,6 +133,7 @@ export const rules: ShieldSchema<Resolvers> = {
     template: or(isUserWithReadPermissions, isContractAdminApp),
     templateCombinedData: or(isUserWithReadPermissions, isContractAdminApp),
     testIdentityStoreGraphClient: isInstanceAdminUser,
+    identityStoreCapabilities: isInstanceAdminUser,
     verifyPresentation: isAllowedToViewPresentations,
     wallet: isAllowedToViewPresentations,
   },

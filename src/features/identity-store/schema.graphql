@@ -24,6 +24,10 @@ type IdentityStore {
   """
   isAuthenticationEnabled: Boolean!
   """
+  Whether access packages are enabled for this identity store.
+  """
+  accessPackagesEnabled: Boolean!
+  """
   Optional client ID (e.g. used for identity look ups)
   """
   clientId: String
@@ -71,6 +75,10 @@ input IdentityStoreInput {
   """
   isAuthenticationEnabled: Boolean!
   """
+  Whether access packages are enabled for this identity store.
+  """
+  accessPackagesEnabled: Boolean!
+  """
   The optional client ID, used for i.e identity lookups.
   """
   clientId: String
@@ -95,6 +103,10 @@ input UpdateIdentityStoreInput {
   Whether users in this store are allowed to authenticate (i.e. log in)
   """
   isAuthenticationEnabled: Boolean!
+  """
+  Whether access packages are enabled for this identity store.
+  """
+  accessPackagesEnabled: Boolean!
   """
   The optional client ID, used for i.e identity lookups.
   """
@@ -171,6 +183,24 @@ enum IdentityStoreType {
   Manual
 }
 
+"""
+Capability assessment for an identity store (typically Entra)
+"""
+type IdentityStoreCapabilities {
+  """
+  Whether the configured Graph client can write/manage TAPs
+  """
+  tapWrite: Boolean!
+  """
+  Whether the configured Graph client can read authentication method policies (TAP policy insight)
+  """
+  tapPolicyInsight: Boolean!
+  """
+  Whether the configured Graph client can read access packages
+  """
+  accessPackages: Boolean!
+}
+
 extend type Query {
   """
   Fetch all identity stores
@@ -190,6 +220,10 @@ extend type Query {
   Test the identity store's graph client configuration
   """
   testIdentityStoreGraphClient(identityStoreId: ID!): MsGraphFailure
+  """
+  Assess the capabilities of the identity store's graph client based on assigned permissions
+  """
+  identityStoreCapabilities(id: ID!): IdentityStoreCapabilities!
 }
 
 extend type Mutation {

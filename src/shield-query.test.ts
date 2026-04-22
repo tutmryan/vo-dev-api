@@ -330,4 +330,21 @@ credentialRecordCount(where: $where)
       { contractId: 'test-contract-id' },
     )
   })
+
+  describe('identityStoreCapabilities', () => {
+    testQueryPermissions(
+      [UserRoles.instanceAdmin],
+      false,
+      `
+      query IdentityStoreCapabilitiesShieldTest($id: ID!) {
+        identityStoreCapabilities(id: $id) {
+          tapWrite
+          tapPolicyInsight
+          accessPackages
+        }
+      }
+    `,
+      { id: 'test-store-id' },
+    )
+  })
 })

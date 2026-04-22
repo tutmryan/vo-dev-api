@@ -1888,6 +1888,8 @@ export type IdentityPresentationWhere = {
 /** A single identity store configuration */
 export type IdentityStore = {
   __typename?: 'IdentityStore';
+  /** Whether access packages are enabled for this identity store. */
+  accessPackagesEnabled: Scalars['Boolean']['output'];
   /** Optional client ID (e.g. used for identity look ups) */
   clientId?: Maybe<Scalars['String']['output']>;
   /** When this identity store was created */
@@ -1914,8 +1916,21 @@ export type IdentityStore = {
   updatedBy?: Maybe<User>;
 };
 
+/** Capability assessment for an identity store (typically Entra) */
+export type IdentityStoreCapabilities = {
+  __typename?: 'IdentityStoreCapabilities';
+  /** Whether the configured Graph client can read access packages */
+  accessPackages: Scalars['Boolean']['output'];
+  /** Whether the configured Graph client can read authentication method policies (TAP policy insight) */
+  tapPolicyInsight: Scalars['Boolean']['output'];
+  /** Whether the configured Graph client can write/manage TAPs */
+  tapWrite: Scalars['Boolean']['output'];
+};
+
 /** Input payload for creating an identity store */
 export type IdentityStoreInput = {
+  /** Whether access packages are enabled for this identity store. */
+  accessPackagesEnabled: Scalars['Boolean']['input'];
   /** The optional client ID, used for i.e identity lookups. */
   clientId?: InputMaybe<Scalars['String']['input']>;
   /** The optional client secret, applicable only to confidential clients. */
@@ -4885,6 +4900,8 @@ export type Query = {
   identityIssuers: Array<IdentityIssuer>;
   /** Fetch an identity store by its ID */
   identityStore?: Maybe<IdentityStore>;
+  /** Assess the capabilities of the identity store's graph client based on assigned permissions */
+  identityStoreCapabilities: IdentityStoreCapabilities;
   /** Returns a single instance by identifier. */
   instanceByIdentifier: Instance;
   /** Get an instance setting by key. Returns null if not set. */
@@ -5207,6 +5224,11 @@ export type QueryIdentityByIdentifierArgs = {
 
 
 export type QueryIdentityStoreArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type QueryIdentityStoreCapabilitiesArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -5849,6 +5871,8 @@ export type TextValidationInput = {
 
 /** Update payload for updating an identity store */
 export type UpdateIdentityStoreInput = {
+  /** Whether access packages are enabled for this identity store. */
+  accessPackagesEnabled: Scalars['Boolean']['input'];
   /** The optional client ID, used for i.e identity lookups. */
   clientId?: InputMaybe<Scalars['String']['input']>;
   /** The optional client secret, applicable only to confidential clients. */
@@ -7297,6 +7321,7 @@ export type ResolversTypes = {
   IdentityPresentationFlowsWhere: IdentityPresentationFlowsWhere;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityStore: ResolverTypeWrapper<IdentityStoreEntity>;
+  IdentityStoreCapabilities: ResolverTypeWrapper<IdentityStoreCapabilities>;
   IdentityStoreInput: IdentityStoreInput;
   IdentityStoreOrderBy: IdentityStoreOrderBy;
   IdentityStoreType: IdentityStoreType;
@@ -7597,6 +7622,7 @@ export type ResolversParentTypes = {
   IdentityPresentationFlowsWhere: IdentityPresentationFlowsWhere;
   IdentityPresentationWhere: IdentityPresentationWhere;
   IdentityStore: IdentityStoreEntity;
+  IdentityStoreCapabilities: IdentityStoreCapabilities;
   IdentityStoreInput: IdentityStoreInput;
   IdentityStoreWhere: IdentityStoreWhere;
   IdentityWhere: IdentityWhere;
@@ -8161,6 +8187,7 @@ export type IdentityIssuerResolvers<ContextType = GraphQLContext, ParentType ext
 };
 
 export type IdentityStoreResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IdentityStore'] = ResolversParentTypes['IdentityStore']> = {
+  accessPackagesEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   clientId?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   createdBy?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
@@ -8173,6 +8200,12 @@ export type IdentityStoreResolvers<ContextType = GraphQLContext, ParentType exte
   type?: Resolver<ResolversTypes['IdentityStoreType'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
+};
+
+export type IdentityStoreCapabilitiesResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IdentityStoreCapabilities'] = ResolversParentTypes['IdentityStoreCapabilities']> = {
+  accessPackages?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  tapPolicyInsight?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  tapWrite?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
 };
 
 export type InstanceResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Instance'] = ResolversParentTypes['Instance']> = {
@@ -8838,6 +8871,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   identityByIdentifier?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityByIdentifierArgs, 'issuerId'>>;
   identityIssuers?: Resolver<Array<ResolversTypes['IdentityIssuer']>, ParentType, ContextType>;
   identityStore?: Resolver<Maybe<ResolversTypes['IdentityStore']>, ParentType, ContextType, RequireFields<QueryIdentityStoreArgs, 'id'>>;
+  identityStoreCapabilities?: Resolver<ResolversTypes['IdentityStoreCapabilities'], ParentType, ContextType, RequireFields<QueryIdentityStoreCapabilitiesArgs, 'id'>>;
   instanceByIdentifier?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<QueryInstanceByIdentifierArgs, 'identifier'>>;
   instanceSetting?: Resolver<Maybe<ResolversTypes['InstanceSetting']>, ParentType, ContextType, RequireFields<QueryInstanceSettingArgs, 'key'>>;
   issuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<QueryIssuanceArgs, 'id'>>;
@@ -9137,6 +9171,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   Identity?: IdentityResolvers<ContextType>;
   IdentityIssuer?: IdentityIssuerResolvers<ContextType>;
   IdentityStore?: IdentityStoreResolvers<ContextType>;
+  IdentityStoreCapabilities?: IdentityStoreCapabilitiesResolvers<ContextType>;
   Instance?: InstanceResolvers<ContextType>;
   InstanceConfiguration?: InstanceConfigurationResolvers<ContextType>;
   InstanceSetting?: InstanceSettingResolvers<ContextType>;

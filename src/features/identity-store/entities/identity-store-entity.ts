@@ -7,14 +7,15 @@ import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tra
 import { MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity } from '../../microsoft-entra-temporary-access-pass-issuance/entities/microsoft-entra-temporary-access-pass-issuance-configuration-entity'
 
 type CreateArgs = Pick<IdentityStoreEntity, 'identifier' | 'name' | 'type' | 'isAuthenticationEnabled'> &
-  Partial<Pick<IdentityStoreEntity, 'clientId'>>
-type UpdateArgs = Pick<IdentityStoreEntity, 'name' | 'type' | 'isAuthenticationEnabled'> & Partial<{ clientId: string | null }>
+  Partial<Pick<IdentityStoreEntity, 'clientId' | 'accessPackagesEnabled'>>
+type UpdateArgs = Pick<IdentityStoreEntity, 'name' | 'type' | 'isAuthenticationEnabled' | 'accessPackagesEnabled'> &
+  Partial<{ clientId: string | null }>
 @Entity('identity_store')
 export class IdentityStoreEntity extends AuditedAndTrackedEntity {
   constructor(args?: CreateArgs) {
     super()
     if (!args) return
-    typeSafeAssign(this, args)
+    typeSafeAssign(this, { accessPackagesEnabled: false, ...args })
   }
 
   @DeleteDateColumn({ type: dateTimeOffsetType, nullable: true, transformer: dateTimeOffsetTransformer })
@@ -31,6 +32,9 @@ export class IdentityStoreEntity extends AuditedAndTrackedEntity {
 
   @Column({ name: 'is_authentication_enabled', type: booleanType })
   isAuthenticationEnabled!: boolean
+
+  @Column({ name: 'access_packages_enabled', type: booleanType, default: false })
+  accessPackagesEnabled!: boolean
 
   @Column({ name: 'client_id', type: 'varchar', length: 255, nullable: true })
   clientId?: string | null

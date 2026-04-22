@@ -55,6 +55,12 @@ export interface AuthenticationMethodConfiguration {
   excludeTargets?: AuthenticationMethodTarget[]
 }
 
+export interface IdentityStoreCapabilities {
+  tapWrite: boolean
+  tapPolicyInsight: boolean
+  accessPackages: boolean
+}
+
 export interface GraphServiceConfig {
   identityStoreId: string
   auth: {
@@ -189,7 +195,7 @@ export class GraphService {
    * Requires EntitlementManagement.Read.All permission.
    * Results are cached for 15 minutes per identity store.
    */
-  async getAccessPackageAssignmentPolicies(): Promise<AccessPackageAssignmentPolicy[]> {
+  async getAccessPackageAssignmentPolicies(): Promise<AccessPackageAssignmentPolicy[] | 'missing_permissions'> {
     const cacheKey = `assignmentPolicies:${this.config.identityStoreId}`
     const cached = await accessPackagePoliciesCache().get(cacheKey)
     if (cached) return cached
@@ -205,13 +211,16 @@ export class GraphService {
       await accessPackagePoliciesCache().set(cacheKey, policies)
       return policies
     } catch (error) {
-      // Silent failure is intentional - return empty array if EntitlementManagement.Read.All permission not granted
       if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
-        logger.info(`Access package policies not available for identity store ${this.config.identityStoreId} - permission not granted`)
-        return []
+        logger.warn(
+          `Access package policies not available for identity store ${this.config.identityStoreId} - missing EntitlementManagement.Read.All permission`,
+        )
+        return 'missing_permissions'
       }
-      logger.error(`Failed to fetch access package assignment policies for identity store ${this.config.identityStoreId}`, { error })
-      throw error
+      logger.warn(`Failed to fetch access package assignment policies for identity store ${this.config.identityStoreId} - regular error`, {
+        error,
+      })
+      return []
     }
   }
 
@@ -221,6 +230,7 @@ export class GraphService {
    */
   async findAccessPackages(credentialTypes: string[]): Promise<AccessPackageResult[]> {
     const policies = await this.getAccessPackageAssignmentPolicies()
+    if (policies === 'missing_permissions') return []
 
     // Filter to only policies with accessPackage and matching credentialTypes
     const filteredPolicies = policies.filter(
@@ -273,16 +283,45 @@ export class GraphService {
   // This requires Microsoft Graph API permissions: Policy.Read.AuthenticationMethod
   // Allows to check if the tenant has enabled the Temporary Access Pass authentication method
   // https://learn.microsoft.com/en-us/graph/api/authenticationmethodspolicy-get?view=graph-rest-1.0&tabs=http
-  async getTemporaryAccessPassPolicy(): Promise<AuthenticationMethodConfiguration | undefined> {
+  async getTemporaryAccessPassPolicy(): Promise<AuthenticationMethodConfiguration | undefined | 'missing_permissions'> {
     try {
       return (await this.client()
         .api('/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/temporaryAccessPass')
         .get()) as AuthenticationMethodConfiguration
     } catch (error) {
       if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
-        throw new Error('Missing policy permissions')
+        return 'missing_permissions'
       }
       return undefined
+    }
+  }
+
+  async checkCapabilities(): Promise<IdentityStoreCapabilities> {
+    if (!this.isConfigured) {
+      return {
+        tapPolicyInsight: false,
+        accessPackages: false,
+        tapWrite: false,
+      }
+    }
+
+    const [tapPolicy, accessPackages] = await Promise.all([this.getTemporaryAccessPassPolicy(), this.getAccessPackageAssignmentPolicies()])
+
+    // For tapWrite, the best check without a concrete user is to see if we can list TAP methods for a non-existent user.
+    // If it returns Forbidden, we definitely don't have it. If it returns NotFound, we likely DO have the permission.
+    let tapWrite = true
+    try {
+      await this.client().api('/users/00000000-0000-0000-0000-000000000000/authentication/temporaryAccessPassMethods').get()
+    } catch (error) {
+      if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
+        tapWrite = false
+      }
+    }
+
+    return {
+      tapPolicyInsight: tapPolicy !== 'missing_permissions',
+      accessPackages: accessPackages !== 'missing_permissions',
+      tapWrite,
     }
   }
 }
@@ -356,7 +395,13 @@ class GraphServiceManager {
    */
   async findAllAccessPackages(credentialTypes: string[]): Promise<AccessPackageResult[]> {
     await this.init()
-    const results = await Promise.all(this.all.map((service) => service.findAccessPackages(credentialTypes)))
+    const stores = await dataSource.getRepository(IdentityStoreEntity).find({
+      where: { type: IdentityStoreType.Entra, accessPackagesEnabled: true },
+    })
+    const enabledStoreIds = stores.map((s) => s.id)
+    const enabledServices = this.all.filter((service) => enabledStoreIds.includes(service.config.identityStoreId))
+
+    const results = await Promise.all(enabledServices.map((service) => service.findAccessPackages(credentialTypes)))
     return results.flat()
   }
 }

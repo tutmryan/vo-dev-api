@@ -6,6 +6,7 @@ import { SuspendIdentityStoreCommand } from './commands/suspend-identity-store-c
 import { UpdateIdentityStoreCommand } from './commands/update-identity-store-command'
 
 import { FindIdentityStoresQuery } from './queries/find-identity-stores-query'
+import { IdentityStoreCapabilitiesQuery } from './queries/identity-store-capabilities-query'
 import { TestIdentityStoreGraphClientQuery } from './queries/test-identity-store-graph-client-query'
 
 export const resolvers: Resolvers = {
@@ -13,6 +14,7 @@ export const resolvers: Resolvers = {
     findIdentityStores: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindIdentityStoresQuery, where, offset, limit, orderBy, orderDirection),
     testIdentityStoreGraphClient: (_, { identityStoreId }, context) => query(context, TestIdentityStoreGraphClientQuery, identityStoreId),
+    identityStoreCapabilities: (_, { id }, context) => query(context, IdentityStoreCapabilitiesQuery, id),
     identityStore: (_, { id }, { dataLoaders: { identityStores } }) => identityStores.load(id),
   },
   Mutation: {

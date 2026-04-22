@@ -7,7 +7,7 @@ import { IdentityStoreEntity } from '../entities/identity-store-entity'
 import { identityStoreSecretService } from '../index'
 
 export async function CreateIdentityStoreCommand(this: CommandContext, input: IdentityStoreInput) {
-  const { identifier, name, type, isAuthenticationEnabled, clientId, clientSecret } = input
+  const { identifier, name, type, isAuthenticationEnabled, accessPackagesEnabled, clientId, clientSecret } = input
 
   validateClientInput(clientId, clientSecret)
 
@@ -25,6 +25,7 @@ export async function CreateIdentityStoreCommand(this: CommandContext, input: Id
       name,
       type: type as IdentityStoreType,
       isAuthenticationEnabled,
+      accessPackagesEnabled,
       clientId: clientId ?? undefined,
     }),
   )
