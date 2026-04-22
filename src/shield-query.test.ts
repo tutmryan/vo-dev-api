@@ -331,13 +331,13 @@ credentialRecordCount(where: $where)
     )
   })
 
-  describe('identityStoreCapabilities', () => {
+  describe('identityStoreEntraCapabilities', () => {
     testQueryPermissions(
       [UserRoles.instanceAdmin],
       false,
       `
-      query IdentityStoreCapabilitiesShieldTest($id: ID!) {
-        identityStoreCapabilities(id: $id) {
+      query IdentityStoreEntraCapabilitiesShieldTest($id: ID!) {
+        identityStoreEntraCapabilities(id: $id) {
           tapWrite
           tapPolicyInsight
           accessPackages

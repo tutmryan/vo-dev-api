@@ -4901,7 +4901,7 @@ export type Query = {
   /** Fetch an identity store by its ID */
   identityStore?: Maybe<IdentityStore>;
   /** Assess the capabilities of the identity store's graph client based on assigned permissions */
-  identityStoreCapabilities: IdentityStoreCapabilities;
+  identityStoreEntraCapabilities: IdentityStoreCapabilities;
   /** Returns a single instance by identifier. */
   instanceByIdentifier: Instance;
   /** Get an instance setting by key. Returns null if not set. */
@@ -5228,7 +5228,7 @@ export type QueryIdentityStoreArgs = {
 };
 
 
-export type QueryIdentityStoreCapabilitiesArgs = {
+export type QueryIdentityStoreEntraCapabilitiesArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -8871,7 +8871,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   identityByIdentifier?: Resolver<ResolversTypes['Identity'], ParentType, ContextType, RequireFields<QueryIdentityByIdentifierArgs, 'issuerId'>>;
   identityIssuers?: Resolver<Array<ResolversTypes['IdentityIssuer']>, ParentType, ContextType>;
   identityStore?: Resolver<Maybe<ResolversTypes['IdentityStore']>, ParentType, ContextType, RequireFields<QueryIdentityStoreArgs, 'id'>>;
-  identityStoreCapabilities?: Resolver<ResolversTypes['IdentityStoreCapabilities'], ParentType, ContextType, RequireFields<QueryIdentityStoreCapabilitiesArgs, 'id'>>;
+  identityStoreEntraCapabilities?: Resolver<ResolversTypes['IdentityStoreCapabilities'], ParentType, ContextType, RequireFields<QueryIdentityStoreEntraCapabilitiesArgs, 'id'>>;
   instanceByIdentifier?: Resolver<ResolversTypes['Instance'], ParentType, ContextType, RequireFields<QueryInstanceByIdentifierArgs, 'identifier'>>;
   instanceSetting?: Resolver<Maybe<ResolversTypes['InstanceSetting']>, ParentType, ContextType, RequireFields<QueryInstanceSettingArgs, 'key'>>;
   issuance?: Resolver<ResolversTypes['Issuance'], ParentType, ContextType, RequireFields<QueryIssuanceArgs, 'id'>>;

@@ -223,7 +223,7 @@ extend type Query {
   """
   Assess the capabilities of the identity store's graph client based on assigned permissions
   """
-  identityStoreCapabilities(id: ID!): IdentityStoreCapabilities!
+  identityStoreEntraCapabilities(id: ID!): IdentityStoreCapabilities!
 }
 
 extend type Mutation {
