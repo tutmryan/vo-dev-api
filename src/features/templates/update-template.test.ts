@@ -172,7 +172,7 @@ describe('updateTemplate mutation', () => {
     expect(updatedTemplate.id).toBe(template.id)
     expect(omit(updatedTemplate, 'id')).toMatchInlineSnapshot(`
       {
-        "credentialTypes": [],
+        "credentialTypes": null,
         "description": "",
         "display": {
           "card": {

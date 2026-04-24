@@ -1,1 +1,7 @@
-{}
+{
+  "1116970": {
+    "active": true,
+    "expiry": "2026/05/23",
+    "notes": "uuid upgraded to v14 as direct dependency; transitive copies in @apollo/server, @azure, bullmq, jest-junit, typeorm are not exploitable as the vulnerable buf parameter is not used"
+  }
+}
