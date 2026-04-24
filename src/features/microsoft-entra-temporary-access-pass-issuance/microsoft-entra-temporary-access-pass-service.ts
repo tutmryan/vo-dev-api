@@ -40,7 +40,7 @@ export class MicrosoftEntraTemporaryAccessPassService {
       return []
     }
 
-    const service = graphServiceManager.get(config.identityStoreId)
+    const service = await graphServiceManager.get(config.identityStoreId)
 
     let unavailableReason: string | undefined
     let enabled = true
@@ -78,7 +78,7 @@ export class MicrosoftEntraTemporaryAccessPassService {
 
     const targetOid = identity.identifier
     const identityId = identity.id
-    const service = graphServiceManager.get(config.identityStoreId)
+    const service = await graphServiceManager.get(config.identityStoreId)
 
     if (!service) {
       // It might be that the store is not Entra, or not configured with secrets

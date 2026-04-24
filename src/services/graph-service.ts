@@ -381,8 +381,40 @@ class GraphServiceManager {
     this.initialised = true
   }
 
-  get(identityStoreId: string): GraphService | undefined {
-    return this.services[identityStoreId]
+  async get(identityStoreId: string): Promise<GraphService | undefined> {
+    if (!this.initialised) {
+      await this.init()
+    }
+    const cachedService = this.services[identityStoreId]
+    if (cachedService) return cachedService
+
+    const store = await dataSource.getRepository(IdentityStoreEntity).findOne({
+      where: { id: identityStoreId, type: IdentityStoreType.Entra },
+      comment: 'GraphServiceManagerLazyFetch',
+    })
+
+    if (store && store.clientId && store.identifier) {
+      try {
+        const clientSecretService = createIdentityStoreSecretService()
+        const clientSecret = await clientSecretService.get(store.clientId)
+        if (clientSecret) {
+          this.services[store.id] = new GraphService({
+            tenantName: store.name,
+            identityStoreId: store.id,
+            auth: {
+              tenantId: store.identifier,
+              clientId: store.clientId,
+              clientSecret,
+            },
+          })
+          return this.services[store.id]
+        }
+      } catch (error) {
+        logger.error(`Failed to lazy load GraphService for identity store ${store.id}`, { error })
+      }
+    }
+
+    return undefined
   }
 
   get all(): GraphService[] {

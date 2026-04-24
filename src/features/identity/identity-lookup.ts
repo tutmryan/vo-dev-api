@@ -16,8 +16,7 @@ const computeLookupValue = (identityStoreId: string, email: string): string => {
 }
 
 const getConfiguredGraphService = async (identityStoreId: string) => {
-  await graphServiceManager.init()
-  const graphService = graphServiceManager.get(identityStoreId)
+  const graphService = await graphServiceManager.get(identityStoreId)
 
   invariant(graphService && graphService.isConfigured, 'Graph service is not configured for the specified identity store.')
 

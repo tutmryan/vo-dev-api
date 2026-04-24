@@ -15,7 +15,7 @@ export async function FindTenantIdentitiesQuery(
 
   const identityStore = await identityStores.load(criteria.identityStoreId)
   invariant(identityStore, `No IdentityStore found for id: ${criteria.identityStoreId}`)
-  const graphService = this.services.graphServiceManager.get(identityStore.id)
+  const graphService = await this.services.graphServiceManager.get(identityStore.id)
   invariant(graphService, `No GraphService for identity store id: ${identityStore.id}`)
 
   const users = await graphService.findUsers(criteria, limit)

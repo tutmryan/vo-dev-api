@@ -2,7 +2,7 @@ import type { QueryContext } from '../../../cqs'
 import type { MsGraphFailure } from '../../../generated/graphql'
 
 export async function TestIdentityStoreGraphClientQuery(this: QueryContext, identityStoreId: string): Promise<MsGraphFailure | null> {
-  const graphService = this.services.graphServiceManager.get(identityStoreId)
+  const graphService = await this.services.graphServiceManager.get(identityStoreId)
   if (!graphService) {
     return {
       identityStoreId,
