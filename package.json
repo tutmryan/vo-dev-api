@@ -139,7 +139,7 @@
     "@makerx/graphql-apollo-server": "^1.7.0",
     "@makerx/graphql-core": "^2.3.0",
     "@makerx/node-common": "^1.5.0",
-    "@makerx/node-winston": "^1.2.0",
+    "@makerx/node-winston": "1.2.0",
     "@microsoft/microsoft-graph-client": "^3.0.7",
     "@opentelemetry/exporter-logs-otlp-grpc": "^0.208.0",
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.208.0",
