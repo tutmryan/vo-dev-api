@@ -307,7 +307,9 @@ function handlePresentationEvent(data: any) {
 }
 
 function displayPresentationResponse(response: any) {
-  const { requestId, qrCode, url } = response
+  const requestId = response.requestId
+  const qrCode = response.qrCode
+  const url = response.url
   const input = document.querySelector('input[name="requestId"]') as HTMLInputElement
   input.value = requestId
 
