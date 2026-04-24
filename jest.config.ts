@@ -20,7 +20,7 @@ const config: Config.InitialOptions = {
   },
   prettierPath: 'prettier-2',
   // Transform ESM-only packages in node_modules so Jest can handle them
-  transformIgnorePatterns: ['node_modules/(?!(cbor2|@cto\\.af|hpke|uuid|jose|jwks-rsa)/)'],
+  transformIgnorePatterns: ['node_modules/(?!(cbor2|@cto\\.af|hpke)/)'],
   // Include transform for JS files from ESM packages
   transform: {
     '^.+\\.[tj]sx?$': [

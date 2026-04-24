@@ -1,2 +1,7 @@
 {
+  "1116970": {
+    "active": true,
+    "expiry": "2026/05/23",
+    "notes": "temporary exception for uuid package version to resolve build issues. Should be removed once the underlying issue is resolved and uuid package is updated to a compatible version."
+  }
 }
