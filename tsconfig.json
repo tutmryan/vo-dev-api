@@ -9,9 +9,9 @@
     "esModuleInterop": true,
     "noUncheckedIndexedAccess": true,
     "useDefineForClassFields": false, // required for typeorm decorator fields to work properly, as per ES2021 behavior
-    "baseUrl": ".",
+    "types": ["jest", "node"],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "files": ["src/express.d.ts"],

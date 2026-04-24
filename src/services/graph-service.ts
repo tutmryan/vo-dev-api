@@ -174,14 +174,46 @@ export class GraphService {
   }
 
   async findUsers({ nameStartsWith }: { nameStartsWith: string }, top: number): Promise<PartialUser[]> {
-    const nameInput = encodeURIComponent(nameStartsWith.replaceAll("'", "''")) //https://learn.microsoft.com/en-us/graph/query-parameters?tabs=javascript#escaping-single-quotes
+    const filter = GraphService.buildFindUsersFilter(nameStartsWith)
     const result = (await this.client()
       .api('/users')
-      .filter(`startswith(displayName,'${nameInput}') or startswith(givenName,'${nameInput}') or startswith(surname,'${nameInput}')`)
+      .filter(filter)
       .top(top)
       .select('displayName,id,identities,givenName,surname,userType')
       .get()) as { value: PartialUser[] }
-    return result.value
+    const searchTokens = nameStartsWith
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((t) => t.toLowerCase())
+    return result.value.filter((user) => GraphService.matchesAllSearchTokens(user, searchTokens))
+  }
+
+  static matchesAllSearchTokens(user: Pick<PartialUser, 'displayName' | 'givenName' | 'surname'>, searchTokens: string[]): boolean {
+    if (searchTokens.length === 0) return true
+
+    const nameFields = [user.displayName, user.givenName, user.surname].filter(Boolean) as string[]
+    const nameTokens = nameFields.flatMap((f) => f.split(/\s+/)).map((t) => t.toLowerCase())
+
+    return searchTokens.every((st) => nameTokens.some((nt) => nt.includes(st)))
+  }
+
+  static buildFindUsersFilter(nameStartsWith: string): string {
+    const normalized = nameStartsWith.trim().replace(/\s+/g, ' ')
+    const escaped = encodeURIComponent(normalized.replaceAll("'", "''"))
+    const tokens = nameStartsWith.trim().split(/\s+/)
+
+    const baseFilter = `startswith(displayName,'${escaped}') or startswith(givenName,'${escaped}') or startswith(surname,'${escaped}')`
+
+    if (tokens.length < 2) {
+      return baseFilter
+    }
+
+    const escapedTokens = tokens.map((t) => encodeURIComponent(t.replaceAll("'", "''")))
+
+    const tokenClauses = escapedTokens.map((et) => `startswith(givenName,'${et}') or startswith(surname,'${et}')`)
+
+    return `(${baseFilter}) or ${tokenClauses.map((c) => `(${c})`).join(' or ')}`
   }
 
   async checkMemberGroups(userId: string, groupIds: string[]): Promise<string[] | 'missing_permissions'> {
