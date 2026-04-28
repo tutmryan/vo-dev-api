@@ -27,6 +27,7 @@ export async function UpdateIdentityStoreCommand(this: CommandContext, id: strin
   })
 
   const updatedIdentityStore = await repo.save(identityStore)
+  this.services.graphServiceManager.clear(id)
   notifyIdentityStoreChanged()
   return updatedIdentityStore
 }

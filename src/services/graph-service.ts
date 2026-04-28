@@ -436,6 +436,10 @@ class GraphServiceManager {
     const results = await Promise.all(enabledServices.map((service) => service.findAccessPackages(credentialTypes)))
     return results.flat()
   }
+
+  clear(identityStoreId: string): void {
+    delete this.services[identityStoreId]
+  }
 }
 
 export type IGraphServiceManager = InstanceType<typeof GraphServiceManager>
