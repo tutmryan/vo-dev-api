@@ -1,14 +1,30 @@
 ---
 title: April 2026
-date: 2026-04-14T00:00
-description: April 2026 releases introduce access control improvements for remote issuance, enhanced presentation flow usability in Composer, a visual indicator for credential type access in presentation flows, and fixes for photo capture issues in Concierge.
+date: 2026-04-20T00:00
+description: April 2026 releases introduce a unified credentials view in Composer, identity proofing support with a restructured OIDC client configuration, tighter Temporary Access Pass eligibility controls in Concierge, access control improvements for remote issuance, enhanced presentation flow usability, a visual indicator for credential type access, and fixes for in-person offer expiry and photo capture.
 slug: v2026_April
-tags: [2026, v2026.4.0]
+tags: [2026, v2026.4.0, v2026.4.1]
 ---
 
-April 2026 releases introduce access control improvements for remote issuance, enhanced presentation flow usability in Composer, a visual indicator for credential type access in presentation flows, and fixes for photo capture issues in Concierge.
+April 2026 releases introduce a unified credentials view in Composer, identity proofing support with a restructured OIDC client configuration, tighter Temporary Access Pass eligibility controls in Concierge, access control improvements for remote issuance, enhanced presentation flow usability, a visual indicator for credential type access, and fixes for in-person offer expiry and photo capture.
 
 <!-- truncate -->
+
+## v2026.4.1
+
+### 🚀 What's new
+
+#### New features
+
+- **Unified credentials view in Composer** - A new Credentials section provides a consolidated view of credential records across all issuance methods, with filtering, sorting and load-more pagination. A detailed view shows offer details, issuance history, presentations and communications, and supports cancelling pending offers and resending notifications.
+- **Identity proofing for OIDC clients** - OIDC client configuration in Composer now supports identity proofing, with a restructured client form that makes setup clearer.
+
+#### Enhancements
+
+- **Client-supplied OIDC authentication parameters and response types** - The API now accepts additional client-supplied authentication parameters and response types during OIDC flows, giving relying parties more flexibility.
+- **Stricter Temporary Access Pass eligibility in Concierge** - Temporary Access Pass eligibility is now evaluated up-front, with clearer messaging when a pass cannot be issued (for example, when an active pass already exists).
+
+---
 
 ## v2026.4.0
 
