@@ -85,10 +85,15 @@ export class GraphService {
   }
 
   config: GraphServiceConfig
-  client = Lazy(() => {
+
+  credential = Lazy(() => {
     if (!this.isConfigured) throw new Error('GraphService is not configured')
     const { tenantId, clientId, clientSecret } = this.config.auth
-    const credential = new ClientSecretCredential(tenantId, clientId, clientSecret)
+    return new ClientSecretCredential(tenantId, clientId, clientSecret)
+  })
+
+  client = Lazy(() => {
+    const credential = this.credential()
     const authProvider = new TokenCredentialAuthenticationProvider(credential, { scopes: ['https://graph.microsoft.com/.default'] })
 
     return Client.initWithMiddleware({
@@ -211,7 +216,7 @@ export class GraphService {
       await accessPackagePoliciesCache().set(cacheKey, policies)
       return policies
     } catch (error) {
-      if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
+      if (isGraphMissingPermissionsError(error)) {
         logger.warn(
           `Access package policies not available for identity store ${this.config.identityStoreId} - missing EntitlementManagement.Read.All permission`,
         )
@@ -289,10 +294,27 @@ export class GraphService {
         .api('/policies/authenticationMethodsPolicy/authenticationMethodConfigurations/temporaryAccessPass')
         .get()) as AuthenticationMethodConfiguration
     } catch (error) {
-      if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
+      if (isGraphMissingPermissionsError(error)) {
         return 'missing_permissions'
       }
       return undefined
+    }
+  }
+
+  /**
+   * Decodes the current Graph access token and returns the list of granted application roles.
+   * This is the most reliable way to check application permissions without making extra API calls
+   * that may return 404 before performing a permission check.
+   */
+  private async getGrantedRoles(): Promise<string[]> {
+    try {
+      const token = await this.credential().getToken('https://graph.microsoft.com/.default')
+      const payloadBase64 = token.token.split('.')[1]!
+      const payload = JSON.parse(Buffer.from(payloadBase64, 'base64').toString('utf-8'))
+      return Array.isArray(payload.roles) ? payload.roles : []
+    } catch (error) {
+      logger.warn(`Failed to decode Graph access token for identity store ${this.config.identityStoreId}`, { error })
+      return []
     }
   }
 
@@ -305,21 +327,13 @@ export class GraphService {
       }
     }
 
-    const [tapPolicy, accessPackages] = await Promise.all([this.getTemporaryAccessPassPolicy(), this.getAccessPackageAssignmentPolicies()])
+    const [accessPackages, grantedRoles] = await Promise.all([this.getAccessPackageAssignmentPolicies(), this.getGrantedRoles()])
 
-    // For tapWrite, the best check without a concrete user is to see if we can list TAP methods for a non-existent user.
-    // If it returns Forbidden, we definitely don't have it. If it returns NotFound, we likely DO have the permission.
-    let tapWrite = true
-    try {
-      await this.client().api('/users/00000000-0000-0000-0000-000000000000/authentication/temporaryAccessPassMethods').get()
-    } catch (error) {
-      if (error instanceof Error && (error.message.includes('Authorization') || error.message.includes('Forbidden'))) {
-        tapWrite = false
-      }
-    }
+    const tapWrite = grantedRoles.includes('UserAuthMethod-TAP.ReadWrite.All')
+    const tapPolicyInsight = grantedRoles.includes('Policy.Read.AuthenticationMethod')
 
     return {
-      tapPolicyInsight: tapPolicy !== 'missing_permissions',
+      tapPolicyInsight,
       accessPackages: accessPackages !== 'missing_permissions',
       tapWrite,
     }
@@ -446,3 +460,21 @@ export type IGraphServiceManager = InstanceType<typeof GraphServiceManager>
 export const graphServiceManager = new GraphServiceManager()
 
 export type PartialUser = Pick<GraphUser, 'id' | 'displayName' | 'identities' | 'givenName' | 'surname' | 'userType'>
+
+function isGraphMissingPermissionsError(error: any): boolean {
+  if (!(error instanceof Error)) return false
+
+  // Check common Graph error codes and status codes
+  const code = (error as any).code
+  const statusCode = (error as any).statusCode
+
+  // 403 Forbidden is the standard permission error
+  if (statusCode === 403) return true
+  // Graph sometimes returns UnAuthorized for 403 scenarios in certain APIs
+  if (code === 'Authorization_RequestDenied' || code === 'UnAuthorized') return true
+
+  const message = error.message.toLowerCase()
+  return (
+    message.includes('authorization') || message.includes('authorized') || message.includes('forbidden') || message.includes('unauthorized')
+  )
+}
