@@ -103,7 +103,10 @@ export class GraphService {
 
   async testConnection(): Promise<MsGraphFailure | undefined> {
     try {
-      await this.findUsers({ nameStartsWith: 'a' }, 1)
+      // A token fetch validates tenant ID, client ID, and client secret without
+      // requiring any specific Graph API permissions, making this a safe probe
+      // that works regardless of what permissions the app registration holds.
+      await this.credential().getToken('https://graph.microsoft.com/.default')
       return undefined
     } catch (error) {
       return {
@@ -318,13 +321,20 @@ export class GraphService {
     }
   }
 
-  async checkCapabilities(): Promise<IdentityStoreCapabilities> {
+  async checkCapabilities(forceRefresh = false): Promise<IdentityStoreCapabilities> {
     if (!this.isConfigured) {
       return {
         tapPolicyInsight: false,
         accessPackages: false,
         tapWrite: false,
       }
+    }
+
+    if (forceRefresh) {
+      // Invalidate the cached AP policy list so we get the current permission state,
+      // not a value that could be up to 15 minutes stale.
+      const cacheKey = `assignmentPolicies:${this.config.identityStoreId}`
+      await accessPackagePoliciesCache().delete(cacheKey)
     }
 
     const [accessPackages, grantedRoles] = await Promise.all([this.getAccessPackageAssignmentPolicies(), this.getGrantedRoles()])
@@ -359,49 +369,62 @@ class GraphServiceManager {
 
   private initialised = false
 
+  /** In-flight init promise — prevents concurrent callers from running init() twice. */
+  private initPromise: Promise<void> | null = null
+
   async reload(): Promise<void> {
     this.initialised = false
+    this.initPromise = null
     return this.init()
   }
 
-  async init() {
+  async init(): Promise<void> {
     if (this.initialised) return
+    if (this.initPromise) return this.initPromise
+    this.initPromise = this._doInit().finally(() => {
+      this.initPromise = null
+    })
+    return this.initPromise
+  }
+
+  private async _doInit(): Promise<void> {
     const clientSecretService = createIdentityStoreSecretService()
-    this.services = {}
     const stores = await dataSource.getRepository(IdentityStoreEntity).find({
       where: { type: IdentityStoreType.Entra },
       comment: 'GraphServiceManagerInit',
     })
 
-    for (const store of stores) {
-      if (store.clientId && store.identifier) {
-        try {
-          const clientSecret = await clientSecretService.get(store.clientId)
-          if (!clientSecret) continue
-          this.services[store.id] = new GraphService({
-            tenantName: store.name,
-            identityStoreId: store.id,
-            auth: {
-              tenantId: store.identifier,
-              clientId: store.clientId,
-              clientSecret,
-            },
-          })
-        } catch (error) {
-          logger.error(`Failed to create GraphService for identity store ${store.id}`, { error })
+    await Promise.all(
+      stores.map(async (store) => {
+        if (store.clientId && store.identifier) {
+          try {
+            const clientSecret = await clientSecretService.get(store.clientId)
+            if (!clientSecret) return
+            this.services[store.id] = new GraphService({
+              tenantName: store.name,
+              identityStoreId: store.id,
+              auth: {
+                tenantId: store.identifier,
+                clientId: store.clientId,
+                clientSecret,
+              },
+            })
+          } catch (error) {
+            logger.error(`Failed to create GraphService for identity store ${store.id}`, { error })
+          }
         }
-      }
-    }
+      }),
+    )
     this.initialised = true
   }
 
   async get(identityStoreId: string): Promise<GraphService | undefined> {
-    if (!this.initialised) {
-      await this.init()
-    }
+    // Check cache first. If it's already there (from init or previous lazy load), return it immediately.
     const cachedService = this.services[identityStoreId]
     if (cachedService) return cachedService
 
+    // If we are not initialized, we *could* wait for init(), but that blocks on ALL stores.
+    // Instead, we just do a lazy fetch for this specific store immediately.
     const store = await dataSource.getRepository(IdentityStoreEntity).findOne({
       where: { id: identityStoreId, type: IdentityStoreType.Entra },
       comment: 'GraphServiceManagerLazyFetch',

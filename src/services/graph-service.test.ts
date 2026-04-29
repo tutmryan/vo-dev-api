@@ -107,3 +107,98 @@ describe('GraphService.findAccessPackages', () => {
     expect(result).toHaveLength(0)
   })
 })
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GraphService.testConnection
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('GraphService.testConnection', () => {
+  const baseConfig: GraphServiceConfig = {
+    identityStoreId: 'store1',
+    tenantName: 'tenant1',
+    auth: { tenantId: 'tid', clientId: 'cid', clientSecret: 'secret' },
+  }
+
+  it('returns undefined when the token fetch succeeds', async () => {
+    const service = new GraphService(baseConfig)
+    jest.spyOn(service['credential'](), 'getToken').mockResolvedValue({ token: 'tok', expiresOnTimestamp: 0 } as any)
+    const result = await service.testConnection()
+    expect(result).toBeUndefined()
+  })
+
+  it('returns MsGraphFailure with the error message when the token fetch fails', async () => {
+    const service = new GraphService(baseConfig)
+    jest.spyOn(service['credential'](), 'getToken').mockRejectedValue(new Error('invalid_client'))
+    const result = await service.testConnection()
+    expect(result).toMatchObject({
+      identityStoreId: 'store1',
+      error: 'invalid_client',
+    })
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GraphService.checkCapabilities
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('GraphService.checkCapabilities', () => {
+  const baseConfig: GraphServiceConfig = {
+    identityStoreId: 'store1',
+    tenantName: 'tenant1',
+    auth: { tenantId: 'tid', clientId: 'cid', clientSecret: 'secret' },
+  }
+
+  function buildJwtPayload(roles: string[]): string {
+    const payload = Buffer.from(JSON.stringify({ roles })).toString('base64')
+    return `header.${payload}.sig`
+  }
+
+  function createServiceWithRoles(roles: string[], apResult: AccessPackageAssignmentPolicy[] | 'missing_permissions') {
+    const service = new GraphService(baseConfig)
+    jest.spyOn(service['credential'](), 'getToken').mockResolvedValue({ token: buildJwtPayload(roles), expiresOnTimestamp: 0 } as any)
+    jest.spyOn(service, 'getAccessPackageAssignmentPolicies').mockResolvedValue(apResult)
+    return service
+  }
+
+  it('returns all-false when isConfigured is false', async () => {
+    const service = new GraphService({
+      ...baseConfig,
+      auth: { tenantId: '', clientId: '', clientSecret: '' },
+    })
+    const caps = await service.checkCapabilities()
+    expect(caps).toEqual({ tapWrite: false, tapPolicyInsight: false, accessPackages: false })
+  })
+
+  it('returns tapWrite=true when UserAuthMethod-TAP.ReadWrite.All role is present', async () => {
+    const service = createServiceWithRoles(['UserAuthMethod-TAP.ReadWrite.All'], [])
+    const caps = await service.checkCapabilities()
+    expect(caps.tapWrite).toBe(true)
+    expect(caps.tapPolicyInsight).toBe(false)
+  })
+
+  it('returns tapPolicyInsight=true when Policy.Read.AuthenticationMethod role is present', async () => {
+    const service = createServiceWithRoles(['Policy.Read.AuthenticationMethod'], [])
+    const caps = await service.checkCapabilities()
+    expect(caps.tapPolicyInsight).toBe(true)
+    expect(caps.tapWrite).toBe(false)
+  })
+
+  it('returns all capabilities when all required roles are present and AP permissions exist', async () => {
+    const service = createServiceWithRoles(['UserAuthMethod-TAP.ReadWrite.All', 'Policy.Read.AuthenticationMethod'], [])
+    const caps = await service.checkCapabilities()
+    expect(caps).toEqual({ tapWrite: true, tapPolicyInsight: true, accessPackages: true })
+  })
+
+  it('returns accessPackages=false when AP permissions are missing', async () => {
+    const service = createServiceWithRoles(['UserAuthMethod-TAP.ReadWrite.All', 'Policy.Read.AuthenticationMethod'], 'missing_permissions')
+    const caps = await service.checkCapabilities()
+    expect(caps.accessPackages).toBe(false)
+  })
+
+  it('returns all-false when no roles are granted', async () => {
+    const service = createServiceWithRoles([], 'missing_permissions')
+    const caps = await service.checkCapabilities()
+    expect(caps).toEqual({ tapWrite: false, tapPolicyInsight: false, accessPackages: false })
+  })
+})
+

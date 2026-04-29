@@ -59,14 +59,10 @@ export async function testAllGraphServices(): Promise<MsGraphFailure[] | undefin
 
   for (const graphService of graphServiceManager.all) {
     if (!graphService.isConfigured) continue
-    try {
-      await graphService.findUsers({ nameStartsWith: 'a' }, 1)
-    } catch (error) {
-      logger.error('Test for MS Graph service integration failed', { error })
-      failures.push({
-        identityStoreId: graphService.config.identityStoreId,
-        error: error instanceof Error ? error.message : String(error),
-      })
+    const failure = await graphService.testConnection()
+    if (failure) {
+      logger.error('Test for MS Graph service integration failed', { error: failure.error })
+      failures.push(failure)
     }
   }
 

@@ -221,9 +221,10 @@ extend type Query {
   """
   testIdentityStoreGraphClient(identityStoreId: ID!): MsGraphFailure
   """
-  Assess the capabilities of the identity store's graph client based on assigned permissions
+  Assess the capabilities of the identity store's graph client based on assigned permissions.
+  If forceRefresh is true, the cached access package policy list will be invalidated first.
   """
-  identityStoreEntraCapabilities(id: ID!): IdentityStoreCapabilities!
+  identityStoreEntraCapabilities(id: ID!, forceRefresh: Boolean): IdentityStoreCapabilities!
 }
 
 extend type Mutation {

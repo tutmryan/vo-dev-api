@@ -5660,9 +5660,10 @@ type Query {
   identityStore(id: ID!): IdentityStore
 
   """
-  Assess the capabilities of the identity store's graph client based on assigned permissions
+  Assess the capabilities of the identity store's graph client based on assigned permissions.
+  If forceRefresh is true, the cached access package policy list will be invalidated first.
   """
-  identityStoreEntraCapabilities(id: ID!): IdentityStoreCapabilities!
+  identityStoreEntraCapabilities(forceRefresh: Boolean, id: ID!): IdentityStoreCapabilities!
 
   """Returns a single instance by identifier."""
   instanceByIdentifier(identifier: String!): Instance!

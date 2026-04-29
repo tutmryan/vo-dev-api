@@ -63,3 +63,6 @@ extensions:
           - introspection
         config:
           minify: true
+      ./src/generated/schema.graphql:
+        plugins:
+          - schema-ast

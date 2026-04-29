@@ -4900,7 +4900,10 @@ export type Query = {
   identityIssuers: Array<IdentityIssuer>;
   /** Fetch an identity store by its ID */
   identityStore?: Maybe<IdentityStore>;
-  /** Assess the capabilities of the identity store's graph client based on assigned permissions */
+  /**
+   * Assess the capabilities of the identity store's graph client based on assigned permissions.
+   * If forceRefresh is true, the cached access package policy list will be invalidated first.
+   */
   identityStoreEntraCapabilities: IdentityStoreCapabilities;
   /** Returns a single instance by identifier. */
   instanceByIdentifier: Instance;
@@ -5229,6 +5232,7 @@ export type QueryIdentityStoreArgs = {
 
 
 export type QueryIdentityStoreEntraCapabilitiesArgs = {
+  forceRefresh?: InputMaybe<Scalars['Boolean']['input']>;
   id: Scalars['ID']['input'];
 };
 
