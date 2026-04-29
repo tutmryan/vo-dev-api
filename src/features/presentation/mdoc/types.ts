@@ -83,6 +83,7 @@ export type MDocRequestDetails = {
   requestedClaims: MDocRequestClaimPath[]
   createdAt: number
   callback?: Callback
+  presentationFlowId?: string
 }
 
 export type ProcessedMDocRequestResponse = {

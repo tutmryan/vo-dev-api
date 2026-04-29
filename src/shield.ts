@@ -37,10 +37,11 @@ import {
   isValidLimitedCancelPresentationFlow,
   isValidLimitedCreatePresentationRequestForPresentationFlow,
   isValidLimitedPresentationFlow,
+  isValidLimitedProcessMDocForPresentationFlow,
 } from './features/limited-presentation-flow-tokens/shield-rules'
+import { microsoftEntraTemporaryAccessPassIssuanceIsToAuthenticatedUser } from './features/microsoft-entra-temporary-access-pass-issuance/shield-rules'
 import { isOidcAuthnClient, isValidOidcAuthnPresentationRequest } from './features/oidc-provider/shield-rules'
 import { isValidCapturePhoto, isValidLimitedIssuancePhotoCaptureRequest } from './features/photo-capture/shield-rules'
-import { microsoftEntraTemporaryAccessPassIssuanceIsToAuthenticatedUser } from './features/microsoft-entra-temporary-access-pass-issuance/shield-rules'
 import {
   canCancelPresentationFlow,
   canCreatePresentationFlow,
@@ -151,6 +152,7 @@ export const rules: ShieldSchema<Resolvers> = {
     cancelIssuanceRequest: or(isAsyncIssuer, isSupportAgentUser),
     capturePhoto: isValidCapturePhoto,
     createPresentationFlow: canCreatePresentationFlow,
+    createMDocPresentationFlow: canCreatePresentationFlow,
     createAsyncIssuanceRequest: isAsyncIssuer,
     createContract: or(isCredentialAdminUser, isContractAdminApp),
     createIdentityStore: isInstanceAdminUser,
@@ -175,7 +177,12 @@ export const rules: ShieldSchema<Resolvers> = {
     deletePresentationFlowTemplate: canDeletePresentationFlowTemplate,
     createPresentationRequestForAuthn: isValidOidcAuthnPresentationRequest,
     createMDocPresentationRequest: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedMdocPresentationRequest),
-    processMDocPresentationResponse: or(isUserWithReadPermissions, isPresentationApp, isValidLimitedMdocPresentationRequest),
+    processMDocPresentationResponse: or(
+      isUserWithReadPermissions,
+      isPresentationApp,
+      isValidLimitedMdocPresentationRequest,
+      isValidLimitedProcessMDocForPresentationFlow,
+    ),
     createMicrosoftEntraTemporaryAccessPassIssuanceConfiguration: isInstanceAdminUser,
     createTemplate: or(isCredentialAdminUser, isContractAdminApp),
     deleteConciergeBranding: isInstanceAdminUser,
@@ -269,6 +276,16 @@ export const rules: ShieldSchema<Resolvers> = {
     '*': or(canReadPresentationFlow, isValidLimitedPresentationFlow),
   },
   PresentationFlow: {
+    '*': or(
+      canReadPresentationFlow,
+      canCreatePresentationFlow,
+      canCancelPresentationFlow,
+      isLimitedPresentationFlowApp,
+      isValidLimitedPresentationFlow,
+      and(isIssuee, presentationFlowIsToAuthenticatedUser),
+    ),
+  },
+  DataDefinition: {
     '*': or(
       canReadPresentationFlow,
       canCreatePresentationFlow,

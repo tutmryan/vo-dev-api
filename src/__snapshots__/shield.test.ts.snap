@@ -2129,6 +2129,14 @@ exports[`shield rules are setup correctly 1`] = `
         "presentationFlow.create"
       ]
     },
+    "createMDocPresentationFlow": {
+      "name": "canCreatePresentationFlow",
+      "cache": "contextual",
+      "__roles": [
+        "presentationFlow.create",
+        "presentationFlow.create"
+      ]
+    },
     "createAsyncIssuanceRequest": {
       "rulesOr": [
         {
@@ -2571,6 +2579,21 @@ exports[`shield rules are setup correctly 1`] = `
             },
             {
               "name": "isValidLimitedMdocPresentationRequest",
+              "cache": "strict"
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedPresentationFlowApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedPresentationFlow"
+              ]
+            },
+            {
+              "name": "isValidLimitedProcessMDocForPresentationFlow",
               "cache": "strict"
             }
           ]
@@ -3711,6 +3734,70 @@ exports[`shield rules are setup correctly 1`] = `
     }
   },
   "PresentationFlow": {
+    "*": {
+      "rulesOr": [
+        {
+          "name": "canReadPresentationFlow",
+          "cache": "contextual",
+          "__roles": [
+            "presentationFlow.read",
+            "presentationFlow.read"
+          ]
+        },
+        {
+          "name": "canCreatePresentationFlow",
+          "cache": "contextual",
+          "__roles": [
+            "presentationFlow.create",
+            "presentationFlow.create"
+          ]
+        },
+        {
+          "name": "canCancelPresentationFlow",
+          "cache": "contextual",
+          "__roles": [
+            "presentationFlow.cancel",
+            "presentationFlow.cancel"
+          ]
+        },
+        {
+          "name": "isLimitedPresentationFlowApp",
+          "cache": "contextual",
+          "__roles": [
+            "VerifiableCredential.LimitedPresentationFlow"
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "isLimitedPresentationFlowApp",
+              "cache": "contextual",
+              "__roles": [
+                "VerifiableCredential.LimitedPresentationFlow"
+              ]
+            },
+            {
+              "name": "isValidLimitedPresentationFlow",
+              "cache": "strict"
+            }
+          ]
+        },
+        {
+          "rulesAnd": [
+            {
+              "name": "hasApiResourceScope-VerifiableCredential.Issuee",
+              "cache": "contextual"
+            },
+            {
+              "name": "presentationFlowIsToAuthenticatedUser",
+              "cache": "strict"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "DataDefinition": {
     "*": {
       "rulesOr": [
         {

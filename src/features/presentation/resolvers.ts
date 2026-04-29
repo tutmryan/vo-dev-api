@@ -1,5 +1,6 @@
 import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
+import { publishPresentationFlowEvent } from '../presentation-flow/pubsub'
 import { resolvePresentationEventData, subscribeToPresentationEventsWithFilter } from './callback/pubsub'
 import { CreateMDocPresentationRequestCommand } from './commands/create-mdoc-presentation-request-command'
 import { CreatePresentationRequestCommand } from './commands/create-presentation-request-command'
@@ -30,8 +31,12 @@ export const resolvers: Resolvers = {
   Mutation: {
     createPresentationRequest: (_parent, { request }, context) => dispatch(context, CreatePresentationRequestCommand, request),
     createMDocPresentationRequest: (_parent, { request }, context) => dispatch(context, CreateMDocPresentationRequestCommand, request),
-    processMDocPresentationResponse: (_parent, { response }, context) =>
-      dispatch(context, ProcessMDocPresentationResponseCommand, response),
+    processMDocPresentationResponse: async (_parent, { response }, context) => {
+      const result = await dispatch(context, ProcessMDocPresentationResponseCommand, response)
+      // Publish AFTER the transaction commits so the admin refetch sees committed data.
+      if (result._presentationFlowId) await publishPresentationFlowEvent(result._presentationFlowId)
+      return result
+    },
   },
   Presentation: {
     presentedCredentials: (presentation, _, { user }) => resolvePresentedCredentials(presentation, user),

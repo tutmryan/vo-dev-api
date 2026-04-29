@@ -2,6 +2,7 @@ import { portalUrl } from '../../config'
 import { dispatch, dispatchTransactional, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { CancelPresentationFlowCommand } from './commands/cancel-presentation-flow-command'
+import { CreateMDocPresentationFlowCommand } from './commands/create-mdoc-presentation-flow-command'
 import { CreatePresentationFlowCommand } from './commands/create-presentation-flow-command'
 import { CreatePresentationFlowTemplateCommand } from './commands/create-presentation-flow-template-command'
 import { CreatePresentationRequestForPresentationFlowCommand } from './commands/create-presentation-request-for-presentation-flow-command'
@@ -17,8 +18,16 @@ import { FindPresentationFlowsQuery } from './queries/find-presentation-flows-qu
 import { FindPresentationFlowContactQuery } from './queries/presentation-flow-contact-query'
 
 export const resolvers: Resolvers = {
+  PresentationFlowRequestResponse: {
+    __resolveType: (response) => {
+      if ('error' in response) return 'RequestErrorResponse'
+      if ('url' in response) return 'PresentationResponse'
+      return 'MDocPresentationResponse'
+    },
+  },
   Mutation: {
     createPresentationFlow: (_, { request }, context) => dispatch(context, CreatePresentationFlowCommand, request),
+    createMDocPresentationFlow: (_, { request }, context) => dispatch(context, CreateMDocPresentationFlowCommand, request),
     createPresentationRequestForPresentationFlow: (_, { presentationFlowId, input }, context) =>
       dispatch(context, CreatePresentationRequestForPresentationFlowCommand, presentationFlowId, input ?? undefined),
     submitPresentationFlowActions: (_, { id, input }, context) => dispatch(context, SubmitPresentationFlowActionsCommand, id, input),
