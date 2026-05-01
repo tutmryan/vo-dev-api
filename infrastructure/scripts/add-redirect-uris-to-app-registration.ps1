@@ -10,6 +10,8 @@ param (
   [string[]]$SpaRedirectUris = @()
 )
 
+. (Join-Path $PSScriptRoot 'shared-utils.ps1')
+
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
@@ -27,7 +29,9 @@ function Get-RedirectUriUpdateUnion {
     [string[]]$RedirectsToAdd
   )
 
-  $existing = (az rest --method get --url $appRegistrationGraphUrl --query "$Platform.redirectUris" | ConvertFrom-Json -noEnumerate) ?? @()
+  $existing = (Invoke-WithRetry -ScriptBlock {
+    az rest --method get --url $appRegistrationGraphUrl --query "$Platform.redirectUris" | ConvertFrom-Json -noEnumerate
+  }) ?? @()
   $union = @($existing + $RedirectsToAdd | Select-Object -uniq)
 
   if ($union.length -ne $existing.length) {
@@ -62,7 +66,9 @@ if (($null -ne $webRedirectUrisToSet) -or ($null -ne $spaRedirectUrisToSet)) {
     $patchBody.spa = @{ redirectUris = $spaRedirectUrisToSet.Union }
   }
 
-  az rest --method patch --url $appRegistrationGraphUrl --body ($patchBody | ConvertTo-Json)
+  Invoke-WithRetry -ScriptBlock {
+    az rest --method patch --url $appRegistrationGraphUrl --body ($patchBody | ConvertTo-Json)
+  }
   Write-Output "Added new redirect URIs for app registration $AppRegistrationId ✅"
 } else {
   Write-Output "No new redirect URIs to add for app registration $AppRegistrationId ✅"

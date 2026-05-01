@@ -9,6 +9,8 @@ param(
   $ResourcePrefix
 )
 
+. (Join-Path $PSScriptRoot 'shared-utils.ps1')
+
 $ErrorActionPreference = 'Stop'
 
 # The legacy Azure Cache for Redis private endpoint is never active now that Managed Redis is always used

@@ -22,6 +22,25 @@ runs:
       run: echo "NOW=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
       shell: bash
 
+    - name: Check if custom domain TLS is already enabled
+      id: check-domain-tls
+      shell: pwsh
+      run: |
+        $domain = "${{ inputs.instance }}.api.${{ inputs.domain }}"
+        $sslState = az webapp show `
+          --name "${{ inputs.app-service-name }}" `
+          --resource-group "${{ inputs.resource-group-name }}" `
+          --query "hostNameSslStates[?name=='$domain'].sslState | [0]" `
+          --output tsv
+
+        if ($sslState -eq 'SniEnabled') {
+          Write-Host "Domain '$domain' already has TLS enabled — skipping initial hostname binding"
+          echo "IS_NEW_DOMAIN=false" >> $env:GITHUB_ENV
+        } else {
+          Write-Host "Domain '$domain' does not have TLS enabled — will create hostname binding first"
+          echo "IS_NEW_DOMAIN=true" >> $env:GITHUB_ENV
+        }
+
     - name: Set up API custom domain
       id: set-up-api-domain
       uses: azure/arm-deploy@v2
@@ -32,3 +51,4 @@ runs:
         parameters: >-
           appServiceName=${{ inputs.app-service-name }}
           domain=${{ inputs.instance }}.api.${{ inputs.domain }}
+          isNewDomain=${{ env.IS_NEW_DOMAIN }}
