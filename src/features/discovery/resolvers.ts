@@ -1,4 +1,14 @@
-import { demoEnabled, devToolsEnabled, docsUrl, faceCheckEnabled, oidcAuthorityUrl, oidcEnabled, portalUrl, version } from '../../config'
+import {
+  demoEnabled,
+  devToolsEnabled,
+  docsUrl,
+  faceCheckEnabled,
+  mdoc,
+  oidcAuthorityUrl,
+  oidcEnabled,
+  portalUrl,
+  version,
+} from '../../config'
 import { dispatch } from '../../cqs'
 import type { Resolvers } from '../../generated/graphql'
 import type { Services } from '../../services'
@@ -26,6 +36,7 @@ function resolveDiscovery({ services: { graphServiceManager } }: { services: Ser
       faceCheckEnabled,
       demoEnabled,
       oidcEnabled,
+      mdocPresentationFlowEnabled: mdoc.presentationsEnabled,
     },
     urls: {
       docsUrl,

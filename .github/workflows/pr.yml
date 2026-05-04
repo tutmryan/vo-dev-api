@@ -36,6 +36,7 @@ jobs:
       pre-test-script: npm run test:ci:start-db
       test-script: npm run test:ci
       output-test-results: true
+      run-build: true
 
   ci-migrations-package:
     name: CI Migrations Package

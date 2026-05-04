@@ -160,7 +160,7 @@ type PresentationFlow {
   prePresentationText: Markdown
   postPresentationText: Markdown
   requestData: JSONObject
-  presentationRequest: JSONObject!
+  presentationRequest: JSONObject
   dataSchema: [DataDefinition!]
   dataResults: JSONObject
   actions: [Action!]
@@ -183,6 +183,10 @@ type PresentationFlow {
   The status of the notification for this presentation flow.
   """
   notificationStatus: PresentationFlowNotificationStatus
+  """
+  The type of this presentation flow — vc for a standard Verifiable Credential flow, mdoc for an ISO 18013-5 mDoc/Google Wallet ID flow.
+  """
+  type: String!
   """
   The communications that have been sent for this presentation flow.
   """
@@ -255,12 +259,30 @@ type ActionedPresentationFlowData {
   callbackSecret: String!
 }
 
+union PresentationFlowRequestResponse = PresentationResponse | MDocPresentationResponse | RequestErrorResponse
+
+"""
+Input for creating an mDoc presentation flow.
+"""
+input MDocPresentationFlowInput {
+  identityId: ID
+  correlationId: ID
+  title: String
+  expiresAt: DateTime
+  prePresentationText: Markdown
+  postPresentationText: Markdown
+  mdocRequest: MDocPresentationRequestInput!
+  callback: Callback
+  contact: PresentationFlowContactInput
+}
+
 extend type Mutation {
   createPresentationFlow(request: PresentationFlowInput!): PresentationFlowResponse!
+  createMDocPresentationFlow(request: MDocPresentationFlowInput!): PresentationFlowResponse!
   createPresentationRequestForPresentationFlow(
     presentationFlowId: ID!
     input: CreatePresentationRequestForPresentationFlowInput
-  ): PresentationRequestResponse!
+  ): PresentationFlowRequestResponse!
   submitPresentationFlowActions(id: ID!, input: SubmitActionsInput!): PresentationFlow!
   cancelPresentationFlow(id: ID!): Void
   createPresentationFlowTemplate(input: PresentationFlowTemplateInput!): PresentationFlowTemplate!

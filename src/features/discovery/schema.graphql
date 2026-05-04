@@ -26,6 +26,11 @@ type Features {
   Indicates whether the OIDC provider is available.
   """
   oidcEnabled: Boolean!
+
+  """
+  Indicates whether the mDoc/Google Wallet ID presentation flow feature is available.
+  """
+  mdocPresentationFlowEnabled: Boolean!
 }
 
 """

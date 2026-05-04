@@ -12,6 +12,7 @@ import type {
   Action,
   Callback,
   DataDefinition,
+  MDocPresentationRequestInput,
   PresentationFlowNotificationStatus,
   PresentationFlowStatus,
   PresentationRequestInput,
@@ -59,8 +60,14 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
   @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
   requestDataJson!: string | null
 
-  @Column({ type: nvarcharMaxType, length: varcharMaxLength })
-  presentationRequestJson!: string
+  @Column({ type: nvarcharType, length: 20 })
+  type!: 'vc' | 'mdoc'
+
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
+  presentationRequestJson!: string | null
+
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
+  mdocRequestJson!: string | null
 
   @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
   dataSchemaJson!: string | null
@@ -112,8 +119,12 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
     return this.requestDataJson ? (JSON.parse(this.requestDataJson) as Record<string, unknown>) : null
   }
 
-  get presentationRequest(): PresentationRequestInput {
-    return JSON.parse(this.presentationRequestJson) as PresentationRequestInput
+  get presentationRequest(): PresentationRequestInput | null {
+    return this.presentationRequestJson ? (JSON.parse(this.presentationRequestJson) as PresentationRequestInput) : null
+  }
+
+  get mdocRequest(): MDocPresentationRequestInput | null {
+    return this.mdocRequestJson ? (JSON.parse(this.mdocRequestJson) as MDocPresentationRequestInput) : null
   }
 
   get callback(): Callback | null {

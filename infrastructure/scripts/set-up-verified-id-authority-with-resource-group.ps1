@@ -17,6 +17,8 @@ param(
   $Location = 'australiaeast'
 )
 
+. (Join-Path $PSScriptRoot 'shared-utils.ps1')
+
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
@@ -34,10 +36,12 @@ $setupAuthorityPayloadJson = ($setupAuthorityPayload | ConvertTo-Json -Compress)
 
 $authoritySetupUri = "/subscriptions/$SubscriptionId/resourceGroups/$ResourceGroupName/providers/Microsoft.VerifiedId/authorities/$AuthorityId`?api-version=$($constants.apiVersion)"
 
-$response = az rest `
-  --method PUT `
-  --uri $authoritySetupUri `
-  --body $setupAuthorityPayloadJson | ConvertFrom-Json
+$response = Invoke-WithRetry -ScriptBlock {
+  az rest `
+    --method PUT `
+    --uri $authoritySetupUri `
+    --body $setupAuthorityPayloadJson | ConvertFrom-Json
+}
 
 if ($null -ne $response) {
   Write-Output "Successfully set up Verified ID Authority with the resource group."

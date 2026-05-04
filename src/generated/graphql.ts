@@ -1678,6 +1678,8 @@ export type Features = {
   faceCheckEnabled: Scalars['Boolean']['output'];
   /** Indicates whether the API instance is configured to support finding home tenant identities via the findTenantIdentities query. */
   findTenantIdentities: Scalars['Boolean']['output'];
+  /** Indicates whether the mDoc/Google Wallet ID presentation flow feature is available. */
+  mdocPresentationFlowEnabled: Scalars['Boolean']['output'];
   /** Indicates whether the OIDC provider is available. */
   oidcEnabled: Scalars['Boolean']['output'];
 };
@@ -2626,6 +2628,19 @@ export type MDocOrgIsoMDocRequest = {
   encryptionInfo: Scalars['String']['output'];
 };
 
+/** Input for creating an mDoc presentation flow. */
+export type MDocPresentationFlowInput = {
+  callback?: InputMaybe<Callback>;
+  contact?: InputMaybe<PresentationFlowContactInput>;
+  correlationId?: InputMaybe<Scalars['ID']['input']>;
+  expiresAt?: InputMaybe<Scalars['DateTime']['input']>;
+  identityId?: InputMaybe<Scalars['ID']['input']>;
+  mdocRequest: MDocPresentationRequestInput;
+  postPresentationText?: InputMaybe<Scalars['Markdown']['input']>;
+  prePresentationText?: InputMaybe<Scalars['Markdown']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
 /** Input for creating an mDoc presentation request. */
 export type MDocPresentationRequestInput = {
   /** Optional callback configuration for receiving presentation responses. */
@@ -2877,6 +2892,7 @@ export type Mutation = {
    * Authenticated identities can optionally provide a photo to be used in the issuance as a [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) using base64 encoding.
    */
   createIssuanceRequestForAsyncIssuance: IssuanceRequestResponse;
+  createMDocPresentationFlow: PresentationFlowResponse;
   /** Creates an mDoc presentation request for use with the Digital Credential API. */
   createMDocPresentationRequest: MDocPresentationRequestResponse;
   /** Create a new Microsoft Entra Temporary Access Pass issuance configuration. */
@@ -2906,7 +2922,7 @@ export type Mutation = {
    * - This operation is only for use by the OIDC provider login UI.
    */
   createPresentationRequestForAuthn: PresentationRequestResponse;
-  createPresentationRequestForPresentationFlow: PresentationRequestResponse;
+  createPresentationRequestForPresentationFlow: PresentationFlowRequestResponse;
   /** Creates a new template */
   createTemplate: Template;
   /** Deletes existing Composer branding. */
@@ -3151,6 +3167,11 @@ export type MutationCreateIssuanceRequestArgs = {
 export type MutationCreateIssuanceRequestForAsyncIssuanceArgs = {
   asyncIssuanceRequestId: Scalars['UUID']['input'];
   photo?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationCreateMDocPresentationFlowArgs = {
+  request: MDocPresentationFlowInput;
 };
 
 
@@ -4459,11 +4480,13 @@ export type PresentationFlow = {
   postPresentationText?: Maybe<Scalars['Markdown']['output']>;
   prePresentationText?: Maybe<Scalars['Markdown']['output']>;
   presentation?: Maybe<Presentation>;
-  presentationRequest: Scalars['JSONObject']['output'];
+  presentationRequest?: Maybe<Scalars['JSONObject']['output']>;
   requestData?: Maybe<Scalars['JSONObject']['output']>;
   status: PresentationFlowStatus;
   template?: Maybe<PresentationFlowTemplate>;
   title?: Maybe<Scalars['String']['output']>;
+  /** The type of this presentation flow — vc for a standard Verifiable Credential flow, mdoc for an ISO 18013-5 mDoc/Google Wallet ID flow. */
+  type: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   updatedBy?: Maybe<User>;
 };
@@ -4526,6 +4549,8 @@ export enum PresentationFlowNotificationStatus {
   /** Notification was successfully sent. */
   Sent = 'SENT'
 }
+
+export type PresentationFlowRequestResponse = MDocPresentationResponse | PresentationResponse | RequestErrorResponse;
 
 export type PresentationFlowResponse = {
   __typename?: 'PresentationFlowResponse';
@@ -4822,6 +4847,8 @@ export type Query = {
   asyncIssuanceRequest: AsyncIssuanceRequest;
   /** Returns the details of the configured instance authority */
   authority: Authority;
+  /** Check if the current authenticated identity is eligible for self-service Temporary Access Pass. */
+  checkMyTapEligibility: Array<SelfServiceAction>;
   /** Returns the Composer branding config or null if no branding has been saved yet. */
   composerBranding?: Maybe<Branding>;
   /** Returns the Concierge branding config or null if no branding has been saved yet. */
@@ -5587,17 +5614,35 @@ export type SelfServiceAction = {
   __typename?: 'SelfServiceAction';
   /** A detailed description of what the action does. */
   description?: Maybe<Scalars['String']['output']>;
-  /** Indicates whether the action is currently enabled and available to the user. */
+  /** Indicates whether the action is administratively enabled. */
   enabled: Scalars['Boolean']['output'];
   /** The unique identifier of the self-service action. */
   id: Scalars['ID']['output'];
   /** The identity store associated with this action. */
   identityStore?: Maybe<IdentityStore>;
+  /** Indicates whether the current user meets the technical requirements to perform this action. */
+  isEligible: Scalars['Boolean']['output'];
   /** The display title of the action. */
   title: Scalars['String']['output'];
-  /** If the action is not enabled, provides a reason why it is unavailable. */
+  /** If the action is not enabled or not eligible, provides a reason why it is unavailable. */
   unavailableReason?: Maybe<Scalars['String']['output']>;
+  /** A machine-readable code for the reason why the action is unavailable. */
+  unavailableReasonCode?: Maybe<SelfServiceActionUnavailableReason>;
 };
+
+/** Represents the reason why a self-service action is unavailable. */
+export enum SelfServiceActionUnavailableReason {
+  AlreadyHasActiveTap = 'ALREADY_HAS_ACTIVE_TAP',
+  GuestUserNotEligible = 'GUEST_USER_NOT_ELIGIBLE',
+  MissingPermissions = 'MISSING_PERMISSIONS',
+  PolicyDisabled = 'POLICY_DISABLED',
+  PolicyNotFound = 'POLICY_NOT_FOUND',
+  SelfServiceDisabled = 'SELF_SERVICE_DISABLED',
+  ServiceNotConfigured = 'SERVICE_NOT_CONFIGURED',
+  UserExcluded = 'USER_EXCLUDED',
+  UserNotFound = 'USER_NOT_FOUND',
+  UserNotIncluded = 'USER_NOT_INCLUDED'
+}
 
 /** The response for sending an async issuance verification code. */
 export type SendAsyncIssuanceVerificationResponse = {
@@ -6842,6 +6887,13 @@ export type PresentationFlowTestQueryVariables = Exact<{
 
 export type PresentationFlowTestQuery = { __typename?: 'Query', presentationFlow: { __typename?: 'PresentationFlow', id: string, title?: string | null, expiresAt: Date, prePresentationText?: string | null, postPresentationText?: string | null, requestData?: Record<string, unknown> | null, status: PresentationFlowStatus } };
 
+export type CreateMDocPresentationFlowTestMutationVariables = Exact<{
+  request: MDocPresentationFlowInput;
+}>;
+
+
+export type CreateMDocPresentationFlowTestMutation = { __typename?: 'Mutation', createMDocPresentationFlow: { __typename?: 'PresentationFlowResponse', callbackSecret: string, request: { __typename?: 'PresentationFlow', id: string, portalUrl: string, type: string, hasContactNotificationSet: boolean, notificationStatus?: PresentationFlowNotificationStatus | null, dataSchema?: Array<{ __typename?: 'DataDefinition', id: string, type: DataType, label: string, required: boolean }> | null } } };
+
 export type CreatePresentationFlowTemplateForDeleteTestMutationVariables = Exact<{
   input: PresentationFlowTemplateInput;
 }>;
@@ -7071,6 +7123,7 @@ export const CapturePhotoDocument = {"kind":"Document","definitions":[{"kind":"O
 export const PhotoCaptureStatusDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PhotoCaptureStatus"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"UUID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"photoCaptureStatus"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"photoCaptureRequestId"},"value":{"kind":"Variable","name":{"kind":"Name","value":"photoCaptureRequestId"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<PhotoCaptureStatusQuery, PhotoCaptureStatusQueryVariables>;
 export const CancelPresentationFlowTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CancelPresentationFlowTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"cancelPresentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<CancelPresentationFlowTestMutation, CancelPresentationFlowTestMutationVariables>;
 export const PresentationFlowTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"PresentationFlowTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"presentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"title"}},{"kind":"Field","name":{"kind":"Name","value":"expiresAt"}},{"kind":"Field","name":{"kind":"Name","value":"prePresentationText"}},{"kind":"Field","name":{"kind":"Name","value":"postPresentationText"}},{"kind":"Field","name":{"kind":"Name","value":"requestData"}},{"kind":"Field","name":{"kind":"Name","value":"status"}}]}}]}}]} as unknown as DocumentNode<PresentationFlowTestQuery, PresentationFlowTestQueryVariables>;
+export const CreateMDocPresentationFlowTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreateMDocPresentationFlowTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"request"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"MDocPresentationFlowInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createMDocPresentationFlow"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"request"},"value":{"kind":"Variable","name":{"kind":"Name","value":"request"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"callbackSecret"}},{"kind":"Field","name":{"kind":"Name","value":"request"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"portalUrl"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"hasContactNotificationSet"}},{"kind":"Field","name":{"kind":"Name","value":"notificationStatus"}},{"kind":"Field","name":{"kind":"Name","value":"dataSchema"},"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"type"}},{"kind":"Field","name":{"kind":"Name","value":"label"}},{"kind":"Field","name":{"kind":"Name","value":"required"}}]}}]}}]}}]}}]} as unknown as DocumentNode<CreateMDocPresentationFlowTestMutation, CreateMDocPresentationFlowTestMutationVariables>;
 export const CreatePresentationFlowTemplateForDeleteTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"CreatePresentationFlowTemplateForDeleteTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"input"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"PresentationFlowTemplateInput"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"createPresentationFlowTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"input"},"value":{"kind":"Variable","name":{"kind":"Name","value":"input"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"isDeleted"}}]}}]}}]} as unknown as DocumentNode<CreatePresentationFlowTemplateForDeleteTestMutation, CreatePresentationFlowTemplateForDeleteTestMutationVariables>;
 export const DeletePresentationFlowTemplateForDeleteTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"mutation","name":{"kind":"Name","value":"DeletePresentationFlowTemplateForDeleteTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"deletePresentationFlowTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}]}]}}]} as unknown as DocumentNode<DeletePresentationFlowTemplateForDeleteTestMutation, DeletePresentationFlowTemplateForDeleteTestMutationVariables>;
 export const GetPresentationFlowTemplateForDeleteTestDocument = {"kind":"Document","definitions":[{"kind":"OperationDefinition","operation":"query","name":{"kind":"Name","value":"GetPresentationFlowTemplateForDeleteTest"},"variableDefinitions":[{"kind":"VariableDefinition","variable":{"kind":"Variable","name":{"kind":"Name","value":"id"}},"type":{"kind":"NonNullType","type":{"kind":"NamedType","name":{"kind":"Name","value":"ID"}}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"presentationFlowTemplate"},"arguments":[{"kind":"Argument","name":{"kind":"Name","value":"id"},"value":{"kind":"Variable","name":{"kind":"Name","value":"id"}}}],"selectionSet":{"kind":"SelectionSet","selections":[{"kind":"Field","name":{"kind":"Name","value":"id"}},{"kind":"Field","name":{"kind":"Name","value":"isDeleted"}}]}}]}}]} as unknown as DocumentNode<GetPresentationFlowTemplateForDeleteTestQuery, GetPresentationFlowTemplateForDeleteTestQueryVariables>;
@@ -7190,6 +7243,11 @@ export type ResolversUnionTypes<_RefType extends Record<string, unknown>> = {
   Me:
     | ( IdentityEntity )
     | ( UserEntity )
+  ;
+  PresentationFlowRequestResponse:
+    | ( MDocPresentationResponse )
+    | ( PresentationResponse )
+    | ( RequestErrorResponse )
   ;
   PresentationRequestResponse:
     | ( PresentationResponse )
@@ -7366,6 +7424,7 @@ export type ResolversTypes = {
   MDocMsoValidityInfo: ResolverTypeWrapper<MDocMsoValidityInfo>;
   MDocNamespace: ResolverTypeWrapper<MDocNamespace>;
   MDocOrgIsoMDocRequest: ResolverTypeWrapper<MDocOrgIsoMDocRequest>;
+  MDocPresentationFlowInput: MDocPresentationFlowInput;
   MDocPresentationRequestInput: MDocPresentationRequestInput;
   MDocPresentationRequestResponse: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['MDocPresentationRequestResponse']>;
   MDocPresentationResponse: ResolverTypeWrapper<MDocPresentationResponse>;
@@ -7439,6 +7498,7 @@ export type ResolversTypes = {
   PresentationFlowContactInput: PresentationFlowContactInput;
   PresentationFlowInput: PresentationFlowInput;
   PresentationFlowNotificationStatus: PresentationFlowNotificationStatus;
+  PresentationFlowRequestResponse: ResolverTypeWrapper<ResolversUnionTypes<ResolversTypes>['PresentationFlowRequestResponse']>;
   PresentationFlowResponse: ResolverTypeWrapper<Omit<PresentationFlowResponse, 'request'> & { request: ResolversTypes['PresentationFlow'] }>;
   PresentationFlowStatus: PresentationFlowStatus;
   PresentationFlowTemplate: ResolverTypeWrapper<PresentationFlowTemplateEntity>;
@@ -7476,6 +7536,7 @@ export type ResolversTypes = {
   ScopedClaimMapping: ResolverTypeWrapper<ScopedClaimMapping>;
   ScopedClaimMappingInput: ScopedClaimMappingInput;
   SelfServiceAction: ResolverTypeWrapper<Omit<SelfServiceAction, 'identityStore'> & { identityStore?: Maybe<ResolversTypes['IdentityStore']> }>;
+  SelfServiceActionUnavailableReason: SelfServiceActionUnavailableReason;
   SendAsyncIssuanceVerificationResponse: ResolverTypeWrapper<SendAsyncIssuanceVerificationResponse>;
   ServiceFailures: ResolverTypeWrapper<ServiceFailures>;
   SetInstanceSettingInput: SetInstanceSettingInput;
@@ -7661,6 +7722,7 @@ export type ResolversParentTypes = {
   MDocMsoValidityInfo: MDocMsoValidityInfo;
   MDocNamespace: MDocNamespace;
   MDocOrgIsoMDocRequest: MDocOrgIsoMDocRequest;
+  MDocPresentationFlowInput: MDocPresentationFlowInput;
   MDocPresentationRequestInput: MDocPresentationRequestInput;
   MDocPresentationRequestResponse: ResolversUnionTypes<ResolversParentTypes>['MDocPresentationRequestResponse'];
   MDocPresentationResponse: MDocPresentationResponse;
@@ -7720,6 +7782,7 @@ export type ResolversParentTypes = {
   PresentationFlowContact: PresentationFlowContact;
   PresentationFlowContactInput: PresentationFlowContactInput;
   PresentationFlowInput: PresentationFlowInput;
+  PresentationFlowRequestResponse: ResolversUnionTypes<ResolversParentTypes>['PresentationFlowRequestResponse'];
   PresentationFlowResponse: Omit<PresentationFlowResponse, 'request'> & { request: ResolversParentTypes['PresentationFlow'] };
   PresentationFlowTemplate: PresentationFlowTemplateEntity;
   PresentationFlowTemplateFieldVisibility: PresentationFlowTemplateFieldVisibility;
@@ -8150,6 +8213,7 @@ export type FeaturesResolvers<ContextType = GraphQLContext, ParentType extends R
   devToolsEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   faceCheckEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   findTenantIdentities?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  mdocPresentationFlowEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   oidcEnabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
 };
 
@@ -8449,6 +8513,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createIdentityStore?: Resolver<ResolversTypes['IdentityStore'], ParentType, ContextType, RequireFields<MutationCreateIdentityStoreArgs, 'input'>>;
   createIssuanceRequest?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestArgs, 'request'>>;
   createIssuanceRequestForAsyncIssuance?: Resolver<ResolversTypes['IssuanceRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateIssuanceRequestForAsyncIssuanceArgs, 'asyncIssuanceRequestId'>>;
+  createMDocPresentationFlow?: Resolver<ResolversTypes['PresentationFlowResponse'], ParentType, ContextType, RequireFields<MutationCreateMDocPresentationFlowArgs, 'request'>>;
   createMDocPresentationRequest?: Resolver<ResolversTypes['MDocPresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreateMDocPresentationRequestArgs, 'request'>>;
   createMicrosoftEntraTemporaryAccessPassIssuanceConfiguration?: Resolver<ResolversTypes['MicrosoftEntraTemporaryAccessPassIssuanceConfiguration'], ParentType, ContextType, RequireFields<MutationCreateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationArgs, 'input'>>;
   createOidcClaimMapping?: Resolver<ResolversTypes['OidcClaimMapping'], ParentType, ContextType, RequireFields<MutationCreateOidcClaimMappingArgs, 'input'>>;
@@ -8462,7 +8527,7 @@ export type MutationResolvers<ContextType = GraphQLContext, ParentType extends R
   createPresentationFlowTemplate?: Resolver<ResolversTypes['PresentationFlowTemplate'], ParentType, ContextType, RequireFields<MutationCreatePresentationFlowTemplateArgs, 'input'>>;
   createPresentationRequest?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestArgs, 'request'>>;
   createPresentationRequestForAuthn?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType>;
-  createPresentationRequestForPresentationFlow?: Resolver<ResolversTypes['PresentationRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestForPresentationFlowArgs, 'presentationFlowId'>>;
+  createPresentationRequestForPresentationFlow?: Resolver<ResolversTypes['PresentationFlowRequestResponse'], ParentType, ContextType, RequireFields<MutationCreatePresentationRequestForPresentationFlowArgs, 'presentationFlowId'>>;
   createTemplate?: Resolver<ResolversTypes['Template'], ParentType, ContextType, RequireFields<MutationCreateTemplateArgs, 'input'>>;
   deleteComposerBranding?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
   deleteConciergeBranding?: Resolver<Maybe<ResolversTypes['Void']>, ParentType, ContextType>;
@@ -8746,17 +8811,22 @@ export type PresentationFlowResolvers<ContextType = GraphQLContext, ParentType e
   postPresentationText?: Resolver<Maybe<ResolversTypes['Markdown']>, ParentType, ContextType>;
   prePresentationText?: Resolver<Maybe<ResolversTypes['Markdown']>, ParentType, ContextType>;
   presentation?: Resolver<Maybe<ResolversTypes['Presentation']>, ParentType, ContextType>;
-  presentationRequest?: Resolver<ResolversTypes['JSONObject'], ParentType, ContextType>;
+  presentationRequest?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   requestData?: Resolver<Maybe<ResolversTypes['JSONObject']>, ParentType, ContextType>;
   status?: Resolver<ResolversTypes['PresentationFlowStatus'], ParentType, ContextType>;
   template?: Resolver<Maybe<ResolversTypes['PresentationFlowTemplate']>, ParentType, ContextType>;
   title?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   updatedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
 };
 
 export type PresentationFlowContactResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlowContact'] = ResolversParentTypes['PresentationFlowContact']> = {
   notification?: Resolver<Maybe<ResolversTypes['Contact']>, ParentType, ContextType>;
+};
+
+export type PresentationFlowRequestResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlowRequestResponse'] = ResolversParentTypes['PresentationFlowRequestResponse']> = {
+  __resolveType: TypeResolveFn<'MDocPresentationResponse' | 'PresentationResponse' | 'RequestErrorResponse', ParentType, ContextType>;
 };
 
 export type PresentationFlowResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PresentationFlowResponse'] = ResolversParentTypes['PresentationFlowResponse']> = {
@@ -8839,6 +8909,7 @@ export type QueryResolvers<ContextType = GraphQLContext, ParentType extends Reso
   asyncIssuanceContact?: Resolver<Maybe<ResolversTypes['AsyncIssuanceContact']>, ParentType, ContextType, RequireFields<QueryAsyncIssuanceContactArgs, 'asyncIssuanceRequestId'>>;
   asyncIssuanceRequest?: Resolver<ResolversTypes['AsyncIssuanceRequest'], ParentType, ContextType, RequireFields<QueryAsyncIssuanceRequestArgs, 'id'>>;
   authority?: Resolver<ResolversTypes['Authority'], ParentType, ContextType>;
+  checkMyTapEligibility?: Resolver<Array<ResolversTypes['SelfServiceAction']>, ParentType, ContextType>;
   composerBranding?: Resolver<Maybe<ResolversTypes['Branding']>, ParentType, ContextType>;
   conciergeBranding?: Resolver<Maybe<ResolversTypes['Branding']>, ParentType, ContextType>;
   contract?: Resolver<ResolversTypes['Contract'], ParentType, ContextType, RequireFields<QueryContractArgs, 'id'>>;
@@ -8978,8 +9049,10 @@ export type SelfServiceActionResolvers<ContextType = GraphQLContext, ParentType 
   enabled?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   identityStore?: Resolver<Maybe<ResolversTypes['IdentityStore']>, ParentType, ContextType>;
+  isEligible?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   unavailableReason?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  unavailableReasonCode?: Resolver<Maybe<ResolversTypes['SelfServiceActionUnavailableReason']>, ParentType, ContextType>;
 };
 
 export type SendAsyncIssuanceVerificationResponseResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['SendAsyncIssuanceVerificationResponse'] = ResolversParentTypes['SendAsyncIssuanceVerificationResponse']> = {
@@ -9233,6 +9306,7 @@ export type Resolvers<ContextType = GraphQLContext> = {
   PresentationEventData?: PresentationEventDataResolvers<ContextType>;
   PresentationFlow?: PresentationFlowResolvers<ContextType>;
   PresentationFlowContact?: PresentationFlowContactResolvers<ContextType>;
+  PresentationFlowRequestResponse?: PresentationFlowRequestResponseResolvers<ContextType>;
   PresentationFlowResponse?: PresentationFlowResponseResolvers<ContextType>;
   PresentationFlowTemplate?: PresentationFlowTemplateResolvers<ContextType>;
   PresentationFlowTemplateFieldVisibility?: PresentationFlowTemplateFieldVisibilityResolvers<ContextType>;

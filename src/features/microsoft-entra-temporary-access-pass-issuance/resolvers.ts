@@ -5,6 +5,7 @@ import { DeleteMicrosoftEntraTemporaryAccessPassIssuanceConfigurationCommand } f
 import { SelfIssueMicrosoftEntraTemporaryAccessPassCommand } from './commands/self-issue-microsoft-entra-temporary-access-pass-command'
 import { UpdateMicrosoftEntraTemporaryAccessPassIssuanceConfigurationCommand } from './commands/update-microsoft-entra-temporary-access-pass-issuance-config-command'
 import { microsoftEntraTemporaryAccessPassService } from './microsoft-entra-temporary-access-pass-service'
+import { CheckMyTapEligibilityQuery } from './queries/check-my-tap-eligibility-query'
 import { FindMicrosoftEntraTemporaryAccessPassIssuanceConfigurationsQuery } from './queries/find-microsoft-entra-temporary-access-pass-issuance-configurations-query'
 import { FindMicrosoftEntraTemporaryAccessPassIssuancesQuery } from './queries/find-microsoft-entra-temporary-access-pass-issuances-query'
 import { GetMicrosoftEntraTemporaryAccessPassIssuanceConfigurationQuery } from './queries/get-microsoft-entra-temporary-access-pass-issuance-configuration-query'
@@ -41,6 +42,7 @@ export const resolvers: Resolvers = {
       query(context, FindMicrosoftEntraTemporaryAccessPassIssuancesQuery, where, offset, limit, orderBy, orderDirection),
     microsoftEntraTemporaryAccessPassIssuance: (_, { id }, { dataLoaders: { microsoftEntraTemporaryAccessPassIssuances } }) =>
       microsoftEntraTemporaryAccessPassIssuances.load(id),
+    checkMyTapEligibility: async (_, __, context) => query(context, CheckMyTapEligibilityQuery),
   },
   Mutation: {
     selfIssueMicrosoftEntraTemporaryAccessPass: (_, __, context) => dispatch(context, SelfIssueMicrosoftEntraTemporaryAccessPassCommand),

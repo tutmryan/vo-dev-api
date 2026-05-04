@@ -89,6 +89,7 @@ export const AuditEvents = {
   PRESENTATION_FLOW_NOTIFICATION_EMAIL_STATUS: { id: 'VO0140', eventType: 'presentation-flow.notification~email.status' },
   PRESENTATION_FLOW_NOTIFICATION_SMS_STATUS: { id: 'VO0141', eventType: 'presentation-flow.notification~sms.status' },
   PRESENTATION_FLOW_NOTIFICATION_RESEND_FAILED: { id: 'VO0142', eventType: 'presentation-flow.notification.resend~failed' },
+  MDOC_PRESENTATION_FLOW_CREATED: { id: 'VO0143', eventType: 'mdoc-presentation-flow.created' },
 
   // ═══════════════════════════════════════════════════════════════════════════
   // Issuance events

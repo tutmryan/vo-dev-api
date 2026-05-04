@@ -13,6 +13,7 @@ export async function SelfIssueMicrosoftEntraTemporaryAccessPassCommand(this: Co
 
   this.logger.auditEvent(AuditEvents.MICROSOFT_ENTRA_TEMPORARY_ACCESS_PASS_SELF_ISSUED, {
     targetIdentityId: entity.id,
+    identityStoreId: entity.identityStoreId,
     temporaryAccessPassId: tap.id,
   })
 

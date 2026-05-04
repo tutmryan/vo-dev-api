@@ -32,7 +32,7 @@ export async function sendPresentationFlowNotification(
   invariant(contact?.notification, 'No contact information set for this presentation flow')
   const notificationContact = contact.notification
 
-  const requestor = entity.presentationRequest.registration.clientName
+  const requestor = entity.presentationRequest?.registration.clientName ?? entity.title ?? entity.type.toUpperCase()
   invariant(requestor, 'Cannot send notification without requestor name')
   const presentationFlowUrl = `${portalUrl}/presentation-flow/${presentationFlowId}`
   const identity = await entity.identity

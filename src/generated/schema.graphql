@@ -2034,6 +2034,11 @@ type Features {
   """
   findTenantIdentities: Boolean!
 
+  """
+  Indicates whether the mDoc/Google Wallet ID presentation flow feature is available.
+  """
+  mdocPresentationFlowEnabled: Boolean!
+
   """Indicates whether the OIDC provider is available."""
   oidcEnabled: Boolean!
 }
@@ -3195,6 +3200,19 @@ type MDocOrgIsoMDocRequest {
   encryptionInfo: String!
 }
 
+"""Input for creating an mDoc presentation flow."""
+input MDocPresentationFlowInput {
+  callback: Callback
+  contact: PresentationFlowContactInput
+  correlationId: ID
+  expiresAt: DateTime
+  identityId: ID
+  mdocRequest: MDocPresentationRequestInput!
+  postPresentationText: Markdown
+  prePresentationText: Markdown
+  title: String
+}
+
 """Input for creating an mDoc presentation request."""
 input MDocPresentationRequestInput {
   """Optional callback configuration for receiving presentation responses."""
@@ -3538,6 +3556,7 @@ type Mutation {
   Authenticated identities can optionally provide a photo to be used in the issuance as a [data URL](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URLs) using base64 encoding.
   """
   createIssuanceRequestForAsyncIssuance(asyncIssuanceRequestId: UUID!, photo: String): IssuanceRequestResponse!
+  createMDocPresentationFlow(request: MDocPresentationFlowInput!): PresentationFlowResponse!
 
   """
   Creates an mDoc presentation request for use with the Digital Credential API.
@@ -3588,7 +3607,7 @@ type Mutation {
   - This operation is only for use by the OIDC provider login UI.
   """
   createPresentationRequestForAuthn: PresentationRequestResponse!
-  createPresentationRequestForPresentationFlow(input: CreatePresentationRequestForPresentationFlowInput, presentationFlowId: ID!): PresentationRequestResponse!
+  createPresentationRequestForPresentationFlow(input: CreatePresentationRequestForPresentationFlowInput, presentationFlowId: ID!): PresentationFlowRequestResponse!
 
   """Creates a new template"""
   createTemplate(input: TemplateInput!): Template!
@@ -5107,11 +5126,16 @@ type PresentationFlow {
   postPresentationText: Markdown
   prePresentationText: Markdown
   presentation: Presentation
-  presentationRequest: JSONObject!
+  presentationRequest: JSONObject
   requestData: JSONObject
   status: PresentationFlowStatus!
   template: PresentationFlowTemplate
   title: String
+
+  """
+  The type of this presentation flow — vc for a standard Verifiable Credential flow, mdoc for an ISO 18013-5 mDoc/Google Wallet ID flow.
+  """
+  type: String!
   updatedAt: DateTime
   updatedBy: User
 }
@@ -5169,6 +5193,8 @@ enum PresentationFlowNotificationStatus {
   """Notification was successfully sent."""
   SENT
 }
+
+union PresentationFlowRequestResponse = MDocPresentationResponse | PresentationResponse | RequestErrorResponse
 
 type PresentationFlowResponse {
   callbackSecret: String!
@@ -5527,6 +5553,11 @@ type Query {
 
   """Returns the details of the configured instance authority"""
   authority: Authority!
+
+  """
+  Check if the current authenticated identity is eligible for self-service Temporary Access Pass.
+  """
+  checkMyTapEligibility: [SelfServiceAction!]!
 
   """
   Returns the Composer branding config or null if no branding has been saved yet.
@@ -6032,9 +6063,7 @@ type SelfServiceAction {
   """A detailed description of what the action does."""
   description: String
 
-  """
-  Indicates whether the action is currently enabled and available to the user.
-  """
+  """Indicates whether the action is administratively enabled."""
   enabled: Boolean!
 
   """The unique identifier of the self-service action."""
@@ -6043,11 +6072,35 @@ type SelfServiceAction {
   """The identity store associated with this action."""
   identityStore: IdentityStore
 
+  """
+  Indicates whether the current user meets the technical requirements to perform this action.
+  """
+  isEligible: Boolean!
+
   """The display title of the action."""
   title: String!
 
-  """If the action is not enabled, provides a reason why it is unavailable."""
+  """
+  If the action is not enabled or not eligible, provides a reason why it is unavailable.
+  """
   unavailableReason: String
+
+  """A machine-readable code for the reason why the action is unavailable."""
+  unavailableReasonCode: SelfServiceActionUnavailableReason
+}
+
+"""Represents the reason why a self-service action is unavailable."""
+enum SelfServiceActionUnavailableReason {
+  ALREADY_HAS_ACTIVE_TAP
+  GUEST_USER_NOT_ELIGIBLE
+  MISSING_PERMISSIONS
+  POLICY_DISABLED
+  POLICY_NOT_FOUND
+  SELF_SERVICE_DISABLED
+  SERVICE_NOT_CONFIGURED
+  USER_EXCLUDED
+  USER_NOT_FOUND
+  USER_NOT_INCLUDED
 }
 
 """The response for sending an async issuance verification code."""

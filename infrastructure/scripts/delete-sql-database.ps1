@@ -13,27 +13,33 @@ param(
   $DatabaseName
 )
 
+. (Join-Path $PSScriptRoot 'shared-utils.ps1')
+
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
 # Check if the database exists
 Write-Output "Checking if database '$DatabaseName' exists on server '$SqlServerName' in resource group '$ResourceGroupName'..."
 
-$database = az sql db list `
-  --resource-group $ResourceGroupName `
-  --server $SqlServerName `
-  --query "[?name=='$DatabaseName'].name" `
-  --output tsv
+$database = Invoke-WithRetry -ScriptBlock {
+  az sql db list `
+    --resource-group $ResourceGroupName `
+    --server $SqlServerName `
+    --query "[?name=='$DatabaseName'].name" `
+    --output tsv
+}
 
 if ($database -eq $DatabaseName) {
   Write-Output "Deleting SQL database '$DatabaseName' from server '$SqlServerName' in resource group '$ResourceGroupName'..."
 
   # Delete the database
-  az sql db delete `
-    --resource-group $ResourceGroupName `
-    --server $SqlServerName `
-    --name $DatabaseName `
-    --yes
+  Invoke-WithRetry -ScriptBlock {
+    az sql db delete `
+      --resource-group $ResourceGroupName `
+      --server $SqlServerName `
+      --name $DatabaseName `
+      --yes
+  }
 
   Write-Output "Deleted SQL database '$DatabaseName' ✅"
 } else {

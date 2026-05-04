@@ -44,10 +44,5 @@ export async function FindMicrosoftEntraTemporaryAccessPassIssuancesQuery(
   qb.skip(offset ?? 0)
   qb.take(limit ?? DEFAULT_LIMIT)
 
-  const results = await qb.getMany()
-
-  return results.map((item) => ({
-    ...item,
-    externalId: (item as any).externalId,
-  }))
+  return await qb.getMany()
 }
