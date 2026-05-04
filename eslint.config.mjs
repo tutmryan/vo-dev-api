@@ -8,7 +8,7 @@ import uuidRequiresTransformer from './.eslint/uuid-requires-transformer.mjs'
 export default [
   // Ignore build artifacts
   {
-    ignores: ['build/**', 'migrate-db/build/**', '**/dist/**', 'node_modules/**'],
+    ignores: ['build/**', 'migrate-db/build/**', '**/dist/**', 'node_modules/**', 'src/generated/**'],
   },
 
   js.configs.recommended,
@@ -68,6 +68,7 @@ export default [
 
   {
     files: ['src/**/*.graphql'],
+    ignores: ['src/generated/**'],
     languageOptions: {
       parser: graphqlPlugin.parser,
     },
@@ -155,6 +156,12 @@ export default [
           caughtErrorsIgnorePattern: '.*',
         },
       ],
+    },
+  },
+  {
+    files: ['src/**/*.test.ts', 'src/**/test.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
     },
   },
 ]

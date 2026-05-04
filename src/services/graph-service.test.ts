@@ -121,7 +121,7 @@ describe('GraphService.testConnection', () => {
 
   it('returns undefined when the token fetch succeeds', async () => {
     const service = new GraphService(baseConfig)
-    jest.spyOn(service['credential'](), 'getToken').mockResolvedValue({ token: 'tok', expiresOnTimestamp: 0 } as any)
+    jest.spyOn(service['credential'](), 'getToken').mockResolvedValue({ token: 'tok', expiresOnTimestamp: 0 } as unknown as import('@azure/core-auth').AccessToken)
     const result = await service.testConnection()
     expect(result).toBeUndefined()
   })
@@ -155,7 +155,7 @@ describe('GraphService.checkCapabilities', () => {
 
   function createServiceWithRoles(roles: string[], apResult: AccessPackageAssignmentPolicy[] | 'missing_permissions') {
     const service = new GraphService(baseConfig)
-    jest.spyOn(service['credential'](), 'getToken').mockResolvedValue({ token: buildJwtPayload(roles), expiresOnTimestamp: 0 } as any)
+    jest.spyOn(service['credential'](), 'getToken').mockResolvedValue({ token: buildJwtPayload(roles), expiresOnTimestamp: 0 } as unknown as import('@azure/core-auth').AccessToken)
     jest.spyOn(service, 'getAccessPackageAssignmentPolicies').mockResolvedValue(apResult)
     return service
   }
