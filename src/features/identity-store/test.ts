@@ -46,6 +46,7 @@ export const identityStoreFragment = graphql(`
     name
     type
     isAuthenticationEnabled
+    accessPackagesEnabled
     clientId
     suspendedAt
   }

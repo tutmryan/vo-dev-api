@@ -35,7 +35,7 @@ type Documents = {
     "\n  query FindCredentialRecords(\n    $where: CredentialRecordWhere\n    $offset: NonNegativeInt\n    $limit: PositiveInt\n    $orderBy: CredentialRecordOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findCredentialRecords(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      id\n      issuanceMethod\n      credentialRecordStatus\n      createdAt\n      createdBy {\n        id\n        name\n      }\n      identity {\n        id\n      }\n      contract {\n        id\n      }\n      issuance {\n        id\n      }\n      asyncIssuanceRequest {\n        id\n      }\n    }\n  }\n": typeof types.FindCredentialRecordsDocument,
     "\n  query CredentialRecordCount($where: CredentialRecordWhere) {\n    credentialRecordCount(where: $where)\n  }\n": typeof types.CredentialRecordCountDocument,
     "\n  query Healthcheck {\n    healthcheck\n  }\n": typeof types.HealthcheckDocument,
-    "\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    clientId\n    suspendedAt\n  }\n": typeof types.IdentityStoreFieldsFragmentDoc,
+    "\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    accessPackagesEnabled\n    clientId\n    suspendedAt\n  }\n": typeof types.IdentityStoreFieldsFragmentDoc,
     "\n  mutation CreateIdentityStore($input: IdentityStoreInput!) {\n    createIdentityStore(input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n": typeof types.CreateIdentityStoreDocument,
     "\n  mutation UpdateIdentityStore($id: ID!, $input: UpdateIdentityStoreInput!) {\n    updateIdentityStore(id: $id, input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n": typeof types.UpdateIdentityStoreDocument,
     "\n  mutation SuspendIdentityStore($id: ID!) {\n    suspendIdentityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n": typeof types.SuspendIdentityStoreDocument,
@@ -158,7 +158,7 @@ const documents: Documents = {
     "\n  query FindCredentialRecords(\n    $where: CredentialRecordWhere\n    $offset: NonNegativeInt\n    $limit: PositiveInt\n    $orderBy: CredentialRecordOrderBy\n    $orderDirection: OrderDirection\n  ) {\n    findCredentialRecords(where: $where, offset: $offset, limit: $limit, orderBy: $orderBy, orderDirection: $orderDirection) {\n      id\n      issuanceMethod\n      credentialRecordStatus\n      createdAt\n      createdBy {\n        id\n        name\n      }\n      identity {\n        id\n      }\n      contract {\n        id\n      }\n      issuance {\n        id\n      }\n      asyncIssuanceRequest {\n        id\n      }\n    }\n  }\n": types.FindCredentialRecordsDocument,
     "\n  query CredentialRecordCount($where: CredentialRecordWhere) {\n    credentialRecordCount(where: $where)\n  }\n": types.CredentialRecordCountDocument,
     "\n  query Healthcheck {\n    healthcheck\n  }\n": types.HealthcheckDocument,
-    "\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    clientId\n    suspendedAt\n  }\n": types.IdentityStoreFieldsFragmentDoc,
+    "\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    accessPackagesEnabled\n    clientId\n    suspendedAt\n  }\n": types.IdentityStoreFieldsFragmentDoc,
     "\n  mutation CreateIdentityStore($input: IdentityStoreInput!) {\n    createIdentityStore(input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n": types.CreateIdentityStoreDocument,
     "\n  mutation UpdateIdentityStore($id: ID!, $input: UpdateIdentityStoreInput!) {\n    updateIdentityStore(id: $id, input: $input) {\n      ...IdentityStoreFields\n    }\n  }\n": types.UpdateIdentityStoreDocument,
     "\n  mutation SuspendIdentityStore($id: ID!) {\n    suspendIdentityStore(id: $id) {\n      ...IdentityStoreFields\n    }\n  }\n": types.SuspendIdentityStoreDocument,
@@ -361,7 +361,7 @@ export function graphql(source: "\n  query Healthcheck {\n    healthcheck\n  }\n
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    clientId\n    suspendedAt\n  }\n"): (typeof documents)["\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    clientId\n    suspendedAt\n  }\n"];
+export function graphql(source: "\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    accessPackagesEnabled\n    clientId\n    suspendedAt\n  }\n"): (typeof documents)["\n  fragment IdentityStoreFields on IdentityStore {\n    id\n    identifier\n    name\n    type\n    isAuthenticationEnabled\n    accessPackagesEnabled\n    clientId\n    suspendedAt\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

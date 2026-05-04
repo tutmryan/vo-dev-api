@@ -170,6 +170,9 @@ jest.mock('../services/graph-service', () => ({
         policyDisplayDescription: 'Test Policy Description',
       },
     ]),
+    get: jest.fn().mockResolvedValue({
+      checkCapabilities: jest.fn().mockResolvedValue({ tapWrite: true, tapPolicyInsight: true, accessPackages: true }),
+    }),
   },
 }))
 

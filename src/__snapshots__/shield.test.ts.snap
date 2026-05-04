@@ -1798,6 +1798,13 @@ exports[`shield rules are setup correctly 1`] = `
         "VerifiableCredential.InstanceAdmin"
       ]
     },
+    "identityStoreEntraCapabilities": {
+      "name": "hasRole-VerifiableCredential.InstanceAdmin",
+      "cache": "contextual",
+      "__roles": [
+        "VerifiableCredential.InstanceAdmin"
+      ]
+    },
     "verifyPresentation": {
       "rulesOr": [
         {
