@@ -28,9 +28,6 @@ describe('OidcClientClaimConstraint', () => {
       expect(getConstraintOperator({ claimName: 'country', values: ['US'], contains: 'US' })).toBeUndefined()
     })
 
-    it('should not count an empty values array as an active operator', () => {
-      expect(getConstraintOperator({ claimName: 'country', values: [] })).toBeUndefined()
-    })
   })
 
   describe('validateClaimConstraint', () => {
@@ -64,10 +61,6 @@ describe('OidcClientClaimConstraint', () => {
 
     it('should reject a constraint with multiple operators set', () => {
       expect(() => validateClaimConstraint({ claimName: 'country', values: ['US'], contains: 'US' })).toThrow('exactly one operator')
-    })
-
-    it('should reject an empty values array', () => {
-      expect(() => validateClaimConstraint({ claimName: 'country', values: [] })).toThrow('exactly one operator')
     })
   })
 

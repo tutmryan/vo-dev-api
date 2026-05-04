@@ -1166,6 +1166,7 @@ describe('vcPolicy and claimConstraint', () => {
 
     it('creates a client with a contains claimConstraint', async () => {
       const input = createOidcClientInput({
+        vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
         claimConstraint: {
           claimName: 'email',
           contains: '@example.com',
@@ -1186,6 +1187,7 @@ describe('vcPolicy and claimConstraint', () => {
 
     it('creates a client with a startsWith claimConstraint', async () => {
       const input = createOidcClientInput({
+        vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
         claimConstraint: {
           claimName: 'name',
           startsWith: 'John',
@@ -1335,6 +1337,7 @@ describe('vcPolicy and claimConstraint', () => {
 
       // Replace with contains constraint
       const updateInput = createOidcClientInput({
+        vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
         claimConstraint: {
           claimName: 'email',
           contains: '@example.com',
@@ -1497,5 +1500,102 @@ describe('faceCheckConfidenceThreshold', () => {
     expect(errors).toBeUndefined()
     expectToBeDefined(data?.createOidcClient)
     expect(data.createOidcClient.faceCheckConfidenceThreshold).toBe(100)
+  })
+})
+
+describe('claim constraint validation', () => {
+  beforeAfterAll()
+  beforeEach(() => {
+    mockedServices.clearAllMocks()
+  })
+  it('allows exact + client-supplied with no values', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.ClientSupplied },
+      claimConstraint: { claimName: 'email', values: [] },
+    })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    expect(data.createOidcClient.claimConstraint?.claimName).toBe('email')
+  })
+
+  it('rejects exact + fixed with no values', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
+      claimConstraint: { claimName: 'email', values: [] },
+    })
+
+    const { errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('A constraint value is required')
+  })
+
+  it('rejects contains with client-supplied', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.ClientSupplied },
+      claimConstraint: { claimName: 'email', contains: '@example.com' },
+    })
+
+    const { errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('Contains and starts with operators require fixed constraint values')
+  })
+
+  it('rejects startsWith with client-supplied', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.ClientSupplied },
+      claimConstraint: { claimName: 'name', startsWith: 'John' },
+    })
+
+    const { errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('Contains and starts with operators require fixed constraint values')
+  })
+
+  it('allows contains with fixed', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
+      claimConstraint: { claimName: 'email', contains: '@example.com' },
+    })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+  })
+
+  it('allows startsWith with fixed', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
+      claimConstraint: { claimName: 'name', startsWith: 'John' },
+    })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
   })
 })

@@ -42,6 +42,8 @@ export async function CreateOidcClientCommand(this: CommandContext, input: OidcC
 
   validateResponseTypes(responseTypes)
 
+  const resolvedVcPolicy = vcPolicy ? OidcClientVcPolicy.fromInput(vcPolicy) : OidcClientVcPolicy.default()
+
   const client = new OidcClientEntity({
     ...rest,
     applicationType: applicationType ?? OidcApplicationType.Web,
@@ -54,8 +56,8 @@ export async function CreateOidcClientCommand(this: CommandContext, input: OidcC
     tokenEndpointAuthMethod,
     clientJwks: tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt ? (input.clientJwks ?? null) : null,
     clientJwksUri: tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt ? (clientJwksUri?.toString() ?? null) : null,
-    vcPolicy: vcPolicy ? OidcClientVcPolicy.fromInput(vcPolicy) : OidcClientVcPolicy.default(),
-    claimConstraint: mapClaimConstraintInput(claimConstraint),
+    vcPolicy: resolvedVcPolicy,
+    claimConstraint: mapClaimConstraintInput(claimConstraint, resolvedVcPolicy.vcConstraintValues),
     responseTypes: responseTypes ?? [OidcResponseType.Code],
   })
 

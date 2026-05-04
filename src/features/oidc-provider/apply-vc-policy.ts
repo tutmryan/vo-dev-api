@@ -27,7 +27,11 @@ export function applyVcPolicy(params: Record<string, unknown>, client: OidcClien
   // -- vc_constraint_operator -- (always fixed from entity)
   applyParam(params, ExtraParams.vc_constraint_operator, VcParamMode.Fixed, () => claimParams.operator ?? undefined)
   // -- vc_constraint_value -- (client-supplied or fixed per policy)
-  applyParam(params, ExtraParams.vc_constraint_value, policy.vcConstraintValues, () => claimParams.value ?? undefined)
+  applyParam(params, ExtraParams.vc_constraint_value, policy.vcConstraintValues, () => {
+    const val = claimParams.value ?? undefined
+    // Empty string from empty values array means no default — return undefined
+    return val === '' ? undefined : val
+  })
 }
 
 function applyParam(
