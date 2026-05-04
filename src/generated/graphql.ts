@@ -1923,6 +1923,8 @@ export type IdentityStoreCapabilities = {
   __typename?: 'IdentityStoreCapabilities';
   /** Whether the configured Graph client can read access packages */
   accessPackages: Scalars['Boolean']['output'];
+  /** The ID of the identity store these capabilities belong to */
+  id: Scalars['ID']['output'];
   /** Whether the configured Graph client can read authentication method policies (TAP policy insight) */
   tapPolicyInsight: Scalars['Boolean']['output'];
   /** Whether the configured Graph client can write/manage TAPs */
@@ -8272,6 +8274,7 @@ export type IdentityStoreResolvers<ContextType = GraphQLContext, ParentType exte
 
 export type IdentityStoreCapabilitiesResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['IdentityStoreCapabilities'] = ResolversParentTypes['IdentityStoreCapabilities']> = {
   accessPackages?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   tapPolicyInsight?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   tapWrite?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
 };

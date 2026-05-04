@@ -188,6 +188,10 @@ Capability assessment for an identity store (typically Entra)
 """
 type IdentityStoreCapabilities {
   """
+  The ID of the identity store these capabilities belong to
+  """
+  id: ID!
+  """
   Whether the configured Graph client can write/manage TAPs
   """
   tapWrite: Boolean!

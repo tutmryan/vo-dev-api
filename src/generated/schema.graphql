@@ -2328,6 +2328,9 @@ type IdentityStoreCapabilities {
   """Whether the configured Graph client can read access packages"""
   accessPackages: Boolean!
 
+  """The ID of the identity store these capabilities belong to"""
+  id: ID!
+
   """
   Whether the configured Graph client can read authentication method policies (TAP policy insight)
   """

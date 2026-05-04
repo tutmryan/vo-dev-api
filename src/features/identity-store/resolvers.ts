@@ -14,7 +14,8 @@ export const resolvers: Resolvers = {
     findIdentityStores: (_, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindIdentityStoresQuery, where, offset, limit, orderBy, orderDirection),
     testIdentityStoreGraphClient: (_, { identityStoreId }, context) => query(context, TestIdentityStoreGraphClientQuery, identityStoreId),
-    identityStoreEntraCapabilities: (_, { id, forceRefresh }, context) => query(context, IdentityStoreCapabilitiesQuery, id, forceRefresh ?? undefined),
+    identityStoreEntraCapabilities: (_, { id, forceRefresh }, context) =>
+      query(context, IdentityStoreCapabilitiesQuery, id, forceRefresh ?? undefined),
     identityStore: (_, { id }, { dataLoaders: { identityStores } }) => identityStores.load(id),
   },
   Mutation: {
