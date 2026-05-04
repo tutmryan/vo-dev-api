@@ -279,7 +279,7 @@ export class GraphService {
       logger.warn(`Failed to fetch access package assignment policies for identity store ${this.config.identityStoreId} - regular error`, {
         error,
       })
-      return []
+      throw error
     }
   }
 
@@ -288,8 +288,11 @@ export class GraphService {
    * Matches policies where at least one verifiableCredentialSettings.credentialType matches any of the provided types.
    */
   async findAccessPackages(credentialTypes: string[]): Promise<AccessPackageResult[]> {
-    const policies = await this.getAccessPackageAssignmentPolicies()
-    if (policies === 'missing_permissions') return []
+    const policies = await this.getAccessPackageAssignmentPolicies().catch((e) => {
+      logger.warn(`Failed to check access packages for identity store ${this.config.identityStoreId}`, { error: e })
+      return 'error' as const
+    })
+    if (policies === 'missing_permissions' || policies === 'error') return []
 
     // Filter to only policies with accessPackage and matching credentialTypes
     const filteredPolicies = policies.filter(
@@ -466,8 +469,13 @@ export class GraphService {
   private async getGrantedRoles(): Promise<string[]> {
     try {
       const token = await this.credential().getToken('https://graph.microsoft.com/.default')
-      const payloadBase64 = token.token.split('.')[1]!
-      const payload = JSON.parse(Buffer.from(payloadBase64, 'base64').toString('utf-8'))
+      const tokenParts = token.token.split('.')
+      if (tokenParts.length < 2 || !tokenParts[1]) {
+        logger.warn(`Received a non-JWT or malformed Graph access token for identity store ${this.config.identityStoreId}`)
+        return []
+      }
+      const payloadBase64 = tokenParts[1]
+      const payload = JSON.parse(Buffer.from(payloadBase64, 'base64url').toString('utf-8'))
       return Array.isArray(payload.roles) ? payload.roles : []
     } catch (error) {
       logger.warn(`Failed to decode Graph access token for identity store ${this.config.identityStoreId}`, { error })
@@ -491,14 +499,17 @@ export class GraphService {
       await accessPackagePoliciesCache().delete(cacheKey)
     }
 
-    const [accessPackages, grantedRoles] = await Promise.all([this.getAccessPackageAssignmentPolicies(), this.getGrantedRoles()])
+    const [accessPackages, grantedRoles] = await Promise.all([
+      this.getAccessPackageAssignmentPolicies().catch(() => 'error' as const),
+      this.getGrantedRoles(),
+    ])
 
     const tapWrite = grantedRoles.includes('UserAuthMethod-TAP.ReadWrite.All')
     const tapPolicyInsight = grantedRoles.includes('Policy.Read.AuthenticationMethod')
 
     return {
       tapPolicyInsight,
-      accessPackages: accessPackages !== 'missing_permissions',
+      accessPackages: Array.isArray(accessPackages),
       tapWrite,
     }
   }

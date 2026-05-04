@@ -28,7 +28,21 @@ export async function UpdateIdentityStoreCommand(this: CommandContext, id: strin
     clientId,
   })
 
-  const updatedIdentityStore = await repo.save(identityStore)
+  let updatedIdentityStore
+  try {
+    updatedIdentityStore = await repo.save(identityStore)
+  } catch (error) {
+    if (clientId && clientSecret && clientId !== previousClientId) {
+      try {
+        await identityStoreSecretService().delete(clientId)
+      } catch (deleteError) {
+        logger.error(`Failed to cleanup orphaned client secret for identity store ${id} (clientId: ${clientId}) after DB save failure`, {
+          error: deleteError,
+        })
+      }
+    }
+    throw error
+  }
 
   // Delete the old secret from the KV store when the clientId is being removed
   // or replaced with a different value, to avoid orphaned secret entries.
