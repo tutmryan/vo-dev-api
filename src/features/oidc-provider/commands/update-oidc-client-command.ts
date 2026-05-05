@@ -51,6 +51,8 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
 
   validateResponseTypes(responseTypes)
 
+  const resolvedVcPolicy = vcPolicy ? OidcClientVcPolicy.fromInput(vcPolicy) : OidcClientVcPolicy.default()
+
   client.update({
     ...rest,
     applicationType: applicationType ?? OidcApplicationType.Web,
@@ -63,8 +65,8 @@ export async function UpdateOidcClientCommand(this: CommandContext, clientId: st
     tokenEndpointAuthMethod,
     clientJwks: tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt ? (input.clientJwks ?? null) : null,
     clientJwksUri: tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt ? (clientJwksUri?.toString() ?? null) : null,
-    vcPolicy: vcPolicy ? OidcClientVcPolicy.fromInput(vcPolicy) : OidcClientVcPolicy.default(),
-    claimConstraint: mapClaimConstraintInput(claimConstraint),
+    vcPolicy: resolvedVcPolicy,
+    claimConstraint: mapClaimConstraintInput(claimConstraint, resolvedVcPolicy.vcConstraintValues),
     responseTypes: responseTypes ?? [OidcResponseType.Code],
   })
 

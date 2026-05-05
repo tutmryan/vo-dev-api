@@ -151,17 +151,7 @@ describe('applyVcPolicy', () => {
       values: ['US', 'UK'],
     }
 
-    const entityConstraintContains: OidcClientClaimConstraint = {
-      claimName: 'country',
-      contains: 'US',
-    }
-
-    const entityConstraintStartsWith: OidcClientClaimConstraint = {
-      claimName: 'country',
-      startsWith: 'US',
-    }
-
-    it('claimName + operator is always FIXED, values can be overridden by CLIENT_SUPPLIED', () => {
+    it('claimName + operator is always FIXED, values are CLIENT_SUPPLIED and can be overridden', () => {
       const client = buildMockClient({
         claimConstraint: entityConstraint,
         vcPolicy: OidcClientVcPolicy.fromInput({
@@ -181,15 +171,14 @@ describe('applyVcPolicy', () => {
       expect(params[ExtraParams.vc_constraint_value]).toBe('21')
     })
 
-    it('claimName + operator is always FIXED, operator is `contains`', () => {
+    it('claimName + operator is always FIXED but values are CLIENT_SUPPLIED, values defaults to config when no value is provided by client', () => {
       const client = buildMockClient({
-        claimConstraint: entityConstraintContains,
+        claimConstraint: entityConstraint,
         vcPolicy: OidcClientVcPolicy.fromInput({
           vcConstraintValues: VcParamMode.ClientSupplied,
         }),
       })
       const params: Record<string, unknown> = {
-        [ExtraParams.vc_constraint_value]: '21',
         [ExtraParams.vc_constraint_operator]: 'cannotbeUsed',
         [ExtraParams.vc_constraint_name]: 'cannotbeUsedEither',
       }
@@ -197,28 +186,8 @@ describe('applyVcPolicy', () => {
       applyVcPolicy(params, client)
 
       expect(params[ExtraParams.vc_constraint_name]).toBe('country')
-      expect(params[ExtraParams.vc_constraint_operator]).toBe('contains')
-      expect(params[ExtraParams.vc_constraint_value]).toBe('21')
-    })
-
-    it('claimName + operator is always FIXED, operator is `startsWith`', () => {
-      const client = buildMockClient({
-        claimConstraint: entityConstraintStartsWith,
-        vcPolicy: OidcClientVcPolicy.fromInput({
-          vcConstraintValues: VcParamMode.ClientSupplied,
-        }),
-      })
-      const params: Record<string, unknown> = {
-        [ExtraParams.vc_constraint_value]: '21',
-        [ExtraParams.vc_constraint_operator]: 'cannotbeUsed',
-        [ExtraParams.vc_constraint_name]: 'cannotbeUsedEither',
-      }
-
-      applyVcPolicy(params, client)
-
-      expect(params[ExtraParams.vc_constraint_name]).toBe('country')
-      expect(params[ExtraParams.vc_constraint_operator]).toBe('startsWith')
-      expect(params[ExtraParams.vc_constraint_value]).toBe('21')
+      expect(params[ExtraParams.vc_constraint_operator]).toBe('values')
+      expect(params[ExtraParams.vc_constraint_value]).toBe('US,UK')
     })
 
     it('claimName + operator is always FIXED, values are fixed', () => {
@@ -255,6 +224,42 @@ describe('applyVcPolicy', () => {
         expect(params[ExtraParams.vc_type]).toBe('CustomType')
         expect(params[ExtraParams.vc_constraint_value]).toBe('21')
       })
+    })
+  })
+
+  describe('exact + client-supplied with no entity values', () => {
+    it('CLIENT_SUPPLIED: uses runtime value when entity has empty values array', () => {
+      const client = buildMockClient({
+        claimConstraint: { claimName: 'email', values: [] },
+        vcPolicy: OidcClientVcPolicy.fromInput({
+          vcConstraintValues: VcParamMode.ClientSupplied,
+        }),
+      })
+      const params: Record<string, unknown> = {
+        [ExtraParams.vc_constraint_value]: 'user@example.com',
+      }
+
+      applyVcPolicy(params, client)
+
+      expect(params[ExtraParams.vc_constraint_name]).toBe('email')
+      expect(params[ExtraParams.vc_constraint_operator]).toBe('values')
+      expect(params[ExtraParams.vc_constraint_value]).toBe('user@example.com')
+    })
+
+    it('CLIENT_SUPPLIED: returns undefined value when entity has empty values and no runtime', () => {
+      const client = buildMockClient({
+        claimConstraint: { claimName: 'email', values: [] },
+        vcPolicy: OidcClientVcPolicy.fromInput({
+          vcConstraintValues: VcParamMode.ClientSupplied,
+        }),
+      })
+      const params: Record<string, unknown> = {}
+
+      applyVcPolicy(params, client)
+
+      expect(params[ExtraParams.vc_constraint_name]).toBe('email')
+      expect(params[ExtraParams.vc_constraint_operator]).toBe('values')
+      expect(params[ExtraParams.vc_constraint_value]).toBeUndefined()
     })
   })
 

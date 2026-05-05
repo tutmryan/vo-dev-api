@@ -25,7 +25,7 @@ type Operator = 'values' | 'contains' | 'startsWith'
  */
 export function getConstraintOperator(constraint: OidcClientClaimConstraint): Operator | undefined {
   const ops: Operator[] = []
-  if (constraint.values && constraint.values.length > 0) ops.push('values')
+  if (constraint.values !== undefined) ops.push('values')
   if (constraint.contains !== undefined) ops.push('contains')
   if (constraint.startsWith !== undefined) ops.push('startsWith')
   return ops.length === 1 ? ops[0] : undefined
@@ -43,10 +43,6 @@ export function validateClaimConstraint(constraint: OidcClientClaimConstraint): 
   const operator = getConstraintOperator(constraint)
   if (!operator) {
     throw new Error('Claim constraint must have exactly one operator: values, contains, or startsWith')
-  }
-
-  if (operator === 'values' && constraint.values!.length === 0) {
-    throw new Error('Claim constraint with values operator must have at least one value')
   }
 }
 
