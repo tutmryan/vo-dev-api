@@ -29,7 +29,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "mssql": "^12.2.0",
+    "mssql": "^12.5.2",
     "typeorm": "^0.3.28"
   },
   "overrides": {
