@@ -1,5 +1,5 @@
 /**
- * Audit Events Catalog - Single source of truth for all audit events.
+ * Audit events catalog - source of truth for all audit events.
  *
  * Each event has:
  * - id: Stable code (VO####) - NEVER change once assigned
@@ -12,16 +12,13 @@
  * - ~qualifier: Optional specificity (e.g., ~email, ~sms for channel; ~queued, ~failed for state)
  *
  * Format: VO#### where #### is a sequential number
- * - VO = Verified Orchestration (organization prefix)
- * - VO0000 = Reserved: Unknown/fallback event (used when eventTypeId is missing or invalid)
- * - VO0001-VO0009 = Reserved for future system-level events
  *
- * Group Ranges (each group starts at xxx0, with gap of at least 15 before next group):
- * - VO0010-VO0029 = API Events
- * - VO0030-VO0059 = OIDC Provider Events
- * - VO0060-VO0079 = Presentation Events
- * - VO0080-VO0099 = Issuance Events
- * - VO0100-VO0129 = Async Issuance Events
+ * Reserved codes:
+ * - VO0000 = Unknown/fallback event. Used when eventTypeId is missing or invalid. This can occur when:
+ *   - External packages (e.g., @makerx/graphql-apollo-server) log without an eventTypeId
+ *   - An invalid/unrecognized eventTypeId is passed
+ *   - Logger metadata is not properly configured
+ * - VO0001-VO0009 = Reserved for future system-level events
  *
  * IMPORTANT:
  * - Never reuse a code, even if the event is deprecated
@@ -29,21 +26,12 @@
  * - Add new codes within the appropriate group range
  * - Each code maps to a specific call site in the codebase
  */
-
-/**
- * Reserved/System Events
- * VO0000: Unknown - Used as fallback when eventTypeId is missing or invalid.
- * This can occur when:
- * - External packages (e.g., @makerx/graphql-apollo-server) log without an eventTypeId
- * - An invalid/unrecognized eventTypeId is passed
- * - Logger metadata is not properly configured
- */
 export const UNKNOWN_EVENT_TYPE_ID = 'VO0000' as const
 export const UNKNOWN_EVENT_TYPE = 'system.unknown' as const
 
 export const AuditEvents = {
   // ═══════════════════════════════════════════════════════════════════════════
-  // API Events (VO0010-VO0029)
+  // API events
   // ═══════════════════════════════════════════════════════════════════════════
   API_GRAPHQL_OPERATION: { id: 'VO0010', eventType: 'api.graphql.operation' }, // Fallback for unknown operation types
   API_GRAPHQL_QUERY: { id: 'VO0011', eventType: 'api.graphql.query' },
@@ -51,7 +39,7 @@ export const AuditEvents = {
   API_GRAPHQL_SUBSCRIPTION: { id: 'VO0013', eventType: 'api.graphql.subscription' },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // OIDC Provider Events (VO0030-VO0059)
+  // OIDC Provider events
   // ═══════════════════════════════════════════════════════════════════════════
   OIDC_INTERACTION_STARTED: { id: 'VO0030', eventType: 'oidc.interaction.started' },
   OIDC_INTERACTION_ENDED: { id: 'VO0031', eventType: 'oidc.interaction.ended' },
@@ -68,31 +56,53 @@ export const AuditEvents = {
   OIDC_SESSION_ENDED: { id: 'VO0042', eventType: 'oidc.session.ended' },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Presentation Events (VO0060-VO0079)
+  // Presentation events
   // ═══════════════════════════════════════════════════════════════════════════
   PRESENTATION_REQUEST_CREATED: { id: 'VO0060', eventType: 'presentation.request.created' },
   PRESENTATION_REQUEST_RETRIEVED: { id: 'VO0061', eventType: 'presentation.request.retrieved' },
   PRESENTATION_REQUEST_COMPLETED: { id: 'VO0062', eventType: 'presentation.request.completed' },
   PRESENTATION_REQUEST_FAILED: { id: 'VO0063', eventType: 'presentation.request.failed' },
-  PRESENTATION_FLOW_CREATED: { id: 'VO0064', eventType: 'presentation.flow.created' },
-  PRESENTATION_FLOW_CANCELLED: { id: 'VO0065', eventType: 'presentation.flow.cancelled' },
-  PRESENTATION_FLOW_SUBMITTED: { id: 'VO0066', eventType: 'presentation.flow.submitted' },
-  PRESENTATION_FLOW_REQUEST_CREATED: { id: 'VO0070', eventType: 'presentation.flow.request.created' },
-  PRESENTATION_FLOW_TEMPLATE_CREATED: { id: 'VO0067', eventType: 'presentation.flow.template.created' },
-  PRESENTATION_FLOW_TEMPLATE_UPDATED: { id: 'VO0068', eventType: 'presentation.flow.template.updated' },
-  PRESENTATION_FLOW_TEMPLATE_DELETED: { id: 'VO0069', eventType: 'presentation.flow.template.deleted' },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Issuance Events (VO0080-VO0099)
+  // Presentation identity resolution events
+  // ═══════════════════════════════════════════════════════════════════════════
+  PRESENTATION_IDENTITY_RESOLVER_FAILED: { id: 'VO0071', eventType: 'presentation.identity-resolver.failed' },
+  PRESENTATION_IDENTITY_RESOLUTION_FAILED: { id: 'VO0072', eventType: 'presentation.identity-resolution.failed' },
+  PRESENTATION_IDENTITY_RESOLVED: { id: 'VO0073', eventType: 'presentation.identity.resolved' },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Presentation flow events
+  // ═══════════════════════════════════════════════════════════════════════════
+  PRESENTATION_FLOW_CREATED: { id: 'VO0064', eventType: 'presentation-flow.created' },
+  PRESENTATION_FLOW_CANCELLED: { id: 'VO0065', eventType: 'presentation-flow.cancelled' },
+  PRESENTATION_FLOW_SUBMITTED: { id: 'VO0066', eventType: 'presentation-flow.submitted' },
+  PRESENTATION_FLOW_TEMPLATE_CREATED: { id: 'VO0067', eventType: 'presentation-flow.template.created' },
+  PRESENTATION_FLOW_TEMPLATE_UPDATED: { id: 'VO0068', eventType: 'presentation-flow.template.updated' },
+  PRESENTATION_FLOW_TEMPLATE_DELETED: { id: 'VO0069', eventType: 'presentation-flow.template.deleted' },
+  PRESENTATION_FLOW_REQUEST_CREATED: { id: 'VO0070', eventType: 'presentation-flow.request.created' },
+  PRESENTATION_FLOW_CONTACT_UPDATED: { id: 'VO0074', eventType: 'presentation-flow.contact.updated' },
+  PRESENTATION_FLOW_NOTIFICATION_EMAIL_SENT: { id: 'VO0075', eventType: 'presentation-flow.notification~email.sent' },
+  PRESENTATION_FLOW_NOTIFICATION_SMS_SENT: { id: 'VO0076', eventType: 'presentation-flow.notification~sms.sent' },
+  PRESENTATION_FLOW_NOTIFICATION_EMAIL_FAILED: { id: 'VO0077', eventType: 'presentation-flow.notification~email.failed' },
+  PRESENTATION_FLOW_NOTIFICATION_SMS_FAILED: { id: 'VO0078', eventType: 'presentation-flow.notification~sms.failed' },
+  PRESENTATION_FLOW_NOTIFICATION_JOB_FAILED: { id: 'VO0079', eventType: 'presentation-flow.notification~job.failed' },
+  PRESENTATION_FLOW_NOTIFICATION_EMAIL_STATUS: { id: 'VO0140', eventType: 'presentation-flow.notification~email.status' },
+  PRESENTATION_FLOW_NOTIFICATION_SMS_STATUS: { id: 'VO0141', eventType: 'presentation-flow.notification~sms.status' },
+  PRESENTATION_FLOW_NOTIFICATION_RESEND_FAILED: { id: 'VO0142', eventType: 'presentation-flow.notification.resend~failed' },
+  MDOC_PRESENTATION_FLOW_CREATED: { id: 'VO0143', eventType: 'mdoc-presentation-flow.created' },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Issuance events
   // ═══════════════════════════════════════════════════════════════════════════
   ISSUANCE_REQUEST_CREATED: { id: 'VO0080', eventType: 'issuance.request.created' },
   ISSUANCE_REQUEST_RETRIEVED: { id: 'VO0081', eventType: 'issuance.request.retrieved' },
   ISSUANCE_CREDENTIAL_ISSUED: { id: 'VO0082', eventType: 'issuance.credential.issued' },
   ISSUANCE_CREDENTIAL_REVOKED: { id: 'VO0083', eventType: 'issuance.credential.revoked' },
   ISSUANCE_CREDENTIAL_FAILED: { id: 'VO0084', eventType: 'issuance.credential.failed' },
+  ISSUANCE_REQUEST_CANCELLED: { id: 'VO0085', eventType: 'issuance.request.cancelled' },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Async Issuance Events (VO0100-VO0129)
+  // Async issuance events
   // ═══════════════════════════════════════════════════════════════════════════
   ASYNC_ISSUANCE_REQUEST_CREATED: { id: 'VO0100', eventType: 'async-issuance.request.created' },
   ASYNC_ISSUANCE_REQUEST_CLAIMED: { id: 'VO0101', eventType: 'async-issuance.request.claimed' },
@@ -111,9 +121,10 @@ export const AuditEvents = {
   ASYNC_ISSUANCE_REQUEST_CANCELLED_COMMAND: { id: 'VO0114', eventType: 'async-issuance.request.cancelled~command' },
   ASYNC_ISSUANCE_REQUEST_CANCELLED_JOB: { id: 'VO0115', eventType: 'async-issuance.request.cancelled~job' },
   ASYNC_ISSUANCE_CANCELLATION_FAILED: { id: 'VO0116', eventType: 'async-issuance.request.cancelled~failed' },
+  ASYNC_ISSUANCE_ISSUANCE_REQUEST_CREATED: { id: 'VO0117', eventType: 'async-issuance.issuance-request.created' },
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Microsoft Entra Temporary Access Pass events (VO0130-VO0139)
+  // Microsoft Entra Temporary Access Pass events
   // ═══════════════════════════════════════════════════════════════════════════
   MICROSOFT_ENTRA_TEMPORARY_ACCESS_PASS_SELF_ISSUED: { id: 'VO0130', eventType: 'microsoft-entra-temporary-access-pass.self-issued' },
   MICROSOFT_ENTRA_TEMPORARY_ACCESS_PASS_SELF_ISSUANCE_FAILED: {
@@ -160,17 +171,21 @@ const wordFormatMap: Record<string, string> = {
  * - Known acronyms/words via wordFormatMap
  *
  * @example
- * formatEventTypeAsMessage('oidc.session.ended') // 'OIDC Session Ended'
- * formatEventTypeAsMessage('api.graphql.operation') // 'API GraphQL Operation'
- * formatEventTypeAsMessage('async-issuance.notification~email.failed') // 'Async Issuance Notification Email Failed'
- * formatEventTypeAsMessage('async-issuance.request.cancelled~queued') // 'Async Issuance Request Cancelled Queued'
+ * formatEventTypeAsMessage('oidc.session.ended') // 'OIDC session ended'
+ * formatEventTypeAsMessage('api.graphql.operation') // 'API GraphQL operation'
+ * formatEventTypeAsMessage('async-issuance.notification~email.failed') // 'Async issuance notification email failed'
+ * formatEventTypeAsMessage('async-issuance.request.cancelled~queued') // 'Async issuance request cancelled queued'
  */
 export function formatEventTypeAsMessage(eventType: string): string {
   // Split by dots first, then handle tildes and hyphens within each segment
-  return eventType
+
+  const formattedString = eventType
     .split('.')
     .flatMap((segment) => segment.split('~')) // Split qualifiers
     .flatMap((segment) => segment.split('-')) // Split hyphenated words
-    .map((word) => wordFormatMap[word.toLowerCase()] ?? word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word) => word.toLowerCase())
+    .map((word) => wordFormatMap[word] ?? word)
     .join(' ')
+
+  return `${formattedString.charAt(0).toUpperCase()}${formattedString.slice(1)}`
 }

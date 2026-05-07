@@ -67,24 +67,24 @@ describe('AuditEvents', () => {
 
 describe('formatEventTypeAsMessage', () => {
   it('should format simple event types', () => {
-    expect(formatEventTypeAsMessage('oidc.session.ended')).toBe('OIDC Session Ended')
-    expect(formatEventTypeAsMessage('issuance.credential.issued')).toBe('Issuance Credential Issued')
+    expect(formatEventTypeAsMessage('oidc.session.ended')).toBe('OIDC session ended')
+    expect(formatEventTypeAsMessage('issuance.credential.issued')).toBe('Issuance credential issued')
   })
 
   it('should handle acronyms correctly', () => {
-    expect(formatEventTypeAsMessage('api.graphql.operation')).toBe('API GraphQL Operation')
-    expect(formatEventTypeAsMessage('oidc.par.succeeded')).toBe('OIDC PAR Succeeded')
+    expect(formatEventTypeAsMessage('api.graphql.operation')).toBe('API GraphQL operation')
+    expect(formatEventTypeAsMessage('oidc.par.succeeded')).toBe('OIDC PAR succeeded')
   })
 
   it('should handle tilde qualifiers', () => {
-    expect(formatEventTypeAsMessage('async-issuance.notification~email.failed')).toBe('Async Issuance Notification Email Failed')
-    expect(formatEventTypeAsMessage('async-issuance.request.cancelled~queued')).toBe('Async Issuance Request Cancelled Queued')
-    expect(formatEventTypeAsMessage('async-issuance.request.cancelled~command')).toBe('Async Issuance Request Cancelled Command')
-    expect(formatEventTypeAsMessage('async-issuance.notification~job.failed')).toBe('Async Issuance Notification Job Failed')
+    expect(formatEventTypeAsMessage('async-issuance.notification~email.failed')).toBe('Async issuance notification email failed')
+    expect(formatEventTypeAsMessage('async-issuance.request.cancelled~queued')).toBe('Async issuance request cancelled queued')
+    expect(formatEventTypeAsMessage('async-issuance.request.cancelled~command')).toBe('Async issuance request cancelled command')
+    expect(formatEventTypeAsMessage('async-issuance.notification~job.failed')).toBe('Async issuance notification job failed')
   })
 
   it('should handle hyphenated feature names', () => {
-    expect(formatEventTypeAsMessage('async-issuance.request.created')).toBe('Async Issuance Request Created')
+    expect(formatEventTypeAsMessage('async-issuance.request.created')).toBe('Async issuance request created')
   })
 })
 

@@ -21,6 +21,7 @@ temp
 # Windows directory/files
 Thumbs.db
 
-# Claude related files
-.claude/*
-claude.md
+.eslintcache
+
+# Ignore OIDC UI build output
+/src/features/oidc-provider/oidc-ui/dist

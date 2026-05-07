@@ -60,6 +60,64 @@ Each application that requires authentication needs an authentication client.
   allowFullScreen
 ></iframe>
 
+## Client authentication methods
+
+Confidential clients must authenticate at the token endpoint. The VO OIDC provider supports two authentication methods:
+
+| Method | Description |
+| --- | --- |
+| `client_secret_post` | The client includes a shared secret in the token request body. This is the default for confidential clients. |
+| `private_key_jwt` | The client sends a signed JWT assertion using a registered public key ([RFC 7523](https://datatracker.ietf.org/doc/html/rfc7523)). |
+
+Public clients use `none` (no client authentication).
+
+:::note
+
+A confidential client must use **either** `client_secret_post` **or** `private_key_jwt`, not both. The authentication method is mutually exclusive.
+
+:::
+
+### Private key JWT authentication
+
+Private key JWT (`private_key_jwt`) allows a client to authenticate using a signed JWT assertion instead of a shared secret. This is recommended for machine-to-machine integrations where the client can securely manage private keys.
+
+#### Supported algorithms
+
+The following signing algorithms are supported for client assertion JWTs:
+
+- **RSA**: `RS256`, `RS384`, `RS512`, `PS256`, `PS384`, `PS512`
+- **EC**: `ES256`, `ES384`, `ES512`
+
+#### Registering public keys
+
+When creating or editing a confidential client with `private_key_jwt` authentication, you must provide the client's public keys using one of (mutually exclusive):
+
+- **Client JWKS** — a JSON Web Key Set (JWKS) document pasted directly into the configuration. This supports multiple keys for key rotation.
+- **Client JWKS URI** — a URL pointing to a hosted JWKS document. The OIDC provider will fetch and cache the keys.
+
+You cannot provide both JWKS and JWKS URI at the same time.
+
+#### Key rotation
+
+Multiple keys can be registered simultaneously to support seamless key rotation. Include both the current and new public keys in the JWKS, then remove the old key after the transition period.
+
+#### Example client assertion
+
+The client assertion JWT must include the following claims:
+
+```json
+{
+  "iss": "<client_id>",
+  "sub": "<client_id>",
+  "aud": "<token_endpoint_url>",
+  "jti": "<unique_identifier>",
+  "exp": "<expiration_time>",
+  "iat": "<issued_at_time>"
+}
+```
+
+The JWT must be signed with a private key corresponding to one of the registered public keys.
+
 ## Add authentication to an application
 
 Exactly how you add authentication to an application depends on the application's technology stack and which authentication library you choose to use.

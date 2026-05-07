@@ -206,6 +206,13 @@ type IssuanceResponse {
   - _Optional:_ When no redirect URL is set, the issuee will remain on the success page.
   """
   postIssuanceRedirectUrl: URL
+  """
+  The ID of the credential record associated with this issuance request.
+
+  Use this to navigate directly to the credential's detail view using a consistent identifier
+  throughout the credential lifecycle.
+  """
+  credentialRecordId: ID!
 }
 
 """
@@ -304,6 +311,12 @@ type Mutation {
   Revokes existing credentials presented by a wallet.
   """
   revokeWalletIssuances(walletId: ID!): ID!
+
+  """
+  Cancels a pending in-person issuance offer (QR code) that has not yet been redeemed.
+  Returns true on success. If the offer has already been cancelled this is a no-op.
+  """
+  cancelIssuanceRequest(credentialRecordId: ID!): Boolean!
 }
 
 """
@@ -361,6 +374,10 @@ type Issuance {
   Indicates whether the issued credential has face check photo.
   """
   hasFaceCheckPhoto: Boolean
+  """
+  The ID of the credential record associated with this issuance.
+  """
+  credentialRecordId: ID!
 }
 
 """

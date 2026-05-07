@@ -1,4 +1,4 @@
-# eslint-disable @graphql-eslint/naming-convention
+ 
 """
 A single identity store configuration
 """
@@ -23,6 +23,10 @@ type IdentityStore {
   Whether this store represents an Entra tenant from which users or applications will authenticate to VO.
   """
   isAuthenticationEnabled: Boolean!
+  """
+  Whether access packages are enabled for this identity store.
+  """
+  accessPackagesEnabled: Boolean!
   """
   Optional client ID (e.g. used for identity look ups)
   """
@@ -71,6 +75,10 @@ input IdentityStoreInput {
   """
   isAuthenticationEnabled: Boolean!
   """
+  Whether access packages are enabled for this identity store.
+  """
+  accessPackagesEnabled: Boolean!
+  """
   The optional client ID, used for i.e identity lookups.
   """
   clientId: String
@@ -95,6 +103,10 @@ input UpdateIdentityStoreInput {
   Whether users in this store are allowed to authenticate (i.e. log in)
   """
   isAuthenticationEnabled: Boolean!
+  """
+  Whether access packages are enabled for this identity store.
+  """
+  accessPackagesEnabled: Boolean!
   """
   The optional client ID, used for i.e identity lookups.
   """
@@ -171,6 +183,28 @@ enum IdentityStoreType {
   Manual
 }
 
+"""
+Capability assessment for an identity store (typically Entra)
+"""
+type IdentityStoreCapabilities {
+  """
+  The ID of the identity store these capabilities belong to
+  """
+  id: ID!
+  """
+  Whether the configured Graph client can write/manage TAPs
+  """
+  tapWrite: Boolean!
+  """
+  Whether the configured Graph client can read authentication method policies (TAP policy insight)
+  """
+  tapPolicyInsight: Boolean!
+  """
+  Whether the configured Graph client can read access packages
+  """
+  accessPackages: Boolean!
+}
+
 extend type Query {
   """
   Fetch all identity stores
@@ -190,6 +224,11 @@ extend type Query {
   Test the identity store's graph client configuration
   """
   testIdentityStoreGraphClient(identityStoreId: ID!): MsGraphFailure
+  """
+  Assess the capabilities of the identity store's graph client based on assigned permissions.
+  If forceRefresh is true, the cached access package policy list will be invalidated first.
+  """
+  identityStoreEntraCapabilities(id: ID!, forceRefresh: Boolean): IdentityStoreCapabilities!
 }
 
 extend type Mutation {

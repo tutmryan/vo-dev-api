@@ -171,9 +171,7 @@ jobs:
           shared-resource-group-name: vo-nonprd-platform-shared-infra
           shared-action-group-alert-name: vo-nonprd-alerts
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
-          redis-cache-sku: Basic
-          redis-cache-family: C
-          redis-cache-capacity: 0
+          managed-redis-sku: ${{ vars.MANAGED_REDIS_SKU || 'Balanced_B0' }}
 
           cors-origin: "${{ vars.CORS_ORIGIN }}"
 

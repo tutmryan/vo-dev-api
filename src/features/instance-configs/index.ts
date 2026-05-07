@@ -14,14 +14,15 @@ import {
   rawCors,
 } from '../../config'
 import { dataSource } from '../../data'
-import { IdentityStoreType } from '../../generated/graphql'
+import { IdentityStoreType, InstanceSettingKey } from '../../generated/graphql'
 import { logger } from '../../logger'
 import { pubsub } from '../../redis/pubsub'
 import { graphServiceManager } from '../../services/graph-service'
 import { IdentityStoreEntity } from '../identity-store/entities/identity-store-entity'
 import { ApplicationLabelConfigEntity } from './entities/application-label-config-entity'
 import { CorsOriginConfigEntity } from './entities/cors-origins-config-entity'
-import { InstanceSettingEntity } from './entities/instance-setting-entity'
+import type { EmailSenderSettingValue, UseModernOidcUiSettingValue } from './entities/instance-setting-entity'
+import { InstanceSettingEntity, parseSettingValue } from './entities/instance-setting-entity'
 
 const homeTenantId = homeTenant.tenantId
 
@@ -74,35 +75,58 @@ export async function reloadDbApplicationLabels() {
 
 export const notifyApplicationLabelConfigChanged = debounce(() => pubsub().publish(APPLICATION_LABEL_CONFIG_CHANGED_TOPIC, {}), 1000)
 
-// --- EMAIL SENDER CONFIG ---
-const EMAIL_SENDER_CONFIG_CHANGED_TOPIC = 'EMAIL_SENDER_CONFIG_CHANGED'
+// --- INSTANCE SETTINGS ---
+const INSTANCE_SETTING_CHANGED_TOPIC = 'INSTANCE_SETTING_CHANGED'
 
-const emailSenderConfig: { senderName: string; senderEmail: string } = {
-  senderName: email.from.name,
-  senderEmail: email.from.email,
+const instanceSettings = {
+  emailSender: {
+    senderName: email.from.name,
+    senderEmail: email.from.email,
+  },
+  useModernOidcUi: false,
 }
 
-export async function reloadDbEmailSenderConfig() {
-  emailSenderConfig.senderName = email.from.name
-  emailSenderConfig.senderEmail = email.from.email
+export async function reloadDbInstanceSettings() {
+  // Reset to defaults
+  instanceSettings.emailSender.senderName = email.from.name
+  instanceSettings.emailSender.senderEmail = email.from.email
+  instanceSettings.useModernOidcUi = false
 
   const repo = dataSource.getRepository(InstanceSettingEntity)
-  const config = await repo.findOneBy({ settingKey: 'email-sender' })
-  const dbValue = config?.getValue()
+  const settings = await repo.find({ comment: 'ReloadDbInstanceSettings' })
 
-  if (dbValue?.senderName != null) {
-    emailSenderConfig.senderName = dbValue.senderName
-  }
-  if (dbValue?.senderEmail != null) {
-    emailSenderConfig.senderEmail = dbValue.senderEmail
+  for (const setting of settings) {
+    switch (setting.settingKey) {
+      case InstanceSettingKey.EmailSender: {
+        const value = parseSettingValue<EmailSenderSettingValue>(setting)
+        if (value?.senderName) {
+          instanceSettings.emailSender.senderName = value.senderName
+        }
+        if (value?.senderEmail) {
+          instanceSettings.emailSender.senderEmail = value.senderEmail
+        }
+        break
+      }
+      case InstanceSettingKey.UseModernOidcUi: {
+        const value = parseSettingValue<UseModernOidcUiSettingValue>(setting)
+        if (value !== undefined) {
+          instanceSettings.useModernOidcUi = value
+        }
+        break
+      }
+    }
   }
 }
 
 export function getEmailSenderConfig() {
-  return emailSenderConfig
+  return instanceSettings.emailSender
 }
 
-export const notifyEmailSenderConfigChanged = debounce(() => pubsub().publish(EMAIL_SENDER_CONFIG_CHANGED_TOPIC, {}), 1000)
+export function getUseModernOidcUiSetting() {
+  return instanceSettings.useModernOidcUi
+}
+
+export const notifyInstanceSettingChanged = debounce(() => pubsub().publish(INSTANCE_SETTING_CHANGED_TOPIC, {}), 1000)
 
 // --- INIT ---
 async function safeReload(reload: () => Promise<any>) {
@@ -118,7 +142,7 @@ export async function initDbConfigs() {
     safeReload(reloadDbCors),
     safeReload(reloadDbAuthEnabledTenantIds),
     safeReload(reloadDbApplicationLabels),
-    safeReload(reloadDbEmailSenderConfig),
+    safeReload(reloadDbInstanceSettings),
     graphServiceManager.reload(),
   ])
 
@@ -128,7 +152,7 @@ export async function initDbConfigs() {
     await graphServiceManager.reload()
   })
   pubsub().subscribe(APPLICATION_LABEL_CONFIG_CHANGED_TOPIC, () => safeReload(reloadDbApplicationLabels))
-  pubsub().subscribe(EMAIL_SENDER_CONFIG_CHANGED_TOPIC, () => safeReload(reloadDbEmailSenderConfig))
+  pubsub().subscribe(INSTANCE_SETTING_CHANGED_TOPIC, () => safeReload(reloadDbInstanceSettings))
 }
 
 // -- EXPANDED CONFIGS --

@@ -8,7 +8,7 @@ import uuidRequiresTransformer from './.eslint/uuid-requires-transformer.mjs'
 export default [
   // Ignore build artifacts
   {
-    ignores: ['build/**', 'node_modules/**'],
+    ignores: ['build/**', 'migrate-db/build/**', '**/dist/**', 'node_modules/**', 'src/generated/**'],
   },
 
   js.configs.recommended,
@@ -68,12 +68,100 @@ export default [
 
   {
     files: ['src/**/*.graphql'],
+    ignores: ['src/generated/**'],
     languageOptions: {
       parser: graphqlPlugin.parser,
     },
     plugins: {
       '@graphql-eslint': graphqlPlugin,
     },
-    rules: graphqlPlugin.configs['flat/schema-recommended'].rules,
+    rules: {
+      ...graphqlPlugin.configs['flat/schema-recommended'].rules,
+      '@graphql-eslint/naming-convention': [
+        'error',
+        {
+          types: 'PascalCase',
+          FieldDefinition: 'camelCase',
+          InputValueDefinition: 'camelCase',
+          Argument: 'camelCase',
+          DirectiveDefinition: 'camelCase',
+          EnumValueDefinition: { ignorePattern: '.*' },
+        },
+      ],
+    },
+  },
+
+  {
+    files: ['migrate-db/**/*.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: './migrate-db/tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    plugins: {
+      prettier: prettierPlugin,
+    },
+    rules: {
+      'prettier/prettier': 'warn',
+      'no-console': 'warn',
+      'prefer-template': 'error',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'error',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          ignoreRestSiblings: true,
+          argsIgnorePattern: '^(_|queryRunner$)',
+          varsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '.*',
+        },
+      ],
+    },
+  },
+
+  {
+    files: ['src/features/oidc-provider/oidc-ui/**/*.ts'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: './src/features/oidc-provider/oidc-ui/tsconfig.json',
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    plugins: {
+      prettier: prettierPlugin,
+    },
+    rules: {
+      'prettier/prettier': 'warn',
+      'no-console': 'warn',
+      'prefer-template': 'error',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'off',
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          ignoreRestSiblings: true,
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '.*',
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/**/*.test.ts', 'src/**/test.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
   },
 ]

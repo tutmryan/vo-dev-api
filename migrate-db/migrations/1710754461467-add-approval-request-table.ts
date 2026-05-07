@@ -1,10 +1,10 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddApprovalRequestTable1710754461467 implements MigrationInterface {
-    name = 'AddApprovalRequestTable1710754461467'
+  name = 'AddApprovalRequestTable1710754461467'
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             CREATE TABLE "approval_request_audit" (
                 "id" uniqueidentifier NOT NULL,
                 "entity_id" uniqueidentifier NOT NULL,
@@ -14,8 +14,8 @@ export class AddApprovalRequestTable1710754461467 implements MigrationInterface 
                 "user_id" uniqueidentifier,
                 CONSTRAINT "id_approval_request_audit" PRIMARY KEY ("id")
             )
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             CREATE TABLE "approval_request" (
                 "id" uniqueidentifier NOT NULL,
                 "created_at" datetimeoffset NOT NULL CONSTRAINT "DF_77dad76c97ccee3ca87d97c777b" DEFAULT getdate(),
@@ -35,44 +35,43 @@ export class AddApprovalRequestTable1710754461467 implements MigrationInterface 
                 "actioned_comment" nvarchar(255),
                 CONSTRAINT "id_approval_request" PRIMARY KEY ("id")
             )
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "approval_request_audit"
             ADD CONSTRAINT "fk_approval_request_audit_user_user_id" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "approval_request"
             ADD CONSTRAINT "fk_approval_request_user_created_by_id" FOREIGN KEY ("created_by_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "approval_request"
             ADD CONSTRAINT "fk_approval_request_user_updated_by_id" FOREIGN KEY ("updated_by_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "approval_request"
             ADD CONSTRAINT "fk_approval_request_presentation_presentation_id" FOREIGN KEY ("presentation_id") REFERENCES "presentation"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-    }
+        `)
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             ALTER TABLE "approval_request" DROP CONSTRAINT "fk_approval_request_presentation_presentation_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "approval_request" DROP CONSTRAINT "fk_approval_request_user_updated_by_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "approval_request" DROP CONSTRAINT "fk_approval_request_user_created_by_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "approval_request_audit" DROP CONSTRAINT "fk_approval_request_audit_user_user_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP TABLE "approval_request"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP TABLE "approval_request_audit"
-        `);
-    }
-
+        `)
+  }
 }

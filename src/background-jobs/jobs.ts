@@ -6,8 +6,6 @@ import type { CancelAsyncIssuanceRequestsJobPayload } from '../features/async-is
 import { cancelAsyncIssuanceRequestsHandler } from '../features/async-issuance/jobs/cancel-async-issuance-requests'
 import type { SendAsyncIssuanceNotificationsJobPayload } from '../features/async-issuance/jobs/send-async-issuance-notifications'
 import { sendAsyncIssuanceNotificationsJobHandler } from '../features/async-issuance/jobs/send-async-issuance-notifications'
-import type { InvokePresentationFlowCallbackJobPayload } from '../features/presentation-flow/jobs/invoke-presentation-flow-callback'
-import { invokePresentationFlowCallbackJobHandler } from '../features/presentation-flow/jobs/invoke-presentation-flow-callback'
 import type { RevokeContractIssuancesJobPayload } from '../features/issuance/jobs/revoke-contract-issuances'
 import { revokeContractIssuancesJobHandler } from '../features/issuance/jobs/revoke-contract-issuances'
 import {
@@ -20,6 +18,10 @@ import { revokeWalletIssuancesJobHandler, type RevokeWalletIssuancesJobPayload }
 import { applyOidcSigningKeysRotationJobHandler } from '../features/oidc-provider/jobs/apply-oidc-key-rotation'
 import { initialiseOidcDataJobHandler } from '../features/oidc-provider/jobs/initialise-data-job-handler'
 import { initialiseOidcKeysJobHandler } from '../features/oidc-provider/jobs/initialise-keys-job-handler'
+import type { InvokePresentationFlowCallbackJobPayload } from '../features/presentation-flow/jobs/invoke-presentation-flow-callback'
+import { invokePresentationFlowCallbackJobHandler } from '../features/presentation-flow/jobs/invoke-presentation-flow-callback'
+import type { SendPresentationFlowNotificationsJobPayload } from '../features/presentation-flow/jobs/send-presentation-flow-notifications'
+import { sendPresentationFlowNotificationsJobHandler } from '../features/presentation-flow/jobs/send-presentation-flow-notifications'
 import type { UserEntity } from '../features/users/entities/user-entity'
 import type { LoggerWithMetaControl } from '../logger'
 import { ONE_MINUTE_TTL } from '../redis/cache'
@@ -27,6 +29,7 @@ import type { AsyncIssuanceService } from '../services/async-issuance-service'
 import type { CommunicationsService } from '../services/communications-service'
 import type { ServiceErrors } from '../services/monitoring'
 import { monitorServicesJobHandler, monitorServicesResultHandler } from '../services/monitoring/job'
+import type { PresentationFlowService } from '../services/presentation-flow-service'
 import type { VerifiedIdAdminService } from '../services/verified-id/admin'
 
 export type JobPayload<TData = unknown> = {
@@ -44,6 +47,7 @@ export type HandlerContext = {
   services: {
     verifiedIdAdmin: VerifiedIdAdminService
     asyncIssuances: AsyncIssuanceService
+    presentationFlows: PresentationFlowService
     communications: CommunicationsService
   }
 }
@@ -82,6 +86,7 @@ export type Jobs = {
   revokeUserIssuances: JobConfig<RevokeUserIssuancesJobPayload>
   revokeWalletIssuances: JobConfig<RevokeWalletIssuancesJobPayload>
   invokePresentationFlowCallback: JobConfig<InvokePresentationFlowCallbackJobPayload>
+  sendPresentationFlowNotifications: JobConfig<SendPresentationFlowNotificationsJobPayload>
   sendAsyncIssuanceNotifications: JobConfig<SendAsyncIssuanceNotificationsJobPayload>
   cancelAsyncIssuanceRequests: JobConfig<CancelAsyncIssuanceRequestsJobPayload>
   initialiseOidcKeys: JobConfig
@@ -116,6 +121,10 @@ export const jobs: Jobs = {
     options: {
       attempts: 18, // exponential backoff means final retry (2 ** 18 = 262144s) = 3 days
     },
+  },
+  sendPresentationFlowNotifications: {
+    handler: sendPresentationFlowNotificationsJobHandler,
+    disableImplicitTransaction: true,
   },
   sendAsyncIssuanceNotifications: {
     handler: sendAsyncIssuanceNotificationsJobHandler,

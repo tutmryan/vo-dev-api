@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class RenamePortalOidcClientConcierge1735879766943 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {

@@ -1,7 +1,7 @@
 import { type Constructor } from '@graphql-tools/utils'
 import type { Express, RequestHandler } from 'express'
 import type { JWK } from 'jose'
-import { debounce } from 'lodash'
+import { debounce, pick } from 'lodash'
 import type { Configuration, Errors, Interaction, interactionPolicy, KoaContextWithOIDC, Provider } from 'oidc-provider'
 import { apiUrl, cookieSession } from '../../config'
 import { logger } from '../../logger'
@@ -65,12 +65,10 @@ async function createProvider() {
   const data = { ...dataPromise.value, keys: jwksKeys }
 
   const { clients, clientMetadata, resources, resourceScopes, mappedClaims } = data
-
   const claims = mergeWithArrays(openidClaims, resourceScopes, mappedClaims)
-
-  const provider = new Provider(issuer, {
+  const configuration = {
     clients: clientMetadata,
-    clientAuthMethods: ['none', 'client_secret_post'],
+    clientAuthMethods: ['none', 'client_secret_post', 'private_key_jwt'],
     ...(isRedisEnabled ? { adapter: (name) => new RedisAdapter(name, redisClient()) } : {}),
     cookies: {
       keys: [cookieSession.secret ?? throwError('cookieSession.secret is required')],
@@ -140,8 +138,28 @@ async function createProvider() {
         'Ed25519',
         'EdDSA',
       ],
+      clientAuthSigningAlgValues: ['RS256', 'RS384', 'RS512', 'PS256', 'PS384', 'PS512', 'ES256', 'ES384', 'ES512'],
     },
-  } satisfies Configuration)
+  } satisfies Configuration
+
+  const provider = new Provider(issuer, configuration)
+
+  logger.debug(
+    'OIDC clients',
+    clientMetadata.map((client) =>
+      pick(client, [
+        'application_type',
+        'client_id',
+        'client_name',
+        'grant_types',
+        'policy_uri',
+        'post_logout_redirect_uris',
+        'redirect_uris',
+        'response_types',
+        'token_endpoint_auth_method',
+      ]),
+    ),
+  )
 
   // allow http + localhost for redirect URIs
   // as per: https://github.com/panva/node-oidc-provider/blob/main/recipes/implicit_http_localhost.md#allowing-http-andor-localhost-for-implicit-response-type-web-clients

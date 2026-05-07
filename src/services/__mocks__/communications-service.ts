@@ -5,7 +5,9 @@ import type { CommunicationsService } from '../communications-service'
 const serviceMock: ServiceMock<CommunicationsService> = {
   sendIssuance: mockFunction<CommunicationsService['sendIssuance']>(),
   sendVerification: mockFunction<CommunicationsService['sendVerification']>(),
-  recordCommunicationFailure: mockFunction<CommunicationsService['recordCommunicationFailure']>(),
+  sendPresentationFlow: mockFunction<CommunicationsService['sendPresentationFlow']>(),
+  recordAsyncIssuanceCommunicationFailure: mockFunction<CommunicationsService['recordAsyncIssuanceCommunicationFailure']>(),
+  recordPresentationFlowCommunicationFailure: mockFunction<CommunicationsService['recordPresentationFlowCommunicationFailure']>(),
 }
 
 jest.mock('../communications-service', () => ({
@@ -26,7 +28,13 @@ export const helper = {
   sendVerification: {
     mock: () => serviceMock.sendVerification,
   },
+  sendPresentationFlow: {
+    mock: () => serviceMock.sendPresentationFlow,
+  },
   recordCommunicationFailure: {
-    mock: () => serviceMock.recordCommunicationFailure,
+    mock: () => serviceMock.recordAsyncIssuanceCommunicationFailure,
+  },
+  recordPresentationFlowCommunicationFailure: {
+    mock: () => serviceMock.recordPresentationFlowCommunicationFailure,
   },
 }

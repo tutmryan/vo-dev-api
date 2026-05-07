@@ -1,5 +1,5 @@
 # eslint-disable @graphql-eslint/strict-id-in-types
-# eslint-disable @graphql-eslint/naming-convention
+
 # eslint-disable @graphql-eslint/require-description
 
 """
@@ -13,6 +13,28 @@ enum PresentationFlowStatus {
   SUBMITTED
   EXPIRED
   CANCELLED
+}
+
+"""
+The notification status of the presentation flow.
+"""
+enum PresentationFlowNotificationStatus {
+  """
+  No notification configured for this presentation flow.
+  """
+  NONE
+  """
+  Notification job is queued but not yet sent.
+  """
+  PENDING
+  """
+  Notification was successfully sent.
+  """
+  SENT
+  """
+  Notification failed to send.
+  """
+  FAILED
 }
 
 """
@@ -79,6 +101,17 @@ input ActionInput {
   label: String!
 }
 
+"""
+Input defining the presentation flow contact information for notifications.
+"""
+input PresentationFlowContactInput {
+  """
+  How the presentation flow notification should be sent.
+  Set to null to remove the notification.
+  """
+  notification: ContactInput
+}
+
 input PresentationFlowInput {
   identityId: ID
   correlationId: ID
@@ -93,11 +126,26 @@ input PresentationFlowInput {
   actions: [ActionInput!]
   autoSubmit: Boolean
   callback: Callback
+  """
+  The contact information for sending notifications about this presentation flow.
+  When provided, a notification will be sent to the recipient.
+  """
+  contact: PresentationFlowContactInput
 }
 
 type PresentationFlowResponse {
   callbackSecret: String!
   request: PresentationFlow!
+}
+
+"""
+Represents the presentation flow contact information.
+"""
+type PresentationFlowContact {
+  """
+  The notification contact information.
+  """
+  notification: Contact
 }
 
 """
@@ -112,7 +160,7 @@ type PresentationFlow {
   prePresentationText: Markdown
   postPresentationText: Markdown
   requestData: JSONObject
-  presentationRequest: JSONObject!
+  presentationRequest: JSONObject
   dataSchema: [DataDefinition!]
   dataResults: JSONObject
   actions: [Action!]
@@ -127,6 +175,28 @@ type PresentationFlow {
   createdAt: DateTime!
   updatedBy: User
   updatedAt: DateTime
+  """
+  Indicates whether this presentation flow has contact notification details set.
+  """
+  hasContactNotificationSet: Boolean!
+  """
+  The status of the notification for this presentation flow.
+  """
+  notificationStatus: PresentationFlowNotificationStatus
+  """
+  The type of this presentation flow — vc for a standard Verifiable Credential flow, mdoc for an ISO 18013-5 mDoc/Google Wallet ID flow.
+  """
+  type: String!
+  """
+  The communications that have been sent for this presentation flow.
+  """
+  communications(
+    where: CommunicationWhere
+    offset: NonNegativeInt
+    limit: PositiveInt
+    orderBy: CommunicationOrderBy
+    orderDirection: OrderDirection
+  ): [Communication!]!
 }
 
 input SubmitActionsInput {
@@ -189,17 +259,51 @@ type ActionedPresentationFlowData {
   callbackSecret: String!
 }
 
+union PresentationFlowRequestResponse = PresentationResponse | MDocPresentationResponse | RequestErrorResponse
+
+"""
+Input for creating an mDoc presentation flow.
+"""
+input MDocPresentationFlowInput {
+  identityId: ID
+  correlationId: ID
+  title: String
+  expiresAt: DateTime
+  prePresentationText: Markdown
+  postPresentationText: Markdown
+  mdocRequest: MDocPresentationRequestInput!
+  callback: Callback
+  contact: PresentationFlowContactInput
+}
+
 extend type Mutation {
   createPresentationFlow(request: PresentationFlowInput!): PresentationFlowResponse!
+  createMDocPresentationFlow(request: MDocPresentationFlowInput!): PresentationFlowResponse!
   createPresentationRequestForPresentationFlow(
     presentationFlowId: ID!
     input: CreatePresentationRequestForPresentationFlowInput
-  ): PresentationRequestResponse!
+  ): PresentationFlowRequestResponse!
   submitPresentationFlowActions(id: ID!, input: SubmitActionsInput!): PresentationFlow!
   cancelPresentationFlow(id: ID!): Void
   createPresentationFlowTemplate(input: PresentationFlowTemplateInput!): PresentationFlowTemplate!
   updatePresentationFlowTemplate(id: ID!, input: PresentationFlowTemplateInput!): PresentationFlowTemplate!
   deletePresentationFlowTemplate(id: ID!): Void
+  """
+  Resend the presentation flow notification for the specified presentation flow ID.
+
+  Items of note:
+  - Synchronous operation that returns the updated presentation flow.
+  - Only works for presentation flows that are in a pending state.
+  """
+  resendPresentationFlowNotification(presentationFlowId: UUID!): PresentationFlow
+  """
+  Update the presentation flow contact information.
+
+  Items of note:
+
+  - Contact information can only be updated when the presentation flow is in a pending state.
+  """
+  updatePresentationFlowContact(presentationFlowId: UUID!, contact: PresentationFlowContactInput): PresentationFlow
 }
 
 extend type Query {
@@ -214,6 +318,15 @@ extend type Query {
   actionedPresentationFlowData(id: ID!): ActionedPresentationFlowData
   presentationFlowTemplate(id: ID!): PresentationFlowTemplate!
   findPresentationFlowTemplates: [PresentationFlowTemplate!]!
+  """
+  Returns the presentation flow contact information.
+
+  Items of note:
+
+  - Returns PII information about the recipient. Use with caution. Intended for verification of presentation flows by admins only.
+  - If the presentation flow has been submitted or expired, this information is no longer available.
+  """
+  presentationFlowContact(presentationFlowId: UUID!): PresentationFlowContact
 }
 
 extend type Subscription {
@@ -221,6 +334,35 @@ extend type Subscription {
   Returns the updated presentation flow when its status changes.
   """
   presentationFlowEvent(id: ID!): PresentationFlow!
+}
+
+"""
+Controls notification behaviour when creating a presentation flow from a template.
+"""
+type PresentationFlowTemplateNotification {
+  """
+  Whether notifications are enabled by default for flows created from this template.
+  """
+  enabled: Boolean!
+  """
+  Whether the runner can change the send-notification toggle. When false the runner sees no notification section.
+  """
+  enabledVisible: Boolean!
+  """
+  The notification method locked by the template. Null means the runner may choose freely (when methodVisible is true).
+  """
+  method: ContactMethod
+  """
+  Whether the runner can change the notification method. When false the method is fixed to the value above.
+  """
+  methodVisible: Boolean!
+}
+
+input PresentationFlowTemplateNotificationInput {
+  enabled: Boolean!
+  enabledVisible: Boolean!
+  method: ContactMethod
+  methodVisible: Boolean!
 }
 
 """
@@ -271,10 +413,12 @@ type PresentationFlowTemplate {
   autoSubmit: Boolean
   expiresAfterDays: Int
   fieldVisibility: PresentationFlowTemplateFieldVisibility!
+  notification: PresentationFlowTemplateNotification!
   createdBy: User!
   createdAt: DateTime!
   updatedBy: User
   updatedAt: DateTime
+  isDeleted: Boolean!
 }
 
 input PresentationFlowTemplateInput {
@@ -288,6 +432,7 @@ input PresentationFlowTemplateInput {
   autoSubmit: Boolean
   expiresAfterDays: Int
   fieldVisibility: PresentationFlowTemplateFieldVisibilityInput!
+  notification: PresentationFlowTemplateNotificationInput
 }
 
 extend type Identity {

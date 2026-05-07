@@ -5,20 +5,26 @@ import { compactErrors } from '../../util/compact-errors'
 import { CreateOidcClaimMappingCommand } from './commands/create-oidc-claim-mapping'
 import { CreateOidcClientCommand } from './commands/create-oidc-client-command'
 import { CreateOidcClientResourceCommand } from './commands/create-oidc-client-resource-command'
+import { CreateOidcIdentityResolverCommand } from './commands/create-oidc-identity-resolver-command'
 import { CreateOidcResourceCommand } from './commands/create-oidc-resource-command'
 import { CreatePresentationRequestForAuthnCommand } from './commands/create-presentation-request-for-authn-command'
 import { DeleteOidcClaimMappingCommand } from './commands/delete-oidc-claim-mapping-command'
 import { DeleteOidcClientCommand } from './commands/delete-oidc-client-command'
 import { DeleteOidcClientResourceCommand } from './commands/delete-oidc-client-resource-command'
+import { DeleteOidcIdentityResolverCommand } from './commands/delete-oidc-identity-resolver-command'
 import { DeleteOidcResourceCommand } from './commands/delete-oidc-resource-command'
-import { UpdateConciergeClientBrandingCommand } from './commands/update-concierge-client-branding'
+import { UpdateConciergeClientCommand } from './commands/update-concierge-client-command'
 import { UpdateOidcClaimMappingCommand } from './commands/update-oidc-claim-mapping'
 import { UpdateOidcClientClaimMappingsCommand } from './commands/update-oidc-client-claim-mappings-command'
 import { UpdateOidcClientCommand } from './commands/update-oidc-client-command'
+import { UpdateOidcClientIdentityResolversCommand } from './commands/update-oidc-client-identity-resolvers-command'
 import { UpdateOidcClientResourceCommand } from './commands/update-oidc-client-resource-command'
+import { UpdateOidcClientVcPolicyCommand } from './commands/update-oidc-client-vc-policy-command'
+import { UpdateOidcIdentityResolverCommand } from './commands/update-oidc-identity-resolver-command'
 import { UpdateOidcResourceCommand } from './commands/update-oidc-resource-command'
 import { FindOidcClaimMappingsQuery } from './queries/find-oidc-claim-mappings-query'
 import { FindOidcClientsQuery } from './queries/find-oidc-clients-query'
+import { FindOidcIdentityResolversQuery } from './queries/find-oidc-identity-resolvers-query'
 import { FindOidcResourcesQuery } from './queries/find-oidc-resources-query'
 
 export const resolvers: Resolvers = {
@@ -45,7 +51,14 @@ export const resolvers: Resolvers = {
     deleteOidcClaimMapping: async (_parent, { id }, context) => dispatch(context, DeleteOidcClaimMappingCommand, id),
     updateOidcClientClaimMappings: async (_parent, { clientId, claimMappingIds }, context) =>
       dispatch(context, UpdateOidcClientClaimMappingsCommand, clientId, claimMappingIds),
-    updateConciergeClientBranding: async (_parent, { input }, context) => dispatch(context, UpdateConciergeClientBrandingCommand, input),
+    createOidcIdentityResolver: async (_parent, { input }, context) => dispatch(context, CreateOidcIdentityResolverCommand, input),
+    updateOidcIdentityResolver: async (_parent, { id, input }, context) => dispatch(context, UpdateOidcIdentityResolverCommand, id, input),
+    deleteOidcIdentityResolver: async (_parent, { id }, context) => dispatch(context, DeleteOidcIdentityResolverCommand, id),
+    updateOidcClientIdentityResolvers: async (_parent, { clientId, identityResolverIds }, context) =>
+      dispatch(context, UpdateOidcClientIdentityResolversCommand, clientId, identityResolverIds),
+    updateConciergeClient: async (_parent, { input }, context) => dispatch(context, UpdateConciergeClientCommand, input),
+    updateOidcClientVcPolicy: async (_parent, { clientId, input }, context) =>
+      dispatch(context, UpdateOidcClientVcPolicyCommand, clientId, input),
     generateOidcClientSecret,
   },
   Query: {
@@ -58,16 +71,26 @@ export const resolvers: Resolvers = {
     oidcClaimMapping: async (_parent, { id }, { dataLoaders: { oidcClaimMappings } }) => oidcClaimMappings.load(id),
     findOidcClaimMappings: async (_parent, { where, offset, limit, orderBy, orderDirection }, context) =>
       query(context, FindOidcClaimMappingsQuery, where, offset, limit, orderBy, orderDirection),
+    oidcIdentityResolver: async (_parent, { id }, { dataLoaders: { oidcIdentityResolvers } }) => oidcIdentityResolvers.load(id),
+    findOidcIdentityResolvers: async (_parent, { where, offset, limit, orderBy, orderDirection }, context) =>
+      query(context, FindOidcIdentityResolversQuery, where, offset, limit, orderBy, orderDirection),
   },
   OidcClient: {
     partners: async (parent, _args, { dataLoaders: { partners } }) => partners.loadMany(parent.partnerIds).then(compactErrors),
     claimMappings: async (parent, _args, { dataLoaders: { oidcClaimMappings } }) =>
       oidcClaimMappings.loadMany(parent.claimMappingIds).then(compactErrors),
+    identityResolvers: async (parent, _args, { dataLoaders: { oidcIdentityResolvers } }) =>
+      oidcIdentityResolvers.loadMany(parent.identityResolverIds).then(compactErrors),
   },
   OidcClientResource: {
     resource: async (parent, _args, { dataLoaders: { oidcResources } }) => oidcResources.load(parent.resourceId),
   },
   OidcClaimMapping: {
     mappings: (parent) => parent.getScopedClaimMappings(),
+  },
+  OidcIdentityResolver: {
+    identityStore: async (parent, _args, { dataLoaders: { identityStores } }) => identityStores.load(parent.identityStoreId),
+    createdBy: async (parent, _args, { dataLoaders: { users } }) => users.load(parent.createdById),
+    updatedBy: async (parent, _args, { dataLoaders: { users } }) => (parent.updatedById ? users.load(parent.updatedById) : null),
   },
 }

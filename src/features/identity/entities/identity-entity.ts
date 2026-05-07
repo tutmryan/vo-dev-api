@@ -11,6 +11,10 @@ type RequiredArgs = Pick<IdentityEntity, 'issuer' | 'identifier' | 'name' | 'ide
 type CreateOrUpdateArgs = RequiredArgs
 @Entity('identity')
 @Index(['issuer', 'identifier'], { unique: true })
+@Index('ix_identity_lookup_value', ['identityStoreId', 'lookupValue'], {
+  unique: true,
+  where: 'lookup_value IS NOT NULL',
+})
 export class IdentityEntity extends AuditedAndTrackedEntity {
   constructor(args?: CreateOrUpdateArgs) {
     super()
@@ -32,6 +36,9 @@ export class IdentityEntity extends AuditedAndTrackedEntity {
 
   @Column({ type: nvarcharType })
   name!: string
+
+  @Column({ name: 'lookup_value', type: nvarcharType, nullable: true, length: 255 })
+  lookupValue!: string | null
 
   update(args: CreateOrUpdateArgs) {
     typeSafeAssign(this, args)

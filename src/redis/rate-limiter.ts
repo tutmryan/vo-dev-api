@@ -1,7 +1,6 @@
 import type { IRateLimiterStoreOptions } from 'rate-limiter-flexible'
 import { RateLimiterMemory, RateLimiterRedis } from 'rate-limiter-flexible'
-import { createRedisClient, redisOptions } from '.'
-import { redis } from '../config'
+import { createRedisClient, isRedisEnabled, redisOptions } from '.'
 import { Lazy } from '../util/lazy'
 
 /**
@@ -17,4 +16,4 @@ const rateLimitRedisClient = Lazy(async () => {
 })
 
 export const rateLimiter = async (options: Omit<IRateLimiterStoreOptions, 'storeClient'>) =>
-  redis.host ? new RateLimiterRedis({ ...options, storeClient: await rateLimitRedisClient() }) : new RateLimiterMemory(options)
+  isRedisEnabled ? new RateLimiterRedis({ ...options, storeClient: await rateLimitRedisClient() }) : new RateLimiterMemory(options)

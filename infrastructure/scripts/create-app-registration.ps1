@@ -12,6 +12,8 @@ param (
   [string] $LogoPath
 )
 
+. (Join-Path $PSScriptRoot 'shared-utils.ps1')
+
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
@@ -27,63 +29,66 @@ $constants = @{
 #
 # Create API app registration if it doesn't exist
 #
-$appRegistration = az ad app list --display-name $Name --output tsv
+$preExisting = $null
+$appRegistration = Invoke-WithRetry -ScriptBlock {
+  az ad app list --display-name $Name --query "[0]" | ConvertFrom-Json
+}
 if ($appRegistration) {
   Write-Output ('API app registration ''{0}'' already exists' -f $Name)
+  $preExisting = $true
 } else {
   Write-Output ('Creating API app registration ''{0}''...' -f $Name)
 
-  az ad app create `
-    --display-name $Name `
-    --sign-in-audience AzureADMultipleOrgs `
-    --web-home-page-url $HomePageUrl `
-    --output none
+  $appRegistration = Invoke-WithRetry -ScriptBlock {
+    az ad app create `
+      --display-name $Name `
+      --sign-in-audience AzureADMultipleOrgs `
+      --required-resource-accesses ('@{0}' -f $constants.requestedResourceAccessFile) `
+      --app-roles ('@{0}' -f $constants.appRolesFile) `
+      --enable-id-token-issuance $true `
+      --web-home-page-url $HomePageUrl | ConvertFrom-Json
+  }
 
-  Write-Output ('Created API app registration ''{0}''' -f $Name)
+  Write-Output ('Created API app registration ''{0}'' with object ID {1}' -f $Name, $appRegistration.id)
 }
 
-$appRegistration = az ad app list --display-name $Name | ConvertFrom-Json
+# Entra operations are shown to be unreliable even when using the object ID immediately after creation
+# so we sleep for a bit to allow the operation to propagate
+if (-not $preExisting) {
+  Start-Sleep -Seconds 20
+}
 $appRegistrationObjectId = $appRegistration.id
 $appRegistrationAppId = $appRegistration.appId
 
 #
 # Service principal
 #
-$servicePrincipal = az ad sp list --display-name $Name --output tsv
-if ($null -ne $servicePrincipal) {
+$servicePrincipal = Invoke-WithRetry -ScriptBlock {
+  az ad sp list --display-name $Name --query "[0].id" --output tsv
+}
+if (-not [string]::IsNullOrWhiteSpace($servicePrincipal)) {
   Write-Output ('Found an existing service principal named ''{0}''' -f $Name)
 } else {
   Write-Output ('Creating a new service principal named ''{0}''...' -f $Name)
 
-  az ad sp create --id $appRegistrationObjectId --output none
+  Invoke-WithRetry -ScriptBlock {
+    az ad sp create --id $appRegistrationObjectId --output none
+  }
 
   Write-Output ('Created a new service principal named ''{0}''' -f $Name)
 }
-
-#
-# Set properties
-#
-Write-Output 'Setting app roles and enabling id token issuance...'
-
-az ad app update `
-  --id $appRegistrationObjectId `
-  --required-resource-accesses ('@{0}' -f $constants.requestedResourceAccessFile)`
-  --app-roles ('@{0}' -f $constants.appRolesFile) `
-  --enable-id-token-issuance $true `
-  --web-home-page-url $HomePageUrl
-
-Write-Output 'Set app roles and enabled id token issuance.'
 
 #
 # Application ID URI
 #
 # - Always set the Application ID URI to api://<applicationId> so the scope identifier is stable.
 #
-Write-Output "Setting Application ID URI to api://$appRegistrationAppId..."
-
-$graphApp = az rest `
-  --method get `
-  --url ("https://graph.microsoft.com/v1.0/applications/{0}" -f $appRegistrationObjectId) | ConvertFrom-Json
+Write-Output 'Configuring API scope and Application ID URI...'
+$graphApp = Invoke-WithRetry -ScriptBlock {
+  az rest `
+    --method get `
+    --url ("https://graph.microsoft.com/v1.0/applications/{0}" -f $appRegistrationObjectId) | ConvertFrom-Json
+}
 
 $identifierUris = @("api://$appRegistrationAppId")
 
@@ -92,11 +97,13 @@ $setIdentifierUrisPayload = @{
 }
 $setIdentifierUrisPayloadJson = ($setIdentifierUrisPayload | ConvertTo-Json -Depth 10 -Compress)
 
-az rest `
-  --method patch `
-  --headers Content-Type=application/json `
-  --url ("https://graph.microsoft.com/v1.0/applications/{0}" -f $appRegistrationObjectId) `
-  --body $setIdentifierUrisPayloadJson
+Invoke-WithRetry -ScriptBlock {
+  az rest `
+    --method patch `
+    --headers Content-Type=application/json `
+    --url ("https://graph.microsoft.com/v1.0/applications/{0}" -f $appRegistrationObjectId) `
+    --body $setIdentifierUrisPayloadJson
+}
 
 Write-Output "Set Application ID URI to api://$appRegistrationAppId."
 
@@ -159,11 +166,13 @@ if ($null -eq $existingScope) {
   $patchPayload = @{ api = @{ oauth2PermissionScopes = $updatedScopes } }
   $patchPayloadJson = ($patchPayload | ConvertTo-Json -Depth 10 -Compress)
 
-  az rest `
-    --method patch `
-    --headers Content-Type=application/json `
-    --url ("https://graph.microsoft.com/v1.0/applications/{0}" -f $appRegistrationObjectId) `
-    --body $patchPayloadJson
+  Invoke-WithRetry -ScriptBlock {
+    az rest `
+      --method patch `
+      --headers Content-Type=application/json `
+      --url ("https://graph.microsoft.com/v1.0/applications/{0}" -f $appRegistrationObjectId) `
+      --body $patchPayloadJson
+  }
 
   Write-Output ("Created API scope '{0}'." -f $scopeValue)
 } else {
@@ -190,17 +199,20 @@ function Set-AppSecretIfExpired {
     [Parameter(Mandatory = $true)][string]$SecretName,
     [Parameter(Mandatory = $true)][string]$EnvOutputKey
   )
-
-  $secret = az ad app credential list --id $AppId | ConvertFrom-Json |
-  Where-Object { $_.displayName -eq $SecretName } | Select-Object -First 1
+  $secret = Invoke-WithRetry -ScriptBlock {
+    az ad app credential list --id $AppId | ConvertFrom-Json |
+    Where-Object { $_.displayName -eq $SecretName } | Select-Object -First 1
+  }
 
   if (-not $secret -or (Test-SecretExpiringSoon -EndDateTime $secret.endDateTime)) {
     Write-Output ('{0} secret is missing or expiring soon. Rotating...' -f $SecretName)
-    $newSecret = az ad app credential reset `
-      --append `
-      --id $AppId `
-      --display-name $SecretName `
-      --years 2 | ConvertFrom-Json
+    $newSecret = Invoke-WithRetry -ScriptBlock {
+      az ad app credential reset `
+        --append `
+        --id $AppId `
+        --display-name $SecretName `
+        --years 2 | ConvertFrom-Json
+    }
 
     Write-Output "Created new $SecretName secret"
     Write-Output "$EnvOutputKey=$($newSecret.password)" >> $Env:GITHUB_OUTPUT
@@ -221,11 +233,13 @@ $setInformationalUrlsPayload = @{
 $setInformationalUrlsPayloadJson = ($setInformationalUrlsPayload  | ConvertTo-Json -Depth 10 -Compress)
 Write-Output 'Setting privacy statement and terms of service urls...'
 
-az rest `
-  --method patch `
-  --headers Content-Type=application/json `
-  --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationObjectId) `
-  --body $setInformationalUrlsPayloadJson
+Invoke-WithRetry -ScriptBlock {
+  az rest `
+    --method patch `
+    --headers Content-Type=application/json `
+    --url ('https://graph.microsoft.com/v1.0/applications/{0}' -f $appRegistrationObjectId) `
+    --body $setInformationalUrlsPayloadJson
+}
 
 Write-Output 'Set privacy statement and terms of service urls...'
 
@@ -243,7 +257,9 @@ $curlArgs = @(
   "--data-binary", "@$LogoPath"
   $url
 )
-& curl @curlArgs
+Invoke-WithRetry -ScriptBlock {
+  & curl @curlArgs
+}
 Write-Output "Uploaded app logo"
 
 # Setting verified publisher needs to be done manually via the Azure Portal.
@@ -260,6 +276,7 @@ Write-Output "Uploaded app logo"
 #   --headers Content-Type=application/json `
 #   --url ('https://graph.microsoft.com/v1.0/applications/{0}/setVerifiedPublisher' -f $appRegistrationObjectId) `
 #   --body $setVerifiedPublisherPayloadJson
+# Start-Sleep -Seconds $constants.entraOpWaitSeconds
 
 # Write-Output 'Set verified publisher ID'
 

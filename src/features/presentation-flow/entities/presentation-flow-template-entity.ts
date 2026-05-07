@@ -1,7 +1,21 @@
 import { Column, Entity } from 'typeorm'
 import { booleanType, nvarcharMaxType, nvarcharType, varcharMaxLength } from '../../../data/utils/crossDbColumnTypes'
-import type { Action, DataDefinition, PresentationRequestInput } from '../../../generated/graphql'
+import type { Action, ContactMethod, DataDefinition, PresentationRequestInput } from '../../../generated/graphql'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
+
+export interface TemplateNotification {
+  enabled: boolean
+  enabledVisible: boolean
+  method: ContactMethod | null
+  methodVisible: boolean
+}
+
+export const defaultTemplateNotification: TemplateNotification = {
+  enabled: false,
+  enabledVisible: false,
+  method: null,
+  methodVisible: false,
+}
 
 export interface FieldVisibility {
   title?: boolean
@@ -50,6 +64,9 @@ export class PresentationFlowTemplateEntity extends AuditedAndTrackedEntity {
   @Column({ type: nvarcharMaxType, length: varcharMaxLength })
   fieldVisibilityJson!: string
 
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
+  notificationJson!: string | null
+
   @Column({ type: booleanType, default: false })
   isDeleted!: boolean
 
@@ -67,5 +84,9 @@ export class PresentationFlowTemplateEntity extends AuditedAndTrackedEntity {
 
   get fieldVisibility(): FieldVisibility {
     return JSON.parse(this.fieldVisibilityJson) as FieldVisibility
+  }
+
+  get notification(): TemplateNotification {
+    return this.notificationJson ? (JSON.parse(this.notificationJson) as TemplateNotification) : defaultTemplateNotification
   }
 }

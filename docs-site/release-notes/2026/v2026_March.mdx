@@ -1,0 +1,96 @@
+---
+title: March 2026
+date: 2026-03-31T00:00
+description: March 2026 releases introduce SMS and email notifications for presentation flows, presentation flow management, self-serve Entra ID TAP issuance workflows, enhanced search in Composer, Apollo Studio integration, private key JWT authentication for OIDC clients, an improved OIDC presentation UI preview, legacy credential login with automatic identity provisioning, role-based navigation in Composer, and infrastructure improvements.
+slug: v2026_March
+tags: [2026, v2026.3.8, v2026.3.6, v2026.3.3, v2026.3.2, v2026.3.1, v2026.3.0]
+---
+
+March 2026 releases introduce SMS and email notifications for presentation flows, presentation flow management, self-serve Entra ID TAP issuance workflows, enhanced search in Composer, Apollo Studio integration, private key JWT authentication for OIDC clients, an improved OIDC presentation UI preview, legacy credential login with automatic identity provisioning, role-based navigation in Composer, and infrastructure improvements.
+
+<!-- truncate -->
+
+## v2026.3.8
+
+#### Enhancements
+
+- **SMS and email notifications for presentation flows** - Presentation flows can now trigger SMS and email notifications, enabling automated communication with users throughout the credential presentation process
+- **Edit and delete presentation flows** - Presentation flows can now be edited and deleted, providing greater control over the full lifecycle of presentation flows
+
+### 🛠️ Notable fixes
+
+- **Database deadlock resolution** - Resolved database deadlock conditions that could cause intermittent failures under concurrent load
+
+---
+
+## v2026.3.6
+
+### 🚀 What's new
+
+#### Enhancements
+
+- **Infrastructure improvements** - Platform infrastructure updates for improved reliability and performance
+
+---
+
+## v2026.3.3
+
+### 🚀 What's new
+
+#### New features
+
+- **Legacy credential login with automatic identity provisioning** - Users can now log in to Concierge using a pre-existing (non-VO-issued) credential. Their identity record is automatically provisioned on first login, enabling seamless onboarding for users with existing credentials
+
+#### Enhancements
+
+- **Role-based navigation in Composer** - Menu items and routes are now hidden when a user lacks the necessary permissions, providing a cleaner and more focused navigation experience
+
+---
+
+## v2026.3.2
+
+### 🚀 What's new
+
+#### New features
+
+- **Private key JWT authentication for OIDC clients** - OIDC confidential clients can now authenticate using private key JWT, with support for configuring client JWKS (as inline JSON or a URI) and JAR request object signing keys directly in Composer
+
+#### Enhancements
+
+- **OIDC presentation UI preview** - Administrators can now enable a preview of the updated OIDC presentation UI from the Configuration page in Composer. The preview UI includes improved retry support when a presentation fails
+
+---
+
+## v2026.3.1
+
+### 🛠️ Notable fixes
+
+- **Presentation flow status** - Fixed issue with incorrect presentation flow statuses
+
+## v2026.3.0
+
+### 🚀 What's new
+
+#### New features
+
+- **Presentation flow management** - Complete API and UI implementation for managing credential presentation workflows
+- **Self-serve tap issuance workflow in Concierge** - End users can now initiate tap-to-phone issuance workflows directly from Concierge
+
+#### Enhancements
+
+- **Advanced issuance search** - Composer now supports complex search queries with AND/OR operators and configurable query limits for more precise credential searches
+- **Apollo Studio integration** - Access Apollo Studio GraphQL explorer directly from activity screens in Composer with role-based access control
+- **Enhanced OIDC client details** - All authentication restrictions now displayed in OIDC client configuration screens for complete visibility
+- **Smart credential filtering** - Concierge now shows only active credentials by default with an easy toggle to view all credentials
+- **Streamlined credential type selection** - Tabs are automatically hidden when only one credential type is selected, reducing visual clutter
+- **Error boundary implementation** - Improved error handling in Concierge provides better user experience when unexpected errors occur
+- **Documentation improvements** - Added custom tip admonitions and updated audit examples with new event types
+- **Important security updates** - Multiple security improvements and dependency upgrades across all components
+
+### ⚠️ Breaking changes
+
+- **API:** The approval flow endpoints have been removed. Any integrations relying on approval flow operations should migrate to the new presentation flow endpoints.
+
+### 🛠️ Notable fixes
+
+- Fixed issue where file picker dialog would inadvertently open when clearing images in Concierge branding settings

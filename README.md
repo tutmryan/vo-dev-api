@@ -1,5 +1,7 @@
 # VO API
 
+[![Deploy Docs](https://github.com/VerifiedOrchestration/verified-orchestration-api/actions/workflows/deploy-docs.yml/badge.svg)](https://github.com/VerifiedOrchestration/verified-orchestration-api/actions/workflows/deploy-docs.yml)
+
 The VO platform GraphQL API backend repository.
 
 ## Developer prerequisites

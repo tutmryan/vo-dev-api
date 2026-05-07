@@ -14,6 +14,10 @@ Issuance requires user-interface components to handle several steps and the reci
 Alternatively, the [remote issuance](/docs/guides/remote-issuance) feature supports issuance via email or SMS.
 :::
 
+:::note
+Both in-person and remote issuances are visible together in the <AdminLink path="/credentials">Credentials</AdminLink> view in Composer, which provides a unified lifecycle view across all issuance methods.
+:::
+
 Issuance is a multistep process:
 
 1. [Create an issuance request](#create-issuance-request)
@@ -60,6 +64,7 @@ mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
       url
       qrCode
       expiry
+      credentialRecordId
     }
     ... on RequestErrorResponse {
       error {
@@ -75,6 +80,11 @@ mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
   }
 }
 ```
+
+:::tip[Credential record ID]
+The `credentialRecordId` in the response is a stable identifier for the credential throughout its lifecycle — from issuance through to revocation and expiry.
+You can use it to navigate directly to the credential detail view in Composer (e.g. `/credentials/<credentialRecordId>`) and to query credential status via `findCredentialRecords`.
+:::
 
 ```json title="Example variables with optional callback and PIN defined"
 {
@@ -105,7 +115,8 @@ mutation CreateIssuanceRequest($request: IssuanceRequestInput!) {
       "requestId": "<request ID>",
       "url": "openid-vc://?request_uri=https://verifiedid.did.msidentity.com/v1.0/tenants/<tenant ID>/verifiableCredentials/issuanceRequests/<request ID>",
       "qrCode": "data:image/png;base64,iVBORw0...<base64 encoded image data>",
-      "expiry": 1695285131
+      "expiry": 1695285131,
+      "credentialRecordId": "<UUID of the credential record>"
     }
   }
 }

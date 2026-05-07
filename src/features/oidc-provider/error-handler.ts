@@ -4,7 +4,7 @@ import type { Configuration, UnknownObject } from 'oidc-provider'
 import path from 'path'
 import { instance } from '../../config'
 import type { VerifiedOrchestrationEntity } from '../../data/verified-orchestration-entity'
-import { OidcApplicationType } from '../../generated/graphql'
+import { OidcApplicationType, OidcResponseType } from '../../generated/graphql'
 import { logger } from '../../logger'
 import { isIe11, isWebView3 } from '../../util/browser'
 import type { AuditedAndTrackedEntity } from '../auditing/entities/audited-and-tracked-entity'
@@ -32,6 +32,7 @@ const minimalClientEntity = {
   uniqueClaimsForSubjectId: null,
   credentialTypes: null,
   deletedAt: null,
+  responseTypes: [OidcResponseType.Code],
 } satisfies Pick<
   OidcClientEntity,
   keyof Omit<
@@ -46,9 +47,19 @@ const minimalClientEntity = {
     | 'claimMappings'
     | 'claimMappingIds'
     | 'clientType'
+    | 'identityResolvers'
+    | 'identityResolverIds'
     | 'authorizationRequestsTypeJarEnabled'
     | 'authorizationRequestsTypeStandardEnabled'
+    | 'relyingPartyJwks'
     | 'relyingPartyJwksUri'
+    | 'tokenEndpointAuthMethod'
+    | 'clientJwks'
+    | 'clientJwksUri'
+    | 'vcPolicy'
+    | 'updateVcPolicy'
+    | 'claimConstraint'
+    | 'faceCheckConfidenceThreshold'
   >
 >
 

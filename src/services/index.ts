@@ -18,6 +18,7 @@ import { AsyncIssuanceService } from './async-issuance-service'
 import { BlobStorageContainerService } from './blob-storage-container-service'
 import { CommunicationsService } from './communications-service'
 import { graphServiceManager, type IGraphServiceManager } from './graph-service'
+import { PresentationFlowService } from './presentation-flow-service'
 import { VerifiedIdAdminService, VerifiedIdRequestService } from './verified-id'
 
 export * from './graph-service'
@@ -28,6 +29,7 @@ export interface Services {
   verifiedIdRequest: VerifiedIdRequestService
   logoImages: BlobStorageContainerService
   asyncIssuances: AsyncIssuanceService
+  presentationFlows: PresentationFlowService
   communications: CommunicationsService
 }
 
@@ -45,6 +47,7 @@ export const createServices = (context: BaseContext): Services => {
     verifiedIdRequest: createVerifiedIdRequestService(context),
     logoImages: createLogoImagesService(),
     asyncIssuances: new AsyncIssuanceService(),
+    presentationFlows: new PresentationFlowService(),
     communications: new CommunicationsService(context.logger),
   }
 }
@@ -56,14 +59,10 @@ export async function testAllGraphServices(): Promise<MsGraphFailure[] | undefin
 
   for (const graphService of graphServiceManager.all) {
     if (!graphService.isConfigured) continue
-    try {
-      await graphService.findUsers({ nameStartsWith: 'a' }, 1)
-    } catch (error) {
-      logger.error('Test for MS Graph service integration failed', { error })
-      failures.push({
-        identityStoreId: graphService.config.identityStoreId,
-        error: error instanceof Error ? error.message : String(error),
-      })
+    const failure = await graphService.testConnection()
+    if (failure) {
+      logger.error('Test for MS Graph service integration failed', { error: failure.error })
+      failures.push(failure)
     }
   }
 

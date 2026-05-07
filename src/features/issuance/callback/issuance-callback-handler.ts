@@ -12,6 +12,7 @@ import { getAsyncIssuanceDataBySessionKey } from '../../async-issuance/session'
 import type { IssuanceCallbackHandler } from '../../callback'
 import { requestDetailsCache } from '../../callback/cache'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
+import { CredentialRecordEntity } from '../../credential-record/entities/credential-record-entity'
 import type { IssuanceRequestDetails } from '../commands/create-issuance-request-command'
 import { IssuanceEntity } from '../entities/issuance-entity'
 import { addIssuanceDataToCache } from './cache'
@@ -56,6 +57,7 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
         ...issuanceRequestDetails,
         requestId: event.requestId,
         expiresAt: issuanceRequestDetails.expirationDate ?? addSeconds(eventReceived, validityIntervalInSeconds),
+        credentialRecordId: issuanceRequestDetails.credentialRecordId,
       })
       addUserToManager(entityManager, issuanceRequestDetails.issuedById)
       const { id } = await entityManager.getRepository(IssuanceEntity).save(issuance)
@@ -65,9 +67,19 @@ export const issuanceCallbackHandler: IssuanceCallbackHandler = async (event) =>
       // if this was an async issuance, complete it
       if (asyncIssuanceKey) await completeAsyncIssuance(asyncIssuanceKey, issuance, entityManager)
     })
-  } else if (event.requestStatus === IssuanceRequestStatus.RequestRetrieved)
+  } else if (event.requestStatus === IssuanceRequestStatus.RequestRetrieved) {
     logger.auditEvent(AuditEvents.ISSUANCE_REQUEST_RETRIEVED, { event: omit(event, 'state') })
-  else logger.auditEvent(AuditEvents.ISSUANCE_CREDENTIAL_FAILED, { event: omit(event, 'state') })
+  } else {
+    logger.auditEvent(AuditEvents.ISSUANCE_CREDENTIAL_FAILED, { event: omit(event, 'state') })
+    if (!asyncIssuanceKey) {
+      await transactionOrReuse(async (entityManager) => {
+        addUserToManager(entityManager, issuanceRequestDetails.issuedById)
+        await entityManager
+          .getRepository(CredentialRecordEntity)
+          .update({ id: issuanceRequestDetails.credentialRecordId }, { failedAt: new Date() })
+      })
+    }
+  }
 
   await addIssuanceDataToCache(topicData)
   await publishIssuanceEvent(topicData)

@@ -1,4 +1,4 @@
-# eslint-disable @graphql-eslint/naming-convention
+ 
 
 """
 The possible communication purposes.
@@ -6,6 +6,7 @@ The possible communication purposes.
 enum CommunicationPurpose {
   issuance
   verification
+  presentationFlow
 }
 
 """
@@ -84,6 +85,10 @@ input CommunicationWhere {
   The ID of the async issuance request that the communication is related to.
   """
   asyncIssuanceRequestId: ID
+  """
+  The ID of the presentation flow that the communication is related to.
+  """
+  presentationFlowId: ID
   """
   The purpose of the communication.
   """

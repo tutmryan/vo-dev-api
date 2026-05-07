@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddAuthorizationRequestsTypeStandardEnabled1765506562274 implements MigrationInterface {
   name = 'AddAuthorizationRequestsTypeStandardEnabled1765506562274'

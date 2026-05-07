@@ -1,3 +1,4 @@
+import { IdentityEntity } from '../features/identity/entities/identity-entity'
 /**
  * Common database and service mocks for shield permission tests.
  * These mocks prevent tests from hitting the database while testing authorization rules.
@@ -68,6 +69,7 @@ jest.mock('../data', () => {
     createQueryBuilder: jest.fn(() => createMockQueryBuilder()),
     count: jest.fn().mockResolvedValue(0),
     findAndCount: jest.fn().mockResolvedValue([[], 0]),
+    query: jest.fn().mockResolvedValue([]),
   }
 
   const mockManager = {
@@ -104,11 +106,18 @@ jest.mock('../context', () => {
   const actual = jest.requireActual('../context')
   return {
     ...actual,
-    findUpdateOrCreateUser: jest.fn().mockImplementation(async (jwtPayload) => ({
-      id: jwtPayload?.oid || 'mock-user-id',
-      email: jwtPayload?.email || 'test@example.com',
-      roles: jwtPayload?.roles || [],
-    })),
+    findUpdateOrCreateUser: jest.fn().mockImplementation(async (jwtPayload) => {
+      const identity = new IdentityEntity()
+      identity.id = jwtPayload?.oid || 'mock-user-id'
+      return {
+        id: identity.id,
+        email: jwtPayload?.email || 'test@example.com',
+        roles: jwtPayload?.roles || [],
+        scopes: (jwtPayload?.scp || '').trim().split(' ').filter(Boolean),
+        claims: jwtPayload || {},
+        entity: identity,
+      }
+    }),
     findUpdateOrCreateUserEntity: jest.fn().mockImplementation(async (jwtPayload) => ({
       id: jwtPayload?.oid || 'mock-user-id',
       email: jwtPayload?.email || 'test@example.com',
@@ -161,6 +170,9 @@ jest.mock('../services/graph-service', () => ({
         policyDisplayDescription: 'Test Policy Description',
       },
     ]),
+    get: jest.fn().mockResolvedValue({
+      checkCapabilities: jest.fn().mockResolvedValue({ tapWrite: true, tapPolicyInsight: true, accessPackages: true }),
+    }),
   },
 }))
 

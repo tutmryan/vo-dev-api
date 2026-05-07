@@ -9,7 +9,23 @@ param(
   $ResourcePrefix
 )
 
+. (Join-Path $PSScriptRoot 'shared-utils.ps1')
+
 $ErrorActionPreference = 'Stop'
+
+# The legacy Azure Cache for Redis private endpoint is never active now that Managed Redis is always used
+$inactiveRedisPeName = "$ResourcePrefix-redis-pe"
+$inactiveRedisPeId = az network private-endpoint show `
+  --resource-group $ResourceGroupName `
+  --name $inactiveRedisPeName `
+  --query "id" -o tsv 2>$null
+
+if ($inactiveRedisPeId) {
+  Write-Host "Deleting inactive Redis private endpoint: $inactiveRedisPeName"
+  az network private-endpoint delete `
+    --resource-group $ResourceGroupName `
+    --name $inactiveRedisPeName
+}
 
 $webTestsToDelete = @(
   "$ResourcePrefix-msgraphservice-health-test",

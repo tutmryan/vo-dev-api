@@ -1,5 +1,9 @@
 import type { Configuration } from 'oidc-provider'
+import type { ClaimConstraint } from '../../generated/graphql'
+import { VcParamMode } from '../../generated/graphql'
+import { invariant } from '../../util/invariant'
 import type { OidcClaimMappingEntity } from './entities/oidc-claim-mapping-entity'
+import type { OidcClientClaimConstraint } from './entities/oidc-client-claim-constraint'
 import type { OidcResourceEntity } from './entities/oidc-resource-entity'
 
 export const presentationLoginStandardClaims = {
@@ -101,4 +105,60 @@ function normalizeBoolean(value: unknown): boolean | undefined {
     return Boolean(value)
   }
   return Boolean(value)
+}
+
+function isNonEmptyString(value: string | null | undefined): value is string {
+  return value !== undefined && value !== null && value.trim().length > 0
+}
+
+/**
+ * Maps a GraphQL ClaimConstraintInput to the entity's OidcClientClaimConstraint shape.
+ *
+ * - `undefined` (field not provided): returns null (no constraint)
+ * - `null` (explicitly cleared): returns null
+ * - object: maps to the entity shape, keeping only the active operator field
+ *
+ * Validation of exactly-one-operator is handled by the entity setter.
+ */
+export function mapClaimConstraintInput(
+  input: ClaimConstraint | null | undefined,
+  vcConstraintValuesMode?: VcParamMode,
+): OidcClientClaimConstraint | null {
+  if (!input) return null
+
+  const hasValues = input.values !== undefined && input.values !== null
+  const hasContains = isNonEmptyString(input.contains)
+  const hasStartsWith = isNonEmptyString(input.startsWith)
+
+  const operatorCount = [hasValues, hasContains, hasStartsWith].filter(Boolean).length
+  invariant(operatorCount <= 1, 'Only one constraint operator (values, contains, startsWith) may be set')
+
+  // contains/startsWith must be FIXED
+  if (hasContains || hasStartsWith) {
+    invariant(
+      !vcConstraintValuesMode || vcConstraintValuesMode === VcParamMode.Fixed,
+      'Contains and starts with operators require fixed constraint values',
+    )
+  }
+
+  // Validate constraint values are present when required
+  if (vcConstraintValuesMode === VcParamMode.Fixed) {
+    invariant(hasContains || hasStartsWith || (hasValues && input.values!.length > 0), 'A constraint value is required')
+  }
+
+  const constraint: OidcClientClaimConstraint = {
+    claimName: input.claimName,
+  }
+
+  if (hasContains) {
+    constraint.contains = input.contains!
+  } else if (hasStartsWith) {
+    constraint.startsWith = input.startsWith!
+  } else if (hasValues) {
+    constraint.values = input.values!
+  } else {
+    invariant(false, 'Failed to map claim constraint: no valid operator value provided')
+  }
+
+  return constraint
 }

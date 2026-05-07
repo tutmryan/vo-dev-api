@@ -11,8 +11,10 @@ import { redactConstraints, redactPresentationReceipt } from '../../../util/reda
 import type { PresentationCallbackHandler } from '../../callback'
 import { requestDetailsCache } from '../../callback/cache'
 import { StandardClaims } from '../../contracts/claims'
+import { findOrCreateIdentityFromEntra } from '../../identity/identity-lookup'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { getLimitedPresentationFlowTokenDataByKey, setLimitedPresentationFlowTokenDataByKey } from '../../limited-presentation-flow-tokens'
+import { OidcClientEntity } from '../../oidc-provider/entities/oidc-client-entity'
 import { setLoginInteractionData, validateLoginSessionForPresentation } from '../../oidc-provider/session'
 import { PartnerEntity } from '../../partners/entities/partner-entity'
 import { PresentationFlowEntity } from '../../presentation-flow/entities/presentation-flow-entity'
@@ -85,6 +87,58 @@ export const presentationCallbackHandler: PresentationCallbackHandler = async (e
 
       // validate and load the login session data if this presentation is for a login flow
       const authInteractionData = authnSessionKey ? await validateLoginSessionForPresentation(authnSessionKey, event.requestId) : null
+
+      // If this is an OIDC login flow with no identity yet, try resolving via the client's configured identity resolvers
+      if (!identityId && authInteractionData?.clientId) {
+        const clientRepo = entityManager.getRepository(OidcClientEntity)
+        const client = await clientRepo.findOne({ where: { id: authInteractionData.clientId }, relations: { identityResolvers: true } })
+
+        const credential = event.verifiedCredentialsData?.[0]
+
+        if (client && credential) {
+          const identityResolvers = await client.identityResolvers
+
+          const applicableResolvers = identityResolvers.filter((resolver) => {
+            if (!resolver.credentialTypes || resolver.credentialTypes.length === 0) return true
+            const types = credential.type
+            return resolver.credentialTypes.some((t) => types.includes(t))
+          })
+
+          for (const resolver of applicableResolvers) {
+            const rawClaimValue = credential.claims[resolver.claimName]
+            const claimValue = typeof rawClaimValue === 'string' ? rawClaimValue : undefined
+            if (!claimValue) continue
+
+            try {
+              const identity = await findOrCreateIdentityFromEntra(entityManager, resolver.identityStoreId, resolver.lookupType, claimValue)
+
+              if (identity) {
+                identityId = identity.id
+                callbackLogger.auditEvent(AuditEvents.PRESENTATION_IDENTITY_RESOLVED, {
+                  resolverId: resolver.id,
+                  resolverName: resolver.name,
+                  identityStoreId: resolver.identityStoreId,
+                  identityId: identity.id,
+                })
+                break
+              }
+            } catch (error) {
+              callbackLogger.auditEvent(AuditEvents.PRESENTATION_IDENTITY_RESOLVER_FAILED, {
+                resolverId: resolver.id,
+                resolverName: resolver.name,
+                identityStoreId: resolver.identityStoreId,
+              })
+            }
+          }
+
+          if (applicableResolvers.length > 0 && !identityId) {
+            callbackLogger.auditEvent(AuditEvents.PRESENTATION_IDENTITY_RESOLUTION_FAILED, {
+              clientId: authInteractionData.clientId,
+              resolverCount: applicableResolvers.length,
+            })
+          }
+        }
+      }
 
       // save presented credential data minus the claims, which is probably PII
       const presentedCredentials: PresentedData[] = event.verifiedCredentialsData

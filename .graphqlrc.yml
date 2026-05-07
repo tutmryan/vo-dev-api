@@ -31,12 +31,14 @@ extensions:
                 OidcResource: ../features/oidc-provider/entities/oidc-resource-entity#OidcResourceEntity
                 OidcClientResource: ../features/oidc-provider/entities/oidc-client-resource-entity#OidcClientResourceEntity
                 OidcClaimMapping: ../features/oidc-provider/entities/oidc-claim-mapping-entity#OidcClaimMappingEntity
+                OidcIdentityResolver: ../features/oidc-provider/entities/oidc-identity-resolver-entity#OidcIdentityResolverEntity
                 Branding: ../features/branding/entities/branding-entity#BrandingEntity
                 Wallet: ../features/wallet/entities/wallet-entity#WalletEntity
                 ApplicationLabelConfig: ../features/instance-configs/entities/application-label-config-entity#ApplicationLabelConfigEntity
                 CorsOriginConfig: ../features/instance-configs/entities/cors-origins-config-entity#CorsOriginConfigEntity
                 MicrosoftEntraTemporaryAccessPassIssuance: ../features/microsoft-entra-temporary-access-pass-issuance/entities/microsoft-entra-temporary-access-pass-issuance-entity#MicrosoftEntraTemporaryAccessPassIssuanceEntity
                 MicrosoftEntraTemporaryAccessPassIssuanceConfiguration: ../features/microsoft-entra-temporary-access-pass-issuance/entities/microsoft-entra-temporary-access-pass-issuance-configuration-entity#MicrosoftEntraTemporaryAccessPassIssuanceConfigurationEntity
+                CredentialRecord: ../features/credential-record/queries/find-credential-records-query#CredentialRecordRow
         config:
           strictScalars: true
           scalars:
@@ -44,6 +46,7 @@ extensions:
             PositiveInt: number
             NonNegativeInt: number
             PositiveFloat: number
+            DataURL: string
             URL: string
             DateTime: Date
             Locale: string

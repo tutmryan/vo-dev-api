@@ -35,6 +35,7 @@ interface BuildJwtInput {
   email: string
   scopes: string[]
   roles: string[]
+  aud: string
 }
 
 export const buildJwt = ({
@@ -44,6 +45,7 @@ export const buildJwt = ({
   email = casual.email,
   scopes = [],
   roles = [],
+  aud,
 }: Partial<BuildJwtInput> = {}): JwtPayload => ({
   oid,
   tid,
@@ -51,6 +53,7 @@ export const buildJwt = ({
   email,
   scp: scopes.join(' '),
   roles,
+  aud,
 })
 
 export function buildIssueeJwt(identityId: string) {

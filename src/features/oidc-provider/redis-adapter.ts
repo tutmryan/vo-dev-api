@@ -39,38 +39,38 @@ class RedisAdapter implements Adapter {
     const key = this.key(id)
     const store = consumable.has(this.name) ? { payload: JSON.stringify(payload) } : JSON.stringify(payload)
 
-    const multi = this.client.multi()
+    const pipeline = this.client.pipeline()
     // @ts-ignore
-    multi[consumable.has(this.name) ? 'hmset' : 'set'](key, store)
+    pipeline[consumable.has(this.name) ? 'hmset' : 'set'](key, store)
 
     if (expiresIn > 0) {
-      multi.expire(key, expiresIn)
+      pipeline.expire(key, expiresIn)
     }
 
     if (grantable.has(this.name) && payload.grantId) {
       const grantKey = grantKeyFor(payload.grantId)
-      multi.rpush(grantKey, key)
+      pipeline.rpush(grantKey, key)
       // if you're seeing grant key lists growing out of acceptable proportions consider using LTRIM
       // here to trim the list to an appropriate length
       const ttl = await this.client.ttl(grantKey)
       if (expiresIn > ttl) {
-        multi.expire(grantKey, expiresIn)
+        pipeline.expire(grantKey, expiresIn)
       }
     }
 
     if (payload.userCode) {
       const userCodeKey = userCodeKeyFor(payload.userCode)
-      multi.set(userCodeKey, id)
-      multi.expire(userCodeKey, expiresIn)
+      pipeline.set(userCodeKey, id)
+      pipeline.expire(userCodeKey, expiresIn)
     }
 
     if (payload.uid) {
       const uidKey = uidKeyFor(payload.uid)
-      multi.set(uidKey, id)
-      multi.expire(uidKey, expiresIn)
+      pipeline.set(uidKey, id)
+      pipeline.expire(uidKey, expiresIn)
     }
 
-    await multi.exec()
+    await pipeline.exec()
   }
 
   async find(id: string): Promise<AdapterPayload | undefined | void> {
@@ -111,11 +111,11 @@ class RedisAdapter implements Adapter {
   }
 
   async revokeByGrantId(grantId: string): Promise<undefined | void> {
-    const multi = this.client.multi()
+    const pipeline = this.client.pipeline()
     const tokens = await this.client.lrange(grantKeyFor(grantId), 0, -1)
-    tokens.forEach((token) => multi.del(token))
-    multi.del(grantKeyFor(grantId))
-    await multi.exec()
+    tokens.forEach((token) => pipeline.del(token))
+    pipeline.del(grantKeyFor(grantId))
+    await pipeline.exec()
   }
 
   async consume(id: string): Promise<undefined | void> {

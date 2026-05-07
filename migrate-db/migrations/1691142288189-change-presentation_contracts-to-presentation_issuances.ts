@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class ChangePresentationContractsToPresentationIssuances1691142288189 implements MigrationInterface {
   name = 'ChangePresentationContractsToPresentationIssuances1691142288189'

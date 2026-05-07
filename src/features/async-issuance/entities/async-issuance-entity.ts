@@ -1,6 +1,6 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm'
 import { calculateExpiryFromNow, convertAsyncIssuanceExpiryDaysToRequestExpiry, ExpiryPeriodsInDays } from '..'
-import { dateTimeOffsetTransformer, dateTimeOffsetType, nvarcharType } from '../../../data/utils/crossDbColumnTypes'
+import { booleanType, dateTimeOffsetTransformer, dateTimeOffsetType, nvarcharType } from '../../../data/utils/crossDbColumnTypes'
 import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
 import { AsyncIssuanceRequestExpiry, AsyncIssuanceRequestStatus } from '../../../generated/graphql'
 import { logger } from '../../../logger'
@@ -9,6 +9,7 @@ import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { CommunicationEntity } from '../../communication/entities/communication-entity'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
+import type { CredentialRecordEntity } from '../../credential-record/entities/credential-record-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 
@@ -18,7 +19,7 @@ export type FailedStates = EndsWithFailed<AsyncIssuanceEntity['state']>
 
 export const failedStates: FailedStates[] = ['contact-failed', 'issuance-failed', 'issuance-verification-failed'] as const
 
-export const expirableStates = ['pending', 'contacted', ...failedStates] as const
+export const expirableStates = ['pending', 'contacted', 'verification-complete', ...failedStates] as const
 
 const indexFor = (fields: (keyof AsyncIssuanceEntity)[]) => fields
 
@@ -29,8 +30,19 @@ const cannotModifyInFinalStateMessage = 'Async issuance cannot be modified'
 @Entity('async_issuance')
 @Index(indexFor(['expiresOn']))
 @Index(indexFor(['state']))
+@Index('ix_async_issuance_credential_record_id', ['credentialRecordId'], { unique: true })
+@Index('ix_async_issuance_identity_id_state_expires_on', ['identityId', 'state', 'expiresOn'])
+@Index('ix_async_issuance_created_by_id', ['createdById'])
+@Index('ix_async_issuance_has_verification_communication', ['hasVerificationCommunication'], {
+  where: '"has_verification_communication" = 1',
+})
 export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
-  constructor(args?: Pick<AsyncIssuanceEntity, 'id' | 'contractId' | 'identityId' | 'expiryPeriodInDays' | 'postIssuanceRedirectUrl'>) {
+  constructor(
+    args?: Pick<
+      AsyncIssuanceEntity,
+      'id' | 'contractId' | 'identityId' | 'expiryPeriodInDays' | 'postIssuanceRedirectUrl' | 'credentialRecordId'
+    >,
+  ) {
     super()
     if (!args) return
     typeSafeAssign(this, {
@@ -65,13 +77,36 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
   issuanceId!: string | null
 
   @Column({ type: nvarcharType, default: 'pending' })
-  state!: 'pending' | 'contacted' | 'contact-failed' | 'issued' | 'issuance-verification-failed' | 'issuance-failed' | 'cancelled'
+  state!:
+    | 'pending'
+    | 'contacted'
+    | 'contact-failed'
+    | 'issued'
+    | 'issuance-verification-failed'
+    | 'issuance-failed'
+    | 'cancelled'
+    | 'verification-complete'
 
   @OneToMany(() => CommunicationEntity, (communication) => communication.asyncIssuance)
   communications!: Promise<CommunicationEntity[]>
 
   @Column({ type: nvarcharType, nullable: true, name: 'post_issuance_redirect_url' })
   postIssuanceRedirectUrl!: string | null
+
+  /**
+   * Denormalized flag indicating whether a verification communication has been sent for this async issuance.
+   * Used to optimize FindCredentialRecordsQuery by avoiding subqueries on the communication table.
+   * Set to true when a verification communication is created.
+   */
+  @Column({ type: booleanType, default: false, name: 'has_verification_communication' })
+  hasVerificationCommunication!: boolean
+
+  @ManyToOne('CredentialRecordEntity')
+  credentialRecord!: Promise<CredentialRecordEntity>
+
+  @Column({ transformer: uuidLowerCaseTransformer })
+  credentialRecordId!: string
+
   @BeforeInsert()
   @BeforeUpdate()
   private setPostIssuanceRedirectUrl() {
@@ -81,6 +116,7 @@ export class AsyncIssuanceEntity extends AuditedAndTrackedEntity {
   get status(): AsyncIssuanceRequestStatus {
     if (this.state === 'issued') return AsyncIssuanceRequestStatus.Issued
     if (this.state === 'cancelled') return AsyncIssuanceRequestStatus.Cancelled
+    if (this.state === 'verification-complete') return AsyncIssuanceRequestStatus.Pending // Still pending until issuance is complete
     if (this.isExpired) return AsyncIssuanceRequestStatus.Expired
     if (failedStates.includes(this.state as FailedStates)) return AsyncIssuanceRequestStatus.Failed
     return AsyncIssuanceRequestStatus.Pending

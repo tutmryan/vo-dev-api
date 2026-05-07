@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddPresentationFlowTable1769077622767 implements MigrationInterface {
   name = 'AddPresentationFlowTable1769077622767'

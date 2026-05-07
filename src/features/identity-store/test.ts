@@ -26,6 +26,7 @@ function getRequiredRandomInput(): IdentityStoreInput {
     name: 'someName',
     type: IdentityStoreType.Entra,
     isAuthenticationEnabled: true,
+    accessPackagesEnabled: false,
   }
 }
 
@@ -34,6 +35,7 @@ function getRequiredUpdateRandomInput(): UpdateIdentityStoreInput {
     name: 'someUpdatedName',
     type: IdentityStoreType.Entra,
     isAuthenticationEnabled: true,
+    accessPackagesEnabled: false,
   }
 }
 
@@ -44,6 +46,7 @@ export const identityStoreFragment = graphql(`
     name
     type
     isAuthenticationEnabled
+    accessPackagesEnabled
     clientId
     suspendedAt
   }
@@ -149,7 +152,22 @@ describe('IdentityStore', () => {
       expect(data?.createIdentityStore.clientId).toBe('abc')
     })
 
-    it('fails the mutation if secret service set fails (and entity not created)', async () => {
+    it('does not store secret when the entity save fails due to duplicate identifier', async () => {
+      const identifier = faker.string.uuid()
+      // Create first time to occupy the identifier
+      const existingInput: IdentityStoreInput = { ...getRequiredRandomInput(), identifier }
+      await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: existingInput } })
+      mockedServices.identityStoreSecretService.set.mock().mockClear()
+
+      // Attempt to create again with same identifier + credentials — entity save will fail
+      const duplicateInput: IdentityStoreInput = { ...getRequiredRandomInput(), identifier, clientId: 'cid2', clientSecret: 'sec2' }
+      const res = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: duplicateInput } })
+      expect(res.errors).toBeDefined()
+      // Secret must NOT have been stored because the entity save failed first
+      expect(mockedServices.identityStoreSecretService.set.mock()).not.toHaveBeenCalled()
+    })
+
+    it('fails the mutation if secret service set fails', async () => {
       const identifier = faker.string.uuid()
       mockedServices.identityStoreSecretService.set.mock().mockRejectedValueOnce(new Error('kv failed'))
       const input: IdentityStoreInput = {
@@ -160,9 +178,6 @@ describe('IdentityStore', () => {
       }
       const res = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input } })
       expect(res.errors).toBeDefined()
-      const findRes = await executeOperationAsInstanceAdmin({ query: findQueryWithWhere, variables: { where: { identifier } } })
-      const identifiers = findRes.data?.findIdentityStores.map((s) => s.identifier)
-      expect(identifiers).not.toContain(identifier)
     })
   })
 
@@ -224,7 +239,7 @@ describe('IdentityStore', () => {
       expect(res.errors).toBeDefined()
     })
 
-    it('clears clientId when explicitly set to null', async () => {
+    it('clears clientId when explicitly set to null and deletes the old secret', async () => {
       const clientId = '11111111-1111-1111-1111-111111111111'
       const createInput = { ...getRequiredRandomInput(), clientId, clientSecret: 'someSecret' }
       const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: createInput } })
@@ -237,6 +252,35 @@ describe('IdentityStore', () => {
       })
       expect(errors).toBeUndefined()
       expect(data?.updateIdentityStore.clientId).toBeNull()
+      // Old secret must be removed from the KV store
+      expect(mockedServices.identityStoreSecretService.delete.lastCallArgs()).toEqual([clientId])
+    })
+
+    it('deletes the old secret when clientId is rotated to a new value', async () => {
+      const oldClientId = '22222222-2222-2222-2222-222222222222'
+      const newClientId = '33333333-3333-3333-3333-333333333333'
+      const createInput = { ...getRequiredRandomInput(), clientId: oldClientId, clientSecret: 'secret1' }
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: createInput } })
+      const id = createRes.data!.createIdentityStore.id
+
+      const updateInput: UpdateIdentityStoreInput = { ...getRequiredUpdateRandomInput(), clientId: newClientId, clientSecret: 'secret2' }
+      const { errors } = await executeOperationAsInstanceAdmin({ query: updateMutation, variables: { id, input: updateInput } })
+      expect(errors).toBeUndefined()
+      // Old secret keyed to oldClientId should have been removed
+      expect(mockedServices.identityStoreSecretService.delete.lastCallArgs()).toEqual([oldClientId])
+    })
+
+    it('does not delete the secret when only non-credential fields are updated', async () => {
+      const clientId = '44444444-4444-4444-4444-444444444444'
+      const createInput = { ...getRequiredRandomInput(), clientId, clientSecret: 'secret' }
+      const createRes = await executeOperationAsInstanceAdmin({ query: createMutation, variables: { input: createInput } })
+      const id = createRes.data!.createIdentityStore.id
+
+      // Update only the name — no clientId or clientSecret change
+      const updateInput: UpdateIdentityStoreInput = { ...getRequiredUpdateRandomInput() }
+      const { errors } = await executeOperationAsInstanceAdmin({ query: updateMutation, variables: { id, input: updateInput } })
+      expect(errors).toBeUndefined()
+      expect(mockedServices.identityStoreSecretService.delete.mock()).not.toHaveBeenCalled()
     })
   })
 

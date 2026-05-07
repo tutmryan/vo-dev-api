@@ -1,21 +1,33 @@
 import { portalUrl } from '../../config'
-import { dispatch, query } from '../../cqs/dispatcher'
+import { dispatch, dispatchTransactional, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { CancelPresentationFlowCommand } from './commands/cancel-presentation-flow-command'
+import { CreateMDocPresentationFlowCommand } from './commands/create-mdoc-presentation-flow-command'
 import { CreatePresentationFlowCommand } from './commands/create-presentation-flow-command'
 import { CreatePresentationFlowTemplateCommand } from './commands/create-presentation-flow-template-command'
 import { CreatePresentationRequestForPresentationFlowCommand } from './commands/create-presentation-request-for-presentation-flow-command'
 import { DeletePresentationFlowTemplateCommand } from './commands/delete-presentation-flow-template-command'
+import { ResendPresentationFlowNotificationCommand } from './commands/resend-presentation-flow-notification-command'
 import { SubmitPresentationFlowActionsCommand } from './commands/submit-presentation-flow-actions-command'
+import { UpdatePresentationFlowContactCommand } from './commands/update-presentation-flow-contact-command'
 import { UpdatePresentationFlowTemplateCommand } from './commands/update-presentation-flow-template-command'
 import { resolvePresentationFlowEvent, subscribeToPresentationFlowEvents } from './pubsub'
 import { FindActionedPresentationFlowDataQuery } from './queries/find-actioned-presentation-flow-data-query'
 import { FindPresentationFlowTemplatesQuery } from './queries/find-presentation-flow-templates-query'
 import { FindPresentationFlowsQuery } from './queries/find-presentation-flows-query'
+import { FindPresentationFlowContactQuery } from './queries/presentation-flow-contact-query'
 
 export const resolvers: Resolvers = {
+  PresentationFlowRequestResponse: {
+    __resolveType: (response) => {
+      if ('error' in response) return 'RequestErrorResponse'
+      if ('url' in response) return 'PresentationResponse'
+      return 'MDocPresentationResponse'
+    },
+  },
   Mutation: {
     createPresentationFlow: (_, { request }, context) => dispatch(context, CreatePresentationFlowCommand, request),
+    createMDocPresentationFlow: (_, { request }, context) => dispatch(context, CreateMDocPresentationFlowCommand, request),
     createPresentationRequestForPresentationFlow: (_, { presentationFlowId, input }, context) =>
       dispatch(context, CreatePresentationRequestForPresentationFlowCommand, presentationFlowId, input ?? undefined),
     submitPresentationFlowActions: (_, { id, input }, context) => dispatch(context, SubmitPresentationFlowActionsCommand, id, input),
@@ -23,6 +35,10 @@ export const resolvers: Resolvers = {
     createPresentationFlowTemplate: (_, { input }, context) => dispatch(context, CreatePresentationFlowTemplateCommand, input),
     updatePresentationFlowTemplate: (_, { id, input }, context) => dispatch(context, UpdatePresentationFlowTemplateCommand, id, input),
     deletePresentationFlowTemplate: (_, { id }, context) => dispatch(context, DeletePresentationFlowTemplateCommand, id),
+    resendPresentationFlowNotification: (_, { presentationFlowId }, context) =>
+      dispatchTransactional(context, ResendPresentationFlowNotificationCommand, presentationFlowId),
+    updatePresentationFlowContact: (_, { presentationFlowId, contact }, context) =>
+      dispatch(context, UpdatePresentationFlowContactCommand, presentationFlowId, contact ?? undefined),
   },
   Query: {
     presentationFlow: (_, { id }, { dataLoaders: { presentationFlows } }) => presentationFlows.load(id),
@@ -31,12 +47,16 @@ export const resolvers: Resolvers = {
     actionedPresentationFlowData: (_, { id }, context) => query(context, FindActionedPresentationFlowDataQuery, id),
     presentationFlowTemplate: (_, { id }, { dataLoaders: { presentationFlowTemplates } }) => presentationFlowTemplates.load(id),
     findPresentationFlowTemplates: (_, _args, context) => query(context, FindPresentationFlowTemplatesQuery),
+    presentationFlowContact: (_, { presentationFlowId }, context) => query(context, FindPresentationFlowContactQuery, presentationFlowId),
   },
   PresentationFlow: {
     portalUrl: (root) => `${portalUrl}/presentation-flow/${root.id}`,
     identity: (root, _, { dataLoaders: { identities } }) => (root.identityId == null ? null : identities.load(root.identityId)),
     template: (root, _, { dataLoaders: { presentationFlowTemplates } }) =>
       root.templateId ? presentationFlowTemplates.load(root.templateId) : null,
+    hasContactNotificationSet: (root) => {
+      return !!root.hasContactNotification
+    },
     action: (root) => {
       if (!root.actionKey) return null
 

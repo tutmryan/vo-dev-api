@@ -7,6 +7,7 @@ import type { AcquireLimitedAccessTokenInput } from '../../../generated/graphql'
 import { beforeAfterAll, executeOperationAsLimitedAccessClient, expectToBeDefined, expectUnauthorizedError } from '../../../test'
 import { mockedServices } from '../../../test/mocks'
 import { createContract, getDefaultContractInput } from '../../contracts/test/create-contract'
+import { CredentialRecordEntity } from '../../credential-record/entities/credential-record-entity'
 import { createIdentity } from '../../identity/tests/create-identity'
 import { IssuanceEntity } from '../../issuance/entities/issuance-entity'
 import { UserEntity } from '../../users/entities/user-entity'
@@ -95,6 +96,12 @@ async function createContractWithIssuance() {
       .getRepository(UserEntity)
       .save(new UserEntity({ email: casual.email, isApp: true, name: 'Test', oid: randomUUID(), tenantId: randomUUID() }))
     addUserToManager(entityManager, issuedBy.id)
+    const credentialRecord = new CredentialRecordEntity()
+    credentialRecord.createdById = issuedBy.id
+    credentialRecord.contractId = contract.id
+    credentialRecord.identityId = identity.id
+    credentialRecord.expiresAt = null
+    await entityManager.getRepository(CredentialRecordEntity).save(credentialRecord)
     const issuance = await entityManager.getRepository(IssuanceEntity).save(
       new IssuanceEntity({
         id: randomUUID(),
@@ -104,6 +111,7 @@ async function createContractWithIssuance() {
         issuedById: issuedBy.id,
         expiresAt: new Date(),
         hasFaceCheckPhoto: null,
+        credentialRecordId: credentialRecord.id,
       }),
     )
     return { issuedBy, issuance }

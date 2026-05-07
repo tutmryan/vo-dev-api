@@ -12,6 +12,7 @@ export const createIssuanceRequestForAsyncIssuanceMutation = graphql(`
         requestId
         url
         qrCode
+        credentialRecordId
       }
       ... on RequestErrorResponse {
         __typename

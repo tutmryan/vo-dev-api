@@ -1,0 +1,229 @@
+import { randomUUID } from 'crypto'
+import { issuanceRequestRegistration } from '../../../config'
+import type { CommandContext } from '../../../cqs'
+import {
+  ClaimType,
+  FaceCheckPhotoSupport,
+  type IssuanceRequestInput,
+  type IssuanceResponse,
+  type RequestErrorResponse,
+} from '../../../generated/graphql'
+import type { IssuanceRequest } from '../../../services/verified-id'
+import { validateIssuanceRequestBodySize } from '../../../services/verified-id/utils'
+import { parseDataUrl } from '../../../util/data-url'
+import { invariant } from '../../../util/invariant'
+import { anyUserInvariant, userIsIdentityEntity } from '../../../util/user-invariant'
+import type { StandardClaims } from '../../contracts/claims'
+import { validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
+import { ContractEntity } from '../../contracts/entities/contract-entity'
+import { createOrUpdateIdentity } from '../../identity'
+import { IdentityEntity } from '../../identity/entities/identity-entity'
+import { deletePhotoCaptureRequest, getPhotoCaptureData } from '../../photo-capture'
+
+export type IssuanceExecutionInput = IssuanceRequestInput & {
+  asyncIssuanceCreatedById?: string
+}
+
+export type IssuanceExecutionSuccess = {
+  requestResponse: IssuanceResponse
+  issuanceId: string
+  issuedById: string
+  identity: IdentityEntity
+  contract: ContractEntity
+  hasFaceCheckPhoto: boolean | null
+  expirationDate: IssuanceRequestInput['expirationDate']
+  photoCaptureRequestId: IssuanceRequestInput['photoCaptureRequestId']
+}
+
+type StandardClaimsData = Record<StandardClaims, string>
+
+export async function executeIssuanceRequest(
+  context: CommandContext,
+  {
+    contractId,
+    identityId,
+    identity: identityInput,
+    claims: claimsInput,
+    faceCheckPhoto,
+    photoCaptureRequestId,
+    asyncIssuanceCreatedById,
+    ...rest
+  }: IssuanceExecutionInput,
+): Promise<IssuanceExecutionSuccess | RequestErrorResponse> {
+  const {
+    user,
+    entityManager,
+    services: { verifiedIdRequest: request, verifiedIdAdmin },
+  } = context
+
+  anyUserInvariant(user)
+
+  if (userIsIdentityEntity(user)) invariant(asyncIssuanceCreatedById, 'asyncIssuanceCreatedById is required')
+
+  // find the contract
+  const contract = await entityManager.getRepository(ContractEntity).findOneByOrFail({ id: contractId })
+  invariant(contract.externalId, 'Contract must be provisioned before issuance')
+  invariant(!contract.isDeprecated, 'Contract must not be deprecated')
+
+  // validate that the provided claims include the required contract claims and validate all claim values
+  validateIssuanceClaimsAgainstContractClaims(claimsInput, contract.display.claims)
+
+  // find the provisioned contract
+  const provisionedContract = await verifiedIdAdmin.contract(contract.externalId)
+  invariant(provisionedContract, 'Published contract could not be found')
+
+  // validate the face check photo input
+  if (contract.faceCheckSupport === FaceCheckPhotoSupport.Required) {
+    invariant(
+      faceCheckPhoto || photoCaptureRequestId,
+      'Face check photo or using a photo capture request is required for issuance of this contract',
+    )
+  }
+
+  if (contract.faceCheckSupport === FaceCheckPhotoSupport.None) {
+    invariant(
+      !faceCheckPhoto && !photoCaptureRequestId,
+      'Contract must support face check when providing either a face check photo or using a photo capture request',
+    )
+  }
+
+  // validate that there is either no image data (false, false) or the image data is from a single source (false, true) | (true, false)
+  invariant(
+    (!faceCheckPhoto && !photoCaptureRequestId) || (faceCheckPhoto && !photoCaptureRequestId) || (!faceCheckPhoto && photoCaptureRequestId),
+    'Face check photo cannot be provided when using a photo capture request',
+  )
+
+  // find or create the identity
+  let identity: IdentityEntity
+  if (user.limitedAccessData?.identityId)
+    identity = await entityManager.getRepository(IdentityEntity).findOneByOrFail({ id: user.limitedAccessData.identityId })
+  else if (identityId) identity = await entityManager.getRepository(IdentityEntity).findOneByOrFail({ id: identityId })
+  else if (!identityInput) throw new Error('Either identityId or identity must be provided')
+  else identity = await createOrUpdateIdentity(entityManager, identityInput)
+
+  // Build the claims data, starting with any claims defined on the contract with (default) values
+  const claimsData: Record<string, any> = {}
+
+  // Populate relevant claims fields from the contract
+  contract.display.claims.forEach(({ claim, type, value, isFixed }) => {
+    claimsData[claim] = { type, value, isFixed: !!isFixed }
+  })
+
+  // Assign issuance request claims input to value, overriding any contract-defined claim values unless isFixed
+  if (claimsInput) {
+    Object.entries(claimsInput).forEach(([claim, inputValue]) => {
+      claimsData[claim] = {
+        ...claimsData[claim],
+        value: claimsData[claim]?.isFixed ? claimsData[claim].value : inputValue,
+      }
+    })
+  }
+
+  // Flatten and process photo claims
+  let claims: Record<string, any> = Object.fromEntries(
+    Object.entries(claimsData).map(([claim, { type, value }]) => [
+      claim,
+      type === ClaimType.Image && value ? convertImageClaimInput(value, claim) : value,
+    ]),
+  )
+
+  // add face check photo claim, if supplied & allowed by the contract
+  if (faceCheckPhoto && contract.faceCheckSupport !== FaceCheckPhotoSupport.None) claims['photo'] = convertFaceCheckPhoto(faceCheckPhoto)
+
+  // validate the photo capture request matches to the contract and identity, set the claims data, and remove the capture cache
+  if (photoCaptureRequestId) {
+    const photoCaptureRequest = await getPhotoCaptureData(photoCaptureRequestId)
+    invariant(photoCaptureRequest, 'Photo capture request not found')
+    invariant(
+      photoCaptureRequest.contractId.toLowerCase() === contractId.toLowerCase(),
+      'Photo capture request must be for the same contract',
+    )
+    invariant(
+      photoCaptureRequest.identityId.toLowerCase() === identity.id.toLowerCase(),
+      'Photo capture request must be for the same identity',
+    )
+    invariant(photoCaptureRequest.photo, 'Photo capture request must have a photo captured')
+    claims['photo'] = photoCaptureRequest.photo
+  }
+
+  // add standard claims
+  const standardClaims: StandardClaimsData = {
+    issuanceId: randomUUID(),
+    name: identity.name,
+    identityId: identity.id,
+  }
+  claims = { ...claims, ...standardClaims }
+
+  // set or override the callback when defined in limitedAccessData (i.e. when it was provided as input to limited access token acquisition)
+  if (user.limitedAccessData?.callback) {
+    rest.callback = user.limitedAccessData.callback
+  }
+
+  // create the issuance request
+  const issuanceRequest: IssuanceRequest = {
+    claims,
+    ...rest,
+    type: contract.credentialTypes.join(','), // the Azure portal issuance example joins the types with a comma
+    authority: (await verifiedIdAdmin.authority()).didModel.did,
+    manifest: provisionedContract.manifestUrl,
+    registration: issuanceRequestRegistration,
+  }
+
+  // validate the size of the request
+  validateIssuanceRequestBodySize(issuanceRequest)
+
+  // send it
+  const requestResponse = await request.createIssuanceRequest(issuanceRequest)
+
+  // if the response is RequestErrorResponse, return it immediately
+  if ('error' in requestResponse) return requestResponse
+
+  // if this was a photo capture, remove the cache, as the photo data is designed to be used a single time
+  if (photoCaptureRequestId) await deletePhotoCaptureRequest(photoCaptureRequestId)
+
+  return {
+    requestResponse,
+    issuanceId: standardClaims.issuanceId,
+    issuedById: asyncIssuanceCreatedById ?? user.entity.id,
+    identity,
+    contract,
+    hasFaceCheckPhoto: contract.faceCheckSupport === FaceCheckPhotoSupport.None ? null : !!claims['photo'],
+    expirationDate: issuanceRequest.expirationDate,
+    photoCaptureRequestId,
+  }
+}
+
+const invalidFaceCheckError = 'Face check photo must be a valid image/jpeg data URL with base64 encoding'
+const invalidImageClaimError = (claim: string) => `Image claim '${claim}' must be a valid image/jpeg data URL with base64 encoding`
+
+// validates image claim input and returns the base64url encoded image data (to be used as the claim value)
+function convertImageClaimInputToClaimValue(imageDataUrl: string, errorMessage: string) {
+  const { encoding, data } = parseImageClaimDataUrl(imageDataUrl, errorMessage)
+  const buffer = Buffer.from(data, encoding)
+  return buffer.toString('base64url')
+}
+
+// parses and validates image claim input (jpeg data URL with base64 encoding)
+function parseImageClaimDataUrl(imageDataUrl: string, errorMessage: string) {
+  try {
+    return parseDataUrl(imageDataUrl, {
+      validMimeTypes: ['image/jpeg'],
+      validEncodings: ['base64'],
+    })
+  } catch {
+    throw new Error(errorMessage)
+  }
+}
+
+// validates face check photo input and returns base64url encoded image data
+export const convertFaceCheckPhoto = (photo: string) => convertImageClaimInputToClaimValue(photo, invalidFaceCheckError)
+
+// validates image claim input and returns the base64url encoded image data (to be used as the claim value)
+export const convertImageClaimInput = (image: string, claim: string) =>
+  convertImageClaimInputToClaimValue(image, invalidImageClaimError(claim))
+
+// parses and validates face check photo input (jpeg data URL with base64 encoding)
+export const validateFaceCheckPhoto = (photo: string) => parseImageClaimDataUrl(photo, invalidFaceCheckError)
+
+// parses and validates image claim input (jpeg data URL with base64 encoding)
+export const validateImageClaimInput = (image: string, claim: string) => parseImageClaimDataUrl(image, invalidImageClaimError(claim))

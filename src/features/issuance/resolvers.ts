@@ -2,6 +2,7 @@ import { dispatch, query } from '../../cqs/dispatcher'
 import type { Resolvers } from '../../generated/graphql'
 import { compactErrors } from '../../util/compact-errors'
 import { resolveIssuanceEventData, subscribeToIssuanceEventsWithFilter } from './callback/pubsub'
+import { CancelIssuanceRequestCommand } from './commands/cancel-issuance-request-command'
 import { CreateIssuanceRequestCommand } from './commands/create-issuance-request-command'
 import { RevokeContractIssuancesCommand } from './commands/revoke-contract-issuances-command'
 import { RevokeIdentityIssuancesCommand } from './commands/revoke-identity-issuances-command'
@@ -28,6 +29,7 @@ export const resolvers: Resolvers = {
   },
   Mutation: {
     createIssuanceRequest: (_, { request }, context) => dispatch(context, CreateIssuanceRequestCommand, request),
+    cancelIssuanceRequest: (_, { credentialRecordId }, context) => dispatch(context, CancelIssuanceRequestCommand, credentialRecordId),
     revokeIssuance: (_, { id }, context) => dispatch(context, RevokeIssuanceCommand, id),
     revokeIssuances: (_, { ids }, context) => dispatch(context, RevokeIssuancesCommand, ids),
     revokeContractIssuances: (_, { contractId }, context) => dispatch(context, RevokeContractIssuancesCommand, contractId),

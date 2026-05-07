@@ -7,7 +7,7 @@ type BaseConfig = Pick<
   'type' | 'synchronize' | 'logging' | 'entities' | 'migrations' | 'host' | 'port' | 'database' | 'subscribers'
 >
 
-const { HOST: host, DATABASE: database } = process.env
+const { DATABASE_HOST: host, DATABASE_NAME: database } = process.env
 const baseConfig: BaseConfig = {
   type: 'mssql',
   host,
@@ -21,7 +21,7 @@ const baseConfig: BaseConfig = {
 }
 
 function usernamePasswordAuthConfig(baseConfig: BaseConfig): SqlServerConnectionOptions {
-  const { USER: username, PASSWORD: password } = process.env
+  const { DATABASE_USERNAME: username, DATABASE_PASSWORD: password } = process.env
   return {
     ...baseConfig,
     username,

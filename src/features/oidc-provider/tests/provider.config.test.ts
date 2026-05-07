@@ -148,7 +148,7 @@ describe('createProvider configuration', () => {
     expect(capturedConfigs.length).toBe(1)
     const config = capturedConfigs[0]!
 
-    expect(config.clientAuthMethods).toEqual(['none', 'client_secret_post'])
+    expect(config.clientAuthMethods).toEqual(['none', 'client_secret_post', 'private_key_jwt'])
 
     expect(config.cookies?.keys).toEqual([TEST_COOKIE_SECRET])
     expect(config.cookies?.long?.sameSite).toBe('none')

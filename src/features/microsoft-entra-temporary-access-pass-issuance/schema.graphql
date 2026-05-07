@@ -1,4 +1,20 @@
 """
+Represents the reason why a self-service action is unavailable.
+"""
+enum SelfServiceActionUnavailableReason {
+  USER_NOT_FOUND
+  GUEST_USER_NOT_ELIGIBLE
+  POLICY_DISABLED
+  USER_EXCLUDED
+  USER_NOT_INCLUDED
+  MISSING_PERMISSIONS
+  POLICY_NOT_FOUND
+  ALREADY_HAS_ACTIVE_TAP
+  SERVICE_NOT_CONFIGURED
+  SELF_SERVICE_DISABLED
+}
+
+"""
 Represents an available self-service action that a user or identity can perform.
 """
 type SelfServiceAction {
@@ -15,13 +31,21 @@ type SelfServiceAction {
   """
   description: String
   """
-  Indicates whether the action is currently enabled and available to the user.
+  Indicates whether the action is administratively enabled.
   """
   enabled: Boolean!
   """
-  If the action is not enabled, provides a reason why it is unavailable.
+  Indicates whether the current user meets the technical requirements to perform this action.
+  """
+  isEligible: Boolean!
+  """
+  If the action is not enabled or not eligible, provides a reason why it is unavailable.
   """
   unavailableReason: String
+  """
+  A machine-readable code for the reason why the action is unavailable.
+  """
+  unavailableReasonCode: SelfServiceActionUnavailableReason
   """
   The identity store associated with this action.
   """
@@ -115,6 +139,11 @@ extend type Query {
   Get a single Microsoft Entra Temporary Access Pass issuance by ID.
   """
   microsoftEntraTemporaryAccessPassIssuance(id: ID!): MicrosoftEntraTemporaryAccessPassIssuance
+
+  """
+  Check if the current authenticated identity is eligible for self-service Temporary Access Pass.
+  """
+  checkMyTapEligibility: [SelfServiceAction!]!
 }
 
 """

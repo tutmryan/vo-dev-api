@@ -158,6 +158,11 @@ A field whose value conforms to the standard URL format as specified in RFC3986:
 """
 scalar URL
 
+"""
+A field whose value conforms to the `data:` URL format as specified in RFC 2397.
+"""
+scalar DataURL
+
 # """
 # The `BigInt` scalar type represents non-fractional signed whole numeric values.
 # """

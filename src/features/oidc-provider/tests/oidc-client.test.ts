@@ -9,10 +9,10 @@ import {
   deleteOidcClientMutation,
   findOidcClientsQuery,
   oidcClientQuery,
-  updateConciergeClientBrandingMutation,
+  updateConciergeClientMutation,
   updateOidcClientMutation,
 } from '.'
-import { OidcApplicationType, OidcClientType } from '../../../generated/graphql'
+import { OidcApplicationType, OidcClientType, OidcResponseType, OidcTokenEndpointAuthMethod, VcParamMode } from '../../../generated/graphql'
 import { UserRoles } from '../../../roles'
 import {
   beforeAfterAll,
@@ -154,6 +154,92 @@ describe('createOidcClient mutation', () => {
     expect(errors?.[0]?.message).toEqual('Confidential clients must have a secret')
   })
 
+  it('can create a confidential client with private_key_jwt and inline JWKS', async () => {
+    const jwks = {
+      keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1', use: 'sig', alg: 'RS256' }],
+    }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.tokenEndpointAuthMethod).toEqual(OidcTokenEndpointAuthMethod.PrivateKeyJwt)
+    expect(client.clientJwks).toEqual(jwks)
+    expect(client.clientJwksUri).toBeNull()
+    // No secret should be stored for private_key_jwt
+    expect(mockedServices.oidcSecretService.set.mock().mock.calls).toHaveLength(0)
+  })
+
+  it('can create a confidential client with private_key_jwt and JWKS URI', async () => {
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwksUri: 'https://example.com/.well-known/jwks.json',
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.tokenEndpointAuthMethod).toEqual(OidcTokenEndpointAuthMethod.PrivateKeyJwt)
+    expect(client.clientJwksUri).toEqual('https://example.com/.well-known/jwks.json')
+  })
+
+  it(`can't create a private_key_jwt client without JWKS or JWKS URI`, async () => {
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('private_key_jwt clients must have clientJwks or clientJwksUri')
+  })
+
+  it(`can't create a private_key_jwt client with a secret`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+      clientSecret: casual.uuid,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('private_key_jwt clients cannot have a secret, use client_secret_post instead')
+  })
+
+  it(`can't create a client_secret_post client with JWKS`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.ClientSecretPost,
+      clientSecret: casual.uuid,
+      clientJwks: jwks,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('client_secret_post clients cannot have JWKS, use private_key_jwt instead')
+  })
+
+  it(`can't create a public client with private_key_jwt`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Public,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('Public clients must use token endpoint auth method "none"')
+  })
+
   it('returns an unauthorized error when accessed anonymously', async () => {
     const { errors } = await executeOperationAnonymous({ query: createOidcClientMutation, variables: { input: createInput } })
     expect(errors).toBeDefined()
@@ -229,6 +315,452 @@ describe('updateOidcClient mutation', () => {
     const persistedPartnerIds = (await reloaded.partners).map((p) => p.id)
     expect(persistedPartnerIds).toEqual(expect.arrayContaining([partner1.id, partner2.id]))
   })
+
+  it('can switch a confidential client from client_secret_post to private_key_jwt', async () => {
+    const confidentialInput = createOidcClientInput({ clientType: OidcClientType.Confidential, clientSecret: casual.uuid })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: confidentialInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const updateInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+    })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    const updated = data.updateOidcClient
+    expect(updated.tokenEndpointAuthMethod).toEqual(OidcTokenEndpointAuthMethod.PrivateKeyJwt)
+    expect(updated.clientJwks).toEqual(jwks)
+    // Secret should be deleted when switching to private_key_jwt
+    expect(mockedServices.oidcSecretService.delete.lastCallArgs()).toEqual([client.id])
+  })
+
+  it('can switch a confidential client from private_key_jwt to client_secret_post', async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const pkjInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+    })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: pkjInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    const newSecret = casual.uuid
+    const updateInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.ClientSecretPost,
+      clientSecret: newSecret,
+    })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    const updated = data.updateOidcClient
+    expect(updated.tokenEndpointAuthMethod).toEqual(OidcTokenEndpointAuthMethod.ClientSecretPost)
+    expect(updated.clientJwks).toBeNull()
+    expect(updated.clientJwksUri).toBeNull()
+    expect(mockedServices.oidcSecretService.set.lastCallArgs()).toEqual([client.id, newSecret])
+  })
+
+  it(`can't switch from private_key_jwt to client_secret_post without a secret`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const pkjInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+    })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: pkjInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    const updateInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.ClientSecretPost,
+    })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(data?.updateOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('Confidential clients must have a secret')
+  })
+
+  it('retains existing secret when updating without providing a new secret', async () => {
+    const originalSecret = casual.uuid
+    const confidentialInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      clientSecret: originalSecret,
+    })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: confidentialInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    expect(mockedServices.oidcSecretService.set.lastCallArgs()).toEqual([client.id, originalSecret])
+
+    mockedServices.clearAllMocks()
+
+    const updateInput = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      name: 'Updated Name',
+    })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    expect(data.updateOidcClient.name).toEqual('Updated Name')
+
+    expect(mockedServices.oidcSecretService.set.mock().mock.calls).toHaveLength(0)
+    expect(mockedServices.oidcSecretService.delete.mock().mock.calls).toHaveLength(0)
+  })
+
+  it('does not attempt to delete a secret when updating a public client', async () => {
+    const publicInput = createOidcClientInput({ clientType: OidcClientType.Public })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: publicInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    mockedServices.clearAllMocks()
+
+    const updateInput = createOidcClientInput({ clientType: OidcClientType.Public, name: 'Updated Name' })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    expect(data.updateOidcClient.name).toEqual('Updated Name')
+
+    // No secret operations should occur — public clients never have a secret stored
+    expect(mockedServices.oidcSecretService.set.mock().mock.calls).toHaveLength(0)
+    expect(mockedServices.oidcSecretService.delete.mock().mock.calls).toHaveLength(0)
+  })
+
+  it(`can't provide both clientJwks and clientJwksUri`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'test-key-1' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+      clientJwksUri: 'https://example.com/.well-known/jwks.json',
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('clientJwks and clientJwksUri are mutually exclusive')
+  })
+
+  it(`can't provide both relyingPartyJwks and relyingPartyJwksUri`, async () => {
+    const jarJwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'jar-key-1' }] }
+    const input = createOidcClientInput({
+      authorizationRequestsTypeJarEnabled: true,
+      relyingPartyJwks: jarJwks,
+      relyingPartyJwksUri: 'https://example.com/.well-known/jwks.json',
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual('relyingPartyJwks and relyingPartyJwksUri are mutually exclusive')
+  })
+
+  it(`can't create a client with invalid JWK structure in clientJwks`, async () => {
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: { invalid: 'structure' },
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('clientJwks must be valid JSON containing a JWK or JWKS object')
+  })
+})
+
+describe('JAR key configuration', () => {
+  beforeAfterAll()
+  beforeEach(() => {
+    mockedServices.clearAllMocks()
+  })
+
+  it('can create a client with JAR enabled and relyingPartyJwksUri', async () => {
+    const input = createOidcClientInput({
+      authorizationRequestsTypeJarEnabled: true,
+      relyingPartyJwksUri: 'https://example.com/.well-known/jwks.json',
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.authorizationRequestsTypeJarEnabled).toBe(true)
+    expect(client.relyingPartyJwksUri).toEqual('https://example.com/.well-known/jwks.json')
+    expect(client.relyingPartyJwks).toBeNull()
+  })
+
+  it('can create a client with JAR enabled and inline relyingPartyJwks', async () => {
+    const jarJwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'jar-key-1', use: 'sig', alg: 'RS256' }] }
+    const input = createOidcClientInput({
+      authorizationRequestsTypeJarEnabled: true,
+      relyingPartyJwks: jarJwks,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.authorizationRequestsTypeJarEnabled).toBe(true)
+    expect(client.relyingPartyJwks).toEqual(jarJwks)
+    expect(client.relyingPartyJwksUri).toBeNull()
+  })
+
+  it('allows JAR without asymmetric keys when using client_secret_post (HS-signed)', async () => {
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      clientSecret: casual.uuid,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.ClientSecretPost,
+      authorizationRequestsTypeJarEnabled: true,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.authorizationRequestsTypeJarEnabled).toBe(true)
+    expect(client.relyingPartyJwks).toBeNull()
+    expect(client.relyingPartyJwksUri).toBeNull()
+  })
+
+  it(`requires JAR keys for private_key_jwt clients with JAR enabled`, async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'auth-key-1' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+      authorizationRequestsTypeJarEnabled: true,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual(
+      'JAR-enabled clients must have relyingPartyJwks or relyingPartyJwksUri (unless using client_secret_post)',
+    )
+  })
+
+  it('can create a private_key_jwt client with both auth and JAR keys (duplicated)', async () => {
+    const jwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'shared-key-1', use: 'sig', alg: 'RS256' }] }
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Confidential,
+      tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.PrivateKeyJwt,
+      clientJwks: jwks,
+      authorizationRequestsTypeJarEnabled: true,
+      relyingPartyJwks: jwks,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    const client = data.createOidcClient
+    expect(client.clientJwks).toEqual(jwks)
+    expect(client.relyingPartyJwks).toEqual(jwks)
+  })
+
+  it('clears JAR keys when JAR is disabled on update', async () => {
+    const jarJwks = { keys: [{ kty: 'RSA', n: 'test-n', e: 'AQAB', kid: 'jar-key-1' }] }
+    const createInput = createOidcClientInput({
+      authorizationRequestsTypeJarEnabled: true,
+      relyingPartyJwks: jarJwks,
+    })
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: createInput } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+    expect(client.relyingPartyJwks).toEqual(jarJwks)
+
+    const updateInput = createOidcClientInput({
+      authorizationRequestsTypeJarEnabled: false,
+    })
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+      UserRoles.oidcAdmin,
+    )
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    const updated = data.updateOidcClient
+    expect(updated.authorizationRequestsTypeJarEnabled).toBe(false)
+    expect(updated.relyingPartyJwks).toBeNull()
+    expect(updated.relyingPartyJwksUri).toBeNull()
+  })
+
+  it('requires JAR keys for public clients with JAR enabled', async () => {
+    const input = createOidcClientInput({
+      clientType: OidcClientType.Public,
+      authorizationRequestsTypeJarEnabled: true,
+    })
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toEqual(
+      'JAR-enabled clients must have relyingPartyJwks or relyingPartyJwksUri (unless using client_secret_post)',
+    )
+  })
+})
+
+describe('response type configuration', () => {
+  beforeAfterAll()
+
+  it('defaults to [CODE] when responseTypes not provided', async () => {
+    const input = createOidcClientInput()
+    delete (input as Record<string, unknown>).responseTypes
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expect(data?.createOidcClient.responseTypes).toEqual([OidcResponseType.Code])
+  })
+
+  it('can create a client with CODE response type', async () => {
+    const input = createOidcClientInput({ responseTypes: [OidcResponseType.Code] })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expect(data?.createOidcClient.responseTypes).toEqual([OidcResponseType.Code])
+  })
+
+  it('can create a client with ID_TOKEN response type', async () => {
+    const input = createOidcClientInput({ responseTypes: [OidcResponseType.IdToken] })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expect(data?.createOidcClient.responseTypes).toEqual([OidcResponseType.IdToken])
+  })
+
+  it('can create a client with CODE and ID_TOKEN response types (hybrid flow)', async () => {
+    const input = createOidcClientInput({
+      responseTypes: [OidcResponseType.Code, OidcResponseType.IdToken],
+    })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expect(data?.createOidcClient.responseTypes).toEqual(expect.arrayContaining([OidcResponseType.Code, OidcResponseType.IdToken]))
+    expect(data?.createOidcClient.responseTypes).toHaveLength(2)
+  })
+
+  it('cannot create a client with empty response types', async () => {
+    const input = createOidcClientInput({ responseTypes: [] })
+
+    const { errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('Response types must not be empty when specified')
+  })
+
+  it('cannot update a client with empty response types', async () => {
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: createOidcClientInput({ responseTypes: [OidcResponseType.Code] }) } },
+      UserRoles.oidcAdmin,
+    )
+    const clientId = createData!.createOidcClient.id
+
+    const input = createOidcClientInput({ responseTypes: [] })
+
+    const { errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: clientId, input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('Response types must not be empty when specified')
+  })
+
+  it('can update a client response types from CODE to hybrid', async () => {
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: createOidcClientInput({ responseTypes: [OidcResponseType.Code] }) } },
+      UserRoles.oidcAdmin,
+    )
+    const clientId = createData!.createOidcClient.id
+
+    const input = createOidcClientInput({
+      responseTypes: [OidcResponseType.Code, OidcResponseType.IdToken],
+    })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: clientId, input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expect(data?.updateOidcClient.responseTypes).toEqual(expect.arrayContaining([OidcResponseType.Code, OidcResponseType.IdToken]))
+  })
+
+  it('can update a client response types from CODE to ID_TOKEN', async () => {
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input: createOidcClientInput({ responseTypes: [OidcResponseType.Code] }) } },
+      UserRoles.oidcAdmin,
+    )
+    const clientId = createData!.createOidcClient.id
+
+    const input = createOidcClientInput({ responseTypes: [OidcResponseType.IdToken] })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: clientId, input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expect(data?.updateOidcClient.responseTypes).toEqual([OidcResponseType.IdToken])
+  })
+
+  it('defaults to [CODE] when updating without responseTypes', async () => {
+    const { data: createData } = await executeOperationAsUser(
+      {
+        query: createOidcClientMutation,
+        variables: { input: createOidcClientInput({ responseTypes: [OidcResponseType.Code, OidcResponseType.IdToken] }) },
+      },
+      UserRoles.oidcAdmin,
+    )
+    const clientId = createData!.createOidcClient.id
+
+    const input = createOidcClientInput()
+    delete (input as Record<string, unknown>).responseTypes
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: clientId, input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    // PUT semantics: no responseTypes provided → defaults to [CODE]
+    expect(data?.updateOidcClient.responseTypes).toEqual([OidcResponseType.Code])
+  })
 })
 
 async function insertConciergeOidcClient(overrides: Partial<OidcClientEntity> = {}) {
@@ -249,6 +781,7 @@ async function insertConciergeOidcClient(overrides: Partial<OidcClientEntity> = 
     name: portalClientName,
     applicationType: OidcApplicationType.Web,
     clientType: OidcClientType.Public,
+    tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.None,
     redirectUris: ['https://example.com/cb'],
     postLogoutUris: ['https://example.com/logout'],
     ...overrides,
@@ -294,29 +827,31 @@ async function createPartner(overrides: Partial<PartnerEntity> = {}) {
 
   return partner!
 }
-describe('updateConciergeClientBranding mutation', () => {
+describe('updateConciergeClient mutation', () => {
   beforeAfterAll()
 
   let initClient: OidcClientEntity
+  const validDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a8J8AAAAASUVORK5CYII='
+  const invalidDataUrl = `${validDataUrl}"></div><div><p>INJECTED HTML</p></div><a`
 
   beforeAll(async () => {
     initClient = await insertConciergeOidcClient({
-      logo: 'http://www.somelogo.com/img.png',
+      logo: validDataUrl,
       backgroundColor: '#fff',
-      backgroundImage: 'http://www.bg.com/img.png',
+      backgroundImage: validDataUrl,
     })
   })
 
   it('can update only the name field', async () => {
     const input = { name: 'New Concierge Name' }
     const { data, errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      { query: updateConciergeClientMutation, variables: { input } },
       UserRoles.oidcAdmin,
     )
 
     expect(errors).toBeUndefined()
-    expectToBeDefined(data?.updateConciergeClientBranding)
-    const updated = data.updateConciergeClientBranding
+    expectToBeDefined(data?.updateConciergeClient)
+    const updated = data.updateConciergeClient
     expect(updated.name).toEqual('New Concierge Name')
     expect(updated.logo).toEqual(initClient.logo)
     expect(updated.backgroundColor).toEqual(initClient.backgroundColor)
@@ -326,39 +861,55 @@ describe('updateConciergeClientBranding mutation', () => {
   })
 
   it('can update only the logo field', async () => {
-    const input = { logo: 'https://new.logo/image.png' }
+    const input = { logo: validDataUrl }
     const { data, errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      { query: updateConciergeClientMutation, variables: { input } },
       UserRoles.oidcAdmin,
     )
 
     expect(errors).toBeUndefined()
-    expectToBeDefined(data?.updateConciergeClientBranding)
-    const updated = data.updateConciergeClientBranding
+    expectToBeDefined(data?.updateConciergeClient)
+    const updated = data.updateConciergeClient
     expect(updated.logo).toEqual(input.logo)
     expect(updated.name).toEqual('New Concierge Name') // previously updated
     expect(updated.backgroundColor).toEqual(initClient.backgroundColor)
     expect(updated.backgroundImage).toEqual(initClient.backgroundImage)
   })
 
-  it('can update multiple branding fields', async () => {
+  it('can update multiple fields', async () => {
     const input = {
       name: '`SomeBrand`',
       backgroundColor: '#123456',
-      backgroundImage: 'https://img.com/bg.png',
+      backgroundImage: validDataUrl,
     }
     const { data, errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      { query: updateConciergeClientMutation, variables: { input } },
       UserRoles.oidcAdmin,
     )
 
     expect(errors).toBeUndefined()
-    expectToBeDefined(data?.updateConciergeClientBranding)
-    const updated = data.updateConciergeClientBranding
+    expectToBeDefined(data?.updateConciergeClient)
+    const updated = data.updateConciergeClient
     expect(updated.name).toEqual(input.name)
     expect(updated.backgroundColor).toEqual(input.backgroundColor)
     expect(updated.backgroundImage).toEqual(input.backgroundImage)
-    expect(updated.logo).toEqual('https://new.logo/image.png') // previously updated
+    expect(updated.logo).toEqual(validDataUrl) // previously updated
+  })
+
+  it('rejects logo values that are not valid data URLs', async () => {
+    const input = { logo: invalidDataUrl }
+    const { errors } = await executeOperationAsUser({ query: updateConciergeClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('RFC 2397')
+  })
+
+  it('rejects backgroundImage values that are not valid data URLs', async () => {
+    const input = { backgroundImage: invalidDataUrl }
+    const { errors } = await executeOperationAsUser({ query: updateConciergeClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('RFC 2397')
   })
 
   it('resets fields to null/default when null', async () => {
@@ -369,20 +920,20 @@ describe('updateConciergeClientBranding mutation', () => {
       backgroundImage: null,
     }
     const { data, errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      { query: updateConciergeClientMutation, variables: { input } },
       UserRoles.oidcAdmin,
     )
 
     expect(errors).toBeUndefined()
-    expectToBeDefined(data?.updateConciergeClientBranding)
-    const updated = data.updateConciergeClientBranding
+    expectToBeDefined(data?.updateConciergeClient)
+    const updated = data.updateConciergeClient
     expect(updated.name).toBeDefined()
     expect(updated.logo).toBeNull()
     expect(updated.backgroundColor).toBeNull()
     expect(updated.backgroundImage).toBeNull()
   })
 
-  it('does not change non-branding fields like redirectUris', async () => {
+  it('does not change other fields like redirectUris', async () => {
     const { data: queryData } = await executeOperationAsUser(
       { query: oidcClientQuery, variables: { id: portalClientId } },
       UserRoles.oidcAdmin,
@@ -392,26 +943,24 @@ describe('updateConciergeClientBranding mutation', () => {
 
     const input = { name: 'BrandOnly' }
     const { data, errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
+      { query: updateConciergeClientMutation, variables: { input } },
       UserRoles.oidcAdmin,
     )
     expect(errors).toBeUndefined()
-    expectToBeDefined(data?.updateConciergeClientBranding)
-    const updated = data.updateConciergeClientBranding
+    expectToBeDefined(data?.updateConciergeClient)
+    const updated = data.updateConciergeClient
 
     expect(updated.redirectUris).toEqual(originalRedirectUris)
   })
 
   it('returns unauthorized error for non-admin roles', async () => {
     const input = { name: 'ShouldNotWork' }
-    const { errors } = await executeOperationAsUser(
-      { query: updateConciergeClientBrandingMutation, variables: { input } },
-      UserRoles.reader,
-    )
+    const { errors } = await executeOperationAsUser({ query: updateConciergeClientMutation, variables: { input } }, UserRoles.reader)
     expect(errors).toBeDefined()
     expectUnauthorizedError(errors)
   })
 })
+
 describe('deleteOidcClient mutation', () => {
   beforeAfterAll()
 
@@ -527,5 +1076,526 @@ describe('findOidcClients query', () => {
     expect(defaultData?.findOidcClients?.length).toEqual(0)
     expect(withDeletedData?.findOidcClients?.length).toEqual(1)
     expect(withDeletedData?.findOidcClients?.[0]?.deletedAt).toBeTruthy()
+  })
+})
+
+describe('vcPolicy and claimConstraint', () => {
+  beforeAfterAll()
+  beforeEach(() => {
+    mockedServices.clearAllMocks()
+  })
+
+  describe('createOidcClient', () => {
+    it('creates a client with default vcPolicy when not provided', async () => {
+      const input = createOidcClientInput()
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.ClientSupplied,
+        vcConstraintValues: VcParamMode.ClientSupplied,
+      })
+    })
+
+    it('creates a client with a fully specified vcPolicy', async () => {
+      const input = createOidcClientInput({
+        vcPolicy: {
+          vcType: VcParamMode.Fixed,
+          vcConstraintValues: VcParamMode.Fixed,
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.Fixed,
+        vcConstraintValues: VcParamMode.Fixed,
+      })
+    })
+
+    it('creates a client with a partial vcPolicy, defaulting omitted fields', async () => {
+      const input = createOidcClientInput({
+        vcPolicy: {
+          vcType: VcParamMode.Fixed,
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.Fixed,
+        vcConstraintValues: VcParamMode.ClientSupplied,
+      })
+    })
+
+    it('creates a client with no claimConstraint when not provided', async () => {
+      const input = createOidcClientInput()
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.claimConstraint).toBeNull()
+    })
+
+    it('creates a client with a values claimConstraint', async () => {
+      const input = createOidcClientInput({
+        claimConstraint: {
+          claimName: 'country',
+          values: ['US', 'UK'],
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.claimConstraint).toEqual({
+        claimName: 'country',
+        values: ['US', 'UK'],
+        contains: null,
+        startsWith: null,
+      })
+    })
+
+    it('creates a client with a contains claimConstraint', async () => {
+      const input = createOidcClientInput({
+        vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
+        claimConstraint: {
+          claimName: 'email',
+          contains: '@example.com',
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.claimConstraint).toEqual({
+        claimName: 'email',
+        values: null,
+        contains: '@example.com',
+        startsWith: null,
+      })
+    })
+
+    it('creates a client with a startsWith claimConstraint', async () => {
+      const input = createOidcClientInput({
+        vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
+        claimConstraint: {
+          claimName: 'name',
+          startsWith: 'John',
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.createOidcClient)
+      expect(data.createOidcClient.claimConstraint).toEqual({
+        claimName: 'name',
+        values: null,
+        contains: null,
+        startsWith: 'John',
+      })
+    })
+  })
+
+  describe('updateOidcClient', () => {
+    it('can set vcPolicy on update', async () => {
+      const { data: createData } = await createOidcClient()
+      expectToBeDefined(createData?.createOidcClient)
+      const client = createData.createOidcClient
+
+      const input = createOidcClientInput({
+        vcPolicy: {
+          vcType: VcParamMode.Fixed,
+          vcConstraintValues: VcParamMode.Fixed,
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser(
+        { query: updateOidcClientMutation, variables: { id: client.id, input } },
+        UserRoles.oidcAdmin,
+      )
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.updateOidcClient)
+      expect(data.updateOidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.Fixed,
+        vcConstraintValues: VcParamMode.Fixed,
+      })
+    })
+
+    it('resets vcPolicy to defaults when not provided on update', async () => {
+      // Create with fixed policy
+      const createInput = createOidcClientInput({
+        vcPolicy: {
+          vcType: VcParamMode.Fixed,
+        },
+      })
+      const { data: createData } = await executeOperationAsUser(
+        { query: createOidcClientMutation, variables: { input: createInput } },
+        UserRoles.oidcAdmin,
+      )
+      expectToBeDefined(createData?.createOidcClient)
+      const client = createData.createOidcClient
+
+      // Update without vcPolicy
+      const updateInput = createOidcClientInput()
+      const { data, errors } = await executeOperationAsUser(
+        { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+        UserRoles.oidcAdmin,
+      )
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.updateOidcClient)
+      expect(data.updateOidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.ClientSupplied,
+        vcConstraintValues: VcParamMode.ClientSupplied,
+      })
+    })
+
+    it('can set a claimConstraint on update', async () => {
+      const { data: createData } = await createOidcClient()
+      expectToBeDefined(createData?.createOidcClient)
+      const client = createData.createOidcClient
+
+      const input = createOidcClientInput({
+        claimConstraint: {
+          claimName: 'country',
+          values: ['US', 'UK'],
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser(
+        { query: updateOidcClientMutation, variables: { id: client.id, input } },
+        UserRoles.oidcAdmin,
+      )
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.updateOidcClient)
+      expect(data.updateOidcClient.claimConstraint).toEqual({
+        claimName: 'country',
+        values: ['US', 'UK'],
+        contains: null,
+        startsWith: null,
+      })
+    })
+
+    it('can clear a claimConstraint by passing null on update', async () => {
+      // Create with constraint
+      const createInput = createOidcClientInput({
+        claimConstraint: {
+          claimName: 'country',
+          values: ['US'],
+        },
+      })
+      const { data: createData } = await executeOperationAsUser(
+        { query: createOidcClientMutation, variables: { input: createInput } },
+        UserRoles.oidcAdmin,
+      )
+      expectToBeDefined(createData?.createOidcClient)
+      const client = createData.createOidcClient
+      expect(client.claimConstraint).not.toBeNull()
+
+      // Update with null constraint
+      const updateInput = createOidcClientInput({
+        claimConstraint: null,
+      })
+
+      const { data, errors } = await executeOperationAsUser(
+        { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+        UserRoles.oidcAdmin,
+      )
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.updateOidcClient)
+      expect(data.updateOidcClient.claimConstraint).toBeNull()
+    })
+
+    it('can replace an existing claimConstraint with a different operator', async () => {
+      // Create with values constraint
+      const createInput = createOidcClientInput({
+        claimConstraint: {
+          claimName: 'country',
+          values: ['US'],
+        },
+      })
+      const { data: createData } = await executeOperationAsUser(
+        { query: createOidcClientMutation, variables: { input: createInput } },
+        UserRoles.oidcAdmin,
+      )
+      expectToBeDefined(createData?.createOidcClient)
+      const client = createData.createOidcClient
+
+      // Replace with contains constraint
+      const updateInput = createOidcClientInput({
+        vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
+        claimConstraint: {
+          claimName: 'email',
+          contains: '@example.com',
+        },
+      })
+
+      const { data, errors } = await executeOperationAsUser(
+        { query: updateOidcClientMutation, variables: { id: client.id, input: updateInput } },
+        UserRoles.oidcAdmin,
+      )
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.updateOidcClient)
+      expect(data.updateOidcClient.claimConstraint).toEqual({
+        claimName: 'email',
+        values: null,
+        contains: '@example.com',
+        startsWith: null,
+      })
+    })
+
+    it('persists vcPolicy and claimConstraint across queries', async () => {
+      const createInput = createOidcClientInput({
+        vcPolicy: {
+          vcType: VcParamMode.Fixed,
+          vcConstraintValues: VcParamMode.Fixed,
+        },
+        claimConstraint: {
+          claimName: 'country',
+          values: ['US', 'AU'],
+        },
+      })
+      const { data: createData } = await executeOperationAsUser(
+        { query: createOidcClientMutation, variables: { input: createInput } },
+        UserRoles.oidcAdmin,
+      )
+      expectToBeDefined(createData?.createOidcClient)
+      const clientId = createData.createOidcClient.id
+
+      // Query it back
+      const { data, errors } = await executeOperationAsUser({ query: oidcClientQuery, variables: { id: clientId } }, UserRoles.reader)
+
+      expect(errors).toBeUndefined()
+      expectToBeDefined(data?.oidcClient)
+      expect(data.oidcClient.vcPolicy).toEqual({
+        vcType: VcParamMode.Fixed,
+        vcConstraintValues: VcParamMode.Fixed,
+      })
+      expect(data.oidcClient.claimConstraint).toEqual({
+        claimName: 'country',
+        values: ['US', 'AU'],
+        contains: null,
+        startsWith: null,
+      })
+    })
+  })
+})
+
+describe('faceCheckConfidenceThreshold', () => {
+  beforeAfterAll()
+  beforeEach(() => {
+    mockedServices.clearAllMocks()
+  })
+
+  it('can create a client with faceCheckConfidenceThreshold', async () => {
+    const input = createOidcClientInput({
+      requireFaceCheck: true,
+      faceCheckConfidenceThreshold: 60,
+    })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    expect(data.createOidcClient.requireFaceCheck).toBe(true)
+    expect(data.createOidcClient.faceCheckConfidenceThreshold).toBe(60)
+  })
+
+  it('rejects faceCheckConfidenceThreshold below 50', async () => {
+    const input = createOidcClientInput({
+      faceCheckConfidenceThreshold: 49,
+    })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('faceCheckConfidenceThreshold must be between 50 and 100')
+  })
+
+  it('rejects faceCheckConfidenceThreshold above 100', async () => {
+    const input = createOidcClientInput({
+      faceCheckConfidenceThreshold: 101,
+    })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(data?.createOidcClient).toBeUndefined()
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('faceCheckConfidenceThreshold must be between 50 and 100')
+  })
+
+  it('can update faceCheckConfidenceThreshold on a client', async () => {
+    const { data: createData } = await createOidcClient()
+    expectToBeDefined(createData?.createOidcClient)
+    const client = createData.createOidcClient
+
+    const input = createOidcClientInput({
+      requireFaceCheck: true,
+      faceCheckConfidenceThreshold: 55,
+    })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: updateOidcClientMutation, variables: { id: client.id, input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.updateOidcClient)
+    expect(data.updateOidcClient.requireFaceCheck).toBe(true)
+    expect(data.updateOidcClient.faceCheckConfidenceThreshold).toBe(55)
+  })
+
+  it('persists faceCheckConfidenceThreshold across queries', async () => {
+    const input = createOidcClientInput({
+      requireFaceCheck: true,
+      faceCheckConfidenceThreshold: 60,
+    })
+
+    const { data: createData } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+    expectToBeDefined(createData?.createOidcClient)
+    const clientId = createData.createOidcClient.id
+
+    const { data, errors } = await executeOperationAsUser({ query: oidcClientQuery, variables: { id: clientId } }, UserRoles.reader)
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.oidcClient)
+    expect(data.oidcClient.requireFaceCheck).toBe(true)
+    expect(data.oidcClient.faceCheckConfidenceThreshold).toBe(60)
+  })
+
+  it('accepts boundary value 50', async () => {
+    const input = createOidcClientInput({ faceCheckConfidenceThreshold: 50 })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    expect(data.createOidcClient.faceCheckConfidenceThreshold).toBe(50)
+  })
+
+  it('accepts boundary value 100', async () => {
+    const input = createOidcClientInput({ faceCheckConfidenceThreshold: 100 })
+
+    const { data, errors } = await executeOperationAsUser({ query: createOidcClientMutation, variables: { input } }, UserRoles.oidcAdmin)
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    expect(data.createOidcClient.faceCheckConfidenceThreshold).toBe(100)
+  })
+})
+
+describe('claim constraint validation', () => {
+  beforeAfterAll()
+  beforeEach(() => {
+    mockedServices.clearAllMocks()
+  })
+  it('allows exact + client-supplied with no values', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.ClientSupplied },
+      claimConstraint: { claimName: 'email', values: [] },
+    })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+    expect(data.createOidcClient.claimConstraint?.claimName).toBe('email')
+  })
+
+  it('rejects exact + fixed with no values', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
+      claimConstraint: { claimName: 'email', values: [] },
+    })
+
+    const { errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('A constraint value is required')
+  })
+
+  it('rejects contains with client-supplied', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.ClientSupplied },
+      claimConstraint: { claimName: 'email', contains: '@example.com' },
+    })
+
+    const { errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('Contains and starts with operators require fixed constraint values')
+  })
+
+  it('rejects startsWith with client-supplied', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.ClientSupplied },
+      claimConstraint: { claimName: 'name', startsWith: 'John' },
+    })
+
+    const { errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeDefined()
+    expect(errors?.[0]?.message).toContain('Contains and starts with operators require fixed constraint values')
+  })
+
+  it('allows contains with fixed', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
+      claimConstraint: { claimName: 'email', contains: '@example.com' },
+    })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
+  })
+
+  it('allows startsWith with fixed', async () => {
+    const input = createOidcClientInput({
+      vcPolicy: { vcConstraintValues: VcParamMode.Fixed },
+      claimConstraint: { claimName: 'name', startsWith: 'John' },
+    })
+
+    const { data, errors } = await executeOperationAsUser(
+      { query: createOidcClientMutation, variables: { input } },
+      UserRoles.oidcAdmin,
+    )
+
+    expect(errors).toBeUndefined()
+    expectToBeDefined(data?.createOidcClient)
   })
 })

@@ -5,6 +5,8 @@ param (
   $Name
 )
 
+. (Join-Path $PSScriptRoot 'shared-utils.ps1')
+
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
@@ -16,39 +18,56 @@ $credentialDetails = Get-Content $constants.credentialFile | ConvertFrom-Json
 #
 # Create migration app registration if it doesn't exist
 #
-$appRegistration = az ad app list --display-name $Name --output tsv
+$preExisting = $null
+$appRegistration = Invoke-WithRetry -ScriptBlock {
+  az ad app list --display-name $Name --query "[0]" | ConvertFrom-Json
+}
+
 if ($appRegistration) {
   Write-Output ('Migration app registration ''{0}'' already exists' -f $Name)
+  $preExisting = $true
 } else {
   Write-Output ('Creating Migration app registration ''{0}''...' -f $Name)
 
-  az ad app create `
-    --display-name $Name `
-    --sign-in-audience AzureADMyOrg `
-    --output none
+  $appRegistration = Invoke-WithRetry -ScriptBlock {
+    az ad app create `
+      --display-name $Name `
+      --sign-in-audience AzureADMyOrg | ConvertFrom-Json
+  }
 
   Write-Output ('Created Migration app registration ''{0}''' -f $Name)
 }
 
-$appRegistration = az ad app list --display-name $Name | ConvertFrom-Json
+# Entra operations are shown to be unreliable even when using the object ID immediately after creation
+# so we sleep for a bit to allow the operation to propagate
+if (-not $preExisting) {
+  Start-Sleep -Seconds 20
+}
 $appRegistrationObjectId = $appRegistration.id
 $appRegistrationAppId = $appRegistration.appId
 
 #
 # Service principal
 #
-$servicePrincipal = az ad sp list --display-name $Name --output tsv
-if ($null -ne $servicePrincipal) {
+$servicePrincipal = Invoke-WithRetry -ScriptBlock {
+  az ad sp list --display-name $Name --query "[0].id" --output tsv
+}
+
+if (-not [string]::IsNullOrWhiteSpace($servicePrincipal)) {
   Write-Output ('Found an existing service principal named ''{0}''' -f $Name)
 } else {
   Write-Output ('Creating a new service principal named ''{0}''...' -f $Name)
 
-  az ad sp create --id $appRegistrationObjectId --output none
+  Invoke-WithRetry -ScriptBlock {
+    az ad sp create --id $appRegistrationObjectId --output none
+  }
 
   Write-Output ('Created a new service principal named ''{0}''' -f $Name)
 }
 
-$credentials = az ad app federated-credential list --id $appRegistrationObjectId | ConvertFrom-Json -NoEnumerate
+$credentials = Invoke-WithRetry -ScriptBlock {
+  az ad app federated-credential list --id $appRegistrationObjectId | ConvertFrom-Json -NoEnumerate
+}
 $credential = $credentials | Where-Object -FilterScript { $_.name -eq $credentialDetails.name }
 
 if ($null -ne $credential) {
@@ -56,7 +75,9 @@ if ($null -ne $credential) {
 } else {
   Write-Output ('Creating a new federated credential named ''{0}''' -f $credentialDetails.name)
 
-  az ad app federated-credential create --id $appRegistrationObjectId --parameters ('@{0}' -f $constants.credentialFile) --output none
+  Invoke-WithRetry -ScriptBlock {
+    az ad app federated-credential create --id $appRegistrationObjectId --parameters ('@{0}' -f $constants.credentialFile) --output none
+  }
 
   Write-Output ('Created a new federated credential named ''{0}''' -f $credentialDetails.name)
 }
@@ -70,4 +91,3 @@ return @{
   migrationAppObjectId = $appRegistrationObjectId
   migrationAppId       = $appRegistrationAppId
 }
-

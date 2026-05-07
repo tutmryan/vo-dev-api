@@ -25,6 +25,7 @@ const config = {
     hooks: {
       onBrokenMarkdownLinks: 'warn',
     },
+    mermaid: true,
   },
 
   // Even if you don't use internalization, you can use this field to set useful
@@ -106,12 +107,17 @@ const config = {
   ],
 
   themes: [
-    [
-      require.resolve('@easyops-cn/docusaurus-search-local'),
-      {
-        hashed: true,
-      },
-    ],
+    ...(process.env.ENABLE_SEARCH === 'false'
+      ? []
+      : [
+          [
+            require.resolve('@easyops-cn/docusaurus-search-local'),
+            {
+              hashed: true,
+            },
+          ],
+        ]),
+    '@docusaurus/theme-mermaid',
   ],
 
   themeConfig:

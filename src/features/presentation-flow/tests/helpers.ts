@@ -22,6 +22,8 @@ export const createPresentationFlowMutation = graphql(
         request {
           id
           portalUrl
+          hasContactNotificationSet
+          notificationStatus
         }
       }
     }
@@ -88,7 +90,7 @@ export async function createPresentationFlow(input: PresentationFlowInput, jwt?:
   return data!.createPresentationFlow
 }
 
-async function createPresentationForPresentationFlow(presentationFlowId: string) {
+export async function createPresentationForPresentationFlow(presentationFlowId: string) {
   const identity = await createIdentity()
   const { presentation } = await dataSource.manager.transaction(ISOLATION_LEVEL, async (entityManager) => {
     const requestedBy = await entityManager

@@ -50,20 +50,51 @@ const markdownScalar = {
   }),
 }
 
+const dataUrlPattern = /^data:([a-z]+\/[a-z0-9.+-]+)?(?:;[a-z-]+=[a-z0-9-]+)*(?:;base64)?,[a-z0-9!$&',()*+;=\-._~:@/?%\s]*$/i
+const dataUrlErrorMessage = 'Must be a valid RFC 2397 data URL'
+
+const dataUrlScalar = {
+  DataURL: new GraphQLScalarType({
+    name: 'DataURL',
+    serialize: (value) => {
+      if (value === null || value === undefined) return null
+      if (typeof value !== 'string' || !dataUrlPattern.test(value)) {
+        throw new GraphQLError(dataUrlErrorMessage)
+      }
+      return value
+    },
+    parseValue: (value) => {
+      if (value === null || value === undefined) return null
+      if (typeof value !== 'string' || !dataUrlPattern.test(value)) {
+        throw new GraphQLError(dataUrlErrorMessage)
+      }
+      return value
+    },
+    parseLiteral: (ast) => {
+      if (ast.kind !== Kind.STRING || !dataUrlPattern.test(ast.value)) {
+        throw new GraphQLError(dataUrlErrorMessage)
+      }
+      return ast.value
+    },
+  }),
+}
+
 function buildLocalSchema() {
   const resolvers = loadFilesSync(
     [path.join(__dirname, './features/**/resolvers.*'), path.join(__dirname, './background-jobs/**/resolvers.*')],
     { extensions: ['ts', 'js'] },
   )
   const typeDefs = loadFilesSync<string>([
+    path.join(__dirname, './background-jobs/**/*.schema.graphql'),
     path.join(__dirname, './background-jobs/**/schema.graphql'),
+    path.join(__dirname, './features/**/*.schema.graphql'),
     path.join(__dirname, './features/**/schema.graphql'),
     path.join(__dirname, './schema/**/*.graphql'),
   ])
 
   let schema = makeExecutableSchema({
     typeDefs: [constraintDirectiveTypeDefs, typeDefs],
-    resolvers: mergeResolvers([usedScalars, markdownScalar, ...resolvers]),
+    resolvers: mergeResolvers([usedScalars, markdownScalar, dataUrlScalar, ...resolvers]),
   })
   schema = constraintDirectiveDocumentation({})(schema)
   requireExplicitResolversForScalars(schema)

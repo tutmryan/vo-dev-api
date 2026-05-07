@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddActionCommentToApprovalRequestsMigratedToPresentationFlows1772617459384 implements MigrationInterface {
   name = 'AddActionCommentToApprovalRequestsMigratedToPresentationFlows1772617459384'

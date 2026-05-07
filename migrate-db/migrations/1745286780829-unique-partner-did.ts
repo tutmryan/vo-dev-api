@@ -1,5 +1,5 @@
 import { createHash } from 'crypto'
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class UniquePartnerDid1745286780829 implements MigrationInterface {
   name = 'UniquePartnerDid1745286780829'

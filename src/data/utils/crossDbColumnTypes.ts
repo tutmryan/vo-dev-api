@@ -1,7 +1,7 @@
 import type { ColumnType } from 'typeorm'
 import type { ValueTransformer } from 'typeorm/decorator/options/ValueTransformer'
 
-const isTestSqlite = process.env.NODE_ENV === 'test' && process.env.TEST_DATA_MIGRATION_DRIFT !== 'true'
+export const isTestSqlite = process.env.NODE_ENV === 'test' && process.env.TEST_DATA_MIGRATION_DRIFT !== 'true'
 
 export const dateTimeOffsetType: ColumnType = isTestSqlite ? 'datetime' : 'datetimeoffset'
 

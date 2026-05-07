@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 const systemUserId = 'FAA690AC-D8D0-4FF8-AA38-2A9C53084CA9'
 const legacySystemUserOid = systemUserId
@@ -6,6 +6,7 @@ const legacySystemUserOid = systemUserId
 export class AddKnownSystemUser1749795075331 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     const legacySystemUserResult = await queryRunner.sql<[{ id: string }]>`SELECT id FROM dbo.[user] WHERE oid = ${legacySystemUserOid}`
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const legacySystemUserId = legacySystemUserResult[0]?.id
 
     // Ensure the OID can be used, so clear it from the existing system user if it exists

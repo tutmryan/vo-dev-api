@@ -1,10 +1,10 @@
-import type { ClientMetadata } from 'oidc-provider'
+import type { ClientMetadata, ResponseType } from 'oidc-provider'
 import { oidcSecretService } from '.'
 import { runDeduplicatedJob } from '../../background-jobs'
 import { apiUrl, portalUrl } from '../../config'
 import { transactionOrReuse } from '../../data'
 import { addUserToManager } from '../../data/user-context-helper'
-import { OidcApplicationType, OidcClientType } from '../../generated/graphql'
+import { OidcApplicationType, OidcClientType, OidcResponseType, OidcTokenEndpointAuthMethod } from '../../generated/graphql'
 import { logger } from '../../logger'
 import { OidcScopes } from '../../roles'
 import { IssuanceEntity } from '../issuance/entities/issuance-entity'
@@ -63,13 +63,19 @@ const toOidcClientMetadata = async ({
   termsOfServiceUrl,
   policyUrl,
   applicationType,
-  clientType,
   authorizationRequestsTypeJarEnabled,
+  relyingPartyJwks,
   relyingPartyJwksUri,
+  tokenEndpointAuthMethod,
+  clientJwks,
+  clientJwksUri,
+  responseTypes,
 }: OidcClientEntity): Promise<ClientMetadata> => {
+  const authMethod = tokenEndpointAuthMethod
+
   let clientSecret: string | undefined
 
-  if (clientType === OidcClientType.Confidential) {
+  if (authMethod === OidcTokenEndpointAuthMethod.ClientSecretPost) {
     try {
       clientSecret = await oidcSecretService().get(id)
     } catch (error) {
@@ -79,7 +85,40 @@ const toOidcClientMetadata = async ({
     clientSecret = undefined
   }
 
-  const jwksUri = authorizationRequestsTypeJarEnabled ? (relyingPartyJwksUri ?? undefined) : undefined
+  // Determine JWKS/JWKS URI for client metadata
+  // node-oidc-provider uses a single jwks/jwks_uri field for both private_key_jwt auth and JAR verification.
+  // We merge keys from both sources: auth keys (clientJwks/clientJwksUri) and JAR keys (relyingPartyJwks/relyingPartyJwksUri).
+  // Only one jwks_uri can be set — if both auth and JAR use URIs, one must be provided as inline JWKS instead.
+  const jwksKeys: object[] = []
+  let jwksUri: string | undefined
+
+  // Auth keys (private_key_jwt)
+  if (authMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt) {
+    if (clientJwks) {
+      const parsed = clientJwks as { keys?: object[] } | { kty: string }
+      const keys: object[] = 'keys' in parsed && parsed.keys ? parsed.keys : [parsed]
+      jwksKeys.push(...keys)
+    }
+    if (clientJwksUri) {
+      jwksUri = clientJwksUri
+    }
+  }
+
+  // JAR keys (request object verification)
+  if (authorizationRequestsTypeJarEnabled) {
+    if (relyingPartyJwks) {
+      const parsed = relyingPartyJwks as { keys?: object[] } | { kty: string }
+      const keys: object[] = 'keys' in parsed && parsed.keys ? parsed.keys : [parsed]
+      jwksKeys.push(...keys)
+    }
+    if (relyingPartyJwksUri && !jwksUri) {
+      jwksUri = relyingPartyJwksUri
+    }
+  }
+
+  const jwks = jwksKeys.length > 0 ? { keys: jwksKeys } : undefined
+  const oidcProviderResponseType = toOidcProviderResponseTypes(responseTypes)
+  const oidcProviderGrantTypes = toOidcProviderGrantTypes(responseTypes)
 
   return {
     client_id: id,
@@ -87,15 +126,39 @@ const toOidcClientMetadata = async ({
     client_secret: clientSecret,
     redirect_uris: redirectUris,
     post_logout_redirect_uris: postLogoutUris,
-    response_types: ['code', 'code id_token', 'id_token'],
-    grant_types: ['authorization_code', 'refresh_token', 'implicit'],
-    token_endpoint_auth_method: clientType === OidcClientType.Confidential ? 'client_secret_post' : 'none',
+    grant_types: oidcProviderGrantTypes,
+    response_types: oidcProviderResponseType,
+    token_endpoint_auth_method: authMethod,
     tos_uri: termsOfServiceUrl ?? undefined,
     policy_uri: policyUrl ?? undefined,
     application_type: applicationType,
-    jwks_uri: jwksUri,
+    ...(jwks ? { jwks } : {}),
+    ...(jwksUri ? { jwks_uri: jwksUri } : {}),
   }
 }
+
+export const toOidcProviderResponseTypes = (responseTypes: OidcResponseType[]): ResponseType[] => {
+  const hasCode = responseTypes.includes(OidcResponseType.Code)
+  const hasIdToken = responseTypes.includes(OidcResponseType.IdToken)
+
+  if (!hasCode && hasIdToken) {
+    return ['id_token']
+  }
+
+  if (hasCode && hasIdToken) {
+    return ['code', 'id_token', 'code id_token']
+  }
+
+  // Authorization Code flow (default)
+  return ['code']
+}
+
+// Map schema response types from entity to OIDC provider's grant values
+const toOidcProviderGrantTypes = (responseTypes: OidcResponseType[]): string[] => [
+  'authorization_code',
+  'refresh_token',
+  ...(responseTypes.includes(OidcResponseType.IdToken) ? ['implicit'] : []),
+]
 
 type SourceOidcData = [OidcClientEntity[], OidcResourceEntity[], PartnerEntity[]]
 
@@ -219,6 +282,7 @@ export async function initialiseDataFromDeduplicatedBackgroundJob() {
           name: portalClientName,
           applicationType: OidcApplicationType.Web,
           clientType: OidcClientType.Public,
+          tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod.None,
           redirectUris: [portalRedirectUri, portalDemoRedirectUri],
           postLogoutUris: [portalRedirectUri, portalDemoRedirectUri],
           allowAnyPartner: true,

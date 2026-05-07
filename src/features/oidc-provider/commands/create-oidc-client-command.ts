@@ -1,15 +1,32 @@
 import { notifyOidcDataChanged, oidcSecretService } from '..'
 import type { CommandContext } from '../../../cqs'
-import { OidcApplicationType, OidcClientType, type OidcClientInput } from '../../../generated/graphql'
+import { OidcApplicationType, OidcResponseType, OidcTokenEndpointAuthMethod, type OidcClientInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import type { PartnerEntity } from '../../partners/entities/partner-entity'
+import { mapClaimConstraintInput } from '../claims'
 import { OidcClientEntity } from '../entities/oidc-client-entity'
+import { OidcClientVcPolicy } from '../entities/oidc-client-vc-policy'
+import { validateClientAuthMethod, validateJarKeys, validateJwksJson, validateResponseTypes } from './utils'
 
 export async function CreateOidcClientCommand(this: CommandContext, input: OidcClientInput) {
-  const { applicationType, requireFaceCheck, allowAnyPartner, partnerIds, relyingPartyJwksUri, ...rest } = input
+  const {
+    applicationType,
+    requireFaceCheck,
+    allowAnyPartner,
+    partnerIds,
+    relyingPartyJwksUri,
+    clientJwksUri,
+    vcPolicy,
+    claimConstraint,
+    responseTypes,
+    ...rest
+  } = input
 
-  if (input.clientType === OidcClientType.Confidential) invariant(input.clientSecret, 'Confidential clients must have a secret')
-  if (input.clientSecret) invariant(input.clientType === OidcClientType.Confidential, 'Only confidential clients can have a secret')
+  const tokenEndpointAuthMethod = validateClientAuthMethod(input)
+
+  if (tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.ClientSecretPost) {
+    invariant(input.clientSecret, 'Confidential clients must have a secret')
+  }
 
   const authorizationRequestsTypeJarEnabled = input.authorizationRequestsTypeJarEnabled ?? false
   const authorizationRequestsTypeStandardEnabled = input.authorizationRequestsTypeStandardEnabled ?? true
@@ -17,9 +34,16 @@ export async function CreateOidcClientCommand(this: CommandContext, input: OidcC
     authorizationRequestsTypeJarEnabled || authorizationRequestsTypeStandardEnabled,
     'At least one authorization requests type must be enabled',
   )
-  if (authorizationRequestsTypeJarEnabled) invariant(input.relyingPartyJwksUri, 'Relying party JWKS URI is required when JAR is enabled')
+  validateJarKeys(input, tokenEndpointAuthMethod)
 
-  const repo = this.entityManager.getRepository(OidcClientEntity)
+  // Validate JWKS JSON format
+  validateJwksJson(input.clientJwks, 'clientJwks')
+  validateJwksJson(input.relyingPartyJwks, 'relyingPartyJwks')
+
+  validateResponseTypes(responseTypes)
+
+  const resolvedVcPolicy = vcPolicy ? OidcClientVcPolicy.fromInput(vcPolicy) : OidcClientVcPolicy.default()
+
   const client = new OidcClientEntity({
     ...rest,
     applicationType: applicationType ?? OidcApplicationType.Web,
@@ -27,16 +51,25 @@ export async function CreateOidcClientCommand(this: CommandContext, input: OidcC
     allowAnyPartner: allowAnyPartner ?? false,
     authorizationRequestsTypeJarEnabled,
     authorizationRequestsTypeStandardEnabled,
-    relyingPartyJwksUri: relyingPartyJwksUri?.toString() ?? null,
+    relyingPartyJwks: authorizationRequestsTypeJarEnabled ? (input.relyingPartyJwks ?? null) : null,
+    relyingPartyJwksUri: authorizationRequestsTypeJarEnabled ? (relyingPartyJwksUri?.toString() ?? null) : null,
+    tokenEndpointAuthMethod,
+    clientJwks: tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt ? (input.clientJwks ?? null) : null,
+    clientJwksUri: tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.PrivateKeyJwt ? (clientJwksUri?.toString() ?? null) : null,
+    vcPolicy: resolvedVcPolicy,
+    claimConstraint: mapClaimConstraintInput(claimConstraint, resolvedVcPolicy.vcConstraintValues),
+    responseTypes: responseTypes ?? [OidcResponseType.Code],
   })
 
   if (partnerIds && partnerIds.length > 0) {
     client.partners = Promise.resolve(partnerIds.map((id) => ({ id }) as PartnerEntity))
   }
 
-  await repo.save(client)
+  await this.entityManager.getRepository(OidcClientEntity).save(client)
 
-  if (input.clientSecret) await oidcSecretService().set(client.id, input.clientSecret)
+  if (tokenEndpointAuthMethod === OidcTokenEndpointAuthMethod.ClientSecretPost && input.clientSecret) {
+    await oidcSecretService().set(client.id, input.clientSecret)
+  }
 
   notifyOidcDataChanged()
   return client

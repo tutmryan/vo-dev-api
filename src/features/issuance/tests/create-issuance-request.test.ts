@@ -1,19 +1,23 @@
 import { randomUUID } from 'crypto'
+import { addMinutes } from 'date-fns'
 import {
   ClaimType,
   ContractDisplayClaimInput,
   ContractInput,
   FaceCheckPhotoSupport,
+  IssuanceRequestStatus,
   type IssuanceRequestInput,
   type PhotoCaptureRequest,
 } from '../../../generated/graphql'
-import { beforeAfterAll, executeOperationAsLimitedAccessClient } from '../../../test'
+import { beforeAfterAll, executeOperationAsLimitedAccessClient, inTransaction } from '../../../test'
 import { mockedServices } from '../../../test/mocks'
 import { NonNullableFields, WithRequired } from '../../../util/type-helpers'
 import { buildContractInput, createContract } from '../../contracts/test/create-contract'
 import { provisionContract } from '../../contracts/test/provision-contract'
+import { CredentialRecordEntity } from '../../credential-record/entities/credential-record-entity'
 import { createIdentity } from '../../identity/tests/create-identity'
 import { capturePhoto, createPhotoCaptureRequest } from '../../photo-capture/test'
+import { issuanceCallbackHandler } from '../callback/issuance-callback-handler'
 import { convertFaceCheckPhoto, convertImageClaimInput } from '../commands/create-issuance-request-command'
 import { createIssuanceRequest, createIssuanceRequestMutation } from './create-issuance'
 
@@ -108,6 +112,55 @@ describe('createIssuanceRequest mutation', () => {
     // Assert
     expect(errors).toBeUndefined()
     expect(data).toBeDefined()
+  })
+  it('returns credentialRecordId in response', async () => {
+    // Arrange
+    withMockedServices()
+    const { contract } = await givenContract({})
+    const identity = await createIdentity()
+
+    // Act
+    const { errors, data } = await executeOperationAsLimitedAccessClient(
+      {
+        query: createIssuanceRequestMutation,
+        variables: {
+          request: {
+            contractId: contract.id,
+          },
+        },
+      },
+      { identityId: identity.id, issuableContractIds: [contract.id] },
+    )
+
+    // Assert
+    expect(errors).toBeUndefined()
+    if (!data?.createIssuanceRequest || !('requestId' in data.createIssuanceRequest)) throw new Error('Expected IssuanceResponse')
+    expect(data.createIssuanceRequest.credentialRecordId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+  })
+  it('persists a new credential record to the database', async () => {
+    // Arrange
+    withMockedServices()
+    const { contract } = await givenContract({})
+    const identity = await createIdentity()
+
+    // Act
+    const { errors, data } = await executeOperationAsLimitedAccessClient(
+      {
+        query: createIssuanceRequestMutation,
+        variables: { request: { contractId: contract.id } },
+      },
+      { identityId: identity.id, issuableContractIds: [contract.id] },
+    )
+
+    // Assert
+    expect(errors).toBeUndefined()
+    if (!data?.createIssuanceRequest || !('requestId' in data.createIssuanceRequest)) throw new Error('Expected IssuanceResponse')
+    const { credentialRecordId } = data.createIssuanceRequest
+    const credentialRecord = await inTransaction((em) =>
+      em.getRepository(CredentialRecordEntity).findOneByOrFail({ id: credentialRecordId }),
+    )
+    expect(credentialRecord.contractId).toBe(contract.id)
+    expect(credentialRecord.identityId).toBe(identity.id)
   })
   it('works with face check when passing the photo', async () => {
     const { contract } = await givenContract({
@@ -277,6 +330,69 @@ describe('createIssuanceRequest mutation', () => {
         },
       )
     })
+  })
+
+  it('marks the credential record as failed when callback returns IssuanceError for an in-person issuance', async () => {
+    // Arrange
+    withMockedServices()
+    const { contract } = await givenContract({})
+    const identity = await createIdentity()
+
+    const result = await createIssuanceRequest({ contractId: contract.id }, { identityId: identity.id, issuableContractIds: [contract.id] })
+
+    if (!result || !('requestId' in result)) throw new Error('Expected IssuanceResponse')
+    const { requestId, credentialRecordId } = result
+
+    // Act — simulate an issuance_error callback from MS Entra
+    await issuanceCallbackHandler({
+      requestId,
+      requestStatus: IssuanceRequestStatus.IssuanceError,
+      state: null,
+      error: { code: 'issuanceCanceled', message: 'User cancelled' },
+    })
+
+    // Assert — credential record should be marked failed
+    const credentialRecord = await inTransaction((em) =>
+      em.getRepository(CredentialRecordEntity).findOneByOrFail({ id: credentialRecordId }),
+    )
+    expect(credentialRecord.failedAt).not.toBeNull()
+    expect(credentialRecord.failedAt).toBeInstanceOf(Date)
+  })
+
+  it('sets expiresAt on the credential record from the offer expiry returned by the issuance service', async () => {
+    // Arrange — mock returns a specific Unix-seconds expiry (5 minutes from now)
+    const offerExpiryUnixSeconds = Math.floor(addMinutes(new Date(), 5).getTime() / 1000)
+    mockedServices.adminService.contract.resolvedWith(mockedServices.adminService.contract.buildResolve())
+    mockedServices.adminService.authority.resolvedWith(mockedServices.adminService.authority.buildResolve())
+    mockedServices.requestService.createIssuanceRequest.resolveWith({
+      ...mockedServices.requestService.createIssuanceRequest.buildResolve(),
+      expiry: offerExpiryUnixSeconds,
+    })
+    mockedServices.blobStorageContainerService.uploadDataUrl.dynamicResolveWith(
+      mockedServices.blobStorageContainerService.uploadDataUrl.buildResolve,
+    )
+    const { contract } = await givenContract({})
+    const identity = await createIdentity()
+
+    // Act
+    const { errors, data } = await executeOperationAsLimitedAccessClient(
+      {
+        query: createIssuanceRequestMutation,
+        variables: { request: { contractId: contract.id } },
+      },
+      { identityId: identity.id, issuableContractIds: [contract.id] },
+    )
+
+    // Assert
+    expect(errors).toBeUndefined()
+    if (!data?.createIssuanceRequest || !('credentialRecordId' in data.createIssuanceRequest)) throw new Error('Expected IssuanceResponse')
+    const { credentialRecordId } = data.createIssuanceRequest
+    const credentialRecord = await inTransaction((em) =>
+      em.getRepository(CredentialRecordEntity).findOneByOrFail({ id: credentialRecordId }),
+    )
+    expect(credentialRecord.expiresAt).toBeInstanceOf(Date)
+    const expectedExpiry = new Date(offerExpiryUnixSeconds * 1000)
+    expect(Math.abs(credentialRecord.expiresAt!.getTime() - expectedExpiry.getTime())).toBeLessThan(2000)
   })
 
   describe('claims handling', () => {

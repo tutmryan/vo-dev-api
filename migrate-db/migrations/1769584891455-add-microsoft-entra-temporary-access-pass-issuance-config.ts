@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddMicrosoftEntraTemporaryAccessPassIssuanceConfig1769584891455 implements MigrationInterface {
   name = 'AddMicrosoftEntraTemporaryAccessPassIssuanceConfig1769584891455'

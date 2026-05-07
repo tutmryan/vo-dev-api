@@ -91,6 +91,7 @@ export type Config = {
     asyncIssuanceContainer: string
     oidcContainer: string
     localdevClientSecretsContainer: string
+    presentationFlowContainer: string
     clientEncryptionKey: string
   }
   oidcKeyVaultUrl: string
@@ -112,6 +113,7 @@ export type Config = {
     templates: {
       issuance: EmailTemplateConfig
       verification: EmailTemplateConfig
+      presentationFlow: EmailTemplateConfig
     }
   }
   homeTenant: {

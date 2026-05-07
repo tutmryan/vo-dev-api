@@ -90,6 +90,7 @@ tags: [{YYYY}, v{YYYY}.{M}.{iteration}, v{YYYY}.{M}.{iteration+1}]
 ❌ Work-in-progress (WIP) features not ready for customers
 ❌ Deployment configuration changes
 ❌ Release documentation tasks (e.g., "Create release notes for v2026.1.0")
+❌ Routine/BAU security dependency updates (e.g., "Security improvements and dependency updates across all components") — these appear in every release and should only be included when explicitly requested
 
 ### Security Vulnerability Disclosure
 

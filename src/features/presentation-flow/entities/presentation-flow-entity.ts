@@ -1,8 +1,26 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm'
-import { booleanType, dateTimeOffsetType, nvarcharMaxType, nvarcharType, varcharMaxLength } from '../../../data/utils/crossDbColumnTypes'
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
+import {
+  booleanType,
+  dateTimeOffsetTransformer,
+  dateTimeOffsetType,
+  nvarcharMaxType,
+  nvarcharType,
+  varcharMaxLength,
+} from '../../../data/utils/crossDbColumnTypes'
 import { uuidLowerCaseTransformer } from '../../../data/utils/uuidLowerCaseTransformer'
-import type { Action, Callback, DataDefinition, PresentationFlowStatus, PresentationRequestInput } from '../../../generated/graphql'
-import { PresentationFlowStatus as PresentationFlowStatusEnum } from '../../../generated/graphql'
+import type {
+  Action,
+  Callback,
+  DataDefinition,
+  MDocPresentationRequestInput,
+  PresentationFlowNotificationStatus,
+  PresentationFlowStatus,
+  PresentationRequestInput,
+} from '../../../generated/graphql'
+import {
+  PresentationFlowNotificationStatus as PresentationFlowNotificationStatusEnum,
+  PresentationFlowStatus as PresentationFlowStatusEnum,
+} from '../../../generated/graphql'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { PresentationEntity } from '../../presentation/entities/presentation-entity'
@@ -21,7 +39,7 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
   @JoinColumn({ name: 'identity_id', foreignKeyConstraintName: 'fk_presentation_flow_identity_identity_id' })
   identity!: Promise<IdentityEntity | null>
 
-  @Column({ type: dateTimeOffsetType })
+  @Column({ type: dateTimeOffsetType, transformer: dateTimeOffsetTransformer })
   expiresAt!: Date
 
   @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
@@ -42,8 +60,14 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
   @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
   requestDataJson!: string | null
 
-  @Column({ type: nvarcharMaxType, length: varcharMaxLength })
-  presentationRequestJson!: string
+  @Column({ type: nvarcharType, length: 20 })
+  type!: 'vc' | 'mdoc'
+
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
+  presentationRequestJson!: string | null
+
+  @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
+  mdocRequestJson!: string | null
 
   @Column({ type: nvarcharMaxType, length: varcharMaxLength, nullable: true })
   dataSchemaJson!: string | null
@@ -66,9 +90,16 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
   @Column({ type: 'uuid', transformer: uuidLowerCaseTransformer })
   callbackSecret!: string
 
+  @Column({ type: booleanType, nullable: true })
+  hasContactNotification!: boolean | null
+
+  @Column({ type: nvarcharType, length: 255, nullable: true })
+  notificationStatus!: PresentationFlowNotificationStatus | null
+
   @ManyToOne(() => PresentationEntity)
   presentation!: Promise<PresentationEntity | null>
 
+  @Index('ix_presentation_flow_presentation_id')
   @Column({ type: 'uuid', nullable: true, transformer: uuidLowerCaseTransformer })
   presentationId!: string | null
 
@@ -88,12 +119,12 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
     return this.requestDataJson ? (JSON.parse(this.requestDataJson) as Record<string, unknown>) : null
   }
 
-  get presentationRequest(): Record<string, unknown> {
-    return JSON.parse(this.presentationRequestJson) as Record<string, unknown>
+  get presentationRequest(): PresentationRequestInput | null {
+    return this.presentationRequestJson ? (JSON.parse(this.presentationRequestJson) as PresentationRequestInput) : null
   }
 
-  get presentationRequestAsInput(): PresentationRequestInput {
-    return JSON.parse(this.presentationRequestJson) as PresentationRequestInput
+  get mdocRequest(): MDocPresentationRequestInput | null {
+    return this.mdocRequestJson ? (JSON.parse(this.mdocRequestJson) as MDocPresentationRequestInput) : null
   }
 
   get callback(): Callback | null {
@@ -120,5 +151,24 @@ export class PresentationFlowEntity extends AuditedAndTrackedEntity {
     if (this.isRequestRetrieved) return PresentationFlowStatusEnum.RequestRetrieved
     if (this.isRequestCreated) return PresentationFlowStatusEnum.RequestCreated
     return PresentationFlowStatusEnum.Pending
+  }
+
+  get isNotificationFinal(): boolean {
+    return (
+      this.notificationStatus === PresentationFlowNotificationStatusEnum.Sent ||
+      this.notificationStatus === PresentationFlowNotificationStatusEnum.Failed
+    )
+  }
+
+  public notificationQueued(): void {
+    this.notificationStatus = PresentationFlowNotificationStatusEnum.Pending
+  }
+
+  public notificationSent(): void {
+    this.notificationStatus = PresentationFlowNotificationStatusEnum.Sent
+  }
+
+  public notificationFailed(): void {
+    this.notificationStatus = PresentationFlowNotificationStatusEnum.Failed
   }
 }

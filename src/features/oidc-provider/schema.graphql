@@ -1,9 +1,9 @@
-# eslint-disable @graphql-eslint/naming-convention
+ 
 
 """
-Branding fields for the concierge OIDC client.
+Input fields for editing the concierge OIDC client.
 """
-input ConciergeClientBrandingInput {
+input ConciergeClientInput {
   """
   The display name shown in concierge flows.
   """
@@ -11,7 +11,7 @@ input ConciergeClientBrandingInput {
   """
   The logo displayed during concierge authentication.
   """
-  logo: URL
+  logo: DataURL
   """
   The background color for concierge authentication screens.
   """
@@ -19,7 +19,39 @@ input ConciergeClientBrandingInput {
   """
   The background image for concierge authentication screens.
   """
-  backgroundImage: URL
+  backgroundImage: DataURL
+}
+
+"""
+The mode that controls how a vc_* authorisation parameter is resolved for an OIDC client.
+"""
+enum VcParamMode {
+  """
+  The client may supply a value at runtime. When missing, the entity's configured value is used as fallback.
+  """
+  client_supplied
+  """
+  The entity's configured value is always used, ignoring any client-supplied value.
+  """
+  fixed
+}
+
+"""
+Input defining the vc_* authorisation parameter policy for an OIDC client.
+Each field accepts a VcParamMode. Omitted fields default to client_supplied.
+"""
+input OidcClientVcPolicyInput {
+  vcType: VcParamMode
+  vcConstraintValues: VcParamMode
+}
+
+"""
+The vc_* authorisation parameter policy for an OIDC client.
+Controls whether entity-configured values are enforced (fixed) or may be overridden at runtime (client_supplied).
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type OidcClientVcPolicy {
+  vcType: VcParamMode!
+  vcConstraintValues: VcParamMode!
 }
 
 extend type Mutation {
@@ -92,13 +124,36 @@ extend type Mutation {
   updateOidcClientClaimMappings(clientId: ID!, claimMappingIds: [ID!]!): OidcClient!
 
   """
+  Creates a new OIDC identity resolver.
+  """
+  createOidcIdentityResolver(input: OidcIdentityResolverInput!): OidcIdentityResolver!
+  """
+  Updates an existing OIDC identity resolver.
+  """
+  updateOidcIdentityResolver(id: ID!, input: OidcIdentityResolverInput!): OidcIdentityResolver!
+  """
+  Deletes an OIDC identity resolver.
+  """
+  deleteOidcIdentityResolver(id: ID!): OidcIdentityResolver!
+
+  """
+  Updates the identity resolvers for an OIDC client.
+  """
+  updateOidcClientIdentityResolvers(clientId: ID!, identityResolverIds: [ID!]!): OidcClient!
+
+  """
   Generates a secret suitable for an OIDC client.
   """
   generateOidcClientSecret: String!
   """
-  Updates branding for the concierge OIDC client.
+  Updates for the concierge OIDC client.
   """
-  updateConciergeClientBranding(input: ConciergeClientBrandingInput!): OidcClient!
+  updateConciergeClient(input: ConciergeClientInput!): OidcClient!
+
+  """
+  Updates the vc_* authorisation parameter policy for an OIDC client.
+  """
+  updateOidcClientVcPolicy(clientId: ID!, input: OidcClientVcPolicyInput!): OidcClient!
 }
 
 extend type Query {
@@ -146,6 +201,21 @@ extend type Query {
     orderBy: OidcClaimMappingOrderBy
     orderDirection: OrderDirection
   ): [OidcClaimMapping!]!
+
+  """
+  Returns a single OIDC identity resolver by ID
+  """
+  oidcIdentityResolver(id: ID!): OidcIdentityResolver!
+  """
+  Returns OIDC identity resolvers, optionally matching the specified criteria.
+  """
+  findOidcIdentityResolvers(
+    where: OidcIdentityResolverWhere
+    offset: PositiveInt
+    limit: PositiveInt = 100
+    orderBy: OidcIdentityResolverOrderBy
+    orderDirection: OrderDirection
+  ): [OidcIdentityResolver!]!
 }
 
 """
@@ -173,13 +243,47 @@ Refer to https://www.rfc-editor.org/rfc/rfc6749#section-2.1
 """
 enum OidcClientType {
   """
-  A client used where secrets can be securely stored, e.g. server-side authentication.
+  A client used where secrets cannot be securely stored, e.g. browser-based or mobile authentication.
   """
   public
   """
-  A client used where secrets cannot be securely stored, e.g. browser-based or mobile authentication.
+  A client used where secrets can be securely stored, e.g. server-side authentication.
   """
   confidential
+}
+
+"""
+The token endpoint authentication method for a confidential OIDC client.
+
+Refer to https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication
+"""
+enum OidcTokenEndpointAuthMethod {
+  """
+  No client authentication (public clients).
+  """
+  none
+  """
+  Client authenticates by including the client secret in the token request body.
+  """
+  client_secret_post
+  """
+  Client authenticates by sending a signed JWT assertion using a registered public key.
+  """
+  private_key_jwt
+}
+
+"""
+The OAuth response types supported by an OIDC client.
+"""
+enum OidcResponseType {
+  """
+  Authorisation code response type, returns an authorisation code.
+  """
+  CODE
+  """
+  ID token response type, can be used alone or with CODE for hybrid flow (code id_token).
+  """
+  ID_TOKEN
 }
 
 """
@@ -320,6 +424,151 @@ enum OidcClaimMappingOrderBy {
 }
 
 """
+The strategy used to look up identities in an external identity store for OIDC identity resolvers.
+"""
+enum OidcIdentityLookupType {
+  """
+  Look up an identity in the external store by object identifier.
+  """
+  OBJECT_ID
+  """
+  Look up an identity in the external store by user principal name.
+  """
+  USER_PRINCIPAL_NAME
+  """
+  Look up an identity in the external store by email.
+  """
+  EMAIL
+}
+
+"""
+Input type for creating or updating an OIDC identity resolver.
+"""
+input OidcIdentityResolverInput {
+  """
+  The name of the identity resolver.
+  """
+  name: String!
+  """
+  The (optional) types of credentials that this identity resolver should be limited to.
+  """
+  credentialTypes: [String!]
+  """
+  The credential claim name used when resolving identities. Exactly one value will be present.
+  """
+  claimName: String!
+  """
+  The identity store that will be used to resolve identities.
+  """
+  identityStoreId: ID!
+  """
+  The lookup strategy that will be used in the identity store.
+  """
+  lookupType: OidcIdentityLookupType!
+}
+
+"""
+Represents an OIDC identity resolver, which maps credential claims to identities using an external identity store.
+"""
+type OidcIdentityResolver {
+  """
+  The unique identifier for the identity resolver.
+  """
+  id: ID!
+  """
+  The name of the identity resolver.
+  """
+  name: String!
+  """
+  The (optional) types of credentials that this identity resolver should be limited to.
+  """
+  credentialTypes: [String!]
+  """
+  The credential claim name used when resolving identities.
+  """
+  claimName: String!
+  """
+  The type of identity store used by this resolver.
+  """
+  identityStoreType: IdentityStoreType!
+  """
+  The identity store used to resolve identities.
+  """
+  identityStore: IdentityStore!
+  """
+  The lookup strategy that will be used in the identity store.
+  """
+  lookupType: OidcIdentityLookupType!
+  """
+  The user who created the resolver.
+  """
+  createdBy: User!
+  """
+  When the resolver was created.
+  """
+  createdAt: DateTime!
+  """
+  The user who last updated the resolver.
+  """
+  updatedBy: User
+  """
+  When the resolver was last updated.
+  """
+  updatedAt: DateTime
+  """
+  When the resolver was deleted.
+  """
+  deletedAt: DateTime
+}
+
+"""
+Criteria for finding OIDC identity resolvers.
+"""
+input OidcIdentityResolverWhere {
+  """
+  List only identity resolvers matching this name.
+  """
+  name: String
+  """
+  List only identity resolvers for this credential type.
+  """
+  credentialType: String
+  """
+  List only identity resolvers for this identity store type.
+  """
+  identityStoreType: IdentityStoreType
+  """
+  List only identity resolvers for this identity store.
+  """
+  identityStoreId: ID
+  """
+  The ID of the user (Person or Application) that created the identity resolver.
+  """
+  createdById: ID
+  """
+  The start of the createdAt period to include.
+  """
+  createdFrom: DateTime
+  """
+  The end of the createdAt period to include.
+  """
+  createdTo: DateTime
+  """
+  List only the identity resolvers which are, or are not, deleted.
+  """
+  isDeleted: Boolean
+}
+
+"""
+Fields that can be used for sorting OIDC identity resolvers by.
+"""
+enum OidcIdentityResolverOrderBy {
+  name
+  createdAt
+  updatedAt
+}
+
+"""
 Input type for creating a new OIDC client.
 """
 input OidcClientInput {
@@ -330,7 +579,7 @@ input OidcClientInput {
   """
   The URL of the client logo to be displayed during auth interactions, can be an image encoded as a data URL.
   """
-  logo: URL
+  logo: DataURL
   """
   The background color, to be displayed during auth interactions, in hexadecimal format.
   """
@@ -338,7 +587,7 @@ input OidcClientInput {
   """
   The URL of the background image to be displayed during auth interactions, can be an image encoded as a data URL.
   """
-  backgroundImage: URL
+  backgroundImage: DataURL
   """
   The URL of a privacy policy for the client, displayed during auth interactions.
   """
@@ -356,9 +605,37 @@ input OidcClientInput {
   """
   clientType: OidcClientType!
   """
-  The client secret, only applicable to confidential clients. Optional for update operations (existing secret will be retained when not provided).
+  The token endpoint authentication method. Defaults to `client_secret_post` for confidential clients and `none` for public clients.
+
+  Note:
+  - Confidential clients must use either `client_secret_post` or `private_key_jwt`, not both.
+  - When `client_secret_post` is used, `clientSecret` is required.
+  - When `private_key_jwt` is used, `clientJwks` or `clientJwksUri` is required.
+  """
+  tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod
+  """
+  The client secret, only applicable to confidential clients using `client_secret_post` authentication. Optional for update operations (existing secret will be retained when not provided).
   """
   clientSecret: String
+  """
+  The client's public key set (JWKS) as a JSON string, used for `private_key_jwt` client authentication.
+
+  Note:
+  - Accepts a single JWK object or a JWKS object containing a `keys` array.
+  - Only public keys (RSA or EC) are accepted.
+  - Multiple keys can be provided to support key rotation.
+  - Mutually exclusive with `clientJwksUri`.
+  """
+  clientJwks: JSONObject
+  """
+  A URI pointing to the client's public key set (JWKS), used for `private_key_jwt` client authentication.
+
+  Note:
+  - The URI must serve a valid JWKS document.
+  - Keys are fetched and cached by the OIDC provider.
+  - Mutually exclusive with `clientJwks`.
+  """
+  clientJwksUri: URL
   """
   The redirect URIs that the client is allowed to use.
   """
@@ -372,6 +649,11 @@ input OidcClientInput {
   """
   requireFaceCheck: Boolean
   """
+  The face check match confidence threshold (50–100). Only applicable when requireFaceCheck is true.
+  When set, this value is sent as the matchConfidenceThreshold in the presentation request.
+  """
+  faceCheckConfidenceThreshold: Int
+  """
   Indicates whether the client allows presentations of credentials from any configured partner.
   """
   allowAnyPartner: Boolean
@@ -380,7 +662,7 @@ input OidcClientInput {
   """
   partnerIds: [ID!]
   """
-  The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
+  The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials.
 
   Note:
   - This is not needed for authentication using VO credentials, the issuanceId claim is used.
@@ -407,11 +689,43 @@ input OidcClientInput {
   """
   authorizationRequestsTypeStandardEnabled: Boolean
   """
-  The relying party's JWKS URI to use when JAR is enabled.
+  The relying party's public key set (JWKS) as a JSON string, used for verifying JWT-secured authorisation requests (JAR).
 
-  This should be the discovery URI without the `.well-known/openid-configuration` suffix.
+  Note:
+  - Accepts a single JWK object or a JWKS object containing a `keys` array.
+  - Only public keys (RSA or EC) are accepted.
+  - Mutually exclusive with `relyingPartyJwksUri`.
+  """
+  relyingPartyJwks: JSONObject
+  """
+  A URI pointing to the relying party's public key set (JWKS), used for verifying JWT-secured authorisation requests (JAR).
+
+  Note:
+  - The URI must serve a valid JWKS document.
+  - Mutually exclusive with `relyingPartyJwks`.
   """
   relyingPartyJwksUri: URL
+  """
+  The vc_* authorisation parameter policy for this client.
+  Controls how each vc_* parameter is resolved at runtime.
+  Omitted fields default to client_supplied.
+  """
+  vcPolicy: OidcClientVcPolicyInput
+  """
+  A claim constraint to configure on this client.
+  Exactly one operator (values, contains, startsWith) must be set.
+  Pass null to clear an existing constraint.
+  """
+  claimConstraint: ClaimConstraint
+  """
+  The OAuth response types supported by this client. Defaults to `[CODE]`.
+  Rules:
+  - At least one response type must be specified when provided.
+  - `CODE` and `ID_TOKEN` may be used individually or together.
+  - When both are specified, hybrid flow (code id_token) is enabled.
+  - Omit or pass null to use the default `[CODE]`.
+  """
+  responseTypes: [OidcResponseType!]
 }
 
 """
@@ -426,7 +740,7 @@ type OidcClient {
   """
   The URL of the client logo to be displayed during auth interactions, can be an image encoded as a data URL.
   """
-  logo: URL
+  logo: DataURL
   """
   The background color, to be displayed during auth interactions, in hexadecimal format.
   """
@@ -434,7 +748,7 @@ type OidcClient {
   """
   The URL of the background image to be displayed during auth interactions, can be an image encoded as a data URL.
   """
-  backgroundImage: URL
+  backgroundImage: DataURL
   """
   The URL of a privacy policy for the client, displayed during auth interactions.
   """
@@ -452,6 +766,18 @@ type OidcClient {
   """
   clientType: OidcClientType!
   """
+  The token endpoint authentication method used by this client.
+  """
+  tokenEndpointAuthMethod: OidcTokenEndpointAuthMethod!
+  """
+  The client's public key set (JWKS) as a JSON string, used for `private_key_jwt` client authentication.
+  """
+  clientJwks: JSONObject
+  """
+  A URI pointing to the client's public key set (JWKS), used for `private_key_jwt` client authentication.
+  """
+  clientJwksUri: URL
+  """
   The redirect URIs that the client is allowed to use.
   """
   redirectUris: [URL!]!
@@ -468,15 +794,27 @@ type OidcClient {
   """
   authorizationRequestsTypeStandardEnabled: Boolean!
   """
-  The relying party's JWKS URI to use when JAR is enabled.
-
-  This should be the discovery URI without the `.well-known/openid-configuration` suffix.
+  The relying party's public key set (JWKS) as a JSON string, used for verifying JWT-secured authorisation requests (JAR).
+  """
+  relyingPartyJwks: JSONObject
+  """
+  A URI pointing to the relying party's public key set (JWKS), used for verifying JWT-secured authorisation requests (JAR).
   """
   relyingPartyJwksUri: URL
+  """
+  The OAuth response types supported by this client.
+  Contains one or both of CODE and ID_TOKEN.
+  """
+  responseTypes: [OidcResponseType!]!
   """
   Indicates this client must use face check with every authentication presentation.
   """
   requireFaceCheck: Boolean!
+  """
+  The face check match confidence threshold (50–100). Only applicable when requireFaceCheck is true.
+  When set, this value is sent as the matchConfidenceThreshold in the presentation request.
+  """
+  faceCheckConfidenceThreshold: Int
   """
   Indicates whether the client allows presentations of credentials from any configured partner.
   """
@@ -486,7 +824,7 @@ type OidcClient {
   """
   partners: [Partner!]!
   """
-  The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials (where no unique claim value is known).
+  The unique claim(s) which can be used to derive the subject identifier (sub claim value) from partner credentials.
 
   Note:
   - This is not needed for authentication using VO credentials, the issuanceId claim is used.
@@ -512,6 +850,18 @@ type OidcClient {
   The claim mappings to be applied to this client.
   """
   claimMappings: [OidcClaimMapping!]!
+  """
+  The identity resolvers to be applied to this client.
+  """
+  identityResolvers: [OidcIdentityResolver!]!
+  """
+  The vc_* authorisation parameter policy for this client.
+  """
+  vcPolicy: OidcClientVcPolicy!
+  """
+  The configured claim constraint for this client.
+  """
+  claimConstraint: OidcClientClaimConstraint
   """
   The user who created the client.
   """
@@ -721,4 +1071,15 @@ enum OidcResourceOrderBy {
   resourceIndicator
   createdAt
   updatedAt
+}
+
+"""
+A claim constraint stored on an OIDC client.
+Exactly one operator field (values, contains, startsWith) will be set.
+""" # eslint-disable-next-line @graphql-eslint/strict-id-in-types
+type OidcClientClaimConstraint {
+  claimName: String!
+  values: [String!]
+  contains: String
+  startsWith: String
 }

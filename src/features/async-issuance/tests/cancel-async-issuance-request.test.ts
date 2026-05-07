@@ -49,6 +49,10 @@ async function runCancellationTest(
     case 'issuance-failed':
       entity.failed(cancelAtState)
       break
+    case 'verification-complete':
+      entity.state = 'verification-complete'
+      await inTransaction(async (entityManager) => entityManager.getRepository(AsyncIssuanceEntity).save(entity), entity.createdById)
+      break
     case 'cancelled':
       entity.canceled()
       await inTransaction(async (entityManager) => entityManager.getRepository(AsyncIssuanceEntity).save(entity), entity.createdById)
@@ -83,6 +87,7 @@ describe('cancelAsyncIssuanceRequestsHandler background job', () => {
       { type: 'issuance with status of contact-failed works', cancelAtState: 'contact-failed' },
       { type: 'issuance with status of issuance-verification-failed works', cancelAtState: 'issuance-verification-failed' },
       { type: 'issuance with status of issuance-failed works', cancelAtState: 'issuance-failed' },
+      { type: 'issuance with status of verification-complete works', cancelAtState: 'verification-complete' },
       { type: 'issuance with status of cancelled works', cancelAtState: 'cancelled' },
     ])('$type', async ({ cancelAtState }) => {
       await runCancellationTest(cancelAtState, async (requestId, asyncIssuance) => {
@@ -113,6 +118,7 @@ describe('cancelAsyncIssuanceRequest mutation', () => {
       { type: 'issuance with status of contact-failed works', cancelAtState: 'contact-failed' },
       { type: 'issuance with status of issuance-verification-failed works', cancelAtState: 'issuance-verification-failed' },
       { type: 'issuance with status of issuance-failed works', cancelAtState: 'issuance-failed' },
+      { type: 'issuance with status of verification-complete works', cancelAtState: 'verification-complete' },
       { type: 'issuance with status of cancelled works', cancelAtState: 'cancelled' },
     ])('$type', async ({ cancelAtState }) => {
       await runCancellationTest(cancelAtState, async (requestId) => {

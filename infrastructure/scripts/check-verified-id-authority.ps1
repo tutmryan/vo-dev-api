@@ -10,6 +10,8 @@ param(
   $LinkedDomainUrl
 )
 
+. (Join-Path $PSScriptRoot 'shared-utils.ps1')
+
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
@@ -34,10 +36,12 @@ if ('' -ne $HomeTenantAuthorityId) {
   # Check if the Verified ID service is already enabled
   #
 
-  $authorities = az rest `
-    --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities `
-    --resource $constants.didResourceId `
-    --query 'value' | ConvertFrom-Json
+  $authorities = Invoke-WithRetry -ScriptBlock {
+    az rest `
+      --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities `
+      --resource $constants.didResourceId `
+      --query 'value' | ConvertFrom-Json
+  }
 
   $authority = $authorities | Where-Object -FilterScript { $_.didModel.linkedDomainUrls -eq $LinkedDomainUrl }[0]
 

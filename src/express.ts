@@ -15,10 +15,12 @@ import cors from 'cors'
 import { randomBytes } from 'crypto'
 import type { Express, Request } from 'express'
 import express from 'express'
+import { existsSync } from 'fs'
 import type { HelmetOptions } from 'helmet'
 import helmet from 'helmet'
 import type { ServerResponse } from 'http'
 import { clone, merge } from 'lodash'
+import path from 'path'
 import { combinedBearerTokenMiddleware } from './authentication'
 import {
   cookieSession as cookieSessionConfig,
@@ -32,6 +34,8 @@ import {
 import { addAsyncIssuanceEmailStatusEndpoint } from './features/async-issuance/email-status-callback'
 import { addAsyncIssuanceSmsStatusEndpoint as addAsyncIssuanceSmsStatusCallbackEndpoint } from './features/async-issuance/sms-status-callback'
 import { issuanceCallbackMiddleware, presentationCallbackMiddleware } from './features/callback'
+import { addPresentationFlowEmailStatusEndpoint } from './features/presentation-flow/email-status-callback'
+import { addPresentationFlowSmsStatusEndpoint } from './features/presentation-flow/sms-status-callback'
 import { demoPresentationTokenHandlers, demoPresentationTokenRoute } from './features/demo'
 import { corsConfig } from './features/instance-configs'
 import { vcLogoProxyHandler, vcLogoProxyTokenRoute } from './features/local-dev/vc-logo-proxy'
@@ -111,6 +115,7 @@ export async function getExpressApp(): Promise<Express> {
               workerSrc: [`'self'`],
               formAction: oidcOnlyCsp.directives.formAction,
               requireTrustedTypesFor: oidcOnlyCsp.directives.requireTrustedTypesFor,
+              connectSrc: ["'self'", 'https://cdn.jsdelivr.net'],
             },
           }
         : oidcEnabled
@@ -133,6 +138,8 @@ export async function getExpressApp(): Promise<Express> {
   addServiceHealthEndpoints(app)
   addAsyncIssuanceSmsStatusCallbackEndpoint(app)
   addAsyncIssuanceEmailStatusEndpoint(app)
+  addPresentationFlowSmsStatusEndpoint(app)
+  addPresentationFlowEmailStatusEndpoint(app)
 
   // Azure start-up probe (Don't use the known default and make the custom one unlikely to be discovered)
   app.get('/azure-startup-probe-40nt0001ihrkbxdry635', (_req, res) => {
@@ -214,6 +221,16 @@ export async function getExpressApp(): Promise<Express> {
     addOidcProvider(app)
       .then((oidcRoute) => logger.info(`OIDC provider ready on ${oidcRoute}`))
       .catch((error) => logger.error('Failed to start OIDC provider', { error }))
+
+    // OIDC UI files are copied to build/src during production build
+    const uiDistPath = path.join(process.cwd(), 'src', 'features', 'oidc-provider', 'oidc-ui', 'dist')
+
+    if (!existsSync(uiDistPath)) {
+      logger.warn('OIDC UI dist not found at', uiDistPath)
+    }
+
+    app.use('/oidc', express.static(uiDistPath))
+    logger.info('Added static route for OIDC provider UI at /oidc')
   }
 
   return app

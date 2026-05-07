@@ -4,6 +4,7 @@ import compression from 'compression'
 import type { Express, RequestHandler } from 'express'
 import { isEmpty, pick } from 'lodash'
 import { strict as assert } from 'node:assert'
+import fs from 'node:fs'
 import path from 'node:path'
 import { stringify } from 'node:querystring'
 import { inspect } from 'node:util'
@@ -13,6 +14,8 @@ import { instance, sdk } from '../../config'
 import { requestOrigin } from '../../express'
 import { isIe11, isWebView3 } from '../../util/browser'
 import { invariant } from '../../util/invariant'
+import { getUseModernOidcUiSetting } from '../instance-configs'
+import { applyVcPolicy } from './apply-vc-policy'
 import { faceCheckAmr, presentationLoginStandardClaims } from './claims'
 import { filterToRequestedClaimsAcr, filterToRequestedClaimsAmr } from './claims-parameter'
 import { eamLoginFailResult, getEamAcr, getEamAmr, isEamRequestAndLoginShouldFail } from './integrations/entra-eam'
@@ -123,14 +126,92 @@ export function routes(app: Express, route: string): void {
 
       const logger = buildRequestLogger(req, { oidc: { interactionId: uid, clientId: client.clientId } })
       const loginInteractionData = await getLoginInteractionData(uid)
+      const forceNewSession = 'retry' in req.query
 
       switch (prompt.name) {
         case 'login': {
+          // Apply vc policy to resolve fixed/default params before consumption
+          const clientEntity = getClient(client.clientId)
+          applyVcPolicy(params, clientEntity)
+
+          // If using modern UI, handle here and return early
+          if (getUseModernOidcUiSetting()) {
+            const { logo, backgroundColor, backgroundImage } = clientEntity
+
+            // Check if we already have a valid session, if not set one up
+            const token = await acquireLoginPresentationToken()
+            if (!forceNewSession && loginInteractionData?.state === 'started' && loginInteractionData.sessionKey) {
+              // Reuse existing session - acquire a new token but reuse the session mapping
+              const sessionKey = getSessionKey(token.access_token)
+              await setupLoginSession(uid, token)
+              await setLoginInteractionData({
+                ...loginInteractionData,
+                sessionKey,
+              })
+            } else {
+              // Force new session (or original static UI flow)
+              const sessionKey = getSessionKey(token.access_token)
+              await setupLoginSession(uid, token)
+              await setLoginInteractionData({
+                ...(loginInteractionData ?? {}),
+                interactionId: uid,
+                state: 'started',
+                clientId: client.clientId,
+                sessionKey,
+                requestedCredential: await extractRequestedCredentials(
+                  params,
+                  clientEntity,
+                  getData().partners,
+                  loginInteractionData,
+                  logger,
+                ),
+              })
+            }
+
+            // Static UI: no per-UA polyfill flags; Vite handles polyfills.
+            const sdkUrl = `${sdk.baseUrl}/index.min.js`
+
+            const config = {
+              uid,
+              title: 'Sign in to',
+              graphqlUrl: `${requestOrigin(req)}/graphql`,
+              presentationAccessToken: token.access_token,
+              voLogoUrl,
+              logoUrl: logo ?? null,
+              backgroundColor: backgroundColor ?? null,
+              backgroundImageUrl: backgroundImage ?? null,
+              clientName: client.clientName ?? null,
+              tosUri: client.policyUri ?? null,
+              policyUri: client.policyUri ?? null,
+              showDebug,
+              sdkUrl,
+              dbg: showDebug
+                ? {
+                    params: debug(params),
+                    prompt: debug(prompt),
+                  }
+                : null,
+            }
+
+            const htmlPath = path.join(process.cwd(), 'src', 'features', 'oidc-provider', 'oidc-ui', 'dist', 'login.html')
+            let html = fs.readFileSync(htmlPath, 'utf8')
+            // Inject the config as JSON
+            html = html.replace(
+              /<script id="oidc-config" type="application\/json">\s*{[^}]*}\s*<\/script>/,
+              `<script id="oidc-config" type="application/json">${JSON.stringify(config)}</script>`,
+            )
+            // Inject nonce into <script> and <style> tags
+            const nonce = res.locals.cspNonce || ''
+            html = html.replace(/<script([^>]*)>/g, `<script$1 nonce="${nonce}">`).replace(/<style([^>]*)>/g, `<style$1 nonce="${nonce}">`)
+            res.send(html)
+            return
+          }
+
+          // Legacy EJS flow
           invariant(loginInteractionData === undefined || loginInteractionData.state === 'pre-start', 'Interaction session already exists')
           const token = await acquireLoginPresentationToken()
           const sessionKey = getSessionKey(token.access_token)
           await setupLoginSession(uid, token)
-          const clientEntity = getClient(client.clientId)
           await setLoginInteractionData({
             ...(loginInteractionData ?? {}),
             interactionId: uid,
@@ -238,18 +319,18 @@ export function routes(app: Express, route: string): void {
       invariant(loginInteractionData, 'login interaction data not found')
 
       const client = getClient(clientId)
+      const identityResolvers = await client.identityResolvers
 
-      const loginResult = await completeLogin(
-        {
-          interactionId: uid,
-          requestId: req.body.requestId,
-          clientId,
-          uniqueClaimForSubParam: params.vc_unique_claim_for_sub as string | undefined,
-        },
-        client.uniqueClaimsForSubjectId ?? [],
-        await client.claimMappings,
+      const loginResult = await completeLogin({
+        interactionId: uid,
+        requestId: req.body.requestId,
+        clientId,
+        uniqueClaimForSubParam: params.vc_unique_claim_for_sub as string | undefined,
+        clientUniqueClaimsForSubjectId: client.uniqueClaimsForSubjectId ?? [],
+        clientClaimMappings: await client.claimMappings,
+        clientIdentityResolverClaims: identityResolvers.map(({ claimName }) => claimName),
         logger,
-      )
+      })
 
       logger.auditEvent(AuditEvents.OIDC_SESSION_STARTED, {
         presentationRequestId: req.body.requestId,

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "node index.js",
-    "dev": "cross-env HOST=localhost DATABASE=VerifiedOrchestration USER=api_user PASSWORD=7o}R~=XA1jmz!-aHQ^pA ts-node --transpile-only -r dotenv/config index",
+"dev": "cross-env DATABASE_HOST=localhost ts-node --transpile-only -r dotenv/config index",
     "check-types": "tsc --noEmit",
     "audit": "npx --yes better-npm-audit audit",
     "verify-migrations": "ts-node scripts/verify-migrations.ts",
@@ -22,7 +22,7 @@
   "devDependencies": {
     "@tsconfig/node20": "^20.1.9",
     "@types/cross-spawn": "^6.0.6",
-    "@types/node": "^25.3.0",
+    "@types/node": "^25.4.0",
     "cross-env": "^10.1.0",
     "shx": "^0.4.0",
     "ts-node": "^10.9.2",
@@ -33,6 +33,7 @@
     "typeorm": "^0.3.28"
   },
   "overrides": {
+    "brace-expansion": ">=5.0.5",
     "@azure/identity": "^4.3.0",
     "glob": "^12.0.0",
     "sha.js": "^2.4.12",

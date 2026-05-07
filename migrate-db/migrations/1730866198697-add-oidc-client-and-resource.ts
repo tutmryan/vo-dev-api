@@ -1,10 +1,10 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddOidcClientAndResource1730866198697 implements MigrationInterface {
-    name = 'AddOidcClientAndResource1730866198697'
+  name = 'AddOidcClientAndResource1730866198697'
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             CREATE TABLE "oidc_resource" (
                 "id" uniqueidentifier NOT NULL,
                 "created_at" datetimeoffset NOT NULL CONSTRAINT "DF_70fa42aa0547ca95cd07a3e4223" DEFAULT getdate(),
@@ -17,8 +17,8 @@ export class AddOidcClientAndResource1730866198697 implements MigrationInterface
                 "scopes_json" nvarchar(MAX) NOT NULL,
                 CONSTRAINT "id_oidc_resource" PRIMARY KEY ("id")
             )
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             CREATE TABLE "oidc_client_resource" (
                 "id" uniqueidentifier NOT NULL,
                 "created_at" datetimeoffset NOT NULL CONSTRAINT "DF_59fe2421715c20e2a5632d5d8b4" DEFAULT getdate(),
@@ -30,11 +30,11 @@ export class AddOidcClientAndResource1730866198697 implements MigrationInterface
                 "resource_scopes_json" nvarchar(MAX) NOT NULL,
                 CONSTRAINT "id_oidc_client_resource" PRIMARY KEY ("id")
             )
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             CREATE UNIQUE INDEX "ix_oidc_client_resource_client_id_resource_id" ON "oidc_client_resource" ("client_id", "resource_id")
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             CREATE TABLE "oidc_client" (
                 "id" uniqueidentifier NOT NULL,
                 "created_at" datetimeoffset NOT NULL CONSTRAINT "DF_489f08b4ebcd7bc7ac4946d9539" DEFAULT getdate(),
@@ -56,8 +56,8 @@ export class AddOidcClientAndResource1730866198697 implements MigrationInterface
                 "credential_types_json" nvarchar(MAX),
                 CONSTRAINT "id_oidc_client" PRIMARY KEY ("id")
             )
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             CREATE TABLE "oidc_resource_audit" (
                 "id" uniqueidentifier NOT NULL,
                 "entity_id" uniqueidentifier NOT NULL,
@@ -67,8 +67,8 @@ export class AddOidcClientAndResource1730866198697 implements MigrationInterface
                 "user_id" uniqueidentifier,
                 CONSTRAINT "id_oidc_resource_audit" PRIMARY KEY ("id")
             )
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             CREATE TABLE "oidc_client_audit" (
                 "id" uniqueidentifier NOT NULL,
                 "entity_id" uniqueidentifier NOT NULL,
@@ -78,8 +78,8 @@ export class AddOidcClientAndResource1730866198697 implements MigrationInterface
                 "user_id" uniqueidentifier,
                 CONSTRAINT "id_oidc_client_audit" PRIMARY KEY ("id")
             )
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             CREATE TABLE "oidc_client_resource_audit" (
                 "id" uniqueidentifier NOT NULL,
                 "entity_id" uniqueidentifier NOT NULL,
@@ -89,158 +89,157 @@ export class AddOidcClientAndResource1730866198697 implements MigrationInterface
                 "user_id" uniqueidentifier,
                 CONSTRAINT "id_oidc_client_resource_audit" PRIMARY KEY ("id")
             )
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             CREATE TABLE "oidc_client_partners" (
                 "oidc_client_id" uniqueidentifier NOT NULL,
                 "partner_id" uniqueidentifier NOT NULL,
                 CONSTRAINT "id_oidc_client_partners" PRIMARY KEY ("oidc_client_id", "partner_id")
             )
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             CREATE INDEX "ix_oidc_client_partners_oidc_client_id" ON "oidc_client_partners" ("oidc_client_id")
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             CREATE INDEX "ix_oidc_client_partners_partner_id" ON "oidc_client_partners" ("partner_id")
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "presentation"
             ADD "oidc_client_id" uniqueidentifier
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_resource"
             ADD CONSTRAINT "fk_oidc_resource_user_created_by_id" FOREIGN KEY ("created_by_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_resource"
             ADD CONSTRAINT "fk_oidc_resource_user_updated_by_id" FOREIGN KEY ("updated_by_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_resource"
             ADD CONSTRAINT "fk_oidc_client_resource_user_created_by_id" FOREIGN KEY ("created_by_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_resource"
             ADD CONSTRAINT "fk_oidc_client_resource_user_updated_by_id" FOREIGN KEY ("updated_by_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_resource"
             ADD CONSTRAINT "fk_oidc_client_resource_oidc_client_client_id" FOREIGN KEY ("client_id") REFERENCES "oidc_client"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_resource"
             ADD CONSTRAINT "fk_oidc_client_resource_oidc_resource_resource_id" FOREIGN KEY ("resource_id") REFERENCES "oidc_resource"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client"
             ADD CONSTRAINT "fk_oidc_client_user_created_by_id" FOREIGN KEY ("created_by_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client"
             ADD CONSTRAINT "fk_oidc_client_user_updated_by_id" FOREIGN KEY ("updated_by_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "presentation"
             ADD CONSTRAINT "fk_presentation_oidc_client_oidc_client_id" FOREIGN KEY ("oidc_client_id") REFERENCES "oidc_client"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_resource_audit"
             ADD CONSTRAINT "fk_oidc_resource_audit_user_user_id" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_audit"
             ADD CONSTRAINT "fk_oidc_client_audit_user_user_id" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_resource_audit"
             ADD CONSTRAINT "fk_oidc_client_resource_audit_user_user_id" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_partners"
             ADD CONSTRAINT "fk_oidc_client_partners_oidc_client_oidc_client_id" FOREIGN KEY ("oidc_client_id") REFERENCES "oidc_client"("id") ON DELETE CASCADE ON UPDATE CASCADE
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_partners"
             ADD CONSTRAINT "fk_oidc_client_partners_partner_partner_id" FOREIGN KEY ("partner_id") REFERENCES "partner"("id") ON DELETE CASCADE ON UPDATE CASCADE
-        `);
-    }
+        `)
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_partners" DROP CONSTRAINT "fk_oidc_client_partners_partner_partner_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_partners" DROP CONSTRAINT "fk_oidc_client_partners_oidc_client_oidc_client_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_resource_audit" DROP CONSTRAINT "fk_oidc_client_resource_audit_user_user_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_audit" DROP CONSTRAINT "fk_oidc_client_audit_user_user_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_resource_audit" DROP CONSTRAINT "fk_oidc_resource_audit_user_user_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "presentation" DROP CONSTRAINT "fk_presentation_oidc_client_oidc_client_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client" DROP CONSTRAINT "fk_oidc_client_user_updated_by_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client" DROP CONSTRAINT "fk_oidc_client_user_created_by_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_resource" DROP CONSTRAINT "fk_oidc_client_resource_oidc_resource_resource_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_resource" DROP CONSTRAINT "fk_oidc_client_resource_oidc_client_client_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_resource" DROP CONSTRAINT "fk_oidc_client_resource_user_updated_by_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_client_resource" DROP CONSTRAINT "fk_oidc_client_resource_user_created_by_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_resource" DROP CONSTRAINT "fk_oidc_resource_user_updated_by_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "oidc_resource" DROP CONSTRAINT "fk_oidc_resource_user_created_by_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             ALTER TABLE "presentation" DROP COLUMN "oidc_client_id"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP INDEX "ix_oidc_client_partners_partner_id" ON "oidc_client_partners"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP INDEX "ix_oidc_client_partners_oidc_client_id" ON "oidc_client_partners"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP TABLE "oidc_client_partners"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP TABLE "oidc_client_resource_audit"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP TABLE "oidc_client_audit"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP TABLE "oidc_resource_audit"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP TABLE "oidc_client"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP INDEX "ix_oidc_client_resource_client_id_resource_id" ON "oidc_client_resource"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP TABLE "oidc_client_resource"
-        `);
-        await queryRunner.query(`
+        `)
+    await queryRunner.query(`
             DROP TABLE "oidc_resource"
-        `);
-    }
-
+        `)
+  }
 }

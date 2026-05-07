@@ -5,7 +5,12 @@ import { identityLoader, isIdentityDeletableLoader } from './features/identity/l
 import { applicationLabelConfigLoader, corsOriginConfigLoader } from './features/instance-configs/loaders'
 import { issuanceCountByContractLoader, issuanceCountByIdentityLoader, issuanceLoader } from './features/issuance/loaders'
 import { microsoftEntraTemporaryAccessPassIssuanceLoader } from './features/microsoft-entra-temporary-access-pass-issuance/loaders'
-import { oidcClaimMappingsLoader, oidcClientLoader, oidcResourceLoader } from './features/oidc-provider/loaders'
+import {
+  oidcClaimMappingsLoader,
+  oidcClientLoader,
+  oidcIdentityResolversLoader,
+  oidcResourceLoader,
+} from './features/oidc-provider/loaders'
 import { partnerByDidLoader, partnerLoader, presentationPartnersLoader } from './features/partners/loaders'
 import { presentationFlowLoader, presentationFlowTemplateLoader } from './features/presentation-flow/loaders'
 import { presentationLoader } from './features/presentation/loaders'
@@ -36,6 +41,7 @@ export const createDataLoaders = (services: Services) => ({
   oidcClients: oidcClientLoader(),
   oidcResources: oidcResourceLoader(),
   oidcClaimMappings: oidcClaimMappingsLoader(),
+  oidcIdentityResolvers: oidcIdentityResolversLoader(),
   isIdentityDeletable: isIdentityDeletableLoader(),
   wallets: walletLoader(),
   walletFirstUsed: walletUsedDateLoader('MIN'),

@@ -4,7 +4,9 @@ import { logger } from '../logger'
 import { redisOptions } from '../redis'
 import { Lazy } from '../util/lazy'
 
-export const JobQueueName = 'jobQueue'
+// Hash tag required for Redis Enterprise (EnterpriseCluster) — ensures all BullMQ keys
+// for this queue land in the same hash slot.
+export const JobQueueName = '{jobQueue}'
 
 export const defaultJobOptions: DefaultJobOptions = {
   removeOnComplete: true,

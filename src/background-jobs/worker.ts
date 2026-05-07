@@ -10,6 +10,7 @@ import { redisOptions } from '../redis'
 import { createVerifiedIdAdminService } from '../services'
 import { AsyncIssuanceService } from '../services/async-issuance-service'
 import { CommunicationsService } from '../services/communications-service'
+import { PresentationFlowService } from '../services/presentation-flow-service'
 import { Lazy } from '../util/lazy'
 import type { JobConfig } from './jobs'
 import { getJobConfig, type HandlerContext, type JobPayload } from './jobs'
@@ -34,6 +35,7 @@ async function executeJob(job: Job<JobPayload>, jobConfig: JobConfig, entityMana
     services: {
       verifiedIdAdmin: createVerifiedIdAdminService(logger),
       asyncIssuances: new AsyncIssuanceService(),
+      presentationFlows: new PresentationFlowService(),
       communications: new CommunicationsService(logger),
     },
   }

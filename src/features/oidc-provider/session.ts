@@ -143,7 +143,7 @@ export async function extractRequestedCredentials(
   const requestedCredential = {
     type,
     acceptedIssuers: vcIssuerParam ? [vcIssuerParam] : undefined,
-    configuration: buildRequestConfiguration(params, client, loginInteractionData),
+    configuration: buildRequestConfiguration(client, loginInteractionData),
     constraints,
   }
 
@@ -154,27 +154,26 @@ export async function extractRequestedCredentials(
   return requestedCredential
 }
 
-const faceCheckMinConfidenceThreshold = 50
-const faceCheckMaxConfidenceThreshold = 70
-const faceCheckOn: RequestConfiguration = { validation: { faceCheck: {} } }
-
 function buildRequestConfiguration(
-  params: UnknownObject,
   client: OidcClientEntity,
   loginInteractionData?: LoginInteractionData,
 ): RequestConfiguration | undefined {
-  const faceCheckParam = params[ExtraParams.vc_facecheck] as string | undefined
-  const faceCheckClientDefault = client.requireFaceCheck ? faceCheckOn : undefined
-  if (faceCheckParam === 'true') return faceCheckOn
-  const asNumber = Number(faceCheckParam)
-  if (!Number.isNaN(asNumber) && asNumber >= faceCheckMinConfidenceThreshold && asNumber <= faceCheckMaxConfidenceThreshold)
-    return { validation: { faceCheck: { matchConfidenceThreshold: asNumber } } }
-  if (
-    !loginInteractionData?.integrations?.entraEam && // don't apply to EAM requests
-    simplifyClaimParameter(loginInteractionData?.requestedClaims?.id_token?.amr ?? undefined)?.values.includes('face')
-  )
-    return faceCheckOn
-  return faceCheckClientDefault
+  const threshold = client.faceCheckConfidenceThreshold ?? 70
+
+  const shouldApplyFaceCheck =
+    client.requireFaceCheck ||
+    (!loginInteractionData?.integrations?.entraEam &&
+      simplifyClaimParameter(loginInteractionData?.requestedClaims?.id_token?.amr ?? undefined)?.values.includes('face'))
+
+  if (!shouldApplyFaceCheck) return undefined
+
+  return {
+    validation: {
+      faceCheck: {
+        matchConfidenceThreshold: threshold,
+      },
+    },
+  }
 }
 
 export type PresentationLoginAccount = {
@@ -199,12 +198,13 @@ export type PresentationLoginAccount = {
  *  - The value of the claim with key specified via auth request param `vc_unique_claim_for_sub`, required if issuanceId is not present, or the single value from the client uniqueClaimsForSub config
  * See https://github.com/bcgov/vc-authn-oidc/blob/main/docs/README.md#subject-identifer-mapping
  */
-async function getSubjectIdentifier(
+function getSubjectIdentifier(
   claims: Record<string, unknown>,
   clientId: string,
   uniqueClaimForSubParam?: string,
   clientUniqueClaimsForSub?: string[],
-): Promise<string> {
+  clientIdentityResolverClaims?: string[],
+): string {
   // the subject identifier should not be the same for the same presentation across different clients
   // use the client id as the namespace for the uuid
   const uuidNamespace = clientId
@@ -219,7 +219,11 @@ async function getSubjectIdentifier(
       clientUniqueClaimsForSub.includes(uniqueClaimForSubParam),
       `The unique claim '${uniqueClaimForSubParam}' specified in the auth request is not allowed for the client`,
     )
-  const uniqueClaimForSub = uniqueClaimForSubParam ?? clientUniqueClaimsForSub?.find((claim) => !!claims[claim])
+  const uniqueClaimForSub =
+    uniqueClaimForSubParam ??
+    clientUniqueClaimsForSub?.find((claim) => !!claims[claim]) ??
+    clientIdentityResolverClaims?.find((claim) => !!claims[claim])
+
   invariant(
     uniqueClaimForSub,
     'A valid unique claim for the subject identifier could not be determined from the client configuration nor the `vc_unique_claim_for_sub` auth request parameter',
@@ -229,22 +233,25 @@ async function getSubjectIdentifier(
   return uuidv5(uniqueClaimValue, uuidNamespace)
 }
 
-export async function completeLogin(
-  {
-    interactionId,
-    requestId,
-    clientId,
-    uniqueClaimForSubParam,
-  }: {
-    interactionId: string
-    requestId: string
-    clientId: string
-    uniqueClaimForSubParam?: string
-  },
-  clientUniqueClaimsForSubjectId: string[],
-  clientClaimMappings: OidcClaimMappingEntity[],
-  logger: Logger,
-): Promise<PresentationLoginAccount> {
+export async function completeLogin({
+  interactionId,
+  requestId,
+  clientId,
+  uniqueClaimForSubParam,
+  clientUniqueClaimsForSubjectId,
+  clientClaimMappings,
+  clientIdentityResolverClaims,
+  logger,
+}: {
+  interactionId: string
+  requestId: string
+  clientId: string
+  uniqueClaimForSubParam?: string
+  clientUniqueClaimsForSubjectId: string[]
+  clientClaimMappings: OidcClaimMappingEntity[]
+  clientIdentityResolverClaims: string[]
+  logger: Logger
+}): Promise<PresentationLoginAccount> {
   // Verify the login interaction state
   const interactionData = await getLoginInteractionData(interactionId)
   invariant(interactionData, 'Interaction session not found')
@@ -272,9 +279,11 @@ export async function completeLogin(
   const { issuanceId, identityId, photo, ...credentialClaims } = allClaims
 
   // When EAM integration is present, use the EAM account ID
+  // Only use identity resolver claims for subject identifier if identity was actually resolved
+  const resolverClaimsForSubject = identity ? clientIdentityResolverClaims : []
   const accountId = interactionData.integrations?.entraEam
     ? getEamAccountId(interactionData, credential, logger)
-    : await getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId)
+    : getSubjectIdentifier(allClaims, clientId, uniqueClaimForSubParam, clientUniqueClaimsForSubjectId, resolverClaimsForSubject)
 
   const applicableClaimMappings = clientClaimMappings.filter(({ credentialTypes }) => {
     if (!credentialTypes || credentialTypes.length === 0) return true

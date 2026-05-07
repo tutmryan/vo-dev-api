@@ -1,4 +1,5 @@
 # eslint-disable @graphql-eslint/strict-id-in-types
+ 
 """
 A human-friendly label for a specific application (by identifier)
 """
@@ -89,6 +90,55 @@ input EmailSenderConfigInput {
   senderEmail: String
 }
 
+"""
+Available instance setting keys
+"""
+enum InstanceSettingKey {
+  """
+  Email sender configuration (senderName, senderEmail)
+  """
+  emailSender
+
+  """
+  Whether to use modern OIDC UI (true = modern, false = legacy EJS)
+  """
+  useModernOidcUi
+}
+
+"""
+Instance setting result - value is JSON encoded based on the key type
+"""
+type InstanceSetting {
+  """
+  The setting key
+  """
+  key: InstanceSettingKey!
+
+  """
+  The setting value as JSON string. Parse based on key:
+  - emailSender: { senderName?: string, senderEmail?: string }
+  - useModernOidcUi: boolean
+  """
+  value: JSON!
+}
+
+"""
+Input for setting an instance setting. Value must be valid JSON matching the key's expected type.
+"""
+input SetInstanceSettingInput {
+  """
+  The setting key
+  """
+  key: InstanceSettingKey!
+
+  """
+  The setting value as JSON string. Must match the key's expected type:
+  - emailSender: { senderName?: string, senderEmail?: string }
+  - useModernOidcUi: boolean
+  """
+  value: JSON!
+}
+
 extend type Query {
   """
   List all application label configs for a given identity store
@@ -105,6 +155,11 @@ extend type Query {
   Returns null if no override is set.
   """
   emailSenderConfig: EmailSenderConfig!
+
+  """
+  Get an instance setting by key. Returns null if not set.
+  """
+  instanceSetting(key: InstanceSettingKey!): InstanceSetting
 }
 
 extend type Mutation {
@@ -117,9 +172,15 @@ extend type Mutation {
   Replace user configurable CORS origin configurations for the VO API instance
   """
   setCorsOriginConfigs(input: [CorsOriginConfigInput!]!): [CorsOriginConfig!]!
+
   """
   Set or update the email sender configuration.
   Passing null or omitting fields will unset the override and revert to defaults.
   """
   setEmailSenderConfig(input: EmailSenderConfigInput!): EmailSenderConfig!
+
+  """
+  Set an instance setting. Value must be valid JSON matching the key's expected type.
+  """
+  setInstanceSetting(input: SetInstanceSettingInput!): InstanceSetting!
 }

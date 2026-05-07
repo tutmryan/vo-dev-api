@@ -25,6 +25,7 @@ import { userInvariant } from '../../../util/user-invariant'
 import { isValidEmail } from '../../../util/validation'
 import { validateIssuanceClaimsAgainstContractClaims } from '../../contracts/claims'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
+import { CredentialRecordEntity } from '../../credential-record/entities/credential-record-entity'
 import { bulkCreateOrUpdateIdentity, identityInputKey } from '../../identity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { validateFaceCheckPhoto } from '../../issuance/commands/create-issuance-request-command'
@@ -193,16 +194,32 @@ export async function CreateAsyncIssuanceRequestCommand(
 
     invariant(identity || identityId, 'Identity or identity ID must be provided')
 
+    const resolvedIdentityId = (identityId ? identityId : identityMap.get(identityInputKey(identity!))) ?? throwError('Identity not found')
+
+    const credentialRecord = new CredentialRecordEntity()
+    credentialRecord.createdById = user.entity.id
+    credentialRecord.contractId = contractId
+    credentialRecord.identityId = resolvedIdentityId
+    credentialRecord.expiresAt = null
+
     const asyncIssuance = new AsyncIssuanceEntity({
       id: randomUUID(),
       contractId,
-      identityId: (identityId ? identityId : identityMap.get(identityInputKey(identity!))) ?? throwError('Identity not found'),
+      identityId: resolvedIdentityId,
       expiryPeriodInDays: convertAsyncIssuanceRequestExpiryToDays(expiry),
       postIssuanceRedirectUrl: asyncIssuanceInput.postIssuanceRedirectUrl ?? null,
+      credentialRecordId: credentialRecord.id,
     })
     response.asyncIssuanceRequestIds.push(asyncIssuance.id)
-    return { asyncIssuance, asyncIssuanceInput }
+    return { asyncIssuance, asyncIssuanceInput, credentialRecord }
   })
+
+  await bulkInsert(
+    asyncIssuancesToSave.map(({ credentialRecord }) => credentialRecord),
+    CredentialRecordEntity,
+    entityManager,
+    {},
+  )
 
   await bulkInsert(
     asyncIssuancesToSave.map(({ asyncIssuance }) => asyncIssuance),

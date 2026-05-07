@@ -169,9 +169,7 @@ jobs:
           shared-action-group-alert-name: vo-alerts
           app-service-plan-id: ${{ vars.APP_SERVICE_PLAN_ID }}
           app-service-zone-redundant: true
-          redis-cache-sku: ${{ startsWith(inputs.instance, 'sandbox.') && 'Basic' || 'Standard' }}
-          redis-cache-family: C
-          redis-cache-capacity: ${{ startsWith(inputs.instance, 'sandbox.') && 0 || 1 }}
+          managed-redis-sku: ${{ vars.MANAGED_REDIS_SKU || 'Balanced_B0' }}
 
           cors-origin: "${{ vars.CORS_ORIGIN }}"
 

@@ -26,6 +26,8 @@ param(
   $LinkedDomainUrl
 )
 
+. (Join-Path $PSScriptRoot 'shared-utils.ps1')
+
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
@@ -44,10 +46,12 @@ $constants = @{
 $authorityId = $null
 $linkedDomainsVerified = $false
 
-$authorities = az rest `
-  --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities `
-  --resource $constants.didResourceId `
-  --query 'value' | ConvertFrom-Json
+$authorities = Invoke-WithRetry -ScriptBlock {
+  az rest `
+    --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities `
+    --resource $constants.didResourceId `
+    --query 'value' | ConvertFrom-Json
+}
 
 $authority = $authorities | Where-Object -FilterScript { $_.didModel.linkedDomainUrls -eq $LinkedDomainUrl }[0]
 
@@ -62,10 +66,12 @@ if ($null -ne $authority) {
   #
   # Enable Verified ID service
   #
-  $keyVaultResourceUrl = az keyvault list `
-    --resource-group $KeyVaultResourceGroupName `
-    --query ("[?name=='{0}'].properties.vaultUri" -f $KeyVaultName) `
-    --output tsv
+  $keyVaultResourceUrl = Invoke-WithRetry -ScriptBlock {
+    az keyvault list `
+      --resource-group $KeyVaultResourceGroupName `
+      --query ("[?name=='{0}'].properties.vaultUri" -f $KeyVaultName) `
+      --output tsv
+  }
 
   $enableVerifiedIdServicePayload = @{
     didMethod        = 'web'
@@ -83,11 +89,13 @@ if ($null -ne $authority) {
 
   Write-Output 'Creating Verified ID Authority...'
 
-  $authority = az rest `
-    --method post `
-    --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities `
-    --resource $constants.didResourceId `
-    --body $enableVerifiedIdServicePayloadJson ` | ConvertFrom-Json
+  $authority = Invoke-WithRetry -ScriptBlock {
+    az rest `
+      --method post `
+      --url https://verifiedid.did.msidentity.com/v1.0/verifiableCredentials/authorities `
+      --resource $constants.didResourceId `
+      --body $enableVerifiedIdServicePayloadJson ` | ConvertFrom-Json
+  }
 
   $authorityId = $authority.id
 

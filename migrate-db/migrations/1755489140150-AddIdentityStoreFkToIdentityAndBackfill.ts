@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 // --- tolerant env parsing helpers (supports {'k':'v'} maps) ---
 function parseJsonLike(input: string | undefined, varName: string): Record<string, string> {
@@ -62,6 +62,7 @@ export class AddIdentityStoreFkToIdentityAndBackfill1755489140150 implements Mig
         AND "is_app" = 1
         AND "name" = 'System'
     `)) as Array<{ id: string }>
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const creatorId = systemUser?.[0]?.id
     if (!creatorId) throw new Error('Backfill aborted: no system user found.')
 
@@ -154,6 +155,7 @@ export class AddIdentityStoreFkToIdentityAndBackfill1755489140150 implements Mig
       FROM "identity"
       WHERE "identity_store_id" IS NULL
     `)) as Array<{ missing: number | string }>
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const missing = Number(rows?.[0]?.missing ?? 0)
     if (missing > 0) throw new Error(`Backfill failed: ${missing} identities have no matching identity_store.`)
 
@@ -191,6 +193,7 @@ export class AddIdentityStoreFkToIdentityAndBackfill1755489140150 implements Mig
     const homeStore = (await queryRunner.query(`SELECT TOP (1) id FROM "identity_store" WHERE "identifier" = @0`, [
       HOME_TENANT_ID,
     ])) as Array<{ id: string }>
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const homeStoreId = homeStore?.[0]?.id
     if (!homeStoreId) throw new Error('Home identity store not found after seeding.')
 

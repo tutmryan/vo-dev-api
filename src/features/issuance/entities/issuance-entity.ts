@@ -5,15 +5,22 @@ import { IssuanceStatus } from '../../../generated/graphql'
 import { typeSafeAssign } from '../../../util/type-safe-assign'
 import { AuditedAndTrackedEntity } from '../../auditing/entities/audited-and-tracked-entity'
 import { ContractEntity } from '../../contracts/entities/contract-entity'
+import type { CredentialRecordEntity } from '../../credential-record/entities/credential-record-entity'
 import { IdentityEntity } from '../../identity/entities/identity-entity'
 import { PresentationEntity } from '../../presentation/entities/presentation-entity'
 import { UserEntity } from '../../users/entities/user-entity'
 
 @Entity('issuance')
 @Index(['contractId', 'issuedAt'])
+@Index('ix_issuance_credential_record_id', ['credentialRecordId'], { unique: true })
+@Index('ix_issuance_identity_id_is_revoked_expires_at', ['identityId', 'isRevoked', 'expiresAt'])
+@Index('ix_issuance_created_by_id', ['issuedById'])
 export class IssuanceEntity extends AuditedAndTrackedEntity {
   constructor(
-    args?: Pick<IssuanceEntity, 'id' | 'requestId' | 'contractId' | 'identityId' | 'issuedById' | 'expiresAt' | 'hasFaceCheckPhoto'>,
+    args?: Pick<
+      IssuanceEntity,
+      'id' | 'requestId' | 'contractId' | 'identityId' | 'issuedById' | 'expiresAt' | 'hasFaceCheckPhoto' | 'credentialRecordId'
+    >,
   ) {
     super()
     if (!args) return
@@ -61,6 +68,12 @@ export class IssuanceEntity extends AuditedAndTrackedEntity {
 
   @Column({ type: booleanType, nullable: true })
   hasFaceCheckPhoto!: boolean | null
+
+  @ManyToOne('CredentialRecordEntity')
+  credentialRecord!: Promise<CredentialRecordEntity>
+
+  @Column({ transformer: uuidLowerCaseTransformer })
+  credentialRecordId!: string
 
   @ManyToMany(() => PresentationEntity)
   @JoinTable({ name: 'presentation_issuances' })

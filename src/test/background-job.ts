@@ -8,6 +8,7 @@ import { logger as globalLogger } from '../logger'
 import { createVerifiedIdAdminService } from '../services'
 import { AsyncIssuanceService } from '../services/async-issuance-service'
 import { CommunicationsService } from '../services/communications-service'
+import { PresentationFlowService } from '../services/presentation-flow-service'
 
 let workerOid: string
 
@@ -47,6 +48,7 @@ export const createTestWorkerContext = async (): Promise<HandlerContext> => {
     services: {
       verifiedIdAdmin: createVerifiedIdAdminService(logger),
       asyncIssuances: new AsyncIssuanceService(),
+      presentationFlows: new PresentationFlowService(),
       communications: new CommunicationsService(logger),
     },
   }

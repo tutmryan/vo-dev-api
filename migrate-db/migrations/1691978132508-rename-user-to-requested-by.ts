@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class RenameUserToRequestedBy1691978132508 implements MigrationInterface {
   name = 'RenameUserToRequestedBy1691978132508'

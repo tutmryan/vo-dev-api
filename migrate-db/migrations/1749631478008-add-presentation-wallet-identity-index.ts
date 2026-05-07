@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddPresentationWalletIdentityIndex1749631478008 implements MigrationInterface {
   name = 'AddPresentationWalletIdentityIndex1749631478008'

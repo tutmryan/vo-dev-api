@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign in to VO</title>
+  <link rel="stylesheet" href="./styles.css" />
+  <style id="dynamic-style"></style>
+</head>
+
+<body class="pre-theme">
+  <div class="login-card">
+    <div class="login-info-wrapper">
+      <div class="login-header-content">
+        <div id="client-logo" class="logo-wrapper d-flex justify-content-center mb-2">
+          <!-- Logo will be injected dynamically -->
+          <img id="logo-img" src="" alt="" />
+        </div>
+        <h1 id="title-text">Sign in to</h1>
+        <h2 id="client-name"></h2>
+      </div>
+      <div id="cancel-btn-horizontal" class="text-center">
+        <a id="cancel-link-h" href="#"
+          class="link-secondary link-offset-2 link-opacity-75 link-opacity-100-hover link-underline-opacity-25 link-underline-opacity-100-hover">Cancel</a>
+      </div>
+    </div>
+
+    <div class="login-content-wrapper">
+      <div class="login-body-content">
+        <div id="progress" class="alert alert-info d-flex align-items-center" role="alert">
+          <div class="spinner-border spinner-border-md text-primary me-3" role="status"></div>
+          <div class="fw-light" id="progressText">Generating QR code...</div>
+        </div>
+        <div id="desktop" class="d-none">
+          <canvas id="qrCodeCanvas" class="rounded mx-auto d-block img-thumbnail mb-3"></canvas>
+          <div id="scan-guide" class="alert alert-info d-flex align-items-center" role="alert" aria-live="polite">
+            <div class="fw-light">
+              <span>Scan this QR code on your phone to sign in with a credential from </span>
+              <a class="link-primary" href="https://www.microsoft.com/en-au/security/mobile-authenticator-app"
+                target="_blank" rel="noopener noreferrer">Microsoft Authenticator</a>.
+              <br />
+              <span class="text-muted">The QR code will expire in 5 minutes.</span>
+            </div>
+          </div>
+        </div>
+        <div id="mobile" class="d-none">
+          <div class="text-center mb-3"><button id="openUrl" type="button" class="btn btn-primary">Present
+              Credential</button>
+          </div>
+          <div class="alert alert-info d-flex align-items-center" role="alert">
+            <div class="text-primary me-3">
+              <i class="bi-info-square text-primary font2"></i>
+            </div>
+            <div class="fw-light">
+              Sign in by presenting a credential from <a class="link-primary"
+                href="https://www.microsoft.com/en-au/security/mobile-authenticator-app" target="_blank">Microsoft
+                Authenticator</a>.
+              <br />The link will expire in 5 minutes.
+            </div>
+          </div>
+        </div>
+        <div id="finish" class="alert alert-success d-flex align-items-center d-none" role="alert">
+          <div class="spinner-border spinner-border-md text-primary me-3" role="status"></div>
+          <div class="fw-light">Presentation received.<br />Signing you in...</div>
+          <div class="ms-auto"></div>
+          <div class="text-success me-3"><i class="bi-check2-all text-success font2"></i></div>
+        </div>
+        <div id="error" class="alert alert-danger d-flex align-items-center d-none my-4" role="alert">
+          <div class="text-primary me-3">
+            <i class="bi-exclamation-circle text-danger font2"></i>
+          </div>
+          <div class="fw-light" id="errorText"></div>
+          <div class="ms-auto"></div>
+        </div>
+        <form autocomplete="off" id="loginForm" method="post">
+          <input type="hidden" name="requestId" />
+        </form>
+        <div id="retry-btn-footer" class="text-center d-none">
+          <a id="retry-login-btn" role="button" href="#"
+            class="link-secondary link-offset-2 link-opacity-75 link-opacity-100-hover link-underline-opacity-25 link-underline-opacity-100-hover">
+            Retry presentation
+          </a>
+        </div>
+        <div id="cancel-btn-vertical" class="text-center">
+          <a id="cancel-link-v" href="#"
+            class="link-secondary link-offset-2 link-opacity-75 link-opacity-100-hover link-underline-opacity-25 link-underline-opacity-100-hover">Cancel</a>
+        </div>
+      </div>
+      <div class="login-footer-content">
+        <div class="login-help">
+          <a id="tos-link" href="#" target="_blank"
+            class="d-none link-secondary link-offset-2 link-opacity-75 link-opacity-100-hover link-underline-opacity-25 link-underline-opacity-100-hover">Terms
+            of Service</a>
+          <a id="policy-link" href="#" target="_blank"
+            class="d-none link-secondary link-offset-2 link-opacity-75 link-opacity-100-hover link-underline-opacity-25 link-underline-opacity-100-hover">Privacy
+            Policy</a>
+        </div>
+      </div>
+      <div id="debug-card" class="debug-card d-none"></div>
+    </div>
+  </div>
+
+
+  <!-- Dynamic config injected by Express -->
+  <script id="oidc-config" type="application/json">
+      {}
+    </script>
+  <!-- Vite-built JS -->
+  <script type="module" src="./main.ts"></script>
+</body>
+
+</html>

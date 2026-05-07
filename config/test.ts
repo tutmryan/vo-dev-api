@@ -72,8 +72,8 @@ const config: DeepPartial<Config> = {
     remoteUrl: 'https://example.com/graphql',
   },
   mdoc: {
-    presentationsEnabled: true,
-    multipazTestCertificatesEnabled: true,
+    presentationsEnabled: false,
+    multipazTestCertificatesEnabled: false,
   },
 }
 

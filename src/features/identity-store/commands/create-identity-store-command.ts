@@ -7,7 +7,7 @@ import { IdentityStoreEntity } from '../entities/identity-store-entity'
 import { identityStoreSecretService } from '../index'
 
 export async function CreateIdentityStoreCommand(this: CommandContext, input: IdentityStoreInput) {
-  const { identifier, name, type, isAuthenticationEnabled, clientId, clientSecret } = input
+  const { identifier, name, type, isAuthenticationEnabled, accessPackagesEnabled, clientId, clientSecret } = input
 
   validateClientInput(clientId, clientSecret)
 
@@ -15,19 +15,23 @@ export async function CreateIdentityStoreCommand(this: CommandContext, input: Id
   const existing = await repo.findOneBy({ identifier })
   invariant(!existing, `IdentityStore identifier '${identifier}' already exists.`)
 
-  if (clientId && clientSecret) {
-    await identityStoreSecretService().set(clientId, clientSecret)
-  }
-
+  // Persist the entity first so that a DB constraint failure (e.g. duplicate identifier)
+  // does not leave an orphaned secret entry in the KV store.
   const identityStore = await repo.save(
     new IdentityStoreEntity({
       identifier,
       name,
       type: type as IdentityStoreType,
       isAuthenticationEnabled,
+      accessPackagesEnabled,
       clientId: clientId ?? undefined,
     }),
   )
+
+  if (clientId && clientSecret) {
+    await identityStoreSecretService().set(clientId, clientSecret)
+  }
+
   notifyIdentityStoreChanged()
   return identityStore
 }

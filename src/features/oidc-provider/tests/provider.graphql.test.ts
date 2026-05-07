@@ -57,7 +57,9 @@ describe('OIDC client request objects and JAR configuration', () => {
 
     expect(data?.updateOidcClient).toBeUndefined()
     expect(errors).toBeDefined()
-    expect(errors?.[0]?.message).toEqual('Relying party JWKS URI is required when JAR is enabled')
+    expect(errors?.[0]?.message).toEqual(
+      'JAR-enabled clients must have relyingPartyJwks or relyingPartyJwksUri (unless using client_secret_post)',
+    )
   })
 
   it('can disable JAR and clear relying party JWKS URI on update', async () => {

@@ -2,15 +2,24 @@ import type { MailDataRequired } from '@sendgrid/mail'
 import { email } from '../config'
 import type { VerifiedOrchestrationEntityManager } from '../data/entity-manager'
 import { getIssuanceEmailStatusCallbackUrl, getVerificationEmailStatusCallbackUrl } from '../features/async-issuance/email-status-callback'
+import { AsyncIssuanceEntity } from '../features/async-issuance/entities/async-issuance-entity'
 import { getIssuanceSmsStatusCallbackUrl, getVerificationSmsStatusCallbackUrl } from '../features/async-issuance/sms-status-callback'
 import { CommunicationEntity } from '../features/communication/entities/communication-entity'
 import { getEmailSenderConfig } from '../features/instance-configs'
+import { getPresentationFlowEmailStatusCallbackUrl } from '../features/presentation-flow/email-status-callback'
+import { getPresentationFlowSmsStatusCallbackUrl } from '../features/presentation-flow/sms-status-callback'
 import { CommunicationPurpose, CommunicationStatus, ContactMethod } from '../generated/graphql'
 import type { Logger } from '../logger'
 import { sendEmail } from '../util/email'
 import { sendSms } from '../util/sms'
 
-export type IssuanceCommunicationData = CommunicationData & {
+type CommunicationData = Pick<CommunicationEntity, 'contactMethod' | 'recipientId' | 'createdById'>
+
+type AsyncIssuanceCommunicationData = CommunicationData & {
+  asyncIssuanceId: string
+}
+
+export type IssuanceCommunicationData = AsyncIssuanceCommunicationData & {
   contractName: string
   identityName: string
   issuer: string
@@ -19,7 +28,7 @@ export type IssuanceCommunicationData = CommunicationData & {
   verificationMethod: string
 }
 
-export type VerificationCommunicationData = CommunicationData & {
+export type VerificationCommunicationData = AsyncIssuanceCommunicationData & {
   contractName: string
   identityName: string
   issuer: string
@@ -27,19 +36,23 @@ export type VerificationCommunicationData = CommunicationData & {
   codeExpiryMinutes: number
 }
 
-export class CommunicationError extends Error {
+export type PresentationFlowCommunicationData = CommunicationData & {
+  presentationFlowId: string
+  presentationFlowUrl: string
+  title: string
+  requestor: string
+  identityName: string
+}
+
+export class CommunicationError<TData extends CommunicationData> extends Error {
   constructor(
     message: string,
     public error: Error,
-    public communicationData: CommunicationData,
+    public communicationData: TData,
   ) {
     super(message)
     this.name = 'CommunicationError'
   }
-}
-
-type CommunicationData = Pick<CommunicationEntity, 'contactMethod' | 'recipientId' | 'createdById'> & {
-  asyncIssuanceId: string
 }
 
 interface IssuanceEmailTemplateData {
@@ -120,6 +133,40 @@ const sendVerificationCodeEmail = async ({
     ],
   } as MailDataRequired
   await sendEmail(to, data, getVerificationEmailStatusCallbackUrl(asyncIssuanceId))
+}
+
+interface PresentationFlowEmailTemplateData {
+  subjectTitle: string
+  subjectRequestor: string
+  preheaderTitle: string
+  preheaderRequestor: string
+  identityName: string
+  requestor: string
+  title: string
+  presentationFlowUrl: string
+}
+
+const sendPresentationFlowEmail = async ({
+  to,
+  presentationFlowId,
+  ...dynamicTemplateData
+}: {
+  to: MailDataRequired['to']
+  presentationFlowId: string
+} & PresentationFlowEmailTemplateData) => {
+  const from = getFromField()
+  const data = {
+    templateId: email.templates.presentationFlow.id,
+    asm: email.templates.presentationFlow.asm,
+    from,
+    personalizations: [
+      {
+        to,
+        dynamicTemplateData,
+      },
+    ],
+  } as MailDataRequired
+  await sendEmail(to, data, getPresentationFlowEmailStatusCallbackUrl(presentationFlowId))
 }
 
 export class CommunicationsService {
@@ -212,14 +259,63 @@ export class CommunicationsService {
     )
   }
 
+  async sendPresentationFlow(
+    to: string,
+    {
+      contactMethod,
+      recipientId,
+      createdById,
+      presentationFlowId,
+      presentationFlowUrl,
+      title,
+      requestor,
+      identityName,
+    }: PresentationFlowCommunicationData,
+    entityManager: VerifiedOrchestrationEntityManager,
+  ) {
+    return await this.trySendPresentationFlowCommunication(
+      async () => {
+        if (contactMethod === ContactMethod.Email) {
+          await sendPresentationFlowEmail({
+            to,
+            presentationFlowId,
+            subjectTitle: title,
+            preheaderTitle: title,
+            title,
+            subjectRequestor: requestor,
+            preheaderRequestor: requestor,
+            requestor,
+            identityName,
+            presentationFlowUrl,
+          })
+        } else {
+          const message = `${identityName ? `Dear ${identityName}, you` : 'You'} have a pending ${title} from ${requestor}. Action it here: ${presentationFlowUrl}`
+          await sendSms(to, message, getPresentationFlowSmsStatusCallbackUrl(presentationFlowId))
+        }
+      },
+      {
+        purpose: CommunicationPurpose.PresentationFlow,
+        contactMethod,
+        recipientId,
+        createdById,
+        presentationFlowId,
+        presentationFlowUrl,
+        title,
+        requestor,
+        identityName,
+      },
+      entityManager,
+    )
+  }
+
   private async trySendCommunication(
     send: () => Promise<void>,
-    communicationData: CommunicationData & { purpose: CommunicationPurpose },
+    communicationData: AsyncIssuanceCommunicationData & { purpose: CommunicationPurpose },
     entityManager: VerifiedOrchestrationEntityManager,
   ) {
     try {
       await send()
-      return await this.recordCommunication(communicationData, entityManager)
+      return await this.recordAsyncIssuanceCommunication(communicationData, entityManager)
     } catch (error) {
       this.logger.error(`Failed to send ${communicationData.purpose}`, error)
       throw new CommunicationError(
@@ -230,22 +326,32 @@ export class CommunicationsService {
     }
   }
 
-  async recordCommunicationFailure(error: CommunicationError, entityManager: VerifiedOrchestrationEntityManager) {
-    await this.recordCommunication(
-      {
-        purpose: CommunicationPurpose.Verification,
-        contactMethod: error.communicationData.contactMethod,
-        recipientId: error.communicationData.recipientId,
-        createdById: error.communicationData.createdById,
-        asyncIssuanceId: error.communicationData.asyncIssuanceId,
-      },
-      entityManager,
-      error.error.message,
-    )
+  private async trySendPresentationFlowCommunication(
+    send: () => Promise<void>,
+    communicationData: PresentationFlowCommunicationData & { purpose: CommunicationPurpose.PresentationFlow },
+    entityManager: VerifiedOrchestrationEntityManager,
+  ) {
+    try {
+      await send()
+      return await this.recordPresentationFlowCommunication(communicationData, entityManager)
+    } catch (error) {
+      this.logger.error(`Failed to send ${communicationData.purpose}`, error)
+      throw new CommunicationError(
+        `Failed to send ${communicationData.purpose} due to an error: ${error}`,
+        error instanceof Error ? error : new Error(`${error}`),
+        communicationData,
+      )
+    }
   }
 
-  private async recordCommunication(
-    { contactMethod, purpose, recipientId, createdById, asyncIssuanceId }: CommunicationData & { purpose: CommunicationPurpose },
+  private async recordAsyncIssuanceCommunication(
+    {
+      contactMethod,
+      purpose,
+      recipientId,
+      createdById,
+      asyncIssuanceId,
+    }: AsyncIssuanceCommunicationData & { purpose: CommunicationPurpose },
     entityManager: VerifiedOrchestrationEntityManager,
     error?: string,
   ) {
@@ -259,6 +365,69 @@ export class CommunicationsService {
         status: error ? CommunicationStatus.Failed : CommunicationStatus.Sent,
         details: error,
       }),
+    )
+
+    // Update the denormalized flag on async_issuance for query optimization
+    if (purpose === CommunicationPurpose.Verification && !error) {
+      await entityManager.getRepository(AsyncIssuanceEntity).update(asyncIssuanceId, {
+        hasVerificationCommunication: true,
+      })
+    }
+  }
+
+  async recordAsyncIssuanceCommunicationFailure<TData extends AsyncIssuanceCommunicationData>(
+    error: CommunicationError<TData>,
+    entityManager: VerifiedOrchestrationEntityManager,
+  ) {
+    await this.recordAsyncIssuanceCommunication(
+      {
+        purpose: CommunicationPurpose.Verification,
+        contactMethod: error.communicationData.contactMethod,
+        recipientId: error.communicationData.recipientId,
+        createdById: error.communicationData.createdById,
+        asyncIssuanceId: error.communicationData.asyncIssuanceId,
+      },
+      entityManager,
+      error.error.message,
+    )
+  }
+
+  private async recordPresentationFlowCommunication(
+    {
+      contactMethod,
+      recipientId,
+      createdById,
+      presentationFlowId,
+    }: Pick<PresentationFlowCommunicationData, 'contactMethod' | 'recipientId' | 'createdById' | 'presentationFlowId'>,
+    entityManager: VerifiedOrchestrationEntityManager,
+    error?: string,
+  ) {
+    await entityManager.getRepository(CommunicationEntity).save(
+      new CommunicationEntity({
+        contactMethod,
+        purpose: CommunicationPurpose.PresentationFlow,
+        recipientId,
+        createdById,
+        presentationFlowId,
+        status: error ? CommunicationStatus.Failed : CommunicationStatus.Sent,
+        details: error,
+      }),
+    )
+  }
+
+  async recordPresentationFlowCommunicationFailure(
+    error: CommunicationError<PresentationFlowCommunicationData>,
+    entityManager: VerifiedOrchestrationEntityManager,
+  ) {
+    await this.recordPresentationFlowCommunication(
+      {
+        contactMethod: error.communicationData.contactMethod,
+        recipientId: error.communicationData.recipientId,
+        createdById: error.communicationData.createdById,
+        presentationFlowId: error.communicationData.presentationFlowId,
+      },
+      entityManager,
+      error.error.message,
     )
   }
 }

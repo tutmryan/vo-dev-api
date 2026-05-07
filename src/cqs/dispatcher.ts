@@ -3,6 +3,7 @@ import { type GraphQLContext } from '../context'
 import { entityManager, transactionOrReuse } from '../data'
 import { wrapEntityManagerWithSafeLimits } from '../data/entity-manager'
 import { addUserToManager } from '../data/user-context-helper'
+import { resolveFeature } from '../util/featureResolver'
 import { userIsUserEntity } from '../util/user-invariant'
 import { performFeatureCheck } from './feature-map'
 
@@ -25,7 +26,7 @@ export const dispatch = async <T extends CommandLike>(
     const ctx: CommandContext = {
       user,
       entityManager: wrapEntityManagerWithSafeLimits(entityManager),
-      logger,
+      logger: logger.child({ feature: resolveFeature(command), command: command.name }),
       services,
       dataLoaders,
       requestInfo,
@@ -45,7 +46,7 @@ export const dispatchTransactional = async <T extends TransactionalCommandLike>(
 ): Promise<Awaited<ReturnType<T>>> => {
   const context: TransactionalCommandContext = {
     user,
-    logger,
+    logger: logger.child({ feature: resolveFeature(command), command: command.name }),
     services,
     dataLoaders,
     requestInfo,
@@ -71,7 +72,7 @@ export const query = async <T extends QueryLike>(
   const queryContext: QueryContext = {
     user,
     entityManager: wrapEntityManagerWithSafeLimits(entityManager),
-    logger,
+    logger: logger.child({ feature: resolveFeature(query), query: query.name }),
     services,
     dataLoaders,
     contextType: 'query',

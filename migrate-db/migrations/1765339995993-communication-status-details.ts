@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class CommunicationStatusDetails1765339995993 implements MigrationInterface {
   name = 'CommunicationStatusDetails1765339995993'

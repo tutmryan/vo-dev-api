@@ -75,7 +75,7 @@ export async function SendAsyncIssuanceVerificationCommand(
       await entityManager.getRepository(AsyncIssuanceEntity).save(asyncIssuanceEntity)
 
       if (error instanceof CommunicationError) {
-        await communications.recordCommunicationFailure(error, entityManager)
+        await communications.recordAsyncIssuanceCommunicationFailure(error, entityManager)
       }
     })
 

@@ -4,7 +4,7 @@ import type { CommandContext } from '../../../cqs'
 import type { PresentationFlowTemplateInput } from '../../../generated/graphql'
 import { invariant } from '../../../util/invariant'
 import { userInvariant } from '../../../util/user-invariant'
-import { PresentationFlowTemplateEntity } from '../entities/presentation-flow-template-entity'
+import { defaultTemplateNotification, PresentationFlowTemplateEntity } from '../entities/presentation-flow-template-entity'
 
 export async function CreatePresentationFlowTemplateCommand(
   this: CommandContext,
@@ -36,6 +36,7 @@ export async function CreatePresentationFlowTemplateCommand(
   entity.autoSubmit = input.autoSubmit ?? null
   entity.expiresAfterDays = input.expiresAfterDays ?? null
   entity.fieldVisibilityJson = JSON.stringify(input.fieldVisibility)
+  entity.notificationJson = JSON.stringify(input.notification ?? defaultTemplateNotification)
   entity.isDeleted = false
 
   const saved = await entityManager.getRepository(PresentationFlowTemplateEntity).save(entity)

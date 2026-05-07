@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class AddRevokeInfoToIssuance1691049886325 implements MigrationInterface {
   name = 'AddRevokeInfoToIssuance1691049886325'

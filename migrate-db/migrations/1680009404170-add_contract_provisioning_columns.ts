@@ -1,4 +1,4 @@
-import { MigrationInterface, QueryRunner } from 'typeorm'
+import type { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class addContractProvisioningColumns1680009404170 implements MigrationInterface {
   name = 'addContractProvisioningColumns1680009404170'

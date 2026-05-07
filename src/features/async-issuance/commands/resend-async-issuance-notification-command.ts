@@ -29,7 +29,7 @@ export async function ResendAsyncNotificationCommand(
       await repository.save(asyncIssuance)
 
       if (error instanceof CommunicationError) {
-        await services.communications.recordCommunicationFailure(error, entityManager)
+        await services.communications.recordAsyncIssuanceCommunicationFailure(error, entityManager)
       }
       logger.auditEvent(AuditEvents.ASYNC_ISSUANCE_NOTIFICATION_RESEND_FAILED)
     })
