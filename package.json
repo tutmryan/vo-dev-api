@@ -225,6 +225,8 @@
     },
     "ts-node": {
       "diff": ">=4.0.4"
-    }
+    },
+    "@tootallnate/once": "^3.0.1",
+    "immutable": "^4.0.0"
   }
 }
