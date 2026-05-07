@@ -153,7 +153,7 @@
     "@opentelemetry/semantic-conventions": "^1.38.0",
     "@sendgrid/mail": "^8.1.6",
     "@types/oidc-provider": "9.1.2",
-    "asn1js": "^3.0.6",
+    "asn1js": "^3.0.10",
     "body-parser": "^2.2.1",
     "bullmq": "^5.65.0",
     "cbor2": "2.0.1",
