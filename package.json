@@ -170,7 +170,7 @@
     "graphql-ws": "^5.16.0",
     "helmet": "^8.1.0",
     "hpke": "^1.0.3",
-    "ioredis": "^5.8.2",
+    "ioredis": "^5.10.1",
     "jose": "^5.9.4",
     "keyv": "^4.5.4",
     "libphonenumber-js": "^1.12.29",
