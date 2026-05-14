@@ -29,8 +29,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "mssql": "^12.2.0",
-    "typeorm": "^0.3.28"
+    "mssql": "^12.5.3",
+    "typeorm": "^0.3.29"
   },
   "overrides": {
     "brace-expansion": ">=5.0.5",
